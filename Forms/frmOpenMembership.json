@@ -1,0 +1,71 @@
+{
+    "frmOpenMembershipFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmMembership: Membership",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                620,
+                450
+            ],
+            "name": "frmOpenMembership",
+            "stylelist": [
+                "CAPTION"
+            ]
+        },
+        "CONTROLS": {
+            "lblForms": {
+                "type": "StaticText",
+                "label": "Forms:",
+                "pos": [
+                    0,
+                    30
+                ],
+                "name": "lblForms"
+            },
+            "Forms": {
+                "type": "ComboBox",
+                "pos": [
+                    125,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Forms",
+                "choices": [
+                    "frmChoices",
+                    "frmChurch",
+                    "frmConfig",
+                    "frmFamily",
+                    "frmFamilyAddress",
+                    "frmFamilyContact",
+                    "frmFamilyDate",
+                    "frmPerson",
+                    "frmPersonAddress",
+                    "frmPersonContact",
+                    "frmPersonDate",
+                    "frmPersonDateGrid",
+                    "frmAttendance"
+                ]
+            },
+            "btnOpen": {
+                "type": "Button",
+                "label": "Open Form",
+                "name": "btnOpen",
+                "pos": [
+                    125,
+                    60
+                ],
+                "size": [
+                    300,
+                    60
+                ]
+            }
+        }
+    }
+}

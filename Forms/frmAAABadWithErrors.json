@@ -1,0 +1,127 @@
+{
+    "frmAAABadWithErrorsFORM": {
+        "FORM": {
+            "name": "frmNotFound",
+            "type": "badPanel",
+            "title": 0,
+            "pos": [
+                0,
+                0
+            ],
+            "posch" : [0,"A"],
+            "size": [
+                100,
+                100
+            ],
+            "sizech" : [0,0],
+            "table": {
+                "name": "tblBadTable",
+                "fields": [
+                    "badfield1","badfield2"
+                ],
+                "condition" : "badcondition = 'bad'",
+                "orderby": "BadSort"
+            },
+            "stylelist": [
+                "CAPTION","badstyle"
+            ],
+            "controls" : ["Navigation","Close","anyoldthing"]
+        },
+        "CONTROLS": {
+            "lblServiceID": {
+                "type": "Notype",
+                "label": "Service:",
+                "pos": [
+                    0,
+                    30
+                ]
+            },
+            "ServiceID": {
+                "name": "ServiceID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblService",
+                    "fields": ["ID",
+                        "DateTime"
+                    ],
+                    "orderby": "DateTime"
+                },
+                "pos": [
+                    125,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblReading": {
+                "type": "StaticText",
+                "label": "Alt Reading:",
+                "pos": [
+                    0,
+                    60
+                ],
+                "name": "lblReading"
+            },
+            "Reading": {
+                "type": "ComboBox",
+                "pos": [
+                    125,
+                    60
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Reading"
+            },
+            "lblReference": {
+                "type": "StaticText",
+                "label": "Reference:",
+                "pos": [
+                    0,
+                    90
+                ],
+                "name": "lblReference"
+            },
+            "Reference": {
+                "type": "TextCtrl",
+                "pos": [
+                    125,
+                    90
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Reference"
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note",
+                "pos": [
+                    0,
+                    120
+                ],
+                "name": "lblNote"
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "pos": [
+                    125,
+                    120
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "MULTILINE",
+                    "WORDWRAP"
+                ]
+            }
+        }
+    }
+}

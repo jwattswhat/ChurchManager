@@ -1,0 +1,235 @@
+{
+    "frmChurchFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmChurch: Church Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                620,
+                500
+            ],
+            "name": "frmChurch",
+            "table": {
+                "name": "tblChurch",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "Church"
+            },
+            "stylelist": [
+                "CAPTION"
+            ]
+        },
+        "CONTROLS": {
+            "lblChurch": {
+                "name": "lblChurch",
+                "type": "StaticText",
+                "label": "Church:",
+                "pos": [
+                    0,
+                    0
+                ]
+            },
+            "Church": {
+                "name": "Church",
+                "type": "TextCtrl",
+                "value": "",
+                "pos": [
+                    75,
+                    0
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblAddress": {
+                "name": "lblAddress",
+                "type": "StaticText",
+                "label": "Address:",
+                "pos": [
+                    0,
+                    30
+                ]
+            },
+            "Address": {
+                "name": "Address",
+                "type": "TextCtrl",
+                "pos": [
+                    75,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "Address2": {
+                "name": "Address2",
+                "type": "TextCtrl",
+                "pos": [
+                    75,
+                    60
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblCity": {
+                "name": "lblCity",
+                "type": "StaticText",
+                "label": "City:",
+                "pos": [
+                    0,
+                    90
+                ]
+            },
+            "City": {
+                "name": "City",
+                "type": "TextCtrl",
+                "value": "",
+                "pos": [
+                    75,
+                    90
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblState": {
+                "name": "lblState",
+                "type": "StaticText",
+                "label": "State:",
+                "pos": [
+                    0,
+                    120
+                ]
+            },
+            "State": {
+                "name": "State",
+                "type": "TextCtrl",
+                "pos": [
+                    75,
+                    120
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblZip": {
+                "name": "lblZip",
+                "type": "StaticText",
+                "label": "Zip:",
+                "pos": [
+                    0,
+                    150
+                ]
+            },
+            "Zip": {
+                "name": "Zip",
+                "type": "TextCtrl",
+                "pos": [
+                    75,
+                    150
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblPastor": {
+                "name": "lblPastor",
+                "type": "StaticText",
+                "label": "Pastor:",
+                "pos": [
+                    0,
+                    180
+                ]
+            },
+            "Pastor": {
+                "name": "Pastor",
+                "type": "TextCtrl",
+                "pos": [
+                    75,
+                    180
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblPhone": {
+                "name": "lblPhone",
+                "type": "StaticText",
+                "label": "Phone:",
+                "pos": [
+                    0,
+                    210
+                ]
+            },
+            "Phone": {
+                "name": "Phone",
+                "type": "TextCtrl",
+                "pos": [
+                    75,
+                    240
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lbleMail": {
+                "name": "lbleMail",
+                "type": "StaticText",
+                "label": "eMail:",
+                "pos": [
+                    0,
+                    240
+                ]
+            },
+            "eMail": {
+                "name": "eMail",
+                "type": "TextCtrl",
+                "pos": [
+                    75,
+                    270
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblNote": {
+                "name": "lblNote",
+                "type": "StaticText",
+                "label": "Note:",
+                "pos": [
+                    0,
+                    300
+                ]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "pos": [
+                    75,
+                    300
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "MULTILINE"
+                ]
+            }
+        }
+    }
+}

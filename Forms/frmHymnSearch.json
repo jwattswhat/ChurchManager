@@ -1,0 +1,189 @@
+{
+    "frmHymnSearchFORM": {
+        "FORM": {
+            "name": "frmHymnSearch",
+            "type": "Panel",
+            "title": "frmHymnSearch : Hymn Search Form",
+            "pos": [
+                20,
+                20
+            ],
+            "size": [
+                1200,
+                800
+            ],
+            "controls": [],
+            "stylestr": "CAPTION",
+            "nodataDB" : true
+        },
+        "CONTROLS": {
+            "lblSearch": {
+                "type": "StaticText",
+                "label": "Search:",
+                "pos": [
+                    10,
+                    0
+                ],
+                "name": "lblSearch"
+            },
+            "Search": {
+                "type": "TextCtrl",
+                "pos": [
+                    100,
+                    0
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Search",
+                "norecorddata": true
+            },
+            "btnHymnSearchByHymn": {
+                "type": "Button",
+                "label": "By Hymn",
+                "pos": [
+                    10,
+                    30
+                ],
+                "size": [
+                    100,
+                    30
+                ],
+                "name": "btnHymnSearchByHymn"
+            },
+            "btnHymnSearchByTitle": {
+                "type": "Button",
+                "label": "By Title",
+                "pos": [
+                    110,
+                    30
+                ],
+                "size": [
+                    100,
+                    30
+                ],
+                "name": "btnHymnSearchByTitle"
+            },
+            "btnHymnSearchByBible": {
+                "type": "Button",
+                "label": "By Bible",
+                "pos": [
+                    210,
+                    30
+                ],
+                "size": [
+                    100,
+                    30
+                ],
+                "name": "btnHymnSearchByBible"
+            },
+            "btnHymnSearchByCategory": {
+                "type": "Button",
+                "label": "By Category",
+                "pos": [
+                    310,
+                    30
+                ],
+                "size": [
+                    100,
+                    30
+                ],
+                "name": "btnHymnSearchByCategory"
+            },
+            "btnHymnSearchByNote": {
+                "type": "Button",
+                "label": "By Note",
+                "pos": [
+                    410,
+                    30
+                ],
+                "size": [
+                    100,
+                    30
+                ],
+                "name": "btnHymnSearchByNote"
+            },
+            "dvlHymnList": {
+                "name": "dvlHymnList",
+                "type": "DataViewListCtrl",
+                "table": {
+                    "name": "tblHymn",
+                    "fields": [
+                        "ID",
+                        "Hymn",
+                        "Title",
+                        "BibleText",
+                        "Category",
+                        "Note"
+                    ]
+                },
+                "column": [
+                    {
+                        "name": "ID",
+                        "label": "ID",
+                        "width": 0
+                    },
+                    {
+                        "name": "Hymn",
+                        "label": "Hymn",
+                        "width": 75
+                    },
+                    {
+                        "name": "Title",
+                        "label": "Title",
+                        "width": 300
+                    },
+                    {
+                        "name": "BibleText",
+                        "label": "BibleText",
+                        "width": 300
+                    },
+                    {
+                        "name": "Category",
+                        "label": "Category",
+                        "width": 200
+                    },
+                    {
+                        "name": "Note",
+                        "label": "Note",
+                        "width": 300
+                    }
+                ],
+                "pos": [
+                    10,
+                    60
+                ],
+                "size": [
+                    1160,
+                    630
+                ]
+            },
+            "UsedAs": {
+                "name": "UsedAs",
+                "type": "ComboBox",
+                "pos": [
+                    10,
+                    690
+                ],
+                "size": [
+                    100,
+                    30
+                ]
+            },
+            "btnHymnSearchAdd": {
+                "name": "btnHymnSearchAdd",
+                "type": "Button",
+                "label": "Add",
+                "pos": [
+                    112,
+                    690
+                ],
+                "size": [
+                    50,
+                    30
+                ]
+            }
+        }
+    }
+}

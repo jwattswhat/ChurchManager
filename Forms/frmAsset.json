@@ -1,0 +1,163 @@
+{
+    "frmAssetFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmAsset: Asset Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                620,
+                400
+            ],
+            "name": "frmAsset",
+            "table": {
+                "name": "tblAsset",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "AssetID"
+            },
+            "stylelist": [
+                "CAPTION"
+            ]
+        },
+        "CONTROLS": {
+            "lblChurchID": {
+                "type": "StaticText",
+                "label": "Church:",
+                "pos": [
+                    0,
+                    30
+                ],
+                "name": "lblChurchID"
+            },
+            "ChurchID": {
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "ID": "ID",
+                    "name": "tblChurch",
+                    "fields": [
+                        "ID",
+                        "Church"
+                    ],
+                    "sort": "ChurchID"
+                },
+                "pos": [
+                    120,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "ChurchID"
+            },
+            "lblAssetID": {
+                "type": "StaticText",
+                "label": "AssetID:",
+                "pos": [
+                    0,
+                    60
+                ],
+                "name": "lblAssetID"
+            },
+            "AssetID": {
+                "type": "TextCtrl",
+                "pos": [
+                    120,
+                    60
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "AssetID"
+            },
+            "lblDescription": {
+                "type": "StaticText",
+                "label": "Description:",
+                "pos": [
+                    0,
+                    90
+                ],
+                "name": "lblDescription"
+            },
+            "Description": {
+                "type": "TextCtrl",
+                "pos": [
+                    120,
+                    90
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Description"
+            },
+            "lblPurchaseDate": {
+                "type": "StaticText",
+                "label": "Purchase Date:",
+                "pos": [
+                    0,
+                    120
+                ],
+                "name": "lblPurchaseDate"
+            },
+            "PurchaseDate": {
+                "type": "DatePickerCtrl",
+                "pos": [
+                    120,
+                    120
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "PurchaseDate"
+            },
+            "lblDepreciate": {
+                "type": "StaticText",
+                "label": "Depreciate:",
+                "pos": [
+                    0,
+                    150
+                ],
+                "name": "lblDepreciate"
+            },
+            "Depreciate": {
+                "type": "CheckBox",
+                "pos": [
+                    120,
+                    150
+                ],
+                "name": "Depreciate"
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "pos": [
+                    0,
+                    180
+                ],
+                "name": "lblNote"
+            },
+            "Note": {
+                "type": "MultiLine",
+                "pos": [
+                    120,
+                    180
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Note"
+            }
+        }
+    }
+}

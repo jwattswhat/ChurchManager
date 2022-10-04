@@ -1,0 +1,162 @@
+{
+    "frmFamilyContactFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmFamilyContact : Family Contact Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                620,
+                500
+            ],
+            "table": {
+                "name": "tblFamilyContact",
+                "fields": [
+                    "*"
+                ]
+            },
+            "stylelist": [
+                "CAPTION"
+            ]
+        },
+        "CONTROLS": {
+            "lblFamilyID": {
+                "type": "StaticText",
+                "label": "Family:",
+                "pos": [
+                    0,
+                    0
+                ],
+                "name": "lblFamilyID"
+            },
+            "FamilyID": {
+                "type": "TextCtrl",
+                "name": "FamilyID",
+                "lookup": {
+                    "table": "tblFamily",
+                    "display": "FamilyName",
+                    "key": "ID"
+                },
+                "pos": [
+                    125,
+                    0
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblLabel": {
+                "type": "StaticText",
+                "label": "Label:",
+                "pos": [
+                    0,
+                    30
+                ],
+                "name": "lblLabel"
+            },
+            "ContactLabel": {
+                "type": "ComboBox",
+                "pos": [
+                    125,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "ContactLabel"
+            },
+            "lblType": {
+                "type": "StaticText",
+                "label": "Type:",
+                "pos": [
+                    0,
+                    60
+                ],
+                "name": "lblType"
+            },
+            "Type": {
+                "type": "ComboBox",
+                "pos": [
+                    125,
+                    60
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Type"
+            },
+            "lblContact": {
+                "type": "StaticText",
+                "label": "Contact:",
+                "pos": [
+                    0,
+                    90
+                ],
+                "name": "lblContact"
+            },
+            "Contact": {
+                "type": "TextCtrl",
+                "pos": [
+                    125,
+                    90
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Contact"
+            },
+            "lblUnlisted": {
+                "type": "StaticText",
+                "label": "Unlisted:",
+                "pos": [
+                    0,
+                    120
+                ],
+                "name": "lblUnlisted"
+            },
+            "Unlisted": {
+                "type": "CheckBox",
+                "pos": [
+                    125,
+                    120
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Unlisted"
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "pos": [
+                    0,
+                    150
+                ],
+                "name": "lblNote"
+            },
+            "Note": {
+                "type": "MultiLine",
+                "value": "",
+                "pos": [
+                    125,
+                    150
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Note"
+            }
+        }
+    }
+}

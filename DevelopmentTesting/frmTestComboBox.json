@@ -1,0 +1,99 @@
+{
+    "frmTestComboBoxFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmTestComboBox",
+            "pos": [
+                20,
+                20
+            ],
+            "size": [
+                500,
+                500
+            ],
+            "name": "frmTestComboBox",
+            "tablename": "tblService",
+            "SQL": "SELECT ID, DateTime, ChurchID, PropersID from tblService ORDER BY DateTime DESC;",
+            "stylelist": [
+                "CAPTION"
+            ]
+        },
+        "CONTROLS": {
+            "lblDateTime": {
+                "type": "StaticText",
+                "label": "Service Date/Time:",
+                "pos": [
+                    0,
+                    30
+                ],
+                "name": "lblDateTime"
+            },
+            "DateTime": {
+                "type": "DateTime",
+                "pos": [
+                    145,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "DateTime"
+            },
+            "lblChurchID": {
+                "type": "StaticText",
+                "label": "Church :",
+                "pos": [
+                    0,
+                    60
+                ],
+                "name": "lblChurchID"
+            },
+            "ChurchID": {
+                "name": "ChurchID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "table": "tblChurch",
+                    "ID": "ID",
+                    "display": ["Church"],
+                    "sort": "Church"
+                },
+                "pos": [
+                    145,
+                    60
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblPropersID": {
+                "type": "StaticText",
+                "label": "Propers:",
+                "pos": [
+                    0,
+                    120
+                ],
+                "name": "lblPropersID"
+            },
+            "PropersID": {
+                "name": "PropersID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "table": "tblPropers",
+                    "ID": "ID",
+                    "display": ["Lectionary","LiturgicalDate"],
+                    "sort": "Lectionary,LiturgicalDate"
+                },
+                "pos": [
+                    145,
+                    120
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            }
+        }
+    }
+}

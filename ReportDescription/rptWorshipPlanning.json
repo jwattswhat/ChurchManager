@@ -1,0 +1,100 @@
+{
+    "Report": {
+        "ReportName": "WorshipPlanningWorksheet.pdf",
+        "PageBreak": 30.0
+    },
+    "Header": {
+        "church": "Life in Christ Lutheran Church",
+        "titles": [
+            "Worship Planning Worksheet"
+        ],
+        "churchfont": {
+            "family": "Arial",
+            "style": "B",
+            "size": 15
+        },
+        "titlefont": {
+            "family": "Arial",
+            "style": "B",
+            "size": 13
+        },
+        "size": 25,
+        "date": "",
+        "lineheight": 6
+    },
+    "Body": {
+        "indent": 0.5,
+        "lineheight": 5,
+        "column1width": 100.0,
+        "column1": 0.0,
+        "column1end": 500.0,
+        "column2width": 100.00,
+        "column2": 120.0,
+        "column2end": 0,
+        "font": {
+            "family": "Arial",
+            "style": "",
+            "size": 10
+        },
+        "boldFont": {
+            "family": "Arial",
+            "style": "B",
+            "size": 10
+        },
+        "Table": {
+            "Service": {
+                "name": "vwservicewithpropers",
+                "fields": [
+                    "*"
+                ],
+                "condition": "ID={ID}"
+            },
+            "AltReading": {
+                "name": "tblAltReading",
+                "fields": [
+                    "Reading,Reference"
+                ]
+            },
+            "Readings": {
+                "name": "tblReading",
+                "fields": [
+                    "Reading",
+                    "Reference"
+                ],
+                "condition": "PropersID = {PropersID}"
+            },
+            "HymnUsage": {
+                "name": "vwhymnusage",
+                "fields": [
+                    "UsedAs",
+                    "Hymn",
+                    "Title"
+                ],
+                "condition": "ServiceID = {ID}"
+            },
+            "Sermon": {
+                "name": "tblSermon",
+                "fields": [
+                    "Reference",
+                    "Title"
+                ],
+                "condition": "ID = {SermonID}"
+            },
+            "ServiceRole": {
+                "name":"vwServiceRoles",
+                "fields" : ["Name","Role"],
+                "condition" : "ServiceID = {ID}",
+                "orderby": "Name"
+            }
+        }
+    },
+    "Footer": {
+        "font": {
+            "family": "Arial",
+            "style": "",
+            "size": 10
+        },
+        "size": 15.0,
+        "lineheight": 6
+    }
+}

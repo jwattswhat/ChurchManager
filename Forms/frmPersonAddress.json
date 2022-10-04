@@ -1,0 +1,260 @@
+{
+    "frmPersonAddressFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmPersonAddress : Person Address Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                620,
+                500
+            ],
+            "name": "frmPersonAddress",
+            "table": {
+                "name": "tblPersonAddress",
+                "fields": [
+                    "*"
+                ]
+            },
+            "stylelist": [
+                "CAPTION"
+            ]
+        },
+        "CONTROLS": {
+            "lblPerson": {
+                "type": "StaticText",
+                "label": "Person:",
+                "pos": [
+                    0,
+                    0
+                ],
+                "name": "lblPerson"
+            },
+            "PersonID": {
+                "type": "ComboBox",
+                "name": "PersonID",
+                "table": {
+                    "name": "tblPerson",
+                    "fields": [
+                        "CONCAT(LastName,', ',FirstName) as PersonID"
+                    ],
+                    "orderby": "LastName, FirstName"
+                },
+                "pos": [
+                    125,
+                    0
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblUnlisted": {
+                "type": "StaticText",
+                "label": "Unlisted:",
+                "pos": [
+                    0,
+                    60
+                ],
+                "name": "lblUnlisted"
+            },
+            "Unlisted": {
+                "type": "CheckBox",
+                "pos": [
+                    125,
+                    60
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Unlisted"
+            },
+            "lblLabel": {
+                "type": "StaticText",
+                "label": "Label:",
+                "pos": [
+                    0,
+                    30
+                ],
+                "name": "lblLabel"
+            },
+            "AddressLabel": {
+                "type": "ComboBox",
+                "name": "AddressLabel",
+                "pos": [
+                    125,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblAddress": {
+                "type": "StaticText",
+                "label": "Address:",
+                "pos": [
+                    0,
+                    90
+                ],
+                "name": "lblAddress"
+            },
+            "Address": {
+                "type": "TextCtrl",
+                "pos": [
+                    125,
+                    90
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Address"
+            },
+            "Address2": {
+                "type": "TextCtrl",
+                "pos": [
+                    125,
+                    120
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Address2"
+            },
+            "lblCity": {
+                "type": "StaticText",
+                "label": "City:",
+                "pos": [
+                    0,
+                    150
+                ],
+                "name": "lblCity"
+            },
+            "City": {
+                "type": "TextCtrl",
+                "pos": [
+                    125,
+                    150
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "City"
+            },
+            "lblState": {
+                "type": "StaticText",
+                "label": "City:",
+                "pos": [
+                    0,
+                    180
+                ],
+                "name": "lblState"
+            },
+            "State": {
+                "type": "TextCtrl",
+                "pos": [
+                    125,
+                    180
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "State"
+            },
+            "lblZip": {
+                "type": "StaticText",
+                "label": "Zip:",
+                "pos": [
+                    0,
+                    210
+                ],
+                "name": "lblZip"
+            },
+            "Zip": {
+                "type": "TextCtrl",
+                "pos": [
+                    125,
+                    210
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Zip"
+            },
+            "lblStartDate": {
+                "type": "StaticText",
+                "label": "Start Date:",
+                "pos": [
+                    0,
+                    240
+                ],
+                "name": "lblStartDate"
+            },
+            "StartDate": {
+                "type": "TextCtrl",
+                "pos": [
+                    125,
+                    240
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "StartDate"
+            },
+            "lblEndDate": {
+                "type": "StaticText",
+                "label": "End Date:",
+                "pos": [
+                    0,
+                    270
+                ],
+                "name": "lblEndDate"
+            },
+            "EndDate": {
+                "type": "TextCtrl",
+                "pos": [
+                    125,
+                    270
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "EndDate"
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "pos": [
+                    0,
+                    300
+                ],
+                "name": "lblNote"
+            },
+            "Note": {
+                "type": "MultiLine",
+                "pos": [
+                    125,
+                    300
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Note"
+            }
+        }
+    }
+}

@@ -1,0 +1,160 @@
+
+"formname" : {
+    "FORM" :
+        "name" : (string)       - name of the form 
+        "type" : (String)       - Form type
+            "Panel" - Normal Form Panel
+            "Dialog" - Modal Dialog (linkedforms only)
+            "StaticBox" - Boarder for a Subform (subforms only)
+        "title" : (string)      - Title for the form displayed on the title bar
+        "pos" : [x,y] (tuple)   - (x,y) screen location in pixels (overrides "posch")
+        "size" : [w,h] (tuple)  - (w,h) form size in pixels (overrides "sizech")
+        "posch" : [xch,ych]     - form position in Characters (does not overirde "pos')
+        "sizech" : [wch,hch]    - form size in Characters (does not override "size")
+        "table" :{ (Dictionary) - sql info for the display records
+            "name" : (String)   - SQL Table Name
+            "fields" : ["One","Two","Three"] (List of strings) - SQL Fields for the forms
+            "condition" : "ID = {id}" (String) - SQL WHERE CLAUSE
+            "orderby" : "field DESC" (String)  - SQL ORDER BY CLAUSE
+        }
+        "controls" : ["Close","Navigation"] (list of string) - predefined controls
+            "btnClose" - Close button shown on the form
+            "Navigation" - New, Update, First(<<), Previous(<), Next(>), Last(>>) buttons shown on form
+        "stylelist" : ["CAPTION", "READONLY"] (list of strings) 
+            "CAPTION"           - Puts a caption on the frame. (required by MINIMIZEBOX, MAXIMIZEBOX and CLOSEBOX)
+            "MINIMIZEBOX"       - Displays a minimize box on the frame.
+            "MAXIMIZEBOX"       - Displays a maximize box on the frame.
+            "CLOSEBOX"          - Displays a maximize box on the frame.
+            "READONLY"          - form is readonly, no editing
+        "subforms" : {          - form displayed on parent form datalinked to parent form
+            - see "FORM" above
+        } 
+        "linkedforms" : {       - seperatly opened form datalinked to parent form
+            - see "FORM" above
+            "bindbtn" : "button" - Parent form button binding button must be in "CONTROLS" section 
+        }   
+
+    }
+    
+    "CONTROLS" : {
+        "controlname" (string) : {  
+            "type" : { control type below: (see wxpythone for more information)
+                ALL TYPES:
+                    "name" : (string)       - control name same as "type"
+                    "pos" : [x,y] (tuple)   - (x,y) position of the control in pixels (overirdes "posch")
+                    "size" : [w,h] (tuple)  - size of the control in pixels (overrides "sizech")
+                    "posch" : [xch,ych]     - form position in Characters (does not overirde "pos')
+                    "sizech" : [wch,hch]    - form size in Characters (does not override "size")
+                    "stylelist" : ["READONLY", etc] (list of strings)
+                        "MULTILINE" {multipule line TextCtrl}
+                        "DONTWRAP" {with multiline} - Don't wrap text a field margin
+                        "WORDWRAP" {with multiline} - Wrap text at field margin
+                        "PROCESSENTER"      - Process the <ENTER> key as part of field data.
+                        "PROCESSTAB"        - process the <TAB> keystroke as part of the field data
+                        "READONLY"          - form is readonly, no editing
+                    "validatorstr" : "validator" (see wx.python for more information)
+                    "required" : true/false or not present - (default is false, not present)  - field is required entry
+
+                "navButton": (internal use only)
+
+                "StaticBox" : {             - display a lined box
+                    see ALL TYPES above
+                    "label" : (string)      - text label for the control
+                }
+                "StaticText" : {            - display characters
+                    see ALL TYPES above
+                    "value" : (string)      - initial value for the control
+                }
+                "TextCtrl" : {              - character entry
+                    see ALL TYPES above
+                    "value" : (string)      - initial value for the control
+                    "lookupchoices" : {
+                        "name" : (string)   - Table name
+                        "fields" : ["field1","field2",etc] (list of strings) - table columns
+                        "condition" (string) - valid SQL condition
+                        "orderby" (string)  - valid SQL SORT
+                    }
+                }
+                "MultiMine" : {             - Automatic handling of multiline data. Stored in db 
+                                              blob field as "[data1/rdata2/rdata3]"
+                    see "TextCtrl"
+                }
+                "ComboBox" : {
+                    see ALL TYPES above
+                    "value" : (string)      - initial value for the control
+                    "choices" : ["string","string"] (list of strings) - ComboBox drop down selections
+                        or
+                    "lookupchoices" : {
+                        "name" : (string)   - Table name
+                        "fields" : ["field1","field2",etc] (list of strings) - table columns
+                        "condition" (string) - valid SQL condition
+                        "orderby" (string)  - valid SQL SORT
+                    }
+                    "refreshform" : true/false or not present (default false, not present) - refresh the form on change
+                }
+                "CheckBox" : {
+                    see ALL TYPES above
+                    "value" : (string)      - initial value for the control
+                }
+                "CheckListBox" {
+                    see ALL TYPES above
+                    "label" : (string)      - text label for the control
+                    "choices" ["string","string"] (list of strings) - checklist labels
+                }
+                "Button" : {
+                    see ALL TYPES above
+                        "size" and "sizech" not required
+                    "id" : (integer)        - ID for buttion (default WX.ID_ANY see wxpython for more information)
+                    "label" : (string)      - text label for the control
+                    "open": (string) "FilePickerCtrl" - open the file spectifed in the FilePickerCtrl
+                        *change to "bindbtn" in FilePickerCtrl
+                }
+                "DataViewListCtrl": {
+                    ONLY - "pos", "size", "style"
+                    "table" : { (Dictionary)
+                        "name" : (String)   - SQL Table Name
+                        "fields" : ["One","Two","Three"] (List of strings) - SQL Fields for the forms
+                        "condition" : "ID = {id}" (String) - SQL WHERE CLAUSE
+                        "orderby" : "field DESC" (String) - SQL ORDER BY CLAUSE
+                    }
+                    "column" : [ (list of dictionaries) display columns
+                        {
+                            "name" : (string)   - fieldname, must match "table""fields" above
+                            "label" : (string)  - column heading
+                            "width" : (integer) - column width in pixels
+                        },
+                        { repeats }
+                    ]
+
+                }
+                "DateTime" {
+                    see ALL TYPES above
+                    "id" : (integer)    - ID for field (default WX.ID_ANY see wxpython for more information)
+                    "dt" : (datetime)   - initial date value for the control
+                }
+                "DatePickerCtrl" : {
+                    see ALL TYPES above
+                    "id" : (integer)    - ID for field (default WX.ID_ANY see wxpython for more information)
+                    "dt" : (datetime)   - initial date value for the control
+                }
+                "TimePickerCtrl" : {
+                    see ALL TYPES above
+                    "id" : (integer)    - ID for field (default WX.ID_ANY see wxpython for more information)
+                    "dt" : (datetime)   - initial date value for the control
+                }
+                "CalendarCtrl": {
+                    see ALL TYPES above
+                    "id" : (integer)    - ID for field (default WX.ID_ANY see wxpython for more information)
+                    "date" : (datetime) - initial date value for the control
+                }
+                "FilePickerCtrl" : {
+                    see ALL TYPES above
+                    "id" : (integer)    - ID for field (default WX.ID_ANY see wxpython for more information)
+                    "path" : (string)   - initial path 
+                    "message" : (string) - message to display on control
+                    "wildcard" : (string) - valid wildcard string (based on platform)
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,21 @@
+INSERT INTO `tblFamilyContact` (`ID`, `xPF`, `FamilyID`, `ContactLabel`, `Type`, `Contact`, `Unlisted`) VALUES
+(1, 'F', 1, 'Main', 'Phone', '2183872591', False),
+(2, 'F', 3, 'Main', 'Phone', '2184752499', False),
+(3, 'F', 4, 'Main', 'Phone', '2183882243', False),
+(4, 'F', 5, 'Main', 'Phone', '2184752458', False),
+(5, 'F', 6, 'Main', 'Phone', '2183879282', False),
+(6, 'F', 7, 'Main', 'Phone', '2183872653', False),
+(7, 'F', 8, 'Main', 'Phone', '2183872396', False),
+(8, 'F', 10, 'Main', 'Phone', '9134888702', False),
+(9, 'F', 11, 'Main', 'Phone', '5154620566', False),
+(10, 'F', 11, 'Main', 'eMail', 'Jonathan@WattsWhat.net', False),
+(13, 'F', 82, 'Main', 'Phone', '2183889449', False),
+(14, 'F', 83, 'Main', 'Phone', '2182700384', False),
+(15, 'F', 84, 'Main', 'eMail', 'mmstevepenning@gmail.com', False),
+(16, 'F', 85, 'Main', 'Phone', '2184752482', False),
+(37, 'F', 93, 'Main', 'Phone', '5075256677', False),
+(38, 'F', 94, 'Main', 'Phone', '9139679715', False),
+(39, 'F', 95, 'Main', 'Phone', '9206605476', False),
+(40, 'F', 96, 'Main', 'Phone', '9206605520', False),
+(41, 'F', 97, 'Main', 'Phone', '', False);
+

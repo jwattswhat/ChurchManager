@@ -1,0 +1,183 @@
+{
+    "frmOSFORM": {
+        "FORM": {
+            "name": "frmOS",
+            "type": "Panel",
+            "title": "frmOrderofService: AltOrderofService Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                620,
+                450
+            ],
+            "table": {
+                "name": "tblOrderOfService",
+                "fields": [
+                    "*"
+                ],
+                "Orderby": "OrderofService,Line"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "controls" : ["Navigation","Close"]
+        },
+        "CONTROLS": {
+            "lblOrderofService": {
+                "name": "lblOrderofServiceID",
+                "type": "StaticText",
+                "label": "OrderofService:",
+                "pos": [
+                    0,
+                    30
+                ]
+            },
+            "OrderofService": {
+                "name": "OrderofService",
+                "type": "ComboBox",
+                "pos": [
+                    125,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblLine": {
+                "name": "lblLine",
+                "type": "StaticText",
+                "label": "Line",
+                "pos": [
+                    0,
+                    60
+                ]
+            },
+            "Line": {
+                "name": "Line",
+                "type": "TextNumber",
+                "format": "{:04.1f}",
+                "pos": [
+                    125,
+                    60
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblTitle": {
+                "name": "lblTitle",
+                "type": "StaticText",
+                "label": "Title",
+                "pos": [
+                    0,
+                    90
+                ]
+            },
+            "Title": {
+                "name": "Title",
+                "type": "TextCtrl",
+                "pos": [
+                    125,
+                    90
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblContent": {
+                "name": "lblContent",
+                "label": "Content",
+                "type": "StaticText",
+                "pos": [
+                    0,
+                    120
+                ]
+            },
+            "Content": {
+                "name": "Content",
+                "type": "TextCtrl",
+                "pos": [
+                    125,
+                    120
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblPage": {
+                "name": "lblPage",
+                "type": "StaticText",
+                "label": "Page",
+                "pos": [
+                    0,
+                    150
+                ]
+            },
+            "Page": {
+                "name": "Page",
+                "type": "TextNumber",
+                "format": "{:03d}",
+                "pos": [
+                    125,
+                    150
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblFile": {
+                "name": "lblFile",
+                "type": "StaticText",
+                "label": "File",
+                "pos": [
+                    0,
+                    180
+                ]
+            },
+            "File": {
+                "name": "File",
+                "type": "TextCtrl",
+                "pos": [
+                    125,
+                    180
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblNote": {
+                "name": "lblNote",
+                "type": "StaticText",
+                "label": "Note",
+                "pos": [
+                    0,
+                    210
+                ]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "pos": [
+                    125,
+                    210
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "MULTILINE",
+                    "WORDWRAP"
+                ]
+            }
+        }
+    }
+}

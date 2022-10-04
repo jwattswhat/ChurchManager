@@ -1,0 +1,241 @@
+{
+    "frmMainFORM": {
+        "FORM": {
+            "name": "frmMain",
+            "type": "Panel",
+            "title": "frmMain: Church Manager - Main Menu",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                600,
+                600
+            ],
+            "stylelist": [
+                "CAPTION"
+            ]
+        },
+        "CONTROLS": {
+            "lblDate": {
+                "type": "StaticText",
+                "label": "24-Aug-2022",
+                "pos": [
+                    480,
+                    0
+                ],
+                "name": "lblNow"
+            },
+            "ChurchBox": {
+                "type": "StaticBox",
+                "name": "ChurchBox",
+                "pos": [
+                    20,
+                    20
+                ],
+                "size": [
+                    270,
+                    60
+                ],
+                "label": "Church"
+            },
+            "lblChurch": {
+                "name": "lblChurch",
+                "type": "StaticText",
+                "pos": [
+                    30,
+                    40
+                ],
+                "label": "Churches"
+            },
+            "ServiceBox": {
+                "type": "StaticBox",
+                "name": "ServiceBox",
+                "pos": [
+                    20,
+                    70
+                ],
+                "size": [
+                    270,
+                    140
+                ],
+                "label": "Service"
+            },
+            "lblService": {
+                "name": "lblService",
+                "type": "StaticText",
+                "pos": [
+                    30,
+                    95
+                ],
+                "label": "Worship Service"
+            },
+            "lblSermon": {
+                "name": "lblSermon",
+                "type": "StaticText",
+                "pos": [
+                    40,
+                    120
+                ],
+                "label": "Sermons"
+            },
+            "lblPropers": {
+                "name": "lblPropers",
+                "type": "StaticText",
+                "pos": [
+                    40,
+                    145
+                ],
+                "label": "Propers"
+            },
+            "lblWorshipPlan": {
+                "name": "lblWorshipPlan",
+                "type": "StaticText",
+                "pos": [
+                    40,
+                    170
+                ],
+                "label": "Planning Report"
+            },
+            "lblOSList":{
+                "name": "lblOSList",
+                "type": "StaticText",
+                "pos": [40,185],
+                "label": "OS List"},
+            "lblOS": {
+                "name": "lblOS",
+                "type": "StaticText",
+                "pos": [40,210],
+                "label": "OS"
+            },
+            "lblGenerateOS":{
+                "name" : "lblGenerateOS",
+                "type": "StaticText",
+                "pos": [40,225],
+                "label": "Generate OS"
+            },
+            "lblNotifyParticipants": {
+                "name": "lblNotifyParticipants",
+                "type": "StaticText",
+                "pos" : [40,250],
+                "label":"Notify Participants"
+            },
+            "lblSundayPrayers": {
+                "name": "lblSundayPrayers",
+                "label": "Sunday Prayers",
+                "pos": [40,285],
+                "type": "StaticText"
+            },
+            "lblPrayers":{
+                "name": "lblPrayers",
+                "label": "Prayers",
+                "pos": [40,305],
+                "type": "StaticText"
+            },
+            "lblMemberDirectory": {
+                "name": "lblMemberDirectory",
+                "label" : "Member Directory",
+                "pos": [40,330],
+                "type": "StaticText"
+            },
+            "lblParticipant": {
+                "name": "lblParticipant",
+                "label": "Participant",
+                "pos": [40,355],
+                "type": "StaticText"
+            },
+            "lblSchedule" : {
+                "name": "lblSchedule",
+                "type": "StaticText",
+                "pos": [40,380],
+                "label": "Schedule"
+            },
+            "lblServiceSchedule": {
+                "name": "lblServiceSchedule",
+                "type": "StaticText",
+                "pos": [40,405],
+                "label" :"Service Schedule"
+            },
+            "MemberBox": {
+                "name": "MemberBox",
+                "label": "Membership",
+                "type": "StaticBox",
+                "pos": [
+                    300,
+                    70
+                ],
+                "size": [
+                    270,
+                    100
+                ]
+            },
+            "lblPeople": {
+                "name": "lblPeople",
+                "type": "StaticText",
+                "pos": [
+                    305,
+                    95
+                ],
+                "label": "People"
+            },
+            "lblFamily": {
+                "name": "lblFamily",
+                "type": "StaticText",
+                "pos": [
+                    305,
+                    120
+                ],
+                "label": "Families"
+            },
+            "UtilitiesBox": {
+                "name": "UtilitiesBox",
+                "type": "StaticBox",
+                "label": "Utilities",
+                "pos": [
+                    300,
+                    350
+                ],
+                "size": [
+                    270,
+                    130
+                ]
+            },
+            "lblConfig": {
+                "name": "lblConfig",
+                "type": "StaticText",
+                "label": "Config",
+                "pos": [
+                    305,
+                    370
+                ]
+            },
+            "lblOptions": {
+                "name": "lblOptions",
+                "type": "StaticText",
+                "label": "Options",
+                "pos": [
+                    305,
+                    395
+                ]
+            },
+            "lblChoices": {
+                "name": "lblChoices",
+                "type": "StaticText",
+                "label": "Choices",
+                "pos": [
+                    305,
+                    420
+                ]
+            },
+            "lblBugs": {
+                "name": "lblBugs",
+                "type": "StaticText",
+                "label": "Bugs",
+                "pos": [
+                    305,
+                    445
+                ]
+            }
+        }
+    }
+}
