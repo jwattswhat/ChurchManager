@@ -1,14 +1,11 @@
 import mysql
 import datetime
 
-import clsDB
-import clsSQL
-import clsSMTP
-from clsConfig import CONFIG
+import JSForm
 
 
 def readonerecord(dbconn, table):
-    SQL = clsSQL.clsSQL(dbconn, table)
+    SQL = JSForm.clsSQL(dbconn, table)
     sql = SQL.select()
     cursor = dbconn.cursor()
     cursor.execute(sql)
@@ -16,7 +13,7 @@ def readonerecord(dbconn, table):
 
 
 def readallrecords(dbconn, table):
-    SQL = clsSQL.clsSQL(dbconn, table)
+    SQL = JSForm.clsSQL(dbconn, table)
     sql = SQL.select()
     cursor = dbconn.cursor()
     cursor.execute(sql)
@@ -38,8 +35,7 @@ def strtolist(st):
 
 def ScheduleParticipants(ServiceID):
 
-    ChurchDB = clsDB.clsDB("localhost", "ChurchDB", "church", "Church99")
-    ChurchDBConnection = mysql.connector.connect(**ChurchDB.DB)
+    ChurchDB = JSForm.clsDB("localhost", "ChurchDB", "church", "Church99")
 
     # check for previous schedule for this service
     serviceroleTable = {
@@ -47,7 +43,7 @@ def ScheduleParticipants(ServiceID):
         "fields": ["*"],
         "condition": "ServiceID={ServiceID}".format(ServiceID=ServiceID),
     }
-    servicerolerows = readallrecords(ChurchDBConnection, serviceroleTable)
+    servicerolerows = readallrecords(ChurchDB.DBConnection, serviceroleTable)
     if len(servicerolerows) != 0:
         return None
     servicerolepos = 0
@@ -63,7 +59,7 @@ def ScheduleParticipants(ServiceID):
         "fields": ["*"],
         "condition": "ID = {ServiceID};".format(ServiceID=ServiceID),
     }
-    servicerow = readonerecord(ChurchDBConnection, serviceTable)
+    servicerow = readonerecord(ChurchDB.DB.DBConnection, serviceTable)
 
     ServiceDate = servicerow[S_DateTime].strftime("%Y-%m-%d")
     ServiceMonth = servicerow[S_DateTime].strftime("%B")
@@ -78,7 +74,7 @@ def ScheduleParticipants(ServiceID):
         "fields": ["*"],
         "condition": "ID = {PropersID};".format(PropersID=servicerow[S_Propers]),
     }
-    propersrow = readonerecord(ChurchDBConnection, propersTable)
+    propersrow = readonerecord(ChurchDB.DB.DBConnection, propersTable)
     ServiceSeason = propersrow[P_Season]
 
     #   participant constants
@@ -93,7 +89,7 @@ def ScheduleParticipants(ServiceID):
 
     #   participants
     participantTable = {"name": "tblParticipant", "fields": ["*"], "orderby": "ID"}
-    participantrows = readallrecords(ChurchDBConnection, participantTable)
+    participantrows = readallrecords(ChurchDB.DB.DBConnection, participantTable)
     participantpos = 0
 
     #   Service Schedule Constants
@@ -106,7 +102,7 @@ def ScheduleParticipants(ServiceID):
 
     #   Service Schedule
     scheduleTable = {"name": "tblSchedule", "fields": ["*"], "orderby": "ID"}
-    schedulerows = readallrecords(ChurchDBConnection, scheduleTable)
+    schedulerows = readallrecords(ChurchDB.DB.DBConnection, scheduleTable)
     schedulepos = 0
     scheduleTime = {}
     scheduleMonth = {}
@@ -151,7 +147,7 @@ def ScheduleParticipants(ServiceID):
                         ParticipantID=participant[P_ID],
                         Role=role,
                     )
-                    cursor = ChurchDBConnection.cursor()
+                    cursor = ChurchDB.DB.DBConnection.cursor()
                     cursor.execute(sql)
 
     return
@@ -161,11 +157,9 @@ def ScheduleParticipants(ServiceID):
 
 
 def notifyviaeMail(ServiceID):
-    global CONFIG
 
-    ChurchDB = clsDB.clsDB("localhost", "ChurchDB", "church", "Church99")
-    ChurchDBConnection = mysql.connector.connect(**ChurchDB.DB)
-    SMTP = clsSMTP.clsSMTP()
+    ChurchDB = JSForm.clsDB("localhost", "ChurchDB", "church", "Church99")
+    SMTP = JSForm.clsSMTP()
 
     #   Service Record Constants
     S_ID = 0
@@ -178,7 +172,7 @@ def notifyviaeMail(ServiceID):
         "fields": ["*"],
         "condition": "ID = {ServiceID};".format(ServiceID=ServiceID),
     }
-    servicerow = readonerecord(ChurchDBConnection, serviceTable)
+    servicerow = readonerecord(ChurchDB.DBConnection, serviceTable)
 
     ServiceDate = servicerow[S_DateTime].strftime("%Y-%m-%d")
     ServiceMonth = servicerow[S_DateTime].strftime("%B")
@@ -200,7 +194,7 @@ def notifyviaeMail(ServiceID):
         "condition": "ServiceID={ServiceID}".format(ServiceID=ServiceID),
         "orderby": "ParticipantID",
     }
-    servicerolerows = readallrecords(ChurchDBConnection, serviceroleTable)
+    servicerolerows = readallrecords(ChurchDB.DBConnection, serviceroleTable)
     servicerolepos = 0
 
     #   participant constants
@@ -221,7 +215,7 @@ def notifyviaeMail(ServiceID):
     }
     participantpos = 0
 
-    location = CONFIG.get_Config_Value("Location", "Report")
+    location = JSForm.CONFIG.get_Config_Value("Location", "Report")
     filename = location + "WorshipPlanningWorksheet.pdf"
 
     msg = [
@@ -234,7 +228,7 @@ def notifyviaeMail(ServiceID):
         parttable["condition"] = participantTable["condition"].format(
             ParticipantID=servicerolerows[SR][SR_ParticipantID]
         )
-        participantrow = readonerecord(ChurchDBConnection, parttable)
+        participantrow = readonerecord(ChurchDB.DBConnection, parttable)
         if participantrow[P_eMail] != None:
             reciever.append(participantrow[P_eMail])
             recievername.append(participantrow[P_Name])

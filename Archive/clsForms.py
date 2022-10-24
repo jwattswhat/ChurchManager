@@ -1,604 +1,989 @@
-# !/usr/bin/env python3
-#   frmChurch.py - Church Forms Classes
-# 	Rev. Jonathan C. Watt
-# 	July 1, 2021
-
+"""
+    frmForms.py - Church Manager Forms Classes
+    Rev. Jonathan C. Watt
+    July 1, 2021
+"""
+#
+#   import wx classes
+#
+import os
 import wx
 import wx.dataview
-from wx.core import CONTROL_ISDEFAULT, Control, ID_ANY, SaveFileSelector, StaticText
-import mysql
+
+#
+#   import Pyhton classes
+#
 import json
+import pyautogui
 
-import clsValidators
+#
+#   import framework classes
+#
+from clsConstants import CONST
+from clsConfig import CONFIG
+from clsFont import FONT
+from clsLog import lg
+import clsFont
 import clsDB
+from clsFields import getcontrolparameters, clsField
+from clsSQL import clsSQL
+import clsValidators
+import fnUtil
 
 
-# <TODO> Documentation for clsForm
-#
-#   clsForm - Form Class
-#       Creates a form and displays controls according to formdescriptin & controldescription disctionaries
-#
-#   Parameters:
-#       parent - Parent ID for this form ('None' for top level form)
-#
-#       DBConnection - prviously defined DB Connection (Maria or MySQL)
-#
-#       formdescription - Dictionary Containing data about form
-#           'FORM' - data to pass wx.Frame (see wxPython documentation) <TODO> add URL
-#           'EXTRA' - other data about the form
-#
-#       controldesdescriptions - Dictionary contianing Screen fields
-#           'CONTROL' - data to pass wx.<field control> (see wxPython documentation)  <TODO> add url
-#           'EXTRA' - other data about the control
-#
-#
+class clsBASEForm:
+    """
+    clsBASEForm: Process a form
+    Rev. Jonathan C. Watt
+    July 2021
 
-#
-#   Functions
-#
-wxpythoncallparmameters = {
-    "Frame": ["title", "pos", "size", "style", "name"],
-    "StaticText": ["label", "pos", "size", "style", "name"],
-    "TextCtrl": ["value", "pos", "size", "style", "validator", "name"],
-    "ComboBox": ["value", "pos", "size", "choices", "style", "validator", "name"],
-    "CheckBox": ["label", "pos", "size", "style", "validator", "name"],
-    "CheckListBox": [
-        "value",
-        "pos",
-        "size",
-        "choices",
-        "style",
-        "validator",
-        "name",
-    ],
-    "Button": ["label", "pos", "size", "style", "validator", "name"],
-    "DataViewListCtrl": ["pos", "size", "style", "validator"],
-    "btnClose": ["label", "pos", "size", "style", "validator", "name"],
-    "btnNextRec": ["label", "pos", "size", "style", "validator", "name"],
-    "btnPrevRec": ["label", "pos", "size", "style", "validator", "name"],
-    "btnDelete": ["label", "pos", "size", "style", "validator", "name"],
-    "btnUpdate": ["label", "pos", "size", "style", "validator", "name"],
-    "btnNew": ["label", "pos", "size", "style", "validator", "name"],
-}
+       Class Variables.
 
+       Parameters
 
-def getcontrolparameters(controldictionary):
-    newdict = {}
-    for key in wxpythoncallparmameters[controldictionary["type"]]:
-        if key in controldictionary.keys():
-            newdict.update({key: controldictionary[key]})
-    return newdict
+    """
 
-
-class clsForm:
-    #    PARENT - Calling clsForm object
-    #    FORM - wxPython Frame for this form
-    #    SUBFORM - Dictionary of Subforms called by this form {formname:id}
-    #    DBConnection - SQL Database Connection
-    #    TABLENAME - Name of the Table for this form
-    #    SQL - Default Query for this form
-
-    #    FORMDESCRIPTION - Dictionary containing Form Description - see CMFormDescriptions.py
-    #    CONTROLDESCRIPTION - Dictionary containing Form Control Descriptions - see CMFormDescriptions.py
-    #    CONTROLID - Dictinary containing the Control ID for every Control on this form {ControlName:ID}
-
-    #    RECORD - Record Class - See clsDB.py
+    class _dirtydialog(wx.Dialog):
+        def __init__(self, parent, title):
+            super().__init__(parent, title=title, size=(400, 200))
+            panel = wx.Panel(self)
+            self.text = wx.StaticText(
+                panel,
+                wx.ID_ANY,
+                label="This form has been modified?",
+                pos=(10, 50),
+            )
+            self.btn = wx.Button(
+                panel,
+                CONST.FORM_CONTINUE,
+                label="Continue",
+                size=(100, 30),
+                pos=(10, 100),
+            )
+            self.btn = wx.Button(
+                panel, CONST.FORM_CANCEL, label="Cancel", size=(100, 30), pos=(120, 100)
+            )
 
     def __init__(
-        self, parent, dbconnection, formdescription, controldescription, sql=""
+        self,
+        parent,
+        dbconnection,
+        formname,
+        controls=None,
+        frmdescription=None,
+        position=None,
+        parentkey=None,
     ):
-
-        self.DBConnection = dbconnection  # Save the Connection Locally
-        self.FORMDESCRIPTION = formdescription
-        self.CONTROLDESCRIPTION = controldescription
-        self.PARENT = parent
-        self.SUBFORM = {}
-
-        if self.PARENT == None:
-            parentform = None
-        else:
-            parentform = self.PARENT.FORM
-        self.FORM = wx.Frame(
-            parentform, wx.ID_ANY, **getcontrolparameters(self.FORMDESCRIPTION)
+        lg.log(
+            formname=formname,
+            controls=controls,
+            frmdescription=frmdescription,
+            position=position,
         )
 
-        #
-        #   Check for Form without a Record / Table (i.e. Main form with Menu Only)
-        #
-        try:
-            self.TABLENAME = self.FORMDESCRIPTION["tablename"]
-            try:
-                self.SQL = self.FORMDESCRIPTION["SQL"]
-            except:
-                self.SQL = "SELECT * FROM " + self.TABLENAME + ";"
-        except:
-            self.TABLENAME = ""
+        self.PARENT = parent
+        self.DBConnection = dbconnection  # Save the Connection Locally
+        self.position = position
+        self.parentkey = parentkey
+        self.RECORDS = None
 
-        if self.TABLENAME != "":
-            if sql != "":
-                self.SQL = sql
-            self.RECORD = clsDB.clsRecord(self.DBConnection, self.TABLENAME, self.SQL)
+        self.LINKEDFORM = {}
+        self.SUBFORM = {}
 
-        self.update_data_to_form(updatecontrolid=True)
+        self.FORMDESCRIPTON, self.CONTROLDESCRIPTION = self.load_form_from_json(
+            formname
+        )
 
-        #
-        # Bind all the Controls (for sub-classes to inherit)
-        #
+        #   if form override is present do it here.
+        if frmdescription is not None:
+            self.FORMDESCRIPTON.update(frmdescription)
+
+        self.override_linked_and_sub_forms()
+
+        if "controls" not in self.FORMDESCRIPTON:
+            self.FORMDESCRIPTON["controls"] = ["Navigation", "Close"]
+        if controls != None:
+            self.FORMDESCRIPTON["controls"] = controls
+
+        self.FORMDESCRIPTON, self.CONTROLDESCRIPTION = fnUtil.charactertopoint(
+            self.FORMDESCRIPTON, self.CONTROLDESCRIPTION
+        )
+
+        #   add predfined controls to the control
+        self.CONTROLDESCRIPTION = {
+            **self.CONTROLDESCRIPTION,
+            **self.process_predefined_controls(self.FORMDESCRIPTON["controls"]),
+        }
+
+        self.FRAME, self.FORM = self.process_form_type(self.FORMDESCRIPTON, position)
+
+        self.CONTROLID = self.build_form()
+
+        self.RECORDS = self.initialize_data_record(self.FORMDESCRIPTON)
+
+        self.initialize_linked_forms()
+        self.initialize_sub_forms()
+
         self.bind_form_controls()
 
-    def show(self, tf):
-        self.FORM.Show(True)
+    def override_linked_and_sub_forms(self):
+        lg.log()
+        if "linkedform" in self.FORMDESCRIPTON:
+            for linkedform in self.FORMDESCRIPTON["linkedform"]:
+                formdesc, controldesc = self.load_form_from_json(linkedform)
+                formdesc.update(self.FORMDESCRIPTON["linkedform"][linkedform])
+                self.FORMDESCRIPTON["linkedform"][linkedform] = formdesc
+        if "subform" in self.FORMDESCRIPTON:
+            for subform in self.FORMDESCRIPTON["subform"]:
+                formdesc, controldesc = self.load_form_from_json(subform)
+                formdesc.update(self.FORMDESCRIPTON["subform"][subform])
+                self.FORMDESCRIPTON["subform"][subform] = formdesc
 
-    def get_combobox_by_index(self, controldescription):
-        if "cbSQL" in controldescription.keys():
-            SQL = controldescription["cbSQL"]
-            cursor = self.DBConnection.cursor()
-            cursor.execute(SQL)
-            rows = cursor.fetchall()
-            cblist = {}
-            for row in rows:
-                cblist.update({row[0]: row[1]})
+    def process_predefined_controls(self, controls):
+        lg.log(controls=controls)
+
+        lastcolumn = self.FORMDESCRIPTON["size"][0]
+        lastline = self.FORMDESCRIPTON["size"][1] - 5
+
+        NavControls = {}
+        self.NavControlsPresent = False
+        x = 5  # start 5 in
+        if "Navigation" in controls:
+            self.NavControlsPresent = True
+
+            for key in CONST.btnNavigationCONTROLS["Navigation"]:
+                NavControls[key] = CONST.btnNavigationCONTROLS["Navigation"][key]
+                NavControls[key]["pos"] = [
+                    x,
+                    lastline,
+                ]  # - CONST.btnNavigationCONTROLS["Navigation"][key]["size"][1]]
+                x += CONST.btnNavigationCONTROLS["Navigation"][key]["size"][0]
         else:
-            cblist = {}
-        return cblist
+            if "Update" in controls:
+                NavControls["btnUpdate"] = CONST.btnNavigationCONTROLS["Navigation"][
+                    "btnUpdate"
+                ]
+                NavControls["btnUpdate"]["pos"] = [
+                    x,
+                    lastline,
+                ]  # -CONST.btnNavigationCONTROLS["Navigation"]["btnUpdate"]["size"][1]]
 
-    def get_combobox_by_choices(self, controldescription):
-        if "cbSQL" in controldescription.keys():
-            sellist = list(self.get_combobox_by_index(controldescription).values())
+        #   Predefined Controls "Close"
+        self.ClosePresent = False
+        if "Close" in controls:
+            self.ClosePresent = True
+            NavControls["btnClose"] = CONST.btnNavigationCONTROLS["Close"]["btnClose"]
+            NavControls["btnClose"]["pos"] = [
+                lastcolumn
+                - CONST.btnNavigationCONTROLS["Close"]["btnClose"]["size"][0],
+                lastline,
+            ]  # -CONST.btnNavigationCONTROLS["Close"]["btnClose"]["size"][1]]
+
+        return NavControls
+
+    def process_form_type(self, formdescription, position):
+        """
+        parameters
+            formdescription["type"]
+                "Dialog" - for Modal Forms
+                "Panel" - Normal
+                "StaticBox" - for SubForms
+            position - override position for form
+
+        """
+        lg.log(formdescription=formdescription, position=position)
+        if position is not None:
+            formdescription["pos"] = [position[0], position[1]]
+
+        if formdescription["type"] == "Dialog":
+            formdescription["size"][0] += 30
+            formdescription["size"][1] += 70
+            FRAME = wx.Dialog(
+                None, id=wx.ID_ANY, **getcontrolparameters(formdescription)
+            )
+            FORM = FRAME
+        elif formdescription["type"] == "Panel":
+            #   Panel must have a frame as a Parent.
+            #   Invisible to the user.
+            size = [formdescription["size"][0] + 30, formdescription["size"][1] + 70]
+            FRAME = wx.Frame(
+                None,
+                id=wx.ID_ANY,
+                title=formdescription["title"],
+                pos=formdescription["pos"],
+                size=size,
+            )
+            formdescription["pos"] = [0, 0]
+            FORM = wx.Panel(FRAME, wx.ID_ANY, **getcontrolparameters(formdescription))
+        elif formdescription["type"] == "StaticBox":
+            FORM = wx.StaticBox(
+                self.PARENT.FORM, wx.ID_ANY, **getcontrolparameters(formdescription)
+            )
+            FRAME = FORM
+            FRAME.SetFont(FONT.Get_Current_Font())
+
+        return FRAME, FORM
+
+    def load_form_from_json(self, Form):
+        """
+        loads form description from a JSON file.
+        """
+        global CONFIG
+        lg.log(Form=Form)
+
+        FormLocation = CONFIG.get_Config_Value("Location", "Form")
+
+        formname = FormLocation + Form + ".json"
+        f = open(
+            formname,
+        )
+        jsonfrm = json.load(f)
+        return jsonfrm[Form + "FORM"]["FORM"], jsonfrm[Form + "FORM"]["CONTROLS"]
+
+    def build_form(self):
+        lg.log()
+        controlid = {}
+        if "readonly" in self.FORMDESCRIPTON:
+            readonly = True
         else:
-            sellist = []
-        return sellist
+            readonly = False
+        for key in self.CONTROLDESCRIPTION.copy():
 
-    def get_comobox_choices_with_index(self, controldescription):
-        if "cbSQL" in controldescription.keys():
-            SQL = controldescription["cbSQL"]
-            cursor = self.DBConnection.cursor()
-            cursor.execute(SQL)
-            rows = cursor.fetchall()
-            cblist = {}
-            for row in rows:
-                cblist.update({row[1]: row[0]})
-        else:
-            cblist = {}
-        return cblist
+            if readonly:
+                self.CONTROLDESCRIPTION[key].update({"readonly": True})
 
-    def translate_combobox_to_text(self, controldescription, key):
-        value = self.RECORD.get_field_by_name(key)
-        if value == "":
-            return ""
-        elif "cbSQL" in controldescription.keys():
-            indexed = self.get_combobox_by_index(controldescription)
-            choices = list(indexed.values())
-            if value.isnumeric():
-                value = int(value)
-            return indexed[value]
-        elif "choices" in controldescription.keys():
-            choices = controldescription["choices"]
-            if value in choices:
-                return value
-            else:
-                return ""
-        else:
-            return ""
+            if "readonlyfields" in self.FORMDESCRIPTON:
+                if key in self.FORMDESCRIPTON["readonlyfields"]:
+                    self.CONTROLDESCRIPTION[key].update({"readonly": True})
 
-    def translate_combobox_to_key(self, controldescription, key):
-        value = self.CONTROLID[key].GetValue()
-        keys = controldescription.keys()
-        if "cbSQL" in controldescription.keys():
-            choiceswithindex = self.get_comobox_choices_with_index(controldescription)
-            return choiceswithindex[value]
-        return value
+            fld = clsField(
+                self, wx.ID_ANY, self.CONTROLDESCRIPTION[key], self.DBConnection
+            )
+            controlid.update({key: fld.FIELD})
+        return controlid
 
-    def update_form_fields(self, key):
-        ctl = None
-        localcontroldict = getcontrolparameters(self.CONTROLDESCRIPTION[key])
-        if self.CONTROLDESCRIPTION[key]["type"] == "StaticText":
-            if key not in self.CONTROLID.keys():
-                ctl = wx.StaticText(self.FORM, wx.ID_ANY, **localcontroldict)
+    def initialize_data_record(self, formdescription):
+        lg.log(formdescription=formdescription)
+        if "table" in formdescription:
+            return clsDB.clsRecord(self.DBConnection, formdescription["table"])
 
-        #        elif self.CONTROLDESCRIPTION[key]["type"] == "StaticBitmap":
-        #            if key not in self.CONTROLID.keys():
-        #                fld = self.RECORD.get_field_by_name("Picture")
-        #                bitmap = wxBitmapFromImage( fld )
-        #                ctl = wx.StaticBitmap(self.FORM, wx.ID_ANY, **localcontroldict)
+    def display_form_data(self, table=None, parentrecord=None):
+        lg.log(table=table, parentrecord=parentrecord)
+        if "table" not in self.FORMDESCRIPTON:
+            return None
 
-        elif self.CONTROLDESCRIPTION[key]["type"] == "TextCtrl":
-            if key not in self.CONTROLID.keys():
-                localcontroldict.update({"value": self.RECORD.get_field_by_name(key)})
-                ctl = wx.TextCtrl(self.FORM, wx.ID_ANY, **localcontroldict)
-            else:
-                ctl = self.CONTROLID[key]
+        if table is None:
+            table = self.FORMDESCRIPTON["table"].copy()
 
-        elif self.CONTROLDESCRIPTION[key]["type"] == "ComboBox":
-            if key not in self.CONTROLID.keys():
-                if "choices" not in localcontroldict.keys():
-                    choices = self.get_combobox_by_choices(localcontroldict)
-                    localcontroldict.update({"choices": choices})
-                ctl = wx.ComboBox(self.FORM, wx.ID_ANY, **localcontroldict)
-            else:
-                ctl = self.CONTROLID[key]
-            ctl.SetValue(self.RECORD.RECORDS[self.RECORD.CURRENTRECORD][key])
+        result = self.RECORDS.load_records(table, parentrecord)
+        if result == "NewRecord":
+            if self.parentkey != None:
+                self.RECORDS._record[self.RECORDS._position][
+                    self.parentkey[0]
+                ] = self.parentkey[1]
+        self._display_records(table, parentrecord)
 
-        elif self.CONTROLDESCRIPTION[key]["type"] == "CheckBox":
-            if key not in self.CONTROLID.keys():
-                ctl = wx.CheckBox(self.FORM, wx.ID_ANY, **localcontroldict)
-            else:
-                ctl = self.CONTROLID[key]
-
-            if self.RECORD.get_field_by_name(key) == True:
-                ctl.SetValue(wx.CHK_CHECKED)
-            else:
-                ctl.SetValue(wx.CHK_UNCHECKED)
-
-        elif self.CONTROLDESCRIPTION[key]["type"] == "CheckListBox":
-            if key not in self.CONTROLID.keys():
-                fld = self.RECORD.get_field_by_name(key)
-                if fld != "":
-                    checklist = json.loads(fld)
-                    clkeys = list(checklist.keys())
-                else:
-                    clkeys = []
-                localcontroldict.update({"choices": clkeys})
-                ctl = wx.CheckListBox(self.FORM, wx.ID_ANY, **localcontroldict)
-                if fld != "":
-                    for c in checklist.keys():
-                        if checklist[c] == "True":
-                            ctl.Check(ctl.FindString(c), True)
-
-            else:
-                ctl = self.CONTROLID[key]
-                fld = self.RECORD.get_field_by_name(key)
-                if fld != "":
-                    checklist = json.loads(fld)
-                    clkeys = list(checklist.keys())
-                else:
-                    clkeys = []
-                ctl.Destroy()  # Since the Checklist is potentially different for each record
-                # we must recreate a new control.
-                localcontroldict.update({"choices": clkeys})
-
-                ctl = wx.CheckListBox(self.FORM, wx.ID_ANY, **localcontroldict)
-                self.CONTROLID[key] = ctl
-                if fld != "":
-                    for c in checklist.keys():
-                        if checklist[c] == "True":
-                            ctl.Check(ctl.FindString(c), True)
-
-        elif self.CONTROLDESCRIPTION[key]["type"] == "Button":
-            if key not in self.CONTROLID.keys():
-                ctl = wx.Button(self.FORM, wx.ID_ANY, **localcontroldict)
-            else:
-                ctl = self.CONTROLID[key]
-
-        elif self.CONTROLDESCRIPTION[key]["type"] == "DataViewListCtrl":
-            if key not in self.CONTROLID.keys():
-                ctl = wx.dataview.DataViewListCtrl(
-                    self.FORM, wx.ID_ANY, **localcontroldict
+    def _load_DataViewListCtrl(self):
+        for field in self.CONTROLID:
+            if self.CONTROLDESCRIPTION[field]["type"] == "DataViewListCtrl":
+                self.CONTROLID[field].SetValueTable(
+                    self.RECORDS.current(), self.CONTROLDESCRIPTION[field]["table"]
                 )
-            else:
-                ctl = self.CONTROLID[key]
+        return None
 
-            i = 0
-            for column in localcontroldict["columns"]:
-                ctl.AppendTextColumn(
-                    column,
-                    width=localcontroldict["columnwidth"][i],
+    def _display_records(self, table=None, parentrecord=None):
+        lg.log(table=table, parentrecord=parentrecord)
+        if "table" not in self.FORMDESCRIPTON:
+            return None
+
+        if table is None:
+            table = self.FORMDESCRIPTON["table"]
+
+        self.fill_form(self.RECORDS.current())
+
+        for linkedfrm in self.LINKEDFORM:
+            self.LINKEDFORM[linkedfrm].display_form_data(
+                self.FORMDESCRIPTON["linkedform"][linkedfrm]["table"],
+                self.RECORDS.current(),
+            )
+
+        for subfrm in self.SUBFORM:
+            self.SUBFORM[subfrm].display_form_data(
+                self.FORMDESCRIPTON["subform"][subfrm]["table"], self.RECORDS.current()
+            )
+
+        self._load_DataViewListCtrl()
+
+    def update_choices(self):
+        lg.log()
+        for field in self.CONTROLID:
+            if self.CONTROLDESCRIPTION[field]["type"] == "ComboBox":
+                choices = self.CONTROLID[field].choices.Load_Choices(
+                    self.CONTROLDESCRIPTION[field]
                 )
-                i += 1
+                if choices != None:
+                    self.CONTROLDESCRIPTION.update({"choices": choices})
+                    value = self.CONTROLID[field].GetValue()
+                    self.CONTROLID[field].Set(choices)
+                    self.CONTROLID[field].ChangeValue(value)
 
-            select = self.RECORD.RECORDS[self.RECORD.CURRENTRECORD][
-                localcontroldict["select"]
-            ]
+    def fill_form(self, record):
+        """
+        fill the form with editable data from the Read record
+        """
+        lg.log(record=record)
+        for key in record:
+            if key == "ID":
+                continue
+            if key not in self.CONTROLDESCRIPTION:
+                continue
+            match self.CONTROLDESCRIPTION[key]["type"]:
+                case "TextCtrl":
+                    self.CONTROLID[key].ChangeValue(record[key])
+                case "TextNumber":
+                    self.CONTROLID[key].ChangeValue(record[key])
+                case "ComboBox":
+                    self.CONTROLID[key].ChangeValue(record[key])
 
-            for row in self.RECORD.RECORDS.keys():
-                if select == self.RECORD.RECORDS[row][localcontroldict["select"]]:
-                    data = []
-                    for column in localcontroldict["columns"]:
-                        data.append(self.RECORD.RECORDS[row][column])
-                    ctl.AppendItem(data)
+                case _:
+                    self.CONTROLID[key].SetValue(record[key])
 
-        #
-        #   Pre-Defined Buttons
-        #
-        elif self.CONTROLDESCRIPTION[key]["type"] == "btnClose":
-            if key not in self.CONTROLID.keys():
-                ctl = wx.Button(self.FORM, wx.ID_ANY, **localcontroldict)
+    def initialize_linked_forms(self):
+        lg.log()
 
-                ctl.SetLabel("Close")
-                self.FORM.Bind(wx.EVT_BUTTON, self.on_close_click, ctl)
-            else:
-                ctl = self.CONTROLID[key]
+        if "linkedform" not in self.FORMDESCRIPTON:
+            return
 
-        elif self.CONTROLDESCRIPTION[key]["type"] == "btnNextRec":
-            if key not in self.CONTROLID.keys():
-                ctl = wx.Button(self.FORM, wx.ID_ANY, **localcontroldict)
+        for lnkdfrm in self.FORMDESCRIPTON["linkedform"]:
+            if "bindbtn" not in self.FORMDESCRIPTON["linkedform"][lnkdfrm]:
+                self.open_linked_form(lnkdfrm)
 
-                ctl.SetLabel("&Next")
-                self.FORM.Bind(wx.EVT_BUTTON, self.on_next_record_click, ctl)
-            else:
-                ctl = self.CONTROLID[key]
+    def open_linked_form(self, lnkdfrm, record=None):
+        """
+        open_linked_form - setup open linked form.
+        """
+        lg.log(lnkdfrm=lnkdfrm, record=record)
 
-        elif self.CONTROLDESCRIPTION[key]["type"] == "btnPrevRec":
-            if key not in self.CONTROLID.keys():
-                ctl = wx.Button(self.FORM, wx.ID_ANY, **localcontroldict)
+        pk = []
+        parentkey = self.FORMDESCRIPTON["linkedform"][lnkdfrm].get("parentkey")
+        if parentkey != None:
+            pk.append(parentkey[0])
+            pk.append(self.RECORDS._record[self.RECORDS._position][parentkey[1]])
+        if pk == []:
+            pk = None
 
-                ctl.SetLabel("&Prev")
-                self.FORM.Bind(wx.EVT_BUTTON, self.on_prev_record_click, ctl)
-            else:
-                ctl = self.CONTROLID[key]
+        LinkedForm = clsForm(
+            self,
+            dbconnection=self.DBConnection,
+            formname=lnkdfrm,
+            frmdescription=self.FORMDESCRIPTON["linkedform"][lnkdfrm],
+            controls=self.FORMDESCRIPTON["linkedform"][lnkdfrm]["controls"],
+            # position=pyautogui.position(),
+            parentkey=pk,
+        )
+        LinkedForm.display_form_data(
+            self.FORMDESCRIPTON["linkedform"][lnkdfrm].get("table", None),
+            self.RECORDS.current(),
+        )
+        self.LINKEDFORM.update({lnkdfrm: LinkedForm})
+        return LinkedForm.show()
 
-        elif self.CONTROLDESCRIPTION[key]["type"] == "btnUpdate":
-            if key not in self.CONTROLID.keys():
-                ctl = wx.Button(self.FORM, wx.ID_ANY, **localcontroldict)
+    def initialize_sub_forms(self):
+        lg.log()
+        if "subform" not in self.FORMDESCRIPTON:
+            return
 
-                ctl.SetLabel("&Update")
-                self.FORM.Bind(wx.EVT_BUTTON, self.on_update_record_click, ctl)
-            else:
-                ctl = self.CONTROLID[key]
+        for subfrm in self.FORMDESCRIPTON["subform"]:
 
-        elif self.CONTROLDESCRIPTION[key]["type"] == "btnDelete":
-            if key not in self.CONTROLID.keys():
-                ctl = wx.Button(self.FORM, wx.ID_ANY, **localcontroldict)
+            SubForm = clsForm(
+                self,
+                dbconnection=self.DBConnection,
+                formname=subfrm,
+                controls=self.FORMDESCRIPTON["subform"][subfrm]["controls"],
+                frmdescription=self.FORMDESCRIPTON["subform"][subfrm],
+            )
 
-                ctl.SetLabel("&Delete")
-                self.FORM.Bind(wx.EVT_BUTTON, self.on_delete_record_click, ctl)
-            else:
-                ctl = self.CONTROLID[key]
-
-        elif self.CONTROLDESCRIPTION[key]["type"] == "btnNew":
-            if key not in self.CONTROLID.keys():
-                ctl = wx.Button(self.FORM, wx.ID_ANY, **localcontroldict)
-
-                ctl.SetLabel("&New")
-                self.FORM.Bind(wx.EVT_BUTTON, self.on_new_record_click, ctl)
-            else:
-                ctl = self.CONTROLID[key]
-
-        else:  # <todo>Need better error trapping here
-            print("Skipping ", key, "Type", self.CONTROLDESCRIPTION[key]["type"])
-
-        return ctl
-
-    def update_data_to_form(self, updatecontrolid=False):
-        if updatecontrolid:
-            self.CONTROLID = {}
-        for key in self.CONTROLDESCRIPTION.keys():
-            ctl = self.update_form_fields(key)
-            if updatecontrolid and ctl != None:
-                if ctl not in self.CONTROLID.keys():
-                    self.CONTROLID.update({key: ctl})
+            self.SUBFORM.update({subfrm: SubForm})
+            return SubForm.show()
 
     def bind_form_controls(self):
-        # for binding sub-class controls
+        lg.log()
+        self.FORM.Bind(wx.EVT_CLOSE, self._on_close)
 
-        #
-        # Set up the Close Event always (click on [x])
-        #
-        self.FORM.Bind(wx.EVT_CLOSE, self.OnClose)
+        if "linkedform" in self.FORMDESCRIPTON:
+            for lnkdfrm in self.FORMDESCRIPTON["linkedform"]:
+                if "bindbtn" in self.FORMDESCRIPTON["linkedform"][lnkdfrm]:
+                    self.FORM.Bind(
+                        wx.EVT_BUTTON,
+                        self._buttonclick,
+                        self.CONTROLID[
+                            self.FORMDESCRIPTON["linkedform"][lnkdfrm]["bindbtn"]
+                        ],
+                    )
+
+        for field in self.CONTROLDESCRIPTION:
+            if "bindmouse" in self.CONTROLDESCRIPTION[field]:
+                self.CONTROLID[field].Bind(
+                    self.CONTROLDESCRIPTION[field]["bindmouse"],
+                    self._capturemouse,
+                )
+            if "bindevent" in self.CONTROLDESCRIPTION[field]:
+                self.CONTROLID[field].Bind(
+                    self._translateevent(self.CONTROLDESCRIPTION[field]["bindevent"]),
+                    self._captureevent,
+                )
+            if "openbtn" in self.CONTROLDESCRIPTION[field]:
+                self.CONTROLID[field].Bind(wx.EVT_BUTTON, self._openfileevent)
+
+        if self.ClosePresent:
+            self.FORM.Bind(
+                wx.EVT_BUTTON, self._on_close_click, self.CONTROLID["btnClose"]
+            )
+
+        if self.NavControlsPresent:
+            self.FORM.Bind(
+                wx.EVT_BUTTON, self._on_new_record_click, self.CONTROLID["btnNew"]
+            )
+            self.FORM.Bind(
+                wx.EVT_BUTTON, self._on_update_record_click, self.CONTROLID["btnUpdate"]
+            )
+            self.FORM.Bind(
+                wx.EVT_BUTTON, self._on_first_record_click, self.CONTROLID["btnFirst"]
+            )
+            self.FORM.Bind(
+                wx.EVT_BUTTON, self._on_prev_record_click, self.CONTROLID["btnPrev"]
+            )
+            self.FORM.Bind(
+                wx.EVT_BUTTON, self._on_next_record_click, self.CONTROLID["btnNext"]
+            )
+            self.FORM.Bind(
+                wx.EVT_BUTTON, self._on_last_record_click, self.CONTROLID["btnLast"]
+            )
+            self.FORM.Bind(
+                wx.EVT_BUTTON, self._on_delete_record_click, self.CONTROLID["btnDelete"]
+            )
+            self.FORM.Bind(
+                wx.EVT_BUTTON, self._on_close_click, self.CONTROLID["btnClose"]
+            )
+        elif "controls" in self.FORMDESCRIPTON:
+            if "Update" in self.FORMDESCRIPTON["controls"]:
+                self.FORM.Bind(
+                    wx.EVT_BUTTON,
+                    self._on_update_record_click,
+                    self.CONTROLID["btnUpdate"],
+                )
+
+        for field in self.CONTROLID:
+            if type(self.CONTROLID[field]).__name__ == "clsComboBox":
+                if self.CONTROLDESCRIPTION[field].get("refreshform") == True:
+                    self.FORM.Bind(
+                        wx.EVT_TEXT, self._captureevent, self.CONTROLID[field]
+                    )
 
     def disable_button(self, name):
+        lg.log()
         self.CONTROLID[name].Disable()
 
-    def enable_all_buttons(self):
-        for c in self.CONTROLID:
-            b = self.CONTROLDESCRIPTION[c]["type"][:3]
-            if self.CONTROLDESCRIPTION[c]["type"][:3] == "btn":
-                self.CONTROLID[c].Enable()
+    def enable_button(self, name):
+        lg.log()
+        self.CONTROLID[name].Enbable()
 
-    def disable_all_buttons(self):
-        for c in self.CONTROLID:
-            b = self.CONTROLDESCRIPTION[c]["type"][:3]
-            if self.CONTROLDESCRIPTION[c]["type"][:3] == "btn":
-                self.CONTROLID[c].Disable()
+    def enable_navigation_buttons(self):
+        lg.log()
+        # pre-defined buttons
+        if self.NavControlsPresent:
+            self.CONTROLID["btnNew"].Enable()
+            self.CONTROLID["btnDelete"].Enable()
+            self.CONTROLID["btnFirst"].Enable()
+            self.CONTROLID["btnPrev"].Enable()
+            self.CONTROLID["btnNext"].Enable()
+            self.CONTROLID["btnLast"].Enable()
+            self.CONTROLID["btnUpdate"].Enable()
+
+    def disable_navigation_buttons(self):
+        lg.log()
+        # pre-defined buttons
+        if self.NavControlsPresent:
+            self.CONTROLID["btnNew"].Disable()
+            self.CONTROLID["btnDelete"].Disable()
+            self.CONTROLID["btnFirst"].Disable()
+            self.CONTROLID["btnPrev"].Disable()
+            self.CONTROLID["btnNext"].Disable()
+            self.CONTROLID["btnLast"].Disable()
+            self.CONTROLID["btnUpdate"].Disable()
 
     def validate_form(self):
-        formvalidate = self.FORM.Validate()
-        controlsvalidate = self.FORM.TransferDataFromWindow()
-        if formvalidate and controlsvalidate:
+        lg.log()
+        if self.FORM.Validate():
             return True
         else:
             return False
 
-    def check_for_modified(self):
-        # <TODO> This routine has been disabled by always returning true. It needs to check for changed fields.
+    def update_screen_to_record(self):
+        lg.log()
+        if self.RECORDS.isempty():
+            return None
+        for field in self.RECORDS.current().keys():
+            if field == "ID":
+                continue
+            self.RECORDS.setfieldvalue(field, self.CONTROLID[field].GetValue())
 
-        modified = False
-        for key in self.CONTROLID.keys():
-            tp = self.CONTROLDESCRIPTION[key]["type"]
-            if (tp != "Button") and (tp[:3] != "btn"):
-                if self.CONTROLID[key].IsModified():
-                    modified = True
-        if modified:
+    def show(self):
+        lg.log()
+        if "modal" in self.FORMDESCRIPTON:
+            return self.FRAME.ShowModal()
+        try:
+            self.FRAME.Show()
+        except:
+            pass
+        finally:
+            self.FORM.Show()
+
+    def showmodal(self):
+        lg.log()
+        return self.FRAME.ShowModal()
+
+    def new_record(self):
+        lg.log()
+        if not self.FORMDirty():
+            self.RECORDS.add(self.RECORDS.sql.get_blank_record())
+            if self.parentkey != None:
+                self.RECORDS._record[self.RECORDS._position][
+                    self.parentkey[0]
+                ] = self.parentkey[1]
+            self.fill_form(self.RECORDS._record[self.RECORDS._position])
+            self._close_linked_forms()
+            if self.NavControlsPresent:
+                self.disable_navigation_buttons()
+                self.CONTROLID["btnUpdate"].Enable()
+
+    def set_all_controls_to_normal_color(self):
+        lg.log()
+        for field in self.CONTROLID:
+            self.CONTROLID[field].SetNormalColor()
+
+    #
+    #   Evant Handlers
+    #
+    def _translateevent(self, eventstring):
+        lg.log()
+        evt = None
+        if eventstring == "EVT_TEXT":
+            evt = wx.EVT_TEXT
+        return evt
+
+    def _buttonclick(self, event):
+        lg.log()
+        btn = event.GetEventObject().GetName()
+        for lnkdfrm in self.FORMDESCRIPTON["linkedform"]:
+            if btn == self.FORMDESCRIPTON["linkedform"][lnkdfrm]["bindbtn"]:
+                if "linkedfield" in self.CONTROLDESCRIPTION[btn]:
+                    row = self.CONTROLID[
+                        self.CONTROLDESCRIPTION[btn]["linkedfield"]
+                    ].GetSelectedRow()
+                    returnvalue = self.open_linked_form(lnkdfrm, row)
+                    if returnvalue == wx.ID_OK:
+                        row = self.CONTROLID[
+                            self.CONTROLDESCRIPTION[btn]["linkedfield"]
+                        ].GetSelectedRowID()
+                        rec = self.LINKEDFORM[lnkdfrm].update_form_to_record()
+                        self.CONTROLID[
+                            self.CONTROLDESCRIPTION[btn]["linkedfield"]
+                        ].SetValueRecord(row, rec)
+                        self.CONTROLID[
+                            self.CONTROLDESCRIPTION[btn]["linkedfield"]
+                        ].Refresh()
+                else:
+                    self.open_linked_form(lnkdfrm)
+
+    def _capturemouse(self, event):  # <TODO> implement.
+        lg.log()
+        field = event.GetEventObject().GetName()
+
+    def _captureevent(self, event):
+        lg.log()
+        if "table" not in self.FORMDESCRIPTON:
+            return
+        if "name" not in self.FORMDESCRIPTON["table"]:
+            return
+        field = event.GetEventObject().GetName()
+        evnttype = event.GetEventType()
+        if evnttype == wx.EVT_TEXT.typeId:
+
+            self.RECORDS.setfieldvalue(field, self.CONTROLID[field].GetValue())
+            self._display_records(self.FORMDESCRIPTON["table"])
+
+            for linkedform in self.LINKEDFORM:
+                table = self.LINKEDFORM[linkedform].FORMDESCRIPTON["table"].copy()
+                if "condition" in table:
+                    table["condition"] = self.RECORDS.sql.condition(
+                        table["condition"], self.RECORDS.current()
+                    )
+                self.LINKEDFORM[linkedform].display_form_data(table)
+
+            for subform in self.SUBFORM:
+                table = self.SUBFORM[subform].FORMDESCRIPTON["table"].copy()
+                table["condition"] = self.RECORDS.sql.condition(
+                    table["condition"], self.RECORDS.current()
+                )
+                self.SUBFORM[subform].display_form_data(table)
+
+    def _openfileevent(self, event):
+        lg.log()
+        file = None
+        field = event.GetEventObject().GetName()
+        evnttype = event.GetEventType()
+        openctrl = self.CONTROLDESCRIPTION[field]["openbtn"]
+        match self.CONTROLDESCRIPTION[openctrl]["type"]:
+            case "FilePickerCtrl":
+                path = CONFIG.get_Config_Value(
+                    self.CONTROLDESCRIPTION[openctrl]["directory"][0],
+                    self.CONTROLDESCRIPTION[openctrl]["directory"][1],
+                )
+                file = path + self.CONTROLID[openctrl].GetPath()
+            case "TextCtrl":
+                file = self.CONTROLID[openctrl].GetValue()
+            case "ComboBox":
+                table = self.CONTROLDESCRIPTION[openctrl]["table"]
+                sql = clsSQL(self.DBConnection, table, self.RECORDS.current())
+                SQL = sql.select()
+                cursor = self.DBConnection.cursor()
+                cursor.execute(SQL)
+                row = cursor.fetchone()
+                file = row[0]
+            case otherwise:
+                file = None
+        if file != None:
+            os.startfile(file)
+
+    def _on_close_click(self, event):
+        lg.log()
+        self.FORM.Close()
+
+    def _on_close(self, event):
+        lg.log()
+        if self.RECORDS == None:  # for no record forms.
+            try:
+                self.FRAME.Destroy()
+            except:
+                #            pass
+                #        finally:
+                self.FORM.Destroy()
+            return
+
+        if self.RECORDS.isempty():
+            return
+
+        if not self.FORMDirty():
+
+            if self.LINKEDFORM:
+                for linkedform in self.LINKEDFORM.copy().keys():
+                    if self.LINKEDFORM[linkedform].FRAME is not None:
+                        self.LINKEDFORM[linkedform].FRAME.Close()
+                    else:
+                        self.LINKEDFORM[linkedform].FORM.Close()
+                    if linkedform in self.LINKEDFORM:
+                        return
+
+            if self.SUBFORM:
+                for subform in self.SUBFORM.copy().keys():
+                    self.SUBFORM[subform].FORM.Close()
+                    if subform in self.SUBFORM:
+                        return
+
+            if self.PARENT:
+                if self.FORM.Name in self.PARENT.LINKEDFORM:
+                    self.PARENT.LINKEDFORM.pop(self.FORM.Name)
+                    self.PARENT.update_choices()
+                if self.FORM.Name in self.PARENT.SUBFORM:
+                    self.PARENT.SUBFORM.pop(self.FORM.Name)
+
+            try:
+                self.FRAME.Destroy()
+            except:
+                #            pass
+                #        finally:
+                self.FORM.Destroy()
+
+    def FORMDirty(self):
+        lg.log()
+
+        if "readonly" not in self.FORMDESCRIPTON:
+            self.update_screen_to_record()
+
+            dirtyfields = self.RECORDS.recordisdirty()
+            if dirtyfields:
+                for field in dirtyfields:
+                    self.CONTROLID[field].SetWarningColor()
+                dlg = self._dirtydialog(self.FORM, title="Form Modified(dirty)")
+                result = dlg.ShowModal()
+                dlg.Destroy()
+                if result == CONST.FORM_CANCEL:
+                    return True
+
+        return False
+
+    def _on_new_record_click(self, event):
+        lg.log()
+        self.new_record()
+
+    def _on_delete_record_click(self, event):
+        lg.log()
+        if not self.FORMDirty():
+            self.RECORDS.delete_record_from_DB()
             dlg = wx.MessageDialog(
                 self.FORM,
-                "This record has unsaved data. Do you really want to leave this form?",
-                "Leave form",
-                wx.OK | wx.CANCEL | wx.ICON_QUESTION,
+                "Record Deleted.",
+                "Deleted",
+                wx.OK,
             )
             result = dlg.ShowModal()
             dlg.Destroy()
-            if result == wx.ID_OK:
-                return True
-        return False  # always return true
+            self.fill_form(self.RECORDS.current())
+            self._close_linked_forms()
 
-    def on_update_record_click(self, event):
-        if self.validate_form() == True:
-            for key in self.CONTROLID:
-                if self.CONTROLDESCRIPTION[key]["type"] == "TextCtrl":
-                    if self.CONTROLID[key].IsMultiLine():
-                        lines = ""
-                        for line in range(0, self.CONTROLID[key].GetNumberOfLines()):
-                            lines = (
-                                lines + self.CONTROLID[key].GetLineText(line) + "\r\n"
-                            )
-                        self.RECORD.RECORDS[self.RECORD.CURRENTRECORD][key] = lines
-                    else:
-                        self.RECORD.RECORDS[self.RECORD.CURRENTRECORD][
-                            key
-                        ] = self.CONTROLID[key].GetValue()
+    def _close_linked_forms(self):
+        lg.log()
+        linked = self.LINKEDFORM.copy()
+        for frm in linked:
+            self.LINKEDFORM[frm].FORM.Close()
+            self.LINKEDFORM.pop(frm)
 
-                elif self.CONTROLDESCRIPTION[key]["type"] == "ComboBox":
-                    k = self.translate_combobox_to_key(self.CONTROLDESCRIPTION, key)
-                    self.RECORD.RECORDS[self.RECORD.CURRENTRECORD][key] = str(k)
-
-                elif self.CONTROLDESCRIPTION[key]["type"] == "CheckBox":
-                    if self.CONTROLID[key].GetValue() == wx.CHK_CHECKED:
-                        self.RECORD.RECORDS[self.RECORD.CURRENTRECORD][key] = "1"
-                    else:
-                        self.RECORD.RECORDS[self.RECORD.CURRENTRECORD][key] = "0"
-
-                elif self.CONTROLDESCRIPTION[key]["type"] == "CheckListBox":
-                    checklist = self.CONTROLID[key].GetStrings()
-                    checked = self.CONTROLID[key].GetCheckedStrings()
-                    di = {}
-                    for c in checklist:
-                        if c in checked:
-                            di.update({c: "True"})
-                        else:
-                            di.update({c: "False"})
-                    j = json.dumps(di)
-                    self.RECORD.RECORDS[self.RECORD.CURRENTRECORD][key] = json.dumps(di)
-
-            self.RECORD.update_current_record()
-            self.enable_all_buttons()
-        else:
-            self.disable_all_buttons()
-            self.CONTROLID["btnUpdate"].Enable()
-            self.CONTROLID["btnClose"].Enable()
-            self.FORM.Refresh()
-
-    def on_next_record_click(self, event):
-        # if self.check_for_modified():
-        self.RECORD.next_record()
-        self.update_data_to_form()
-        self.FORM.Refresh()
-
-    def on_prev_record_click(self, event):
-        # if self.check_for_modified():
-        self.RECORD.prev_record()
-        self.update_data_to_form()
-        self.FORM.Refresh()
-
-    def on_delete_record_click(self, event):
+    def _on_update_record_click(self, event):
+        lg.log()
+        self.update_screen_to_record()
+        self.RECORDS.update_current_record_in_DB()
+        self.enable_navigation_buttons()
         dlg = wx.MessageDialog(
             self.FORM,
-            "Do you really want to DELETE this record?",
-            "Confirm Exit",
-            wx.OK | wx.CANCEL | wx.ICON_QUESTION,
+            "Record Updated.",
+            "Updated",
+            wx.OK,
         )
         result = dlg.ShowModal()
         dlg.Destroy()
-        if result == wx.ID_OK:
-            self.RECORD.delete_record()
-            self.update_data_to_form()
-            self.FORM.Refresh()
+        self.set_all_controls_to_normal_color()
 
-    def on_new_record_click(self, event):
-        self.RECORD.new_blank_record()
-        self.update_data_to_form()
-        self.disable_all_buttons()
-        self.CONTROLID["btnUpdate"].Enable()
-        self.CONTROLID["btnClose"].Enable()
-        self.FORM.Refresh()
+    def _first_prev_next_last(self, firstprevnextlast):
+        lg.log()
+        if not self.FORMDirty():
 
-        #
-        # <TODO> Decide how to deal with new records.
+            self.RECORDS._record[
+                self.RECORDS._position
+            ] = self.RECORDS.original.restore()
 
-    def on_close_click(self, event):
-        self.FORM.Close()
+            if firstprevnextlast == CONST.FORM_FIRST:
+                self.RECORDS.first()
+            elif firstprevnextlast == CONST.FORM_PREV:
+                self.RECORDS.prev()
+            elif firstprevnextlast == CONST.FORM_NEXT:
+                self.RECORDS.next()
+            elif firstprevnextlast == CONST.FORM_LAST:
+                self.RECORDS.last()
 
-    def OnClose(self, event):
-        if event.CanVeto():
-            dlg = wx.MessageDialog(
-                self.FORM,
-                "Do you really want to close this form?",
-                "Confirm Exit",
-                wx.OK | wx.CANCEL | wx.ICON_QUESTION,
+            self._display_records(self.FORMDESCRIPTON["table"], self.RECORDS.current())
+
+    def _on_first_record_click(self, event):
+        lg.log()
+        self._first_prev_next_last(CONST.FORM_FIRST)
+
+    def _on_prev_record_click(self, event):
+        lg.log()
+        self._first_prev_next_last(CONST.FORM_PREV)
+
+    def _on_next_record_click(self, event):
+        lg.log()
+        self._first_prev_next_last(CONST.FORM_NEXT)
+
+    def _on_last_record_click(self, event):
+        lg.log()
+        self._first_prev_next_last(CONST.FORM_LAST)
+
+
+class clsForm(clsBASEForm):
+    class MergeorReplaceChecklist(wx.Dialog):
+        def __init__(self, parent, title):
+            super().__init__(parent, title=title, size=(400, 200))
+            panel = wx.Panel(self)
+            self.text = wx.StaticText(
+                panel,
+                wx.ID_ANY,
+                label="Merge or Replace this CheckList with existing?",
+                pos=(10, 50),
             )
-            result = dlg.ShowModal()
-            dlg.Destroy()
-            if result == wx.ID_OK:
-                for key in self.SUBFORM.copy().keys():
-                    self.SUBFORM[key].OnClose(event)
-                    if event.GetVeto():
-                        event.Veto()
-                        return
-                    # self.SUBFORM.pop(key)
+            self.btn = wx.Button(
+                panel, wx.ID_OK, label="Merge", size=(100, 30), pos=(10, 100)
+            )
+            self.btn = wx.Button(
+                panel, wx.ID_CANCEL, label="Replace", size=(100, 30), pos=(120, 100)
+            )
+
+    def bind_form_controls(self):
+        lg.log()
+        if "CheckListID" in self.CONTROLID:
+            self.CONTROLID["CheckListID"].Bind(wx.EVT_TEXT, self._fillchecklist)
+            self.CONTROLID["CheckList"].Bind(
+                wx.EVT_CHECKLISTBOX, self._checkboxallchecked
+            )
+        if "btnHymnSearchByHymn" in self.CONTROLID:
+            self.FORM.Bind(
+                wx.EVT_BUTTON,
+                self._processhymnsearch,
+                self.CONTROLID["btnHymnSearchByHymn"],
+            )
+        if "btnHymnSearchByTitle" in self.CONTROLID:
+            self.FORM.Bind(
+                wx.EVT_BUTTON,
+                self._processhymnsearch,
+                self.CONTROLID["btnHymnSearchByTitle"],
+            )
+        if "btnHymnSearchByBible" in self.CONTROLID:
+            self.FORM.Bind(
+                wx.EVT_BUTTON,
+                self._processhymnsearch,
+                self.CONTROLID["btnHymnSearchByBible"],
+            )
+        if "btnHymnSearchByCategory" in self.CONTROLID:
+            self.FORM.Bind(
+                wx.EVT_BUTTON,
+                self._processhymnsearch,
+                self.CONTROLID["btnHymnSearchByCategory"],
+            )
+        if "btnHymnSearchByNote" in self.CONTROLID:
+            self.FORM.Bind(
+                wx.EVT_BUTTON,
+                self._processhymnsearch,
+                self.CONTROLID["btnHymnSearchByNote"],
+            )
+
+        if "btnHymnSearchAdd" in self.CONTROLID:
+            self.FORM.Bind(
+                wx.EVT_BUTTON,
+                self._processhymnsearch,
+                self.CONTROLID["btnHymnSearchAdd"],
+            )
+
+        if "btnHymnUsageUpdate" in self.CONTROLID:
+            self.FORM.Bind(
+                wx.EVT_BUTTON,
+                self._processhymnusage,
+                self.CONTROLID["btnHymnUsageUpdate"],
+            )
+
+        if "btnHymnUsageAdd" in self.CONTROLID:
+            self.FORM.Bind(
+                wx.EVT_BUTTON, self._processhymnusage, self.CONTROLID["btnHymnUsageAdd"]
+            )
+
+        super().bind_form_controls()
+
+    def _fillchecklist(self, event):
+        field = event.GetEventObject().GetName()
+        evnttype = event.GetEventType()
+        ID = self.CONTROLID[field].GetValue()
+        if ID is None:
+            return None
+        sql = "SELECT CheckList FROM tblCheckList WHERE ID = {ID};".format(ID=ID)
+        cursor = self.DBConnection.cursor()
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        newchecklist = json.loads(row[0])
+        fld = self.CONTROLID["CheckList"].GetValue()
+        if fld != None:
+            existingchecklist = json.loads(fld)
+            if len(existingchecklist) == 0:
+                self.CONTROLID["CheckList"].SetValue(json.dumps(newchecklist))
+                self.CONTROLID["CheckListComplete"].SetValue(False)
+                return
+        dlg = self.MergeorReplaceChecklist(self.FORM, title="CheckList Merge / Replace")
+        result = dlg.ShowModal()
+        dlg.Destroy()
+        if result == wx.ID_OK:  # ok is merge
+            self.CONTROLID["CheckList"].SetValue(
+                json.dumps(newchecklist | existingchecklist)
+            )
+        else:  # cancel is replace
+            self.CONTROLID["CheckList"].SetValue(json.dumps(newchecklist))
+        self.CONTROLID["CheckListComplete"].SetValue(False)
+
+    def _checkboxallchecked(self, event):
+        lg.log()
+        field = event.GetEventObject().GetName()
+        evnttype = event.GetEventType()
+        ID = self.CONTROLID[field].GetValue()
+        if len(self.CONTROLID[field].Items) == len(
+            self.CONTROLID[field].GetCheckedItems()
+        ):
+            self.CONTROLID["CheckListComplete"].SetValue(True)
+        else:
+            self.CONTROLID["CheckListComplete"].SetValue(False)
+
+    def _processhymnsearch(self, event):
+        lg.log()
+        field = event.GetEventObject().GetName()
+        eventtype = event.GetEventType()
+        if field == "btnHymnSearchAdd":
+            if self.CONTROLID["UsedAs"].GetValueText() is None:
+                dlg = wx.MessageDialog(self.FORM, "'Used As' cannot be blank")
+                dlg.ShowModal()
+                dlg.Destroy()
+                return
+            usedas = self.CONTROLID["UsedAs"].GetValueText()
+            row = self.CONTROLID["dvlHymnList"].GetSelectedRow()
+            if row is None:
+                dlg = wx.MessageDialog(self.FORM, "No Hymn Selected")
+                dlg.ShowModal()
+                dlg.Destroy()
+                return
+            self.PARENT.CONTROLID["HymnID"].ChangeValue(row["ID"])
+            self.PARENT.CONTROLID["UsedAs"].ChangeValue(usedas)
+            self.PARENT.LINKEDFORM.pop("frmHymnSearch")
+            try:
+                self.FRAME.Destroy()
+            except:
+                pass
+            finally:
                 self.FORM.Destroy()
-                if self.PARENT != None:
-                    self.PARENT.SUBFORM.pop(self.FORM.Name)
-                return
-            else:
-                event.Veto()
-                return
-        self.FORM.Destroy()
-        if self.PARENT != None:
-            self.PARENT.SUBFORM.pop(self.FORM.Name)
 
+        elif "Search" in self.CONTROLID:
+            search = self.CONTROLID["Search"].GetValue()
+            if search == "":
+                return None
+            table = {}
+            table["name"] = "tblHymn"
+            table["fields"] = ["ID", "Hymn", "Title", "BibleText", "Category", "Note"]
+            table["condition"] = "{column} LIKE '%{search}%'"
 
-#
+            if field == "btnHymnSearchByHymn":
+                table["condition"] = table["condition"].format(
+                    column="Hymn", search=search
+                )
+            elif field == "btnHymnSearchByTitle":
+                table["condition"] = table["condition"].format(
+                    column="Title", search=search
+                )
+            elif field == "btnHymnSearchByBible":
+                table["condition"] = table["condition"].format(
+                    column="BibleText", search=search
+                )
+            elif field == "btnHymnSearchByCategory":
+                table["condition"] = table["condition"].format(
+                    column="Category", search=search
+                )
+            elif field == "btnHymnSearchByNote":
+                table["condition"] = table["condition"].format(
+                    column="Note", search=search
+                )
+            if "dvlHymnList" in self.CONTROLID:
+                self.CONTROLID["dvlHymnList"].SetValueTable(table=table)
 
-#
-#   <TODO> Documentation for Record Form.
-
-
-class clsRecordForm(clsForm):
-    def __init__(
-        self, parent, dbconnection, formdescription, controldescription, sql=""
-    ):
-        btnStandardCONTROL = {
-            "btnClose": {
-                "type": "btnClose",
-                "label": "Close",
-                "pos": wx.Point(0, 0),
-                "name": "btnClose",
-            },
-            "btnNextRec": {
-                "type": "btnNextRec",
-                "label": "Next",
-                "pos": wx.Point(0, 0),
-                "name": "btnNextRec",
-            },
-            "btnPrevRec": {
-                "type": "btnPrevRec",
-                "label": "Prev",
-                "pos": wx.Point(0, 0),
-                "name": "btnPrevRec",
-            },
-            "btnUpdate": {
-                "type": "btnUpdate",
-                "label": "Update",
-                "pos": wx.Point(0, 0),
-                "name": "btnUpdate",
-            },
-            "btnDelete": {
-                "type": "btnDelete",
-                "label": "Delete",
-                "pos": wx.Point(0, 0),
-                "name": "btnDelete",
-            },
-            "btnNew": {
-                "type": "btnNew",
-                "Label": "New",
-                "pos": wx.Point(0, 0),
-                "name": "btnNew",
-            },
-        }
-        cd = {}
-
-        pos = formdescription["size"]
-        x = pos[0]
-        y = pos[1] - 75
-        for key in btnStandardCONTROL.keys():
-            x -= 100
-            btnStandardCONTROL[key].update({"pos": wx.Point(x, y)})
-        for key in btnStandardCONTROL.keys():
-            controldescription.update({key: btnStandardCONTROL[key]})
-
-        clsForm.__init__(
-            self, parent, dbconnection, formdescription, controldescription, sql
-        )
-
-    def disable_prev_next(self):
-        self.CONTROLID["btnPrevRec"].Disable()
-        self.CONTROLID["btnNextRec"].Disable()
+    def _processhymnusage(self, event):
+        lg.log()
+        field = event.GetEventObject().GetName()
+        eventtype = event.GetEventType()
+        if field == "btnHymnSearchAdd":
+            row = self.CONTROLID["dvlHymnList"].GetSelectedRow()
+            self.CONTROLID["dvlHymnUsage"].SetValue(row)
+        if field == "btnHymnUsageUpdate":
+            row = self.CONTROLID["dvlHymnUsage"].GetSelectedRow()
+            self.open_linked_form("frmHymnUsage")

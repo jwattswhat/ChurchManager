@@ -9,9 +9,7 @@ import mysql
 import mysql.connector
 
 #   ChurchManager Classes
-import clsDB
-from clsConfig import CONFIG
-from clsSQL import clsSQL
+import JSForm
 
 
 rpt_fontfamily = 0
@@ -107,9 +105,8 @@ class PDF(FPDF):
         """
         loads form description from a JSON file.
         """
-        global CONFIG
 
-        ReportDescriptionLocation = CONFIG.get_Config_Value("Report", "Description")
+        ReportDescriptionLocation = JSForm.CONFIG.get_Config_Value("Report", "Description")
 
         reportname = ReportDescriptionLocation + report + ".json"
         f = open(
@@ -377,11 +374,11 @@ class PDF(FPDF):
             align="L",
         )
         self.set_x(self.ic.inn())
-        sql = clsSQL(
-            ChurchDBConnection, rptService["Body"]["Table"]["Readings"], service
+        sql = JSForm.clsSQL(
+            ChurchDB.DBConnection, rptService["Body"]["Table"]["Readings"], service
         )
         SQL = sql.select()
-        cursor = ChurchDBConnection.cursor()
+        cursor = ChurchDB.DBConnection.cursor()
         cursor.execute(SQL)
         rows = cursor.fetchall()
         for row in rows:
@@ -403,11 +400,11 @@ class PDF(FPDF):
         self.set_x(self.ic.out())
 
     def print_altreadings(self, labelwidth, service):
-        sql = clsSQL(
-            ChurchDBConnection, rptService["Body"]["Table"]["AltReading"], service
+        sql = JSForm.clsSQL(
+            ChurchDB.DBConnection, rptService["Body"]["Table"]["AltReading"], service
         )
         SQL = sql.select()
-        cursor = ChurchDBConnection.cursor()
+        cursor = ChurchDB.DBConnection.cursor()
         cursor.execute(SQL)
         rows = cursor.fetchall()
         if len(rows) == 0:
@@ -431,11 +428,11 @@ class PDF(FPDF):
             )
 
     def print_hymns(self, labelwidth, service):
-        sql = clsSQL(
-            ChurchDBConnection, rptService["Body"]["Table"]["HymnUsage"], service
+        sql = JSForm.clsSQL(
+            ChurchDB.DBConnection, rptService["Body"]["Table"]["HymnUsage"], service
         )
         SQL = sql.select()
-        cursor = ChurchDBConnection.cursor()
+        cursor = ChurchDB.DBConnection.cursor()
         cursor.execute(SQL)
         rows = cursor.fetchall()
         if len(rows) == 0:
@@ -470,9 +467,9 @@ class PDF(FPDF):
     def print_sermon(self, service):
         if service["SermonID"] == None:
             return
-        sql = clsSQL(ChurchDBConnection, rptService["Body"]["Table"]["Sermon"], service)
+        sql = JSForm.clsSQL(ChurchDB.DBConnection, rptService["Body"]["Table"]["Sermon"], service)
         SQL = sql.select()
-        cursor = ChurchDBConnection.cursor()
+        cursor = ChurchDB.DBConnection.cursor()
         cursor.execute(SQL)
         row = cursor.fetchone()
         if len(row) == 0:
@@ -494,11 +491,11 @@ class PDF(FPDF):
         )
 
     def print_roles(self, service):
-        sql = clsSQL(
-            ChurchDBConnection, rptService["Body"]["Table"]["ServiceRole"], service
+        sql = JSForm.clsSQL(
+            ChurchDB.DBConnection, rptService["Body"]["Table"]["ServiceRole"], service
         )
         SQL = sql.select()
-        cursor = ChurchDBConnection.cursor()
+        cursor = ChurchDB.DBConnection.cursor()
         cursor.execute(SQL)
         rows = cursor.fetchall()
         if len(rows) == 0:
@@ -526,28 +523,28 @@ class PDF(FPDF):
 
 def create_sql_views():
     sql = "DROP VIEW IF EXISTS vwservicewithpropers;"
-    cursor = ChurchDBConnection.cursor()
+    cursor = ChurchDB.DBConnection.cursor()
     cursor.execute(sql)
 
     sql = "CREATE VIEW vwservicewithpropers AS SELECT s.ID as ID,s.ChurchID AS ChurchID,s.DateTime AS DateTime,s.PropersID AS PropersID,p.LiturgicalDate as PropersLiturgicalDate,s.LiturgicalDate AS ServiceLiturgicalDate,s.HolyCommunion AS HolyCommunion,s.OrderofService AS OrderofService,s.OSNote AS OSNote,s.PsalmorIntroit AS PsalmorIntroit,s.SermonID AS SermonID,s.Bulletin AS Bulletin,s.Note AS Note,p.ID AS PID,p.Lectionary AS Lectionary,p.Season AS Season,p.Color AS Color,p.Theme AS Theme,p.Introit AS Introit FROM (tblservice s JOIN tblpropers p ON (s.PropersID = p.ID));"
 
-    cursor = ChurchDBConnection.cursor()
+    cursor = ChurchDB.DBConnection.cursor()
     cursor.execute(sql)
 
     sql = "DROP VIEW IF EXISTS vwhymnusage;"
-    cursor = ChurchDBConnection.cursor()
+    cursor = ChurchDB.DBConnection.cursor()
     cursor.execute(sql)
 
     sql = "CREATE VIEW vwhymnusage  AS  select u.ID AS ID,s.ID AS ServiceID,s.DateTime AS DateTime,h.ID AS HymnID,h.Hymn AS Hymn,h.Title AS Title,u.UsedAs AS UsedAs,h.BibleText AS BibleText,h.Category AS Category,h.File AS File,u.Note AS Note from ((tblhymnusage u join tblservice s on(u.ServiceID = s.ID)) join tblhymn h on(u.HymnID = h.ID));"
-    cursor = ChurchDBConnection.cursor()
+    cursor = ChurchDB.DBConnection.cursor()
     cursor.execute(sql)
 
     sql = "DROP VIEW IF EXISTS vwserviceroles;"
-    cursor = ChurchDBConnection.cursor()
+    cursor = ChurchDB.DBConnection.cursor()
     cursor.execute(sql)
 
     sql = "CREATE VIEW vwServiceRoles AS SELECT sr.ID as SID, sr.ServiceID, sr.ParticipantID, p.ID as PID, p.Name, sr.Role FROM tblservicerole AS sr, tblparticipant AS p WHERE sr.ParticipantID = p.ID;"
-    cursor = ChurchDBConnection.cursor()
+    cursor = ChurchDB.DBConnection.cursor()
     cursor.execute(sql)
 
 
@@ -569,12 +566,11 @@ if not args.ID:
     print("no Service ID")
     exit()
 
-ChurchDB = clsDB.clsDB("localhost", "ChurchDB", "church", "Church99")
-ChurchDBConnection = mysql.connector.connect(**ChurchDB.DB)
+ChurchDB = JSForm.clsDB("localhost", "ChurchDB", "church", "Church99")
 create_sql_views()
 
-CONFIG.set_Config_DBConnection(ChurchDBConnection)
-ReportLocation = CONFIG.get_Config_Value("Location", "Report")
+JSForm.CONFIG.set_Config_DBConnection(ChurchDB.DBConnection)
+ReportLocation = JSForm.CONFIG.get_Config_Value("Location", "Report")
 
 
 pdf = PDF()
@@ -598,7 +594,7 @@ page_left = page_size
 pdf.add_page()
 pdf.add_font("Arial", "", "c:\\WINDOWS\\FONTS\\arial.ttf", uni=True)
 
-service = clsDB.clsRecord(ChurchDBConnection, rptService["Body"]["Table"]["Service"])
+service = JSForm.clsRecord(ChurchDB.DBConnection, rptService["Body"]["Table"]["Service"])
 service.load_records(rptService["Body"]["Table"]["Service"])
 pdf.print_service(service)
 
