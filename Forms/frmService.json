@@ -279,7 +279,7 @@
                         "LiturgicalDate"
                     ],
                     "condition": "Lectionary = {OPTION:Current:Lectionary}",
-                    "orderby": "Lectionary,LiturgicalDate"
+                    "orderby": "Lectionary,Sort"
                 }
             },
             "btnEditPropers": {
