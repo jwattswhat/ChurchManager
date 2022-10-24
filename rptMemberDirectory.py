@@ -5,8 +5,7 @@ import mysql.connector
 import subprocess
 
 #   ChurchManager Classes
-import clsDB
-import clsConfig
+import JSForm
 
 rpt_fontfamily = 0
 rpt_fontstyle = 1
@@ -195,7 +194,7 @@ class PDF(FPDF):
         table["condition"] = rptMemberDir["Body"]["People"]["condition"].replace(
             "{FamilyID}", str(family["ID"])
         )
-        people = clsDB.clsRecord(ChurchDBConnection, table)
+        people = JSForm.clsRecord(ChurchDB.DBConnection, table)
         nr = people.load_records()
         if nr != "NewRecord":
             if people != None:
@@ -207,7 +206,7 @@ class PDF(FPDF):
         table["condition"] = rptMemberDir["Body"]["FamilyAddress"]["condition"].replace(
             "{FamilyID}", str(family["ID"])
         )
-        addresses = clsDB.clsRecord(ChurchDBConnection, table)
+        addresses = JSForm.clsRecord(ChurchDB.DBConnection, table)
         nr = addresses.load_records()
         if nr != "NewRecord":
             address = addresses.first()
@@ -221,7 +220,7 @@ class PDF(FPDF):
         table["condition"] = rptMemberDir["Body"]["FamilyContact"]["condition"].replace(
             "{FamilyID}", str(family["ID"])
         )
-        contacts = clsDB.clsRecord(ChurchDBConnection, table)
+        contacts = JSForm.clsRecord(ChurchDB.DBConnection, table)
         nr = contacts.load_records()
         if nr != "NewRecord":
             contact = contacts.first()
@@ -384,7 +383,7 @@ class PDF(FPDF):
         table["condition"] = rptMemberDir["Body"]["PersonAddress"]["condition"].replace(
             "{PersonID}", str(person["ID"])
         )
-        addresses = clsDB.clsRecord(ChurchDBConnection, table)
+        addresses = JSForm.clsRecord(ChurchDB.DBConnection, table)
         #   Print the addresses
         nr = addresses.load_records()
         if nr != "NewRecord":
@@ -398,7 +397,7 @@ class PDF(FPDF):
         table["condition"] = rptMemberDir["Body"]["PersonContact"]["condition"].replace(
             "{PersonID}", str(person["ID"])
         )
-        contacts = clsDB.clsRecord(ChurchDBConnection, table)
+        contacts = JSForm.clsRecord(ChurchDB.DBConnection, table)
         nr = contacts.load_records()
         if nr != "NewRecord":
             contact = contacts.first()
@@ -409,12 +408,11 @@ class PDF(FPDF):
         self.set_x(self.ic.out())
 
 
-ChurchDB = clsDB.clsDB("localhost", "ChurchDB", "church", "Church99")
-ChurchDBConnection = mysql.connector.connect(**ChurchDB.DB)
-Config = clsConfig.clsConfig(ChurchDBConnection)
-PictureLocation = Config.get_Config_Value("Location", "Picture")
+ChurchDB = JSForm.clsDB("localhost", "ChurchDB", "church", "Church99")
+JSForm.CONFIG.set_Config_DBConnection(ChurchDB.DBConnection)
+PictureLocation = JSForm.CONFIG.get_Config_Value("Location", "Picture")
 DefaultPicture = PictureLocation + "Default.jpg"
-ReportLocation = Config.get_Config_Value("Location", "Report")
+ReportLocation = JSForm.CONFIG.get_Config_Value("Location", "Report")
 
 pdf = PDF()
 pdf.set_auto_page_break(auto=False, margin=rptMemberDir["Report"]["PageBreak"])
@@ -431,7 +429,7 @@ page_left = page_size
 pdf.add_page()
 pdf.setFont()
 
-families = clsDB.clsRecord(ChurchDBConnection, rptMemberDir["Body"]["Families"])
+families = JSForm.clsRecord(ChurchDB.DBConnection, rptMemberDir["Body"]["Families"])
 families.load_records()
 family = families.first()
 while family != None:

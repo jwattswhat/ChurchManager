@@ -141,7 +141,7 @@
                 "name": "lblPeople",
                 "type": "StaticText",
                 "posch": [
-                    25,
+                    24,
                     5
                 ],
                 "label": "People"
@@ -150,7 +150,7 @@
                 "name": "lblFamily",
                 "type": "StaticText",
                 "posch": [
-                    25,
+                    24,
                     7
                 ],
                 "label": "Families"
