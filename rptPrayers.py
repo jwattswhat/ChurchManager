@@ -4,16 +4,14 @@ from datetime import datetime, date
 import calendar
 import subprocess
 
-import clsDB
-import clsSQL
-from clsConfig import CONFIG
-import fnUtil
+import JSForm
+
 
 
 def readallrecords(table):
-    SQL = clsSQL.clsSQL(ChurchDBConnection, table)
+    SQL = JSForm.clsSQL(ChurchDB.DBConnection, table)
     sql = SQL.select()
-    cursor = ChurchDBConnection.cursor()
+    cursor = ChurchDB.DBConnection.cursor()
     cursor.execute(sql)
     return cursor.fetchall()
 
@@ -26,29 +24,29 @@ def sunday(dt):
 
 TODAY = datetime.now()
 # print("Today",TODAY)
-FIRSTDAY = fnUtil.date_to_datetime(TODAY.replace(day=1))
+FIRSTDAY = JSForm.date_to_datetime(TODAY.replace(day=1))
 # print("First Day",FIRSTDAY)
-LASTDAY = fnUtil.date_to_datetime(
+LASTDAY = JSForm.date_to_datetime(
     date(TODAY.year, TODAY.month, calendar.monthrange(TODAY.year, TODAY.month)[1])
 )
 # print("Last Day",LASTDAY)
-SUNDAY = fnUtil.next_weekday(TODAY, 6)
+SUNDAY = JSForm.next_weekday(TODAY, 6)
 # print ("Current Sunday", SUNDAY)
 SUNDAYS = []
 SUNDAYS.append(
-    fnUtil.date_to_datetime(fnUtil.next_weekday(FIRSTDAY, 6))
+    JSForm.date_to_datetime(JSForm.next_weekday(FIRSTDAY, 6))
 )  # first sunday
 SUNDAYS.append(
-    fnUtil.date_to_datetime(fnUtil.next_weekday(SUNDAYS[0], 6))
+    JSForm.date_to_datetime(JSForm.next_weekday(SUNDAYS[0], 6))
 )  # second sunday
 SUNDAYS.append(
-    fnUtil.date_to_datetime(fnUtil.next_weekday(SUNDAYS[1], 6))
+    JSForm.date_to_datetime(JSForm.next_weekday(SUNDAYS[1], 6))
 )  # third sunday
 SUNDAYS.append(
-    fnUtil.date_to_datetime(fnUtil.next_weekday(SUNDAYS[2], 6))
+    JSForm.date_to_datetime(JSForm.next_weekday(SUNDAYS[2], 6))
 )  # fourth sunday
-FIFTHSUNDAY = fnUtil.date_to_datetime(
-    fnUtil.next_weekday(SUNDAYS[3], 6)
+FIFTHSUNDAY = JSForm.date_to_datetime(
+    JSForm.next_weekday(SUNDAYS[3], 6)
 )  # fifth sunday
 if FIFTHSUNDAY > LASTDAY:
     FIFTHSUNDAY = None
@@ -58,8 +56,7 @@ SUNDAYS.append(FIFTHSUNDAY)
 
 # print ("Next Sunday",SUNDAY)
 
-ChurchDB = clsDB.clsDB("localhost", "ChurchDB", "church", "Church99")
-ChurchDBConnection = mysql.connector.connect(**ChurchDB.DB)
+ChurchDB = JSForm.clsDB("localhost", "ChurchDB", "church", "Church99")
 
 PR_ID = 0
 PR_CHURCHID = 1
@@ -93,8 +90,8 @@ for p in range(len(prayers)):
         startdate = SUNDAY
         enddate = SUNDAY
     else:
-        startdate = fnUtil.date_to_datetime(prayers[p][PR_STARTDATE])
-        enddate = fnUtil.date_to_datetime(prayers[p][PR_ENDDATE])
+        startdate = JSForm.date_to_datetime(prayers[p][PR_STARTDATE])
+        enddate = JSForm.date_to_datetime(prayers[p][PR_ENDDATE])
 
     # print (prayers[p][PR_REQUESTFOR])
     thissunday = False

@@ -4,13 +4,13 @@
             "name": "frmMain",
             "type": "Panel",
             "title": "frmMain: Church Manager - Main Menu",
-            "posch": [
-                1,
-                1
+            "pos": [
+                10,
+                10
             ],
-            "sizech": [
-                35,
-                35
+            "size": [
+                600,
+                600
             ],
             "stylelist": [
                 "CAPTION"
@@ -34,8 +34,8 @@
                     3
                 ],
                 "sizech": [
-                    15,
-                    3
+                    20,
+                    5
                 ],
                 "label": "Church"
             },
@@ -44,7 +44,7 @@
                 "type": "StaticText",
                 "posch": [
                     3,
-                    4
+                    5
                 ],
                 "label": "Churches"
             },
@@ -53,10 +53,10 @@
                 "name": "ServiceBox",
                 "posch": [
                     2,
-                    6
+                    8
                 ],
                 "sizech": [
-                    15,
+                    20,
                     18
                 ],
                 "label": "Service"
@@ -66,7 +66,7 @@
                 "type": "StaticText",
                 "posch": [
                     3,
-                    7
+                    10
                 ],
                 "label": "Worship Service"
             },
@@ -75,7 +75,7 @@
                 "type": "StaticText",
                 "posch": [
                     4,
-                    8.5
+                    12
                 ],
                 "label": "Sermons"
             },
@@ -84,7 +84,7 @@
                 "type": "StaticText",
                 "posch": [
                     4,
-                    10
+                    14
                 ],
                 "label": "Propers"
             },
@@ -93,7 +93,7 @@
                 "type": "StaticText",
                 "posch": [
                     4,
-                    11.5
+                    16
                 ],
                 "label": "OS"
             },
@@ -102,7 +102,7 @@
                 "label": "Prayers",
                 "posch": [
                     4,
-                    13
+                    18
                 ],
                 "type": "StaticText"
             },
@@ -111,7 +111,7 @@
                 "label": "Participant",
                 "posch": [
                     4,
-                    14.5
+                    20
                 ],
                 "type": "StaticText"
             },
@@ -120,7 +120,7 @@
                 "type": "StaticText",
                 "posch": [
                     4,
-                    16
+                    22
                 ],
                 "label": "Schedule"
             },
@@ -129,11 +129,11 @@
                 "label": "Membership",
                 "type": "StaticBox",
                 "posch": [
-                    18,
+                    23,
                     3
                 ],
                 "sizech": [
-                    15,
+                    20,
                     8
                 ]
             },
@@ -141,8 +141,8 @@
                 "name": "lblPeople",
                 "type": "StaticText",
                 "posch": [
-                    19,
-                    4.5
+                    24,
+                    5
                 ],
                 "label": "People"
             },
@@ -150,8 +150,8 @@
                 "name": "lblFamily",
                 "type": "StaticText",
                 "posch": [
-                    19,
-                    6
+                    24,
+                    7
                 ],
                 "label": "Families"
             },
@@ -159,12 +159,12 @@
                 "type": "StaticBox",
                 "name": "ReportBox",
                 "posch": [
-                    18,
+                    23,
                     11
                 ],
                 "sizech": [
-                    15,
-                    13
+                    20,
+                    18
                 ],
                 "label": "Reports"
             },
@@ -172,8 +172,8 @@
                 "name": "lblWorshipPlan",
                 "type": "StaticText",
                 "posch": [
-                    19,
-                    12
+                    24,
+                    13
                 ],
                 "label": "Planning Report"
             },
@@ -181,8 +181,8 @@
                 "name": "lblOSList",
                 "type": "StaticText",
                 "posch": [
-                    19,
-                    13.5
+                    24,
+                    15
                 ],
                 "label": "OS List"
             },
@@ -190,8 +190,8 @@
                 "name": "lblGenerateOS",
                 "type": "StaticText",
                 "posch": [
-                    19,
-                    15
+                    24,
+                    17
                 ],
                 "label": "Generate OS"
             },
@@ -199,8 +199,8 @@
                 "name": "lblNotifyParticipants",
                 "type": "StaticText",
                 "posch": [
-                    19,
-                    16.5
+                    24,
+                    19
                 ],
                 "label": "Notify Participants"
             },
@@ -208,8 +208,8 @@
                 "name": "lblSundayPrayers",
                 "label": "Sunday Prayers",
                 "posch": [
-                    19,
-                    18
+                    24,
+                    21
                 ],
                 "type": "StaticText"
             },
@@ -217,8 +217,8 @@
                 "name": "lblMemberDirectory",
                 "label": "Member Directory",
                 "posch": [
-                    19,
-                    19.5
+                    24,
+                    23
                 ],
                 "type": "StaticText"
             },
@@ -226,8 +226,8 @@
                 "name": "lblServiceSchedule",
                 "type": "StaticText",
                 "posch": [
-                    19,
-                    21
+                    24,
+                    25
                 ],
                 "label": "Service Schedule"
             },
@@ -236,12 +236,12 @@
                 "type": "StaticBox",
                 "label": "Utilities",
                 "posch": [
-                    18,
-                    24
+                    23,
+                    37
                 ],
                 "sizech": [
-                    15,
-                    9
+                    20,
+                    11
                 ]
             },
             "lblConfig": {
@@ -249,8 +249,8 @@
                 "type": "StaticText",
                 "label": "Config",
                 "posch": [
-                    19,
-                    25
+                    24,
+                    39
                 ]
             },
             "lblOptions": {
@@ -258,8 +258,8 @@
                 "type": "StaticText",
                 "label": "Options",
                 "posch": [
-                    19,
-                    26.5
+                    24,
+                    41
                 ]
             },
             "lblChoices": {
@@ -267,8 +267,8 @@
                 "type": "StaticText",
                 "label": "Choices",
                 "posch": [
-                    19,
-                    28
+                    24,
+                    43
                 ]
             },
             "lblBugs": {
@@ -276,8 +276,8 @@
                 "type": "StaticText",
                 "label": "Bugs",
                 "posch": [
-                    19,
-                    29.5
+                    24,
+                    45
                 ]
             }
         }

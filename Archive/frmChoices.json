@@ -1,0 +1,101 @@
+{
+    "frmChoicesFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmChoices : Choices Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                620,
+                550
+            ],
+            "name": "frmChoices",
+            "table": {
+                "name": "tblChoices",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "Field"
+            },
+            "stylelist": [
+                "CAPTION"
+            ]
+        },
+        "CONTROLS": {
+            "lblField": {
+                "name": "lblField",
+                "type": "StaticText",
+                "label": "Field:",
+                "pos": [
+                    0,
+                    0
+                ]
+            },
+            "Field": {
+                "name": "Field",
+                "type": "TextCtrl",
+                "pos": [
+                    100,
+                    0
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblChoices": {
+                "name": "lblChoices",
+                "type": "StaticText",
+                "label": "Choices:",
+                "pos": [
+                    0,
+                    30
+                ]
+            },
+            "Choices": {
+                "name": "Choices",
+                "type": "MultiLine",
+                "list": true,
+                "pos": [
+                    100,
+                    30
+                ],
+                "size": [
+                    300,
+                    300
+                ],
+                "stylelist": [
+                    "MULTILINE",
+                    "DONTWRAP"
+                ]
+            },
+            "lblNote": {
+                "name": "lblNote",
+                "type": "StaticText",
+                "label": "Note:",
+                "pos": [
+                    0,
+                    330
+                ]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "TextCtrl",
+                "pos": [
+                    100,
+                    330
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "MULTILINE",
+                    "WORDWRAP"
+                ]
+            }
+        }
+    }
+}

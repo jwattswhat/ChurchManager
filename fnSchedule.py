@@ -59,7 +59,7 @@ def ScheduleParticipants(ServiceID):
         "fields": ["*"],
         "condition": "ID = {ServiceID};".format(ServiceID=ServiceID),
     }
-    servicerow = readonerecord(ChurchDB.DB.DBConnection, serviceTable)
+    servicerow = readonerecord(ChurchDB.DBConnection, serviceTable)
 
     ServiceDate = servicerow[S_DateTime].strftime("%Y-%m-%d")
     ServiceMonth = servicerow[S_DateTime].strftime("%B")
@@ -74,7 +74,7 @@ def ScheduleParticipants(ServiceID):
         "fields": ["*"],
         "condition": "ID = {PropersID};".format(PropersID=servicerow[S_Propers]),
     }
-    propersrow = readonerecord(ChurchDB.DB.DBConnection, propersTable)
+    propersrow = readonerecord(ChurchDB.DBConnection, propersTable)
     ServiceSeason = propersrow[P_Season]
 
     #   participant constants
@@ -89,7 +89,7 @@ def ScheduleParticipants(ServiceID):
 
     #   participants
     participantTable = {"name": "tblParticipant", "fields": ["*"], "orderby": "ID"}
-    participantrows = readallrecords(ChurchDB.DB.DBConnection, participantTable)
+    participantrows = readallrecords(ChurchDB.DBConnection, participantTable)
     participantpos = 0
 
     #   Service Schedule Constants
@@ -102,7 +102,7 @@ def ScheduleParticipants(ServiceID):
 
     #   Service Schedule
     scheduleTable = {"name": "tblSchedule", "fields": ["*"], "orderby": "ID"}
-    schedulerows = readallrecords(ChurchDB.DB.DBConnection, scheduleTable)
+    schedulerows = readallrecords(ChurchDB.DBConnection, scheduleTable)
     schedulepos = 0
     scheduleTime = {}
     scheduleMonth = {}
@@ -147,7 +147,7 @@ def ScheduleParticipants(ServiceID):
                         ParticipantID=participant[P_ID],
                         Role=role,
                     )
-                    cursor = ChurchDB.DB.DBConnection.cursor()
+                    cursor = ChurchDB.DBConnection.cursor()
                     cursor.execute(sql)
 
     return

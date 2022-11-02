@@ -1,0 +1,157 @@
+{
+    "frmHymnUsageFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmHymnUsage: Hymn Usage Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                620,
+                400
+            ],
+            "name": "frmHymnUsage",
+            "table": {
+                "name": "tblHymnUsage",
+                "fields": [
+                    "ID",
+                    "ServiceID",
+                    "HymnID",
+                    "UsedAs",
+                    "Note"
+                ],
+                "orderby": "DateTime DESC"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "linkedform": {
+                "frmHymnSearch": {
+                    "name": "frmHymnSearch",
+                    "pos": [
+                        630,
+                        10
+                    ],
+                    "bindbtn": "btnOpenHymnSearch",
+                    "controls": ["Close"]
+                }
+            }
+        },
+        "CONTROLS": {
+            "lblServiceID": {
+                "name": "lblServiceID",
+                "type": "StaticText",
+                "label": "Service:",
+                "pos": [
+                    0,
+                    30
+                ]
+            },
+            "ServiceID": {
+                "name": "ServiceID",
+                "type": "ComboBox",
+                "pos": [
+                    150,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "lookupchoices": {
+                    "name": "tblService",
+                    "fields": [
+                        "ID",
+                        "DateTime"
+                    ],
+                    "orderby": "DateTime DESC"
+                }
+            },
+            "lblHymnID": {
+                "name": "lblHymnID",
+                "type": "StaticText",
+                "label": "Hymn:",
+                "pos": [
+                    0,
+                    60
+                ]
+            },
+            "HymnID": {
+                "name": "HymnID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblHymn",
+                    "fields": [
+                        "ID",
+                        "Hymn",
+                        "Title"
+                    ],
+                    "orderby": "Hymn ASC"
+                },
+                "pos": [
+                    150,
+                    60
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "btnOpenHymnSearch": {
+                "name": "btnOpenHymnSearch",
+                "type": "Button",
+                "label": "Select Hymn",
+                "pos": [
+                    475,
+                    60
+                ]
+            },
+            "lblUsedAs": {
+                "name": "lblUsedAs",
+                "type": "StaticText",
+                "label": "UsedAs:",
+                "pos": [
+                    0,
+                    90
+                ]
+            },
+            "UsedAs": {
+                "name": "UsedAs",
+                "type": "ComboBox",
+                "pos": [
+                    150,
+                    90
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblNote": {
+                "name": "lblNote",
+                "type": "StaticText",
+                "label": "Note:",
+                "pos": [
+                    0,
+                    120
+                ]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "pos": [
+                    150,
+                    120
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "TE_MULTILINE"
+                ]
+            }
+        }
+    }
+}

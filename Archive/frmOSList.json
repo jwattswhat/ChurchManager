@@ -1,0 +1,91 @@
+{
+    "frmOSListFORM": {
+        "FORM": {
+            "name": "frmOrderofService",
+            "type": "Panel",
+            "title": "frmOrderofService: AltOrderofService Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                880,
+                750
+            ],
+            "stylelist": [
+                "CAPTION"
+            ],
+            "controls": [
+                "Close"
+            ]
+        },
+        "CONTROLS": {
+            "lblOrderofService": {
+                "name": "lblOrderofServiceID",
+                "type": "StaticText",
+                "label": "OrderofService:",
+                "pos": [
+                    0,
+                    30
+                ]
+            },
+            "OrderofService": {
+                "name": "OrderofService",
+                "type": "ComboBox",
+                "pos": [
+                    125,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "refreshform": true
+            },
+            "dvlOS": {
+                "name": "dvlReadings",
+                "type": "DataViewListCtrl",
+                "table": {
+                    "name": "tblOrderOfService",
+                    "fields": [
+                        "Line",
+                        "Content",
+                        "Page",
+                        "Note"
+                    ],
+                    "condition": "OrderofService = '{OrderofService}'"
+                },
+                "column": [
+                    {
+                        "name": "Line",
+                        "label": "Line",
+                        "width": 75
+                    },
+                    {
+                        "name": "Content",
+                        "label": "Content",
+                        "width": 300
+                    },
+                    {
+                        "name": "Page",
+                        "label": "Page",
+                        "width": 75
+                    },
+                    {
+                        "name": "Note",
+                        "label": "Note",
+                        "width": 100
+                    }
+                ],
+                "pos": [
+                    5,
+                    60
+                ],
+                "size": [
+                    850,
+                    600
+                ]
+            }
+        }
+    }
+}

@@ -507,7 +507,7 @@
                     500,
                     430
                 ],
-                "openbtn": "Bulletin"
+                "open": "Bulletin"
             },
             "lblCheckListComplete": {
                 "name": "lblCheckListComplete",

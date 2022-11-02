@@ -1,0 +1,130 @@
+{
+    "frmServiceScheduleFORM": {
+        "FORM": {
+            "name": "frmServiceSchedule",
+            "type": "Panel",
+            "title": "frmServiceSchedule: ServiceSchedule Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                800,
+                700
+            ],
+            "table": {
+                "name": "tblService",
+                "fields": [
+                    "ID AS ServiceID",
+                    "DateTime"
+                ],
+                "orderby": "DateTIme DESC"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "controls": [
+                "Navigation",
+                "Close"
+            ]
+        },
+        "CONTROLS": {
+            "lblServiceID": {
+                "name": "lblServiceID",
+                "type": "StaticText",
+                "label": "ServiceID:",
+                "pos": [
+                    0,
+                    30
+                ]
+            },
+            "ServiceID": {
+                "name": "ServiceID",
+                "type": "TextNumber",
+                "pos": [
+                    125,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "format": "{:n}",
+                "readonly": true
+            },
+            "lblDateTime": {
+                "name": "lblDateTime",
+                "type": "StaticText",
+                "label": "Service Date:",
+                "pos": [
+                    0,
+                    60
+                ]
+            },
+            "DateTime": {
+                "name": "DateTime",
+                "type": "TextCtrl",
+                "pos": [
+                    125,
+                    60
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "readonly": true
+            },
+            "btnRunSchedule": {
+                "name": "btnRunSchedule",
+                "type": "Button",
+                "pos": [
+                    400,
+                    60
+                ],
+                "size": [
+                    200,
+                    30
+                ],
+                "label": "Run Schedule"
+            },
+            "dvlParticipantSchedule": {
+                "name": "dvlParticipantSchedule",
+                "type": "DataViewListCtrl",
+                "table": {
+                    "name": "tblServiceRole",
+                    "fields": [
+                        "ID",
+                        "ParticipantID",
+                        "Role"
+                    ],
+                    "condition": "ServiceID = {ServiceID}"
+                },
+                "column": [
+                    {
+                        "name": "ParticipantID",
+                        "label": "Participant",
+                        "width": 300,
+                        "lookup": {
+                            "table": "tblParticipant",
+                            "display": "Name",
+                            "key": "ID"
+                        }
+                    },
+                    {
+                        "name": "Role",
+                        "label": "Role",
+                        "width": 200
+                    }
+                ],
+                "pos": [
+                    125,
+                    90
+                ],
+                "size": [
+                    500,
+                    300
+                ]
+            }
+        }
+    }
+}

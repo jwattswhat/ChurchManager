@@ -1,0 +1,187 @@
+{
+    "frmHymnUsageDisplayFORM": {
+        "FORM": {
+            "type": "Panel",
+            "name": "frmHymnUsageDisplay",
+            "title": "frmHymnUsageDisplay : HymnUsageDisplay",
+            "table": {
+                "name": "tblService",
+                "fields": [
+                    "ID",
+                    "DateTime"
+                ],
+                "orderby": "DateTime DESC"
+            },
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                800,
+                400
+            ],
+            "stylelist": "CAPTION",
+            "linkedform": {
+                "frmHymnSearch": {
+                    "pos": [
+                        100,
+                        100
+                    ],
+                    "table": {
+                        "name": "tblHymn",
+                        "fields": [
+                            "*"
+                        ]
+                    },
+                    "bindbtn": "btnHymnUsageAdd",
+                    "controls": [
+                        "Close"
+                    ],
+                    "stylelist": [
+                        "CAPTION"
+                    ]
+                },
+                "frmNote": {
+                    "name": "frmNote",
+                    "nodataDB": true,
+                    "pos": [
+                        100,
+                        100
+                    ],
+                    "table": {
+                        "name": "tblHymnUsage",
+                        "fields": [
+                            "Note"
+                        ]
+                    },
+                    "bindbtn": "btnChangeNote",
+                    "controls": [],
+                    "stylelist": [
+                        "CAPTION"
+                    ]
+                }
+            }
+        },
+        "CONTROLS": {
+            "lblService": {
+                "name": "lblService",
+                "type": "StaticText",
+                "label": "Service:",
+                "pos": [
+                    30,
+                    30
+                ],
+                "readonly": true
+            },
+            "DateTime": {
+                "name": "DateTime",
+                "type": "DateTime",
+                "pos": [
+                    150,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "readonly": true
+            },
+            "boxHymns": {
+                "name": "boxHymns",
+                "type": "StaticBox",
+                "label": "Hymns",
+                "pos": [
+                    10,
+                    60
+                ],
+                "size": [
+                    780,
+                    250
+                ]
+            },
+            "dvlHymnUsage": {
+                "name": "dvlHymnUsage",
+                "type": "DataViewListCtrl",
+                "table": {
+                    "name": "tblHymnUsage",
+                    "fields": [
+                        "ID",
+                        "ServiceID",
+                        "HymnID",
+                        "HymnID as Title",
+                        "UsedAs",
+                        "Note"
+                    ],
+                    "condition": "ServiceID = {ID}"
+                },
+                "column": [
+                    {
+                        "name": "UsedAs",
+                        "label": "UsedAs",
+                        "width": 100
+                    },
+                    {
+                        "name": "HymnID",
+                        "label": "Hymn",
+                        "width": 200,
+                        "lookupchoices": {
+                            "name": "tblHymn",
+                            "fields": [
+                                "Hymn"
+                            ],
+                            "condition": "ID = {HymnID}"
+                        }
+                    },
+                    {
+                        "name": "Title",
+                        "label": "Title",
+                        "width": 400,
+                        "lookupchoices": {
+                            "name": "tblHymn",
+                            "fields": [
+                                "Title"
+                            ],
+                            "condition": "ID = {HymnID}"
+                        }
+                    }
+                ],
+                "pos": [
+                    25,
+                    90
+                ],
+                "size": [
+                    700,
+                    160
+                ]
+            },
+            "btnHymnUsageAdd": {
+                "name": "btnHymnUsageAdd",
+                "type": "Button",
+                "label": "Add",
+                "pos": [
+                    20,
+                    265
+                ]
+            },
+            "btnHymnDelete": {
+                "name": "btnHymnDelete",
+                "type": "Button",
+                "label": "Delete",
+                "pos": [
+                    110,
+                    265
+                ]
+            },
+            "btnChangeNote": {
+                "name": "btnChangeNote",
+                "type": "Button",
+                "label": "Change Note",
+                "pos": [
+                    200,
+                    265
+                ],
+                "linkedfield": "dvlHymnUsage"
+            }
+        }
+    }
+}

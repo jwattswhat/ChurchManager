@@ -1,0 +1,291 @@
+{
+    "frmPropersFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmPropers: Propers Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                850,
+                750
+            ],
+            "name": "frmPropers",
+            "table": {
+                "name": "tblPropers",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "Lectionary, Sort;"
+            },
+            "stylelist": [
+                "CAPTION"
+            ]
+        },
+        "CONTROLS": {
+            "lblLectionary": {
+                "type": "StaticText",
+                "label": "Lectionary:",
+                "pos": [
+                    0,
+                    0
+                ],
+                "name": "lblLectionary"
+            },
+            "Lectionary": {
+                "type": "ComboBox",
+                "pos": [
+                    125,
+                    0
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Lectionary"
+            },
+            "lblTheme": {
+                "type": "StaticText",
+                "label": "Theme:",
+                "pos": [
+                    450,
+                    0
+                ],
+                "name": "lblTheme"
+            },
+            "Theme": {
+                "type": "MultiLine",
+                "pos": [
+                    505,
+                    0
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "MULTILINE",
+                    "WORDWRAP"
+                ],
+                "name": "Theme"
+            },
+            "lblSort": {
+                "type": "StaticText",
+                "label": "Sort:",
+                "pos": [
+                    0,
+                    30
+                ],
+                "name": "lblSort"
+            },
+            "Sort": {
+                "type": "TextCtrl",
+                "pos": [
+                    125,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Sort"
+            },
+            "lblSeason": {
+                "type": "StaticText",
+                "label": "Season:",
+                "pos": [
+                    0,
+                    60
+                ],
+                "name": "lblSeason"
+            },
+            "Season": {
+                "type": "ComboBox",
+                "pos": [
+                    125,
+                    60
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Season"
+            },
+            "lblLiturgicalDate": {
+                "type": "StaticText",
+                "label": "Liturgical Date:",
+                "pos": [
+                    0,
+                    90
+                ],
+                "name": "lblLiturgicalDate"
+            },
+            "LiturgicalDate": {
+                "type": "TextCtrl",
+                "pos": [
+                    125,
+                    90
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "LiturgicalDate"
+            },
+            "lblHymnSug": {
+                "type": "StaticText",
+                "label": "Hymns:",
+                "pos": [
+                    450,
+                    150
+                ],
+                "name": "lblHymnSug"
+            },
+            "HymnSug": {
+                "type": "MultiLine",
+                "pos": [
+                    505,
+                    150
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "HymnSug"
+            },
+            "lblColor": {
+                "type": "StaticText",
+                "label": "Liturgical Color:",
+                "pos": [
+                    0,
+                    210
+                ],
+                "name": "lblColor"
+            },
+            "Color": {
+                "type": "ComboBox",
+                "pos": [
+                    125,
+                    210
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Color"
+            },
+            "lblAltColor": {
+                "type": "StaticText",
+                "label": "Alt Color:",
+                "pos": [
+                    0,
+                    240
+                ],
+                "name": "lblAltColor"
+            },
+            "AltColor": {
+                "type": "ComboBox",
+                "pos": [
+                    125,
+                    240
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "AltColor"
+            },
+            "dvlReadings": {
+                "name": "dvlReadings",
+                "type": "DataViewListCtrl",
+                "table": {
+                    "name": "tblReading",
+                    "fields": [
+                        "ID",
+                        "Reading",
+                        "Reference",
+                        "Note"
+                    ],
+                    "condition": "PropersID = {ID}"
+                },
+                "column": [
+                    {
+                        "name": "Reading",
+                        "label": "Reading",
+                        "width": 100
+                    },
+                    {
+                        "name": "Reference",
+                        "label": "Reference",
+                        "width": 200
+                    },
+                    {
+                        "name": "Note",
+                        "label": "Note",
+                        "width": 100
+                    }
+                ],
+                "pos": [
+                    25,
+                    270
+                ],
+                "size": [
+                    400,
+                    200
+                ]
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "pos": [
+                    0,
+                    475
+                ],
+                "name": "lblNote"
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "pos": [
+                    125,
+                    475
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "MULTILINE"
+                ]
+            },
+            "lblIntroit": {
+                "type": "StaticText",
+                "label": "Introit:",
+                "pos": [
+                    450,
+                    270
+                ],
+                "name": "lblIntroit"
+            },
+            "Introit": {
+                "type": "MultiLine",
+                "pos": [
+                    505,
+                    270
+                ],
+                "size": [
+                    300,
+                    300
+                ],
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Introit"
+            }
+        }
+    }
+}

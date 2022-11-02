@@ -11,7 +11,9 @@ import json
 
 import JSForm
 import fnSchedule
-class clsForm(JSForm.clsBASEForm):
+
+
+class clsForm(JSForm.clsForms.clsForm):
     class MergeorReplaceChecklist(wx.Dialog):
         def __init__(self, parent, title):
             super().__init__(parent, title=title, size=(400, 200))
@@ -242,7 +244,7 @@ def _buttonclick(event):
         case "lblPropers":
             formname = "frmPropers"
         case "lblWorshipPlan":
-            frm = clsForm(
+            frm = JSForm.clsForm(
                 None, ChurchDB.DBConnection, "frmGenerateWorshipPlanning", ["Close"]
             )
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runSPrpt)
@@ -256,14 +258,16 @@ def _buttonclick(event):
         case "lblOS":
             formname = "frmOS"
         case "lblGenerateOS":
-            frm = clsForm(None, ChurchDB.DBConnection, "frmGenerateOS", ["Close"])
+            frm = JSForm.clsForm(
+                None, ChurchDB.DBConnection, "frmGenerateOS", ["Close"]
+            )
 
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runOSrpt)
             frm.display_form_data()
             frm.show()
             return
         case "lblNotifyParticipants":
-            frm = clsForm(None, ChurchDB.DBConnection, "frmNotifyviaeMail")
+            frm = JSForm.clsForm(None, ChurchDB.DBConnection, "frmNotifyviaeMail")
             frm.CONTROLID["btnNotify"].Bind(wx.EVT_LEFT_DOWN, _runNotify)
             frm.display_form_data()
             frm.show()
@@ -276,8 +280,11 @@ def _buttonclick(event):
             subprocess.Popen("python rptMemberDirectory.py", shell=True)
 
         case "lblServiceSchedule":
-            frm = clsForm(
-                None, ChurchDB.DBConnection, "frmServiceSchedule", ["Navigation", "Close"]
+            frm = JSForm.clsForm(
+                None,
+                ChurchDB.DBConnection,
+                "frmServiceSchedule",
+                ["Navigation", "Close"],
             )
             frm.CONTROLID["btnRunSchedule"].Bind(wx.EVT_LEFT_DOWN, _runSchedule)
             frm.display_form_data()
@@ -321,7 +328,9 @@ JSForm.CONFIG.set_Config_DBConnection(ChurchDB.DBConnection)
 JSForm.OPTION.set_Option_DBConnection(ChurchDB.DBConnection)
 JSForm.FONT.set_Font_DBConnection(ChurchDB.DBConnection)
 JSForm.FONT.Get_Config_Font()
-JSForm.CONST.btnNavigationCONTROLS = JSForm.convertNavButtons(JSForm.CONST.btnNavigationCONTROLS)
+JSForm.CONST.btnNavigationCONTROLS = JSForm.convertNavButtons(
+    JSForm.CONST.btnNavigationCONTROLS
+)
 #
 # 	Main form
 #
@@ -361,5 +370,3 @@ PARENTRECORD = {}
 frm.show()
 frm.display_form_data()
 app.MainLoop()
-
-

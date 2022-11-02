@@ -152,7 +152,7 @@
                     720,
                     120
                 ],
-                "openbtn": "Sermon"
+                "open": "Sermon"
             },
             "lblOutline": {
                 "type": "StaticText",

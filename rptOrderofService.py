@@ -7,10 +7,7 @@ from typing import OrderedDict
 import json
 import subprocess
 
-
-import clsDB
-import clsSQL
-from clsConfig import CONFIG
+import JSForm
 
 #   Service Constants
 S_ID = 0
@@ -51,17 +48,17 @@ def getimbedname(arg):
 
 
 def readallrecords(table):
-    SQL = clsSQL.clsSQL(ChurchDBConnection, table)
+    SQL = JSForm.clsSQL(ChurchDB.DBConnection, table)
     sql = SQL.select()
-    cursor = ChurchDBConnection.cursor()
+    cursor = ChurchDB.DBConnection.cursor()
     cursor.execute(sql)
     return cursor.fetchall()
 
 
 def readonerecord(table):
-    SQL = clsSQL.clsSQL(ChurchDBConnection, table)
+    SQL = JSForm.clsSQL(ChurchDB.DBConnection, table)
     sql = SQL.select()
-    cursor = ChurchDBConnection.cursor()
+    cursor = ChurchDB.DBConnection.cursor()
     cursor.execute(sql)
     return cursor.fetchone()
 
@@ -91,9 +88,8 @@ if not args.ID:
     print("no Service ID")
     exit()
 
-ChurchDB = clsDB.clsDB("localhost", "ChurchDB", "church", "Church99")
-ChurchDBConnection = mysql.connector.connect(**ChurchDB.DB)
-CONFIG.set_Config_DBConnection(ChurchDBConnection)
+ChurchDB = JSForm.clsDB("localhost", "ChurchDB", "church", "Church99")
+JSForm.CONFIG.set_Config_DBConnection(ChurchDB.DBConnection)
 
 #   Service
 
@@ -187,7 +183,7 @@ for row in osrows:
         case ("Entrance" | "Office Hymn" | "Of the Day" | "Communion" | "Closing"):
             useage = searchrecrods(imbed, hrows)
             sql = "SELECT * FROM tblHymn WHERE ID = {id};".format(id=useage[HU_Usage])
-            cursor = ChurchDBConnection.cursor()
+            cursor = ChurchDB.DBConnection.cursor()
             cursor.execute(sql)
             hymn = cursor.fetchone()
             prnt[row[OS_Line]] = row[OS_Content].replace(
@@ -215,7 +211,7 @@ OS_Line += 1
 prnt[
     row[OS_Line]
 ] = "Liturgy Used by Permission Concordia Publishing House #{License}".format(
-    License=CONFIG.get_Config_Value("License", "Liturgy")
+    License=JSForm.CONFIG.get_Config_Value("License", "Liturgy")
 )
 
 with open("OS.json", "w") as jsonfile:

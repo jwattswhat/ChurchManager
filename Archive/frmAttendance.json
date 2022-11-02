@@ -1,0 +1,160 @@
+{
+    "frmAttendanceFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmAttendance : Service Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                620,
+                500
+            ],
+            "table": {
+                "name": "frmAttendance",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "AttendanceDate Desc"
+            },
+            "stylelist": [
+                "CAPTION"
+            ]
+        },
+        "CONTROLS": {
+            "lblPersonID": {
+                "type": "StaticText",
+                "label": "Person ID :",
+                "pos": [
+                    0,
+                    0
+                ],
+                "name": "lblPersonID"
+            },
+            "PersonID": {
+                "type": "ComboBox",
+                "pos": [
+                    145,
+                    0
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "PersonID"
+            },
+            "lblAttendanceEventID": {
+                "type": "StaticText",
+                "label": "Attenandance Event ID:",
+                "pos": [
+                    0,
+                    30
+                ],
+                "name": "lblAttendanceEventID"
+            },
+            "AttendanceEventID": {
+                "type": "TextCtrl",
+                "pos": [
+                    145,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "AttendanceID"
+            },
+            "lblAttendanceDate": {
+                "type": "StaticText",
+                "label": "Attendance Date: ",
+                "pos": [
+                    0,
+                    60
+                ],
+                "name": "lblAttendanceDate"
+            },
+            "AttendanceDate": {
+                "type": "DateTime",
+                "displaydate": 1,
+                "displaytime": 1,
+                "pos": [
+                    145,
+                    60
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "AttendanceDate",
+                "validatorstr": "DateTime"
+            },
+            "lblHolyCommunion": {
+                "type": "StaticText",
+                "label": "Holy Communion:",
+                "pos": [
+                    0,
+                    90
+                ],
+                "name": "lblHolyCommunion"
+            },
+            "HolyCommunion": {
+                "type": "CheckBox",
+                "pos": [
+                    145,
+                    90
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "HolyCommunion"
+            },
+            "lblAttendanceType": {
+                "type": "StaticText",
+                "label": "Attendance Type ID:",
+                "pos": [
+                    0,
+                    120
+                ],
+                "name": "lblAttendanceType"
+            },
+            "AttendanceType": {
+                "type": "TextCtrl",
+                "pos": [
+                    145,
+                    120
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "lblAttendanceType"
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "pos": [
+                    0,
+                    150
+                ],
+                "name": "lblNote"
+            },
+            "Note": {
+                "type": "MultiLine",
+                "pos": [
+                    145,
+                    150
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Note"
+            }
+        }
+    }
+}
