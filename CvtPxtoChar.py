@@ -1,11 +1,11 @@
 import json
+import os
 import argparse
 import pprint
 from typing import OrderedDict
 
 def pttoch(pt):
-    p = pt*.125
-    p = p + .5
+    p = pt*.083
     p = int(p)
     return p
 
@@ -30,54 +30,59 @@ parser.add_argument(
 )
 args = parser.parse_args()
 if not args.form:
-    print("no form")
-    exit()
+    inputformname = input("Enter Form:")
+else:
+    inputformname = args.form[0]
 
 FormLocation = ".\\Forms\\"
-formname = FormLocation + args.form[0] + ".json"
+formname = FormLocation + inputformname + ".json"
+saveform = FormLocation + "sv." + inputformname +".json"
 print ("Processing form:",formname)
 f = open(
     formname,
 )
 jsonfrm = json.load(f,object_pairs_hook=OrderedDict)
 f.close()
-for fld in jsonfrm[args.form[0]+"FORM"]["FORM"].copy():
+
+os.rename(formname,saveform)
+for fld in jsonfrm[inputformname+"FORM"]["FORM"].copy():
     if fld == "pos":
-        jsonfrm[args.form[0]+"FORM"]["FORM"]["posch"] = convpostoch(jsonfrm[args.form[0]+"FORM"]["FORM"][fld])
-        jsonfrm[args.form[0]+"FORM"]["FORM"].pop("pos")
+        jsonfrm[inputformname+"FORM"]["FORM"]["posch"] = convpostoch(jsonfrm[inputformname+"FORM"]["FORM"][fld])
+        jsonfrm[inputformname+"FORM"]["FORM"].pop("pos")
     if fld == "size":
-        jsonfrm[args.form[0]+"FORM"]["FORM"]["sizech"] = convpostoch(jsonfrm[args.form[0]+"FORM"]["FORM"][fld])
-        jsonfrm[args.form[0]+"FORM"]["FORM"].pop("size")
+        jsonfrm[inputformname+"FORM"]["FORM"]["sizech"] = convpostoch(jsonfrm[inputformname+"FORM"]["FORM"][fld])
+        jsonfrm[inputformname+"FORM"]["FORM"].pop("size")
     if fld == "linkedform":
-        for frm in jsonfrm[args.form[0]+"FORM"]["FORM"][fld].copy():
-            for f in jsonfrm[args.form[0]+"FORM"]["FORM"][fld][frm].copy():
+        for frm in jsonfrm[inputformname+"FORM"]["FORM"][fld].copy():
+            for f in jsonfrm[inputformname+"FORM"]["FORM"][fld][frm].copy():
                 if f == "pos":
-                    jsonfrm[args.form[0]+"FORM"]["FORM"][fld][frm]["posch"] = convpostoch(jsonfrm[args.form[0]+"FORM"]["FORM"][fld][frm][f])
-                    jsonfrm[args.form[0]+"FORM"]["FORM"][fld][frm].pop("pos")
+                    jsonfrm[inputformname+"FORM"]["FORM"][fld][frm]["posch"] = convpostoch(jsonfrm[inputformname+"FORM"]["FORM"][fld][frm][f])
+                    jsonfrm[inputformname+"FORM"]["FORM"][fld][frm].pop("pos")
                 if f == "size":
-                    jsonfrm[args.form[0]+"FORM"]["FORM"][fld][frm]["sizech"] = convpostoch(jsonfrm[args.form[0]+"FORM"]["FORM"][fld][frm][f])
-                    jsonfrm[args.form[0]+"FORM"]["FORM"][fld].pop("size")
+                    jsonfrm[inputformname+"FORM"]["FORM"][fld][frm]["sizech"] = convpostoch(jsonfrm[inputformname+"FORM"]["FORM"][fld][frm][f])
+                    jsonfrm[inputformname+"FORM"]["FORM"][fld].pop("size")
     if fld == "subform":
-        for frm in jsonfrm[args.form[0]+"FORM"]["FORM"][fld].copy():
-            for f in jsonfrm[args.form[0]+"FORM"]["FORM"][fld][frm].copy():
+        for frm in jsonfrm[inputformname+"FORM"]["FORM"][fld].copy():
+            for f in jsonfrm[inputformname+"FORM"]["FORM"][fld][frm].copy():
                 if f == "pos":
-                    jsonfrm[args.form[0]+"FORM"]["FORM"][fld][frm]["posch"] = convpostoch(jsonfrm[args.form[0]+"FORM"]["FORM"][fld][frm][f])
-                    jsonfrm[args.form[0]+"FORM"]["FORM"][fld][frm].pop("pos")
+                    jsonfrm[inputformname+"FORM"]["FORM"][fld][frm]["posch"] = convpostoch(jsonfrm[inputformname+"FORM"]["FORM"][fld][frm][f])
+                    jsonfrm[inputformname+"FORM"]["FORM"][fld][frm].pop("pos")
                 if f == "size":
-                    jsonfrm[args.form[0]+"FORM"]["FORM"][fld][frm]["sizech"] = convpostoch(jsonfrm[args.form[0]+"FORM"]["FORM"][fld][frm][f])
-                    jsonfrm[args.form[0]+"FORM"]["FORM"][fld].pop("size")
+                    jsonfrm[inputformname+"FORM"]["FORM"][fld][frm]["sizech"] = convpostoch(jsonfrm[inputformname+"FORM"]["FORM"][fld][frm][f])
+                    jsonfrm[inputformname+"FORM"]["FORM"][fld].pop("size")
 
 
-for control in jsonfrm[args.form[0]+"FORM"]["CONTROLS"].copy():
-    for fld in jsonfrm[args.form[0]+"FORM"]["CONTROLS"][control].copy():
+for control in jsonfrm[inputformname+"FORM"]["CONTROLS"].copy():
+    for fld in jsonfrm[inputformname+"FORM"]["CONTROLS"][control].copy():
         if fld == "pos":
-            jsonfrm[args.form[0]+"FORM"]["CONTROLS"][control]["posch"] = convpostoch(jsonfrm[args.form[0]+"FORM"]["CONTROLS"][control][fld])
-            jsonfrm[args.form[0]+"FORM"]["CONTROLS"][control].pop("pos")
+            jsonfrm[inputformname+"FORM"]["CONTROLS"][control]["posch"] = convpostoch(jsonfrm[inputformname+"FORM"]["CONTROLS"][control][fld])
+            jsonfrm[inputformname+"FORM"]["CONTROLS"][control].pop("pos")
         if fld == "size":
-            jsonfrm[args.form[0]+"FORM"]["CONTROLS"][control]["sizech"] = convpostoch(jsonfrm[args.form[0]+"FORM"]["CONTROLS"][control][fld])
-            jsonfrm[args.form[0]+"FORM"]["CONTROLS"][control].pop("size")
+            jsonfrm[inputformname+"FORM"]["CONTROLS"][control]["sizech"] = convpostoch(jsonfrm[inputformname+"FORM"]["CONTROLS"][control][fld])
+            jsonfrm[inputformname+"FORM"]["CONTROLS"][control].pop("size")
 
-pprint.pprint(jsonfrm[args.form[0]+"FORM"])
+pprint.pprint(jsonfrm[inputformname+"FORM"])
+print (formname)
 f = open(
     formname,"w"
 )

@@ -3,6 +3,14 @@
         "FORM": {
             "type": "Panel",
             "title": "frmSermon: Sermon Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                850,
+                400
+            ],
             "name": "frmSermon",
             "table": {
                 "name": "tblSermon",
@@ -20,109 +28,101 @@
             },
             "stylelist": [
                 "CAPTION"
-            ],
-            "posch": [
-                0,
-                0
-            ],
-            "sizech": [
-                70,
-                33
             ]
         },
         "CONTROLS": {
             "lblReference": {
                 "type": "StaticText",
                 "label": "Reference:",
-                "name": "lblReference",
-                "posch": [
+                "pos": [
                     0,
                     0
-                ]
+                ],
+                "name": "lblReference"
             },
             "Reference": {
                 "type": "TextCtrl",
-                "name": "Reference",
-                "posch": [
-                    9,
+                "pos": [
+                    120,
                     0
                 ],
-                "sizech": [
-                    24,
-                    2
-                ]
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Reference"
             },
             "lblTitle": {
                 "type": "StaticText",
                 "label": "Title:",
-                "name": "lblTitle",
-                "posch": [
+                "pos": [
                     0,
-                    2
-                ]
+                    30
+                ],
+                "name": "lblTitle"
             },
             "Title": {
                 "type": "TextCtrl",
-                "name": "Title",
-                "posch": [
-                    9,
-                    2
+                "pos": [
+                    120,
+                    30
                 ],
-                "sizech": [
-                    24,
-                    2
-                ]
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Title"
             },
             "lblPreacher": {
                 "type": "StaticText",
                 "label": "Preacher:",
-                "name": "lblPreacher",
-                "posch": [
+                "pos": [
                     0,
-                    4
-                ]
+                    60
+                ],
+                "name": "lblPreacher"
             },
             "Preacher": {
                 "type": "ComboBox",
-                "name": "Preacher",
-                "posch": [
-                    9,
-                    4
+                "pos": [
+                    120,
+                    60
                 ],
-                "sizech": [
-                    24,
-                    2
-                ]
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Preacher"
             },
             "lblDate": {
                 "type": "StaticText",
                 "label": "Date:",
-                "name": "lblDate",
-                "posch": [
+                "pos": [
                     0,
-                    7
-                ]
+                    90
+                ],
+                "name": "lblDate"
             },
             "Date": {
                 "type": "DatePickerCtrl",
-                "name": "Date",
-                "posch": [
-                    9,
-                    7
+                "pos": [
+                    120,
+                    90
                 ],
-                "sizech": [
-                    24,
-                    2
-                ]
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Date"
             },
             "lblSermon": {
                 "type": "StaticText",
                 "label": "Sermon:",
-                "name": "lblSermon",
-                "posch": [
+                "pos": [
                     0,
-                    9
-                ]
+                    120
+                ],
+                "name": "lblSermon"
             },
             "Sermon": {
                 "name": "Sermon",
@@ -131,37 +131,37 @@
                     "Location",
                     "Sermon"
                 ],
+                "pos": [
+                    120,
+                    120
+                ],
+                "size": [
+                    600,
+                    30
+                ],
                 "stylelist": [
                     "FLPCHANGEDIR",
                     "FLPUSETEXTCTRL"
-                ],
-                "posch": [
-                    9,
-                    9
-                ],
-                "sizech": [
-                    49,
-                    2
                 ]
             },
             "btnOpenSermon": {
                 "name": "btnOpenSermon",
                 "type": "Button",
                 "label": "Open",
-                "openbtn": "Sermon",
-                "posch": [
-                    59,
-                    9
-                ]
+                "pos": [
+                    720,
+                    120
+                ],
+                "openbtn": "Sermon"
             },
             "lblOutline": {
                 "type": "StaticText",
                 "label": "Outline:",
-                "name": "lblOutline",
-                "posch": [
+                "pos": [
                     0,
-                    12
-                ]
+                    150
+                ],
+                "name": "lblOutline"
             },
             "Outline": {
                 "name": "Outline",
@@ -170,52 +170,52 @@
                     "Location",
                     "Outline"
                 ],
+                "pos": [
+                    120,
+                    150
+                ],
+                "size": [
+                    600,
+                    30
+                ],
                 "stylelist": [
                     "FLPCHANGEDIR",
                     "FLPUSETEXTCTRL"
-                ],
-                "posch": [
-                    9,
-                    12
-                ],
-                "sizech": [
-                    49,
-                    2
                 ]
             },
             "btnOpenOutline": {
                 "name": "btnOpenOutline",
                 "type": "Button",
                 "label": "Open",
-                "open": "Outline",
-                "posch": [
-                    59,
-                    12
-                ]
+                "pos": [
+                    720,
+                    150
+                ],
+                "open": "Outline"
             },
             "lblNote": {
                 "type": "StaticText",
                 "label": "Note:",
-                "name": "lblNote",
-                "posch": [
+                "pos": [
                     0,
-                    14
-                ]
+                    180
+                ],
+                "name": "lblNote"
             },
             "Note": {
                 "type": "MultiLine",
+                "pos": [
+                    120,
+                    180
+                ],
+                "size": [
+                    300,
+                    100
+                ],
                 "stylelist": [
                     "MULTILINE"
                 ],
-                "name": "Note",
-                "posch": [
-                    9,
-                    14
-                ],
-                "sizech": [
-                    24,
-                    8
-                ]
+                "name": "Note"
             }
         }
     }

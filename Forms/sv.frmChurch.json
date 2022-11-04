@@ -3,6 +3,14 @@
         "FORM": {
             "type": "Panel",
             "title": "frmChurch: Church Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                620,
+                500
+            ],
             "name": "frmChurch",
             "table": {
                 "name": "tblChurch",
@@ -13,14 +21,6 @@
             },
             "stylelist": [
                 "CAPTION"
-            ],
-            "posch": [
-                0,
-                0
-            ],
-            "sizech": [
-                51,
-                41
             ]
         },
         "CONTROLS": {
@@ -28,7 +28,7 @@
                 "name": "lblChurch",
                 "type": "StaticText",
                 "label": "Church:",
-                "posch": [
+                "pos": [
                     0,
                     0
                 ]
@@ -37,197 +37,197 @@
                 "name": "Church",
                 "type": "TextCtrl",
                 "value": "",
-                "posch": [
-                    6,
+                "pos": [
+                    75,
                     0
                 ],
-                "sizech": [
-                    24,
-                    2
+                "size": [
+                    300,
+                    30
                 ]
             },
             "lblAddress": {
                 "name": "lblAddress",
                 "type": "StaticText",
                 "label": "Address:",
-                "posch": [
+                "pos": [
                     0,
-                    2
+                    30
                 ]
             },
             "Address": {
                 "name": "Address",
                 "type": "TextCtrl",
-                "posch": [
-                    6,
-                    2
+                "pos": [
+                    75,
+                    30
                 ],
-                "sizech": [
-                    24,
-                    2
+                "size": [
+                    300,
+                    30
                 ]
             },
             "Address2": {
                 "name": "Address2",
                 "type": "TextCtrl",
-                "posch": [
-                    6,
-                    4
+                "pos": [
+                    75,
+                    60
                 ],
-                "sizech": [
-                    24,
-                    2
+                "size": [
+                    300,
+                    30
                 ]
             },
             "lblCity": {
                 "name": "lblCity",
                 "type": "StaticText",
                 "label": "City:",
-                "posch": [
+                "pos": [
                     0,
-                    7
+                    90
                 ]
             },
             "City": {
                 "name": "City",
                 "type": "TextCtrl",
                 "value": "",
-                "posch": [
-                    6,
-                    7
+                "pos": [
+                    75,
+                    90
                 ],
-                "sizech": [
-                    24,
-                    2
+                "size": [
+                    300,
+                    30
                 ]
             },
             "lblState": {
                 "name": "lblState",
                 "type": "StaticText",
                 "label": "State:",
-                "posch": [
+                "pos": [
                     0,
-                    9
+                    120
                 ]
             },
             "State": {
                 "name": "State",
                 "type": "TextCtrl",
-                "posch": [
-                    6,
-                    9
+                "pos": [
+                    75,
+                    120
                 ],
-                "sizech": [
-                    24,
-                    2
+                "size": [
+                    300,
+                    30
                 ]
             },
             "lblZip": {
                 "name": "lblZip",
                 "type": "StaticText",
                 "label": "Zip:",
-                "posch": [
+                "pos": [
                     0,
-                    12
+                    150
                 ]
             },
             "Zip": {
                 "name": "Zip",
                 "type": "TextCtrl",
-                "posch": [
-                    6,
-                    12
+                "pos": [
+                    75,
+                    150
                 ],
-                "sizech": [
-                    24,
-                    2
+                "size": [
+                    300,
+                    30
                 ]
             },
             "lblPastor": {
                 "name": "lblPastor",
                 "type": "StaticText",
                 "label": "Pastor:",
-                "posch": [
+                "pos": [
                     0,
-                    14
+                    180
                 ]
             },
             "Pastor": {
                 "name": "Pastor",
                 "type": "TextCtrl",
-                "posch": [
-                    6,
-                    14
+                "pos": [
+                    75,
+                    180
                 ],
-                "sizech": [
-                    24,
-                    2
+                "size": [
+                    300,
+                    30
                 ]
             },
             "lblPhone": {
                 "name": "lblPhone",
                 "type": "StaticText",
                 "label": "Phone:",
-                "posch": [
+                "pos": [
                     0,
-                    17
+                    210
                 ]
             },
             "Phone": {
                 "name": "Phone",
                 "type": "TextCtrl",
-                "posch": [
-                    6,
-                    19
+                "pos": [
+                    75,
+                    240
                 ],
-                "sizech": [
-                    24,
-                    2
+                "size": [
+                    300,
+                    30
                 ]
             },
             "lbleMail": {
                 "name": "lbleMail",
                 "type": "StaticText",
                 "label": "eMail:",
-                "posch": [
+                "pos": [
                     0,
-                    19
+                    240
                 ]
             },
             "eMail": {
                 "name": "eMail",
                 "type": "TextCtrl",
-                "posch": [
-                    6,
-                    22
+                "pos": [
+                    75,
+                    270
                 ],
-                "sizech": [
-                    24,
-                    2
+                "size": [
+                    300,
+                    30
                 ]
             },
             "lblNote": {
                 "name": "lblNote",
                 "type": "StaticText",
                 "label": "Note:",
-                "posch": [
+                "pos": [
                     0,
-                    24
+                    300
                 ]
             },
             "Note": {
                 "name": "Note",
                 "type": "MultiLine",
+                "pos": [
+                    75,
+                    300
+                ],
+                "size": [
+                    300,
+                    100
+                ],
                 "stylelist": [
                     "MULTILINE"
-                ],
-                "posch": [
-                    6,
-                    24
-                ],
-                "sizech": [
-                    24,
-                    8
                 ]
             }
         }

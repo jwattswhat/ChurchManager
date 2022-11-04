@@ -4,6 +4,14 @@
             "name": "frmAltReading",
             "type": "Panel",
             "title": "frmAltReading: AltReading Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                620,
+                450
+            ],
             "table": {
                 "name": "tblAltReading",
                 "fields": [
@@ -13,111 +21,103 @@
             },
             "stylelist": [
                 "CAPTION"
-            ],
-            "posch": [
-                0,
-                0
-            ],
-            "sizech": [
-                35,
-                18
             ]
         },
         "CONTROLS": {
             "lblServiceID": {
                 "type": "StaticText",
                 "label": "Service:",
-                "name": "lblServiceID",
-                "posch": [
-                    1,
-                    2
-                ]
+                "pos": [
+                    0,
+                    30
+                ],
+                "name": "lblServiceID"
             },
             "ServiceID": {
                 "name": "ServiceID",
                 "type": "ComboBox",
                 "lookupchoices": {
                     "name": "tblService",
-                    "fields": [
-                        "ID",
+                    "fields": ["ID",
                         "DateTime"
                     ],
                     "orderby": "DateTime"
                 },
-                "posch": [
-                    10,
-                    2
+                "pos": [
+                    125,
+                    30
                 ],
-                "sizech": [
-                    24,
-                    1.5
+                "size": [
+                    300,
+                    30
                 ]
             },
             "lblReading": {
                 "type": "StaticText",
                 "label": "Alt Reading:",
-                "name": "lblReading",
-                "posch": [
-                    1,
-                    3.5
-                ]
+                "pos": [
+                    0,
+                    60
+                ],
+                "name": "lblReading"
             },
             "Reading": {
                 "type": "ComboBox",
-                "name": "Reading",
-                "posch": [
-                    10,
-                    3.5
+                "pos": [
+                    125,
+                    60
                 ],
-                "sizech": [
-                    24,
-                    1.5
-                ]
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Reading"
             },
             "lblReference": {
                 "type": "StaticText",
                 "label": "Reference:",
-                "name": "lblReference",
-                "posch": [
-                    1,
-                    5
-                ]
+                "pos": [
+                    0,
+                    90
+                ],
+                "name": "lblReference"
             },
             "Reference": {
                 "type": "TextCtrl",
-                "name": "Reference",
-                "posch": [
-                    10,
-                    5
+                "pos": [
+                    125,
+                    90
                 ],
-                "sizech": [
-                    24,
-                    1.5
-                ]
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Reference"
             },
             "lblNote": {
                 "type": "StaticText",
                 "label": "Note",
-                "name": "lblNote",
-                "posch": [
-                    1,
-                    6.5
-                ]
+                "pos": [
+                    0,
+                    120
+                ],
+                "name": "lblNote"
             },
             "Note": {
                 "name": "Note",
                 "type": "MultiLine",
+                "pos": [
+                    125,
+                    120
+                ],
+                "size": [
+                    300,
+                    100
+                ],
                 "stylelist": [
                     "MULTILINE",
                     "WORDWRAP"
-                ],
-                "posch": [
-                    10,
-                    6.5
-                ],
-                "sizech": [
-                    24,
-                    10                ]
+                ]
             }
         }
     }

@@ -1,7 +1,8 @@
 """
-    cm.py - Church Manager.
+    cm.py - Church Manager
     Rev. Jonathan C. Watt
     Copyright: 2022, Jonathan C. Watt
+    July 2022
     
 """
 import wx
