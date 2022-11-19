@@ -221,3 +221,4 @@ with open("OS.txt", "w") as osfile:
     for line in prnt:
         osfile.write(prnt[line].replace("\\t", "\t") + "\r")
 subprocess.Popen(["notepad", "OS.txt"])
+subprocess.Popen(["notepad", "OS.json"])
