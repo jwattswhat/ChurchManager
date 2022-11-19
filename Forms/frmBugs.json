@@ -16,7 +16,8 @@
                 "name": "tblBugs",
                 "fields": [
                     "*"
-                ]
+                ],
+                "orderby" : "Complete, Priority"
             },
             "stylelist": [
                 "CAPTION"

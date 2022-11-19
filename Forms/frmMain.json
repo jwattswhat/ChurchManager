@@ -44,7 +44,7 @@
                 "type": "StaticText",
                 "posch": [
                     3,
-                    4
+                    4.5
                 ],
                 "label": "Churches"
             },
@@ -66,7 +66,7 @@
                 "type": "StaticText",
                 "posch": [
                     3,
-                    7
+                    8
                 ],
                 "label": "Worship Service"
             },
@@ -75,7 +75,7 @@
                 "type": "StaticText",
                 "posch": [
                     4,
-                    8.5
+                    9.5
                 ],
                 "label": "Sermons"
             },
@@ -84,7 +84,7 @@
                 "type": "StaticText",
                 "posch": [
                     4,
-                    10
+                    11
                 ],
                 "label": "Propers"
             },
@@ -93,7 +93,7 @@
                 "type": "StaticText",
                 "posch": [
                     4,
-                    11.5
+                    12.5
                 ],
                 "label": "OS"
             },
@@ -102,7 +102,7 @@
                 "label": "Prayers",
                 "posch": [
                     4,
-                    13
+                    14
                 ],
                 "type": "StaticText"
             },
@@ -111,7 +111,7 @@
                 "label": "Participant",
                 "posch": [
                     4,
-                    14.5
+                    15.5
                 ],
                 "type": "StaticText"
             },
@@ -120,7 +120,7 @@
                 "type": "StaticText",
                 "posch": [
                     4,
-                    16
+                    17
                 ],
                 "label": "Schedule"
             },
@@ -173,7 +173,7 @@
                 "type": "StaticText",
                 "posch": [
                     19,
-                    12
+                    12.5
                 ],
                 "label": "Planning Report"
             },
@@ -182,7 +182,7 @@
                 "type": "StaticText",
                 "posch": [
                     19,
-                    13.5
+                    14
                 ],
                 "label": "OS List"
             },
@@ -191,7 +191,7 @@
                 "type": "StaticText",
                 "posch": [
                     19,
-                    15
+                    15.5
                 ],
                 "label": "Generate OS"
             },
@@ -200,7 +200,7 @@
                 "type": "StaticText",
                 "posch": [
                     19,
-                    16.5
+                    17
                 ],
                 "label": "Notify Participants"
             },
@@ -209,7 +209,7 @@
                 "label": "Sunday Prayers",
                 "posch": [
                     19,
-                    18
+                    18.5
                 ],
                 "type": "StaticText"
             },
@@ -218,7 +218,7 @@
                 "label": "Member Directory",
                 "posch": [
                     19,
-                    19.5
+                    20
                 ],
                 "type": "StaticText"
             },
@@ -227,7 +227,7 @@
                 "type": "StaticText",
                 "posch": [
                     19,
-                    21
+                    21.5
                 ],
                 "label": "Service Schedule"
             },
@@ -250,7 +250,7 @@
                 "label": "Config",
                 "posch": [
                     19,
-                    25
+                    25.5
                 ]
             },
             "lblOptions": {
@@ -259,7 +259,7 @@
                 "label": "Options",
                 "posch": [
                     19,
-                    26.5
+                    27
                 ]
             },
             "lblChoices": {
@@ -268,7 +268,7 @@
                 "label": "Choices",
                 "posch": [
                     19,
-                    28
+                    28.5
                 ]
             },
             "lblBugs": {
@@ -277,7 +277,7 @@
                 "label": "Bugs",
                 "posch": [
                     19,
-                    29.5
+                    30
                 ]
             }
         }
