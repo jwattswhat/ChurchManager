@@ -1,0 +1,169 @@
+{
+    "frmProjectFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmProject: Project Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                620,
+                400
+            ],
+            "name": "frmProject",
+            "table": {
+                "name": "tblProject",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "Project"
+            },
+            "stylelist": [
+                "CAPTION"
+            ]
+        },
+        "CONTROLS": {
+            "lblComplete": {
+                "type": "StaticText",
+                "pos":[0,10],
+                "label": "Complete:",
+                "name": "lblComplete"
+            },
+            "Complete": {
+                "type": "CheckBox",
+                "pos":[80,10],
+                "name": "Complete"
+            },
+            "lblProject": {
+                "type": "StaticText",
+                "label": "Project:",
+                "pos": [
+                    0,
+                    40
+                ],
+                "name": "lblProject"
+            },
+            "Project": {
+                "type": "TextCtrl",
+                "pos": [
+                    80,
+                    40
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Project"
+            },
+            "lblDescription": {
+                "type": "StaticText",
+                "label": "Descritption:",
+                "pos": [
+                    0,
+                    70
+                ],
+                "name": "lblDescription"
+            },
+            "Description": {
+                "type": "TextCtrl",
+                "pos": [
+                    80,
+                    70
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Description"
+            },
+            "lblStartDate": {
+                "type": "StaticText",
+                "label": "Start Date:",
+                "pos": [
+                    0,
+                    100
+                ],
+                "name": "lblStartDate"
+            },
+            "StartDate": {
+                "type": "DatePickerCtrl",
+                "pos": [
+                    80,
+                    100
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "StartDate"
+            },
+            "lblEndDate": {
+                "type": "StaticText",
+                "label": "End Date:",
+                "pos": [
+                    0,
+                    130
+                ],
+                "name": "lblEndDate"
+            },
+            "EndDate": {
+                "type": "DatePickerCtrl",
+                "pos": [
+                    80,
+                    130
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "EndDate"
+            },
+            "lblAssignedTo": {
+                "type": "StaticText",
+                "label": "AssignedTo:",
+                "pos": [
+                    0,
+                    160
+                ],
+                "name": "lblAssignedTo"
+            },
+            "AssignedTo": {
+                "type": "TextCtrl",
+                "pos": [
+                    80,
+                    160
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "AssignedTo"
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "pos": [
+                    0,
+                    190
+                ],
+                "name": "lblNote"
+            },
+            "Note": {
+                "type": "MultiLine",
+                "pos": [
+                    80,
+                    190
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Note"
+            }
+        }
+    }
+}

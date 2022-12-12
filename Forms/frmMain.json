@@ -124,6 +124,38 @@
                 ],
                 "label": "Schedule"
             },
+            "lblOSList": {
+                "name": "lblOSList",
+                "type": "StaticText",
+                "posch": [
+                    4,
+                    18.5
+                ],
+                "label": "OS List"
+            },
+            "ProjectBox": {
+                "type": "StaticBox",
+                "name": "ProjectBox",
+                "posch": [
+                    2,
+                    25
+                ],
+                "sizech": [
+                    15,
+                    5
+                ],
+                "label": "Project"
+            },
+            "lblProject": {
+                "name": "lblProject",
+                "type": "StaticText",
+                "posch": [
+                    3,
+                    27
+                ],
+                "label": "Project"
+            },
+    
             "MemberBox": {
                 "name": "MemberBox",
                 "label": "Membership",
@@ -164,34 +196,22 @@
                 ],
                 "sizech": [
                     15,
-                    13
+                    10
                 ],
                 "label": "Reports"
             },
-            "lblWorshipPlan": {
-                "name": "lblWorshipPlan",
+            "lblReports": {
+                "name":"lblReports",
                 "type": "StaticText",
-                "posch": [
-                    19,
-                    12.5
-                ],
-                "label": "Planning Report"
-            },
-            "lblOSList": {
-                "name": "lblOSList",
-                "type": "StaticText",
-                "posch": [
-                    19,
-                    14
-                ],
-                "label": "OS List"
+                "posch": [19,12.5],
+                "label": "Reports"
             },
             "lblGenerateOS": {
                 "name": "lblGenerateOS",
                 "type": "StaticText",
                 "posch": [
                     19,
-                    15.5
+                    14
                 ],
                 "label": "Generate OS"
             },
@@ -200,7 +220,7 @@
                 "type": "StaticText",
                 "posch": [
                     19,
-                    17
+                    15.5
                 ],
                 "label": "Notify Participants"
             },
@@ -209,16 +229,7 @@
                 "label": "Sunday Prayers",
                 "posch": [
                     19,
-                    18.5
-                ],
-                "type": "StaticText"
-            },
-            "lblMemberDirectory": {
-                "name": "lblMemberDirectory",
-                "label": "Member Directory",
-                "posch": [
-                    19,
-                    20
+                    17
                 ],
                 "type": "StaticText"
             },
@@ -227,7 +238,7 @@
                 "type": "StaticText",
                 "posch": [
                     19,
-                    21.5
+                    18.5
                 ],
                 "label": "Service Schedule"
             },
@@ -237,7 +248,7 @@
                 "label": "Utilities",
                 "posch": [
                     18,
-                    24
+                    21
                 ],
                 "sizech": [
                     15,
@@ -250,7 +261,7 @@
                 "label": "Config",
                 "posch": [
                     19,
-                    25.5
+                    22.5
                 ]
             },
             "lblOptions": {
@@ -259,7 +270,7 @@
                 "label": "Options",
                 "posch": [
                     19,
-                    27
+                    24
                 ]
             },
             "lblChoices": {
@@ -268,16 +279,16 @@
                 "label": "Choices",
                 "posch": [
                     19,
-                    28.5
+                    25.5
                 ]
             },
             "lblBugs": {
                 "name": "lblBugs",
                 "type": "StaticText",
-                "label": "Bugs",
+                "label": "Enhancements / Bugs",
                 "posch": [
                     19,
-                    30
+                    27
                 ]
             }
         }

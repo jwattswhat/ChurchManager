@@ -1,0 +1,101 @@
+{
+    "frmReportsFORM": {
+        "FORM": {
+            "name": "frmReports",
+            "type": "Panel",
+            "title": "frmReports: Church Manager - Report Menu",
+            "posch": [
+                1,
+                1
+            ],
+            "sizech": [
+                35,
+                15
+            ],
+            "stylelist": [
+                "CAPTION"
+            ]
+        },
+        "CONTROLS": {
+            "lblChurchID": {
+                "name": "lblChurchID",
+                "type": "StaticText",
+                "label": "Church :",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "ChurchID": {
+                "name": "ChurchID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblChurch",
+                    "fields": [
+                        "ID",
+                        "Church"
+                    ],
+                    "sort": "Church"
+                },
+                "posch": [
+                    7,
+                    1
+                ],
+                "sizech": [
+                    25,
+                    30
+                ],
+                "validatorstr": "NotNull"
+            },
+            "lblReports": {
+                "name":"lblReports",
+                "type":"StaticText",
+                "posch":[1,4],
+                "label": "Report:"
+            },
+            "ReportID": {
+                "name": "Report",
+                "type": "ComboBox",
+                "posch": [7,4],
+                "lookupchoices":{
+                    "name":"tblReports",
+                    "fields": ["ID","Report","Title"],
+                    "orderby": "Report"
+                }
+            },
+            "lblService": {
+                "name": "lblService",
+                "type": "StaticText",
+                "posch": [
+                    1,
+                    7
+                ],
+                "label": "Service:"
+            },
+            "ServiceID": {
+                "name": "ServiceID",
+                "type": "ComboBox",
+                "posch": [
+                    7,
+                    7
+                ],
+                "lookupchoices": {
+                    "name": "tblService",
+                    "fields": [
+                        "ID",
+                        "DatetIME"
+                    ],
+                    "orderby": "DateTime DESC"
+                }
+            },
+            "btnRun" : {
+                "name" : "btnRun",
+                "type": "Button",
+                "label" : "Run Report",
+                "posch" : [5,10]
+            }
+        }
+    }
+}
+
+         

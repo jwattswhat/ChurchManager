@@ -216,7 +216,7 @@ def notifyviaeMail(ServiceID):
     participantpos = 0
 
     location = JSForm.CONFIG.get_Config_Value("Location", "Report")
-    filename = location + "WorshipPlanningWorksheet.pdf"
+    filename = location + "CMWP01.pdf"
 
     msg = [
         "Dear Member of Life in Christ\n\nYou have been scheduled to serve in Worship this coming week. Please see the attached file for more infomation.\n\nPastor Watt"

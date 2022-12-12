@@ -148,15 +148,22 @@ prow = readonerecord(
 
 rrows = readallrecords(
     {
-        "name": "tblReading",
+        "name": "tblAltReading",
         "fields": ["*"],
-        "condition": "PropersID={propersid}".format(propersid=prow[P_ID]),
+        "condition": "ServiceID={serviceid}".format(serviceid=args.ID[0]),
     }
 )
+if len(rrows) == 0:
+    rrows = readallrecords(
+        {
+            "name": "tblReading",
+            "fields": ["*"],
+            "condition": "PropersID={propersid}".format(propersid=prow[P_ID]),
+        }
+    )
 # print("Readings")
 # pprint.pprint(rrows)
 # print()
-
 
 #   Main Loop
 jsondict = OrderedDict()
@@ -197,22 +204,23 @@ for row in osrows:
             continue
 
         #   Readings
-        case ("Psalm" | "First" | "Old Testament" | "Epistle" | "Gospel"):
+        case ("Psalm" | "First" | "Second" | "Third" | "Old Testament" | "Epistle" | "Gospel"):
             reading = searchrecrods(imbed, rrows)
-            prnt[row[OS_Line]] = row[OS_Content].replace(
-                "{" + imbed + "}", reading[R_Reference]
-            )
+            if reading != None:
+                prnt[row[OS_Line]] = row[OS_Content].replace(
+                    "{" + imbed + "}", reading[R_Reference]
+                )
             continue
 
         case _:
             print("other", imbed)
             continue
 OS_Line += 1
-prnt[
-    row[OS_Line]
-] = "Liturgy Used by Permission Concordia Publishing House #{License}".format(
-    License=JSForm.CONFIG.get_Config_Value("License", "Liturgy")
-)
+#prnt[
+#    srow[OS_Line]
+#] = "Liturgy Used by Permission Concordia Publishing House #{License}".format(
+#    License=JSForm.CONFIG.get_Config_Value("License", "Liturgy")
+#)
 
 with open("OS.json", "w") as jsonfile:
     json.dump(jsondict, jsonfile)

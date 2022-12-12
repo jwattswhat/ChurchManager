@@ -458,7 +458,7 @@
                         "Reference",
                         "Title"
                     ],
-                    "orderby": "Reference"
+                    "orderby": "ID DESC,Reference"
                 }
             },
             "btnOpenSermonForm": {

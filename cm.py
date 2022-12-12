@@ -5,6 +5,7 @@
     July 2022
     
 """
+import os
 import wx
 import mysql
 import subprocess
@@ -205,10 +206,24 @@ class clsForm(JSForm.clsForms.clsForm):
 
 def _buttonclick(event):
     def _runSPrpt(event):
+        reportdescription = JSForm.CONFIG.get_Config_Value(
+            "Location", "ReportDescription"
+        )
+        report = JSForm.CONFIG.get_Config_Value("Location", "Report")
+        limedir = JSForm.CONFIG.get_Config_Value("Location", "LimeReport")
         ID = frm.CONTROLID["ServiceID"].GetValue()
         if ID == None:
             return
-        cmdline = "python rptWorshipPlanningWorksheet.py -I={ID}".format(ID=ID)
+        try:
+            os.remove("{report}CMWP01.pdf".format(report=report))
+        except:
+            pass
+        cmdline = "{limedir}limereport -s{reportdescription}CMWP01.lrxml -d{report}CMWP01.pdf -pserviceid={ID}".format(
+            limedir=limedir, reportdescription=reportdescription, report=report, ID=ID
+        )
+        sb = subprocess.Popen(cmdline)
+        sb.wait()
+        cmdline = "{report}CMWP01.pdf".format(report=report)
         subprocess.Popen(cmdline, shell=True)
         frm.FORM.Close()
 
@@ -231,6 +246,125 @@ def _buttonclick(event):
         if ID == None:
             return
         fnSchedule.notifyviaeMail(ID)
+
+    def _runPrayerRequests():
+        reportdescription = JSForm.CONFIG.get_Config_Value(
+            "Location", "ReportDescription"
+        )
+        report = JSForm.CONFIG.get_Config_Value("Location", "Report")
+        limedir = JSForm.CONFIG.get_Config_Value("Location", "LimeReport")
+        try:
+            os.remove("{report}CMPR01.pdf".format(report=report))
+        except:
+            pass
+        cmdline = "{limedir}limereport -s{reportdescription}CMPR01.lrxml -d{report}CMPR01.pdf".format(
+            limedir=limedir, reportdescription=reportdescription, report=report
+        )
+        sb = subprocess.Popen(cmdline)
+        sb.wait()
+        cmdline = "{report}CMPR01.pdf".format(report=report)
+        sb = subprocess.Popen(cmdline, shell=True)
+
+    def _runSundayPrayers():
+        sb = subprocess.Popen("python rptPrayers.py", shell=True)
+
+    def _runReports(event):
+        class _requiredfielddialog(wx.Dialog):
+            def __init__(self, parent, title, report="", field=""):
+                super().__init__(parent, title=title, size=(400, 200))
+                panel = wx.Panel(self)
+                self.text = wx.StaticText(
+                    panel,
+                    wx.ID_ANY,
+                    label="Field {field} Required for FORM {report}.".format(field=field,report=report),
+                    pos=(10, 50),
+                )
+                self.btn = wx.Button(
+                    panel,
+                    JSForm.CONST.FORM_CONTINUE,
+                    label="Continue",
+                    size=(100, 30),
+                    pos=(10, 100),
+                )
+
+        reportdescription = JSForm.CONFIG.get_Config_Value(
+            "Location", "ReportDescription"
+        )
+        reportlocation = JSForm.CONFIG.get_Config_Value("Location", "Report")
+        limedir = JSForm.CONFIG.get_Config_Value("Location", "LimeReport")
+
+        ReportID = frm.CONTROLID["ReportID"].GetValue()
+        if ReportID == None:
+            dlg = _requiredfielddialog(frm.FORM,"Report Selection Required")
+            result = dlg.ShowModal()
+            dlg.Destroy()
+            return None
+
+        SQL = "SELECT * FROM tblReports WHERE ID = {ID};".format(ID=ReportID)
+        cursor = ChurchDB.DBConnection.cursor()
+        cursor.execute(SQL)
+        row = cursor.fetchone()
+        cursor.close()
+        if row == None:
+            dlg = _requiredfielddialog(frm.FORM,"Report Not Found",rptTitle,"Report")
+            result = dlg.ShowModal()
+            dlg.Destroy()
+            return None
+
+        #   Name the record values
+        rptReport = row[1]
+        rptTitle = row[2]
+        rptParams = row[3].replace("[", "")
+        rptParams = rptParams.replace("]", "")
+        rptParams = rptParams.replace(",", "")
+        rptParams = rptParams.splitlines()
+        rptNote = row[4]
+
+        try:
+            # Get Name from Report Record
+            os.remove(
+                "{reportlocation}{rptreport}.pdf".format(
+                    report=reportlocation, rptreport=rptReport
+                )
+            )
+        except:
+            pass
+
+        ChurchID = frm.CONTROLID["ChurchID"].GetValue()
+        if "ChurchID" in rptParams and ChurchID == None:
+            dlg = _requiredfielddialog(frm.FORM,"Required Field",rptTitle,"Church")
+            result = dlg.ShowModal()
+            dlg.Destroy()
+            return None
+
+        ServiceID = frm.CONTROLID["ServiceID"].GetValue()
+        if "ServiceID" in rptParams and ServiceID == None:
+            dlg = _requiredfielddialog(frm.FORM,"Required Field",rptTitle,"Service")
+            result = dlg.ShowModal()
+            dlg.Destroy()
+            return None
+
+        cmdline = "{limedir}limereport -s{reportdescription}{rptreport}.lrxml -d{reportlocation}{rptreport}.pdf".format(
+            limedir=limedir,
+            reportdescription=reportdescription,
+            reportlocation=reportlocation,
+            rptreport=rptReport,
+        )
+
+        #   Replace with a mord generic form that uses rptParams to select from
+        #   from andy table.
+        if "ChurchID" in rptParams:
+            cmdline = cmdline + " -pchurchid={churchid}".format(churchid=ChurchID)
+        if "ServiceID" in rptParams:
+            cmdline = cmdline + " -pserviceid={serviceid}".format(serviceid=ServiceID)
+
+        sb = subprocess.Popen(cmdline)
+        sb.wait()
+        cmdline = "{reportlocation}{rptreport}.pdf".format(
+            reportlocation=reportlocation, rptreport=rptReport
+        )
+        subprocess.Popen(cmdline, shell=True)
+        frm.FORM.Close()
 
     select = event.GetEventObject().GetName()
     formname = None
@@ -275,7 +409,10 @@ def _buttonclick(event):
             return
 
         case "lblSundayPrayers":
-            subprocess.Popen("python rptPrayers.py", shell=True)
+            _runSundayPrayers()
+
+        case "lblPrayerRequests":
+            _runPrayerRequests()
 
         case "lblMemberDirectory":
             subprocess.Popen("python rptMemberDirectory.py", shell=True)
@@ -288,6 +425,13 @@ def _buttonclick(event):
                 ["Navigation", "Close"],
             )
             frm.CONTROLID["btnRunSchedule"].Bind(wx.EVT_LEFT_DOWN, _runSchedule)
+            frm.display_form_data()
+            frm.show()
+            return
+        case "lblReports":
+            frm = JSForm.clsForm(None, ChurchDB.DBConnection, "frmReports", ["Close"])
+
+            frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runReports)
             frm.display_form_data()
             frm.show()
             return
@@ -310,6 +454,8 @@ def _buttonclick(event):
             formname = "frmChoices"
         case "lblBugs":
             formname = "frmBugs"
+        case "lblProject":
+            formname = "frmProject"
         case _:
             print("form name not found found. {}".format(formname))
 
@@ -342,14 +488,13 @@ frm.CONTROLID["lblChurch"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 frm.CONTROLID["lblService"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 frm.CONTROLID["lblSermon"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 frm.CONTROLID["lblPropers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblWorshipPlan"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 frm.CONTROLID["lblOSList"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 frm.CONTROLID["lblOS"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 frm.CONTROLID["lblGenerateOS"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 frm.CONTROLID["lblNotifyParticipants"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 frm.CONTROLID["lblSundayPrayers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 frm.CONTROLID["lblPrayers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblMemberDirectory"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+frm.CONTROLID["lblReports"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 frm.CONTROLID["lblParticipant"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 frm.CONTROLID["lblSchedule"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
@@ -362,6 +507,8 @@ frm.CONTROLID["lblConfig"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 frm.CONTROLID["lblOptions"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 frm.CONTROLID["lblChoices"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 frm.CONTROLID["lblBugs"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+
+frm.CONTROLID["lblProject"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 PARENTRECORD = {}
 #
