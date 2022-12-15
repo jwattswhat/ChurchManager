@@ -11,6 +11,8 @@
                     "Reference",
                     "Title",
                     "Preacher",
+                    "Author",
+                    "Series",
                     "Date",
                     "Sermon",
                     "Outline",
@@ -94,13 +96,55 @@
                     2
                 ]
             },
+            "lblAuthor": {
+                "type": "StaticText",
+                "label": "Author:",
+                "name": "lblAuthor",
+                "posch": [
+                    0,
+                    6
+                ]
+            },
+            "Author": {
+                "type": "ComboBox",
+                "name": "Author",
+                "posch": [
+                    9,
+                    6
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblSeries": {
+                "type": "StaticText",
+                "label": "Series:",
+                "name": "lblPreacher",
+                "posch": [
+                    0,
+                    8
+                ]
+            },
+            "Series": {
+                "type": "TextCtrl",
+                "name": "Series",
+                "posch": [
+                    9,
+                    8
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
             "lblDate": {
                 "type": "StaticText",
                 "label": "Date:",
                 "name": "lblDate",
                 "posch": [
                     0,
-                    7
+                    10
                 ]
             },
             "Date": {
@@ -108,7 +152,7 @@
                 "name": "Date",
                 "posch": [
                     9,
-                    7
+                    10
                 ],
                 "sizech": [
                     24,
@@ -121,7 +165,7 @@
                 "name": "lblSermon",
                 "posch": [
                     0,
-                    9
+                    12
                 ]
             },
             "Sermon": {
@@ -137,7 +181,7 @@
                 ],
                 "posch": [
                     9,
-                    9
+                    12
                 ],
                 "sizech": [
                     49,
@@ -151,7 +195,7 @@
                 "openbtn": "Sermon",
                 "posch": [
                     59,
-                    9
+                    12
                 ]
             },
             "lblOutline": {
@@ -160,7 +204,7 @@
                 "name": "lblOutline",
                 "posch": [
                     0,
-                    12
+                    14
                 ]
             },
             "Outline": {
@@ -176,7 +220,7 @@
                 ],
                 "posch": [
                     9,
-                    12
+                    14
                 ],
                 "sizech": [
                     49,
@@ -190,7 +234,7 @@
                 "open": "Outline",
                 "posch": [
                     59,
-                    12
+                    14
                 ]
             },
             "lblNote": {
@@ -199,7 +243,7 @@
                 "name": "lblNote",
                 "posch": [
                     0,
-                    14
+                    16
                 ]
             },
             "Note": {
@@ -210,7 +254,7 @@
                 "name": "Note",
                 "posch": [
                     9,
-                    14
+                    16
                 ],
                 "sizech": [
                     24,

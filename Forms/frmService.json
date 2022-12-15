@@ -280,7 +280,8 @@
                     ],
                     "condition": "Lectionary = {OPTION:Current:Lectionary}",
                     "orderby": "Lectionary,Sort"
-                }
+                },
+                "refreshform": "true"
             },
             "btnEditPropers": {
                 "name": "btnEditPropers",
