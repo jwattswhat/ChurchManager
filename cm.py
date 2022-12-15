@@ -246,6 +246,8 @@ def _buttonclick(event):
         if ID == None:
             return
         fnSchedule.notifyviaeMail(ID)
+        frm.FORM.Close()
+
 
     def _runPrayerRequests():
         reportdescription = JSForm.CONFIG.get_Config_Value(
