@@ -281,7 +281,7 @@
                     "condition": "Lectionary = {OPTION:Current:Lectionary}",
                     "orderby": "Lectionary,Sort"
                 },
-                "refreshform": "true"
+                "event": "refreshform"
             },
             "btnEditPropers": {
                 "name": "btnEditPropers",
@@ -508,7 +508,7 @@
                     500,
                     430
                 ],
-                "openbtn": "Bulletin"
+                "openfile": "Bulletin"
             },
             "lblCheckListComplete": {
                 "name": "lblCheckListComplete",
