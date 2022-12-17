@@ -70,26 +70,30 @@ class clsForm(JSForm.clsForms.clsForm):
                 self._processhymnsearch,
                 self.CONTROLID["btnHymnSearchByNote"],
             )
-
         if "btnHymnSearchAdd" in self.CONTROLID:
             self.FORM.Bind(
                 wx.EVT_BUTTON,
                 self._processhymnsearch,
                 self.CONTROLID["btnHymnSearchAdd"],
             )
-
         if "btnHymnUsageUpdate" in self.CONTROLID:
             self.FORM.Bind(
                 wx.EVT_BUTTON,
                 self._processhymnusage,
                 self.CONTROLID["btnHymnUsageUpdate"],
             )
-
         if "btnHymnUsageAdd" in self.CONTROLID:
             self.FORM.Bind(
                 wx.EVT_BUTTON, self._processhymnusage, self.CONTROLID["btnHymnUsageAdd"]
             )
-
+        if "btnAddSermonID" in self.CONTROLID:
+            self.FORM.Bind(
+                wx.EVT_BUTTON, self._addIDtofilename, self.CONTROLID["btnAddSermonID"]
+            )
+        if "btnAddOutlineID" in self.CONTROLID:
+            self.FORM.Bind(
+                wx.EVT_BUTTON, self._addIDtofilename, self.CONTROLID["btnAddOutlineID"]
+            )
         super().bind_form_controls()
 
     def _fillchecklist(self, event):
@@ -203,6 +207,21 @@ class clsForm(JSForm.clsForms.clsForm):
             row = self.CONTROLID["dvlHymnUsage"].GetSelectedRow()
             self.open_linked_form("frmHymnUsage")
 
+    def _addIDtofilename(self,event):
+        field = event.GetEventObject().GetName()
+        match field:
+            case "btnAddSermonID":
+                field = "Sermon"
+            case "btnAddOutlineID":
+                field = "Outline"
+        filename = self.CONTROLID[field].GetValue()
+        if "ID(" not in filename:
+            ID = self.RECORDS._record[self.RECORDS._position]["ID"]
+            filename = os.path.splitext(filename)
+            newfilename = filename[0]+".ID("+str(ID)+")"+filename[1]
+            os.rename(
+                filename[0]+filename[1],newfilename)
+            self.CONTROLID[field].SetValue(newfilename)
 
 def _buttonclick(event):
     def _runSPrpt(event):

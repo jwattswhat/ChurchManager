@@ -6,18 +6,7 @@
             "name": "frmSermon",
             "table": {
                 "name": "tblSermon",
-                "fields": [
-                    "ID",
-                    "Reference",
-                    "Title",
-                    "Preacher",
-                    "Author",
-                    "Series",
-                    "Date",
-                    "Sermon",
-                    "Outline",
-                    "Note"
-                ],
+                "fields": ["*"],
                 "orderby": "Date,Reference,Title DESC"
             },
             "stylelist": [
@@ -184,7 +173,7 @@
                     12
                 ],
                 "sizech": [
-                    49,
+                    31,
                     2
                 ]
             },
@@ -194,9 +183,17 @@
                 "label": "Open",
                 "openfile": "Sermon",
                 "posch": [
-                    59,
+                    40,
                     12
-                ]
+                ],
+                "sizech": [6,2]
+            },
+            "btnAddSermonID" :{
+                "name":"btnAddSermonID",
+                "type": "Button",
+                "label": "Add ID",
+                "posch": [46,12],
+                "sizech": [6,2]
             },
             "lblOutline": {
                 "type": "StaticText",
@@ -223,7 +220,7 @@
                     14
                 ],
                 "sizech": [
-                    49,
+                    31,
                     2
                 ]
             },
@@ -233,9 +230,17 @@
                 "label": "Open",
                 "open": "Outline",
                 "posch": [
-                    59,
+                    40,
                     14
-                ]
+                ],
+                "sizech": [6,2]
+            },
+            "btnAddOutlineID" :{
+                "name":"btnAddOutlineID",
+                "type": "Button",
+                "label": "Add ID",
+                "posch": [46,14],
+                "sizech": [6,2]
             },
             "lblNote": {
                 "type": "StaticText",
