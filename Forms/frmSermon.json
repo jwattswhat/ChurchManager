@@ -17,7 +17,7 @@
                 0
             ],
             "sizech": [
-                70,
+                52,
                 33
             ]
         },
@@ -146,7 +146,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "stylelist": ["ALLOWNONE"]
             },
             "lblSermon": {
                 "type": "StaticText",

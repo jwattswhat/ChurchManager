@@ -40,7 +40,7 @@
                     300,
                     30
                 ],
-                "refreshform": true
+                "event": "refreshform"
             },
             "dvlOS": {
                 "name": "dvlReadings",

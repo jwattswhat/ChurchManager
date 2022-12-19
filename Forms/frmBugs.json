@@ -150,7 +150,8 @@
                     300,
                     30
                 ],
-                "name": "DateDue"
+                "name": "DateDue",
+                "stylelist": ["ALLOWNONE"]
             },
             "lblEnteredBy": {
                 "type": "StaticText",

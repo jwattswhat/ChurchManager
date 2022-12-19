@@ -391,7 +391,6 @@ def _buttonclick(event):
     match select:
         case "lblChurch":
             formname = "frmChurch"
-
         case "lblService":
             formname = "frmService"
         case "lblSermon":
@@ -427,16 +426,12 @@ def _buttonclick(event):
             frm.display_form_data()
             frm.show()
             return
-
         case "lblSundayPrayers":
             _runSundayPrayers()
-
         case "lblPrayerRequests":
             _runPrayerRequests()
-
         case "lblMemberDirectory":
             subprocess.Popen("python rptMemberDirectory.py", shell=True)
-
         case "lblServiceSchedule":
             frm = JSForm.clsForm(
                 None,
@@ -455,17 +450,14 @@ def _buttonclick(event):
             frm.display_form_data()
             frm.show()
             return
-
         case "lblFamily":
             formname = "frmFamily"
         case "lblPeople":
             formname = "frmPerson"
-
         case "lblParticipant":
             formname = "frmParticipant"
         case "lblSchedule":
             formname = "frmSchedule"
-
         case "lblConfig":
             formname = "frmConfig"
         case "lblOptions":
