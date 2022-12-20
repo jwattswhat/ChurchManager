@@ -124,12 +124,21 @@
                 ],
                 "label": "Schedule"
             },
+            "lblServiceSchedule": {
+                "name": "lblServiceSchedule",
+                "type": "StaticText",
+                "posch": [
+                    4,
+                    18.5
+                ],
+                "label": "Schedule Participants"
+            },
             "lblOSList": {
                 "name": "lblOSList",
                 "type": "StaticText",
                 "posch": [
                     4,
-                    18.5
+                    20
                 ],
                 "label": "OS List"
             },
@@ -155,7 +164,12 @@
                 ],
                 "label": "Project"
             },
-    
+            "lblTask": {
+                "name": "lblTask",
+                "type": "StaticText",
+                "posch" : [3,28.5],
+                "label": "Task"
+            },
             "MemberBox": {
                 "name": "MemberBox",
                 "label": "Membership",
@@ -232,15 +246,6 @@
                     17
                 ],
                 "type": "StaticText"
-            },
-            "lblServiceSchedule": {
-                "name": "lblServiceSchedule",
-                "type": "StaticText",
-                "posch": [
-                    19,
-                    18.5
-                ],
-                "label": "Service Schedule"
             },
             "UtilitiesBox": {
                 "name": "UtilitiesBox",

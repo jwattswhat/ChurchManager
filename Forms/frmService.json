@@ -39,7 +39,7 @@
             "linkedform": {
                 "frmOptions": {
                     "name": "frmOptions",
-                    "type": "Dialog",
+                    "type": "Panel",
                     "title": "frmOptions: Change Lectionary",
                     "table": {
                         "name": "tblOptions",
@@ -59,7 +59,7 @@
                 },
                 "frmSermon": {
                     "name": "frmSermon",
-                    "type": "Dialog",
+                    "type": "Panel",
                     "table": {
                         "name": "tblSermon",
                         "fields": [
@@ -75,6 +75,7 @@
                 },
                 "frmHymnUsage": {
                     "name": "frmHymnUsage",
+                    "type": "Panel",
                     "table": {
                         "name": "tblHymnUsage",
                         "fields": [
@@ -101,7 +102,7 @@
                 },
                 "frmPropers": {
                     "name": "frmPropers",
-                    "type": "Dialog",
+                    "type": "Panel",
                     "label": "Propers",
                     "pos": [
                         625,
@@ -127,6 +128,7 @@
                     ]
                 },
                 "frmAltReading": {
+                    "type": "Panel",
                     "table": {
                         "name": "tblAltReading",
                         "fields": ["*"],

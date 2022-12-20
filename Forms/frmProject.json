@@ -8,8 +8,8 @@
                 10
             ],
             "size": [
-                620,
-                400
+                500,
+                450
             ],
             "name": "frmProject",
             "table": {
@@ -21,7 +21,25 @@
             },
             "stylelist": [
                 "CAPTION"
-            ]
+            ],
+            "linkedform": {
+                "frmTask" : {
+                    "name": "frmTask",
+                    "type": "Panel",
+                    "pos": [100,100],
+                    "controls": [
+                        "Update",
+                        "Close"
+                    ],
+                    "table": {
+                        "name" : "tblTask",
+                        "fields" : ["*"],
+                        "condition": "ProjectID = {ID}",
+                        "orderby": "Complete DESC, StartDate,Task"
+                    },
+                    "bindbtn": "btnTask"
+                }
+            }
         },
         "CONTROLS": {
             "lblChurch": {
@@ -54,12 +72,24 @@
                 "pos":[80,40],
                 "name": "Complete"
             },
+            "lblCompletionDate": {
+                "type":"StaticText",
+                "name": "lblCompletionDate",
+                "pos": [0,70],
+                "label": "Completion Date:"
+            },
+            "CompletionDate" : {
+                "type": "DatePickerCtrl",
+                "name": "CompletionDate",
+                "pos":[80,70],
+                "stylelist": ["ALLOWNONE"]
+            },
             "lblProject": {
                 "type": "StaticText",
                 "label": "Project:",
                 "pos": [
                     0,
-                    70
+                    100
                 ],
                 "name": "lblProject"
             },
@@ -67,7 +97,7 @@
                 "type": "TextCtrl",
                 "pos": [
                     80,
-                    70
+                    100
                 ],
                 "size": [
                     300,
@@ -75,12 +105,18 @@
                 ],
                 "name": "Project"
             },
+            "btnTask": {
+                "name":"btnTask",
+                "label": "Tasks",
+                "pos": [380,70],
+                "type": "Button"
+            },
             "lblDescription": {
                 "type": "StaticText",
                 "label": "Descritption:",
                 "pos": [
                     0,
-                    100
+                    130
                 ],
                 "name": "lblDescription"
             },
@@ -88,7 +124,7 @@
                 "type": "TextCtrl",
                 "pos": [
                     80,
-                    100
+                    130
                 ],
                 "size": [
                     300,
@@ -98,25 +134,25 @@
             },
             "lblProjectCategory": {
                 "type":"StaticText",
-                "pos": [0,130],
+                "pos": [0,160],
                 "label": "Category:",
                 "name":"lblprojectCategory"
             },
             "ProjectCategory": {
                 "type": "ComboBox",
-                "pos": [80,130],
+                "pos": [80,160],
                 "size": [300,30],
                 "name": "ProjectCategory"
             },
             "lblPriority": {
                 "type": "StaticText",
-                "pos": [0,160],
+                "pos": [0,190],
                 "label": "Priority:",
                 "name": "lblPriority"
             },
             "Priority" : {
                 "type": "ComboBox",
-                "pos": [80,160],
+                "pos": [80,190],
                 "size": [300,30],
                 "name" : "Priority"
             },
@@ -125,7 +161,7 @@
                 "label": "Start Date:",
                 "pos": [
                     0,
-                    190
+                    220
                 ],
                 "name": "lblStartDate"
             },
@@ -133,20 +169,21 @@
                 "type": "DatePickerCtrl",
                 "pos": [
                     80,
-                    190
+                    220
                 ],
                 "size": [
                     300,
                     30
                 ],
-                "name": "StartDate"
+                "name": "StartDate",
+                "stylelist": ["ALLOWNONE"]
             },
             "lblEndDate": {
                 "type": "StaticText",
                 "label": "End Date:",
                 "pos": [
                     0,
-                    220
+                    250
                 ],
                 "name": "lblEndDate"
             },
@@ -154,20 +191,21 @@
                 "type": "DatePickerCtrl",
                 "pos": [
                     80,
-                    220
+                    250
                 ],
                 "size": [
                     300,
                     30
                 ],
-                "name": "EndDate"
+                "name": "EndDate",
+                "stylelist": ["ALLOWNONE"]
             },
             "lblAssignedTo": {
                 "type": "StaticText",
                 "label": "AssignedTo:",
                 "pos": [
                     0,
-                    250
+                    280
                 ],
                 "name": "lblAssignedTo"
             },
@@ -175,7 +213,7 @@
                 "type": "ComboBox",
                 "pos": [
                     80,
-                    250
+                    280
                 ],
                 "size": [
                     300,
@@ -188,7 +226,7 @@
                 "label": "Note:",
                 "pos": [
                     0,
-                    280
+                    310
                 ],
                 "name": "lblNote"
             },
@@ -196,7 +234,7 @@
                 "type": "MultiLine",
                 "pos": [
                     80,
-                    280
+                    310
                 ],
                 "size": [
                     300,

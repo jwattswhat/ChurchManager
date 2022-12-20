@@ -307,8 +307,8 @@ def _buttonclick(event):
                     pos=(10, 100),
                 )
 
-        reportdescription = JSForm.CONFIG.get_Config_Value(
-            "Location", "ReportDescription"
+        reportpattern = JSForm.CONFIG.get_Config_Value(
+            "Location", "LimeReportPattern"
         )
         reportlocation = JSForm.CONFIG.get_Config_Value("Location", "Report")
         limedir = JSForm.CONFIG.get_Config_Value("Location", "LimeReport")
@@ -364,9 +364,9 @@ def _buttonclick(event):
             dlg.Destroy()
             return None
 
-        cmdline = "{limedir}limereport -s{reportdescription}{rptreport}.lrxml -d{reportlocation}{rptreport}.pdf".format(
+        cmdline = "{limedir}limereport -s{reportpattern}{rptreport}.lrxml -d{reportlocation}{rptreport}.pdf".format(
             limedir=limedir,
-            reportdescription=reportdescription,
+            reportpattern=reportpattern,
             reportlocation=reportlocation,
             rptreport=rptReport,
         )
@@ -468,6 +468,8 @@ def _buttonclick(event):
             formname = "frmBugs"
         case "lblProject":
             formname = "frmProject"
+        case "lblTask":
+            formname = "frmTask"
         case _:
             print("form name not found found. {}".format(formname))
 
@@ -521,6 +523,7 @@ frm.CONTROLID["lblChoices"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 frm.CONTROLID["lblBugs"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 frm.CONTROLID["lblProject"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+frm.CONTROLID["lblTask"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 PARENTRECORD = {}
 #
