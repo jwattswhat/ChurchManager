@@ -67,13 +67,25 @@
                 ],
                 "name": "Description"
             },
+            "lblPriority": {
+                "type": "StaticText",
+                "pos": [0,90],
+                "label": "Priority:",
+                "name": "lblPriority"
+            },
+            "Priority" : {
+                "type": "ComboBox",
+                "pos": [120,90],
+                "size": [300,30],
+                "name" : "Priority"
+            },
 
             "lblComplete": {
                 "type": "StaticText",
                 "label": "Complete:",
                 "pos": [
                     0,
-                    90
+                    120
                 ],
                 "name": "lblComplete"
             },
@@ -81,7 +93,7 @@
                 "type": "CheckBox",
                 "pos": [
                     120,
-                    90
+                    120
                 ],
                 "size": [
                     300,
@@ -94,7 +106,7 @@
                 "label": "Completion Date:",
                 "pos": [
                     0,
-                    120
+                    150
                 ],
                 "name": "lblCompletionDate"
             },
@@ -102,7 +114,7 @@
                 "type": "DatePickerCtrl",
                 "pos": [
                     120,
-                    120
+                    150
                 ],
                 "size": [
                     300,
@@ -117,7 +129,7 @@
                 "label": "Project:",
                 "pos": [
                     0,
-                    150
+                    180
                 ],
                 "name": "Project"
             },
@@ -125,7 +137,7 @@
                 "type": "ComboBox",
                 "pos": [
                     120,
-                    150
+                    180
                 ],
                 "size": [
                     300,
@@ -143,7 +155,7 @@
                 "label": "Dependencies:",
                 "pos": [
                     0,
-                    180
+                    210
                 ],
                 "name": "lblDependencyID"
             },
@@ -151,7 +163,7 @@
                 "type": "TextCtrl",
                 "pos": [
                     120,
-                    180
+                    210
                 ],
                 "size": [300,30],
                 "name": "DependencyID"
@@ -159,39 +171,39 @@
             "lblStartDate": {
                 "name" : "lblStartDate"
                 ,"type" : "StaticText",
-                "pos" : [0,210],
+                "pos" : [0,240],
                 "label": "Start Date:"
             },
             "StartDate" : {
                 "name" : "StartDate",
                 "type": "DatePickerCtrl",
-                "pos" : [120,210],
+                "pos" : [120,240],
                 "size" : [300,30],
                 "stylelist": ["ALLOWNONE"]
             },
             "lblEndDate": {
                 "name" : "lblEndDate"
                 ,"type" : "StaticText",
-                "pos" : [0,240],
+                "pos" : [0,270],
                 "label": "End Date:"
             },
             "EndDate" : {
                 "name" : "EndDate",
                 "type": "DatePickerCtrl",
-                "pos" : [120,240],
+                "pos" : [120,270],
                 "size" : [300,30],
                 "stylelist": ["ALLOWNONE"]
             },
             "lblAssignedTo": {
                 "name" : "lblAssignedTo",
-                "pos"   : [0,270],
+                "pos"   : [0,300],
                 "label" : "Assigned To:",
                 "type" : "StaticText"
             },
             "AssignedTo": {
                 "name" : "AssignedTo",
                 "type": "TextCtrl",
-                "pos": [120,270],
+                "pos": [120,300],
                 "size": [300,30]
             },
             "lblNote": {
@@ -199,7 +211,7 @@
                 "label": "Note:",
                 "pos": [
                     0,
-                    300
+                    330
                 ],
                 "name": "lblNote"
             },
@@ -207,7 +219,7 @@
                 "type": "MultiLine",
                 "pos": [
                     120,
-                    300
+                    330
                 ],
                 "size": [
                     300,

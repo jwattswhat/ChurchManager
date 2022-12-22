@@ -8,8 +8,8 @@
                 10
             ],
             "size": [
-                620,
-                500
+                450,
+                450
             ],
             "name": "frmBugs",
             "table": {
@@ -40,7 +40,7 @@
                     0
                 ],
                 "size": [
-                    600,
+                    300,
                     30
                 ],
                 "name": "Description"
@@ -215,7 +215,8 @@
                     300,
                     30
                 ],
-                "name": "CompleteDate"
+                "name": "CompleteDate",
+                "stylelist": ["ALLOWNONE"]
             },
             "lblNote": {
                 "type": "StaticText",

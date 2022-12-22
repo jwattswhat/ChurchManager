@@ -9,7 +9,7 @@
                 20
             ],
             "size": [
-                1475,
+                1600,
                 900
             ],
             "table": {
@@ -45,7 +45,8 @@
                         "name": "tblOptions",
                         "fields": [
                             "*"
-                        ]
+                        ],
+                        "condition": "OptionFor = 'Lectionary' and OptionType = 'Current'"
                     },
                     "controls": [
                         "Update",
@@ -106,7 +107,7 @@
                     "label": "Propers",
                     "pos": [
                         625,
-                        10
+                        20
                     ],
                     "table": {
                         "name": "tblPropers",

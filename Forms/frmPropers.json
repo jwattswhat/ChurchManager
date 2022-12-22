@@ -8,7 +8,7 @@
                 10
             ],
             "size": [
-                850,
+                1000,
                 750
             ],
             "name": "frmPropers",
@@ -61,8 +61,8 @@
                     0
                 ],
                 "size": [
-                    300,
-                    100
+                    450,
+                    130
                 ],
                 "stylelist": [
                     "MULTILINE",
@@ -149,8 +149,8 @@
                     150
                 ],
                 "size": [
-                    300,
-                    100
+                    450,
+                    230
                 ],
                 "stylelist": [
                     "MULTILINE"
@@ -256,7 +256,7 @@
                 ],
                 "size": [
                     300,
-                    100
+                    250
                 ],
                 "stylelist": [
                     "MULTILINE"
@@ -267,7 +267,7 @@
                 "label": "Introit:",
                 "pos": [
                     450,
-                    270
+                    400
                 ],
                 "name": "lblIntroit"
             },
@@ -275,11 +275,11 @@
                 "type": "MultiLine",
                 "pos": [
                     505,
-                    270
+                    400
                 ],
                 "size": [
-                    300,
-                    300
+                    450,
+                    325
                 ],
                 "stylelist": [
                     "MULTILINE"
