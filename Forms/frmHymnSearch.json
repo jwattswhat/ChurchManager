@@ -12,9 +12,10 @@
                 1200,
                 800
             ],
-            "controls": [],
+            "controls": ["Close"],
             "stylestr": "CAPTION",
             "nodataDB" : true
+
         },
         "CONTROLS": {
             "lblSearch": {

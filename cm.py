@@ -14,7 +14,6 @@ import json
 import JSForm
 import fnSchedule
 
-
 class clsForm(JSForm.clsForms.clsForm):
     class MergeorReplaceChecklist(wx.Dialog):
         def __init__(self, parent, title):
@@ -208,6 +207,7 @@ class clsForm(JSForm.clsForms.clsForm):
             self.open_linked_form("frmHymnUsage")
 
     def _addIDtofilename(self,event):
+        global CONFIG
         field = event.GetEventObject().GetName()
         match field:
             case "btnAddSermonID":
@@ -219,11 +219,15 @@ class clsForm(JSForm.clsForms.clsForm):
             ID = self.RECORDS._record[self.RECORDS._position]["ID"]
             filename = os.path.splitext(filename)
             newfilename = filename[0]+".ID("+str(ID)+")"+filename[1]
+            path = JSForm.CONFIG.get_Config_Value("Location", field)
             os.rename(
-                filename[0]+filename[1],newfilename)
+                path+filename[0]+filename[1],path+newfilename)
             self.CONTROLID[field].SetValue(newfilename)
 
+##  Main App    ##
+
 def _buttonclick(event):
+
     def _runSPrpt(event):
         reportdescription = JSForm.CONFIG.get_Config_Value(
             "Location", "ReportDescription"
@@ -334,10 +338,13 @@ def _buttonclick(event):
         #   Name the record values
         rptReport = row[1]
         rptTitle = row[2]
-        rptParams = row[3].replace("[", "")
-        rptParams = rptParams.replace("]", "")
-        rptParams = rptParams.replace(",", "")
-        rptParams = rptParams.splitlines()
+        if row[3]:
+            rptParams = row[3].replace("[", "")
+            rptParams = rptParams.replace("]", "")
+            rptParams = rptParams.replace(",", "")
+            rptParams = rptParams.splitlines()
+        else:
+            rptParams = []
         rptNote = row[4]
 
         try:
@@ -374,7 +381,7 @@ def _buttonclick(event):
         #   Replace with a mord generic form that uses rptParams to select from
         #   from andy table.
         if "ChurchID" in rptParams:
-            cmdline = cmdline + " -pchurchid={churchid}".format(churchid=ChurchID)
+            cmdline = cmdline + " -pchurchID={churchid}".format(churchid=ChurchID)
         if "ServiceID" in rptParams:
             cmdline = cmdline + " -pserviceid={serviceid}".format(serviceid=ServiceID)
 
@@ -398,8 +405,8 @@ def _buttonclick(event):
         case "lblPropers":
             formname = "frmPropers"
         case "lblWorshipPlan":
-            frm = JSForm.clsForm(
-                None, ChurchDB.DBConnection, "frmGenerateWorshipPlanning", ["Close"]
+            frm = (
+                cmfrm, ChurchDB.DBConnection, "frmGenerateWorshipPlanning", ["Close"]
             )
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runSPrpt)
             frm.display_form_data()
@@ -412,8 +419,8 @@ def _buttonclick(event):
         case "lblOS":
             formname = "frmOS"
         case "lblGenerateOS":
-            frm = JSForm.clsForm(
-                None, ChurchDB.DBConnection, "frmGenerateOS", ["Close"]
+            frm = clsForm(
+                cmfrm, ChurchDB.DBConnection, "frmGenerateOS", ["Close"]
             )
 
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runOSrpt)
@@ -421,7 +428,7 @@ def _buttonclick(event):
             frm.show()
             return
         case "lblNotifyParticipants":
-            frm = JSForm.clsForm(None, ChurchDB.DBConnection, "frmNotifyviaeMail")
+            frm = clsForm(cmfrm, ChurchDB.DBConnection, "frmNotifyviaeMail")
             frm.CONTROLID["btnNotify"].Bind(wx.EVT_LEFT_DOWN, _runNotify)
             frm.display_form_data()
             frm.show()
@@ -433,8 +440,8 @@ def _buttonclick(event):
         case "lblMemberDirectory":
             subprocess.Popen("python rptMemberDirectory.py", shell=True)
         case "lblServiceSchedule":
-            frm = JSForm.clsForm(
-                None,
+            frm = clsForm(
+                cmfrm,
                 ChurchDB.DBConnection,
                 "frmServiceSchedule",
                 ["Navigation", "Close"],
@@ -444,7 +451,7 @@ def _buttonclick(event):
             frm.show()
             return
         case "lblReports":
-            frm = JSForm.clsForm(None, ChurchDB.DBConnection, "frmReports", ["Close"])
+            frm = clsForm(cmfrm, ChurchDB.DBConnection, "frmReports", ["Close"])
 
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runReports)
             frm.display_form_data()
@@ -474,7 +481,7 @@ def _buttonclick(event):
             print("form name not found found. {}".format(formname))
 
     if formname != None:
-        form = clsForm(None, ChurchDB.DBConnection, formname)
+        form = clsForm(cmfrm, ChurchDB.DBConnection, formname)
         form.display_form_data()
         form.show()
 
@@ -495,41 +502,41 @@ JSForm.CONST.btnNavigationCONTROLS = JSForm.convertNavButtons(
 #
 # 	Main form
 #
-frm = clsForm(None, ChurchDB.DBConnection, "frmMain", ["Close"])
+cmfrm = clsForm(None, ChurchDB.DBConnection, "frmMain", ["Close"])
 
-frm.CONTROLID["lblChurch"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblChurch"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
-frm.CONTROLID["lblService"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblSermon"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblPropers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblOSList"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblOS"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblGenerateOS"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblNotifyParticipants"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblSundayPrayers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblPrayers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblReports"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblService"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblSermon"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblPropers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblOSList"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblOS"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblGenerateOS"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblNotifyParticipants"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblSundayPrayers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblPrayers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblReports"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
-frm.CONTROLID["lblParticipant"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblSchedule"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblServiceSchedule"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblParticipant"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblSchedule"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblServiceSchedule"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
-frm.CONTROLID["lblFamily"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblPeople"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblFamily"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblPeople"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
-frm.CONTROLID["lblConfig"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblOptions"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblChoices"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblBugs"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblConfig"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblOptions"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblChoices"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblBugs"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
-frm.CONTROLID["lblProject"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-frm.CONTROLID["lblTask"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblProject"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblTask"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 PARENTRECORD = {}
 #
 # bind application events
 #
 
-frm.show()
-frm.display_form_data()
+cmfrm.show()
+cmfrm.display_form_data()
 app.MainLoop()

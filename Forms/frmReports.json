@@ -45,7 +45,7 @@
                     25,
                     30
                 ],
-                "validatorstr": "NotNull"
+                "value": "Life in Christ Lutheran Church"
             },
             "lblReports": {
                 "name":"lblReports",
@@ -61,7 +61,8 @@
                     "name":"tblReports",
                     "fields": ["ID","Report","Title"],
                     "orderby": "Report"
-                }
+                },
+                "value":"CMWP01 Worship Planning Worksheet"
             },
             "lblService": {
                 "name": "lblService",

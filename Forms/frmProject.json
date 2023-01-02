@@ -60,7 +60,8 @@
                         "Church"
                     ],
                     "sort": "Church"
-                }
+                },
+                "defaultvalue": 0
             },
             "lblComplete": {
                 "type": "StaticText",
