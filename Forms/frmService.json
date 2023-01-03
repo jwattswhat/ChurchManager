@@ -81,6 +81,7 @@
                         "name": "tblHymnUsage",
                         "fields": [
                             "ID",
+                            "ChurchID",
                             "ServiceID",
                             "HymnID",
                             "UsedAs",
@@ -230,8 +231,7 @@
                 "size": [
                     300,
                     30
-                ],
-                "validatorstr": "NotNull"
+                ]
             },
             "lblDateTime": {
                 "name": "lblDateTime",

@@ -16,11 +16,11 @@
                 "name": "tblHymnUsage",
                 "fields": [
                     "ID",
+                    "ChurchID",
                     "ServiceID",
                     "HymnID",
                     "UsedAs",
-                    "Note"
-                ],
+                    "Note"],
                 "orderby": "DateTime DESC"
             },
             "stylelist": [
@@ -38,13 +38,34 @@
             }
         },
         "CONTROLS": {
+            "lblChurchID": {
+                "name": "lblChurchID",
+                "type": "StaticText",
+                "label": "Church:",
+                "pos": [0,30]
+            },
+            "ChurchID": {
+                "name": "ChurchID",
+                "type": "ComboBox",
+                "pos": [150,30],
+                "size": [300,30],
+                "lookupchoices": {
+                    "name": "tblChurch",
+                    "fields": [
+                        "ID",
+                        "Church"
+                    ],
+                    "orderby": "Church"
+                },
+                "readonly": true
+            },
             "lblServiceID": {
                 "name": "lblServiceID",
                 "type": "StaticText",
                 "label": "Service:",
                 "pos": [
                     0,
-                    30
+                    60
                 ]
             },
             "ServiceID": {
@@ -52,7 +73,7 @@
                 "type": "ComboBox",
                 "pos": [
                     150,
-                    30
+                    60
                 ],
                 "size": [
                     300,
@@ -73,7 +94,7 @@
                 "label": "Hymn:",
                 "pos": [
                     0,
-                    60
+                    90
                 ]
             },
             "HymnID": {
@@ -90,7 +111,7 @@
                 },
                 "pos": [
                     150,
-                    60
+                    90
                 ],
                 "size": [
                     300,
@@ -103,15 +124,8 @@
                 "label": "Select Hymn",
                 "pos": [
                     475,
-                    60
+                    90
                 ]
-            },
-            "btnDisplayUsage": {
-                "name":"btnDisplayUsage",
-                "type": "Button",
-                "label": "Show Usage",
-                "pos": [475,90],
-                "report": "CMHU03"
             },
             "lblUsedAs": {
                 "name": "lblUsedAs",
@@ -119,7 +133,7 @@
                 "label": "UsedAs:",
                 "pos": [
                     0,
-                    90
+                    120
                 ]
             },
             "UsedAs": {
@@ -127,12 +141,19 @@
                 "type": "ComboBox",
                 "pos": [
                     150,
-                    90
+                    120
                 ],
                 "size": [
                     300,
                     30
                 ]
+            },
+            "btnDisplayUsage": {
+                "name":"btnDisplayUsage",
+                "type": "Button",
+                "label": "Show Usage",
+                "pos": [475,120],
+                "report": "CMHU03"
             },
             "lblNote": {
                 "name": "lblNote",
@@ -140,7 +161,7 @@
                 "label": "Note:",
                 "pos": [
                     0,
-                    120
+                    150
                 ]
             },
             "Note": {
@@ -148,7 +169,7 @@
                 "type": "MultiLine",
                 "pos": [
                     150,
-                    120
+                    150
                 ],
                 "size": [
                     300,
