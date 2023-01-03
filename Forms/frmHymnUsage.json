@@ -106,6 +106,13 @@
                     60
                 ]
             },
+            "btnDisplayUsage": {
+                "name":"btnDisplayUsage",
+                "type": "Button",
+                "label": "Show Usage",
+                "pos": [475,90],
+                "report": "CMHU03"
+            },
             "lblUsedAs": {
                 "name": "lblUsedAs",
                 "type": "StaticText",

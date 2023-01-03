@@ -106,7 +106,7 @@ srow = readonerecord(
 
 #   Order of Service
 
-osrows = readallrecords(
+osr = readallrecords(
     {
         "name": "tblOrderofService",
         "fields": ["*"],
@@ -114,6 +114,19 @@ osrows = readallrecords(
         "orderby": "Line",
     }
 )
+
+#   replace special characters
+osrows = []
+replacevalues = {"{tab}":"\t"}
+for rep in replacevalues:
+    for row in range(len(osr)):
+        osrows.append([])
+        for col in range(len(osr[row])):
+            if col == 4:
+                osrows[row].append(osr[row][col].replace(rep,replacevalues[rep]))
+            else:
+                osrows[row].append(osr[row][col])
+
 # print ("Order of Service")
 # pprint.pprint(osrows)
 # rint()

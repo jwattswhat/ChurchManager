@@ -229,26 +229,7 @@ class clsForm(JSForm.clsForms.clsForm):
 def _buttonclick(event):
 
     def _runSPrpt(event):
-        reportdescription = JSForm.CONFIG.get_Config_Value(
-            "Location", "ReportDescription"
-        )
-        report = JSForm.CONFIG.get_Config_Value("Location", "Report")
-        limedir = JSForm.CONFIG.get_Config_Value("Location", "LimeReport")
-        ID = frm.CONTROLID["ServiceID"].GetValue()
-        if ID == None:
-            return
-        try:
-            os.remove("{report}CMWP01.pdf".format(report=report))
-        except:
-            pass
-        cmdline = "{limedir}limereport -s{reportdescription}CMWP01.lrxml -d{report}CMWP01.pdf -pserviceid={ID}".format(
-            limedir=limedir, reportdescription=reportdescription, report=report, ID=ID
-        )
-        sb = subprocess.Popen(cmdline)
-        sb.wait()
-        cmdline = "{report}CMWP01.pdf".format(report=report)
-        subprocess.Popen(cmdline, shell=True)
-        frm.FORM.Close()
+        JSForm.RunReport(2,frm,ChurchDB.DBConnection)
 
     def _runOSrpt(event):
         ID = frm.CONTROLID["ServiceID"].GetValue()
@@ -293,105 +274,8 @@ def _buttonclick(event):
         sb = subprocess.Popen("python rptPrayers.py", shell=True)
 
     def _runReports(event):
-        class _requiredfielddialog(wx.Dialog):
-            def __init__(self, parent, title, report="", field=""):
-                super().__init__(parent, title=title, size=(400, 200))
-                panel = wx.Panel(self)
-                self.text = wx.StaticText(
-                    panel,
-                    wx.ID_ANY,
-                    label="Field {field} Required for FORM {report}.".format(field=field,report=report),
-                    pos=(10, 50),
-                )
-                self.btn = wx.Button(
-                    panel,
-                    JSForm.CONST.FORM_CONTINUE,
-                    label="Continue",
-                    size=(100, 30),
-                    pos=(10, 100),
-                )
-
-        reportpattern = JSForm.CONFIG.get_Config_Value(
-            "Location", "LimeReportPattern"
-        )
-        reportlocation = JSForm.CONFIG.get_Config_Value("Location", "Report")
-        limedir = JSForm.CONFIG.get_Config_Value("Location", "LimeReport")
-
-        ReportID = frm.CONTROLID["ReportID"].GetValue()
-        if ReportID == None:
-            dlg = _requiredfielddialog(frm.FORM,"Report Selection Required")
-            result = dlg.ShowModal()
-            dlg.Destroy()
-            return None
-
-        SQL = "SELECT * FROM tblReports WHERE ID = {ID};".format(ID=ReportID)
-        cursor = ChurchDB.DBConnection.cursor()
-        cursor.execute(SQL)
-        row = cursor.fetchone()
-        cursor.close()
-        if row == None:
-            dlg = _requiredfielddialog(frm.FORM,"Report Not Found",rptTitle,"Report")
-            result = dlg.ShowModal()
-            dlg.Destroy()
-            return None
-
-        #   Name the record values
-        rptReport = row[1]
-        rptTitle = row[2]
-        if row[3]:
-            rptParams = row[3].replace("[", "")
-            rptParams = rptParams.replace("]", "")
-            rptParams = rptParams.replace(",", "")
-            rptParams = rptParams.splitlines()
-        else:
-            rptParams = []
-        rptNote = row[4]
-
-        try:
-            # Get Name from Report Record
-            os.remove(
-                "{reportlocation}{rptreport}.pdf".format(
-                    report=reportlocation, rptreport=rptReport
-                )
-            )
-        except:
-            pass
-
-        ChurchID = frm.CONTROLID["ChurchID"].GetValue()
-        if "ChurchID" in rptParams and ChurchID == None:
-            dlg = _requiredfielddialog(frm.FORM,"Required Field",rptTitle,"Church")
-            result = dlg.ShowModal()
-            dlg.Destroy()
-            return None
-
-        ServiceID = frm.CONTROLID["ServiceID"].GetValue()
-        if "ServiceID" in rptParams and ServiceID == None:
-            dlg = _requiredfielddialog(frm.FORM,"Required Field",rptTitle,"Service")
-            result = dlg.ShowModal()
-            dlg.Destroy()
-            return None
-
-        cmdline = "{limedir}limereport -s{reportpattern}{rptreport}.lrxml -d{reportlocation}{rptreport}.pdf".format(
-            limedir=limedir,
-            reportpattern=reportpattern,
-            reportlocation=reportlocation,
-            rptreport=rptReport,
-        )
-
-        #   Replace with a mord generic form that uses rptParams to select from
-        #   from andy table.
-        if "ChurchID" in rptParams:
-            cmdline = cmdline + " -pchurchID={churchid}".format(churchid=ChurchID)
-        if "ServiceID" in rptParams:
-            cmdline = cmdline + " -pserviceid={serviceid}".format(serviceid=ServiceID)
-
-        sb = subprocess.Popen(cmdline)
-        sb.wait()
-        cmdline = "{reportlocation}{rptreport}.pdf".format(
-            reportlocation=reportlocation, rptreport=rptReport
-        )
-        subprocess.Popen(cmdline, shell=True)
-        frm.FORM.Close()
+        reportid = frm.CONTROLID["ReportID"].GetValue()
+        JSForm.RunReport(reportid,frm,ChurchDB.DBConnection)
 
     select = event.GetEventObject().GetName()
     formname = None
