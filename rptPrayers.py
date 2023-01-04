@@ -78,7 +78,7 @@ prayers = readallrecords(
     {"name": "tblPrayer", "fields": ["*"], "orderby": "PrayerCategory, RequestFor"}
 )
 
-prfmt = "\t{FOR}\t{REQ}\t{NOTE}"
+prfmt = "\t{FOR}" #\t{REQ}\t{NOTE}" # too much data
 prfile = []
 oldcat = ""
 for p in range(len(prayers)):
@@ -123,7 +123,7 @@ for p in range(len(prayers)):
         PrNote = ""
     else:
         PrNote = prayers[p][PR_NOTE]
-    prfile.append(prfmt.format(REQ=req, FOR=prayers[p][PR_REQUESTFOR],NOTE=PrNote))
+    prfile.append(prfmt.format(FOR=prayers[p][PR_REQUESTFOR])) #REQ=req)) #, ,NOTE=PrNote))
 
 with open("prayers.txt", "w") as osfile:
     for l in range(len(prfile)):

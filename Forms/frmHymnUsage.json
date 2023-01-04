@@ -57,6 +57,7 @@
                     ],
                     "orderby": "Church"
                 },
+                "defaultvalue": 0,
                 "readonly": true
             },
             "lblServiceID": {

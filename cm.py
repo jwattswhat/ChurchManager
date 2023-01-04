@@ -276,6 +276,7 @@ def _buttonclick(event):
     def _runReports(event):
         reportid = frm.CONTROLID["ReportID"].GetValue()
         JSForm.RunReport(reportid,frm,ChurchDB.DBConnection)
+        frm.FORM.Close()
 
     select = event.GetEventObject().GetName()
     formname = None
