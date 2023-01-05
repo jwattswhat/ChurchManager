@@ -4,6 +4,11 @@
             "name": "frmOrderofService",
             "type": "Panel",
             "title": "frmOrderofService: AltOrderofService Edit Form",
+            "table": {
+                "name": "tblOrderOfService",
+                "fields": ["UNIQUE OrderofService"],
+                "orderby": "OrderofService"
+            },
             "pos": [
                 10,
                 10
@@ -16,7 +21,7 @@
                 "CAPTION"
             ],
             "controls": [
-                "Close"
+                "Close","Navigation"
             ]
         },
         "CONTROLS": {
@@ -31,7 +36,7 @@
             },
             "OrderofService": {
                 "name": "OrderofService",
-                "type": "ComboBox",
+                "type": "TextCtrl",
                 "pos": [
                     125,
                     30
@@ -40,7 +45,7 @@
                     300,
                     30
                 ],
-                "event": "refreshform"
+                "readonly": true
             },
             "dvlOS": {
                 "name": "dvlReadings",
@@ -53,7 +58,8 @@
                         "Page",
                         "Note"
                     ],
-                    "condition": "OrderofService = '{OrderofService}'"
+                    "condition": "OrderofService = '{OrderofService}'",
+                    "orderby": "Line"
                 },
                 "column": [
                     {
