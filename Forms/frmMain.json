@@ -142,6 +142,12 @@
                 ],
                 "label": "OS List"
             },
+            "lblCheckList": {
+                "name": "lblCheckList",
+                "type": "StaticText",
+                "posch": [4,21.5],
+                "label": "CheckLists"
+            },
             "ProjectBox": {
                 "type": "StaticBox",
                 "name": "ProjectBox",

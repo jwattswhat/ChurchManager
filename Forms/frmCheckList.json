@@ -1,0 +1,52 @@
+{
+    "frmCheckListFORM": {
+        "FORM":{
+            "name": "frmChecklist",
+            "type":"Panel",
+            "title":"CheckList",
+            "table": {
+                "name":"tblCheckList",
+                "fields": ["*"],
+                "orderby": "Name"
+            },
+            "posch" : [10,10],
+            "sizech": [35,20],
+            "stylelist":["CAPTION"],
+            "controls": ["Navigation","Close"]
+        },
+        "CONTROLS":{
+            "lblName":{
+                "type":"StaticText",
+                "label":"Name:",
+                "posch":[1,1],
+                "name":"lblName"
+            },
+            "Name":{
+                "type":"TextCtrl",
+                "name":"Name",
+                "posch":[10,1],
+                "sizech":[20,2]
+            },
+            "lblCheckList":{
+                "type":"StaticText",
+                "label":"CheckList:",
+                "posch":[1,3],
+                "name":"lblCheckList"
+            },
+            "CheckList":{
+                "type":"CheckListBox",
+                "name": "CheckList",
+                "posch": [10,3],
+                "sizech": [20,10]
+            },
+            "btnEditCheckList":{
+                "type": "Button",
+                "name": "btnEditCheckList",
+                "label": "Edit CheckList",
+                "posch":[5,15],
+                "sizech":[10,2],
+                "editchecklist":"CheckList"
+            }
+        }
+    }
+}
