@@ -579,6 +579,14 @@
                     550
                 ]
             },
+            "btnEditCheckList":{
+                "type": "Button",
+                "name": "btnEditCheckList",
+                "label": "Edit CheckList",
+                "pos":[5,580],
+                "sizech":[10,2],
+                "editchecklist":"CheckList"
+            },
             "CheckList": {
                 "name": "CheckList",
                 "type": "CheckListBox",
