@@ -187,7 +187,8 @@
                     40,
                     12
                 ],
-                "sizech": [6,2]
+                "sizech": [6,2],
+                "action":["openfile","Sermon"]
             },
             "btnAddSermonID" :{
                 "name":"btnAddSermonID",
@@ -234,7 +235,8 @@
                     40,
                     14
                 ],
-                "sizech": [6,2]
+                "sizech": [6,2],
+                "action": ["openfile","Outline"]
             },
             "btnAddOutlineID" :{
                 "name":"btnAddOutlineID",

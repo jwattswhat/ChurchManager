@@ -202,7 +202,8 @@
                 "size": [
                     100,
                     30
-                ]
+                ],
+                "action": ["openlinkedform","frmHymnUsage"]
             },
             "lblChurchID": {
                 "name": "lblChurchID",
@@ -297,7 +298,8 @@
                     100,
                     30
                 ],
-                "label": "Propers"
+                "label": "Propers",
+                "action":["openlinkedform","frmPropers"]
             },
             "btnChangeLectionary": {
                 "name": "btnChangeLectionary",
@@ -310,7 +312,8 @@
                     100,
                     30
                 ],
-                "label": "Lectionary"
+                "label": "Lectionary",
+                "action": ["openlinkedform","frmOptions"]
             },
             "lblLiturgicalDate": {
                 "name": "lblLiturgicalDate",
@@ -344,7 +347,8 @@
                 "size": [
                     100,
                     30
-                ]
+                ],
+                "action": ["openlinkedform","frmAltReading"]
             },
             "lblHolyCommunion": {
                 "name": "lblHolyCommunion",
@@ -472,7 +476,8 @@
                 "pos": [
                     500,
                     400
-                ]
+                ],
+                "action": ["openlinkedform","frmSermon"]
             },
             "lblBulletin": {
                 "name": "lblBulletin",
@@ -511,7 +516,7 @@
                     500,
                     430
                 ],
-                "openfile": "Bulletin"
+                "action": ["openfile","Bulletin"]
             },
             "lblCheckListComplete": {
                 "name": "lblCheckListComplete",
@@ -586,6 +591,14 @@
                 "pos":[5,580],
                 "sizech":[10,2],
                 "editchecklist":"CheckList"
+            },
+            "btnNewCheckList":{
+                "type": "Button",
+                "name": "btnNewCheckList",
+                "label": "New CheckList",
+                "pos":[5,610],
+                "sizech":[10,2],
+                "mergeorreplacechecklist" : "CheckList"
             },
             "CheckList": {
                 "name": "CheckList",

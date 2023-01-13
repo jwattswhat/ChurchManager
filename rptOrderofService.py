@@ -26,8 +26,12 @@ OS_File = 6
 P_ID = 0
 
 #   Hymn Usage Constants
-HU_Usage = 2
+HU_ID = 0
+HU_ChurchID = 1
+HU_ServiceID = 2
 HU_HymnID = 3
+HU_Usage = 4
+HU_Note = 5
 
 #   Hymn Constants
 H_Hymn = 2
@@ -202,7 +206,7 @@ for row in osrows:
         #   Hymns
         case ("Entrance" | "Office Hymn" | "Of the Day" | "Communion" | "Closing"):
             useage = searchrecrods(imbed, hrows)
-            sql = "SELECT * FROM tblHymn WHERE ID = {id};".format(id=useage[HU_Usage])
+            sql = "SELECT * FROM tblHymn WHERE ID = {id};".format(id=useage[HU_HymnID])
             cursor = ChurchDB.DBConnection.cursor()
             cursor.execute(sql)
             hymn = cursor.fetchone()

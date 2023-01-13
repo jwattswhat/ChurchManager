@@ -15,30 +15,9 @@ import JSForm
 import fnSchedule
 
 class clsForm(JSForm.clsForms.clsForm):
-    class MergeorReplaceChecklist(wx.Dialog):
-        def __init__(self, parent, title):
-            super().__init__(parent, title=title, size=(400, 200))
-            panel = wx.Panel(self)
-            self.text = wx.StaticText(
-                panel,
-                wx.ID_ANY,
-                label="Merge or Replace this CheckList with existing?",
-                pos=(10, 50),
-            )
-            self.btn = wx.Button(
-                panel, wx.ID_OK, label="Merge", size=(100, 30), pos=(10, 100)
-            )
-            self.btn = wx.Button(
-                panel, wx.ID_CANCEL, label="Replace", size=(100, 30), pos=(120, 100)
-            )
 
     def bind_form_controls(self):
         JSForm.LG.log()
-        if "CheckListID" in self.CONTROLID:
-            self.CONTROLID["CheckListID"].Bind(wx.EVT_TEXT, self._fillchecklist)
-            self.CONTROLID["CheckList"].Bind(
-                wx.EVT_CHECKLISTBOX, self._checkboxallchecked
-            )
         if "btnHymnSearchByHymn" in self.CONTROLID:
             self.FORM.Bind(
                 wx.EVT_BUTTON,
@@ -94,35 +73,6 @@ class clsForm(JSForm.clsForms.clsForm):
                 wx.EVT_BUTTON, self._addIDtofilename, self.CONTROLID["btnAddOutlineID"]
             )
         super().bind_form_controls()
-
-    def _fillchecklist(self, event):
-        field = event.GetEventObject().GetName()
-        evnttype = event.GetEventType()
-        ID = self.CONTROLID[field].GetValue()
-        if ID is None:
-            return None
-        sql = "SELECT CheckList FROM tblCheckList WHERE ID = {ID};".format(ID=ID)
-        cursor = self.DBConnection.cursor()
-        cursor.execute(sql)
-        row = cursor.fetchone()
-        newchecklist = json.loads(row[0])
-        fld = self.CONTROLID["CheckList"].GetValue()
-        if fld != None:
-            existingchecklist = json.loads(fld)
-            if len(existingchecklist) == 0:
-                self.CONTROLID["CheckList"].SetValue(json.dumps(newchecklist))
-                self.CONTROLID["CheckListComplete"].SetValue(False)
-                return
-        dlg = self.MergeorReplaceChecklist(self.FORM, title="CheckList Merge / Replace")
-        result = dlg.ShowModal()
-        dlg.Destroy()
-        if result == wx.ID_OK:  # ok is merge
-            self.CONTROLID["CheckList"].SetValue(
-                json.dumps(newchecklist | existingchecklist)
-            )
-        else:  # cancel is replace
-            self.CONTROLID["CheckList"].SetValue(json.dumps(newchecklist))
-        self.CONTROLID["CheckListComplete"].SetValue(False)
 
     def _checkboxallchecked(self, event):
         JSForm.LG.log()
@@ -294,7 +244,6 @@ def _buttonclick(event):
                 cmfrm, ChurchDB.DBConnection, "frmGenerateWorshipPlanning", ["Close"]
             )
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runSPrpt)
-            frm.display_form_data()
             frm.show()
             return
         case "lblPrayers":
@@ -311,13 +260,11 @@ def _buttonclick(event):
             )
 
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runOSrpt)
-            frm.display_form_data()
             frm.show()
             return
         case "lblNotifyParticipants":
             frm = clsForm(cmfrm, ChurchDB.DBConnection, "frmNotifyviaeMail")
             frm.CONTROLID["btnNotify"].Bind(wx.EVT_LEFT_DOWN, _runNotify)
-            frm.display_form_data()
             frm.show()
             return
         case "lblSundayPrayers":
@@ -334,14 +281,12 @@ def _buttonclick(event):
                 ["Navigation", "Close"],
             )
             frm.CONTROLID["btnRunSchedule"].Bind(wx.EVT_LEFT_DOWN, _runSchedule)
-            frm.display_form_data()
             frm.show()
             return
         case "lblReports":
             frm = clsForm(cmfrm, ChurchDB.DBConnection, "frmReports", ["Close"])
 
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runReports)
-            frm.display_form_data()
             frm.show()
             return
         case "lblFamily":
@@ -369,15 +314,14 @@ def _buttonclick(event):
 
     if formname != None:
         form = clsForm(cmfrm, ChurchDB.DBConnection, formname)
-        form.display_form_data()
         form.show()
 
 
 app = wx.App(0)
+
 #
 # 	Connect to DataBase
 #
-
 ChurchDB = JSForm.clsDB("localhost", "ChurchDB", "church", "Church99")
 JSForm.CONFIG.set_Config_DBConnection(ChurchDB.DBConnection)
 JSForm.OPTION.set_Option_DBConnection(ChurchDB.DBConnection)
@@ -386,11 +330,15 @@ JSForm.FONT.Get_Config_Font()
 JSForm.CONST.btnNavigationCONTROLS = JSForm.convertNavButtons(
     JSForm.CONST.btnNavigationCONTROLS
 )
+
 #
 # 	Main form
 #
 cmfrm = clsForm(None, ChurchDB.DBConnection, "frmMain", ["Close"])
 
+#
+# bind application events
+#
 cmfrm.CONTROLID["lblChurch"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblService"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
@@ -421,10 +369,6 @@ cmfrm.CONTROLID["lblProject"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblTask"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 PARENTRECORD = {}
-#
-# bind application events
-#
 
 cmfrm.show()
-cmfrm.display_form_data()
 app.MainLoop()

@@ -8,7 +8,7 @@
                 10
             ],
             "size": [
-                450,
+                550,
                 450
             ],
             "name": "frmBugs",
@@ -128,7 +128,8 @@
                     300,
                     30
                 ],
-                "name": "DateEntered"
+                "name": "DateEntered",
+                "stylelist": ["ALLOWNONE"]
             },
             "lblDateDue": {
                 "type": "StaticText",
