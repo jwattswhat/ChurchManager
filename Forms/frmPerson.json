@@ -35,7 +35,6 @@
             ],
             "linkedform": {
                 "frmPersonAddress": {
-                    "bindbtn": "btnPersonAddress",
                     "controls": [
                         "Close",
                         "Navigation"
@@ -53,7 +52,6 @@
                     ]
                 },
                 "frmPersonContact": {
-                    "bindbtn": "btnPersonContact",
                     "controls": [
                         "Close",
                         "Navigation"
@@ -71,7 +69,6 @@
                     ]
                 },
                 "frmPersonDate": {
-                    "bindbtn": "btnPersonDate",
                     "controls": [
                         "Close",
                         "Navigation"
@@ -98,7 +95,8 @@
                     450,
                     30
                 ],
-                "name": "btnPersonAddress"
+                "name": "btnPersonAddress",
+                "action":["openform","frmPersonAddress"]
             },
             "btnPersonContact": {
                 "type": "Button",
@@ -107,7 +105,8 @@
                     450,
                     60
                 ],
-                "name": "btnPersonContact"
+                "name": "btnPersonContact",
+                "action": ["openform","frmPersonContact"]
             },
             "btnPersonDate": {
                 "type": "Button",
@@ -116,7 +115,8 @@
                     450,
                     90
                 ],
-                "name": "btnPersonDate"
+                "name": "btnPersonDate",
+                "action": ["openform","frmPersonDate"]
             },
             "lblChurchID": {
                 "type": "StaticText",

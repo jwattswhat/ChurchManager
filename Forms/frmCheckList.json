@@ -10,7 +10,7 @@
                 "orderby": "Name"
             },
             "posch" : [10,10],
-            "sizech": [35,20],
+            "sizech": [35,25],
             "stylelist":["CAPTION"],
             "controls": ["Navigation","Close"]
         },
@@ -22,8 +22,16 @@
                 "name":"lblName"
             },
             "Name":{
-                "type":"TextCtrl",
                 "name":"Name",
+                "type":"ComboBox",
+                "lookupchoices": {
+                    "name": "tblCheckList",
+                    "fields": [
+                        "ID",
+                        "Name"
+                    ],
+                    "orderby": "Name"
+                },
                 "posch":[10,1],
                 "sizech":[20,2]
             },
@@ -34,18 +42,10 @@
                 "name":"lblCheckList"
             },
             "CheckList":{
-                "type":"CheckListBox",
+                "type":"CheckListEdit",
                 "name": "CheckList",
                 "posch": [10,3],
                 "sizech": [20,10]
-            },
-            "btnEditCheckList":{
-                "type": "Button",
-                "name": "btnEditCheckList",
-                "label": "Edit CheckList",
-                "posch":[5,15],
-                "sizech":[10,2],
-                "editchecklist":"CheckList"
             }
         }
     }

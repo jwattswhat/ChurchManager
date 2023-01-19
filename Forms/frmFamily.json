@@ -28,7 +28,6 @@
             ],
             "linkedform": {
                 "frmFamilyAddress": {
-                    "bindbtn": "btnFamilyAddress",
                     "controls": [
                         "Close",
                         "Navigation"
@@ -46,7 +45,6 @@
                     ]
                 },
                 "frmFamilyContact": {
-                    "bindbtn": "btnFamilyContact",
                     "controls": [
                         "Close",
                         "Navigation"
@@ -64,7 +62,6 @@
                     ]
                 },
                 "frmFamilyDate": {
-                    "bindbtn": "btnFamilyDate",
                     "controls": [
                         "Close",
                         "Navigation"
@@ -82,7 +79,6 @@
                     ]
                 },
                 "frmPerson": {
-                    "bindbtn": "btnPerson",
                     "controls": [
                         "Close",
                         "Navigation"
@@ -120,7 +116,8 @@
                 "pos": [
                     450,
                     30
-                ]
+                ],
+                "action":["openform","frmFamilyAddress"]
             },
             "btnFamilyContact": {
                 "type": "Button",
@@ -129,7 +126,8 @@
                     450,
                     60
                 ],
-                "name": "btnFamilyContact"
+                "name": "btnFamilyContact",
+                "action":["openform","frmFamilyContact"]
             },
             "btnFamilyDate": {
                 "type": "Button",
@@ -138,7 +136,8 @@
                     450,
                     90
                 ],
-                "name": "btnFamilyDate"
+                "name": "btnFamilyDate",
+                "action": ["openform","frmFamilyDate"]
             },
             "btnPerson": {
                 "type": "Button",
@@ -147,7 +146,8 @@
                     450,
                     150
                 ],
-                "name": "btnPerson"
+                "name": "btnPerson",
+                "action": ["openform","frmPerson"]
             },
             "lblChurchID": {
                 "type": "StaticText",

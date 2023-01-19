@@ -32,8 +32,7 @@
                     "pos": [
                         630,
                         10
-                    ],
-                    "bindbtn": "btnOpenHymnSearch"
+                    ]
                 }
             }
         },
@@ -126,7 +125,8 @@
                 "pos": [
                     475,
                     90
-                ]
+                ],
+                "action": ["openform","frmHymnSearch"]
             },
             "lblUsedAs": {
                 "name": "lblUsedAs",

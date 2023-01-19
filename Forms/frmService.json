@@ -93,9 +93,6 @@
                         "Navigation",
                         "Close"
                     ],
-                    "readonlyfields": [
-                        "ServiceID"
-                    ],
                     "parentkey": [
                         "ServiceID",
                         "ID"
