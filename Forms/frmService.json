@@ -200,7 +200,7 @@
                     100,
                     30
                 ],
-                "action": ["openlinkedform","frmHymnUsage"]
+                "action": ["openform","frmHymnUsage"]
             },
             "lblChurchID": {
                 "name": "lblChurchID",
@@ -296,7 +296,7 @@
                     30
                 ],
                 "label": "Propers",
-                "action":["openlinkedform","frmPropers"]
+                "action":["openform","frmPropers"]
             },
             "btnChangeLectionary": {
                 "name": "btnChangeLectionary",
@@ -310,7 +310,7 @@
                     30
                 ],
                 "label": "Lectionary",
-                "action": ["openlinkedform","frmOptions"]
+                "action": ["openform","frmOptions"]
             },
             "lblLiturgicalDate": {
                 "name": "lblLiturgicalDate",
@@ -345,7 +345,7 @@
                     100,
                     30
                 ],
-                "action": ["openlinkedform","frmAltReading"]
+                "action": ["openform","frmAltReading"]
             },
             "lblHolyCommunion": {
                 "name": "lblHolyCommunion",
@@ -474,7 +474,7 @@
                     500,
                     400
                 ],
-                "action": ["openlinkedform","frmSermon"]
+                "action": ["openform","frmSermon"]
             },
             "lblBulletin": {
                 "name": "lblBulletin",
