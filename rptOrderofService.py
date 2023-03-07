@@ -204,7 +204,7 @@ for row in osrows:
     match imbed:
 
         #   Hymns
-        case ("Entrance" | "Office Hymn" | "Of the Day" | "Communion" | "Closing"):
+        case ("Entrance" | "Processional" | "Office Hymn" | "Of the Day" | "Communion" |"Hymn" | "Closing"):
             useage = searchrecrods(imbed, hrows)
             sql = "SELECT * FROM tblHymn WHERE ID = {id};".format(id=useage[HU_HymnID])
             cursor = ChurchDB.DBConnection.cursor()

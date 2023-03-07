@@ -136,7 +136,7 @@ def ScheduleParticipants(ServiceID):
                             thisservice = True
                     elif scheduleSeason[s] != None:
                         if ServiceSeason in scheduleSeason[s]:
-                            thisservcie = True
+                            thisservice = True
                     else:
                         thisservice = True
             if thisservice:

@@ -27,7 +27,6 @@
                     "SermonID",
                     "Bulletin",
                     "CheckListComplete",
-                    "CheckListID",
                     "CheckList",
                     "Note"
                 ],
@@ -52,7 +51,6 @@
                         "Update",
                         "Close"
                     ],
-                    "bindbtn": "btnChangeLectionary",
                     "readonlyfields": [
                         "OptionFor",
                         "OptionType"
@@ -71,8 +69,7 @@
                     "controls": [
                         "Navigation",
                         "Close"
-                    ],
-                    "bindbtn": "btnOpenSermonForm"
+                    ]
                 },
                 "frmHymnUsage": {
                     "name": "frmHymnUsage",
@@ -93,11 +90,10 @@
                         "Navigation",
                         "Close"
                     ],
-                    "parentkey": [
+                    "fillonblank": [
                         "ServiceID",
                         "ID"
-                    ],
-                    "bindbtn": "btnServiceHymns"
+                    ]
                 },
                 "frmPropers": {
                     "name": "frmPropers",
@@ -118,7 +114,6 @@
                         "Update",
                         "Close"
                     ],
-                    "bindbtn": "btnEditPropers",
                     "readonlyfields": [
                         "Lectionary",
                         "Sort",
@@ -140,11 +135,17 @@
                     "readonlyfields": [
                         "ServiceID"
                     ],
-                    "parentkey": [
+                    "fillonblank": [
                         "ServiceID",
                         "ID"
-                    ],
-                    "bindbtn": "btnServiceAltReading"
+                    ]
+                },
+                "frmEditCheckList":{
+                    "type":"Panel",
+                    "controls": [
+                        "Navigation",
+                        "Close"
+                    ]
                 }
             },
             "subform": {
@@ -200,7 +201,7 @@
                     100,
                     30
                 ],
-                "action": ["openform","frmHymnUsage"]
+                "action": ["openlinkedform","frmHymnUsage"]
             },
             "lblChurchID": {
                 "name": "lblChurchID",
@@ -282,7 +283,7 @@
                     "condition": "Lectionary = {OPTION:Current:Lectionary}",
                     "orderby": "Lectionary,Sort"
                 },
-                "event": "refreshform"
+                "action": ["refreshform"]
             },
             "btnEditPropers": {
                 "name": "btnEditPropers",
@@ -296,7 +297,7 @@
                     30
                 ],
                 "label": "Propers",
-                "action":["openform","frmPropers"]
+                "action":["openlinkedform","frmPropers"]
             },
             "btnChangeLectionary": {
                 "name": "btnChangeLectionary",
@@ -310,7 +311,7 @@
                     30
                 ],
                 "label": "Lectionary",
-                "action": ["openform","frmOptions"]
+                "action": ["openlinkedform","frmOptions"]
             },
             "lblLiturgicalDate": {
                 "name": "lblLiturgicalDate",
@@ -345,7 +346,7 @@
                     100,
                     30
                 ],
-                "action": ["openform","frmAltReading"]
+                "action": ["openlinkedform","frmAltReading"]
             },
             "lblHolyCommunion": {
                 "name": "lblHolyCommunion",
@@ -474,7 +475,7 @@
                     500,
                     400
                 ],
-                "action": ["openform","frmSermon"]
+                "action": ["openlinkedform","frmSermon"]
             },
             "lblBulletin": {
                 "name": "lblBulletin",
@@ -536,42 +537,6 @@
                     30
                 ]
             },
-            "lblCheckListID": {
-                "name": "lblCheckListID",
-                "type": "StaticText",
-                "label": "Check List ID:",
-                "pos": [
-                    0,
-                    520
-                ]
-            },
-            "CheckListID": {
-                "name": "CheckListID",
-                "type": "ComboBox",
-                "lookupchoices": {
-                    "name": "tblCheckList",
-                    "ID": "ID",
-                    "fields": [
-                        "ID",
-                        "Name"
-                    ],
-                    "sort": "Name"
-                },
-                "pos": [
-                    145,
-                    520
-                ],
-                "size": [
-                    300,
-                    30
-                ],
-                "bindappproc": "_fillchecklist",
-                "bindappevent": "EVT_TEXT",
-                "stylelist": [
-                    "MULTILINE",
-                    "DONTWRAP"
-                ]
-            },
             "lblCheckList": {
                 "name": "lblCheckList",
                 "type": "StaticText",
@@ -587,15 +552,7 @@
                 "label": "Edit CheckList",
                 "pos":[5,580],
                 "sizech":[10,2],
-                "editchecklist":"CheckList"
-            },
-            "btnNewCheckList":{
-                "type": "Button",
-                "name": "btnNewCheckList",
-                "label": "New CheckList",
-                "pos":[5,610],
-                "sizech":[10,2],
-                "mergeorreplacechecklist" : "CheckList"
+                "action" : ["openlinkedform","frmEditCheckList"]
             },
             "CheckList": {
                 "name": "CheckList",

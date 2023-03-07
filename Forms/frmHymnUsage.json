@@ -86,7 +86,8 @@
                         "DateTime"
                     ],
                     "orderby": "DateTime DESC"
-                }
+                },
+                "readonly": true
             },
             "lblHymnID": {
                 "name": "lblHymnID",
@@ -126,7 +127,7 @@
                     475,
                     90
                 ],
-                "action": ["openform","frmHymnSearch"]
+                "action": ["openlinkedform","frmHymnSearch"]
             },
             "lblUsedAs": {
                 "name": "lblUsedAs",
@@ -154,7 +155,7 @@
                 "type": "Button",
                 "label": "Show Usage",
                 "pos": [475,120],
-                "report": "CMHU03"
+                "action": ["openreport","CMHU03"]
             },
             "lblNote": {
                 "name": "lblNote",

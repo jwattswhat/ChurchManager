@@ -14,8 +14,8 @@ import json
 import JSForm
 import fnSchedule
 
-class clsForm(JSForm.clsForms.clsForm):
 
+class clsForm(JSForm.clsForms.clsForm):
     def bind_form_controls(self):
         JSForm.LG.log()
         if "btnHymnSearchByHymn" in self.CONTROLID:
@@ -156,7 +156,7 @@ class clsForm(JSForm.clsForms.clsForm):
             row = self.CONTROLID["dvlHymnUsage"].GetSelectedRow()
             self.open_linked_form("frmHymnUsage")
 
-    def _addIDtofilename(self,event):
+    def _addIDtofilename(self, event):
         global CONFIG
         field = event.GetEventObject().GetName()
         match field:
@@ -168,18 +168,18 @@ class clsForm(JSForm.clsForms.clsForm):
         if "ID(" not in filename:
             ID = self.RECORDS._record[self.RECORDS._position]["ID"]
             filename = os.path.splitext(filename)
-            newfilename = filename[0]+".ID("+str(ID)+")"+filename[1]
+            newfilename = filename[0] + ".ID(" + str(ID) + ")" + filename[1]
             path = JSForm.CONFIG.get_Config_Value("Location", field)
-            os.rename(
-                path+filename[0]+filename[1],path+newfilename)
+            os.rename(path + filename[0] + filename[1], path + newfilename)
             self.CONTROLID[field].SetValue(newfilename)
+
 
 ##  Main App    ##
 
-def _buttonclick(event):
 
+def _buttonclick(event):
     def _runSPrpt(event):
-        JSForm.RunReport(2,frm,ChurchDB.DBConnection)
+        JSForm.RunReport(2, frm, ChurchDB.DBConnection)
 
     def _runOSrpt(event):
         ID = frm.CONTROLID["ServiceID"].GetValue()
@@ -225,7 +225,7 @@ def _buttonclick(event):
 
     def _runReports(event):
         reportid = frm.CONTROLID["ReportID"].GetValue()
-        JSForm.RunReport(reportid,frm,ChurchDB.DBConnection)
+        JSForm.RunReport(reportid, frm, ChurchDB.DBConnection)
         frm.FORM.Close()
 
     select = event.GetEventObject().GetName()
@@ -241,7 +241,10 @@ def _buttonclick(event):
             formname = "frmPropers"
         case "lblWorshipPlan":
             frm = (
-                cmfrm, ChurchDB.DBConnection, "frmGenerateWorshipPlanning", ["Close"]
+                cmfrm,
+                ChurchDB.DBConnection,
+                "frmGenerateWorshipPlanning",
+                ["Close"],
             )
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runSPrpt)
             frm.show()
@@ -255,9 +258,7 @@ def _buttonclick(event):
         case "lblCheckList":
             formname = "frmCheckList"
         case "lblGenerateOS":
-            frm = clsForm(
-                cmfrm, ChurchDB.DBConnection, "frmGenerateOS", ["Close"]
-            )
+            frm = clsForm(cmfrm, ChurchDB.DBConnection, "frmGenerateOS", ["Close"])
 
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runOSrpt)
             frm.show()

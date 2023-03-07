@@ -9,8 +9,8 @@
                 1
             ],
             "sizech": [
-                35,
-                15
+                45,
+                25
             ],
             "stylelist": [
                 "CAPTION"
@@ -64,12 +64,19 @@
                 },
                 "value":"CMWP01 Worship Planning Worksheet"
             },
+            "ParameterBox":{
+                "name":"ParameterBox",
+                "type":"StaticBox",
+                "posch":[1,8],
+                "sizech": [42,12],
+                "label": "Parameters"
+            },
             "lblService": {
                 "name": "lblService",
                 "type": "StaticText",
                 "posch": [
-                    1,
-                    7
+                    2,
+                    10
                 ],
                 "label": "Service:"
             },
@@ -77,8 +84,8 @@
                 "name": "ServiceID",
                 "type": "ComboBox",
                 "posch": [
-                    7,
-                    7
+                    9,
+                    10
                 ],
                 "lookupchoices": {
                     "name": "tblService",
@@ -89,11 +96,64 @@
                     "orderby": "DateTime DESC"
                 }
             },
+            "lblPerson": {
+                "name": "lblPerson",
+                "type": "StaticText",
+                "posch": [
+                    2,
+                    13
+                ],
+                "label": "Person:"
+            },
+            "PersonID": {
+                "name": "PersonID",
+                "type": "ComboBox",
+                "posch": [
+                    9,
+                    13
+                ],
+                "lookupchoices": {
+                    "name": "tblPerson",
+                    "fields": [
+                        "ID",
+                        "LastName",
+                        "FirstName"
+                    ],
+                    "orderby": "LastName,FirstName"
+                }
+            },
+
+            "lblHymn": {
+                "name": "lblHymn",
+                "type": "StaticText",
+                "posch": [
+                    2,
+                    16
+                ],
+                "label": "Hymn:"
+            },
+            "HymnID": {
+                "name": "HymnID",
+                "type": "ComboBox",
+                "posch": [
+                    9,
+                    16
+                ],
+                "lookupchoices": {
+                    "name": "tblHymn",
+                    "fields": [
+                        "ID",
+                        "Hymn",
+                        "Title"
+                    ],
+                    "orderby": "Hymn"
+                }
+            },
             "btnRun" : {
                 "name" : "btnRun",
                 "type": "Button",
                 "label" : "Run Report",
-                "posch" : [5,10]
+                "posch" : [35,21]
             }
         }
     }
