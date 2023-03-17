@@ -294,6 +294,10 @@ def _buttonclick(event):
             formname = "frmFamily"
         case "lblPeople":
             formname = "frmPerson"
+        case "lblAttendanceEvent":
+            formname = "frmAttendanceEvent"
+        case "lblAttendance":
+            formname = "frmAttendance"
         case "lblParticipant":
             formname = "frmParticipant"
         case "lblSchedule":
@@ -360,6 +364,8 @@ cmfrm.CONTROLID["lblServiceSchedule"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblFamily"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblPeople"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblAttendanceEvent"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblAttendance"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblConfig"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblOptions"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)

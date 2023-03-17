@@ -8,7 +8,7 @@
                 10
             ],
             "size": [
-                500,
+                550,
                 450
             ],
             "name": "frmTask",
@@ -21,17 +21,43 @@
             },
             "stylelist": [
                 "CAPTION"
-            ], "controls" : ["Navigation","Close"]
+            ], "controls" : ["Navigation","Close"],
+            "linkedform": {
+                "frmTaskWorker" : {
+                    "name": "frmTaskWorker",
+                    "type": "Panel",
+                    "pos": [100,100],
+                    "controls": [
+                        "Navigation",
+                        "Update",
+                        "Close"
+                    ],
+                    "table": {
+                        "name" : "tblTaskWorker",
+                        "fields" : ["*"],
+                        "condition": "TaskID = {ID}",
+                        "orderby": "Task"
+                    },
+                    "readonlyfields": [
+                        "TaskID"
+                    ],
+                    "fillonblank": [
+                        "TaskID",
+                        "ID"
+                    ],
+                    "bindbtn": "btnTaskWorker"
+                }
+            }
         },
         "CONTROLS": {
-            "lblChurchID": {
+            "lblTask": {
                 "type": "StaticText",
                 "label": "Task:",
                 "pos": [
                     0,
                     30
                 ],
-                "name": "lblTaskID"
+                "name": "lblTask"
             },
             "Task": {
                 "type": "TextCtrl",
@@ -45,7 +71,13 @@
                 ],
                 "name": "Task"
             },
-
+            "btnTaskWorker": {
+                "type": "Button",
+                "label": "Workers",
+                "pos": [450,30],
+                "action": ["openlinkedform","frmTaskWorker"],
+                "name": "btnTaskWorker"
+            },
             "lblDescription": {
                 "type": "StaticText",
                 "label": "Description:",
@@ -194,24 +226,12 @@
                 "size" : [300,30],
                 "stylelist": ["ALLOWNONE"]
             },
-            "lblAssignedTo": {
-                "name" : "lblAssignedTo",
-                "pos"   : [0,300],
-                "label" : "Assigned To:",
-                "type" : "StaticText"
-            },
-            "AssignedTo": {
-                "name" : "AssignedTo",
-                "type": "TextCtrl",
-                "pos": [120,300],
-                "size": [300,30]
-            },
             "lblNote": {
                 "type": "StaticText",
                 "label": "Note:",
                 "pos": [
                     0,
-                    330
+                    300
                 ],
                 "name": "lblNote"
             },
@@ -219,7 +239,7 @@
                 "type": "MultiLine",
                 "pos": [
                     120,
-                    330
+                    300
                 ],
                 "size": [
                     300,

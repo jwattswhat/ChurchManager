@@ -3,20 +3,19 @@
         "FORM": {
             "type": "Panel",
             "title": "frmAttendance : Service Edit Form",
-            "pos": [
-                10,
-                10
+            "posch": [
+                5,
+                5
             ],
-            "size": [
-                620,
-                500
+            "sizech": [
+                50,
+                50
             ],
             "table": {
-                "name": "frmAttendance",
+                "name": "tblAttendance",
                 "fields": [
                     "*"
-                ],
-                "orderby": "AttendanceDate Desc"
+                ]
             },
             "stylelist": [
                 "CAPTION"
@@ -26,129 +25,98 @@
             "lblPersonID": {
                 "type": "StaticText",
                 "label": "Person ID :",
-                "pos": [
-                    0,
-                    0
+                "posch": [
+                    1,
+                    1
                 ],
                 "name": "lblPersonID"
             },
             "PersonID": {
                 "type": "ComboBox",
-                "pos": [
-                    145,
-                    0
+                "posch": [
+                    15,
+                    1
                 ],
-                "size": [
-                    300,
-                    30
+                "lookupchoices": {
+                    "name": "tblPerson",
+                    "fields": [
+                        "ID",
+                        "LastName",
+                        "FirstName"
+                    ],
+                    "orderby": "LastName"
+                },
+                "sizech": [
+                    30,
+                    2
                 ],
                 "name": "PersonID"
             },
             "lblAttendanceEventID": {
                 "type": "StaticText",
                 "label": "Attenandance Event ID:",
-                "pos": [
-                    0,
-                    30
+                "posch": [
+                    1,
+                    3
                 ],
                 "name": "lblAttendanceEventID"
             },
             "AttendanceEventID": {
-                "type": "TextCtrl",
-                "pos": [
-                    145,
-                    30
+                "type": "ComboBox",
+                "posch": [
+                    15,
+                    3
                 ],
-                "size": [
-                    300,
-                    30
+                "sizech": [
+                    30,
+                    2
                 ],
-                "name": "AttendanceID"
+                "lookupchoices": {
+                    "name": "tblAttendanceEvent",
+                    "fields": [
+                        "ID",
+                        "DateTime",
+                        "Description"
+                    ],
+                    "orderby": "DateTime"
+                },
+                "name": "AttendanceEventID"
             },
-            "lblAttendanceDate": {
-                "type": "StaticText",
-                "label": "Attendance Date: ",
-                "pos": [
-                    0,
-                    60
-                ],
-                "name": "lblAttendanceDate"
-            },
-            "AttendanceDate": {
-                "type": "DateTime",
-                "displaydate": 1,
-                "displaytime": 1,
-                "pos": [
-                    145,
-                    60
-                ],
-                "size": [
-                    300,
-                    30
-                ],
-                "name": "AttendanceDate",
-                "validatorstr": "DateTime"
-            },
-            "lblHolyCommunion": {
+            "lblCommunion": {
                 "type": "StaticText",
                 "label": "Holy Communion:",
-                "pos": [
-                    0,
-                    90
+                "posch": [
+                    1,
+                    5
                 ],
-                "name": "lblHolyCommunion"
+                "name": "lblCommunion"
             },
-            "HolyCommunion": {
+            "Communion": {
                 "type": "CheckBox",
-                "pos": [
-                    145,
-                    90
+                "posch": [
+                    15,
+                    5
                 ],
-                "size": [
-                    300,
-                    30
-                ],
-                "name": "HolyCommunion"
-            },
-            "lblAttendanceType": {
-                "type": "StaticText",
-                "label": "Attendance Type ID:",
-                "pos": [
-                    0,
-                    120
-                ],
-                "name": "lblAttendanceType"
-            },
-            "AttendanceType": {
-                "type": "TextCtrl",
-                "pos": [
-                    145,
-                    120
-                ],
-                "size": [
-                    300,
-                    30
-                ],
-                "name": "lblAttendanceType"
+                "name": "Communion"
             },
             "lblNote": {
                 "type": "StaticText",
                 "label": "Note:",
-                "pos": [
-                    0,
-                    150
+                "posch": [
+                    1,
+                    7
                 ],
                 "name": "lblNote"
             },
             "Note": {
                 "type": "MultiLine",
-                "pos": [
-                    145,
-                    150
+                "posch": [
+                    15,
+                    7
                 ],
-                "size": [
-                    300,
-                    100
+                "sizech": [
+                    30,
+                    40
                 ],
                 "stylelist": [
                     "MULTILINE"

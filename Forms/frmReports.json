@@ -149,6 +149,12 @@
                     "orderby": "Hymn"
                 }
             },
+            "ReportDate": {
+                "name":"ReportDate",
+                "type":"DatePickerCtrl",
+                "posch":[9,19],
+                "format": "%Y/%m/%d"
+            },
             "btnRun" : {
                 "name" : "btnRun",
                 "type": "Button",

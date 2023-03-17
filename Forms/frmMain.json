@@ -207,6 +207,18 @@
                 ],
                 "label": "Families"
             },
+            "lblAttendanceEvent": {
+                "type": "StaticText",
+                "name": "lblAttendanceEvent",
+                "posch": [19,7.5],
+                "label": "Attendance Event"
+            },
+            "lblAttendance": {
+                "type": "StaticText",
+                "name": "lblAttendance",
+                "posch": [19,9],
+                "label": "Attendance"
+            },
             "ReportBox": {
                 "type": "StaticBox",
                 "name": "ReportBox",
