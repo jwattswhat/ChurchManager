@@ -36,12 +36,14 @@
             "PersonID": {
                 "type": "ComboBox",
                 "name": "PersonID",
-                "table": {
-                    "name": "tblperson",
+                "lookupchoices": {
+                    "name": "tblPerson",
                     "fields": [
                         "ID",
-                        "CONCAT(LastName,', ',FirstName) as PersonID"
-                    ]
+                        "LastName",
+                        "FirstName"
+                    ],
+                    "orderby": "LastName, FirstName"
                 },
                 "pos": [
                     125,
@@ -71,10 +73,7 @@
                     300,
                     30
                 ],
-                "name": "DateType",
-                "choicesSQL": "SELECT Choices FROM tblChoices WHERE Field = 'DateType';",
-                "choicevalue": 0,
-                "comparevalue": 0
+                "name": "DateType"
             },
             "lblDate": {
                 "type": "StaticText",
@@ -86,7 +85,7 @@
                 "name": "lblDate"
             },
             "Date": {
-                "type": "TextCtrl",
+                "type": "DatePickerCtrl",
                 "pos": [
                     125,
                     60
@@ -95,7 +94,6 @@
                     300,
                     30
                 ],
-                "validator": "valDateAndNull",
                 "name": "Date"
             },
             "lblNote": {

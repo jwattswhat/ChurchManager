@@ -91,7 +91,8 @@
                 "type": "DatePickerCtrl",
                 "name": "CompletionDate",
                 "pos":[80,70],
-                "stylelist": ["ALLOWNONE"]
+                "stylelist": ["ALLOWNONE"],
+                "defaultvalue":null
             },
             "lblProject": {
                 "type": "StaticText",
@@ -186,7 +187,8 @@
                     30
                 ],
                 "name": "StartDate",
-                "stylelist": ["ALLOWNONE"]
+                "stylelist": ["ALLOWNONE"],
+                "defaultvalue":null
             },
             "lblEndDate": {
                 "type": "StaticText",
@@ -208,7 +210,8 @@
                     30
                 ],
                 "name": "EndDate",
-                "stylelist": ["ALLOWNONE"]
+                "stylelist": ["ALLOWNONE"],
+                "defaultvalue":null
             },
             "lblAssignedTo": {
                 "type": "",

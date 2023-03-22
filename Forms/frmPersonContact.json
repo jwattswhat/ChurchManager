@@ -2,7 +2,7 @@
     "frmPersonContactFORM": {
         "FORM": {
             "type": "Panel",
-            "title": "frmPersonContact : Person Address Edit Form",
+            "title": "frmPersonContact : Person Contact Edit Form",
             "pos": [
                 10,
                 10
@@ -35,11 +35,12 @@
             "PersonID": {
                 "type": "ComboBox",
                 "name": "PersonID",
-                "table": {
+                "lookupchoices": {
                     "name": "tblPerson",
                     "fields": [
                         "ID",
-                        "CONCAT(LastName,', ',FirstName) as PersonID"
+                        "LastName",
+                        "FirstName"
                     ],
                     "orderby": "LastName, FirstName"
                 },

@@ -153,7 +153,8 @@
                     30
                 ],
                 "name": "CompletionDate",
-                "stylelist": ["ALLOWNONE"]
+                "stylelist": ["ALLOWNONE"],
+                "defaultvalue": null
 
             },
             "lblProjectID": {
@@ -211,7 +212,8 @@
                 "type": "DatePickerCtrl",
                 "pos" : [120,240],
                 "size" : [300,30],
-                "stylelist": ["ALLOWNONE"]
+                "stylelist": ["ALLOWNONE"],
+                "defaultvalue": null
             },
             "lblEndDate": {
                 "name" : "lblEndDate"
@@ -224,7 +226,8 @@
                 "type": "DatePickerCtrl",
                 "pos" : [120,270],
                 "size" : [300,30],
-                "stylelist": ["ALLOWNONE"]
+                "stylelist": ["ALLOWNONE"],
+                "defaultvalue": null
             },
             "lblNote": {
                 "type": "StaticText",

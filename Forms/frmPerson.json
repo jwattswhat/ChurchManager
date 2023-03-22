@@ -49,6 +49,10 @@
                     },
                     "readonlyfields": [
                         "PersonID"
+                    ],
+                    "fillonblank": [
+                        "PersonID",
+                        "ID"
                     ]
                 },
                 "frmPersonContact": {
@@ -66,6 +70,10 @@
                     },
                     "readonlyfields": [
                         "PersonID"
+                    ],
+                    "fillonblank": [
+                        "PersonID",
+                        "ID"
                     ]
                 },
                 "frmPersonDate": {
@@ -83,6 +91,10 @@
                     },
                     "readonlyfields": [
                         "PersonID"
+                    ],
+                    "fillonblank": [
+                        "PersonID",
+                        "ID"
                     ]
                 }
             }
@@ -96,7 +108,7 @@
                     30
                 ],
                 "name": "btnPersonAddress",
-                "action":["openform","frmPersonAddress"]
+                "action":["openlinkedform","frmPersonAddress"]
             },
             "btnPersonContact": {
                 "type": "Button",
@@ -106,7 +118,7 @@
                     60
                 ],
                 "name": "btnPersonContact",
-                "action": ["openform","frmPersonContact"]
+                "action": ["openlinkedform","frmPersonContact"]
             },
             "btnPersonDate": {
                 "type": "Button",
@@ -116,7 +128,7 @@
                     90
                 ],
                 "name": "btnPersonDate",
-                "action": ["openform","frmPersonDate"]
+                "action": ["openlinkedform","frmPersonDate"]
             },
             "lblChurchID": {
                 "type": "StaticText",

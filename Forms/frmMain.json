@@ -189,14 +189,14 @@
                     8
                 ]
             },
-            "lblPeople": {
-                "name": "lblPeople",
+            "lblPerson": {
+                "name": "lblPerson",
                 "type": "StaticText",
                 "posch": [
                     19,
                     4.5
                 ],
-                "label": "People"
+                "label": "Person"
             },
             "lblFamily": {
                 "name": "lblFamily",

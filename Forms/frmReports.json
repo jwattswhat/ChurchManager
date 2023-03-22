@@ -10,7 +10,7 @@
             ],
             "sizech": [
                 45,
-                25
+                40
             ],
             "stylelist": [
                 "CAPTION"
@@ -59,10 +59,14 @@
                 "posch": [7,4],
                 "lookupchoices":{
                     "name":"tblReports",
-                    "fields": ["ID","Report","Title"],
-                    "orderby": "Report"
+                    "fields": [
+                        "ID",
+                        "Title",
+                        "CONCAT('(',Report,')')"
+                    ],
+                    "orderby": "Title"
                 },
-                "value":"CMWP01 Worship Planning Worksheet"
+                "value":"Worship Planning Worksheet (CMWP01)"
             },
             "ParameterBox":{
                 "name":"ParameterBox",
@@ -91,7 +95,8 @@
                     "name": "tblService",
                     "fields": [
                         "ID",
-                        "DatetIME"
+                        "DatetIME",
+                        "LiturgicalDate"
                     ],
                     "orderby": "DateTime DESC"
                 }
@@ -122,7 +127,6 @@
                     "orderby": "LastName,FirstName"
                 }
             },
-
             "lblHymn": {
                 "name": "lblHymn",
                 "type": "StaticText",
@@ -149,17 +153,80 @@
                     "orderby": "Hymn"
                 }
             },
-            "ReportDate": {
-                "name":"ReportDate",
+            "lblStartDate":{
+                "name": "lblStartDate",
+                "type": "StaticText",
+                "posch": [2,19],
+                "label": "Start Date:"
+            },
+            "StartDate": {
+                "name":"StartDate",
                 "type":"DatePickerCtrl",
                 "posch":[9,19],
                 "format": "%Y/%m/%d"
+            },
+            "lblEndDate":{
+                "name": "lblEndDate",
+                "type": "StaticText",
+                "posch": [2,22],
+                "label": "End Date:"
+            },
+            "EndDate": {
+                "name": "EndDate",
+                "type": "DatePickerCtrl",
+                "posch": [9,22],
+                "format": "%Y/%m/%d"
+            },
+            "lblAttendanceType": {
+                "name": "lblAttendanceType",
+                "type": "StaticText",
+                "posch": [2,25],
+                "label": "Attend Type:"
+            },
+            "AttendanceType": {
+                "name": "AttendanceType",
+                "type": "ComboBox",
+                "posch": [9,25],
+                "sizech": [30,3],
+                "value":"All"
+            },
+            "lblDetail": {
+                "name": "lblDetail",
+                "type": "StaticText",
+                "posch": [2,28],
+                "label": "Detail:"
+            },
+            "Detail": {
+                "name":"Detail",
+                "type": "CheckBox",
+                "posch": [9,28],
+                "value": 0
+            },
+            "lblProjectID":{
+                "name":"lblProjectID",
+                "type":"StaticText",
+                "posch":[2,31],
+                "label":"Project:"
+            },
+            "ProjectID": {
+                "name":"ProjectID",
+                "type": "ComboBox",
+                "posch": [9,31],
+                "lookupchoices":{
+                    "name": "tblProject",
+                    "fields": [
+                        "ID",
+                        "Description"
+                    ],
+                    "orderby": "Description"
+                },
+                "value":"All"
             },
             "btnRun" : {
                 "name" : "btnRun",
                 "type": "Button",
                 "label" : "Run Report",
-                "posch" : [35,21]
+                "posch" : [35,33]
             }
         }
     }

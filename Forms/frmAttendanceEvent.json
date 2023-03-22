@@ -64,13 +64,15 @@
             "ServiceID":{
                 "type": "ComboBox",
                 "posch": [17,4],
-                "sizech": [15,2],
+                "sizech": [30,2],
                 "lookupchoices": {
                     "name": "tblService",
                     "fields": [
                         "ID",
-                        "DateTime"
-                    ]
+                        "DateTime",
+                        "LiturgicalDate"
+                    ],
+                    "orderby": "DateTime DESC"
                 },
                 "name": "ServicID"
             },
@@ -84,7 +86,8 @@
                 "type":"DateTime",
                 "posch" : [17,6],
                 "sizech": [20,2],
-                "name": "DateTime"
+                "name": "DateTime",
+                "stylelist": ["ALLOWNONE"]
             },
             "lblAttendanceType":{
                 "type":"StaticText",

@@ -292,7 +292,7 @@ def _buttonclick(event):
             return
         case "lblFamily":
             formname = "frmFamily"
-        case "lblPeople":
+        case "lblPerson":
             formname = "frmPerson"
         case "lblAttendanceEvent":
             formname = "frmAttendanceEvent"
@@ -320,7 +320,6 @@ def _buttonclick(event):
     if formname != None:
         form = clsForm(cmfrm, ChurchDB.DBConnection, formname)
         form.show()
-
 
 app = wx.App(0)
 
@@ -363,7 +362,7 @@ cmfrm.CONTROLID["lblSchedule"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblServiceSchedule"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblFamily"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblPeople"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblPerson"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblAttendanceEvent"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblAttendance"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
