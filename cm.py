@@ -173,9 +173,87 @@ class clsForm(JSForm.clsForms.clsForm):
             os.rename(path + filename[0] + filename[1], path + newfilename)
             self.CONTROLID[field].SetValue(newfilename)
 
+    def _processaction(self,event):
+
+        class _neededoptionsdialog(wx.Dialog):
+            def __init__(self, parent, title,formlabel=None):
+                super().__init__(parent, title=title, size=(200, 150))
+                panel = wx.Panel(self)
+                self.text = wx.StaticText(
+                    panel,
+                    wx.ID_ANY,
+                    label=formlabel,
+                    pos=(10, 30),
+                )
+                self.btn = wx.Button(
+                    panel,
+                    JSForm.CONST.FORM_CONTINUE,
+                    label="Continue",
+                    size=(100, 30),
+                    pos=(10, 75),
+                )
+
+        def processattendance(field,):
+            communion = self.CONTROLID[field].GetCheckedItems()
+            attend = self.CONTROLID[field].GetSelections()
+            #if (not communion and not attend) and (field == "Members"):
+            #    dlg = _neededoptionsdialog(self.FORM, title="Required Field",formlabel="No Attendance Data.")
+            #    result = dlg.ShowModal()
+            #    dlg.Destroy()
+            #    return False
+
+            attrec = []
+            for a in range(0,len(attend)):
+                attrec.append({"AttendanceEventID":attendevent,
+                            "PersonID":self.CONTROLID[field].choices.id[attend[a]],
+                            "Communion":0
+                            })
+            for c in range(0,len(communion)):
+                found = False
+                for a in range(len(attrec)):
+                    if self.CONTROLID[field].choices.id[communion[c]] == (attrec[a]["PersonID"]):
+                        attrec[a]["Communion"] = (CommunionOffered == 1)
+                        found = True
+                if not found:
+                    attrec.append({"AttendanceEventID":attendevent,
+                            "PersonID":self.CONTROLID[field].choices.id[communion[c]],
+                            "Communion": (CommunionOffered == 1)
+                            })
+
+            attendancetable = {
+                "name":"tblAttendance",
+                "fields": ["PersonID","AttendanceEventID","Communion"]                    
+            }
+
+            self.sql = JSForm.clsSQL(self.DBConnection, attendancetable)
+            cursor = self.DBConnection.cursor()
+            for rec in attrec:
+                sql = self.sql.insert(rec)
+                try:
+                    cursor.execute(sql)
+                except:
+                    return False
+            self.FORM.Close()
+            return True
+
+        field = event.GetEventObject().GetName()
+        attendevent = self.CONTROLID["AttendanceEventID"].GetValue()
+        if not attendevent:
+            dlg = _neededoptionsdialog(self.FORM, title="Required Field",formlabel="Attendance Event not entered.")
+            result = dlg.ShowModal()
+            dlg.Destroy()
+            return
+        sql = "SELECT CommunionOffered FROM tblAttendanceEvent WHERE ID = {AttenanceEventID}".format(AttenanceEventID=attendevent)
+        cursor = self.DBConnection.cursor()
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        CommunionOffered = row[0]
+        if not processattendance("Members"):
+            return
+        if not processattendance("Visitors"):
+            return
 
 ##  Main App    ##
-
 
 def _buttonclick(event):
     def _runSPrpt(event):
@@ -222,6 +300,9 @@ def _buttonclick(event):
 
     def _runSundayPrayers():
         sb = subprocess.Popen("python rptPrayers.py", shell=True)
+
+    def _runSundayAnnouncements():
+        sb = subprocess.Popen("python rptAnnouncement.py")
 
     def _runReports(event):
         reportid = frm.CONTROLID["ReportID"].GetValue()
@@ -270,6 +351,8 @@ def _buttonclick(event):
             return
         case "lblSundayPrayers":
             _runSundayPrayers()
+        case "lblAnnouncements":
+            _runSundayAnnouncements()
         case "lblPrayerRequests":
             _runPrayerRequests()
         case "lblMemberDirectory":
@@ -314,6 +397,8 @@ def _buttonclick(event):
             formname = "frmProject"
         case "lblTask":
             formname = "frmTask"
+        case "lblRecordAttendance":
+            formname = "frmRecordAttendance"
         case _:
             print("form name not found found. {}".format(formname))
 
@@ -356,6 +441,7 @@ cmfrm.CONTROLID["lblNotifyParticipants"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblSundayPrayers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblPrayers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblReports"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblAnnouncements"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblParticipant"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblSchedule"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
@@ -374,7 +460,8 @@ cmfrm.CONTROLID["lblBugs"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblProject"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblTask"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
-PARENTRECORD = {}
+cmfrm.CONTROLID["lblRecordAttendance"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
+PARENTRECORD = {}
 cmfrm.show()
 app.MainLoop()

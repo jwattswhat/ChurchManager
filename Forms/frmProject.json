@@ -91,6 +91,10 @@
                 "type": "DatePickerCtrl",
                 "name": "CompletionDate",
                 "pos":[80,70],
+                "size": [
+                    300,
+                    30
+                ],
                 "stylelist": ["ALLOWNONE"],
                 "defaultvalue":null
             },

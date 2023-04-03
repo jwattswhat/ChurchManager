@@ -71,50 +71,51 @@ for lastsunday in range(0,len(SUNDAYS)):
                 td = "Fifth = 1 AND"
         break
 
+# print ("Next Sunday",SUNDAY)
 
 ChurchDB = JSForm.clsDB("localhost", "ChurchDB", "church", "Church99")
 
-PR_ID = 0
-PR_CHURCHID = 1
-PR_REQUEST = 2
-PR_CATEGORY = 3
-PR_REQUESTFOR = 4
-PR_REQUESTBY = 5
-PR_CONTINUOUS = 6
-PR_FIRSTSUNDAY = 7
-PR_SECONDSUNDAY = 8
-PR_THIRDSUNDAY = 9
-PR_FOURTHSUNDAY = 10
-PR_FIFTHSUNDAY = 11
-PR_STARTDATE = 12
-PR_ENDDATE = 13
-PR_NOTE = 14
+AN_ID = 0
+AN_CHURCHID = 1
+AN_LABEL = 2
+AN_ANNOUNCEMENT = 3
+AN_REQUESTBY = 4
+AN_CONTINUOUS = 5
+AN_FIRSTSUNDAY = 6
+AN_SECONDSUNDAY = 7
+AN_THIRDSUNDAY = 8
+AN_FOURTHSUNDAY = 9
+AN_FIFTHSUNDAY = 10
+AN_STARTDATE = 11
+AN_ENDDATE = 12
+AN_NOTE = 13
 
-prayers = readallrecords(
-    {"name": "tblPrayer", 
+
+announcement = readallrecords(
+    {"name": "tblAnnouncement", 
      "fields": ["*"], 
      "condition": "{Sunday} ((Continuous = 1) OR (NOW() BETWEEN StartDate AND EndDate))".format(Sunday=td),
-     "orderby": "PrayerCategory, RequestFor"}
+     "orderby": "Label, RequestBy"}
 )
 
-prfmt = "\t{FOR}" #\t{REQ}\t{NOTE}" # too much data
-prfile = []
+prfmt = "{ANNOUNCEMENT}" #\t{REQ}\t{NOTE}" # too much data
+anfile = []
 oldcat = ""
-for p in range(len(prayers)):
-    if oldcat != prayers[p][PR_CATEGORY]:
-        oldcat = prayers[p][PR_CATEGORY]
-        prfile.append(prayers[p][PR_CATEGORY])
+for a in range(len(announcement)):
+    #if oldcat != announcement[p][AN_CATEGORY]:
+    #    oldcat = announcement[p][AN_CATEGORY]
+    #    prfile.append(announcement[p][AN_CATEGORY])
 
-    req = ""
-    if prayers[p][PR_REQUEST] != prayers[p][PR_CATEGORY]:
-        req = prayers[p][PR_REQUEST]
-    if prayers[p][PR_NOTE] == None:
+    ann = ""
+    #if announcement[a][AN_ANNOUNCEMENT] != announcement[a][AN_CATEGORY]:
+    ann = announcement[a][AN_ANNOUNCEMENT]
+    if announcement[a][AN_NOTE] == None:
         PrNote = ""
     else:
-        PrNote = prayers[p][PR_NOTE]
-    prfile.append(prfmt.format(FOR=prayers[p][PR_REQUESTFOR])) #REQ=req)) #, ,NOTE=PrNote))
+        PrNote = announcement[a][AN_NOTE]
+    anfile.append(prfmt.format(ANNOUNCEMENT=announcement[a][AN_ANNOUNCEMENT])) #REQ=req)) #, ,NOTE=PrNote))
 
-with open("prayers.txt", "w") as osfile:
-    for l in range(len(prfile)):
-        osfile.write(prfile[l] + "\r")
-subprocess.Popen(["notepad", "prayers.txt"])
+with open("announcement.txt", "w") as osfile:
+    for l in range(len(anfile)):
+        osfile.write(anfile[l] + "\r")
+subprocess.Popen(["notepad", "announcement.txt"])

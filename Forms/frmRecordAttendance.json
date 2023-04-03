@@ -1,0 +1,87 @@
+{
+    "frmRecordAttendanceFORM": {
+        "FORM":{
+            "name": "frmRecordAttendance",
+            "type":"Panel",
+            "title":"Record Event Attendance",
+            "posch" : [-1,-1],
+            "sizech": [35,30],
+            "stylelist":["CAPTION"],
+            "controls": ["Close"],
+            "table": {
+                "name": "tblAttendanceEvent",
+                "fields": [
+                    "ID",
+                    "Description", 
+                    "AttendanceType"
+                ],
+                "orderby": "Description LIMIT 1"
+            }
+        },
+        "CONTROLS":{
+            "AttendanceEventID": {
+                "name": "AttendanceEventID",
+                "type": "ComboBox",
+                "posch": [
+                    3,
+                    1
+                ],
+                "lookupchoices": {
+                    "name": "vwattendance",
+                    "fields": [
+                        "ID",
+                        "dt", 
+                        "Description",
+                        "AttendanceType"
+                    ],
+                    "orderby": "dt DESC"
+                }
+            },
+            "lblMembers":{
+                "name":"lblMembers",
+                "posch":[3,3],
+                "type":"StaticText",
+                "label": "Members"
+            },
+            "Members": {
+                "name":"Members",
+                "type":"CheckListBox",
+                "posch": [3,4],
+                "sizech": [15,20],
+                "lookupchoices": {
+                    "name":"vmperson",
+                    "fields": ["ID","CONCAT(FirstName,' ',LastName)"],
+                    "condition": "Member = 1"
+                },
+                "stylelist": "MULTIPLE"
+
+            },
+            "lblVisitors":{
+                "name":"lblMembers",
+                "posch":[18,3],
+                "type":"StaticText",
+                "label": "Visitors"
+            },
+            "Visitors": {
+                "name": "Visitors",
+                "type": "CheckListBox",
+                "posch": [18,4],
+                "sizech": [15,20],
+                "lookupchoices": {
+                    "name":"vmperson",
+                    "fields": ["ID", "CONCAT(FirstName,' ',LastName)"],
+                    "condition": "Member = 0"
+                },
+                "stylelist": "MULTIPLE"
+            },
+            "btnRecordAttendance":{
+                "type":"Button",
+                "name": "btnRecordAttendance",
+                "label": "Record Attendance",
+                "posch": [3,25],
+                "sizech": [20,2],
+                "action": ["process"]
+            }
+        }
+    }
+}

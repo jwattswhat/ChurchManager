@@ -5,8 +5,8 @@
             "type": "Panel",
             "title": "frmMain: Church Manager - Main Menu",
             "posch": [
-                1,
-                1
+                -1,
+                -1
             ],
             "sizech": [
                 35,
@@ -176,6 +176,12 @@
                 "posch" : [4,28.5],
                 "label": "Task"
             },
+            "lblRecordAttendance":{
+                "name": "lblRecordAttendance",
+                "type": "StaticText",
+                "posch": [4,30],
+                "label": "RecordAttendance"
+            },
             "MemberBox": {
                 "name": "MemberBox",
                 "label": "Membership",
@@ -264,6 +270,12 @@
                     17
                 ],
                 "type": "StaticText"
+            },
+            "lblAnnouncements": {
+                "name": "lblAnnouncements",
+                "type": "StaticText",
+                "label": "Announcements",
+                "posch": [19,18.5]
             },
             "UtilitiesBox": {
                 "name": "UtilitiesBox",

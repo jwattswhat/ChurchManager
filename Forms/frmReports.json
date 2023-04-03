@@ -5,8 +5,8 @@
             "type": "Panel",
             "title": "frmReports: Church Manager - Report Menu",
             "posch": [
-                1,
-                1
+                -1,
+                -1
             ],
             "sizech": [
                 45,
