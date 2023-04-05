@@ -4,13 +4,13 @@
             "name": "frmMain",
             "type": "Dialog",
             "title": "frmNotifyviaeMail: Notify Participants",
-            "pos": [
-                60,
-                60
+            "posch": [
+                -1,
+                -1
             ],
-            "size": [
-                350,
-                200
+            "sizech": [
+                40,
+                10
             ],
             "stylelist": [
                 "CAPTION"
@@ -38,7 +38,8 @@
                     "name": "tblService",
                     "fields": [
                         "ID",
-                        "DatetIME"
+                        "DateTime",
+                        "LiturgicalDate"
                     ],
                     "orderby": "DateTime DESC"
                 }

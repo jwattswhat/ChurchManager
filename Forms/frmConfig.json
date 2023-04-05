@@ -3,9 +3,9 @@
         "FORM": {
             "type": "Panel",
             "title": "frmConfig: Config Edit Form",
-            "pos": [
-                10,
-                10
+            "posch": [
+                -1,
+                -1
             ],
             "size": [
                 450,

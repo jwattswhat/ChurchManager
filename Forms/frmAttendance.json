@@ -4,12 +4,12 @@
             "type": "Panel",
             "title": "frmAttendance : Service Edit Form",
             "posch": [
-                5,
-                5
+                -1,
+                -1
             ],
             "sizech": [
                 50,
-                50
+                30
             ],
             "table": {
                 "name": "tblAttendance",
@@ -116,7 +116,7 @@
                 ],
                 "sizech": [
                     30,
-                    40
+                    20
                 ],
                 "stylelist": [
                     "MULTILINE"

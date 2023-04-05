@@ -3,7 +3,7 @@
         "FORM": {
             "type": "Panel",
             "title": "frmAttendanceEvent :Attendance Event Edit Form",
-            "posch": [5,5            ],
+            "posch": [-1,-1],
             "sizech": [
                 50,
                 40
