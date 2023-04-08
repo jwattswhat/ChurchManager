@@ -12,21 +12,9 @@
                 ],
                 "orderby": "DateTime DESC"
             },
-            "pos": [
-                10,
-                10
-            ],
-            "size": [
-                800,
-                400
-            ],
-            "stylelist": "CAPTION",
+            "stylelist": ["CAPTION"],
             "linkedform": {
                 "frmHymnSearch": {
-                    "pos": [
-                        100,
-                        100
-                    ],
                     "table": {
                         "name": "tblHymn",
                         "fields": [
@@ -39,15 +27,15 @@
                     ],
                     "stylelist": [
                         "CAPTION"
+                    ],
+                    "posch": [
+                        8,
+                        8
                     ]
                 },
                 "frmNote": {
                     "name": "frmNote",
                     "nodataDB": true,
-                    "pos": [
-                        100,
-                        100
-                    ],
                     "table": {
                         "name": "tblHymnUsage",
                         "fields": [
@@ -58,45 +46,57 @@
                     "controls": [],
                     "stylelist": [
                         "CAPTION"
+                    ],
+                    "posch": [
+                        8,
+                        8
                     ]
                 }
-            }
+            },
+            "posch": [
+                0,
+                0
+            ],
+            "sizech": [
+                66,
+                33
+            ]
         },
         "CONTROLS": {
             "lblService": {
                 "name": "lblService",
                 "type": "StaticText",
                 "label": "Service:",
-                "pos": [
-                    30,
-                    30
-                ],
-                "readonly": true
+                "readonly": true,
+                "posch": [
+                    2,
+                    2
+                ]
             },
             "DateTime": {
                 "name": "DateTime",
                 "type": "DateTime",
-                "pos": [
-                    150,
-                    30
+                "readonly": true,
+                "posch": [
+                    12,
+                    2
                 ],
-                "size": [
-                    300,
-                    30
-                ],
-                "readonly": true
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "boxHymns": {
                 "name": "boxHymns",
                 "type": "StaticBox",
                 "label": "Hymns",
-                "pos": [
-                    10,
-                    60
+                "posch": [
+                    0,
+                    4
                 ],
-                "size": [
-                    780,
-                    250
+                "sizech": [
+                    64,
+                    20
                 ]
             },
             "dvlHymnUsage": {
@@ -145,42 +145,42 @@
                         }
                     }
                 ],
-                "pos": [
-                    25,
-                    90
+                "posch": [
+                    2,
+                    7
                 ],
-                "size": [
-                    700,
-                    160
+                "sizech": [
+                    58,
+                    13
                 ]
             },
             "btnHymnUsageAdd": {
                 "name": "btnHymnUsageAdd",
                 "type": "Button",
                 "label": "Add",
-                "pos": [
-                    20,
-                    265
+                "posch": [
+                    1,
+                    21
                 ]
             },
             "btnHymnDelete": {
                 "name": "btnHymnDelete",
                 "type": "Button",
                 "label": "Delete",
-                "pos": [
-                    110,
-                    265
+                "posch": [
+                    9,
+                    21
                 ]
             },
             "btnChangeNote": {
                 "name": "btnChangeNote",
                 "type": "Button",
                 "label": "Change Note",
-                "pos": [
-                    200,
-                    265
-                ],
-                "linkedfield": "dvlHymnUsage"
+                "linkedfield": "dvlHymnUsage",
+                "posch": [
+                    16,
+                    21
+                ]
             }
         }
     }

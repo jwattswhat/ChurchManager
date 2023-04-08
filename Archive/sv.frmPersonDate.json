@@ -1,0 +1,125 @@
+{
+    "frmPersonDateFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmPersonDate : Person Date Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                620,
+                500
+            ],
+            "name": "frmPersonDate",
+            "table": {
+                "name": "tblPersonDate",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "Date"
+            },
+            "stylelist": [
+                "CAPTION"
+            ]
+        },
+        "CONTROLS": {
+            "lblPerson": {
+                "type": "StaticText",
+                "label": "Person:",
+                "pos": [
+                    0,
+                    0
+                ],
+                "name": "lblPerson"
+            },
+            "PersonID": {
+                "type": "ComboBox",
+                "name": "PersonID",
+                "lookupchoices": {
+                    "name": "tblPerson",
+                    "fields": [
+                        "ID",
+                        "LastName",
+                        "FirstName"
+                    ],
+                    "orderby": "LastName, FirstName"
+                },
+                "pos": [
+                    125,
+                    0
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblType": {
+                "type": "StaticText",
+                "label": "Type:",
+                "pos": [
+                    0,
+                    30
+                ],
+                "name": "lblType"
+            },
+            "DateType": {
+                "type": "ComboBox",
+                "pos": [
+                    125,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "DateType"
+            },
+            "lblDate": {
+                "type": "StaticText",
+                "label": "Date:",
+                "pos": [
+                    0,
+                    60
+                ],
+                "name": "lblDate"
+            },
+            "Date": {
+                "type": "DatePickerCtrl",
+                "pos": [
+                    125,
+                    60
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "Date"
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "pos": [
+                    0,
+                    90
+                ],
+                "name": "lblNote:"
+            },
+            "Note": {
+                "type": "MultiLine",
+                "pos": [
+                    125,
+                    90
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Note"
+            }
+        }
+    }
+}

@@ -3,10 +3,9 @@
         "FORM": {
             "type": "Panel",
             "title": "frmBugs : Bugs Edit Form",
-            "posch": [-1,-1],
-            "size": [
-                550,
-                450
+            "posch": [
+                -1,
+                -1
             ],
             "name": "frmBugs",
             "table": {
@@ -14,231 +13,241 @@
                 "fields": [
                     "*"
                 ],
-                "orderby" : "Complete, Priority"
+                "orderby": "Complete, Priority"
             },
             "stylelist": [
                 "CAPTION"
+            ],
+            "sizech": [
+                45,
+                37
             ]
         },
         "CONTROLS": {
             "lblDescription": {
                 "type": "StaticText",
                 "label": "Description:",
-                "pos": [
+                "name": "lblDescription",
+                "posch": [
                     0,
                     0
-                ],
-                "name": "lblDescription"
+                ]
             },
             "Description": {
                 "type": "TextCtrl",
-                "pos": [
-                    100,
+                "name": "Description",
+                "posch": [
+                    8,
                     0
                 ],
-                "size": [
-                    300,
-                    30
-                ],
-                "name": "Description"
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblPriority": {
                 "type": "StaticText",
                 "label": "Priority:",
-                "pos": [
+                "name": "lblPriority",
+                "posch": [
                     0,
-                    30
-                ],
-                "name": "lblPriority"
+                    2
+                ]
             },
             "Priority": {
                 "type": "ComboBox",
-                "pos": [
-                    100,
-                    30
+                "name": "Priority",
+                "posch": [
+                    8,
+                    2
                 ],
-                "size": [
-                    300,
-                    30
-                ],
-                "name": "Priority"
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblModule": {
                 "type": "StaticText",
                 "label": "Module:",
-                "pos": [
+                "name": "lblModule",
+                "posch": [
                     0,
-                    60
-                ],
-                "name": "lblModule"
+                    4
+                ]
             },
             "Module": {
                 "type": "TextCtrl",
-                "pos": [
-                    100,
-                    60
+                "name": "Module",
+                "posch": [
+                    8,
+                    4
                 ],
-                "size": [
-                    300,
-                    30
-                ],
-                "name": "Module"
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblScreen": {
                 "type": "StaticText",
                 "label": "Screen:",
-                "pos": [
+                "name": "lblScreen",
+                "posch": [
                     0,
-                    90
-                ],
-                "name": "lblScreen"
+                    7
+                ]
             },
             "Screen": {
                 "type": "TextCtrl",
-                "pos": [
-                    100,
-                    90
+                "name": "Screen",
+                "posch": [
+                    8,
+                    7
                 ],
-                "size": [
-                    300,
-                    30
-                ],
-                "name": "Screen"
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblDateEntered": {
                 "type": "StaticText",
                 "label": "Date Entered:",
-                "pos": [
+                "name": "lblDateEntered",
+                "posch": [
                     0,
-                    120
-                ],
-                "name": "lblDateEntered"
+                    9
+                ]
             },
             "DateEntered": {
                 "type": "DatePickerCtrl",
                 "displaydate": 1,
-                "pos": [
-                    100,
-                    120
-                ],
-                "size": [
-                    300,
-                    30
-                ],
                 "name": "DateEntered",
-                "stylelist": ["ALLOWNONE"]
+                "stylelist": [
+                    "ALLOWNONE"
+                ],
+                "posch": [
+                    8,
+                    9
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblDateDue": {
                 "type": "StaticText",
                 "label": "Date Due:",
-                "pos": [
+                "name": "lblDateDue",
+                "posch": [
                     0,
-                    150
-                ],
-                "name": "lblDateDue"
+                    12
+                ]
             },
             "DateDue": {
                 "type": "DatePickerCtrl",
                 "displaydate": 1,
-                "pos": [
-                    100,
-                    150
-                ],
-                "size": [
-                    300,
-                    30
-                ],
                 "name": "DateDue",
-                "stylelist": ["ALLOWNONE"]
+                "stylelist": [
+                    "ALLOWNONE"
+                ],
+                "posch": [
+                    8,
+                    12
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblEnteredBy": {
                 "type": "StaticText",
                 "label": "Entered By:",
-                "pos": [
+                "name": "lblEnteredBy",
+                "posch": [
                     0,
-                    180
-                ],
-                "name": "lblEnteredBy"
+                    14
+                ]
             },
             "EnteredBy": {
                 "type": "ComboBox",
-                "pos": [
-                    100,
-                    180
+                "name": "EnteredBy",
+                "posch": [
+                    8,
+                    14
                 ],
-                "size": [
-                    300,
-                    30
-                ],
-                "name": "EnteredBy"
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblComplete": {
                 "type": "StaticText",
                 "label": "Complete:",
-                "pos": [
+                "name": "lblComplete",
+                "posch": [
                     0,
-                    210
-                ],
-                "name": "lblComplete"
+                    17
+                ]
             },
             "Complete": {
                 "type": "CheckBox",
-                "pos": [
-                    100,
-                    210
+                "name": "Complete",
+                "posch": [
+                    8,
+                    17
                 ],
-                "size": [
-                    300,
-                    30
-                ],
-                "name": "Complete"
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblCompleteDate": {
                 "type": "StaticText",
                 "label": "Complete Date:",
-                "pos": [
+                "name": "lblCompleteDate",
+                "posch": [
                     0,
-                    240
-                ],
-                "name": "lblCompleteDate"
+                    19
+                ]
             },
             "CompleteDate": {
                 "type": "DatePickerCtrl",
                 "displaydate": 1,
-                "pos": [
-                    100,
-                    240
-                ],
-                "size": [
-                    300,
-                    30
-                ],
                 "name": "CompleteDate",
-                "stylelist": ["ALLOWNONE"]
+                "stylelist": [
+                    "ALLOWNONE"
+                ],
+                "posch": [
+                    8,
+                    19
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblNote": {
                 "type": "StaticText",
                 "label": "Note:",
-                "pos": [
+                "name": "lblNote",
+                "posch": [
                     0,
-                    270
-                ],
-                "name": "lblNote"
+                    22
+                ]
             },
             "Note": {
                 "name": "Note",
                 "type": "MultiLine",
-                "pos": [
-                    100,
-                    270
-                ],
-                "size": [
-                    300,
-                    100
-                ],
                 "stylelist": [
                     "MULTILINE",
                     "WORDWRAP"
+                ],
+                "posch": [
+                    8,
+                    22
+                ],
+                "sizech": [
+                    24,
+                    8
                 ]
             }
         }

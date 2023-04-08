@@ -1,50 +1,53 @@
 {
-    "frmAAABadWithErrorsFORM": {
+    "frmReadingFORM": {
         "FORM": {
-            "name": "frmNotFound",
-            "type": "badPanel",
-            "title": 0,
+            "type": "Panel",
+            "title": "frmReading: Reading Edit Form",
             "pos": [
-                0,
-                0
+                10,
+                10
             ],
-            "posch" : [0,"A"],
             "size": [
-                100,
-                100
+                620,
+                450
             ],
-            "sizech" : [0,0],
+            "name": "frmReading",
             "table": {
-                "name": "tblBadTable",
+                "name": "tblReading",
                 "fields": [
-                    "badfield1","badfield2"
+                    "ID",
+                    "PropersID",
+                    "Reading",
+                    "Reference",
+                    "Note"
                 ],
-                "condition" : "badcondition = 'bad'",
-                "orderby": "BadSort"
+                "orderby": "PropersID"
             },
             "stylelist": [
-                "CAPTION","badstyle"
-            ],
-            "controls" : ["Navigation","Close","anyoldthing"]
+                "CAPTION"
+            ]
         },
         "CONTROLS": {
-            "lblServiceID": {
-                "type": "Notype",
-                "label": "Service:",
+            "lblPropers": {
+                "name": "lblPropers",
+                "type": "StaticText",
+                "label": "Proper:",
                 "pos": [
                     0,
                     30
                 ]
             },
-            "ServiceID": {
-                "name": "ServiceID",
+            "PropersID": {
+                "name": "PropersID",
                 "type": "ComboBox",
                 "lookupchoices": {
-                    "name": "tblService",
-                    "fields": ["ID",
-                        "DateTime"
+                    "name": "tblPropers",
+                    "fields": [
+                        "ID",
+                        "CONCAT(Lectionary,' ',LiturgicalDate)"
                     ],
-                    "orderby": "DateTime"
+                    "orderby": "Lectionary, Sort",
+                    "condition": "ID={PropersID}"
                 },
                 "pos": [
                     125,
@@ -53,11 +56,12 @@
                 "size": [
                     300,
                     30
-                ]
+                ],
+                "readonly": true
             },
             "lblReading": {
                 "type": "StaticText",
-                "label": "Alt Reading:",
+                "label": "Reading:",
                 "pos": [
                     0,
                     60
@@ -107,7 +111,6 @@
                 "name": "lblNote"
             },
             "Note": {
-                "name": "Note",
                 "type": "MultiLine",
                 "pos": [
                     125,
@@ -118,9 +121,9 @@
                     100
                 ],
                 "stylelist": [
-                    "MULTILINE",
-                    "WORDWRAP"
-                ]
+                    "MULTILINE"
+                ],
+                "name": "Note"
             }
         }
     }

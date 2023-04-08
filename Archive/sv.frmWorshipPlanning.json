@@ -1,0 +1,53 @@
+{
+    "frmWorshipPlanningFORM": {
+        "FORM": {
+            "name": "frmMain",
+            "type": "Dialog",
+            "title": "frmWorshipPlanning: Worship Planning",
+            "pos": [
+                60,
+                60
+            ],
+            "size": [
+                350,
+                200
+            ],
+            "stylelist": [
+                "CAPTION"
+            ]
+        },
+        "CONTROLS": {
+            "lblService": {
+                "name": "lblService",
+                "type": "StaticText",
+                "pos": [
+                    30,
+                    30
+                ],
+                "label": "Service"
+            },
+            "ServiceID": {
+                "name": "ServiceID",
+                "type": "ComboBox",
+                "pos": [
+                    120,
+                    30
+                ],
+                "lookupchoices": {
+                    "name": "tblService",
+                    "fields": [
+                        "ID",
+                        "DatetIME"
+                    ],
+                    "orderby": "DateTime DESC"
+                }
+            },
+            "btnRun" : {
+                "name" : "btnRun",
+                "type": "Button",
+                "label" : "Run Report",
+                "pos" : [30,75]
+            }
+        }
+    }
+}

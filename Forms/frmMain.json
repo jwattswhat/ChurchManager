@@ -145,7 +145,10 @@
             "lblCheckList": {
                 "name": "lblCheckList",
                 "type": "StaticText",
-                "posch": [4,21.5],
+                "posch": [
+                    4,
+                    21.5
+                ],
                 "label": "CheckLists"
             },
             "ProjectBox": {
@@ -173,14 +176,11 @@
             "lblTask": {
                 "name": "lblTask",
                 "type": "StaticText",
-                "posch" : [4,28.5],
+                "posch": [
+                    4,
+                    28.5
+                ],
                 "label": "Task"
-            },
-            "lblRecordAttendance":{
-                "name": "lblRecordAttendance",
-                "type": "StaticText",
-                "posch": [4,30],
-                "label": "RecordAttendance"
             },
             "MemberBox": {
                 "name": "MemberBox",
@@ -216,14 +216,20 @@
             "lblAttendanceEvent": {
                 "type": "StaticText",
                 "name": "lblAttendanceEvent",
-                "posch": [19,7.5],
+                "posch": [
+                    19,
+                    7.5
+                ],
                 "label": "Attendance Event"
             },
-            "lblAttendance": {
+            "lblRecordAttendance": {
+                "name": "lblRecordAttendance",
                 "type": "StaticText",
-                "name": "lblAttendance",
-                "posch": [19,9],
-                "label": "Attendance"
+                "posch": [
+                    19,
+                    9
+                ],
+                "label": "Record Attendance"
             },
             "ReportBox": {
                 "type": "StaticBox",
@@ -239,9 +245,12 @@
                 "label": "Reports"
             },
             "lblReports": {
-                "name":"lblReports",
+                "name": "lblReports",
                 "type": "StaticText",
-                "posch": [19,12.5],
+                "posch": [
+                    19,
+                    12.5
+                ],
                 "label": "Reports"
             },
             "lblGenerateOS": {
@@ -274,8 +283,11 @@
             "lblAnnouncements": {
                 "name": "lblAnnouncements",
                 "type": "StaticText",
-                "label": "Announcements",
-                "posch": [19,18.5]
+                "label": "Sunday Announcements",
+                "posch": [
+                    19,
+                    18.5
+                ]
             },
             "UtilitiesBox": {
                 "name": "UtilitiesBox",

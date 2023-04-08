@@ -3,14 +3,6 @@
         "FORM": {
             "type": "Frame",
             "title": "frmPersonDate : Person Address Edit Form",
-            "pos": [
-                10,
-                10
-            ],
-            "size": [
-                620,
-                500
-            ],
             "name": "frmPersonDate",
             "table": {
                 "name": "frmPersonDate",
@@ -21,17 +13,25 @@
             },
             "style": [
                 "CAPTION"
+            ],
+            "posch": [
+                0,
+                0
+            ],
+            "sizech": [
+                51,
+                41
             ]
         },
         "CONTROLS": {
             "lblPerson": {
                 "type": "StaticText",
                 "label": "Person:",
-                "pos": [
+                "name": "lblPerson",
+                "posch": [
                     0,
                     0
-                ],
-                "name": "lblPerson"
+                ]
             },
             "PersonID": {
                 "type": "ComboBox",
@@ -43,16 +43,17 @@
                         "CONCAT(LastName,', ',FirstName) as PersonID"
                     ]
                 },
-                "pos": [
-                    125,
+                "posch": [
+                    10,
                     0
                 ],
-                "size": [
-                    300,
-                    30
+                "sizech": [
+                    24,
+                    2
                 ]
             },
             "dvlPersonDate": {
+                "name":"dvlPersonDate",
                 "type": "DataViewListCtrl",
                 "column": [
                     [
@@ -70,13 +71,13 @@
                 ],
                 "columnSQL": "SELECT DateType,Date,Note FROM tblPersonDate WHERE PersonID = {value};",
                 "value": "PersonID",
-                "pos": [
+                "posch": [
                     0,
-                    30
+                    2
                 ],
-                "size": [
-                    600,
-                    300
+                "sizech": [
+                    49,
+                    24
                 ]
             }
         }

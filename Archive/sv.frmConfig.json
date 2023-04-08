@@ -1,0 +1,116 @@
+{
+    "frmConfigFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmConfig: Config Edit Form",
+            "posch": [
+                -1,
+                -1
+            ],
+            "size": [
+                450,
+                250
+            ],
+            "name": "frmConfig",
+            "table": {
+                "name": "tblConfig",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "ConfigFamily, ConfigType"
+            },
+            "stylelist": [
+                "CAPTION"
+            ]
+        },
+        "CONTROLS": {
+            "lblConfigFamily": {
+                "name": "lblConfigFamily",
+                "type": "StaticText",
+                "label": "Family:",
+                "pos": [
+                    0,
+                    0
+                ]
+            },
+            "ConfigFamily": {
+                "name": "ConfigFamily",
+                "type": "TextCtrl",
+                "pos": [
+                    75,
+                    0
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblConfigType": {
+                "name": "lblConfigType",
+                "type": "StaticText",
+                "label": "Type:",
+                "pos": [
+                    0,
+                    30
+                ]
+            },
+            "ConfigType": {
+                "name": "ConfigType",
+                "type": "TextCtrl",
+                "pos": [
+                    75,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblConfigValue": {
+                "name": "lblConfigValue",
+                "type": "StaticText",
+                "label": "Value:",
+                "pos": [
+                    0,
+                    60
+                ]
+            },
+            "ConfigValue": {
+                "name": "ConfigValue",
+                "type": "TextCtrl",
+                "pos": [
+                    75,
+                    60
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblNote": {
+                "name": "lblNote",
+                "type": "StaticText",
+                "label": "Note:",
+                "pos": [
+                    0,
+                    90
+                ]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "pos": [
+                    75,
+                    90
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "MULTILINE"
+                ]
+            }
+        }
+    }
+}

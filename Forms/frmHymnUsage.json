@@ -3,14 +3,6 @@
         "FORM": {
             "type": "Panel",
             "title": "frmHymnUsage: Hymn Usage Edit Form",
-            "pos": [
-                10,
-                10
-            ],
-            "size": [
-                620,
-                400
-            ],
             "name": "frmHymnUsage",
             "table": {
                 "name": "tblHymnUsage",
@@ -20,7 +12,8 @@
                     "ServiceID",
                     "HymnID",
                     "UsedAs",
-                    "Note"],
+                    "Note"
+                ],
                 "orderby": "DateTime DESC"
             },
             "stylelist": [
@@ -29,25 +22,34 @@
             "linkedform": {
                 "frmHymnSearch": {
                     "name": "frmHymnSearch",
-                    "pos": [
-                        630,
-                        10
+                    "posch": [
+                        52,
+                        0
                     ]
                 }
-            }
+            },
+            "posch": [
+                0,
+                0
+            ],
+            "sizech": [
+                51,
+                33
+            ]
         },
         "CONTROLS": {
             "lblChurchID": {
                 "name": "lblChurchID",
                 "type": "StaticText",
                 "label": "Church:",
-                "pos": [0,30]
+                "posch": [
+                    0,
+                    2
+                ]
             },
             "ChurchID": {
                 "name": "ChurchID",
                 "type": "ComboBox",
-                "pos": [150,30],
-                "size": [300,30],
                 "lookupchoices": {
                     "name": "tblChurch",
                     "fields": [
@@ -57,28 +59,28 @@
                     "orderby": "Church"
                 },
                 "defaultvalue": 0,
-                "readonly": true
+                "readonly": true,
+                "posch": [
+                    12,
+                    2
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblServiceID": {
                 "name": "lblServiceID",
                 "type": "StaticText",
                 "label": "Service:",
-                "pos": [
+                "posch": [
                     0,
-                    60
+                    4
                 ]
             },
             "ServiceID": {
                 "name": "ServiceID",
                 "type": "ComboBox",
-                "pos": [
-                    150,
-                    60
-                ],
-                "size": [
-                    300,
-                    30
-                ],
                 "lookupchoices": {
                     "name": "tblService",
                     "fields": [
@@ -87,15 +89,23 @@
                     ],
                     "orderby": "DateTime DESC"
                 },
-                "readonly": true
+                "readonly": true,
+                "posch": [
+                    12,
+                    4
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblHymnID": {
                 "name": "lblHymnID",
                 "type": "StaticText",
                 "label": "Hymn:",
-                "pos": [
+                "posch": [
                     0,
-                    90
+                    7
                 ]
             },
             "HymnID": {
@@ -110,75 +120,84 @@
                     ],
                     "orderby": "Hymn ASC"
                 },
-                "pos": [
-                    150,
-                    90
+                "posch": [
+                    12,
+                    7
                 ],
-                "size": [
-                    300,
-                    30
+                "sizech": [
+                    24,
+                    2
                 ]
             },
             "btnOpenHymnSearch": {
                 "name": "btnOpenHymnSearch",
                 "type": "Button",
                 "label": "Select Hymn",
-                "pos": [
-                    475,
-                    90
+                "action": [
+                    "openlinkedform",
+                    "frmHymnSearch"
                 ],
-                "action": ["openlinkedform","frmHymnSearch"]
+                "posch": [
+                    39,
+                    7
+                ]
             },
             "lblUsedAs": {
                 "name": "lblUsedAs",
                 "type": "StaticText",
                 "label": "UsedAs:",
-                "pos": [
+                "posch": [
                     0,
-                    120
+                    9
                 ]
             },
             "UsedAs": {
                 "name": "UsedAs",
                 "type": "ComboBox",
-                "pos": [
-                    150,
-                    120
+                "posch": [
+                    12,
+                    9
                 ],
-                "size": [
-                    300,
-                    30
+                "sizech": [
+                    24,
+                    2
                 ]
             },
             "btnDisplayUsage": {
-                "name":"btnDisplayUsage",
+                "name": "btnDisplayUsage",
                 "type": "Button",
                 "label": "Show Usage",
-                "pos": [475,120],
-                "action": ["openreport","CMHU03"]
+                "action": [
+                    "openreport",
+                    "CMHU03"
+                ],
+                "posch": [
+                    39,
+                    9
+                ]
             },
             "lblNote": {
                 "name": "lblNote",
                 "type": "StaticText",
                 "label": "Note:",
-                "pos": [
+                "posch": [
                     0,
-                    150
+                    12
                 ]
             },
             "Note": {
                 "name": "Note",
                 "type": "MultiLine",
-                "pos": [
-                    150,
-                    150
-                ],
-                "size": [
-                    300,
-                    100
-                ],
                 "stylelist": [
-                    "TE_MULTILINE"
+                    "MULTILINE"
+                ],
+                "posch": [
+                    12,
+                    12
+                ],
+                "sizech": [
+                    24,
+                    8
                 ]
             }
         }

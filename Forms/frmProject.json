@@ -3,14 +3,6 @@
         "FORM": {
             "type": "Panel",
             "title": "frmProject: Project Edit Form",
-            "pos": [
-                10,
-                10
-            ],
-            "size": [
-                500,
-                470
-            ],
             "name": "frmProject",
             "table": {
                 "name": "tblProject",
@@ -23,18 +15,19 @@
                 "CAPTION"
             ],
             "linkedform": {
-                "frmTask" : {
+                "frmTask": {
                     "name": "frmTask",
                     "type": "Panel",
-                    "pos": [100,100],
                     "controls": [
                         "Navigation",
                         "Update",
                         "Close"
                     ],
                     "table": {
-                        "name" : "tblTask",
-                        "fields" : ["*"],
+                        "name": "tblTask",
+                        "fields": [
+                            "*"
+                        ],
                         "condition": "ProjectID = {ID}",
                         "orderby": "Complete DESC, StartDate,Task"
                     },
@@ -45,21 +38,35 @@
                         "ProjectID",
                         "ID"
                     ],
-                   "bindbtn": "btnTask"
+                    "bindbtn": "btnTask",
+                    "posch": [
+                        8,
+                        8
+                    ]
                 }
-            }
+            },
+            "posch": [
+                0,
+                0
+            ],
+            "sizech": [
+                41,
+                39
+            ]
         },
         "CONTROLS": {
             "lblChurch": {
                 "name": "lblChurchID",
                 "type": "StaticText",
                 "label": "Church:",
-                "pos":[0,10]
+                "posch": [
+                    0,
+                    0
+                ]
             },
             "ChurchID": {
                 "name": "ChurchID",
                 "type": "ComboBox",
-                "pos": [80,10],
                 "lookupchoices": {
                     "name": "tblChurch",
                     "fields": [
@@ -68,174 +75,212 @@
                     ],
                     "sort": "Church"
                 },
-                "defaultvalue": 0
+                "defaultvalue": 0,
+                "posch": [
+                    6,
+                    0
+                ]
             },
             "lblComplete": {
                 "type": "StaticText",
-                "pos":[0,40],
                 "label": "Complete:",
-                "name": "lblComplete"
+                "name": "lblComplete",
+                "posch": [
+                    0,
+                    3
+                ]
             },
             "Complete": {
                 "type": "CheckBox",
-                "pos":[80,40],
-                "name": "Complete"
+                "name": "Complete",
+                "posch": [
+                    6,
+                    3
+                ]
             },
             "lblCompletionDate": {
-                "type":"StaticText",
+                "type": "StaticText",
                 "name": "lblCompletionDate",
-                "pos": [0,70],
-                "label": "Completion Date:"
+                "label": "Completion Date:",
+                "posch": [
+                    0,
+                    5
+                ]
             },
-            "CompletionDate" : {
+            "CompletionDate": {
                 "type": "DatePickerCtrl",
                 "name": "CompletionDate",
-                "pos":[80,70],
-                "size": [
-                    300,
-                    30
+                "stylelist": [
+                    "ALLOWNONE"
                 ],
-                "stylelist": ["ALLOWNONE"],
-                "defaultvalue":null
+                "defaultvalue": null,
+                "posch": [
+                    6,
+                    5
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblProject": {
                 "type": "StaticText",
                 "label": "Project:",
-                "pos": [
+                "name": "lblProject",
+                "posch": [
                     0,
-                    100
-                ],
-                "name": "lblProject"
+                    8
+                ]
             },
             "Project": {
                 "type": "TextCtrl",
-                "pos": [
-                    80,
-                    100
+                "name": "Project",
+                "posch": [
+                    6,
+                    8
                 ],
-                "size": [
-                    300,
-                    30
-                ],
-                "name": "Project"
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "btnTask": {
-                "name":"btnTask",
+                "name": "btnTask",
                 "label": "Tasks",
-                "pos": [380,70],
                 "type": "Button",
-                "action": ["openlinkedform","frmTask"]
+                "action": [
+                    "openlinkedform",
+                    "frmTask"
+                ],
+                "posch": [
+                    31,
+                    5
+                ]
             },
             "lblDescription": {
                 "type": "StaticText",
                 "label": "Descritption:",
-                "pos": [
+                "name": "lblDescription",
+                "posch": [
                     0,
-                    130
-                ],
-                "name": "lblDescription"
+                    10
+                ]
             },
             "Description": {
                 "type": "TextCtrl",
-                "pos": [
-                    80,
-                    130
+                "name": "Description",
+                "posch": [
+                    6,
+                    10
                 ],
-                "size": [
-                    300,
-                    30
-                ],
-                "name": "Description"
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblProjectCategory": {
-                "type":"StaticText",
-                "pos": [0,160],
+                "type": "StaticText",
                 "label": "Category:",
-                "name":"lblprojectCategory"
+                "name": "lblprojectCategory",
+                "posch": [
+                    0,
+                    13
+                ]
             },
             "ProjectCategory": {
                 "type": "ComboBox",
-                "pos": [80,160],
-                "size": [300,30],
-                "name": "ProjectCategory"
+                "name": "ProjectCategory",
+                "posch": [
+                    6,
+                    13
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblPriority": {
                 "type": "StaticText",
-                "pos": [0,190],
                 "label": "Priority:",
-                "name": "lblPriority"
+                "name": "lblPriority",
+                "posch": [
+                    0,
+                    15
+                ]
             },
-            "Priority" : {
+            "Priority": {
                 "type": "ComboBox",
-                "pos": [80,190],
-                "size": [300,30],
-                "name" : "Priority"
+                "name": "Priority",
+                "posch": [
+                    6,
+                    15
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblStartDate": {
                 "type": "StaticText",
                 "label": "Start Date:",
-                "pos": [
+                "name": "lblStartDate",
+                "posch": [
                     0,
-                    220
-                ],
-                "name": "lblStartDate"
+                    18
+                ]
             },
             "StartDate": {
                 "type": "DatePickerCtrl",
-                "pos": [
-                    80,
-                    220
-                ],
-                "size": [
-                    300,
-                    30
-                ],
                 "name": "StartDate",
-                "stylelist": ["ALLOWNONE"],
-                "defaultvalue":null
+                "stylelist": [
+                    "ALLOWNONE"
+                ],
+                "defaultvalue": null,
+                "posch": [
+                    6,
+                    18
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblEndDate": {
                 "type": "StaticText",
                 "label": "End Date:",
-                "pos": [
+                "name": "lblEndDate",
+                "posch": [
                     0,
-                    250
-                ],
-                "name": "lblEndDate"
+                    20
+                ]
             },
             "EndDate": {
                 "type": "DatePickerCtrl",
-                "pos": [
-                    80,
-                    250
-                ],
-                "size": [
-                    300,
-                    30
-                ],
                 "name": "EndDate",
-                "stylelist": ["ALLOWNONE"],
-                "defaultvalue":null
+                "stylelist": [
+                    "ALLOWNONE"
+                ],
+                "defaultvalue": null,
+                "posch": [
+                    6,
+                    20
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblAssignedTo": {
-                "type": "",
+                "type": "StaticText",
                 "label": "AssignedTo:",
-                "pos": [
+                "name": "lblAssignedTo",
+                "posch": [
                     0,
-                    280
-                ],
-                "name": "lblAssignedTo"
+                    23
+                ]
             },
             "AssignedTo": {
                 "type": "ComboBox",
-                "pos": [
-                    80,
-                    280
-                ],
-                "size": [
-                    300,
-                    30
-                ],
                 "lookupchoices": {
                     "name": "tblPerson",
                     "fields": [
@@ -245,53 +290,60 @@
                     ],
                     "orderby": "LastName,FirstName"
                 },
-                "name": "AssignedTo"
+                "name": "AssignedTo",
+                "posch": [
+                    6,
+                    23
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblAssignedToText": {
                 "type": "StaticText",
                 "label": "Assigned To Alt:",
-                "pos": [
+                "name": "lblAssignedToText",
+                "posch": [
                     0,
-                    310
-                ],
-                "name": "lblAssignedToText"
+                    25
+                ]
             },
             "AssignedToText": {
                 "type": "TextCtrl",
-                "pos": [
-                    80,
-                    310
+                "name": "AssignedToText",
+                "posch": [
+                    6,
+                    25
                 ],
-                "size": [
-                    300,
-                    30
-                ],
-                "name": "AssignedToText"
+                "sizech": [
+                    24,
+                    2
+                ]
             },
-
             "lblNote": {
                 "type": "StaticText",
                 "label": "Note:",
-                "pos": [
+                "name": "lblNote",
+                "posch": [
                     0,
-                    340
-                ],
-                "name": "lblNote"
+                    28
+                ]
             },
             "Note": {
                 "type": "MultiLine",
-                "pos": [
-                    80,
-                    340
-                ],
-                "size": [
-                    300,
-                    100
-                ],
                 "stylelist": [
                     "MULTILINE"
                 ],
-                "name": "Note"
+                "name": "Note",
+                "posch": [
+                    6,
+                    28
+                ],
+                "sizech": [
+                    24,
+                    8
+                ]
             }
         }
     }

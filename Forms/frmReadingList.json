@@ -5,22 +5,23 @@
             "title": "frmReadingList : ReadingsDisplay",
             "subformtype": "StaticBox",
             "label": "Readings",
-            "pos": [
-                10,
-                10
-            ],
-            "size": [
-                800,
-                350
-            ],
             "name": "frmReadingList",
             "tablename": "tblPropers",
             "stylelist": [
                 "CAPTION"
+            ],
+            "posch": [
+                0,
+                0
+            ],
+            "sizech": [
+                66,
+                29
             ]
         },
         "CONTROLS": {
             "dvlReadings": {
+                "name":"dvlReadings",
                 "type": "DataViewListCtrl",
                 "column": [
                     [
@@ -38,13 +39,13 @@
                 ],
                 "columnSQL": "SELECT Reading, ReadingReference, Note FROM tblReading WHERE PropersID = {value};",
                 "value": "ID",
-                "pos": [
-                    25,
-                    30
+                "posch": [
+                    2,
+                    2
                 ],
-                "size": [
-                    760,
-                    250
+                "sizech": [
+                    63,
+                    20
                 ]
             }
         }

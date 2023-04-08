@@ -11,7 +11,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["--ID","47"]
+            "args": ["--user","church","--password","Church99"]
         }
     ]
 }

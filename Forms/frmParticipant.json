@@ -4,14 +4,6 @@
             "name": "frmParticipant",
             "type": "Panel",
             "title": "frmParticipant: Participant Edit Form",
-            "pos": [
-                10,
-                10
-            ],
-            "size": [
-                750,
-                550
-            ],
             "table": {
                 "name": "tblParticipant",
                 "fields": [
@@ -29,73 +21,73 @@
             ],
             "stylelist": [
                 "CAPTION"
+            ],
+            "posch": [
+                0,
+                0
+            ],
+            "sizech": [
+                62,
+                45
             ]
         },
         "CONTROLS": {
             "lblName": {
                 "type": "StaticText",
                 "label": "Name:",
-                "pos": [
+                "name": "lblName",
+                "posch": [
                     0,
-                    30
-                ],
-                "name": "lblName"
+                    2
+                ]
             },
             "Name": {
                 "name": "Name",
                 "type": "TextCtrl",
-                "pos": [
-                    125,
-                    30
+                "posch": [
+                    10,
+                    2
                 ],
-                "size": [
-                    300,
-                    30
+                "sizech": [
+                    24,
+                    2
                 ]
             },
             "lblRoles": {
                 "type": "StaticText",
                 "label": "Roles:",
-                "pos": [
-                    10,
-                    60
-                ],
-                "name": "lblRole"
+                "name": "lblRole",
+                "posch": [
+                    0,
+                    4
+                ]
             },
             "Roles": {
                 "name": "Roles",
                 "type": "ListCtrl",
-                "label" :"Roles",
-                "pos": [
-                    10,
-                    90
+                "label": "Roles",
+                "posch": [
+                    0,
+                    7
                 ],
-                "size": [
-                    350,
-                    200
+                "sizech": [
+                    29,
+                    16
                 ]
             },
             "lblSchedule": {
                 "type": "StaticText",
                 "label": "Schedule:",
-                "pos": [
-                    375,
-                    60
-                ],
-                "name": "lblSchedules"
+                "name": "lblSchedules",
+                "posch": [
+                    31,
+                    4
+                ]
             },
             "Schedule": {
                 "name": "Schedule",
                 "type": "ListCtrlID",
-                "label" : "Schedule",
-                "pos": [
-                    375,
-                    90
-                ],
-                "size": [
-                    300,
-                    200
-                ],
+                "label": "Schedule",
                 "lookupchoices": {
                     "name": "tblSchedule",
                     "fields": [
@@ -113,31 +105,39 @@
                     "display": "Description",
                     "key": "ID",
                     "orderby": "Description"
-                }
+                },
+                "posch": [
+                    31,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    16
+                ]
             },
             "lblNote": {
                 "type": "StaticText",
                 "label": "Note",
-                "pos": [
+                "name": "lblNote",
+                "posch": [
                     0,
-                    300
-                ],
-                "name": "lblNote"
+                    24
+                ]
             },
             "Note": {
                 "name": "Note",
                 "type": "MultiLine",
-                "pos": [
-                    125,
-                    300
-                ],
-                "size": [
-                    300,
-                    100
-                ],
                 "stylelist": [
                     "MULTILINE",
                     "WORDWRAP"
+                ],
+                "posch": [
+                    10,
+                    24
+                ],
+                "sizech": [
+                    24,
+                    8
                 ]
             }
         }

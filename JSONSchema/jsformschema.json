@@ -1,0 +1,177 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "definitions": {
+    "possize":{
+      "type": "array",
+      "items": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        }
+      ]
+    },
+    "tableproperties": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "orderby": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "fields"
+      ]
+    },
+    "formproperties": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "Panel",
+            "Dialog",
+            "Frame",
+            "StaticBox"
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "table": {"$ref":"#/definitions/tableproperties"},
+        "stylelist": {
+          "type": "array",
+          "items": {
+            "type":"string",
+            "enum": ["CAPTION","READONLY"]}
+        },
+        "posch": {"$ref":"#/definitions/possize"},
+        "sizech": {"$ref":"#/definitions/possize"},
+        "pos": {"$ref":"#/definitions/possize"},
+        "size": {"$ref":"#/definitions/possize"},
+        "linkedform":{
+            "type":"object",
+            "patternProperties":{
+              ".*":{"$ref":"#/definitions/formproperties"}
+            },
+            "additionalProperties": true
+        },
+        "subform":{
+          "type":"object",
+          "patternProperties":{
+            ".*":{"$ref":"#/definitions/formproperties"}
+          },
+          "additionalProperties": true
+        }
+      }
+    }
+  },
+  "type": "object",
+  "patternProperties": {
+    ".*": {
+      "type": "object",
+      "properties": {
+        "FORM": {"$ref": "#/definitions/formproperties"},
+        "CONTROLS": {
+          "type": "object",
+          "patternProperties": {
+            ".*":{
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum":[
+                    "StaticBox",
+                    "StaticText",
+                    "MultiLine",
+                    "TextCtrl",
+                    "TextNumber",
+                    "JSON",
+                    "ComboBox",
+                    "ListCtrl",
+                    "ListCtrlID",
+                    "CheckBox",
+                    "CheckListBox",
+                    "CheckListEdit",
+                    "Button",
+                    "DataViewListCtrl",
+                    "DateTime",
+                    "DatePickerCtrl",
+                    "TimePickerCtrl",
+                    "FilePickerCtrl",
+                    "HTMLCtrl"
+                  ]
+                },
+                "label": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "posch": {"$ref":"#/definitions/possize"},
+                "sizech":{"$ref":"#/definitions/possize"},
+                "pos": {"$ref":"#/definitions/possize"},
+                "size":{"$ref":"#/definitions/possize"},
+                "stylelist": {
+                  "type": "array",
+                  "items": {
+                    "type":"string",
+                    "enum": [
+                      "MULTILINE",
+                      "DONTWRAP",
+                      "WORDWRAP",
+                      "READONLY",
+                      "PROCESSENTER",
+                      "PROCESSTAB",
+                      "FLPCHANGEDIR",
+                      "FLPSMALL",
+                      "FLPUSETEXTCTRL",
+                      "ALLOWNONE",
+                      "DROPDOWN",
+                      "MULTIPLE"
+                    ] 
+                  }
+                },
+                "lookupchoices":{"$ref":"#/definitions/tableproperties"},
+                "action":{
+                  "type": "array",
+                  "items": [
+                    {
+                      "type":"string",
+                      "enum": ["openlinkedform","refreshform","editchecklist","openfile","openreport","process"]
+                    },
+                    {"type":"string"}
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "name"
+              ]
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "FORM",
+        "CONTROLS"
+      ]
+    }
+  }
+}

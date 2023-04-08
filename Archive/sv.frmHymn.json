@@ -1,0 +1,167 @@
+{
+    "frmHymnFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmHymn: Hymn Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                620,
+                400
+            ],
+            "name": "frmHymn",
+            "table": {
+                "name": "tblHymn",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "Hymn"
+            },
+            "stylelist": [
+                "CAPTION"
+            ]
+        },
+        "CONTROLS": {
+            "lblHymnal": {
+                "name": "lblHymnal",
+                "type": "StaticText",
+                "label": "Hymnal:",
+                "pos": [
+                    0,
+                    0
+                ]
+            },
+            "HymnalID": {
+                "name": "HymnalID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblHymnal",
+                    "fields": [
+                        "ID",
+                        "Hymnal"
+                    ],
+                    "orderby": "Hymnal"
+                },
+                "pos": [
+                    80,
+                    0
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "savestyle": "CB_READONLY"
+            },
+            "lblHymn": {
+                "name": "lblHymn",
+                "type": "StaticText",
+                "label": "Hymn:",
+                "pos": [
+                    0,
+                    30
+                ]
+            },
+            "Hymn": {
+                "name": "Hymn",
+                "type": "TextCtrl",
+                "pos": [
+                    80,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblTitle": {
+                "name": "lblTitle",
+                "type": "StaticText",
+                "label": "Title:",
+                "pos": [
+                    0,
+                    60
+                ]
+            },
+            "Title": {
+                "name": "Title",
+                "type": "TextCtrl",
+                "pos": [
+                    80,
+                    60
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblBibleText": {
+                "name": "lblBibleText",
+                "type": "StaticText",
+                "label": "Bible Refs:",
+                "pos": [
+                    0,
+                    90
+                ]
+            },
+            "BibleText": {
+                "name": "BibleText",
+                "type": "TextCtrl",
+                "pos": [
+                    80,
+                    90
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblCategory": {
+                "name": "lblCategory",
+                "type": "StaticText",
+                "label": "Category:",
+                "pos": [
+                    0,
+                    120
+                ]
+            },
+            "Category": {
+                "name": "Category",
+                "type": "ComboBox",
+                "pos": [
+                    80,
+                    120
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "lblNote": {
+                "name": "lblNote",
+                "type": "StaticText",
+                "label": "Note:",
+                "pos": [
+                    0,
+                    150
+                ]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "pos": [
+                    80,
+                    150
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "MULTILINE"
+                ]
+            }
+        }
+    }
+}

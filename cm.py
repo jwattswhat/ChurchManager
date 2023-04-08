@@ -10,6 +10,7 @@ import wx
 import mysql
 import subprocess
 import json
+import argparse
 
 import JSForm
 import fnSchedule
@@ -173,10 +174,9 @@ class clsForm(JSForm.clsForms.clsForm):
             os.rename(path + filename[0] + filename[1], path + newfilename)
             self.CONTROLID[field].SetValue(newfilename)
 
-    def _processaction(self,event):
-
+    def _processaction(self, event):
         class _neededoptionsdialog(wx.Dialog):
-            def __init__(self, parent, title,formlabel=None):
+            def __init__(self, parent, title, formlabel=None):
                 super().__init__(parent, title=title, size=(200, 150))
                 panel = wx.Panel(self)
                 self.text = wx.StaticText(
@@ -193,36 +193,46 @@ class clsForm(JSForm.clsForms.clsForm):
                     pos=(10, 75),
                 )
 
-        def processattendance(field,):
+        def processattendance(
+            field,
+        ):
             communion = self.CONTROLID[field].GetCheckedItems()
             attend = self.CONTROLID[field].GetSelections()
-            #if (not communion and not attend) and (field == "Members"):
+            # if (not communion and not attend) and (field == "Members"):
             #    dlg = _neededoptionsdialog(self.FORM, title="Required Field",formlabel="No Attendance Data.")
             #    result = dlg.ShowModal()
             #    dlg.Destroy()
             #    return False
 
             attrec = []
-            for a in range(0,len(attend)):
-                attrec.append({"AttendanceEventID":attendevent,
-                            "PersonID":self.CONTROLID[field].choices.id[attend[a]],
-                            "Communion":0
-                            })
-            for c in range(0,len(communion)):
+            for a in range(0, len(attend)):
+                attrec.append(
+                    {
+                        "AttendanceEventID": attendevent,
+                        "PersonID": self.CONTROLID[field].choices.id[attend[a]],
+                        "Communion": 0,
+                    }
+                )
+            for c in range(0, len(communion)):
                 found = False
                 for a in range(len(attrec)):
-                    if self.CONTROLID[field].choices.id[communion[c]] == (attrec[a]["PersonID"]):
-                        attrec[a]["Communion"] = (CommunionOffered == 1)
+                    if self.CONTROLID[field].choices.id[communion[c]] == (
+                        attrec[a]["PersonID"]
+                    ):
+                        attrec[a]["Communion"] = CommunionOffered == 1
                         found = True
                 if not found:
-                    attrec.append({"AttendanceEventID":attendevent,
-                            "PersonID":self.CONTROLID[field].choices.id[communion[c]],
-                            "Communion": (CommunionOffered == 1)
-                            })
+                    attrec.append(
+                        {
+                            "AttendanceEventID": attendevent,
+                            "PersonID": self.CONTROLID[field].choices.id[communion[c]],
+                            "Communion": (CommunionOffered == 1),
+                        }
+                    )
 
             attendancetable = {
-                "name":"tblAttendance",
-                "fields": ["PersonID","AttendanceEventID","Communion"]                    
+                "name": "tblAttendance",
+                "fields": ["PersonID", "AttendanceEventID", "Communion"],
             }
 
             self.sql = JSForm.clsSQL(self.DBConnection, attendancetable)
@@ -239,11 +249,17 @@ class clsForm(JSForm.clsForms.clsForm):
         field = event.GetEventObject().GetName()
         attendevent = self.CONTROLID["AttendanceEventID"].GetValue()
         if not attendevent:
-            dlg = _neededoptionsdialog(self.FORM, title="Required Field",formlabel="Attendance Event not entered.")
+            dlg = _neededoptionsdialog(
+                self.FORM,
+                title="Required Field",
+                formlabel="Attendance Event not entered.",
+            )
             result = dlg.ShowModal()
             dlg.Destroy()
             return
-        sql = "SELECT CommunionOffered FROM tblAttendanceEvent WHERE ID = {AttenanceEventID}".format(AttenanceEventID=attendevent)
+        sql = "SELECT CommunionOffered FROM tblAttendanceEvent WHERE ID = {AttenanceEventID}".format(
+            AttenanceEventID=attendevent
+        )
         cursor = self.DBConnection.cursor()
         cursor.execute(sql)
         row = cursor.fetchone()
@@ -253,7 +269,9 @@ class clsForm(JSForm.clsForms.clsForm):
         if not processattendance("Visitors"):
             return
 
+
 ##  Main App    ##
+
 
 def _buttonclick(event):
     def _runSPrpt(event):
@@ -373,14 +391,16 @@ def _buttonclick(event):
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runReports)
             frm.show()
             return
+
         case "lblFamily":
             formname = "frmFamily"
         case "lblPerson":
             formname = "frmPerson"
         case "lblAttendanceEvent":
             formname = "frmAttendanceEvent"
-        case "lblAttendance":
-            formname = "frmAttendance"
+        case "lblRecordAttendance":
+            formname = "frmRecordAttendance"
+
         case "lblParticipant":
             formname = "frmParticipant"
         case "lblSchedule":
@@ -397,8 +417,6 @@ def _buttonclick(event):
             formname = "frmProject"
         case "lblTask":
             formname = "frmTask"
-        case "lblRecordAttendance":
-            formname = "frmRecordAttendance"
         case _:
             print("form name not found found. {}".format(formname))
 
@@ -406,12 +424,30 @@ def _buttonclick(event):
         form = clsForm(cmfrm, ChurchDB.DBConnection, formname)
         form.show()
 
+cmparser = argparse.ArgumentParser(
+    prog="ChurchManager",
+    description="Church Manager v0.1"
+)
+cmparser.add_argument("-s","--server",type=str,default="localhost")
+cmparser.add_argument("-d","--database",type=str,default="ChurchDB")
+cmparser.add_argument("-u","--user",type=str)
+cmparser.add_argument("-p","--password",type=str)
+
+args = cmparser.parse_args()
+#print(args.server,args.database,args.user,args.password)
+
+
+server = args.server
+database = args.database
+user = args.user
+password = args.password
+
 app = wx.App(0)
 
 #
 # 	Connect to DataBase
 #
-ChurchDB = JSForm.clsDB("localhost", "ChurchDB", "church", "Church99")
+ChurchDB = JSForm.clsDB(server,database,user,password)
 JSForm.CONFIG.set_Config_DBConnection(ChurchDB.DBConnection)
 JSForm.OPTION.set_Option_DBConnection(ChurchDB.DBConnection)
 JSForm.FONT.set_Font_DBConnection(ChurchDB.DBConnection)
@@ -450,7 +486,6 @@ cmfrm.CONTROLID["lblServiceSchedule"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblFamily"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblPerson"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblAttendanceEvent"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblAttendance"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblConfig"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblOptions"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)

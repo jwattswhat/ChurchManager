@@ -1,0 +1,132 @@
+{
+    "frmTaskWorkerFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmTaskWorkers: Task WorkersEdit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                500,
+                450
+            ],
+            "name": "frmTaskWorker",
+            "table": {
+                "name": "tblTaskWorkers",
+                "fields": [
+                    "*"
+                ]
+            },
+            "stylelist": [
+                "CAPTION"
+            ], 
+            "controls" : ["Navigation","Close"]
+
+        },
+        "CONTROLS": {
+            "lblTaskID":{
+                "type": "StaticText",
+                "pos": [0,30],
+                "label": "Task:",
+                "name":"lblTaskID"
+            },
+            "TaskID": {
+                "type": "ComboBox",
+                "pos": [
+                    80,
+                    30
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "lookupchoices": {
+                    "name": "tblTask",
+                    "fields": [
+                        "ID",
+                        "Task",
+                        "Description"
+                    ],
+                    "orderby": "Task,Description"
+                },
+                "name": "TaskID"
+            },
+            "lblPersonID": {
+                "type": "StaticText",
+                "label": "Worker:",
+                "pos": [
+                    0,
+                    60
+                ],
+                "name": "lblPersonID"
+            },
+            "PersonID": {
+                "type": "ComboBox",
+                "pos": [
+                    80,
+                    60
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "lookupchoices": {
+                    "name": "tblPerson",
+                    "fields": [
+                        "ID",
+                        "FirstName",
+                        "LastName"
+                    ],
+                    "orderby": "LastName,FirstName"
+                },
+                "name": "PersonID"
+            },
+            "lblPersonText": {
+                "type": "StaticText",
+                "label": "Worker Alt:",
+                "pos": [
+                    0,
+                    90
+                ],
+                "name": "lblPersonText"
+            },
+            "PersonText": {
+                "type": "TextCtrl",
+                "pos": [
+                    80,
+                    90
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "name": "PersonText"
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "pos": [
+                    0,
+                    120
+                ],
+                "name": "lblNote"
+            },
+            "Note": {
+                "type": "MultiLine",
+                "pos": [
+                    80,
+                    120
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Note"
+            }
+        }
+    }
+}

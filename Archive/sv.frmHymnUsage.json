@@ -1,0 +1,186 @@
+{
+    "frmHymnUsageFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmHymnUsage: Hymn Usage Edit Form",
+            "pos": [
+                10,
+                10
+            ],
+            "size": [
+                620,
+                400
+            ],
+            "name": "frmHymnUsage",
+            "table": {
+                "name": "tblHymnUsage",
+                "fields": [
+                    "ID",
+                    "ChurchID",
+                    "ServiceID",
+                    "HymnID",
+                    "UsedAs",
+                    "Note"],
+                "orderby": "DateTime DESC"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "linkedform": {
+                "frmHymnSearch": {
+                    "name": "frmHymnSearch",
+                    "pos": [
+                        630,
+                        10
+                    ]
+                }
+            }
+        },
+        "CONTROLS": {
+            "lblChurchID": {
+                "name": "lblChurchID",
+                "type": "StaticText",
+                "label": "Church:",
+                "pos": [0,30]
+            },
+            "ChurchID": {
+                "name": "ChurchID",
+                "type": "ComboBox",
+                "pos": [150,30],
+                "size": [300,30],
+                "lookupchoices": {
+                    "name": "tblChurch",
+                    "fields": [
+                        "ID",
+                        "Church"
+                    ],
+                    "orderby": "Church"
+                },
+                "defaultvalue": 0,
+                "readonly": true
+            },
+            "lblServiceID": {
+                "name": "lblServiceID",
+                "type": "StaticText",
+                "label": "Service:",
+                "pos": [
+                    0,
+                    60
+                ]
+            },
+            "ServiceID": {
+                "name": "ServiceID",
+                "type": "ComboBox",
+                "pos": [
+                    150,
+                    60
+                ],
+                "size": [
+                    300,
+                    30
+                ],
+                "lookupchoices": {
+                    "name": "tblService",
+                    "fields": [
+                        "ID",
+                        "DateTime"
+                    ],
+                    "orderby": "DateTime DESC"
+                },
+                "readonly": true
+            },
+            "lblHymnID": {
+                "name": "lblHymnID",
+                "type": "StaticText",
+                "label": "Hymn:",
+                "pos": [
+                    0,
+                    90
+                ]
+            },
+            "HymnID": {
+                "name": "HymnID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblHymn",
+                    "fields": [
+                        "ID",
+                        "Hymn",
+                        "Title"
+                    ],
+                    "orderby": "Hymn ASC"
+                },
+                "pos": [
+                    150,
+                    90
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "btnOpenHymnSearch": {
+                "name": "btnOpenHymnSearch",
+                "type": "Button",
+                "label": "Select Hymn",
+                "pos": [
+                    475,
+                    90
+                ],
+                "action": ["openlinkedform","frmHymnSearch"]
+            },
+            "lblUsedAs": {
+                "name": "lblUsedAs",
+                "type": "StaticText",
+                "label": "UsedAs:",
+                "pos": [
+                    0,
+                    120
+                ]
+            },
+            "UsedAs": {
+                "name": "UsedAs",
+                "type": "ComboBox",
+                "pos": [
+                    150,
+                    120
+                ],
+                "size": [
+                    300,
+                    30
+                ]
+            },
+            "btnDisplayUsage": {
+                "name":"btnDisplayUsage",
+                "type": "Button",
+                "label": "Show Usage",
+                "pos": [475,120],
+                "action": ["openreport","CMHU03"]
+            },
+            "lblNote": {
+                "name": "lblNote",
+                "type": "StaticText",
+                "label": "Note:",
+                "pos": [
+                    0,
+                    150
+                ]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "pos": [
+                    150,
+                    150
+                ],
+                "size": [
+                    300,
+                    100
+                ],
+                "stylelist": [
+                    "TE_MULTILINE"
+                ]
+            }
+        }
+    }
+}
