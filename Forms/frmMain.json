@@ -337,6 +337,18 @@
                     19,
                     27
                 ]
+            },
+            "lblDonor":{
+                "name":"lblDonor",
+                "type":"StaticText",
+                "label":"Donors",
+                "posch":[19,29.5]
+            },
+            "lblDonorGift":{
+                "name":"lblDonorGift",
+                "type":"StaticText",
+                "label":"Donor Gifts",
+                "posch":[19,31]
             }
         }
     }

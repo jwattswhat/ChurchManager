@@ -1,1 +1,56 @@
-{"frmWorshipPlanningFORM": {"FORM": {"name": "frmMain", "type": "Dialog", "title": "frmWorshipPlanning: Worship Planning", "stylelist": ["CAPTION"], "posch": [4, 4], "sizech": [29, 16]}, "CONTROLS": {"lblService": {"name": "lblService", "type": "StaticText", "label": "Service", "posch": [2, 2]}, "ServiceID": {"name": "ServiceID", "type": "ComboBox", "lookupchoices": {"name": "tblService", "fields": ["ID", "DatetIME"], "orderby": "DateTime DESC"}, "posch": [9, 2]}, "btnRun": {"name": "btnRun", "type": "Button", "label": "Run Report", "posch": [2, 6]}}}}
+{
+    "frmWorshipPlanningFORM": {
+        "FORM": {
+            "name": "frmMain",
+            "type": "Dialog",
+            "title": "frmWorshipPlanning: Worship Planning",
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                4,
+                4
+            ],
+            "sizech": [
+                29,
+                16
+            ]
+        },
+        "CONTROLS": {
+            "lblService": {
+                "name": "lblService",
+                "type": "StaticText",
+                "label": "Service",
+                "posch": [
+                    2,
+                    2
+                ]
+            },
+            "ServiceID": {
+                "name": "ServiceID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblService",
+                    "fields": [
+                        "ID",
+                        "DatetIME"
+                    ],
+                    "orderby": "DateTime DESC"
+                },
+                "posch": [
+                    9,
+                    2
+                ]
+            },
+            "btnRun": {
+                "name": "btnRun",
+                "type": "Button",
+                "label": "Run Report",
+                "posch": [
+                    2,
+                    6
+                ]
+            }
+        }
+    }
+}

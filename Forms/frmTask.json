@@ -1,1 +1,310 @@
-{"frmTaskFORM": {"FORM": {"type": "Panel", "title": "frmTask: Task Edit Form", "name": "frmTask", "table": {"name": "tblTask", "fields": ["*"], "orderby": "Complete,StartDate"}, "stylelist": ["CAPTION"], "controls": ["Navigation", "Close"], "linkedform": {"frmTaskWorker": {"name": "frmTaskWorker", "type": "Panel", "controls": ["Navigation", "Update", "Close"], "table": {"name": "tblTaskWorker", "fields": ["*"], "condition": "TaskID = {ID}", "orderby": "Task"}, "readonlyfields": ["TaskID"], "fillonblank": ["TaskID", "ID"], "bindbtn": "btnTaskWorker", "posch": [8, 8]}}, "posch": [0, 0], "sizech": [45, 37]}, "CONTROLS": {"lblTask": {"type": "StaticText", "label": "Task:", "name": "lblTask", "posch": [0, 2]}, "Task": {"type": "TextCtrl", "name": "Task", "posch": [9, 2], "sizech": [24, 2]}, "btnTaskWorker": {"type": "Button", "label": "Workers", "action": ["openlinkedform", "frmTaskWorker"], "name": "btnTaskWorker", "posch": [37, 2]}, "lblDescription": {"type": "StaticText", "label": "Description:", "name": "lblDescription", "posch": [0, 4]}, "Description": {"type": "TextCtrl", "name": "Description", "posch": [9, 4], "sizech": [24, 2]}, "lblPriority": {"type": "StaticText", "label": "Priority:", "name": "lblPriority", "posch": [0, 7]}, "Priority": {"type": "ComboBox", "name": "Priority", "posch": [9, 7], "sizech": [24, 2]}, "lblComplete": {"type": "StaticText", "label": "Complete:", "name": "lblComplete", "posch": [0, 9]}, "Complete": {"type": "CheckBox", "name": "Complete", "posch": [9, 9], "sizech": [24, 2]}, "lblCompletionDate": {"type": "StaticText", "label": "Completion Date:", "name": "lblCompletionDate", "posch": [0, 12]}, "CompletionDate": {"type": "DatePickerCtrl", "name": "CompletionDate", "stylelist": ["ALLOWNONE"], "defaultvalue": null, "posch": [9, 12], "sizech": [24, 2]}, "lblProjectID": {"type": "StaticText", "label": "Project:", "name": "Project", "posch": [0, 14]}, "ProjectID": {"type": "ComboBox", "lookupchoices": {"name": "tblProject", "fields": ["ID", "Project"], "orderby": "StartDate,Project"}, "name": "ProjectID", "posch": [9, 14], "sizech": [24, 2]}, "lblDependencyID": {"type": "StaticText", "label": "Dependencies:", "name": "lblDependencyID", "posch": [0, 17]}, "DependencyID": {"type": "TextCtrl", "name": "DependencyID", "posch": [9, 17], "sizech": [24, 2]}, "lblStartDate": {"name": "lblStartDate", "type": "StaticText", "label": "Start Date:", "posch": [0, 19]}, "StartDate": {"name": "StartDate", "type": "DatePickerCtrl", "stylelist": ["ALLOWNONE"], "defaultvalue": null, "posch": [9, 19], "sizech": [24, 2]}, "lblEndDate": {"name": "lblEndDate", "type": "StaticText", "label": "End Date:", "posch": [0, 22]}, "EndDate": {"name": "EndDate", "type": "DatePickerCtrl", "stylelist": ["ALLOWNONE"], "defaultvalue": null, "posch": [9, 22], "sizech": [24, 2]}, "lblNote": {"type": "StaticText", "label": "Note:", "name": "lblNote", "posch": [0, 24]}, "Note": {"type": "MultiLine", "stylelist": ["MULTILINE"], "name": "Note", "posch": [9, 24], "sizech": [24, 8]}}}}
+{
+    "frmTaskFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmTask: Task Edit Form",
+            "name": "frmTask",
+            "table": {
+                "name": "tblTask",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "Complete,StartDate"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "controls": [
+                "Navigation",
+                "Close"
+            ],
+            "linkedform": {
+                "frmTaskWorker": {
+                    "name": "frmTaskWorker",
+                    "type": "Panel",
+                    "controls": [
+                        "Navigation",
+                        "Update",
+                        "Close"
+                    ],
+                    "table": {
+                        "name": "tblTaskWorker",
+                        "fields": [
+                            "*"
+                        ],
+                        "condition": "TaskID = {ID}",
+                        "orderby": "Task"
+                    },
+                    "readonlyfields": [
+                        "TaskID"
+                    ],
+                    "fillonblank": [
+                        "TaskID",
+                        "ID"
+                    ],
+                    "bindbtn": "btnTaskWorker",
+                    "posch": [
+                        8,
+                        8
+                    ]
+                }
+            },
+            "posch": [
+                0,
+                0
+            ],
+            "sizech": [
+                45,
+                37
+            ]
+        },
+        "CONTROLS": {
+            "lblTask": {
+                "type": "StaticText",
+                "label": "Task:",
+                "name": "lblTask",
+                "posch": [
+                    0,
+                    2
+                ]
+            },
+            "Task": {
+                "type": "TextCtrl",
+                "name": "Task",
+                "posch": [
+                    9,
+                    2
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "btnTaskWorker": {
+                "type": "Button",
+                "label": "Workers",
+                "action": [
+                    "openlinkedform",
+                    "frmTaskWorker"
+                ],
+                "name": "btnTaskWorker",
+                "posch": [
+                    37,
+                    2
+                ]
+            },
+            "lblDescription": {
+                "type": "StaticText",
+                "label": "Description:",
+                "name": "lblDescription",
+                "posch": [
+                    0,
+                    4
+                ]
+            },
+            "Description": {
+                "type": "TextCtrl",
+                "name": "Description",
+                "posch": [
+                    9,
+                    4
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblPriority": {
+                "type": "StaticText",
+                "label": "Priority:",
+                "name": "lblPriority",
+                "posch": [
+                    0,
+                    7
+                ]
+            },
+            "Priority": {
+                "type": "ComboBox",
+                "name": "Priority",
+                "posch": [
+                    9,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblComplete": {
+                "type": "StaticText",
+                "label": "Complete:",
+                "name": "lblComplete",
+                "posch": [
+                    0,
+                    9
+                ]
+            },
+            "Complete": {
+                "type": "CheckBox",
+                "name": "Complete",
+                "posch": [
+                    9,
+                    9
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblCompletionDate": {
+                "type": "StaticText",
+                "label": "Completion Date:",
+                "name": "lblCompletionDate",
+                "posch": [
+                    0,
+                    12
+                ]
+            },
+            "CompletionDate": {
+                "type": "DatePickerCtrl",
+                "name": "CompletionDate",
+                "stylelist": [
+                    "ALLOWNONE"
+                ],
+                "defaultvalue": null,
+                "posch": [
+                    9,
+                    12
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblProjectID": {
+                "type": "StaticText",
+                "label": "Project:",
+                "name": "Project",
+                "posch": [
+                    0,
+                    14
+                ]
+            },
+            "ProjectID": {
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblProject",
+                    "fields": [
+                        "ID",
+                        "Project"
+                    ],
+                    "orderby": "StartDate,Project"
+                },
+                "name": "ProjectID",
+                "posch": [
+                    9,
+                    14
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblDependencyID": {
+                "type": "StaticText",
+                "label": "Dependencies:",
+                "name": "lblDependencyID",
+                "posch": [
+                    0,
+                    17
+                ]
+            },
+            "DependencyID": {
+                "type": "TextCtrl",
+                "name": "DependencyID",
+                "posch": [
+                    9,
+                    17
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblStartDate": {
+                "name": "lblStartDate",
+                "type": "StaticText",
+                "label": "Start Date:",
+                "posch": [
+                    0,
+                    19
+                ]
+            },
+            "StartDate": {
+                "name": "StartDate",
+                "type": "DatePickerCtrl",
+                "stylelist": [
+                    "ALLOWNONE"
+                ],
+                "defaultvalue": null,
+                "posch": [
+                    9,
+                    19
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblEndDate": {
+                "name": "lblEndDate",
+                "type": "StaticText",
+                "label": "End Date:",
+                "posch": [
+                    0,
+                    22
+                ]
+            },
+            "EndDate": {
+                "name": "EndDate",
+                "type": "DatePickerCtrl",
+                "stylelist": [
+                    "ALLOWNONE"
+                ],
+                "defaultvalue": null,
+                "posch": [
+                    9,
+                    22
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "name": "lblNote",
+                "posch": [
+                    0,
+                    24
+                ]
+            },
+            "Note": {
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Note",
+                "posch": [
+                    9,
+                    24
+                ],
+                "sizech": [
+                    24,
+                    8
+                ]
+            }
+        }
+    }
+}

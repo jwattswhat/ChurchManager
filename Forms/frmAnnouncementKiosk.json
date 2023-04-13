@@ -1,1 +1,42 @@
-{"frmAnnouncementKioskFORM": {"FORM": {"type": "Panel", "title": "frmAnnouncementKisok - Announcement Kiosk", "posch": [0, 0], "sizech": [125, 75], "table": {"name": "tblAnnouncement", "fields": ["Announcement"], "Orderby": "Label"}, "name": "frmAnnouncementKisok", "stylelist": ["CAPTION"], "readonly": 1}, "CONTROLS": {"Announcement": {"type": "HTMLCtrl", "posch": [0, 0], "sizech": [125, 75], "name": "HTMLCtrl"}}}}
+{
+    "frmAnnouncementKioskFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmAnnouncementKisok - Announcement Kiosk",
+            "posch": [
+                0,
+                0
+            ],
+            "sizech": [
+                125,
+                75
+            ],
+            "table": {
+                "name": "tblAnnouncement",
+                "fields": [
+                    "Announcement"
+                ],
+                "Orderby": "Label"
+            },
+            "name": "frmAnnouncementKisok",
+            "stylelist": [
+                "CAPTION"
+            ],
+            "readonly": 1
+        },
+        "CONTROLS": {
+            "Announcement": {
+                "type": "HTMLCtrl",
+                "posch": [
+                    0,
+                    0
+                ],
+                "sizech": [
+                    125,
+                    75
+                ],
+                "name": "HTMLCtrl"
+            }
+        }
+    }
+}

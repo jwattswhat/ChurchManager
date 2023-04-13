@@ -1,1 +1,292 @@
-{"frmPropersFORM": {"FORM": {"type": "Panel", "title": "frmPropers: Propers Edit Form", "name": "frmPropers", "table": {"name": "tblPropers", "fields": ["*"], "orderby": "Lectionary, Sort;"}, "stylelist": ["CAPTION"], "posch": [0, 0], "sizech": [83, 62]}, "CONTROLS": {"lblLectionary": {"type": "StaticText", "label": "Lectionary:", "name": "lblLectionary", "posch": [0, 0]}, "Lectionary": {"type": "ComboBox", "name": "Lectionary", "posch": [10, 0], "sizech": [24, 2]}, "lblTheme": {"type": "StaticText", "label": "Theme:", "name": "lblTheme", "posch": [37, 0]}, "Theme": {"type": "MultiLine", "stylelist": ["MULTILINE", "WORDWRAP"], "name": "Theme", "posch": [41, 0], "sizech": [37, 10]}, "lblSort": {"type": "StaticText", "label": "Sort:", "name": "lblSort", "posch": [0, 2]}, "Sort": {"type": "TextCtrl", "name": "Sort", "posch": [10, 2], "sizech": [24, 2]}, "lblSeason": {"type": "StaticText", "label": "Season:", "name": "lblSeason", "posch": [0, 4]}, "Season": {"type": "ComboBox", "name": "Season", "posch": [10, 4], "sizech": [24, 2]}, "lblLiturgicalDate": {"type": "StaticText", "label": "Liturgical Date:", "name": "lblLiturgicalDate", "posch": [0, 7]}, "LiturgicalDate": {"type": "TextCtrl", "name": "LiturgicalDate", "posch": [10, 7], "sizech": [24, 2]}, "lblHymnSug": {"type": "StaticText", "label": "Hymns:", "name": "lblHymnSug", "posch": [37, 12]}, "HymnSug": {"type": "MultiLine", "stylelist": ["MULTILINE", "WORDWRAP"], "name": "HymnSug", "posch": [41, 12], "sizech": [37, 19]}, "lblColor": {"type": "StaticText", "label": "Liturgical Color:", "name": "lblColor", "posch": [0, 17]}, "Color": {"type": "ComboBox", "name": "Color", "posch": [10, 17], "sizech": [24, 2]}, "lblAltColor": {"type": "StaticText", "label": "Alt Color:", "name": "lblAltColor", "posch": [0, 19]}, "AltColor": {"type": "ComboBox", "name": "AltColor", "posch": [10, 19], "sizech": [24, 2]}, "dvlReadings": {"name": "dvlReadings", "type": "DataViewListCtrl", "table": {"name": "tblReading", "fields": ["ID", "Reading", "Reference", "Note"], "condition": "PropersID = {ID}"}, "column": [{"name": "Reading", "label": "Reading", "width": 100}, {"name": "Reference", "label": "Reference", "width": 200}, {"name": "Note", "label": "Note", "width": 100}], "posch": [2, 22], "sizech": [33, 16]}, "lblNote": {"type": "StaticText", "label": "Note:", "name": "lblNote", "posch": [0, 39]}, "Note": {"name": "Note", "type": "MultiLine", "stylelist": ["MULTILINE"], "posch": [10, 39], "sizech": [24, 20]}, "lblIntroit": {"type": "StaticText", "label": "Introit:", "name": "lblIntroit", "posch": [37, 33]}, "Introit": {"type": "MultiLine", "stylelist": ["MULTILINE"], "name": "Introit", "posch": [41, 33], "sizech": [37, 26]}}}}
+{
+    "frmPropersFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmPropers: Propers Edit Form",
+            "name": "frmPropers",
+            "table": {
+                "name": "tblPropers",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "Lectionary, Sort;"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                0,
+                0
+            ],
+            "sizech": [
+                83,
+                62
+            ]
+        },
+        "CONTROLS": {
+            "lblLectionary": {
+                "type": "StaticText",
+                "label": "Lectionary:",
+                "name": "lblLectionary",
+                "posch": [
+                    1,
+                    0
+                ]
+            },
+            "Lectionary": {
+                "type": "ComboBox",
+                "name": "Lectionary",
+                "posch": [
+                    10,
+                    0
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblTheme": {
+                "type": "StaticText",
+                "label": "Theme:",
+                "name": "lblTheme",
+                "posch": [
+                    37,
+                    0
+                ]
+            },
+            "Theme": {
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE",
+                    "WORDWRAP"
+                ],
+                "name": "Theme",
+                "posch": [
+                    41,
+                    0
+                ],
+                "sizech": [
+                    37,
+                    10
+                ]
+            },
+            "lblSort": {
+                "type": "StaticText",
+                "label": "Sort:",
+                "name": "lblSort",
+                "posch": [
+                    1,
+                    2
+                ]
+            },
+            "Sort": {
+                "type": "TextCtrl",
+                "name": "Sort",
+                "posch": [
+                    10,
+                    2
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblSeason": {
+                "type": "StaticText",
+                "label": "Season:",
+                "name": "lblSeason",
+                "posch": [
+                    1,
+                    4
+                ]
+            },
+            "Season": {
+                "type": "ComboBox",
+                "name": "Season",
+                "posch": [
+                    10,
+                    4
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblLiturgicalDate": {
+                "type": "StaticText",
+                "label": "Liturgical Date:",
+                "name": "lblLiturgicalDate",
+                "posch": [
+                    1,
+                    6
+                ]
+            },
+            "LiturgicalDate": {
+                "type": "TextCtrl",
+                "name": "LiturgicalDate",
+                "posch": [
+                    10,
+                    6
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblHymnSug": {
+                "type": "StaticText",
+                "label": "Hymns:",
+                "name": "lblHymnSug",
+                "posch": [
+                    37,
+                    12
+                ]
+            },
+            "HymnSug": {
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE",
+                    "WORDWRAP"
+                ],
+                "name": "HymnSug",
+                "posch": [
+                    41,
+                    12
+                ],
+                "sizech": [
+                    37,
+                    19
+                ]
+            },
+            "lblColor": {
+                "type": "StaticText",
+                "label": "Liturgical Color:",
+                "name": "lblColor",
+                "posch": [
+                    1,
+                    8
+                ]
+            },
+            "Color": {
+                "type": "ComboBox",
+                "name": "Color",
+                "posch": [
+                    10,
+                    8
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblAltColor": {
+                "type": "StaticText",
+                "label": "Alt Color:",
+                "name": "lblAltColor",
+                "posch": [
+                    1,
+                    10
+                ]
+            },
+            "AltColor": {
+                "type": "ComboBox",
+                "name": "AltColor",
+                "posch": [
+                    10,
+                    10
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "dvlReadings": {
+                "name": "dvlReadings",
+                "type": "DataViewListCtrl",
+                "table": {
+                    "name": "tblReading",
+                    "fields": [
+                        "ID",
+                        "Reading",
+                        "Reference",
+                        "Note"
+                    ],
+                    "condition": "PropersID = {ID}"
+                },
+                "column": [
+                    {
+                        "name": "Reading",
+                        "label": "Reading",
+                        "widthch": 8
+                    },
+                    {
+                        "name": "Reference",
+                        "label": "Reference",
+                        "widthch": 10
+                    },
+                    {
+                        "name": "Note",
+                        "label": "Note",
+                        "widthch": 20
+                    }
+                ],
+                "posch": [
+                    2,
+                    13
+                ],
+                "sizech": [
+                    33,
+                    16
+                ]
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "name": "lblNote",
+                "posch": [
+                    1,
+                    30
+                ]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "posch": [
+                    10,
+                    30
+                ],
+                "sizech": [
+                    24,
+                    20
+                ]
+            },
+            "lblIntroit": {
+                "type": "StaticText",
+                "label": "Introit:",
+                "name": "lblIntroit",
+                "posch": [
+                    37,
+                    33
+                ]
+            },
+            "Introit": {
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Introit",
+                "posch": [
+                    41,
+                    33
+                ],
+                "sizech": [
+                    37,
+                    26
+                ]
+            }
+        }
+    }
+}

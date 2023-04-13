@@ -1,0 +1,128 @@
+{
+    "frmDonorGiftFORM":{
+        "FORM":{
+            "type":"Panel",
+            "title":"frmDonorGift: Donor Gift Edit Form",
+            "name":"frmDonor",
+            "table":{
+                "name":"tblDonorGift",
+                "fields":["*"],
+                "orderby": "Date DESC"
+            },
+            "posch":[-1,-1],
+            "sizech": [50,25]
+        },
+        "CONTROLS":{
+            "lblDonorID":{
+                "type":"StaticText",
+                "name":"lblName",
+                "label":"Donor Name:",
+                "posch":[1,1]
+            },
+            "DonorID":{
+                "type":"ComboBox",
+                "name":"Name",
+                "posch":[10,1],
+                "sizech":[25,2],
+                "lookupchoices": {
+                    "name": "tblDonor",
+                    "fields": [
+                        "ID",
+                        "Name"
+                    ],
+                    "orderby": "Name"
+                }
+            },
+            "lblDescription": {
+                "type": "StaticText",
+                "label": "Description:",
+                "name": "lblDescription",
+                "posch": [
+                    1,
+                    3
+                ]
+            },
+            "Description": {
+                "type": "TextCtrl",
+                "name": "Description",
+                "posch": [
+                    10,
+                    3
+                ],
+                "sizech": [
+                    25,
+                    2
+                ]
+            },
+            "lblDate":{
+                "type":"StaticText",
+                "name":"lblDate",
+                "label":"Date:",
+                "posch":[1,5]
+            },
+            "Date":{
+                "type":"DatePickerCtrl",
+                "name":"Date",
+                "posch":[10,5]
+            },
+            "lblAmount": {
+                "type": "StaticText",
+                "name": "Amount:",
+                "label":"Amount:",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "Amount": {
+                "type": "Float",
+                "name": "lblCity",
+                "posch": [
+                    10,7
+                ],
+                "format": "{:,.2f}"
+            },
+            "lblAcknowledged": {
+                "type": "StaticText",
+                "label": "Acknowledged:",
+                "name": "lblAcknowledged",
+                "posch": [
+                    1,
+                    9
+                ]
+            },
+            "Acknowledged": {
+                "type": "CheckBox",
+                "name": "Aclknowledged",
+                "posch": [
+                    10,
+                    9
+                ]
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "name": "lblNote",
+                "posch": [
+                    1,
+                    11
+                ]
+            },
+            "Note": {
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Note",
+                "posch": [
+                    10,
+                    11
+                ],
+                "sizech": [
+                    25,
+                    8
+                ]
+            }
+        }
+    }
+}

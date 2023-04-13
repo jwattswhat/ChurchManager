@@ -245,8 +245,30 @@ class clsForm(JSForm.clsForms.clsForm):
                     return False
             self.FORM.Close()
             return True
-
         field = event.GetEventObject().GetName()
+        if field == "ReportID":
+            rptid = self.CONTROLID[field].GetValue()
+            cursor = self.DBConnection.cursor()
+            sql = "SELECT Params FROM tblReports WHERE ID={rptid}".format(rptid=rptid)
+            try:
+                cursor.execute(sql)
+            except:
+                return None
+            row = cursor.fetchone()
+            if len(row) == 0:
+                return []
+            params = row[0]
+            self.disable_all_buttons()
+            self.enable_button("ChurchID")
+            self.enable_button("ReportID")
+            self.enable_button("btnRun")
+            params = row[0].replace("[", "")
+            params = params.replace("]", "")
+            params = params.replace(",", "")
+            params = params.splitlines()
+            self.enable_buttons(params)
+            return 
+
         attendevent = self.CONTROLID["AttendanceEventID"].GetValue()
         if not attendevent:
             dlg = _neededoptionsdialog(
@@ -387,8 +409,9 @@ def _buttonclick(event):
             return
         case "lblReports":
             frm = clsForm(cmfrm, ChurchDB.DBConnection, "frmReports", ["Close"])
-
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runReports)
+            frm.disable_all_buttons()
+            frm.enable_button("ReportID")
             frm.show()
             return
 
@@ -417,6 +440,10 @@ def _buttonclick(event):
             formname = "frmProject"
         case "lblTask":
             formname = "frmTask"
+        case "lblDonor":
+            formname = "frmDonor"
+        case "lblDonorGift":
+            formname = "frmDonorGift"
         case _:
             print("form name not found found. {}".format(formname))
 
@@ -424,17 +451,17 @@ def _buttonclick(event):
         form = clsForm(cmfrm, ChurchDB.DBConnection, formname)
         form.show()
 
+
 cmparser = argparse.ArgumentParser(
-    prog="ChurchManager",
-    description="Church Manager v0.1"
+    prog="ChurchManager", description="Church Manager v0.1"
 )
-cmparser.add_argument("-s","--server",type=str,default="localhost")
-cmparser.add_argument("-d","--database",type=str,default="ChurchDB")
-cmparser.add_argument("-u","--user",type=str)
-cmparser.add_argument("-p","--password",type=str)
+cmparser.add_argument("-s", "--server", type=str, default="localhost")
+cmparser.add_argument("-d", "--database", type=str, default="ChurchDB")
+cmparser.add_argument("-u", "--user", type=str)
+cmparser.add_argument("-p", "--password", type=str)
 
 args = cmparser.parse_args()
-#print(args.server,args.database,args.user,args.password)
+# print(args.server,args.database,args.user,args.password)
 
 
 server = args.server
@@ -447,7 +474,7 @@ app = wx.App(0)
 #
 # 	Connect to DataBase
 #
-ChurchDB = JSForm.clsDB(server,database,user,password)
+ChurchDB = JSForm.clsDB(server, database, user, password)
 JSForm.CONFIG.set_Config_DBConnection(ChurchDB.DBConnection)
 JSForm.OPTION.set_Option_DBConnection(ChurchDB.DBConnection)
 JSForm.FONT.set_Font_DBConnection(ChurchDB.DBConnection)
@@ -494,6 +521,9 @@ cmfrm.CONTROLID["lblBugs"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblProject"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblTask"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+
+cmfrm.CONTROLID["lblDonor"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblDonorGift"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblRecordAttendance"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 

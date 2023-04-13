@@ -94,7 +94,7 @@ AN_NOTE = 13
 announcement = readallrecords(
     {"name": "tblAnnouncement", 
      "fields": ["*"], 
-     "condition": "{Sunday} ((Continuous = 1) OR (NOW() BETWEEN StartDate AND EndDate))".format(Sunday=td),
+     "condition": "({Sunday} ((Continuous = 1) OR (NOW() BETWEEN StartDate AND EndDate))) AND (eDisplayOnly = 0)".format(Sunday=td),
      "orderby": "Label, RequestBy"}
 )
 

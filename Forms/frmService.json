@@ -1,1 +1,634 @@
-{"frmServiceFORM": {"FORM": {"name": "frmService", "type": "Panel", "title": "frmService : Service Edit Form", "posch": [-1, -1], "table": {"name": "tblService", "fields": ["ID", "ChurchID", "DateTime", "PropersID", "LiturgicalDate", "HolyCommunion", "OrderofService", "OSNote", "PsalmorIntroit", "SermonID", "Bulletin", "CheckListComplete", "CheckList", "Note"], "orderby": "DateTime DESC"}, "stylelist": ["CAPTION"], "linkedform": {"frmOptions": {"name": "frmOptions", "type": "Panel", "title": "frmOptions: Change Lectionary", "table": {"name": "tblOptions", "fields": ["*"], "condition": "OptionFor = 'Lectionary' and OptionType = 'Current'"}, "controls": ["Update", "Close"], "readonlyfields": ["OptionFor", "OptionType"]}, "frmSermon": {"name": "frmSermon", "title": "frmSermon - Add/Edit/Delete Sermon", "type": "Panel", "table": {"name": "tblSermon", "fields": ["*"], "condition": "ID = {SermonID}"}, "controls": ["Navigation", "Close"]}, "frmHymnUsage": {"name": "frmHymnUsage", "title": "frmHymnUsage - Add/Edit/Delete Hymns Used", "type": "Panel", "table": {"name": "tblHymnUsage", "fields": ["ID", "ChurchID", "ServiceID", "HymnID", "UsedAs", "Note"], "condition": "ServiceID = {ID}"}, "controls": ["Navigation", "Close"], "fillonblank": ["ServiceID", "ID"]}, "frmPropers": {"name": "frmPropers", "title": "frmPropers - Add/Edit/Delete Propers", "type": "Panel", "label": "Propers", "table": {"name": "tblPropers", "fields": ["*"], "condition": "ID = {PropersID}"}, "controls": ["Update", "Close"], "readonlyfields": ["Lectionary", "Sort", "Season", "LiturgicalDate"], "posch": [51, 1]}, "frmAltReading": {"name": "frmAltReading", "title": "frmAltReading - Add/Edit/Delete Alternate Readings", "type": "Panel", "table": {"name": "tblAltReading", "fields": ["*"], "condition": "ServiceID = {ID}"}, "controls": ["Navigation", "Close"], "readonlyfields": ["ServiceID"], "fillonblank": ["ServiceID", "ID"]}, "frmEditCheckList": {"name": "frmEditCheckList", "title": "frmEditCheckList - Add/Edit/Delete items in CheckList", "type": "Panel", "controls": ["Navigation", "Close"]}}, "subform": {"frmPropers": {"name": "frmPropers", "title": "frmPropers", "type": "StaticBox", "label": "Propers", "table": {"name": "tblPropers", "fields": ["*"], "condition": "ID = {PropersID}"}, "controls": [], "readonly": 1, "posch": [51, 0]}}, "sizech": [132, 74]}, "CONTROLS": {"lblLectionary": {"name": "lblLectionary", "type": "StaticText", "label": "Lectionary:", "posch": [0, 0]}, "Lectionary": {"name": "Lectionary", "type": "StaticText", "fcolor": "Blue", "bcolor": "White", "posch": [1, 1]}, "btnServiceHymns": {"name": "btnServiceHymns", "type": "Button", "label": "Hymns", "action": ["openlinkedform", "frmHymnUsage"], "posch": [41, 2], "sizech": [8, 2]}, "lblChurchID": {"name": "lblChurchID", "type": "StaticText", "label": "Church :", "posch": [0, 4]}, "ChurchID": {"name": "ChurchID", "type": "ComboBox", "lookupchoices": {"name": "tblChurch", "fields": ["ID", "Church"], "sort": "Church"}, "posch": [12, 4], "sizech": [24, 2]}, "lblDateTime": {"name": "lblDateTime", "type": "StaticText", "label": "Service Date/Time:", "posch": [0, 7]}, "DateTime": {"name": "DateTime", "type": "DateTime", "posch": [12, 7], "sizech": [24, 2]}, "lblPropersID": {"name": "lblPropersID", "type": "StaticText", "label": "Propers:", "posch": [0, 9]}, "PropersID": {"name": "PropersID", "type": "ComboBox", "lookupchoices": {"name": "tblPropers", "fields": ["ID", "Lectionary", "LiturgicalDate"], "condition": "Lectionary = {OPTION:Current:Lectionary}", "orderby": "Lectionary,Sort"}, "action": ["refreshform"], "posch": [12, 9], "sizech": [24, 2]}, "btnEditPropers": {"name": "btnEditPropers", "type": "Button", "label": "Propers", "action": ["openlinkedform", "frmPropers"], "posch": [41, 9], "sizech": [8, 2]}, "btnChangeLectionary": {"name": "btnChangeLectionary", "type": "Button", "label": "Lectionary", "action": ["openlinkedform", "frmOptions"], "posch": [41, 12], "sizech": [8, 2]}, "lblLiturgicalDate": {"name": "lblLiturgicalDate", "type": "StaticText", "label": "Liturgical Date:", "posch": [0, 12]}, "LiturgicalDate": {"name": "LiturgicalDate", "type": "TextCtrl", "posch": [12, 12], "sizech": [24, 2]}, "btnServiceAltReading": {"name": "btnServiceAltReading", "type": "Button", "label": "Alt Readings", "action": ["openlinkedform", "frmAltReading"], "posch": [41, 16], "sizech": [8, 2]}, "lblHolyCommunion": {"name": "lblHolyCommunion", "type": "StaticText", "label": "Holy Communion:", "posch": [0, 14]}, "HolyCommunion": {"name": "HolyCommunion", "type": "CheckBox", "posch": [12, 14], "sizech": [24, 2]}, "lblOrderofService": {"name": "lblOrderofService", "type": "StaticText", "label": "OrderofService:", "posch": [0, 17]}, "OrderofService": {"name": "OrderofService", "type": "ComboBox", "posch": [12, 17], "sizech": [24, 2]}, "lblOSNote": {"name": "lblOSNote", "type": "StaticText", "label": "OSNote:", "posch": [0, 19]}, "OSNote": {"name": "OSNote", "type": "MultiLine", "stylelist": ["MULTILINE"], "posch": [12, 19], "sizech": [24, 10]}, "lblPsalmorIntroit": {"name": "lblPsalmorIntroit", "type": "StaticText", "label": "Psalm or Introit:", "posch": [0, 30]}, "PsalmorIntroit": {"name": "PsalmorIntroit", "type": "ComboBox", "posch": [12, 30], "sizech": [24, 2]}, "lblSermonID": {"name": "lblSermonID", "type": "StaticText", "label": "Sermon:", "posch": [0, 33]}, "SermonID": {"name": "SermonID", "type": "ComboBox", "lookupchoices": {"name": "tblSermon", "fields": ["ID", "ID", "Reference", "Title"], "orderby": "ID DESC,Reference"}, "posch": [12, 33], "sizech": [24, 2]}, "btnOpenSermonForm": {"name": "btnOpenSermonForm", "type": "Button", "label": "Open Form", "action": ["openlinkedform", "frmSermon"], "posch": [41, 33]}, "lblBulletin": {"name": "lblBulletin", "type": "StaticText", "label": "Bulletin:", "posch": [0, 35]}, "Bulletin": {"name": "Bulletin", "type": "FilePickerCtrl", "directory": ["Location", "Bulletin"], "stylelist": ["FLPCHANGEDIR", "FLPUSETEXTCTRL"], "posch": [12, 35], "sizech": [24, 2]}, "btnOpenBulletin": {"name": "btnOpenBulletin", "type": "Button", "label": "Open", "action": ["openfile", "Bulletin"], "posch": [41, 35]}, "lblCheckListComplete": {"name": "lblCheckListComplete", "type": "StaticText", "label": "Check List Complete:", "posch": [0, 40]}, "CheckListComplete": {"name": "CheckListComplete", "type": "CheckBox", "posch": [12, 40], "sizech": [24, 2]}, "lblCheckList": {"name": "lblCheckList", "type": "StaticText", "label": "CheckList:", "posch": [0, 45]}, "btnEditCheckList": {"type": "Button", "name": "btnEditCheckList", "label": "Edit CheckList", "sizech": [10, 2], "action": ["openlinkedform", "frmEditCheckList"], "posch": [0, 48]}, "CheckList": {"name": "CheckList", "type": "CheckListBox", "posch": [12, 45], "sizech": [24, 10]}, "lblNote": {"name": "lblNote", "type": "StaticText", "label": "Note:", "posch": [0, 56]}, "Note": {"name": "Note", "type": "MultiLine", "stylelist": ["MULTILINE", "WORDWRAP"], "posch": [12, 56], "sizech": [24, 8]}}}}
+{
+    "frmServiceFORM": {
+        "FORM": {
+            "name": "frmService",
+            "type": "Panel",
+            "title": "frmService : Service Edit Form",
+            "posch": [
+                -1,
+                -1
+            ],
+            "table": {
+                "name": "tblService",
+                "fields": [
+                    "ID",
+                    "ChurchID",
+                    "DateTime",
+                    "PropersID",
+                    "LiturgicalDate",
+                    "HolyCommunion",
+                    "OrderofService",
+                    "OSNote",
+                    "PsalmorIntroit",
+                    "SermonID",
+                    "Bulletin",
+                    "CheckListComplete",
+                    "CheckList",
+                    "Note"
+                ],
+                "orderby": "DateTime DESC"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "linkedform": {
+                "frmOptions": {
+                    "name": "frmOptions",
+                    "type": "Panel",
+                    "title": "frmOptions: Change Lectionary",
+                    "table": {
+                        "name": "tblOptions",
+                        "fields": [
+                            "*"
+                        ],
+                        "condition": "OptionFor = 'Lectionary' and OptionType = 'Current'"
+                    },
+                    "controls": [
+                        "Update",
+                        "Close"
+                    ],
+                    "readonlyfields": [
+                        "OptionFor",
+                        "OptionType"
+                    ]
+                },
+                "frmSermon": {
+                    "name": "frmSermon",
+                    "title": "frmSermon - Add/Edit/Delete Sermon",
+                    "type": "Panel",
+                    "table": {
+                        "name": "tblSermon",
+                        "fields": [
+                            "*"
+                        ],
+                        "condition": "ID = {SermonID}"
+                    },
+                    "controls": [
+                        "Navigation",
+                        "Close"
+                    ]
+                },
+                "frmHymnUsage": {
+                    "name": "frmHymnUsage",
+                    "title": "frmHymnUsage - Add/Edit/Delete Hymns Used",
+                    "type": "Panel",
+                    "table": {
+                        "name": "tblHymnUsage",
+                        "fields": [
+                            "ID",
+                            "ChurchID",
+                            "ServiceID",
+                            "HymnID",
+                            "UsedAs",
+                            "Note"
+                        ],
+                        "condition": "ServiceID = {ID}"
+                    },
+                    "controls": [
+                        "Navigation",
+                        "Close"
+                    ],
+                    "fillonblank": [
+                        "ServiceID",
+                        "ID"
+                    ]
+                },
+                "frmPropers": {
+                    "name": "frmPropers",
+                    "title": "frmPropers - Add/Edit/Delete Propers",
+                    "type": "Panel",
+                    "label": "Propers",
+                    "table": {
+                        "name": "tblPropers",
+                        "fields": [
+                            "*"
+                        ],
+                        "condition": "ID = {PropersID}"
+                    },
+                    "controls": [
+                        "Update",
+                        "Close"
+                    ],
+                    "readonlyfields": [
+                        "Lectionary",
+                        "Sort",
+                        "Season",
+                        "LiturgicalDate"
+                    ],
+                    "posch": [
+                        51,
+                        1
+                    ]
+                },
+                "frmAltReading": {
+                    "name": "frmAltReading",
+                    "title": "frmAltReading - Add/Edit/Delete Alternate Readings",
+                    "type": "Panel",
+                    "table": {
+                        "name": "tblAltReading",
+                        "fields": [
+                            "*"
+                        ],
+                        "condition": "ServiceID = {ID}"
+                    },
+                    "controls": [
+                        "Navigation",
+                        "Close"
+                    ],
+                    "readonlyfields": [
+                        "ServiceID"
+                    ],
+                    "fillonblank": [
+                        "ServiceID",
+                        "ID"
+                    ]
+                },
+                "frmEditCheckList": {
+                    "name": "frmEditCheckList",
+                    "title": "frmEditCheckList - Add/Edit/Delete items in CheckList",
+                    "type": "Panel",
+                    "controls": [
+                        "Navigation",
+                        "Close"
+                    ]
+                }
+            },
+            "subform": {
+                "frmPropers": {
+                    "name": "frmPropers",
+                    "title": "frmPropers",
+                    "type": "StaticBox",
+                    "label": "Propers",
+                    "table": {
+                        "name": "tblPropers",
+                        "fields": [
+                            "*"
+                        ],
+                        "condition": "ID = {PropersID}"
+                    },
+                    "controls": [],
+                    "readonly": 1,
+                    "posch": [
+                        51,
+                        0
+                    ]
+                }
+            },
+            "sizech": [
+                132,
+                65
+            ]
+        },
+        "CONTROLS": {
+            "lblLectionary": {
+                "name": "lblLectionary",
+                "type": "StaticText",
+                "label": "Lectionary:",
+                "posch": [
+                    0,
+                    0
+                ]
+            },
+            "Lectionary": {
+                "name": "Lectionary",
+                "type": "StaticText",
+                "fcolor": "Blue",
+                "bcolor": "White",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "btnServiceHymns": {
+                "name": "btnServiceHymns",
+                "type": "Button",
+                "label": "Hymns",
+                "action": [
+                    "openlinkedform",
+                    "frmHymnUsage"
+                ],
+                "posch": [
+                    41,
+                    2
+                ],
+                "sizech": [
+                    8,
+                    2
+                ]
+            },
+            "lblChurchID": {
+                "name": "lblChurchID",
+                "type": "StaticText",
+                "label": "Church :",
+                "posch": [
+                    0,
+                    4
+                ]
+            },
+            "ChurchID": {
+                "name": "ChurchID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblChurch",
+                    "fields": [
+                        "ID",
+                        "Church"
+                    ],
+                    "sort": "Church"
+                },
+                "posch": [
+                    12,
+                    4
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblDateTime": {
+                "name": "lblDateTime",
+                "type": "StaticText",
+                "label": "Service Date/Time:",
+                "posch": [
+                    0,
+                    7
+                ]
+            },
+            "DateTime": {
+                "name": "DateTime",
+                "type": "DateTime",
+                "posch": [
+                    12,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblPropersID": {
+                "name": "lblPropersID",
+                "type": "StaticText",
+                "label": "Propers:",
+                "posch": [
+                    0,
+                    9
+                ]
+            },
+            "PropersID": {
+                "name": "PropersID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblPropers",
+                    "fields": [
+                        "ID",
+                        "Lectionary",
+                        "LiturgicalDate"
+                    ],
+                    "condition": "Lectionary = {OPTION:Current:Lectionary}",
+                    "orderby": "Lectionary,Sort"
+                },
+                "action": [
+                    "refreshform"
+                ],
+                "posch": [
+                    12,
+                    9
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "btnEditPropers": {
+                "name": "btnEditPropers",
+                "type": "Button",
+                "label": "Propers",
+                "action": [
+                    "openlinkedform",
+                    "frmPropers"
+                ],
+                "posch": [
+                    41,
+                    9
+                ],
+                "sizech": [
+                    8,
+                    2
+                ]
+            },
+            "btnChangeLectionary": {
+                "name": "btnChangeLectionary",
+                "type": "Button",
+                "label": "Lectionary",
+                "action": [
+                    "openlinkedform",
+                    "frmOptions"
+                ],
+                "posch": [
+                    41,
+                    12
+                ],
+                "sizech": [
+                    8,
+                    2
+                ]
+            },
+            "lblLiturgicalDate": {
+                "name": "lblLiturgicalDate",
+                "type": "StaticText",
+                "label": "Liturgical Date:",
+                "posch": [
+                    0,
+                    12
+                ]
+            },
+            "LiturgicalDate": {
+                "name": "LiturgicalDate",
+                "type": "TextCtrl",
+                "posch": [
+                    12,
+                    12
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "btnServiceAltReading": {
+                "name": "btnServiceAltReading",
+                "type": "Button",
+                "label": "Alt Readings",
+                "action": [
+                    "openlinkedform",
+                    "frmAltReading"
+                ],
+                "posch": [
+                    41,
+                    16
+                ],
+                "sizech": [
+                    8,
+                    2
+                ]
+            },
+            "lblHolyCommunion": {
+                "name": "lblHolyCommunion",
+                "type": "StaticText",
+                "label": "Holy Communion:",
+                "posch": [
+                    0,
+                    14
+                ]
+            },
+            "HolyCommunion": {
+                "name": "HolyCommunion",
+                "type": "CheckBox",
+                "posch": [
+                    12,
+                    14
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblOrderofService": {
+                "name": "lblOrderofService",
+                "type": "StaticText",
+                "label": "OrderofService:",
+                "posch": [
+                    0,
+                    17
+                ]
+            },
+            "OrderofService": {
+                "name": "OrderofService",
+                "type": "ComboBox",
+                "posch": [
+                    12,
+                    17
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblOSNote": {
+                "name": "lblOSNote",
+                "type": "StaticText",
+                "label": "OSNote:",
+                "posch": [
+                    0,
+                    19
+                ]
+            },
+            "OSNote": {
+                "name": "OSNote",
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "posch": [
+                    12,
+                    19
+                ],
+                "sizech": [
+                    24,
+                    10
+                ]
+            },
+            "lblPsalmorIntroit": {
+                "name": "lblPsalmorIntroit",
+                "type": "StaticText",
+                "label": "Psalm or Introit:",
+                "posch": [
+                    0,
+                    30
+                ]
+            },
+            "PsalmorIntroit": {
+                "name": "PsalmorIntroit",
+                "type": "ComboBox",
+                "posch": [
+                    12,
+                    30
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblSermonID": {
+                "name": "lblSermonID",
+                "type": "StaticText",
+                "label": "Sermon:",
+                "posch": [
+                    0,
+                    33
+                ]
+            },
+            "SermonID": {
+                "name": "SermonID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblSermon",
+                    "fields": [
+                        "ID",
+                        "ID",
+                        "Reference",
+                        "Title"
+                    ],
+                    "orderby": "ID DESC,Reference"
+                },
+                "posch": [
+                    12,
+                    33
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "btnOpenSermonForm": {
+                "name": "btnOpenSermonForm",
+                "type": "Button",
+                "label": "Open Form",
+                "action": [
+                    "openlinkedform",
+                    "frmSermon"
+                ],
+                "posch": [
+                    41,
+                    33
+                ]
+            },
+            "lblBulletin": {
+                "name": "lblBulletin",
+                "type": "StaticText",
+                "label": "Bulletin:",
+                "posch": [
+                    0,
+                    35
+                ]
+            },
+            "Bulletin": {
+                "name": "Bulletin",
+                "type": "FilePickerCtrl",
+                "directory": [
+                    "Location",
+                    "Bulletin"
+                ],
+                "stylelist": [
+                    "FLPCHANGEDIR",
+                    "FLPUSETEXTCTRL"
+                ],
+                "posch": [
+                    12,
+                    35
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "btnOpenBulletin": {
+                "name": "btnOpenBulletin",
+                "type": "Button",
+                "label": "Open",
+                "action": [
+                    "openfile",
+                    "Bulletin"
+                ],
+                "posch": [
+                    41,
+                    35
+                ]
+            },
+            "lblCheckListComplete": {
+                "name": "lblCheckListComplete",
+                "type": "StaticText",
+                "label": "Check List Complete:",
+                "posch": [
+                    0,
+                    40
+                ]
+            },
+            "CheckListComplete": {
+                "name": "CheckListComplete",
+                "type": "CheckBox",
+                "posch": [
+                    12,
+                    40
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblCheckList": {
+                "name": "lblCheckList",
+                "type": "StaticText",
+                "label": "CheckList:",
+                "posch": [
+                    0,
+                    45
+                ]
+            },
+            "btnEditCheckList": {
+                "type": "Button",
+                "name": "btnEditCheckList",
+                "label": "Edit CheckList",
+                "sizech": [
+                    10,
+                    2
+                ],
+                "action": [
+                    "openlinkedform",
+                    "frmEditCheckList"
+                ],
+                "posch": [
+                    0,
+                    48
+                ]
+            },
+            "CheckList": {
+                "name": "CheckList",
+                "type": "CheckListBox",
+                "posch": [
+                    12,
+                    45
+                ],
+                "sizech": [
+                    24,
+                    10
+                ]
+            },
+            "lblNote": {
+                "name": "lblNote",
+                "type": "StaticText",
+                "label": "Note:",
+                "posch": [
+                    0,
+                    56
+                ]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE",
+                    "WORDWRAP"
+                ],
+                "posch": [
+                    12,
+                    56
+                ],
+                "sizech": [
+                    24,
+                    8
+                ]
+            }
+        }
+    }
+}

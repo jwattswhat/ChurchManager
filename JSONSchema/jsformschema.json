@@ -35,31 +35,33 @@
         "fields"
       ]
     },
+    "formtype":{
+      "type": "string",
+      "enum": [
+        "Panel",
+        "Dialog",
+        "Frame",
+        "StaticBox"
+      ]
+    },
+    "formstylelist": {
+      "type": "array",
+      "items": {
+        "type":"string",
+        "enum": ["CAPTION","READONLY"]}
+    },
     "formproperties": {
       "type": "object",
       "properties": {
         "name": {
           "type": "string"
         },
-        "type": {
-          "type": "string",
-          "enum": [
-            "Panel",
-            "Dialog",
-            "Frame",
-            "StaticBox"
-          ]
-        },
+        "type": {"$ref":"#/definitions/formtype"},
         "title": {
           "type": "string"
         },
         "table": {"$ref":"#/definitions/tableproperties"},
-        "stylelist": {
-          "type": "array",
-          "items": {
-            "type":"string",
-            "enum": ["CAPTION","READONLY"]}
-        },
+        "stylelist": {"$ref":"#/definitions/formstylelist"},
         "posch": {"$ref":"#/definitions/possize"},
         "sizech": {"$ref":"#/definitions/possize"},
         "pos": {"$ref":"#/definitions/possize"},
@@ -67,17 +69,36 @@
         "linkedform":{
             "type":"object",
             "patternProperties":{
-              ".*":{"$ref":"#/definitions/formproperties"}
+              ".*":{"$ref":"#/definitions/linkedandsubform"}
             },
             "additionalProperties": true
         },
         "subform":{
           "type":"object",
           "patternProperties":{
-            ".*":{"$ref":"#/definitions/formproperties"}
+            ".*":{"$ref":"#/definitions/linkedandsubform"}
           },
           "additionalProperties": true
         }
+      },
+      "required": ["name","type","title","posch","sizech"]
+    },
+    "linkedandsubform":{
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {"$ref":"#/definitions/formtype"},
+        "title": {
+          "type": "string"
+        },
+        "stylelist": {"$ref":"#/definitions/formstylelist"},
+        "table": {"$ref":"#/definitions/tableproperties"},
+        "posch": {"$ref":"#/definitions/possize"},
+        "sizech": {"$ref":"#/definitions/possize"},
+        "pos": {"$ref":"#/definitions/possize"},
+        "size": {"$ref":"#/definitions/possize"}
       }
     }
   },
@@ -101,6 +122,7 @@
                     "MultiLine",
                     "TextCtrl",
                     "TextNumber",
+                    "Float",
                     "JSON",
                     "ComboBox",
                     "ListCtrl",
@@ -153,7 +175,7 @@
                   "items": [
                     {
                       "type":"string",
-                      "enum": ["openlinkedform","refreshform","editchecklist","openfile","openreport","process"]
+                      "enum": ["openlinkedform","refreshform","editchecklist","openfile","openreport","process","onchange"]
                     },
                     {"type":"string"}
                   ]
@@ -161,7 +183,8 @@
               },
               "required": [
                 "type",
-                "name"
+                "name",
+                "posch"
               ]
             }
           },
