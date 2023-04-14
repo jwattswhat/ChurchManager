@@ -1,1 +1,163 @@
-{"frmAssetFORM": {"FORM": {"type": "Panel", "title": "frmAsset: Asset Edit Form", "name": "frmAsset", "table": {"name": "tblAsset", "fields": ["*"], "orderby": "AssetID"}, "stylelist": ["CAPTION"], "posch": [0, 0], "sizech": [51, 33]}, "CONTROLS": {"lblChurchID": {"type": "StaticText", "label": "Church:", "name": "lblChurchID", "posch": [0, 2]}, "ChurchID": {"type": "ComboBox", "lookupchoices": {"ID": "ID", "name": "tblChurch", "fields": ["ID", "Church"], "sort": "ChurchID"}, "name": "ChurchID", "posch": [9, 2], "sizech": [24, 2]}, "lblAssetID": {"type": "StaticText", "label": "AssetID:", "name": "lblAssetID", "posch": [0, 4]}, "AssetID": {"type": "TextCtrl", "name": "AssetID", "posch": [9, 4], "sizech": [24, 2]}, "lblDescription": {"type": "StaticText", "label": "Description:", "name": "lblDescription", "posch": [0, 7]}, "Description": {"type": "TextCtrl", "name": "Description", "posch": [9, 7], "sizech": [24, 2]}, "lblPurchaseDate": {"type": "StaticText", "label": "Purchase Date:", "name": "lblPurchaseDate", "posch": [0, 9]}, "PurchaseDate": {"type": "DatePickerCtrl", "name": "PurchaseDate", "posch": [9, 9], "sizech": [24, 2]}, "lblDepreciate": {"type": "StaticText", "label": "Depreciate:", "name": "lblDepreciate", "posch": [0, 12]}, "Depreciate": {"type": "CheckBox", "name": "Depreciate", "posch": [9, 12]}, "lblNote": {"type": "StaticText", "label": "Note:", "name": "lblNote", "posch": [0, 14]}, "Note": {"type": "MultiLine", "stylelist": ["MULTILINE"], "name": "Note", "posch": [9, 14], "sizech": [24, 8]}}}}
+{
+    "frmAssetFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmAsset: Asset Edit Form",
+            "name": "frmAsset",
+            "table": {
+                "name": "tblAsset",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "AssetID"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                0,
+                0
+            ],
+            "sizech": [
+                51,
+                33
+            ]
+        },
+        "CONTROLS": {
+            "lblChurchID": {
+                "type": "StaticText",
+                "label": "Church:",
+                "name": "lblChurchID",
+                "posch": [
+                    0,
+                    1
+                ]
+            },
+            "ChurchID": {
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "ID": "ID",
+                    "name": "tblChurch",
+                    "fields": [
+                        "ID",
+                        "Church"
+                    ],
+                    "sort": "ChurchID"
+                },
+                "name": "ChurchID",
+                "posch": [
+                    9,
+                    1
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblAssetID": {
+                "type": "StaticText",
+                "label": "AssetID:",
+                "name": "lblAssetID",
+                "posch": [
+                    0,
+                    3
+                ]
+            },
+            "AssetID": {
+                "type": "TextCtrl",
+                "name": "AssetID",
+                "posch": [
+                    9,
+                    3
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblDescription": {
+                "type": "StaticText",
+                "label": "Description:",
+                "name": "lblDescription",
+                "posch": [
+                    0,
+                    5
+                ]
+            },
+            "Description": {
+                "type": "TextCtrl",
+                "name": "Description",
+                "posch": [
+                    9,
+                    5
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblPurchaseDate": {
+                "type": "StaticText",
+                "label": "Purchase Date:",
+                "name": "lblPurchaseDate",
+                "posch": [
+                    0,
+                    7
+                ]
+            },
+            "PurchaseDate": {
+                "type": "DatePickerCtrl",
+                "name": "PurchaseDate",
+                "posch": [
+                    9,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblDepreciate": {
+                "type": "StaticText",
+                "label": "Depreciate:",
+                "name": "lblDepreciate",
+                "posch": [
+                    0,
+                    9
+                ]
+            },
+            "Depreciate": {
+                "type": "CheckBox",
+                "name": "Depreciate",
+                "posch": [
+                    9,
+                    9
+                ]
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "name": "lblNote",
+                "posch": [
+                    0,
+                    11
+                ]
+            },
+            "Note": {
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Note",
+                "posch": [
+                    9,
+                    11
+                ],
+                "sizech": [
+                    24,
+                    8
+                ]
+            }
+        }
+    }
+}

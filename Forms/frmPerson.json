@@ -1,1 +1,379 @@
-{"frmPersonFORM": {"FORM": {"type": "Panel", "title": "frmPerson : Person Edit Form", "name": "frmPerson", "table": {"name": "tblPerson", "fields": ["ID", "ChurchID", "FamilyID", "FirstName", "MiddleName", "LastName", "Status", "Baptized", "Confirmed", "Member", "AssociateMember", "Note"], "orderby": "LastName,FirstName"}, "stylelist": ["CAPTION"], "linkedform": {"frmPersonAddress": {"controls": ["Close", "Navigation"], "table": {"name": "tblPersonAddress", "fields": ["*"], "condition": "PersonID = {ID}", "orderby": "Address,Zip"}, "readonlyfields": ["PersonID"], "fillonblank": ["PersonID", "ID"]}, "frmPersonContact": {"controls": ["Close", "Navigation"], "table": {"name": "tblPersonContact", "fields": ["*"], "condition": "PersonID = {ID}", "orderby": "Type"}, "readonlyfields": ["PersonID"], "fillonblank": ["PersonID", "ID"]}, "frmPersonDate": {"controls": ["Close", "Navigation"], "table": {"name": "tblPersonDate", "fields": ["*"], "condition": "PersonID = {ID}", "orderby": "Date"}, "readonlyfields": ["PersonID"], "fillonblank": ["PersonID", "ID"]}}, "posch": [0, 0], "sizech": [60, 41]}, "CONTROLS": {"btnPersonAddress": {"type": "Button", "label": "Add/Edit/Delete Person Addresses", "name": "btnPersonAddress", "action": ["openlinkedform", "frmPersonAddress"], "posch": [37, 2]}, "btnPersonContact": {"type": "Button", "label": "Add/Edit/Delete Person Contacts", "name": "btnPersonContact", "action": ["openlinkedform", "frmPersonContact"], "posch": [37, 4]}, "btnPersonDate": {"type": "Button", "label": "Add/Edit/Delete Person Date", "name": "btnPersonDate", "action": ["openlinkedform", "frmPersonDate"], "posch": [37, 7]}, "lblChurchID": {"type": "StaticText", "label": "Church:", "name": "lblChurchID", "posch": [0, 0]}, "ChurchID": {"type": "ComboBox", "name": "ChurchID", "lookupchoices": {"ID": "ID", "name": "tblChurch", "fields": ["ID", "Church"], "orderby": "Church"}, "posch": [10, 0], "sizech": [24, 2]}, "lblFamilyID": {"type": "StaticText", "label": "Family:", "name": "lblFamilyID", "posch": [0, 2]}, "FamilyID": {"type": "ComboBox", "name": "FamilyID", "lookupchoices": {"name": "tblFamily", "fields": ["ID", "FamilyName"], "orderby": "FamilyName"}, "posch": [10, 2], "sizech": [24, 2]}, "lblFirstName": {"type": "StaticText", "label": "First Name:", "name": "lblFirstName", "posch": [0, 4]}, "FirstName": {"type": "TextCtrl", "name": "FirstName", "posch": [10, 4], "sizech": [24, 2]}, "lblMiddleName": {"type": "StaticText", "label": "Middle Name:", "name": "lblMiddleName", "posch": [0, 7]}, "MiddleName": {"type": "TextCtrl", "name": "MiddleName", "posch": [10, 7], "sizech": [24, 2]}, "lblLastName": {"type": "StaticText", "label": "Last Name:", "name": "lblLastName", "posch": [0, 9]}, "LastName": {"type": "TextCtrl", "name": "LastName", "posch": [10, 9], "sizech": [24, 2]}, "lblStatus": {"label": "Status", "type": "StaticText", "name": "lblStatus", "posch": [0, 12]}, "Status": {"type": "ComboBox", "name": "Status", "posch": [10, 12], "sizech": [24, 2]}, "lblBaptized": {"type": "StaticText", "label": "Baptized:", "name": "lblBaptized", "posch": [0, 14]}, "Baptized": {"type": "CheckBox", "name": "Baptized", "posch": [10, 14], "sizech": [0, 0]}, "lblConfirmed": {"type": "StaticText", "label": "Confirmed:", "name": "lblConfirmed", "posch": [0, 17]}, "Confirmed": {"type": "CheckBox", "name": "Confirmed", "posch": [10, 17], "sizech": [0, 0]}, "lblMember": {"type": "StaticText", "label": "Member:", "name": "lblMember", "posch": [0, 19]}, "Member": {"type": "CheckBox", "name": "Member", "posch": [10, 19], "sizech": [0, 0]}, "lblAssociateMember": {"type": "StaticText", "label": "Associate Member:", "name": "lblAssociateMember", "posch": [0, 22]}, "AssociateMember": {"type": "CheckBox", "name": "AssociateMember", "posch": [10, 22], "sizech": [0, 0]}, "lblNote": {"type": "StaticText", "label": "Note:", "name": "lblNote", "posch": [0, 24]}, "Note": {"type": "MultiLine", "name": "Note", "stylelist": ["MULTILINE"], "posch": [10, 24], "sizech": [24, 8]}}}}
+{
+    "frmPersonFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmPerson : Person Edit Form",
+            "name": "frmPerson",
+            "table": {
+                "name": "tblPerson",
+                "fields": [
+                    "ID",
+                    "ChurchID",
+                    "FamilyID",
+                    "FirstName",
+                    "MiddleName",
+                    "LastName",
+                    "Status",
+                    "Baptized",
+                    "Confirmed",
+                    "Member",
+                    "AssociateMember",
+                    "Note"
+                ],
+                "orderby": "LastName,FirstName"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "linkedform": {
+                "frmPersonAddress": {
+                    "controls": [
+                        "Close",
+                        "Navigation"
+                    ],
+                    "table": {
+                        "name": "tblPersonAddress",
+                        "fields": [
+                            "*"
+                        ],
+                        "condition": "PersonID = {ID}",
+                        "orderby": "Address,Zip"
+                    },
+                    "readonlyfields": [
+                        "PersonID"
+                    ],
+                    "fillonblank": [
+                        "PersonID",
+                        "ID"
+                    ]
+                },
+                "frmPersonContact": {
+                    "controls": [
+                        "Close",
+                        "Navigation"
+                    ],
+                    "table": {
+                        "name": "tblPersonContact",
+                        "fields": [
+                            "*"
+                        ],
+                        "condition": "PersonID = {ID}",
+                        "orderby": "Type"
+                    },
+                    "readonlyfields": [
+                        "PersonID"
+                    ],
+                    "fillonblank": [
+                        "PersonID",
+                        "ID"
+                    ]
+                },
+                "frmPersonDate": {
+                    "controls": [
+                        "Close",
+                        "Navigation"
+                    ],
+                    "table": {
+                        "name": "tblPersonDate",
+                        "fields": [
+                            "*"
+                        ],
+                        "condition": "PersonID = {ID}",
+                        "orderby": "Date"
+                    },
+                    "readonlyfields": [
+                        "PersonID"
+                    ],
+                    "fillonblank": [
+                        "PersonID",
+                        "ID"
+                    ]
+                }
+            },
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                55,
+                35
+            ]
+        },
+        "CONTROLS": {
+            "btnPersonAddress": {
+                "type": "Button",
+                "label": "Add/Edit/Delete Person Addresses",
+                "name": "btnPersonAddress",
+                "action": [
+                    "openlinkedform",
+                    "frmPersonAddress"
+                ],
+                "posch": [
+                    37,
+                    2
+                ]
+            },
+            "btnPersonContact": {
+                "type": "Button",
+                "label": "Add/Edit/Delete Person Contacts",
+                "name": "btnPersonContact",
+                "action": [
+                    "openlinkedform",
+                    "frmPersonContact"
+                ],
+                "posch": [
+                    37,
+                    4
+                ]
+            },
+            "btnPersonDate": {
+                "type": "Button",
+                "label": "Add/Edit/Delete Person Date",
+                "name": "btnPersonDate",
+                "action": [
+                    "openlinkedform",
+                    "frmPersonDate"
+                ],
+                "posch": [
+                    37,
+                    6
+                ]
+            },
+            "lblChurchID": {
+                "type": "StaticText",
+                "label": "Church:",
+                "name": "lblChurchID",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "ChurchID": {
+                "type": "ComboBox",
+                "name": "ChurchID",
+                "lookupchoices": {
+                    "ID": "ID",
+                    "name": "tblChurch",
+                    "fields": [
+                        "ID",
+                        "Church"
+                    ],
+                    "orderby": "Church"
+                },
+                "posch": [
+                    10,
+                    1
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblFamilyID": {
+                "type": "StaticText",
+                "label": "Family:",
+                "name": "lblFamilyID",
+                "posch": [
+                    1,
+                    3
+                ]
+            },
+            "FamilyID": {
+                "type": "ComboBox",
+                "name": "FamilyID",
+                "lookupchoices": {
+                    "name": "tblFamily",
+                    "fields": [
+                        "ID",
+                        "FamilyName"
+                    ],
+                    "orderby": "FamilyName"
+                },
+                "posch": [
+                    10,
+                    3
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblFirstName": {
+                "type": "StaticText",
+                "label": "First Name:",
+                "name": "lblFirstName",
+                "posch": [
+                    1,
+                    5
+                ]
+            },
+            "FirstName": {
+                "type": "TextCtrl",
+                "name": "FirstName",
+                "posch": [
+                    10,
+                    5
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblMiddleName": {
+                "type": "StaticText",
+                "label": "Middle Name:",
+                "name": "lblMiddleName",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "MiddleName": {
+                "type": "TextCtrl",
+                "name": "MiddleName",
+                "posch": [
+                    10,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblLastName": {
+                "type": "StaticText",
+                "label": "Last Name:",
+                "name": "lblLastName",
+                "posch": [
+                    1,
+                    9
+                ]
+            },
+            "LastName": {
+                "type": "TextCtrl",
+                "name": "LastName",
+                "posch": [
+                    10,
+                    9
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblStatus": {
+                "label": "Status",
+                "type": "StaticText",
+                "name": "lblStatus",
+                "posch": [
+                    1,
+                    11
+                ]
+            },
+            "Status": {
+                "type": "ComboBox",
+                "name": "Status",
+                "posch": [
+                    10,
+                    11
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblBaptized": {
+                "type": "StaticText",
+                "label": "Baptized:",
+                "name": "lblBaptized",
+                "posch": [
+                    1,
+                    13
+                ]
+            },
+            "Baptized": {
+                "type": "CheckBox",
+                "name": "Baptized",
+                "posch": [
+                    10,
+                    13
+                ]
+            },
+            "lblConfirmed": {
+                "type": "StaticText",
+                "label": "Confirmed:",
+                "name": "lblConfirmed",
+                "posch": [
+                    1,
+                    15
+                ]
+            },
+            "Confirmed": {
+                "type": "CheckBox",
+                "name": "Confirmed",
+                "posch": [
+                    10,
+                    15
+                ]
+            },
+            "lblMember": {
+                "type": "StaticText",
+                "label": "Member:",
+                "name": "lblMember",
+                "posch": [
+                    1,
+                    17
+                ]
+            },
+            "Member": {
+                "type": "CheckBox",
+                "name": "Member",
+                "posch": [
+                    10,
+                    17
+                ]
+            },
+            "lblAssociateMember": {
+                "type": "StaticText",
+                "label": "Associate Member:",
+                "name": "lblAssociateMember",
+                "posch": [
+                    1,
+                    19
+                ]
+            },
+            "AssociateMember": {
+                "type": "CheckBox",
+                "name": "AssociateMember",
+                "posch": [
+                    10,
+                    19
+                ]
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "name": "lblNote",
+                "posch": [
+                    1,
+                    21
+                ]
+            },
+            "Note": {
+                "type": "MultiLine",
+                "name": "Note",
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "posch": [
+                    10,
+                    21
+                ],
+                "sizech": [
+                    24,
+                    8
+                ]
+            }
+        }
+    }
+}

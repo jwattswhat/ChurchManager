@@ -1,1 +1,55 @@
-{"frmHymnHistoryFORM": {"FORM": {"type": "Panel", "title": "frmHymnHistory: Hymn Usage History Form", "name": "frmHymnHistory", "tablename": "frmHymnUsage", "stylelist": ["CAPTION"], "posch": [0, 0], "sizech": [51, 33]}, "CONTROLS": {"dvlHymnUsage": {"type": "DataViewListCtrl", "column": [["DateTime", 100], ["UsedAs", 100], ["Hymn", 200], ["Title", 400]], "columnSQL": "SELECT DateTimeUsedAs,Hymn,Title FROM vwHymnUsage WHERE ServiceID = {ID};", "value": "ID", "name": "dvlHymnUsage", "posch": [0, 0], "sizech": [58, 13]}}}}
+{
+    "frmHymnHistoryFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmHymnHistory: Hymn Usage History Form",
+            "name": "frmHymnHistory",
+            "tablename": "frmHymnUsage",
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                -1,
+                10
+            ],
+            "sizech": [
+                51,
+                33
+            ]
+        },
+        "CONTROLS": {
+            "dvlHymnUsage": {
+                "type": "DataViewListCtrl",
+                "column": [
+                    [
+                        "DateTime",
+                        100
+                    ],
+                    [
+                        "UsedAs",
+                        100
+                    ],
+                    [
+                        "Hymn",
+                        200
+                    ],
+                    [
+                        "Title",
+                        400
+                    ]
+                ],
+                "columnSQL": "SELECT DateTimeUsedAs,Hymn,Title FROM vwHymnUsage WHERE ServiceID = {ID};",
+                "value": "ID",
+                "name": "dvlHymnUsage",
+                "posch": [
+                    0,
+                    0
+                ],
+                "sizech": [
+                    58,
+                    13
+                ]
+            }
+        }
+    }
+}

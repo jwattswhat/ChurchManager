@@ -129,8 +129,8 @@
                 -1
             ],
             "sizech": [
-                60,
-                41
+                55,
+                20
             ]
         },
         "CONTROLS": {
@@ -144,7 +144,7 @@
                 ],
                 "posch": [
                     37,
-                    2
+                    1
                 ]
             },
             "btnFamilyContact": {
@@ -157,7 +157,7 @@
                 ],
                 "posch": [
                     37,
-                    4
+                    3
                 ]
             },
             "btnFamilyDate": {
@@ -170,7 +170,7 @@
                 ],
                 "posch": [
                     37,
-                    7
+                    5
                 ]
             },
             "btnPerson": {
@@ -183,7 +183,7 @@
                 ],
                 "posch": [
                     37,
-                    12
+                    7
                 ]
             },
             "lblChurchID": {
@@ -191,8 +191,8 @@
                 "label": "Church:",
                 "name": "lblChurchID",
                 "posch": [
-                    0,
-                    0
+                    1,
+                    1
                 ]
             },
             "ChurchID": {
@@ -208,7 +208,7 @@
                 "name": "ChurchID",
                 "posch": [
                     10,
-                    0
+                    1
                 ],
                 "sizech": [
                     24,
@@ -220,8 +220,8 @@
                 "label": "Family Name:",
                 "name": "lblFamilyName",
                 "posch": [
-                    0,
-                    2
+                    1,
+                    3
                 ]
             },
             "FamilyName": {
@@ -230,7 +230,7 @@
                 "name": "FamilyName",
                 "posch": [
                     10,
-                    2
+                    3
                 ],
                 "sizech": [
                     24,
@@ -242,8 +242,8 @@
                 "label": "Marriage Status:",
                 "name": "lblMarriageStatus",
                 "posch": [
-                    0,
-                    4
+                    1,
+                    5
                 ]
             },
             "MarriageStatus": {
@@ -251,7 +251,7 @@
                 "name": "MarriageStatus",
                 "posch": [
                     10,
-                    4
+                    5
                 ],
                 "sizech": [
                     24,
@@ -263,7 +263,7 @@
                 "label": "Directory?:",
                 "name": "lblDirectory",
                 "posch": [
-                    0,
+                    1,
                     7
                 ]
             },
@@ -273,10 +273,6 @@
                 "posch": [
                     10,
                     7
-                ],
-                "sizech": [
-                    24,
-                    2
                 ]
             },
             "lblNote": {

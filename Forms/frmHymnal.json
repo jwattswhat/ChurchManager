@@ -1,1 +1,116 @@
-{"frmHymnalFORM": {"FORM": {"type": "Panel", "title": "frmHymn: Hymnal Edit Form", "name": "frmHymnal", "table": {"name": "tblHymnal", "fields": ["*"], "orderby": "Title"}, "stylelist": ["CAPTION"], "posch": [0, 0], "sizech": [51, 33]}, "CONTROLS": {"lblHymnal": {"type": "StaticText", "label": "Hymnal:", "name": "lblHymnal", "posch": [0, 2]}, "Hymnal": {"type": "TextCtrl", "name": "Hymnal", "posch": [6, 2], "sizech": [24, 2]}, "lblTitle": {"type": "StaticText", "label": "Title:", "name": "lblTitle", "posch": [0, 4]}, "Title": {"type": "TextCtrl", "name": "Title", "posch": [6, 4], "sizech": [24, 2]}, "lblPublisher": {"type": "StaticText", "label": "Publisher:", "name": "lblPublisher", "posch": [0, 7]}, "Publisher": {"type": "TextCtrl", "name": "Publisher", "posch": [6, 7], "sizech": [24, 2]}, "lblNote": {"type": "StaticText", "label": "Note:", "name": "lblNote", "posch": [0, 9]}, "Note": {"type": "MultiLine", "stylelist": ["MULTILINE"], "name": "Note", "posch": [6, 9], "sizech": [24, 8]}}}}
+{
+    "frmHymnalFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmHymn: Hymnal Edit Form",
+            "name": "frmHymnal",
+            "table": {
+                "name": "tblHymnal",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "Title"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                51,
+                33
+            ]
+        },
+        "CONTROLS": {
+            "lblHymnal": {
+                "type": "StaticText",
+                "label": "Hymnal:",
+                "name": "lblHymnal",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "Hymnal": {
+                "type": "TextCtrl",
+                "name": "Hymnal",
+                "posch": [
+                    6,
+                    1
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblTitle": {
+                "type": "StaticText",
+                "label": "Title:",
+                "name": "lblTitle",
+                "posch": [
+                    1,
+                    3
+                ]
+            },
+            "Title": {
+                "type": "TextCtrl",
+                "name": "Title",
+                "posch": [
+                    6,
+                    3
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblPublisher": {
+                "type": "StaticText",
+                "label": "Publisher:",
+                "name": "lblPublisher",
+                "posch": [
+                    1,
+                    5
+                ]
+            },
+            "Publisher": {
+                "type": "TextCtrl",
+                "name": "Publisher",
+                "posch": [
+                    6,
+                    5
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "name": "lblNote",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "Note": {
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Note",
+                "posch": [
+                    6,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    8
+                ]
+            }
+        }
+    }
+}
