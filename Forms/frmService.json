@@ -8,6 +8,10 @@
                 -1,
                 -1
             ],
+            "sizech": [
+                50,
+                55
+            ],
             "table": {
                 "name": "tblService",
                 "fields": [
@@ -72,6 +76,7 @@
                     "name": "frmHymnUsage",
                     "title": "frmHymnUsage - Add/Edit/Delete Hymns Used",
                     "type": "Panel",
+                    "posch":[10,1],
                     "table": {
                         "name": "tblHymnUsage",
                         "fields": [
@@ -114,10 +119,6 @@
                         "Sort",
                         "Season",
                         "LiturgicalDate"
-                    ],
-                    "posch": [
-                        51,
-                        -1
                     ]
                 },
                 "frmAltReading": {
@@ -152,77 +153,16 @@
                         "Close"
                     ]
                 }
-            },
-            "subform": {
-                "frmPropers": {
-                    "name": "frmPropers",
-                    "title": "frmPropers",
-                    "type": "StaticBox",
-                    "label": "Propers",
-                    "table": {
-                        "name": "tblPropers",
-                        "fields": [
-                            "*"
-                        ],
-                        "condition": "ID = {PropersID}"
-                    },
-                    "controls": [],
-                    "readonly": 1,
-                    "posch": [
-                        51,
-                        0
-                    ]
-                }
-            },
-            "sizech": [
-                132,
-                65
-            ]
+            }
         },
         "CONTROLS": {
-            "lblLectionary": {
-                "name": "lblLectionary",
-                "type": "StaticText",
-                "label": "Lectionary:",
-                "posch": [
-                    0,
-                    0
-                ]
-            },
-            "Lectionary": {
-                "name": "Lectionary",
-                "type": "StaticText",
-                "fcolor": "Blue",
-                "bcolor": "White",
-                "posch": [
-                    1,
-                    1
-                ]
-            },
-            "btnServiceHymns": {
-                "name": "btnServiceHymns",
-                "type": "Button",
-                "label": "Hymns",
-                "action": [
-                    "openlinkedform",
-                    "frmHymnUsage"
-                ],
-                "posch": [
-                    41,
-                    2
-                ],
-                "sizech": [
-                    8,
-                    2
-                ]
-            },
             "lblChurchID": {
                 "name": "lblChurchID",
                 "type": "StaticText",
                 "label": "Church :",
                 "posch": [
-                    0,
-                    4
+                    1,
+                    1
                 ]
             },
             "ChurchID": {
@@ -238,11 +178,24 @@
                 },
                 "posch": [
                     12,
-                    4
+                    1
                 ],
                 "sizech": [
                     24,
                     2
+                ]
+            },
+            "btnServiceHymns": {
+                "name": "btnServiceHymns",
+                "type": "Button",
+                "label": "Hymns",
+                "action": [
+                    "openlinkedform",
+                    "frmHymnUsage"
+                ],
+                "posch": [
+                    41,
+                    1
                 ]
             },
             "lblDateTime": {
@@ -250,8 +203,8 @@
                 "type": "StaticText",
                 "label": "Service Date/Time:",
                 "posch": [
-                    0,
-                    7
+                    1,
+                    3
                 ]
             },
             "DateTime": {
@@ -259,7 +212,7 @@
                 "type": "DateTime",
                 "posch": [
                     12,
-                    7
+                    3
                 ],
                 "sizech": [
                     24,
@@ -271,8 +224,8 @@
                 "type": "StaticText",
                 "label": "Propers:",
                 "posch": [
-                    0,
-                    9
+                    1,
+                    5
                 ]
             },
             "PropersID": {
@@ -293,7 +246,7 @@
                 ],
                 "posch": [
                     12,
-                    9
+                    5
                 ],
                 "sizech": [
                     24,
@@ -310,10 +263,27 @@
                 ],
                 "posch": [
                     41,
-                    9
+                    5
+                ]
+            },
+            "lblLiturgicalDate": {
+                "name": "lblLiturgicalDate",
+                "type": "StaticText",
+                "label": "Liturgical Date:",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "LiturgicalDate": {
+                "name": "LiturgicalDate",
+                "type": "TextCtrl",
+                "posch": [
+                    12,
+                    7
                 ],
                 "sizech": [
-                    8,
+                    24,
                     2
                 ]
             },
@@ -327,28 +297,24 @@
                 ],
                 "posch": [
                     41,
-                    12
-                ],
-                "sizech": [
-                    8,
-                    2
+                    7
                 ]
             },
-            "lblLiturgicalDate": {
-                "name": "lblLiturgicalDate",
+            "lblHolyCommunion": {
+                "name": "lblHolyCommunion",
                 "type": "StaticText",
-                "label": "Liturgical Date:",
+                "label": "Holy Communion:",
                 "posch": [
-                    0,
-                    12
+                    1,
+                    9
                 ]
             },
-            "LiturgicalDate": {
-                "name": "LiturgicalDate",
-                "type": "TextCtrl",
+            "HolyCommunion": {
+                "name": "HolyCommunion",
+                "type": "CheckBox",
                 "posch": [
                     12,
-                    12
+                    9
                 ],
                 "sizech": [
                     24,
@@ -365,32 +331,7 @@
                 ],
                 "posch": [
                     41,
-                    16
-                ],
-                "sizech": [
-                    8,
-                    2
-                ]
-            },
-            "lblHolyCommunion": {
-                "name": "lblHolyCommunion",
-                "type": "StaticText",
-                "label": "Holy Communion:",
-                "posch": [
-                    0,
-                    14
-                ]
-            },
-            "HolyCommunion": {
-                "name": "HolyCommunion",
-                "type": "CheckBox",
-                "posch": [
-                    12,
-                    14
-                ],
-                "sizech": [
-                    24,
-                    2
+                    9
                 ]
             },
             "lblOrderofService": {
@@ -398,8 +339,8 @@
                 "type": "StaticText",
                 "label": "OrderofService:",
                 "posch": [
-                    0,
-                    17
+                    1,
+                    11
                 ]
             },
             "OrderofService": {
@@ -407,7 +348,7 @@
                 "type": "ComboBox",
                 "posch": [
                     12,
-                    17
+                    11
                 ],
                 "sizech": [
                     24,
@@ -419,8 +360,8 @@
                 "type": "StaticText",
                 "label": "OSNote:",
                 "posch": [
-                    0,
-                    19
+                    1,
+                    13
                 ]
             },
             "OSNote": {
@@ -431,7 +372,7 @@
                 ],
                 "posch": [
                     12,
-                    19
+                    13
                 ],
                 "sizech": [
                     24,
@@ -443,8 +384,8 @@
                 "type": "StaticText",
                 "label": "Psalm or Introit:",
                 "posch": [
-                    0,
-                    30
+                    1,
+                    25
                 ]
             },
             "PsalmorIntroit": {
@@ -452,7 +393,7 @@
                 "type": "ComboBox",
                 "posch": [
                     12,
-                    30
+                    25
                 ],
                 "sizech": [
                     24,
@@ -464,8 +405,8 @@
                 "type": "StaticText",
                 "label": "Sermon:",
                 "posch": [
-                    0,
-                    33
+                    1,
+                    27
                 ]
             },
             "SermonID": {
@@ -483,7 +424,7 @@
                 },
                 "posch": [
                     12,
-                    33
+                    27
                 ],
                 "sizech": [
                     24,
@@ -500,7 +441,7 @@
                 ],
                 "posch": [
                     41,
-                    33
+                    27
                 ]
             },
             "lblBulletin": {
@@ -508,8 +449,8 @@
                 "type": "StaticText",
                 "label": "Bulletin:",
                 "posch": [
-                    0,
-                    35
+                    1,
+                    29
                 ]
             },
             "Bulletin": {
@@ -525,7 +466,7 @@
                 ],
                 "posch": [
                     12,
-                    35
+                    29
                 ],
                 "sizech": [
                     24,
@@ -542,7 +483,7 @@
                 ],
                 "posch": [
                     41,
-                    35
+                    29
                 ]
             },
             "lblCheckListComplete": {
@@ -550,8 +491,8 @@
                 "type": "StaticText",
                 "label": "Check List Complete:",
                 "posch": [
-                    0,
-                    40
+                    1,
+                    31
                 ]
             },
             "CheckListComplete": {
@@ -559,11 +500,7 @@
                 "type": "CheckBox",
                 "posch": [
                     12,
-                    40
-                ],
-                "sizech": [
-                    24,
-                    2
+                    31
                 ]
             },
             "lblCheckList": {
@@ -571,25 +508,8 @@
                 "type": "StaticText",
                 "label": "CheckList:",
                 "posch": [
-                    0,
-                    45
-                ]
-            },
-            "btnEditCheckList": {
-                "type": "Button",
-                "name": "btnEditCheckList",
-                "label": "Edit CheckList",
-                "sizech": [
-                    10,
-                    2
-                ],
-                "action": [
-                    "openlinkedform",
-                    "frmEditCheckList"
-                ],
-                "posch": [
-                    0,
-                    48
+                    1,
+                    33
                 ]
             },
             "CheckList": {
@@ -597,20 +517,34 @@
                 "type": "CheckListBox",
                 "posch": [
                     12,
-                    45
+                    33
                 ],
                 "sizech": [
                     24,
                     10
                 ]
             },
+            "btnEditCheckList": {
+                "type": "Button",
+                "name": "btnEditCheckList",
+                "label": "Edit CheckList",
+                "action": [
+                    "openlinkedform",
+                    "frmEditCheckList"
+                ],
+                "posch": [
+                    1,
+                    35
+                ]
+            },
+   
             "lblNote": {
                 "name": "lblNote",
                 "type": "StaticText",
                 "label": "Note:",
                 "posch": [
-                    0,
-                    56
+                    1,
+                    43
                 ]
             },
             "Note": {
@@ -622,7 +556,7 @@
                 ],
                 "posch": [
                     12,
-                    56
+                    43
                 ],
                 "sizech": [
                     24,

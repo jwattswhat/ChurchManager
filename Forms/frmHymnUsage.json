@@ -23,18 +23,18 @@
                 "frmHymnSearch": {
                     "name": "frmHymnSearch",
                     "posch": [
-                        52,
-                        0
+                        55,
+                        1
                     ]
                 }
             },
             "posch": [
-                0,
-                0
+                -1,
+                -1
             ],
             "sizech": [
-                51,
-                33
+                45,
+                25
             ]
         },
         "CONTROLS": {

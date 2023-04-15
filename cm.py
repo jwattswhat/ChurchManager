@@ -262,6 +262,7 @@ class clsForm(JSForm.clsForms.clsForm):
             self.enable_button("ChurchID")
             self.enable_button("ReportID")
             self.enable_button("btnRun")
+            self.enable_button("btnClose")
             params = row[0].replace("[", "")
             params = params.replace("]", "")
             params = params.replace(",", "")
