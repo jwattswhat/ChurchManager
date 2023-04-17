@@ -16,7 +16,7 @@ import JSForm
 import fnSchedule
 
 
-class clsForm(JSForm.clsForms.clsForm):
+class clsForm(JSForm.clsForm):
     def bind_form_controls(self):
         JSForm.LG.log()
         if "btnHymnSearchByHymn" in self.CONTROLID:
@@ -435,8 +435,6 @@ def _buttonclick(event):
             formname = "frmOptions"
         case "lblChoices":
             formname = "frmChoices"
-        case "lblBugs":
-            formname = "frmBugs"
         case "lblProject":
             formname = "frmProject"
         case "lblTask":
@@ -475,6 +473,8 @@ app = wx.App(0)
 #
 # 	Connect to DataBase
 #
+JSFormDB = JSForm.clsDB(databasename="JSForm", username="church", password="Church99")
+JSForm.JSFORMCONFIG.set_Config_DBConnection(JSFormDB.DBConnection)
 ChurchDB = JSForm.clsDB(server, database, user, password)
 JSForm.CONFIG.set_Config_DBConnection(ChurchDB.DBConnection)
 JSForm.OPTION.set_Option_DBConnection(ChurchDB.DBConnection)
@@ -518,7 +518,6 @@ cmfrm.CONTROLID["lblAttendanceEvent"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblConfig"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblOptions"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblChoices"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblBugs"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblProject"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblTask"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)

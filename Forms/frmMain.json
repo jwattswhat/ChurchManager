@@ -329,15 +329,6 @@
                     25.5
                 ]
             },
-            "lblBugs": {
-                "name": "lblBugs",
-                "type": "StaticText",
-                "label": "Enhancements / Bugs",
-                "posch": [
-                    19,
-                    27
-                ]
-            },
             "lblDonor":{
                 "name":"lblDonor",
                 "type":"StaticText",
