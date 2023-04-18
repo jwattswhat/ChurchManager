@@ -111,13 +111,13 @@
             },
             "State": {
                 "name": "State",
-                "type": "TextCtrl",
+                "type": "ComboBox",
                 "posch": [
                     6,
                     9
                 ],
                 "sizech": [
-                    24,
+                    4,
                     2
                 ]
             },

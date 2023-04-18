@@ -148,7 +148,7 @@
             },
             "lblState": {
                 "type": "StaticText",
-                "label": "City:",
+                "label": "State:",
                 "name": "lblState",
                 "posch": [
                     1,
@@ -156,7 +156,7 @@
                 ]
             },
             "State": {
-                "type": "TextCtrl",
+                "type": "ComboBox",
                 "validatorstr": "NotNull",
                 "name": "State",
                 "posch": [
@@ -164,7 +164,7 @@
                     13
                 ],
                 "sizech": [
-                    24,
+                    4,
                     2
                 ]
             },

@@ -255,7 +255,7 @@ class clsForm(JSForm.clsForm):
             except:
                 return None
             row = cursor.fetchone()
-            if len(row) == 0:
+            if not row[0]:
                 return []
             params = row[0]
             self.disable_all_buttons()
@@ -413,9 +413,12 @@ def _buttonclick(event):
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runReports)
             frm.disable_all_buttons()
             frm.enable_button("ReportID")
+            frm.enable_button("btnRun")
+            frm.enable_button("btnClose")
             frm.show()
             return
-
+        case "lblEnhancements":
+            formname = "frmEnhancement"
         case "lblFamily":
             formname = "frmFamily"
         case "lblPerson":
@@ -506,6 +509,7 @@ cmfrm.CONTROLID["lblSundayPrayers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblPrayers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblReports"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblAnnouncements"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblEnhancements"].Bind(wx.EVT_LEFT_DOWN,_buttonclick)
 
 cmfrm.CONTROLID["lblParticipant"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblSchedule"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)

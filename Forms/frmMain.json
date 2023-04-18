@@ -289,6 +289,12 @@
                     18.5
                 ]
             },
+            "lblEnhancements":{
+                "name": "lblEnhancements",
+                "type": "StaticText",
+                "label": "Enhancements / Bugs",
+                "posch": [19,20]
+            },
             "UtilitiesBox": {
                 "name": "UtilitiesBox",
                 "type": "StaticBox",

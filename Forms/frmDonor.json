@@ -170,14 +170,14 @@
                 ]
             },
             "State": {
-                "type": "TextCtrl",
+                "type": "ComboBox",
                 "name": "State",
                 "posch": [
                     10,
                     15
                 ],
                 "sizech": [
-                    25,
+                    4,
                     2
                 ]
             },

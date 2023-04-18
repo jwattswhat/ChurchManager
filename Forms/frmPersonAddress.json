@@ -1,1 +1,260 @@
-{"frmPersonAddressFORM": {"FORM": {"type": "Panel", "title": "frmPersonAddress : Person Address Edit Form", "name": "frmPersonAddress", "table": {"name": "tblPersonAddress", "fields": ["*"]}, "stylelist": ["CAPTION"], "posch": [0, 0], "sizech": [51, 41]}, "CONTROLS": {"lblPerson": {"type": "StaticText", "label": "Person:", "name": "lblPerson", "posch": [0, 0]}, "PersonID": {"type": "ComboBox", "name": "PersonID", "table": {"name": "tblPerson", "fields": ["CONCAT(LastName,', ',FirstName) as PersonID"], "orderby": "LastName, FirstName"}, "posch": [10, 0], "sizech": [24, 2]}, "lblUnlisted": {"type": "StaticText", "label": "Unlisted:", "name": "lblUnlisted", "posch": [0, 4]}, "Unlisted": {"type": "CheckBox", "name": "Unlisted", "posch": [10, 4], "sizech": [24, 2]}, "lblLabel": {"type": "StaticText", "label": "Label:", "name": "lblLabel", "posch": [0, 2]}, "AddressLabel": {"type": "ComboBox", "name": "AddressLabel", "posch": [10, 2], "sizech": [24, 2]}, "lblAddress": {"type": "StaticText", "label": "Address:", "name": "lblAddress", "posch": [0, 7]}, "Address": {"type": "TextCtrl", "name": "Address", "posch": [10, 7], "sizech": [24, 2]}, "Address2": {"type": "TextCtrl", "name": "Address2", "posch": [10, 9], "sizech": [24, 2]}, "lblCity": {"type": "StaticText", "label": "City:", "name": "lblCity", "posch": [0, 12]}, "City": {"type": "TextCtrl", "name": "City", "posch": [10, 12], "sizech": [24, 2]}, "lblState": {"type": "StaticText", "label": "City:", "name": "lblState", "posch": [0, 14]}, "State": {"type": "TextCtrl", "name": "State", "posch": [10, 14], "sizech": [24, 2]}, "lblZip": {"type": "StaticText", "label": "Zip:", "name": "lblZip", "posch": [0, 17]}, "Zip": {"type": "TextCtrl", "name": "Zip", "posch": [10, 17], "sizech": [24, 2]}, "lblStartDate": {"type": "StaticText", "label": "Start Date:", "name": "lblStartDate", "posch": [0, 19]}, "StartDate": {"type": "TextCtrl", "name": "StartDate", "posch": [10, 19], "sizech": [24, 2]}, "lblEndDate": {"type": "StaticText", "label": "End Date:", "name": "lblEndDate", "posch": [0, 22]}, "EndDate": {"type": "TextCtrl", "name": "EndDate", "posch": [10, 22], "sizech": [24, 2]}, "lblNote": {"type": "StaticText", "label": "Note:", "name": "lblNote", "posch": [0, 24]}, "Note": {"type": "MultiLine", "stylelist": ["MULTILINE"], "name": "Note", "posch": [10, 24], "sizech": [24, 8]}}}}
+{
+    "frmPersonAddressFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmPersonAddress : Person Address Edit Form",
+            "name": "frmPersonAddress",
+            "table": {
+                "name": "tblPersonAddress",
+                "fields": [
+                    "*"
+                ]
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                0,
+                0
+            ],
+            "sizech": [
+                51,
+                41
+            ]
+        },
+        "CONTROLS": {
+            "lblPerson": {
+                "type": "StaticText",
+                "label": "Person:",
+                "name": "lblPerson",
+                "posch": [
+                    0,
+                    0
+                ]
+            },
+            "PersonID": {
+                "type": "ComboBox",
+                "name": "PersonID",
+                "table": {
+                    "name": "tblPerson",
+                    "fields": [
+                        "CONCAT(LastName,', ',FirstName) as PersonID"
+                    ],
+                    "orderby": "LastName, FirstName"
+                },
+                "posch": [
+                    10,
+                    0
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblUnlisted": {
+                "type": "StaticText",
+                "label": "Unlisted:",
+                "name": "lblUnlisted",
+                "posch": [
+                    0,
+                    4
+                ]
+            },
+            "Unlisted": {
+                "type": "CheckBox",
+                "name": "Unlisted",
+                "posch": [
+                    10,
+                    4
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblLabel": {
+                "type": "StaticText",
+                "label": "Label:",
+                "name": "lblLabel",
+                "posch": [
+                    0,
+                    2
+                ]
+            },
+            "AddressLabel": {
+                "type": "ComboBox",
+                "name": "AddressLabel",
+                "posch": [
+                    10,
+                    2
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblAddress": {
+                "type": "StaticText",
+                "label": "Address:",
+                "name": "lblAddress",
+                "posch": [
+                    0,
+                    7
+                ]
+            },
+            "Address": {
+                "type": "TextCtrl",
+                "name": "Address",
+                "posch": [
+                    10,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "Address2": {
+                "type": "TextCtrl",
+                "name": "Address2",
+                "posch": [
+                    10,
+                    9
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblCity": {
+                "type": "StaticText",
+                "label": "City:",
+                "name": "lblCity",
+                "posch": [
+                    0,
+                    12
+                ]
+            },
+            "City": {
+                "type": "TextCtrl",
+                "name": "City",
+                "posch": [
+                    10,
+                    12
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblState": {
+                "type": "StaticText",
+                "label": "State:",
+                "name": "lblState",
+                "posch": [
+                    0,
+                    14
+                ]
+            },
+            "State": {
+                "type": "ComboBox",
+                "name": "State",
+                "posch": [
+                    10,
+                    14
+                ],
+                "sizech": [
+                    4,
+                    2
+                ]
+            },
+            "lblZip": {
+                "type": "StaticText",
+                "label": "Zip:",
+                "name": "lblZip",
+                "posch": [
+                    0,
+                    17
+                ]
+            },
+            "Zip": {
+                "type": "TextCtrl",
+                "name": "Zip",
+                "posch": [
+                    10,
+                    17
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblStartDate": {
+                "type": "StaticText",
+                "label": "Start Date:",
+                "name": "lblStartDate",
+                "posch": [
+                    0,
+                    19
+                ]
+            },
+            "StartDate": {
+                "type": "TextCtrl",
+                "name": "StartDate",
+                "posch": [
+                    10,
+                    19
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblEndDate": {
+                "type": "StaticText",
+                "label": "End Date:",
+                "name": "lblEndDate",
+                "posch": [
+                    0,
+                    22
+                ]
+            },
+            "EndDate": {
+                "type": "TextCtrl",
+                "name": "EndDate",
+                "posch": [
+                    10,
+                    22
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "name": "lblNote",
+                "posch": [
+                    0,
+                    24
+                ]
+            },
+            "Note": {
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Note",
+                "posch": [
+                    10,
+                    24
+                ],
+                "sizech": [
+                    24,
+                    8
+                ]
+            }
+        }
+    }
+}
