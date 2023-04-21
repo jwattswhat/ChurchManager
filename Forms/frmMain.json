@@ -10,28 +10,19 @@
             ],
             "sizech": [
                 35,
-                35
+                33
             ],
             "stylelist": [
                 "CAPTION"
             ]
         },
         "CONTROLS": {
-            "lblDate": {
-                "type": "StaticText",
-                "label": "24-Aug-2022",
-                "posch": [
-                    60,
-                    0
-                ],
-                "name": "lblNow"
-            },
             "ChurchBox": {
                 "type": "StaticBox",
                 "name": "ChurchBox",
                 "posch": [
-                    2,
-                    3
+                    1,
+                    1
                 ],
                 "sizech": [
                     15,
@@ -43,21 +34,23 @@
                 "name": "lblChurch",
                 "type": "StaticText",
                 "posch": [
-                    3,
-                    4.5
+                    2,
+                    2
                 ],
                 "label": "Churches"
             },
+
+
             "ServiceBox": {
                 "type": "StaticBox",
                 "name": "ServiceBox",
                 "posch": [
-                    2,
-                    6
+                    1,
+                    4
                 ],
                 "sizech": [
                     15,
-                    18
+                    12
                 ],
                 "label": "Service"
             },
@@ -65,8 +58,8 @@
                 "name": "lblService",
                 "type": "StaticText",
                 "posch": [
-                    3,
-                    8
+                    2,
+                    5
                 ],
                 "label": "Worship Service"
             },
@@ -74,8 +67,8 @@
                 "name": "lblSermon",
                 "type": "StaticText",
                 "posch": [
-                    4,
-                    9.5
+                    3,
+                    6
                 ],
                 "label": "Sermons"
             },
@@ -83,8 +76,8 @@
                 "name": "lblPropers",
                 "type": "StaticText",
                 "posch": [
-                    4,
-                    11
+                    3,
+                    7
                 ],
                 "label": "Propers"
             },
@@ -92,8 +85,8 @@
                 "name": "lblOS",
                 "type": "StaticText",
                 "posch": [
-                    4,
-                    12.5
+                    3,
+                    8
                 ],
                 "label": "OS"
             },
@@ -101,8 +94,8 @@
                 "name": "lblPrayers",
                 "label": "Prayers",
                 "posch": [
-                    4,
-                    14
+                    3,
+                    9
                 ],
                 "type": "StaticText"
             },
@@ -110,8 +103,8 @@
                 "name": "lblParticipant",
                 "label": "Participant",
                 "posch": [
-                    4,
-                    15.5
+                    3,
+                    10
                 ],
                 "type": "StaticText"
             },
@@ -119,8 +112,8 @@
                 "name": "lblSchedule",
                 "type": "StaticText",
                 "posch": [
-                    4,
-                    17
+                    3,
+                    11
                 ],
                 "label": "Schedule"
             },
@@ -128,8 +121,8 @@
                 "name": "lblServiceSchedule",
                 "type": "StaticText",
                 "posch": [
-                    4,
-                    18.5
+                    3,
+                    12
                 ],
                 "label": "Schedule Participants"
             },
@@ -137,70 +130,40 @@
                 "name": "lblOSList",
                 "type": "StaticText",
                 "posch": [
-                    4,
-                    20
+                    3,
+                    13
                 ],
                 "label": "OS List"
             },
-            "lblCheckList": {
-                "name": "lblCheckList",
+            "lblAttendanceEvent": {
                 "type": "StaticText",
-                "posch": [
-                    4,
-                    21.5
-                ],
-                "label": "CheckLists"
-            },
-            "ProjectBox": {
-                "type": "StaticBox",
-                "name": "ProjectBox",
-                "posch": [
-                    2,
-                    25
-                ],
-                "sizech": [
-                    15,
-                    6
-                ],
-                "label": "Project"
-            },
-            "lblProject": {
-                "name": "lblProject",
-                "type": "StaticText",
+                "name": "lblAttendanceEvent",
                 "posch": [
                     3,
-                    27
+                    14
                 ],
-                "label": "Project"
+                "label": "Attendance Event"
             },
-            "lblTask": {
-                "name": "lblTask",
-                "type": "StaticText",
-                "posch": [
-                    4,
-                    28.5
-                ],
-                "label": "Task"
-            },
+
             "MemberBox": {
                 "name": "MemberBox",
                 "label": "Membership",
                 "type": "StaticBox",
                 "posch": [
-                    18,
-                    3
+                    1,
+                    16
                 ],
                 "sizech": [
                     15,
-                    8
+                    4
                 ]
             },
             "lblPerson": {
                 "name": "lblPerson",
                 "type": "StaticText",
                 "posch": [
-                    19,
-                    4.5
+                    2,
+                    17
                 ],
                 "label": "Person"
             },
@@ -208,39 +171,110 @@
                 "name": "lblFamily",
                 "type": "StaticText",
                 "posch": [
-                    19,
-                    6
+                    2,
+                    18
                 ],
                 "label": "Families"
             },
-            "lblAttendanceEvent": {
-                "type": "StaticText",
-                "name": "lblAttendanceEvent",
+
+            "AttendanceBox":{
+                "name": "MemberBox",
+                "label": "Membership",
+                "type": "StaticBox",
                 "posch": [
-                    19,
-                    7.5
+                    1,
+                    20
                 ],
-                "label": "Attendance Event"
+                "sizech": [
+                    15,
+                    3
+                ]
             },
             "lblRecordAttendance": {
                 "name": "lblRecordAttendance",
                 "type": "StaticText",
                 "posch": [
-                    19,
-                    9
+                    2,
+                    21
                 ],
                 "label": "Record Attendance"
             },
+
+            "ProjectBox": {
+                "type": "StaticBox",
+                "name": "ProjectBox",
+                "posch": [
+                    1,
+                    23
+                ],
+                "sizech": [
+                    15,
+                    4
+                ],
+                "label": "Project"
+            },
+            "lblProject": {
+                "name": "lblProject",
+                "type": "StaticText",
+                "posch": [
+                    2,
+                    24
+                ],
+                "label": "Project"
+            },
+            "lblTask": {
+                "name": "lblTask",
+                "type": "StaticText",
+                "posch": [
+                    3,
+                    25
+                ],
+                "label": "Task"
+            },
+
+            "DonorBox": {
+                "type": "StaticBox",
+                "name": "DonorBox",
+                "posch": [
+                    1,
+                    27
+                ],
+                "sizech": [
+                    15,
+                    4
+                ],
+                "label": "Donor"
+            },
+            "lblDonor":{
+                "name":"lblDonor",
+                "type":"StaticText",
+                "label":"Donors",
+                "posch":[
+                    2,
+                    28
+                ]
+            },
+            "lblDonorGift":{
+                "name":"lblDonorGift",
+                "type":"StaticText",
+                "label":"Donor Gifts",
+                "posch":[
+                    3,
+                    29
+                ]
+            },
+
+
             "ReportBox": {
                 "type": "StaticBox",
                 "name": "ReportBox",
                 "posch": [
                     18,
-                    11
+                    1
                 ],
                 "sizech": [
                     15,
-                    10
+                    7
                 ],
                 "label": "Reports"
             },
@@ -249,7 +283,7 @@
                 "type": "StaticText",
                 "posch": [
                     19,
-                    12.5
+                    2
                 ],
                 "label": "Reports"
             },
@@ -258,7 +292,7 @@
                 "type": "StaticText",
                 "posch": [
                     19,
-                    14
+                    3
                 ],
                 "label": "Generate OS"
             },
@@ -267,7 +301,7 @@
                 "type": "StaticText",
                 "posch": [
                     19,
-                    15.5
+                    4
                 ],
                 "label": "Notify Participants"
             },
@@ -276,7 +310,7 @@
                 "label": "Sunday Prayers",
                 "posch": [
                     19,
-                    17
+                    5
                 ],
                 "type": "StaticText"
             },
@@ -286,26 +320,21 @@
                 "label": "Sunday Announcements",
                 "posch": [
                     19,
-                    18.5
+                    6
                 ]
             },
-            "lblEnhancements":{
-                "name": "lblEnhancements",
-                "type": "StaticText",
-                "label": "Enhancements / Bugs",
-                "posch": [19,20]
-            },
+
             "UtilitiesBox": {
                 "name": "UtilitiesBox",
                 "type": "StaticBox",
                 "label": "Utilities",
                 "posch": [
                     18,
-                    21
+                    8
                 ],
                 "sizech": [
                     15,
-                    9
+                    6
                 ]
             },
             "lblConfig": {
@@ -314,7 +343,7 @@
                 "label": "Config",
                 "posch": [
                     19,
-                    22.5
+                    9
                 ]
             },
             "lblOptions": {
@@ -323,7 +352,7 @@
                 "label": "Options",
                 "posch": [
                     19,
-                    24
+                    10
                 ]
             },
             "lblChoices": {
@@ -332,20 +361,85 @@
                 "label": "Choices",
                 "posch": [
                     19,
-                    25.5
+                    11
                 ]
             },
-            "lblDonor":{
-                "name":"lblDonor",
-                "type":"StaticText",
-                "label":"Donors",
-                "posch":[19,29.5]
+            "lblCheckList": {
+                "name": "lblCheckList",
+                "type": "StaticText",
+                "posch": [
+                    19,
+                    12
+                ],
+                "label": "CheckLists"
             },
-            "lblDonorGift":{
-                "name":"lblDonorGift",
+
+            "Finance":{
+                "name": "UtilitiesBox",
+                "type": "StaticBox",
+                "label": "Utilities",
+                "posch": [
+                    18,
+                    14
+                ],
+                "sizech": [
+                    15,
+                    5
+                ]
+            },
+            "lblChartofAccounts":{
+                "name":"lblChartofAccounts",
                 "type":"StaticText",
-                "label":"Donor Gifts",
-                "posch":[19,31]
+                "label":"Chart of Accounts",
+                "posch":[19,15]
+            },
+            "lblBalance":{
+                "name":"lblBalance",
+                "type":"StaticText",
+                "label":"Account Balances",
+                "posch":[19,16]
+            },
+            "lblBudget":{
+                "name":"lblBudget",
+                "type":"StaticText",
+                "label":"Account Budget",
+                "posch":[19,17]
+            },
+
+
+
+            "EnhancementsBox":{
+                "name": "UtilitiesBox",
+                "type": "StaticBox",
+                "label": "Enhancements / Bugs",
+                "posch": [
+                    18,
+                    19
+                ],
+                "sizech": [
+                    15,
+                    3
+                ]
+            },
+            "lblEnhancements":{
+                "name": "lblEnhancements",
+                "type": "StaticText",
+                "label": "Enhancements / Bugs",
+                "posch": [19,20]
+            },
+
+            "JSFormUtilitiesBox":{
+                "name": "JSFormUtilitiesBox",
+                "type": "StaticBox",
+                "label": "JSForm Utilities",
+                "posch": [
+                    18,
+                    24
+                ],
+                "sizech": [
+                    15,
+                    5
+                ]
             }
         }
     }

@@ -1,0 +1,174 @@
+{
+    "frmBalanceFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmBalance: Balance Edit Form",
+            "name": "frmBalance",
+            "table": {
+                "name": "tblBalance",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "BalanceID"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                51,
+                33
+            ]
+        },
+        "CONTROLS": {
+            "lblChurchID": {
+                "type": "StaticText",
+                "label": "Church:",
+                "name": "lblChurchID",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "ChurchID": {
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "ID": "ID",
+                    "name": "tblChurch",
+                    "fields": [
+                        "ID",
+                        "Church"
+                    ],
+                    "sort": "ChurchID"
+                },
+                "name": "ChurchID",
+                "posch": [
+                    9,
+                    1
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblAccountID": {
+                "type": "StaticText",
+                "label": "Account:",
+                "name": "lblAccountID",
+                "posch": [
+                    1,
+                    3
+                ]
+            },
+            "AccountID": {
+                "type": "ComboBox",
+                "name": "BalanceID",
+                "lookupchoices":{
+                    "name": "tblFund",
+                    "fields": [
+                        "ID","AccountNumber","Description"
+                    ],
+                    "orderby": "AccountNumber"
+                },
+                "posch": [
+                    9,
+                    3
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblFiscalYear":{
+                "name": "lblFiscalYear",
+                "type": "StaticText",
+                "label": "Fiscal Year:",
+                "posch":[1,5]
+            },
+            "FiscalYear":{
+                "name": "FiscalYear",
+                "type": "TextCtrl",
+                "posch": [9,5]
+            },
+            "lblDescription": {
+                "type": "StaticText",
+                "label": "Description:",
+                "name": "lblDescription",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "Description": {
+                "type": "TextCtrl",
+                "name": "Description",
+                "posch": [
+                    9,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblAmount": {
+                "type": "StaticText",
+                "label": "Amount:",
+                "name": "lblAmount",
+                "posch": [
+                    1,
+                    9
+                ]
+            },
+            "Amount": {
+                "type": "Float",
+                "name": "Amount",
+                "posch": [
+                    9,
+                    9
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "format": "{:,.2f}"
+            },
+            "Depreciate": {
+                "type": "CheckBox",
+                "name": "Depreciate",
+                "label": "Closed",
+                "posch": [
+                    9,
+                    11
+                ]
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "name": "lblNote",
+                "posch": [
+                    1,
+                    13
+                ]
+            },
+            "Note": {
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Note",
+                "posch": [
+                    9,
+                    13
+                ],
+                "sizech": [
+                    24,
+                    8
+                ]
+            }
+        }
+    }
+}

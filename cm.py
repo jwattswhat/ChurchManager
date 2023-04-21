@@ -446,6 +446,13 @@ def _buttonclick(event):
             formname = "frmDonor"
         case "lblDonorGift":
             formname = "frmDonorGift"
+
+        case "lblChartofAccounts":
+            formname = "frmFund"
+        case "lblBalance":
+            formname = "frmBalance"
+        case "lblBudget":
+            formname = "frmBudget"
         case _:
             print("form name not found found. {}".format(formname))
 
@@ -530,6 +537,10 @@ cmfrm.CONTROLID["lblDonor"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblDonorGift"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblRecordAttendance"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+
+cmfrm.CONTROLID["lblChartofAccounts"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblBalance"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblBudget"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 PARENTRECORD = {}
 cmfrm.show()
