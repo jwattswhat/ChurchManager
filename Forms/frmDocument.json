@@ -1,15 +1,15 @@
 {
-    "frmBalanceFORM": {
+    "frmDocumentFORM": {
         "FORM": {
             "type": "Panel",
-            "title": "frmBalance: Balance Edit Form",
-            "name": "frmBalance",
+            "title": "frmDocument: Document Edit Form",
+            "name": "frmDocument",
             "table": {
-                "name": "tblBalance",
+                "name": "tblDocument",
                 "fields": [
                     "*"
                 ],
-                "orderby": "BalanceID"
+                "orderby": "Date,Title DESC"
             },
             "stylelist": [
                 "CAPTION"
@@ -19,8 +19,8 @@
                 -1
             ],
             "sizech": [
-                51,
-                33
+                47,
+                30
             ]
         },
         "CONTROLS": {
@@ -36,13 +36,12 @@
             "ChurchID": {
                 "type": "ComboBox",
                 "lookupchoices": {
-                    "ID": "ID",
                     "name": "tblChurch",
                     "fields": [
                         "ID",
                         "Church"
                     ],
-                    "sort": "ChurchID"
+                    "orderby": "Church"
                 },
                 "name": "ChurchID",
                 "posch": [
@@ -52,27 +51,21 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "defaultvalue": "Life in Christ Lutheran Church"
             },
-            "lblAccountID": {
+            "lblTitle": {
                 "type": "StaticText",
-                "label": "Account:",
-                "name": "lblAccountID",
+                "label": "Title:",
+                "name": "lblTitle",
                 "posch": [
                     1,
                     3
                 ]
             },
-            "AccountID": {
-                "type": "ComboBox",
-                "name": "BalanceID",
-                "lookupchoices":{
-                    "name": "tblFund",
-                    "fields": [
-                        "ID","AccountNumber","Description"
-                    ],
-                    "orderby": "AccountNumber"
-                },
+            "Title": {
+                "type": "TextCtrl",
+                "name": "Title",
                 "posch": [
                     9,
                     3
@@ -82,16 +75,97 @@
                     2
                 ]
             },
-            "lblFiscalYear":{
-                "name": "lblFiscalYear",
+            "lblDocument": {
                 "type": "StaticText",
-                "label": "Fiscal Year:",
-                "posch":[1,5]
+                "label": "Document:",
+                "name": "lblDocument",
+                "posch": [
+                    1,
+                    5
+                ]
             },
-            "FiscalYear":{
-                "name": "FiscalYear",
-                "type": "TextCtrl",
-                "posch": [9,5]
+            "Document": {
+                "name": "Document",
+                "type": "FilePickerCtrl",
+                "directory": [
+                    "Location",
+                    "Document"
+                ],
+                "stylelist": [
+                    "FLPCHANGEDIR",
+                    "FLPUSETEXTCTRL"
+                ],
+                "posch": [
+                    9,
+                    5
+                ],
+                "sizech": [
+                    31,
+                    2
+                ]
+            },
+            "btnOpenDocument": {
+                "name": "btnOpenDocument",
+                "type": "Button",
+                "label": "Open",
+                "openfile": "Document",
+                "posch": [
+                    40,
+                    5
+                ],
+                "sizech": [
+                    6,
+                    2
+                ],
+                "action": [
+                    "openfile",
+                    "Document"
+                ]
+            },
+            "lblDocumentType": {
+                "type": "StaticText",
+                "label": "DocumentType:",
+                "name": "DocumentType",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "DocumentType": {
+                "type": "ComboBox",
+                "name": "DocumentType",
+                "posch": [
+                    9,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblDate": {
+                "type": "StaticText",
+                "label": "Date:",
+                "name": "lblDate",
+                "posch": [
+                    1,
+                    9
+                ]
+            },
+            "Date": {
+                "type": "DatePickerCtrl",
+                "name": "Date",
+                "posch": [
+                    9,
+                    9
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "stylelist": [
+                    "ALLOWNONE"
+                ]
             },
             "lblDescription": {
                 "type": "StaticText",
@@ -99,50 +173,22 @@
                 "name": "lblDescription",
                 "posch": [
                     1,
-                    7
+                    11
                 ]
             },
             "Description": {
-                "type": "TextCtrl",
+                "type": "MultiLine",
                 "name": "Description",
-                "posch": [
-                    9,
-                    7
+                "stylelist": [
+                    "MULTILINE"
                 ],
-                "sizech": [
-                    24,
-                    2
-                ]
-            },
-            "lblAmount": {
-                "type": "StaticText",
-                "label": "Amount:",
-                "name": "lblAmount",
-                "posch": [
-                    1,
-                    9
-                ]
-            },
-            "Amount": {
-                "type": "Float",
-                "name": "Amount",
-                "posch": [
-                    9,
-                    9
-                ],
-                "sizech": [
-                    24,
-                    2
-                ],
-                "format": "{:,.2f}"
-            },
-            "Closed": {
-                "type": "CheckBox",
-                "name": "Closed",
-                "label": "Closed",
                 "posch": [
                     9,
                     11
+                ],
+                "sizech": [
+                    24,
+                    8
                 ]
             },
             "lblNote": {
@@ -151,7 +197,7 @@
                 "name": "lblNote",
                 "posch": [
                     1,
-                    13
+                    20
                 ]
             },
             "Note": {
@@ -162,7 +208,7 @@
                 "name": "Note",
                 "posch": [
                     9,
-                    13
+                    20
                 ],
                 "sizech": [
                     24,

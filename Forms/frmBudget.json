@@ -136,9 +136,9 @@
                 ],
                 "format": "{:,.2f}"
             },
-            "Depreciate": {
+            "Closed": {
                 "type": "CheckBox",
-                "name": "Depreciate",
+                "name": "Closed",
                 "label": "Closed",
                 "posch": [
                     9,

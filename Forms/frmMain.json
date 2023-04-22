@@ -405,8 +405,19 @@
                 "label":"Account Budget",
                 "posch":[19,17]
             },
+            "lblLedger":{
+                "name":"lblLedger",
+                "type":"StaticText",
+                "label":"General Ledgert",
+                "posch":[19,18]
+            },
 
-
+            "lblDocument":{
+                "name": "lblDocument",
+                "type":"StaticText",
+                "label": "Documents",
+                "posch":[19,19]
+            },
 
             "EnhancementsBox":{
                 "name": "UtilitiesBox",
@@ -414,7 +425,7 @@
                 "label": "Enhancements / Bugs",
                 "posch": [
                     18,
-                    19
+                    21
                 ],
                 "sizech": [
                     15,
@@ -425,7 +436,7 @@
                 "name": "lblEnhancements",
                 "type": "StaticText",
                 "label": "Enhancements / Bugs",
-                "posch": [19,20]
+                "posch": [19,22]
             },
 
             "JSFormUtilitiesBox":{

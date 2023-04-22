@@ -1,15 +1,15 @@
 {
-    "frmBalanceFORM": {
+    "frmLedgerFORM": {
         "FORM": {
             "type": "Panel",
-            "title": "frmBalance: Balance Edit Form",
-            "name": "frmBalance",
+            "title": "frmLedger: Ledger Edit Form",
+            "name": "frmLedger",
             "table": {
-                "name": "tblBalance",
+                "name": "tblLedger",
                 "fields": [
                     "*"
                 ],
-                "orderby": "BalanceID"
+                "orderby": "LedgerID"
             },
             "stylelist": [
                 "CAPTION"
@@ -54,18 +54,30 @@
                     2
                 ]
             },
-            "lblAccountID": {
+            "lblDate":{
+                "type":"StaticText",
+                "name":"lblDate",
+                "label":"Date:",
+                "posch":[1,3]
+            },
+            "Date":{
+                "type":"DatePickerCtrl",
+                "name":"Date",
+                "posch":[9,3],
+                "sizech":[24,2]
+            },
+            "lblDebitAccountID": {
                 "type": "StaticText",
-                "label": "Account:",
-                "name": "lblAccountID",
+                "label": "Debit Account:",
+                "name": "lblDebitAccountID",
                 "posch": [
                     1,
-                    3
+                    5
                 ]
             },
-            "AccountID": {
+            "DebitAccountID": {
                 "type": "ComboBox",
-                "name": "BalanceID",
+                "name": "DebitAcountID",
                 "lookupchoices":{
                     "name": "tblFund",
                     "fields": [
@@ -75,23 +87,40 @@
                 },
                 "posch": [
                     9,
-                    3
+                    5
                 ],
                 "sizech": [
                     24,
                     2
                 ]
             },
-            "lblFiscalYear":{
-                "name": "lblFiscalYear",
+            "lblCreidtAccountID": {
                 "type": "StaticText",
-                "label": "Fiscal Year:",
-                "posch":[1,5]
+                "label": "Credit Account:",
+                "name": "lblDebitAccountID",
+                "posch": [
+                    1,
+                    7
+                ]
             },
-            "FiscalYear":{
-                "name": "FiscalYear",
-                "type": "TextCtrl",
-                "posch": [9,5]
+            "CreditAccountID": {
+                "type": "ComboBox",
+                "name": "CreditAccountID",
+                "lookupchoices":{
+                    "name": "tblFund",
+                    "fields": [
+                        "ID","AccountNumber","Description"
+                    ],
+                    "orderby": "AccountNumber"
+                },
+                "posch": [
+                    9,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
             },
             "lblDescription": {
                 "type": "StaticText",
@@ -99,7 +128,7 @@
                 "name": "lblDescription",
                 "posch": [
                     1,
-                    7
+                    9
                 ]
             },
             "Description": {
@@ -107,7 +136,7 @@
                 "name": "Description",
                 "posch": [
                     9,
-                    7
+                    9
                 ],
                 "sizech": [
                     24,
@@ -120,7 +149,7 @@
                 "name": "lblAmount",
                 "posch": [
                     1,
-                    9
+                    11
                 ]
             },
             "Amount": {
@@ -128,7 +157,7 @@
                 "name": "Amount",
                 "posch": [
                     9,
-                    9
+                    11
                 ],
                 "sizech": [
                     24,
@@ -136,13 +165,13 @@
                 ],
                 "format": "{:,.2f}"
             },
-            "Closed": {
+            "Audited": {
                 "type": "CheckBox",
-                "name": "Closed",
-                "label": "Closed",
+                "name": "Audited",
+                "label": "Audited",
                 "posch": [
                     9,
-                    11
+                    13
                 ]
             },
             "lblNote": {
@@ -151,7 +180,7 @@
                 "name": "lblNote",
                 "posch": [
                     1,
-                    13
+                    15
                 ]
             },
             "Note": {
@@ -162,7 +191,7 @@
                 "name": "Note",
                 "posch": [
                     9,
-                    13
+                    15
                 ],
                 "sizech": [
                     24,
