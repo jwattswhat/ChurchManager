@@ -374,7 +374,7 @@
                 "label": "CheckLists"
             },
 
-            "Finance":{
+            "FinanceBox":{
                 "name": "UtilitiesBox",
                 "type": "StaticBox",
                 "label": "Utilities",
@@ -384,7 +384,7 @@
                 ],
                 "sizech": [
                     15,
-                    5
+                    6
                 ]
             },
             "lblChartofAccounts":{
@@ -408,7 +408,7 @@
             "lblLedger":{
                 "name":"lblLedger",
                 "type":"StaticText",
-                "label":"General Ledgert",
+                "label":"General Ledger",
                 "posch":[19,18]
             },
 
@@ -416,7 +416,7 @@
                 "name": "lblDocument",
                 "type":"StaticText",
                 "label": "Documents",
-                "posch":[19,19]
+                "posch":[19,20]
             },
 
             "EnhancementsBox":{
@@ -425,7 +425,7 @@
                 "label": "Enhancements / Bugs",
                 "posch": [
                     18,
-                    21
+                    22
                 ],
                 "sizech": [
                     15,
@@ -436,7 +436,7 @@
                 "name": "lblEnhancements",
                 "type": "StaticText",
                 "label": "Enhancements / Bugs",
-                "posch": [19,22]
+                "posch": [19,23]
             },
 
             "JSFormUtilitiesBox":{
@@ -445,7 +445,7 @@
                 "label": "JSForm Utilities",
                 "posch": [
                     18,
-                    24
+                    25
                 ],
                 "sizech": [
                     15,

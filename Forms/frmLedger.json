@@ -94,7 +94,7 @@
                     2
                 ]
             },
-            "lblCreidtAccountID": {
+            "lblCreditAccountID": {
                 "type": "StaticText",
                 "label": "Credit Account:",
                 "name": "lblDebitAccountID",

@@ -63,9 +63,9 @@
                     3
                 ]
             },
-            "AccountID": {
+            "FundID": {
                 "type": "ComboBox",
-                "name": "BalanceID",
+                "name": "FundID",
                 "lookupchoices":{
                     "name": "tblFund",
                     "fields": [
@@ -124,7 +124,7 @@
                 ]
             },
             "Amount": {
-                "type": "Float",
+                "type": "Currency",
                 "name": "Amount",
                 "posch": [
                     9,

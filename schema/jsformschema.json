@@ -122,6 +122,7 @@
                     "MultiLine",
                     "TextCtrl",
                     "TextNumber",
+                    "Currency",
                     "Float",
                     "JSON",
                     "ComboBox",

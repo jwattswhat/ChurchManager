@@ -63,9 +63,9 @@
                     3
                 ]
             },
-            "AccountID": {
+            "FundID": {
                 "type": "ComboBox",
-                "name": "BudgetID",
+                "name": "FundID",
                 "lookupchoices":{
                     "name": "tblFund",
                     "fields": [

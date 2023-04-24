@@ -9,7 +9,7 @@
                 "fields": [
                     "*"
                 ],
-                "orderby": "Date,Title DESC"
+                "orderby": "DocumentType, Date DESC, Title"
             },
             "stylelist": [
                 "CAPTION"
