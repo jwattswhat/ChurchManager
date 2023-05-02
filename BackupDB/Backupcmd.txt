@@ -1,0 +1,2 @@
+mysqldump -uchurch -pChurch99 -h192.168.3.200 ChurchDB > C:\Users\jonat\Documents\PythonProjects\ChurchManager\BackupDB\ChurchDB.Backup.2023.5.1.SQL
+mysqldump -uchurch -pChurch99 -h192.168.3.200 JSForm > C:\Users\jonat\Documents\PythonProjects\JSForm\BackupDB\JSForm.Backup.2023.5.1.SQL

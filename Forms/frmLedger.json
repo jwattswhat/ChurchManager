@@ -83,6 +83,7 @@
                     "fields": [
                         "ID","AccountNumber","Description"
                     ],
+                    "condition": "SummaryAccount IS FALSE",
                     "orderby": "AccountNumber"
                 },
                 "posch": [
@@ -111,6 +112,7 @@
                     "fields": [
                         "ID","AccountNumber","Description"
                     ],
+                    "condition": "SummaryAccount IS FALSE",
                     "orderby": "AccountNumber"
                 },
                 "posch": [
@@ -153,7 +155,7 @@
                 ]
             },
             "Amount": {
-                "type": "Float",
+                "type": "Currency",
                 "name": "Amount",
                 "posch": [
                     9,

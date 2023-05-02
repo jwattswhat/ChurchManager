@@ -373,14 +373,26 @@
                 ],
                 "label": "CheckLists"
             },
+            "lblJournal":{
+                "name":"lblJournal",
+                "type":"StaticText",
+                "posch":[19,13],
+                "label":"Journal"
+            },
+            "lblBackupsDB":{
+                "name":"lblBackupDB",
+                "type":"StaticText",
+                "posch":[19,14],
+                "label":"Backup DB"
+            },
 
             "FinanceBox":{
-                "name": "UtilitiesBox",
+                "name": "FinanceBox",
                 "type": "StaticBox",
-                "label": "Utilities",
+                "label": "Finance",
                 "posch": [
                     18,
-                    14
+                    15
                 ],
                 "sizech": [
                     15,
@@ -391,41 +403,41 @@
                 "name":"lblChartofAccounts",
                 "type":"StaticText",
                 "label":"Chart of Accounts",
-                "posch":[19,15]
-            },
-            "lblBalance":{
-                "name":"lblBalance",
-                "type":"StaticText",
-                "label":"Account Balances",
                 "posch":[19,16]
+            },
+            "lblFund":{
+                "name":"lblFund",
+                "type":"StaticText",
+                "label":"Accounts",
+                "posch":[19,17]
             },
             "lblBudget":{
                 "name":"lblBudget",
                 "type":"StaticText",
                 "label":"Account Budget",
-                "posch":[19,17]
+                "posch":[19,18]
             },
             "lblLedger":{
                 "name":"lblLedger",
                 "type":"StaticText",
                 "label":"General Ledger",
-                "posch":[19,18]
+                "posch":[19,19]
             },
 
             "lblDocument":{
                 "name": "lblDocument",
                 "type":"StaticText",
                 "label": "Documents",
-                "posch":[19,20]
+                "posch":[19,21]
             },
 
             "EnhancementsBox":{
-                "name": "UtilitiesBox",
+                "name": "EnhancementsBox",
                 "type": "StaticBox",
                 "label": "Enhancements / Bugs",
                 "posch": [
                     18,
-                    22
+                    23
                 ],
                 "sizech": [
                     15,
@@ -436,7 +448,7 @@
                 "name": "lblEnhancements",
                 "type": "StaticText",
                 "label": "Enhancements / Bugs",
-                "posch": [19,23]
+                "posch": [19,24]
             },
 
             "JSFormUtilitiesBox":{
@@ -445,7 +457,7 @@
                 "label": "JSForm Utilities",
                 "posch": [
                     18,
-                    25
+                    26
                 ],
                 "sizech": [
                     15,

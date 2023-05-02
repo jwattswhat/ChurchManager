@@ -349,6 +349,9 @@ def _buttonclick(event):
         reportid = frm.CONTROLID["ReportID"].GetValue()
         JSForm.RunReport(reportid, frm, ChurchDB.DBConnection)
         frm.FORM.Close()
+    def _runBackupDB(event):
+        pass
+
 
     select = event.GetEventObject().GetName()
     formname = None
@@ -438,6 +441,11 @@ def _buttonclick(event):
             formname = "frmOptions"
         case "lblChoices":
             formname = "frmChoices"
+        case "lblJournal":
+            formname = "frmJournal"
+        case "lblBackupDB":
+            _runBackupDB()            
+
         case "lblProject":
             formname = "frmProject"
         case "lblTask":
@@ -449,12 +457,12 @@ def _buttonclick(event):
 
         case "lblChartofAccounts":
             formname = "frmFund"
-        case "lblBalance":
-            formname = "frmBalance"
         case "lblBudget":
             formname = "frmBudget"
         case "lblLedger":
             formname = "frmLedger"
+        case "lblFund":
+            formname = "frmFund"
 
         case "lblDocument":
             formname = "frmDocument"
@@ -479,7 +487,7 @@ args = cmparser.parse_args()
 # print(args.server,args.database,args.user,args.password)
 
 
-server = args.server
+host = args.server
 database = args.database
 user = args.user
 password = args.password
@@ -489,12 +497,10 @@ app = wx.App(0)
 #
 # 	Connect to DataBase
 #
-JSFormDB = JSForm.clsDB(databasename="JSForm", username="church", password="Church99")
-JSForm.JSFORMCONFIG.set_Config_DBConnection(JSFormDB.DBConnection)
-ChurchDB = JSForm.clsDB(server, database, user, password)
-JSForm.CONFIG.set_Config_DBConnection(ChurchDB.DBConnection)
-JSForm.OPTION.set_Option_DBConnection(ChurchDB.DBConnection)
-JSForm.FONT.set_Font_DBConnection(ChurchDB.DBConnection)
+ChurchDB = JSForm.clsDB(host, database, user, password)
+JSForm.CONFIG.set_Config_DBConnection(ChurchDB)
+JSForm.OPTION.set_Option_DBConnection(ChurchDB)
+JSForm.FONT.set_Font_DBConnection(ChurchDB)
 JSForm.FONT.Get_Config_Font()
 JSForm.CONST.btnNavigationCONTROLS = JSForm.convertNavButtons(
     JSForm.CONST.btnNavigationCONTROLS
@@ -535,6 +541,8 @@ cmfrm.CONTROLID["lblAttendanceEvent"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblConfig"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblOptions"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblChoices"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblJournal"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+#cmfrm.CONTROLID["lblBackupDB"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblProject"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblTask"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
@@ -545,9 +553,9 @@ cmfrm.CONTROLID["lblDonorGift"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblRecordAttendance"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblChartofAccounts"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblBalance"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblBudget"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblLedger"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblFund"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblDocument"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 

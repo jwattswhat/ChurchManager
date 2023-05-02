@@ -11,7 +11,12 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["--user","church","--password","Church99"]
+            "args":[
+                "-s","192.168.3.200",
+                "-d","ChurchDB",
+                "-u","church",
+                "-p","Church99"
+            ]        
         }
     ]
 }

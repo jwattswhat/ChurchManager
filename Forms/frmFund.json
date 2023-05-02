@@ -7,9 +7,16 @@
             "table": {
                 "name": "tblFund",
                 "fields": [
-                    "*"
+                    "ID",
+                    "ChurchID",
+                    "AccountNumber",
+                    "Description",
+                    "Parent",
+                    "AccountType",
+                    "FiscalYear",
+                    "SummaryAccount"
                 ],
-                "orderby": "AccountNumber"
+                "orderby": "FiscalYear DESC, AccountNumber"
             },
             "stylelist": [
                 "CAPTION"
@@ -75,9 +82,6 @@
                     2
                 ]
             },
-
-
-
             "lblDescription": {
                 "type": "StaticText",
                 "label": "Description:",

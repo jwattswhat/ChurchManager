@@ -5,11 +5,20 @@
             "title": "frmBudget: Budget Edit Form",
             "name": "frmBudget",
             "table": {
-                "name": "tblBudget",
+                "name": "tblFund",
                 "fields": [
-                    "*"
+                    "ID",
+                    "ChurchID",
+                    "Description",
+                    "FiscalYear",
+                    "AccountNumber",
+                    "CashBeginningBalance",
+                    "Balance",
+                    "Budget",
+                    "Closed",
+                    "Note"
                 ],
-                "orderby": "BudgetID"
+                "orderby": "FiscalYear DESC, AccountNumber"
             },
             "stylelist": [
                 "CAPTION"
@@ -21,7 +30,8 @@
             "sizech": [
                 51,
                 33
-            ]
+            ],
+            "readonlyfields":["Balance","CashBeginningBalance"]
         },
         "CONTROLS": {
             "lblChurchID": {
@@ -54,44 +64,40 @@
                     2
                 ]
             },
-            "lblAccountID": {
-                "type": "StaticText",
-                "label": "Account:",
-                "name": "lblAccountID",
-                "posch": [
-                    1,
-                    3
-                ]
-            },
-            "FundID": {
-                "type": "ComboBox",
-                "name": "FundID",
-                "lookupchoices":{
-                    "name": "tblFund",
-                    "fields": [
-                        "ID","AccountNumber","Description"
-                    ],
-                    "orderby": "AccountNumber"
-                },
-                "posch": [
-                    9,
-                    3
-                ],
-                "sizech": [
-                    24,
-                    2
-                ]
-            },
             "lblFiscalYear":{
                 "name": "lblFiscalYear",
                 "type": "StaticText",
                 "label": "Fiscal Year:",
-                "posch":[1,5]
+                "posch":[1,3]
             },
             "FiscalYear":{
                 "name": "FiscalYear",
                 "type": "TextCtrl",
-                "posch": [9,5]
+                "posch": [9,3],
+                "sizech":[4,2],
+                "stylelist":["READONLY"]
+            },
+            "lblAccount": {
+                "type": "StaticText",
+                "label": "Account:",
+                "name": "lblAccount",
+                "posch": [
+                    1,
+                    5
+                ]
+            },
+            "AccountNumber": {
+                "type": "TextCtrl",
+                "name": "AccountNumber",
+                "posch": [
+                    9,
+                    5
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "stylelist":["READONLY"]
             },
             "lblDescription": {
                 "type": "StaticText",
@@ -114,27 +120,59 @@
                     2
                 ]
             },
-            "lblAmount": {
+            "lblCashBeginningBalance":{
                 "type": "StaticText",
-                "label": "Amount:",
-                "name": "lblAmount",
+                "name":"lblCashBeginningBalance",
+                "posch":[1,9],
+                "label":"Beginning Balance(CASH):"
+            },
+            "CashBeginningBalance":{
+                "type":"Currency",
+                "name": "CashBeginningBalance",
+                "posch": [9,9],
+                "sizech": [8,2]
+            },
+            "lblBalance": {
+                "type": "StaticText",
+                "label": "Balance:",
+                "name": "lblBalance",
                 "posch": [
                     1,
-                    9
+                    11
                 ]
             },
-            "Amount": {
-                "type": "Float",
-                "name": "Amount",
+            "Balance": {
+                "type": "Currency",
+                "name": "Balance",
                 "posch": [
                     9,
-                    9
+                    11
                 ],
                 "sizech": [
-                    24,
+                    8,
                     2
+                ]
+            },
+            "lblBudget": {
+                "type": "StaticText",
+                "label": "Budget:",
+                "name": "lblBudget",
+                "posch": [
+                    1,
+                    13
+                ]
+            },
+            "Budget": {
+                "type": "Currency",
+                "name": "Budget",
+                "posch": [
+                    9,
+                    13
                 ],
-                "format": "{:,.2f}"
+                "sizech": [
+                    8,
+                    2
+                ]
             },
             "Closed": {
                 "type": "CheckBox",
@@ -142,7 +180,7 @@
                 "label": "Closed",
                 "posch": [
                     9,
-                    11
+                    15
                 ]
             },
             "lblNote": {
@@ -151,7 +189,7 @@
                 "name": "lblNote",
                 "posch": [
                     1,
-                    13
+                    17
                 ]
             },
             "Note": {
@@ -162,7 +200,7 @@
                 "name": "Note",
                 "posch": [
                     9,
-                    13
+                    17
                 ],
                 "sizech": [
                     24,

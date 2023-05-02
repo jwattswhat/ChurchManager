@@ -1,0 +1,127 @@
+{
+    "frmJournalFORM": {
+        "FORM": {
+            "name": "frmJournal",
+            "type": "Panel",
+            "title": "frmJournal: Journal Edit Form",
+            "table": {
+                "name": "tblJournal",
+                "fields": [
+                    "*"
+                ],
+                "Orderby": "StartDate DESC"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                50,
+                25
+            ]
+        },
+        "CONTROLS": {
+            "lblChurchID": {
+                "name": "lblChurchID",
+                "type": "StaticText",
+                "label": "Church :",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "ChurchID": {
+                "name": "ChurchID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblChurch",
+                    "fields": [
+                        "ID",
+                        "Church"
+                    ],
+                    "orderby": "Church"
+                },
+                "posch": [
+                    12,
+                    1
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblStartDate": {
+                "name":"lblStartDate",
+                "type":"StaticText",
+                "posch":[1,3],
+                "label":"Start Date:"
+            },
+            "StartDate":{
+                "name":"StartDate",
+                "type":"DateTime",
+                "posch":[12,3],
+                "sizech":[20,2],
+                "stylelist":["ALLOWNONE"]
+            },
+            "lblEndDate": {
+                "name":"lblEndDate",
+                "type":"StaticText",
+                "posch":[1,5],
+                "label":"End Date:"
+            },
+            "EndDate":{
+                "name":"EndDate",
+                "type":"DateTime",
+                "posch":[12,5],
+                "sizech":[20,2],
+                "stylelist":["ALLOWNONE"]
+            },
+            "lblEvent":{
+                "name":"lblEvent",
+                "type":"StaticText",
+                "posch":[1,7],
+                "label":"Event:"
+            },
+            "Event":{
+                "name":"Event",
+                "type":"TextCtrl",
+                "posch":[12,7],
+                "sizech": [25,2]
+            },
+            "Complete":{
+                "name":"Complete",
+                "type":"CheckBox",
+                "posch":[12,9],
+                "label":"Complete"
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note",
+                "name": "lblNote",
+                "posch": [
+                    1,
+                    11
+                ]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE",
+                    "WORDWRAP"
+                ],
+                "posch": [
+                    12,
+                    11
+                ],
+                "sizech": [
+                    24,
+                    10
+                ]
+            }
+        }
+    }
+}
