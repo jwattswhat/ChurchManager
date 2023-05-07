@@ -379,12 +379,6 @@
                 "posch":[19,13],
                 "label":"Journal"
             },
-            "lblBackupsDB":{
-                "name":"lblBackupDB",
-                "type":"StaticText",
-                "posch":[19,14],
-                "label":"Backup DB"
-            },
 
             "FinanceBox":{
                 "name": "FinanceBox",
@@ -463,6 +457,12 @@
                     15,
                     5
                 ]
+            },
+            "lblBackupDB":{
+                "name":"lblBackupDB",
+                "type": "StaticText",
+                "label": "Backup DBs {OPTION:Backup:LastDate}",
+                "posch": [19,27]
             }
         }
     }

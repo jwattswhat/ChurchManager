@@ -124,6 +124,7 @@
                 ],
                 "label": "Schedule"
             },
+
             "MemberBox": {
                 "name": "MemberBox",
                 "label": "Membership",
@@ -155,6 +156,7 @@
                 ],
                 "label": "Families"
             },
+
             "ReportBox": {
                 "type": "StaticBox",
                 "name": "ReportBox",
@@ -231,6 +233,7 @@
                 ],
                 "label": "Service Schedule"
             },
+
             "UtilitiesBox": {
                 "name": "UtilitiesBox",
                 "type": "StaticBox",
@@ -241,7 +244,7 @@
                 ],
                 "sizech": [
                     20,
-                    11
+                    12
                 ]
             },
             "lblConfig": {
@@ -279,7 +282,14 @@
                     24,
                     45
                 ]
+            },
+            "lblBackupDBs":{
+                "name":"lblBackupDBs",
+                "type": "StaticText",
+                "label": "Backup DBs {OPTION:Current:Lectionary}",
+                "posch": [24,46]
             }
+
         }
     }
 }

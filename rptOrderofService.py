@@ -92,8 +92,8 @@ if not args.ID:
     print("no Service ID")
     exit()
 
-ChurchDB = JSForm.clsDB("localhost", "ChurchDB", "church", "Church99")
-JSForm.CONFIG.set_Config_DBConnection(ChurchDB.DBConnection)
+ChurchDB = JSForm.clsDB("192.168.3.200", "ChurchDB", "church", "Church99")
+JSForm.CONFIG.set_Config_DBConnection(ChurchDB)
 
 #   Service
 

@@ -35,7 +35,7 @@ def strtolist(st):
 
 def ScheduleParticipants(ServiceID):
 
-    ChurchDB = JSForm.clsDB("localhost", "ChurchDB", "church", "Church99")
+    ChurchDB = JSForm.clsDB("192.168.3.200", "ChurchDB", "church", "Church99")
 
     # check for previous schedule for this service
     serviceroleTable = {

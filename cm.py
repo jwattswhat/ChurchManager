@@ -11,6 +11,7 @@ import mysql
 import subprocess
 import json
 import argparse
+import datetime
 
 import JSForm
 import fnSchedule
@@ -349,9 +350,45 @@ def _buttonclick(event):
         reportid = frm.CONTROLID["ReportID"].GetValue()
         JSForm.RunReport(reportid, frm, ChurchDB.DBConnection)
         frm.FORM.Close()
-    def _runBackupDB(event):
-        pass
 
+    def _runBackupDB():
+
+        class _backupcomplete(wx.Dialog):
+            def __init__(self, parent, title, formlabel=None):
+                super().__init__(parent, title=title, size=(200, 150))
+                panel = wx.Panel(self)
+                self.text = wx.StaticText(
+                    panel,
+                    wx.ID_ANY,
+                    label=formlabel,
+                    pos=(10, 30),
+                )
+                self.btn = wx.Button(
+                    panel,
+                    JSForm.CONST.FORM_CONTINUE,
+                    label="Ok",
+                    size=(100, 30),
+                    pos=(10, 75),
+                )
+
+
+        stamp = datetime.datetime.now().strftime('%Y-%m-%d.%H%M')
+        mysqldump = JSForm.CONFIG.get_Config_Value("Location","MySQLDump")
+        dbbackup = JSForm.CONFIG.get_Config_Value("Location","DBBackup")
+        cmdline = "{mysqldump}mysqldump -uchurch -pChurch99 -h192.168.3.200 ChurchDB > {dbbackup}.ChurchDB.Backup.{stamp}.SQL".format(
+            mysqldump=mysqldump,
+            dbbackup=dbbackup,
+            stamp=stamp)
+        sb = subprocess.Popen(cmdline,shell=True)
+        sb.wait()
+        JSForm.OPTION.set_Option_Value("Backup","LastDate",stamp)
+        dlg = _backupcomplete(
+            None,
+            title="Backup Complete",
+            formlabel="Backup Complete.\n{stamp}".format(stamp=stamp),
+        )
+        result = dlg.ShowModal()
+        dlg.Destroy()
 
     select = event.GetEventObject().GetName()
     formname = None
@@ -443,8 +480,6 @@ def _buttonclick(event):
             formname = "frmChoices"
         case "lblJournal":
             formname = "frmJournal"
-        case "lblBackupDB":
-            _runBackupDB()            
 
         case "lblProject":
             formname = "frmProject"
@@ -466,6 +501,9 @@ def _buttonclick(event):
 
         case "lblDocument":
             formname = "frmDocument"
+
+        case "lblBackupDB":
+            _runBackupDB()            
 
         case _:
             print("form name not found found. {}".format(formname))
@@ -559,6 +597,7 @@ cmfrm.CONTROLID["lblFund"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblDocument"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
+cmfrm.CONTROLID["lblBackupDB"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 PARENTRECORD = {}
 cmfrm.show()
 app.MainLoop()

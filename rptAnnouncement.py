@@ -54,6 +54,7 @@ if FIFTHSUNDAY > LASTDAY:
     else:
         FIFTHSUNDAY = None
 SUNDAYS.append(FIFTHSUNDAY)
+td = ""
 for lastsunday in range(0,len(SUNDAYS)):
     if SUNDAYS[lastsunday] == None:
         break
@@ -73,7 +74,7 @@ for lastsunday in range(0,len(SUNDAYS)):
 
 # print ("Next Sunday",SUNDAY)
 
-ChurchDB = JSForm.clsDB("localhost", "ChurchDB", "church", "Church99")
+ChurchDB = JSForm.clsDB("192.168.3.200", "ChurchDB", "church", "Church99")
 
 AN_ID = 0
 AN_CHURCHID = 1
