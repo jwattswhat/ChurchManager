@@ -246,6 +246,7 @@ class clsForm(JSForm.clsForm):
                     return False
             self.FORM.Close()
             return True
+
         field = event.GetEventObject().GetName()
         if field == "ReportID":
             rptid = self.CONTROLID[field].GetValue()
@@ -269,7 +270,7 @@ class clsForm(JSForm.clsForm):
             params = params.replace(",", "")
             params = params.splitlines()
             self.enable_buttons(params)
-            return 
+            return
 
         attendevent = self.CONTROLID["AttendanceEventID"].GetValue()
         if not attendevent:
@@ -352,7 +353,6 @@ def _buttonclick(event):
         frm.FORM.Close()
 
     def _runBackupDB():
-
         class _backupcomplete(wx.Dialog):
             def __init__(self, parent, title, formlabel=None):
                 super().__init__(parent, title=title, size=(200, 150))
@@ -371,17 +371,15 @@ def _buttonclick(event):
                     pos=(10, 75),
                 )
 
-
-        stamp = datetime.datetime.now().strftime('%Y-%m-%d.%H%M')
-        mysqldump = JSForm.CONFIG.get_Config_Value("Location","MySQLDump")
-        dbbackup = JSForm.CONFIG.get_Config_Value("Location","DBBackup")
+        stamp = datetime.datetime.now().strftime("%Y-%m-%d.%H%M")
+        mysqldump = JSForm.CONFIG.get_Config_Value("Location", "MySQLDump")
+        dbbackup = JSForm.CONFIG.get_Config_Value("Location", "DBBackup")
         cmdline = "{mysqldump}mysqldump -uchurch -pChurch99 -h192.168.3.200 ChurchDB > {dbbackup}.ChurchDB.Backup.{stamp}.SQL".format(
-            mysqldump=mysqldump,
-            dbbackup=dbbackup,
-            stamp=stamp)
-        sb = subprocess.Popen(cmdline,shell=True)
+            mysqldump=mysqldump, dbbackup=dbbackup, stamp=stamp
+        )
+        sb = subprocess.Popen(cmdline, shell=True)
         sb.wait()
-        JSForm.OPTION.set_Option_Value("Backup","LastDate",stamp)
+        JSForm.OPTION.set_Option_Value("Backup", "LastDate", stamp)
         dlg = _backupcomplete(
             None,
             title="Backup Complete",
@@ -503,7 +501,7 @@ def _buttonclick(event):
             formname = "frmDocument"
 
         case "lblBackupDB":
-            _runBackupDB()            
+            _runBackupDB()
 
         case _:
             print("form name not found found. {}".format(formname))
@@ -566,7 +564,7 @@ cmfrm.CONTROLID["lblSundayPrayers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblPrayers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblReports"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblAnnouncements"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblEnhancements"].Bind(wx.EVT_LEFT_DOWN,_buttonclick)
+cmfrm.CONTROLID["lblEnhancements"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblParticipant"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblSchedule"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
@@ -580,7 +578,7 @@ cmfrm.CONTROLID["lblConfig"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblOptions"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblChoices"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblJournal"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-#cmfrm.CONTROLID["lblBackupDB"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+# cmfrm.CONTROLID["lblBackupDB"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblProject"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblTask"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
