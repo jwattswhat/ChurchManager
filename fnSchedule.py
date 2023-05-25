@@ -158,7 +158,7 @@ def ScheduleParticipants(ServiceID):
 
 def notifyviaeMail(ServiceID):
 
-    ChurchDB = JSForm.clsDB("localhost", "ChurchDB", "church", "Church99")
+    ChurchDB = JSForm.clsDB("192.168.3.200", "ChurchDB", "church", "Church99")
     SMTP = JSForm.clsSMTP()
 
     #   Service Record Constants

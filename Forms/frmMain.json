@@ -463,6 +463,12 @@
                 "type": "StaticText",
                 "label": "Backup DBs {OPTION:Backup:LastDate}",
                 "posch": [19,27]
+            },
+            "lblAnnouncement":{
+                "name": "lblAnnouncement",
+                "type": "StaticText",
+                "label": "Announcement",
+                "posch": [19,28]
             }
         }
     }

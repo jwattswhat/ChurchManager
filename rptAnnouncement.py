@@ -79,24 +79,25 @@ ChurchDB = JSForm.clsDB("192.168.3.200", "ChurchDB", "church", "Church99")
 AN_ID = 0
 AN_CHURCHID = 1
 AN_LABEL = 2
-AN_ANNOUNCEMENT = 3
-AN_REQUESTBY = 4
-AN_CONTINUOUS = 5
-AN_FIRSTSUNDAY = 6
-AN_SECONDSUNDAY = 7
-AN_THIRDSUNDAY = 8
-AN_FOURTHSUNDAY = 9
-AN_FIFTHSUNDAY = 10
-AN_STARTDATE = 11
-AN_ENDDATE = 12
-AN_NOTE = 13
+AN_PRIORITY = 3
+AN_ANNOUNCEMENT = 4
+AN_REQUESTBY = 5
+AN_CONTINUOUS = 6
+AN_FIRSTSUNDAY = 7
+AN_SECONDSUNDAY = 8
+AN_THIRDSUNDAY = 9
+AN_FOURTHSUNDAY = 10
+AN_FIFTHSUNDAY = 11
+AN_STARTDATE = 12
+AN_ENDDATE = 13
+AN_NOTE = 14
 
 
 announcement = readallrecords(
     {"name": "tblAnnouncement", 
      "fields": ["*"], 
      "condition": "({Sunday} ((Continuous = 1) OR (NOW() BETWEEN StartDate AND EndDate))) AND (eDisplayOnly = 0)".format(Sunday=td),
-     "orderby": "Label, RequestBy"}
+     "orderby": "Priority, Label, RequestBy"}
 )
 
 prfmt = "{ANNOUNCEMENT}" #\t{REQ}\t{NOTE}" # too much data
@@ -109,12 +110,13 @@ for a in range(len(announcement)):
 
     ann = ""
     #if announcement[a][AN_ANNOUNCEMENT] != announcement[a][AN_CATEGORY]:
-    ann = announcement[a][AN_ANNOUNCEMENT]
+    ann = announcement[a][AN_ANNOUNCEMENT].replace("[","")
+    ann = ann.replace("]","")
     if announcement[a][AN_NOTE] == None:
         PrNote = ""
     else:
         PrNote = announcement[a][AN_NOTE]
-    anfile.append(prfmt.format(ANNOUNCEMENT=announcement[a][AN_ANNOUNCEMENT])) #REQ=req)) #, ,NOTE=PrNote))
+    anfile.append(prfmt.format(ANNOUNCEMENT=ann)) #REQ=req)) #, ,NOTE=PrNote))
 
 with open("announcement.txt", "w") as osfile:
     for l in range(len(anfile)):

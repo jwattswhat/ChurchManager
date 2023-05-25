@@ -10,7 +10,7 @@
             ],
             "sizech": [
                 50,
-                55
+                46
             ],
             "table": {
                 "name": "tblService",
@@ -315,11 +315,8 @@
                 "posch": [
                     12,
                     9
-                ],
-                "sizech": [
-                    24,
-                    2
                 ]
+
             },
             "btnServiceAltReading": {
                 "name": "btnServiceAltReading",
@@ -376,7 +373,7 @@
                 ],
                 "sizech": [
                     24,
-                    10
+                    5
                 ]
             },
             "lblPsalmorIntroit": {
@@ -385,7 +382,7 @@
                 "label": "Psalm or Introit:",
                 "posch": [
                     1,
-                    25
+                    18
                 ]
             },
             "PsalmorIntroit": {
@@ -393,7 +390,7 @@
                 "type": "ComboBox",
                 "posch": [
                     12,
-                    25
+                    18
                 ],
                 "sizech": [
                     24,
@@ -406,7 +403,7 @@
                 "label": "Sermon:",
                 "posch": [
                     1,
-                    27
+                    20
                 ]
             },
             "SermonID": {
@@ -424,7 +421,7 @@
                 },
                 "posch": [
                     12,
-                    27
+                    20
                 ],
                 "sizech": [
                     24,
@@ -441,7 +438,7 @@
                 ],
                 "posch": [
                     41,
-                    27
+                    20
                 ]
             },
             "lblBulletin": {
@@ -450,7 +447,7 @@
                 "label": "Bulletin:",
                 "posch": [
                     1,
-                    29
+                    22
                 ]
             },
             "Bulletin": {
@@ -466,7 +463,7 @@
                 ],
                 "posch": [
                     12,
-                    29
+                    22
                 ],
                 "sizech": [
                     24,
@@ -483,7 +480,7 @@
                 ],
                 "posch": [
                     41,
-                    29
+                    22
                 ]
             },
             "lblCheckListComplete": {
@@ -492,7 +489,7 @@
                 "label": "Check List Complete:",
                 "posch": [
                     1,
-                    31
+                    24
                 ]
             },
             "CheckListComplete": {
@@ -500,7 +497,7 @@
                 "type": "CheckBox",
                 "posch": [
                     12,
-                    31
+                    24
                 ]
             },
             "lblCheckList": {
@@ -509,7 +506,7 @@
                 "label": "CheckList:",
                 "posch": [
                     1,
-                    33
+                    26
                 ]
             },
             "CheckList": {
@@ -517,7 +514,7 @@
                 "type": "CheckListBox",
                 "posch": [
                     12,
-                    33
+                    26
                 ],
                 "sizech": [
                     24,
@@ -534,17 +531,16 @@
                 ],
                 "posch": [
                     1,
-                    35
+                    28
                 ]
             },
-   
             "lblNote": {
                 "name": "lblNote",
                 "type": "StaticText",
                 "label": "Note:",
                 "posch": [
                     1,
-                    43
+                    36
                 ]
             },
             "Note": {
@@ -556,7 +552,7 @@
                 ],
                 "posch": [
                     12,
-                    43
+                    36
                 ],
                 "sizech": [
                     24,

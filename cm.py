@@ -502,7 +502,8 @@ def _buttonclick(event):
 
         case "lblBackupDB":
             _runBackupDB()
-
+        case "lblAnnouncement":
+            formname = "frmAnnouncement"
         case _:
             print("form name not found found. {}".format(formname))
 
@@ -596,6 +597,8 @@ cmfrm.CONTROLID["lblFund"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblDocument"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblBackupDB"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+cmfrm.CONTROLID["lblAnnouncement"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+
 PARENTRECORD = {}
 cmfrm.show()
 app.MainLoop()
