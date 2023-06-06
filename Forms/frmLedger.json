@@ -98,7 +98,7 @@
             "lblCreditAccountID": {
                 "type": "StaticText",
                 "label": "Credit Account:",
-                "name": "lblDebitAccountID",
+                "name": "lblCreditAccountID",
                 "posch": [
                     1,
                     7

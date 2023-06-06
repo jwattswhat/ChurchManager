@@ -496,6 +496,10 @@ def _buttonclick(event):
             formname = "frmLedger"
         case "lblFund":
             formname = "frmFund"
+        case "lblEnvelope":
+            formname = "frmEnvelope"
+        case "lblCheckRegister":
+            formname = "frmCheckRegister"
 
         case "lblDocument":
             formname = "frmDocument"
@@ -593,6 +597,8 @@ cmfrm.CONTROLID["lblChartofAccounts"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblBudget"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblLedger"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 cmfrm.CONTROLID["lblFund"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+#cmfrm.CONTROLID["lblEnvelope"].Bind(wx.EVT_LEFT_DOWN,_buttonclick)
+cmfrm.CONTROLID["lblCheckRegister"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
 cmfrm.CONTROLID["lblDocument"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 

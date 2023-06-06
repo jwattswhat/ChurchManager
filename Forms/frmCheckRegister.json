@@ -1,0 +1,229 @@
+{
+    "frmCheckRegisterFORM": {
+        "FORM": {
+            "name": "frmCheckRegister",
+            "type": "Panel",
+            "title": "frmCheckRegister: CheckRegister Edit Form",
+            "table": {
+                "name": "tblCheckRegister",
+                "fields": [
+                    "*"
+                ],
+                "condition":"LedgerID is NULL",
+                "Orderby": "ID"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                55,
+                20
+            ]
+        },
+        "CONTROLS": {
+            "boxCheck":{
+                "type":"StaticBox",
+                "name":"boxCheck",
+                "posch":[0.5,0],
+                "sizech":[55,13]
+            },
+            "Cleared":{
+                "type":"CheckBox",
+                "label":"Cleared",
+                "name": "Cleared",
+                "posch": [44,1]
+            },
+            "lblCheckNumber":{
+                "type": "StaticText",
+                "label": "#:",
+                "name": "lblCheckNumber",
+                "posch": [
+                    37,
+                    1
+                ]
+            },
+            "CheckNumber":{
+                "type":"TextCtrl",
+                "name":"CheckNumber",
+                "posch":[38,1],
+                "sizech":[5,2]
+            },
+            "lblDate":{
+                "type": "StaticText",
+                "label": "Date:",
+                "name": "lblDate",
+                "posch": [
+                    35,
+                    3
+                ]
+            },
+            "Date":{
+                "type":"DatePickerCtrl",
+                "name":"Date",
+                "posch":[38,3]
+            },
+            "lblVendorID":{
+                "type": "StaticText",
+                "label": "PTO:",
+                "name": "lblPTO",
+                "posch": [
+                    1,
+                    5
+                ]
+            },
+            "VendorID":{
+                "type":"ComboBox",
+                "name":"Vendor",
+                "lookupchoices": {
+                    "name": "tblVendor",
+                    "fields": [
+                        "ID",
+                        "Name"
+                    ],
+                    "orderby": "Name"
+                },
+                "posch":[5,5],
+                "sizech":[25,2]
+            },
+            "lblAmount":{
+                "type": "StaticText",
+                "label": "Amount:",
+                "name": "lblAmount",
+                "posch": [
+                    34,
+                    5
+                ]
+            },
+            "Amount":{
+                "type":"Currency",
+                "name":"Amount",
+                "posch":[38,5],
+                "sizech":[10,2],
+                "format":"{:10.2f}"
+            },
+
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "name": "lblNote",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE",
+                    "WORDWRAP"
+                ],
+                "posch": [
+                    5,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    5
+                ]
+            },
+
+            "lblSignedBy":{
+                "type": "StaticText",
+                "label": "SignedBy:",
+                "name": "lblSignedBy",
+                "posch": [
+                    30,
+                    7
+                ]
+            },
+            "SignedBy":{
+                "type":"TextCtrl",
+                "name":"SignedBy",
+                "posch":[35,7],
+                "sizech":[20,2]
+            },
+
+            "lblChurchID": {
+                "type": "StaticText",
+                "label": "Church:",
+                "name": "lblChurchID",
+                "posch": [
+                    1,
+                    14
+                ]
+            },
+            "ChurchID": {
+                "name": "ChurchID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblChurch",
+                    "fields": [
+                        "ID",
+                        "Church"
+                    ],
+                    "orderby": "Church"
+                },
+                "posch": [
+                    5,
+                    14
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblCreditAccountID":{
+                "type": "StaticText",
+                "label": "Credit\nAccount:",
+                "name": "lblAccountID",
+                "posch": [
+                    1,
+                    16
+                ]
+            },
+            "CreditAccountID":{
+                "type":"ComboBox",
+                "name":"AccountID",
+                "lookupchoices": {
+                    "name": "tblFund",
+                    "fields": [
+                        "ID",
+                        "CONCAT(AccountNumber,'-',Description)"
+                    ],
+                    "condition":"AccountType = 'Expense' AND NOT SummaryAccount",
+                    "orderby": "AccountNumber"
+                },
+                "posch":[5,16]
+            },
+            "lblDebitAccountID":{
+                "type": "StaticText",
+                "label": "Debit\nAccount:",
+                "name": "lblAccountID",
+                "posch": [
+                    21,
+                    16
+                ]
+            },
+            "DebitAccountID":{
+                "type":"ComboBox",
+                "name":"AccountID",
+                "lookupchoices": {
+                    "name": "tblFund",
+                    "fields": [
+                        "ID",
+                        "CONCAT(AccountNumber,'-',Description)"
+                    ],
+                    "condition":"AccountType = 'Cash' AND NOT SummaryAccount",
+                    "orderby": "AccountNumber"
+                },
+                "posch":[25,16]
+            }
+
+        }
+    }
+}
