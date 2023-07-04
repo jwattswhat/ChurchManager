@@ -3,6 +3,7 @@ import mysql
 from datetime import datetime, date
 import calendar
 import subprocess
+import argparse
 
 import JSForm
 
@@ -21,8 +22,22 @@ def sunday(dt):
     deltime = wk - dt.weekday()
     return dt + datetime.timedelta(deltime)
 
+cmparser = argparse.ArgumentParser(
+    prog="rptAnnouncement", description="Church Manager v0.1"
+)
+cmparser.add_argument("-r", "--reportdate", type=str, default="")
 
-TODAY = datetime.now()
+args = cmparser.parse_args()
+# print(args.server,args.database,args.user,args.password)
+
+
+reportdate = args.reportdate
+if not reportdate:
+    dt = datetime.now()
+else:
+    dt = datetime.strptime(reportdate,"%m/%d/%Y")
+
+TODAY = dt
 # print("Today",TODAY)
 FIRSTDAY = JSForm.date_to_datetime(TODAY.replace(day=1))
 # print("First Day",FIRSTDAY)

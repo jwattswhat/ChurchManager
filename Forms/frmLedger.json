@@ -66,16 +66,29 @@
                 "posch":[9,3],
                 "sizech":[24,2]
             },
+            "lblFiscalYear":{
+                "name": "lblFiscalYear",
+                "type": "StaticText",
+                "label": "Fiscal Year:",
+                "posch":[1,5]
+            },
+            "FiscalYear":{
+                "name": "FiscalYear",
+                "type": "TextCtrl",
+                "posch": [9,5],
+                "sizech":[4,2],
+                "stylelist":["READONLY"]
+            },
             "lblDebitAccountID": {
                 "type": "StaticText",
                 "label": "Debit Account:",
                 "name": "lblDebitAccountID",
                 "posch": [
                     1,
-                    5
+                    7
                 ]
             },
-            "DebitAccountID": {
+            "DebitAccount": {
                 "type": "ComboBox",
                 "name": "DebitAcountID",
                 "lookupchoices":{
@@ -88,7 +101,7 @@
                 },
                 "posch": [
                     9,
-                    5
+                    7
                 ],
                 "sizech": [
                     24,
@@ -101,10 +114,10 @@
                 "name": "lblCreditAccountID",
                 "posch": [
                     1,
-                    7
+                    9
                 ]
             },
-            "CreditAccountID": {
+            "CreditAccount": {
                 "type": "ComboBox",
                 "name": "CreditAccountID",
                 "lookupchoices":{
@@ -117,7 +130,7 @@
                 },
                 "posch": [
                     9,
-                    7
+                    9
                 ],
                 "sizech": [
                     24,
@@ -130,7 +143,7 @@
                 "name": "lblDescription",
                 "posch": [
                     1,
-                    9
+                    11
                 ]
             },
             "Description": {
@@ -138,7 +151,7 @@
                 "name": "Description",
                 "posch": [
                     9,
-                    9
+                    11
                 ],
                 "sizech": [
                     24,
@@ -151,7 +164,7 @@
                 "name": "lblAmount",
                 "posch": [
                     1,
-                    11
+                    13
                 ]
             },
             "Amount": {
@@ -159,13 +172,13 @@
                 "name": "Amount",
                 "posch": [
                     9,
-                    11
+                    13
                 ],
                 "sizech": [
                     24,
                     2
                 ],
-                "format": "{:,.2f}"
+                "stylelist": ["JUSTIFYRIGHT"]
             },
             "Audited": {
                 "type": "CheckBox",
@@ -173,16 +186,29 @@
                 "label": "Audited",
                 "posch": [
                     9,
-                    13
+                    15
                 ]
             },
+            "lblDatePosted":{
+                "type":"StaticText",
+                "name":"lblDate",
+                "label":"Date Posted:",
+                "posch":[1,17]
+            },
+            "PostedDate":{
+                "type":"DatePickerCtrl",
+                "name":"Date",
+                "posch":[9,17],
+                "sizech":[24,2]
+            },
+
             "lblNote": {
                 "type": "StaticText",
                 "label": "Note:",
                 "name": "lblNote",
                 "posch": [
                     1,
-                    15
+                    19
                 ]
             },
             "Note": {
@@ -193,7 +219,7 @@
                 "name": "Note",
                 "posch": [
                     9,
-                    15
+                    19
                 ],
                 "sizech": [
                     24,

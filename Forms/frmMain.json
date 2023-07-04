@@ -407,10 +407,10 @@
 
 
 
-            "FinanceBox":{
-                "name": "FinanceBox",
+            "AccountingBox":{
+                "name": "AccountingBox",
                 "type": "StaticBox",
-                "label": "Finance",
+                "label": "Accounting",
                 "posch": [
                     35,
                     1
@@ -426,29 +426,23 @@
                 "label":"Chart of Accounts",
                 "posch":[36,2]
             },
-            "lblFund":{
-                "name":"lblFund",
-                "type":"StaticText",
-                "label":"Accounts",
-                "posch":[36,3]
-            },
             "lblBudget":{
                 "name":"lblBudget",
                 "type":"StaticText",
                 "label":"Account Budget",
-                "posch":[36,4]
+                "posch":[36,3]
             },
             "lblLedger":{
                 "name":"lblLedger",
                 "type":"StaticText",
                 "label":"General Ledger",
-                "posch":[36,5]
+                "posch":[36,4]
             },
             "lblCheckRegister":{
                 "name":"lblCheckRegister",
                 "type":"StaticText",
                 "label":"Check Register",
-                "posch":[36,6]
+                "posch":[36,5]
             },
 
             "DonorBox": {

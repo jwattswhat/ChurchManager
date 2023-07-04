@@ -103,9 +103,8 @@
                 "name":"Amount",
                 "posch":[38,5],
                 "sizech":[10,2],
-                "format":"{:10.2f}"
+                "stylelist": ["JUSTIFYRIGHT"]
             },
-
             "lblNote": {
                 "type": "StaticText",
                 "label": "Note:",

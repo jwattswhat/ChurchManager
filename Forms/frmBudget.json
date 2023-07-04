@@ -130,7 +130,8 @@
                 "type":"Currency",
                 "name": "CashBeginningBalance",
                 "posch": [9,9],
-                "sizech": [8,2]
+                "sizech": [8,2],
+                "stylelist": ["JUSTIFYRIGHT"]
             },
             "lblBalance": {
                 "type": "StaticText",
@@ -151,7 +152,8 @@
                 "sizech": [
                     8,
                     2
-                ]
+                ],
+                "stylelist": ["JUSTIFYRIGHT"]
             },
             "lblBudget": {
                 "type": "StaticText",
@@ -172,7 +174,8 @@
                 "sizech": [
                     8,
                     2
-                ]
+                ],
+                "stylelist": ["JUSTIFYRIGHT"]
             },
             "Closed": {
                 "type": "CheckBox",

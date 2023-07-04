@@ -12,7 +12,7 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args":[
-                "-s","192.168.3.200",
+                "-s", "192.168.3.200",
                 "-d","ChurchDB",
                 "-u","church",
                 "-p","Church99"

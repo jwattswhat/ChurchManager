@@ -5,28 +5,28 @@
     <pages Type="Collection">
       <item Type="Object" ClassName="LimeReport::PageDesignIntf">
         <objectName Type="QString">page1</objectName>
-        <sceneRect width="2259" Type="QRect" y="-50" x="-50" height="2894"/>
+        <sceneRect Type="QRect" x="-50" width="2259" y="-50" height="2894"/>
         <bspTreeDepth Type="int" Value="5"/>
-        <font underline="0" Type="QFont" family="MS Shell Dlg 2" italic="0" pointSize="8" weight="50"/>
+        <font italic="0" Type="QFont" weight="50" family="MS Shell Dlg 2" underline="0" pointSize="8"/>
         <sortCacheEnabled Type="bool" Value="0"/>
         <stickyFocus Type="bool" Value="0"/>
         <minimumRenderSize Type="qreal" Value="0"/>
         <focusOnTouch Type="bool" Value="1"/>
         <pageItem Type="Object" ClassName="PageItem">
           <objectName Type="QString">Reportpage1</objectName>
-          <geometry width="2159" Type="QRect" y="0" x="0" height="2794"/>
+          <geometry Type="QRect" x="0" width="2159" y="0" height="2794"/>
           <children Type="Collection">
             <item Type="Object" ClassName="Data">
-              <objectName Type="QString">DataBand6</objectName>
-              <geometry width="1029" Type="QRect" y="390" x="50" height="80"/>
+              <objectName Type="QString">FamilyName</objectName>
+              <geometry Type="QRect" x="50" width="1029" y="390" height="80"/>
               <children Type="Collection">
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TextItem6</objectName>
-                  <geometry width="300" Type="QRect" y="30" x="50" height="50"/>
+                  <geometry Type="QRect" x="50" width="300" y="30" height="50"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
-                  <parentName Type="QString">DataBand6</parentName>
+                  <parentName Type="QString">FamilyName</parentName>
                   <borderLineSize Type="int" Value="1"/>
                   <isVisible Type="bool" Value="1"/>
                   <borderColor Type="QColor" Value="#000000"/>
@@ -39,7 +39,7 @@
                   <alignment Type="enumAndFlags" Value="33"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" family="Arial" italic="0" pointSize="10" weight="50"/>
+                  <font italic="0" Type="QFont" weight="50" family="Arial" underline="0" pointSize="10"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#000000"/>
@@ -84,28 +84,28 @@
               <backgroundMode Type="enumAndFlags" Value="0"/>
               <backgroundOpacity Type="int" Value="100"/>
               <datasource Type="QString">person</datasource>
-              <keepSubdetailTogether Type="bool" Value="0"/>
+              <keepSubdetailTogether Type="bool" Value="1"/>
               <splittable Type="bool" Value="0"/>
               <keepFooterTogether Type="bool" Value="0"/>
               <sliceLastRow Type="bool" Value="0"/>
               <columnsCount Type="int" Value="2"/>
-              <columnsFillDirection Type="enumAndFlags" Value="0"/>
+              <columnsFillDirection Type="enumAndFlags" Value="1"/>
               <startNewPage Type="bool" Value="0"/>
               <startFromNewPage Type="bool" Value="0"/>
               <alternateBackgroundColor Type="QColor" Value="#ffffff"/>
               <useAlternateBackgroundColor Type="bool" Value="0"/>
             </item>
             <item Type="Object" ClassName="SubDetail">
-              <objectName Type="QString">SubDetailBand17</objectName>
-              <geometry width="1029" Type="QRect" y="470" x="50" height="100"/>
+              <objectName Type="QString">FamilyContacts</objectName>
+              <geometry Type="QRect" x="50" width="1029" y="470" height="100"/>
               <children Type="Collection">
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TextItem17</objectName>
-                  <geometry width="450" Type="QRect" y="0" x="580" height="50"/>
+                  <geometry Type="QRect" x="580" width="450" y="0" height="50"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
-                  <parentName Type="QString">SubDetailBand17</parentName>
+                  <parentName Type="QString">FamilyContacts</parentName>
                   <borderLineSize Type="int" Value="1"/>
                   <isVisible Type="bool" Value="1"/>
                   <borderColor Type="QColor" Value="#000000"/>
@@ -118,7 +118,7 @@
                   <alignment Type="enumAndFlags" Value="33"/>
                   <autoWidth Type="enumAndFlags" Value="2"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" family="Arial" italic="0" pointSize="10" weight="50"/>
+                  <font italic="0" Type="QFont" weight="50" family="Arial" underline="0" pointSize="10"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -146,11 +146,11 @@
                 </item>
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TextItem18</objectName>
-                  <geometry width="250" Type="QRect" y="0" x="100" height="50"/>
+                  <geometry Type="QRect" x="100" width="250" y="0" height="50"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
-                  <parentName Type="QString">SubDetailBand17</parentName>
+                  <parentName Type="QString">FamilyContacts</parentName>
                   <borderLineSize Type="int" Value="1"/>
                   <isVisible Type="bool" Value="1"/>
                   <borderColor Type="QColor" Value="#000000"/>
@@ -163,7 +163,7 @@
                   <alignment Type="enumAndFlags" Value="33"/>
                   <autoWidth Type="enumAndFlags" Value="1"/>
                   <autoHeight Type="bool" Value="1"/>
-                  <font underline="0" Type="QFont" family="Arial" italic="0" pointSize="10" weight="50"/>
+                  <font italic="0" Type="QFont" weight="50" family="Arial" underline="0" pointSize="10"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -191,11 +191,11 @@
                 </item>
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TextItem19</objectName>
-                  <geometry width="160" Type="QRect" y="0" x="420" height="50"/>
+                  <geometry Type="QRect" x="420" width="160" y="0" height="50"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
-                  <parentName Type="QString">SubDetailBand17</parentName>
+                  <parentName Type="QString">FamilyContacts</parentName>
                   <borderLineSize Type="int" Value="1"/>
                   <isVisible Type="bool" Value="1"/>
                   <borderColor Type="QColor" Value="#000000"/>
@@ -208,7 +208,7 @@
                   <alignment Type="enumAndFlags" Value="33"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" family="Arial" italic="0" pointSize="10" weight="50"/>
+                  <font italic="0" Type="QFont" weight="50" family="Arial" underline="0" pointSize="10"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -236,11 +236,11 @@
                 </item>
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TextItem3</objectName>
-                  <geometry width="320" Type="QRect" y="0" x="100" height="50"/>
+                  <geometry Type="QRect" x="100" width="320" y="0" height="50"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="-0.1"/>
                   <borders Type="enumAndFlags" Value="0"/>
-                  <parentName Type="QString">SubDetailBand17</parentName>
+                  <parentName Type="QString">FamilyContacts</parentName>
                   <borderLineSize Type="int" Value="1"/>
                   <isVisible Type="bool" Value="1"/>
                   <borderColor Type="QColor" Value="#000000"/>
@@ -253,7 +253,7 @@
                   <alignment Type="enumAndFlags" Value="33"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" family="Arial" italic="0" pointSize="10" weight="50"/>
+                  <font italic="0" Type="QFont" weight="50" family="Arial" underline="0" pointSize="10"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -291,7 +291,7 @@
               <bandIndex Type="int" Value="3"/>
               <keepBottomSpace Type="bool" Value="0"/>
               <keepTopSpace Type="bool" Value="1"/>
-              <parentBand Type="QString">DataBand6</parentBand>
+              <parentBand Type="QString">FamilyName</parentBand>
               <backgroundColor Type="QColor" Value="#ffffff"/>
               <backgroundBrushStyle Type="enumAndFlags" Value="1"/>
               <printIfEmpty Type="bool" Value="0"/>
@@ -306,16 +306,16 @@
               <useAlternateBackgroundColor Type="bool" Value="0"/>
             </item>
             <item Type="Object" ClassName="SubDetail">
-              <objectName Type="QString">SubDetailBand12</objectName>
-              <geometry width="1029" Type="QRect" y="570" x="50" height="100"/>
+              <objectName Type="QString">Person</objectName>
+              <geometry Type="QRect" x="50" width="1029" y="570" height="100"/>
               <children Type="Collection">
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TextItem12</objectName>
-                  <geometry width="450" Type="QRect" y="0" x="580" height="50"/>
+                  <geometry Type="QRect" x="580" width="450" y="0" height="50"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
-                  <parentName Type="QString">SubDetailBand12</parentName>
+                  <parentName Type="QString">Person</parentName>
                   <borderLineSize Type="int" Value="1"/>
                   <isVisible Type="bool" Value="1"/>
                   <borderColor Type="QColor" Value="#000000"/>
@@ -328,7 +328,7 @@
                   <alignment Type="enumAndFlags" Value="33"/>
                   <autoWidth Type="enumAndFlags" Value="2"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" family="Arial" italic="0" pointSize="10" weight="50"/>
+                  <font italic="0" Type="QFont" weight="50" family="Arial" underline="0" pointSize="10"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -356,11 +356,11 @@
                 </item>
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TextItem13</objectName>
-                  <geometry width="50" Type="QRect" y="0" x="100" height="50"/>
+                  <geometry Type="QRect" x="100" width="50" y="0" height="50"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
-                  <parentName Type="QString">SubDetailBand12</parentName>
+                  <parentName Type="QString">Person</parentName>
                   <borderLineSize Type="int" Value="1"/>
                   <isVisible Type="bool" Value="1"/>
                   <borderColor Type="QColor" Value="#000000"/>
@@ -373,7 +373,7 @@
                   <alignment Type="enumAndFlags" Value="33"/>
                   <autoWidth Type="enumAndFlags" Value="2"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" family="Arial" italic="0" pointSize="10" weight="50"/>
+                  <font italic="0" Type="QFont" weight="50" family="Arial" underline="0" pointSize="10"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -401,11 +401,11 @@
                 </item>
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TextItem14</objectName>
-                  <geometry width="160" Type="QRect" y="0" x="420" height="50"/>
+                  <geometry Type="QRect" x="420" width="160" y="0" height="50"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
-                  <parentName Type="QString">SubDetailBand12</parentName>
+                  <parentName Type="QString">Person</parentName>
                   <borderLineSize Type="int" Value="1"/>
                   <isVisible Type="bool" Value="1"/>
                   <borderColor Type="QColor" Value="#000000"/>
@@ -418,7 +418,7 @@
                   <alignment Type="enumAndFlags" Value="33"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" family="Arial" italic="0" pointSize="10" weight="50"/>
+                  <font italic="0" Type="QFont" weight="50" family="Arial" underline="0" pointSize="10"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -446,11 +446,11 @@
                 </item>
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TextItem4</objectName>
-                  <geometry width="320" Type="QRect" y="0" x="100" height="50"/>
+                  <geometry Type="QRect" x="100" width="320" y="0" height="50"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="-0.1"/>
                   <borders Type="enumAndFlags" Value="0"/>
-                  <parentName Type="QString">SubDetailBand12</parentName>
+                  <parentName Type="QString">Person</parentName>
                   <borderLineSize Type="int" Value="1"/>
                   <isVisible Type="bool" Value="1"/>
                   <borderColor Type="QColor" Value="#000000"/>
@@ -463,7 +463,7 @@
                   <alignment Type="enumAndFlags" Value="33"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" family="Arial" italic="0" pointSize="10" weight="50"/>
+                  <font italic="0" Type="QFont" weight="50" family="Arial" underline="0" pointSize="10"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -501,7 +501,7 @@
               <bandIndex Type="int" Value="4"/>
               <keepBottomSpace Type="bool" Value="0"/>
               <keepTopSpace Type="bool" Value="1"/>
-              <parentBand Type="QString">DataBand6</parentBand>
+              <parentBand Type="QString">FamilyName</parentBand>
               <backgroundColor Type="QColor" Value="#ffffff"/>
               <backgroundBrushStyle Type="enumAndFlags" Value="1"/>
               <printIfEmpty Type="bool" Value="0"/>
@@ -517,11 +517,11 @@
             </item>
             <item Type="Object" ClassName="ReportHeader">
               <objectName Type="QString">ReportHeader1</objectName>
-              <geometry width="2059" Type="QRect" y="50" x="50" height="340"/>
+              <geometry Type="QRect" x="50" width="2059" y="50" height="340"/>
               <children Type="Collection">
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TextItem48</objectName>
-                  <geometry width="1950" Type="QRect" y="150" x="48" height="50"/>
+                  <geometry Type="QRect" x="48" width="1950" y="150" height="50"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -538,7 +538,7 @@
                   <alignment Type="enumAndFlags" Value="36"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" family="Arial" italic="0" pointSize="10" weight="50"/>
+                  <font italic="0" Type="QFont" weight="50" family="Arial" underline="0" pointSize="10"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -566,7 +566,7 @@
                 </item>
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TextItem43</objectName>
-                  <geometry width="200" Type="QRect" y="0" x="48" height="50"/>
+                  <geometry Type="QRect" x="48" width="200" y="0" height="50"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -583,7 +583,7 @@
                   <alignment Type="enumAndFlags" Value="33"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" family="Arial" italic="0" pointSize="10" weight="75"/>
+                  <font italic="0" Type="QFont" weight="75" family="Arial" underline="0" pointSize="10"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -611,7 +611,7 @@
                 </item>
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TextItem49</objectName>
-                  <geometry width="1950" Type="QRect" y="250" x="50" height="50"/>
+                  <geometry Type="QRect" x="50" width="1950" y="250" height="50"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -628,7 +628,7 @@
                   <alignment Type="enumAndFlags" Value="68"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" family="Arial" italic="0" pointSize="14" weight="75"/>
+                  <font italic="0" Type="QFont" weight="75" family="Arial" underline="0" pointSize="14"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -656,7 +656,7 @@
                 </item>
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TextItem35</objectName>
-                  <geometry width="380" Type="QRect" y="0" x="1618" height="50"/>
+                  <geometry Type="QRect" x="1618" width="380" y="0" height="50"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -673,7 +673,7 @@
                   <alignment Type="enumAndFlags" Value="34"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" family="Arial" italic="0" pointSize="10" weight="75"/>
+                  <font italic="0" Type="QFont" weight="75" family="Arial" underline="0" pointSize="10"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -701,7 +701,7 @@
                 </item>
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TextItem45</objectName>
-                  <geometry width="1950" Type="QRect" y="50" x="48" height="50"/>
+                  <geometry Type="QRect" x="48" width="1950" y="50" height="50"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -718,7 +718,7 @@
                   <alignment Type="enumAndFlags" Value="36"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" family="Arial" italic="0" pointSize="14" weight="75"/>
+                  <font italic="0" Type="QFont" weight="75" family="Arial" underline="0" pointSize="14"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -746,7 +746,7 @@
                 </item>
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TextItem47</objectName>
-                  <geometry width="1950" Type="QRect" y="100" x="48" height="50"/>
+                  <geometry Type="QRect" x="48" width="1950" y="100" height="50"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -763,7 +763,7 @@
                   <alignment Type="enumAndFlags" Value="68"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" family="Arial" italic="0" pointSize="10" weight="50"/>
+                  <font italic="0" Type="QFont" weight="50" family="Arial" underline="0" pointSize="10"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -791,7 +791,7 @@
                 </item>
                 <item Type="Object" ClassName="ImageItem">
                   <objectName Type="QString">ImageItem4</objectName>
-                  <geometry width="300" Type="QRect" y="70" x="50" height="180"/>
+                  <geometry Type="QRect" x="50" width="300" y="70" height="180"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -827,7 +827,7 @@
               <geometryLocked Type="bool" Value="0"/>
               <autoHeight Type="bool" Value="1"/>
               <bandIndex Type="int" Value="1"/>
-              <keepBottomSpace Type="bool" Value="0"/>
+              <keepBottomSpace Type="bool" Value="1"/>
               <keepTopSpace Type="bool" Value="1"/>
               <parentBand Type="QString"></parentBand>
               <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -840,11 +840,11 @@
             </item>
             <item Type="Object" ClassName="PageFooter">
               <objectName Type="QString">PageFooter1</objectName>
-              <geometry width="2059" Type="QRect" y="670" x="50" height="100"/>
+              <geometry Type="QRect" x="50" width="2059" y="670" height="100"/>
               <children Type="Collection">
                 <item Type="Object" ClassName="TextItem">
                   <objectName Type="QString">TextItem1</objectName>
-                  <geometry width="1950" Type="QRect" y="10" x="50" height="50"/>
+                  <geometry Type="QRect" x="50" width="1950" y="10" height="50"/>
                   <children Type="Collection"/>
                   <zOrder Type="qreal" Value="0"/>
                   <borders Type="enumAndFlags" Value="0"/>
@@ -861,7 +861,7 @@
                   <alignment Type="enumAndFlags" Value="36"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
                   <autoHeight Type="bool" Value="0"/>
-                  <font underline="0" Type="QFont" family="Arial" italic="0" pointSize="10" weight="50"/>
+                  <font italic="0" Type="QFont" weight="50" family="Arial" underline="0" pointSize="10"/>
                   <backgroundOpacity Type="int" Value="100"/>
                   <backgroundMode Type="enumAndFlags" Value="1"/>
                   <backgroundColor Type="QColor" Value="#ffffff"/>
@@ -964,7 +964,7 @@
         <item Type="Object" ClassName="LimeReport::QueryDesc">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">person</queryName>
-          <queryText Type="QString">SELECT DISTINCT LastName FROM `tblperson` 
+          <queryText Type="QString">SELECT DISTINCT LastName FROM `tblPerson` 
 WHERE ChurchID = $V{churchID} AND Member =  1
 ORDER BY LastName;</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
