@@ -189,26 +189,13 @@
                     15
                 ]
             },
-            "lblDatePosted":{
-                "type":"StaticText",
-                "name":"lblDate",
-                "label":"Date Posted:",
-                "posch":[1,17]
-            },
-            "PostedDate":{
-                "type":"DatePickerCtrl",
-                "name":"Date",
-                "posch":[9,17],
-                "sizech":[24,2]
-            },
-
             "lblNote": {
                 "type": "StaticText",
                 "label": "Note:",
                 "name": "lblNote",
                 "posch": [
                     1,
-                    19
+                    17
                 ]
             },
             "Note": {
@@ -219,7 +206,7 @@
                 "name": "Note",
                 "posch": [
                     9,
-                    19
+                    17
                 ],
                 "sizech": [
                     24,

@@ -131,7 +131,7 @@
                 ]
             },
 
-            "lblSignedBy":{
+            "lblSignedby":{
                 "type": "StaticText",
                 "label": "SignedBy:",
                 "name": "lblSignedBy",
@@ -140,9 +140,9 @@
                     7
                 ]
             },
-            "SignedBy":{
+            "Signedby":{
                 "type":"TextCtrl",
-                "name":"SignedBy",
+                "name":"Signedby",
                 "posch":[35,7],
                 "sizech":[20,2]
             },
