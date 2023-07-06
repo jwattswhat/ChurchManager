@@ -444,6 +444,18 @@
                 "label":"Check Register",
                 "posch":[36,5]
             },
+            "lblEnvelope":{
+                "name":"lblEnvelope",
+                "type":"StaticText",
+                "label":"Envelopes",
+                "posch":[36,6]
+            },
+            "lblGivingJournal":{
+                "name":"lblGivingJournal",
+                "type":"StaticText",
+                "label":"Giving Journal",
+                "posch":[36,7]
+            },
 
             "DonorBox": {
                 "type": "StaticBox",

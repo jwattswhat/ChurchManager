@@ -1,0 +1,198 @@
+{
+    "frmPostGivingFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmPostCheck: Post Giving Journal to General Ledger",
+            "table": {
+                "name": "tblGivingRegister",
+                "fields": [
+                    "*"
+                ],
+                "condition": "LedgerID is NULL",
+                "orderby": "Date"
+            },
+            "name": "frmPostGiving",
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                38,
+            25
+            ],
+            "readonlyfields": [
+                "ChurchID",
+                "EnvelopeID",
+                "CreditAccountID",
+                "DebitAccountID",
+                "Amount","Date"
+            ]
+        },
+        "CONTROLS": {
+            "lblChurchID": {
+                "type": "StaticText",
+                "label": "Church:",
+                "name": "lblChurchID",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "ChurchID": {
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "ID": "ID",
+                    "name": "tblChurch",
+                    "fields": [
+                        "ID",
+                        "Church"
+                    ],
+                    "sort": "ChurchID"
+                },
+                "name": "ChurchID",
+                "posch": [
+                    9,
+                    1
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblDate": {
+                "type": "StaticText",
+                "label": "Date:",
+                "name": "lblDate",
+                "posch": [
+                    1,
+                    3
+                ]
+            },
+            "Date":{
+                "type":"DatePickerCtrl",
+                "name":"Date",
+                "posch":[9,3]
+            },
+            "lblAmount": {
+                "type": "StaticText",
+                "label": "Amount:",
+                "name": "lblAmount",
+                "posch": [
+                    1,
+                    9
+                ]
+            },
+            "Amount": {
+                "type": "Currency",
+                "name": "Amount",
+                "posch": [
+                    9,
+                    9
+                ],
+                "sizech": [
+                    10,
+                    2
+                ],
+                "stylelist": [
+                    "JUSTIFYRIGHT","READONLY"
+                ]
+            },
+            "lblCreditAccountID": {
+                "type": "StaticText",
+                "label": "Credit Account:",
+                "name": "lblAccountID",
+                "posch": [
+                    1,
+                    11
+                ]
+            },
+            "CreditAccountID": {
+                "type": "ComboBox",
+                "name": "AccountID",
+                "lookupchoices": {
+                    "name": "tblFund",
+                    "fields": [
+                        "ID",
+                        "CONCAT(AccountNumber,'-',Description)"
+                    ],
+                    "condition": "AccountType = 'Expense' AND NOT SummaryAccount",
+                    "orderby": "AccountNumber"
+                },
+                "posch": [
+                    9,
+                    11
+                ]
+            },
+            "lblDebitAccountID": {
+                "type": "StaticText",
+                "label": "Debit Account:",
+                "name": "lblAccountID",
+                "posch": [
+                    1,
+                    13
+                ]
+            },
+            "DebitAccountID": {
+                "type": "ComboBox",
+                "name": "AccountID",
+                "lookupchoices": {
+                    "name": "tblFund",
+                    "fields": [
+                        "ID",
+                        "CONCAT(AccountNumber,'-',Description)"
+                    ],
+                    "condition": "AccountType = 'Cash' AND NOT SummaryAccount",
+                    "orderby": "AccountNumber"
+                },
+                "posch": [
+                    9,
+                    13
+                ]
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "name": "lblNote",
+                "posch": [
+                    1,
+                    15
+                ]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE",
+                    "WORDWRAP","READONLY"
+                ],
+                "posch": [
+                    9,
+                    15
+                ],
+                "sizech": [
+                    24,
+                    5
+                ]
+            },
+            "btnPost": {
+                "name": "btnPost",
+                "type": "Button",
+                "label": "Post",
+                "posch": [
+                    9,20
+
+                ]
+            },
+            "btnPostAll": {
+                "name": "btnPostAll",
+                "type": "Button",
+                "label": "Post All",
+                "posch": [
+                    15,20
+
+                ]
+            }
+
+        }
+    }
+}

@@ -1,0 +1,162 @@
+{
+    "frmEnvelopeFORM": {
+        "FORM": {
+            "name": "frmEnvelope",
+            "type": "Panel",
+            "title": "frmEnvelope: Envelope Edit Form",
+            "table": {
+                "name": "tblEnvelope",
+                "fields": [
+                    "*"
+                ],
+                "Orderby": "Envelope"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                55,
+                20
+            ]
+        },
+        "CONTROLS": {
+            "lblChurchID": {
+                "type": "StaticText",
+                "label": "Church:",
+                "name": "lblChurchID",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "ChurchID": {
+                "name": "ChurchID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblChurch",
+                    "fields": [
+                        "ID",
+                        "Church"
+                    ],
+                    "orderby": "Church"
+                },
+                "posch": [
+                    9,
+                    1
+                ],
+                "sizech": [
+                    24,
+                    2
+                ]
+            },
+            "lblEnvelope":{
+                "type": "StaticText",
+                "label": "Envelope:",
+                "name": "lblEnvelope",
+                "posch": [
+                    1,
+                    3
+                ]
+            },
+            "Envelope":{
+                "type":"TextCtrl",
+                "name":"Envelope",
+                "posch":[9,3],
+                "sizech":[25,2]
+            },
+            "lblFiscalYear":{
+                "type":"StaticText",
+                "label":"Fiscal Year:",
+                "name":"lblFiscalYear",
+                "posch": [1,5]
+            },
+            "FiscalYear":{
+                "type":"TextCtrl",
+                "name":"FiscalYear",
+                "posch":[9,5],
+                "sizech":[5,2]
+            },
+            "lblPersonID":{
+                "type":"StaticText",
+                "name":"PersonID",
+                "label":"Person:",
+                "posch":[1,7]
+            },
+            "PersonID":{
+                "type":"ComboBox",
+                "name":"PersonID",
+                "posch":[9,7],
+                "lookupchoices": {
+                    "name": "tblPerson",
+                    "fields": [
+                        "ID",
+                        "LastName","FirstName"
+                    ],
+                    "orderby": "LastName,FirstName"
+                }
+            },
+            "lblAmount":{
+                "type": "StaticText",
+                "label": "Amount:",
+                "name": "lblAmount",
+                "posch": [
+                    1,
+                    9
+                ]
+            },
+            "Amount":{
+                "type":"Currency",
+                "name":"Amount",
+                "posch":[9,9],
+                "sizech":[10,2],
+                "stylelist": ["JUSTIFYRIGHT"]
+            },
+            "lblPledge":{
+                "type": "StaticText",
+                "label": "Pledge:",
+                "name": "lblPledge",
+                "posch": [
+                    1,
+                    11
+                ]
+            },
+            "Pledge":{
+                "type":"Currency",
+                "name":"Pledge",
+                "posch":[9,11],
+                "sizech":[10,2],
+                "stylelist": ["JUSTIFYRIGHT"]
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "name": "lblNote",
+                "posch": [
+                    1,
+                    13
+                ]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE",
+                    "WORDWRAP"
+                ],
+                "posch": [
+                    9,
+                    13
+                ],
+                "sizech": [
+                    24,
+                    5
+                ]
+            }
+
+        }
+    }
+}
