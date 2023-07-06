@@ -17,6 +17,7 @@ import JSForm
 import fnSchedule
 import fnCMargParse
 
+
 class clsForm(JSForm.clsForm):
     def bind_form_controls(self):
         JSForm.LG.log()
@@ -513,8 +514,11 @@ def _buttonclick(event):
         form = clsForm(cmfrm, ChurchDB.DBConnection, formname)
         form.show()
 
+
 #   Get arguments
-host,database,user,password = fnCMargParse.CMargs(prog="ChurchManager",description="ChurchManager v.01")
+host, database, user, password = fnCMargParse.CMargs(
+    prog="ChurchManager", description="ChurchManager v.01"
+)
 
 app = wx.App(0)
 
