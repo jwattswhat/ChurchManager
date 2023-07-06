@@ -8,58 +8,9 @@ import datetime
 
 import JSForm
 
+import fnFinancial
+
 import fnCMargParse
-
-
-def posttogl(record):
-    """
-    Args:
-        "LedgerID:rec["LedgerID"],
-        "ChurchID":rec["ChurchID"],
-        "DebitAccountID": rec["DebitAccountID"],
-        "CreditAccountID": rec["CreditAccountID"],
-        "Description": "Check #" + rec["CheckNumber"],
-        "Amount": rec["Amount"],
-        "Note": rec["Note"],
-
-    Returns:
-        lid: LedgerID
-    """
-
-    if record["LedgerID"] != None:
-        return False
-    postdate = datetime.datetime.now().strftime("%m/%d/%Y")
-    fiscalyear = JSForm.CONFIG.get_Config_Value("Financial", "FiscalYear")
-    tblgl = {"name": "tblLedger", "fields": ["*"]}
-    SQL = JSForm.clsSQL(ChurchDB.DBConnection, tblgl)
-    ledgerrec = {
-        "ChurchID": record["ChurchID"],
-        "Date": postdate,
-        "FiscalYear": fiscalyear,
-        "DebitAccountID": record["DebitAccountID"],
-        "CreditAccountID": record["CreditAccountID"],
-        "Description": record["Description"],
-        "Amount": record["Amount"],
-        "Note": record["Note"],
-    }
-    sql = SQL.insert(ledgerrec)
-    cursor = ChurchDB.DBConnection.cursor()
-    try:
-        cursor.execute(sql)
-    except Exception as ex:
-        print("sql error {err}:{sql} ".format(err=ex, sql=sql))
-    ChurchDB.DBConnection.commit()
-
-    # Get the ID (autoincrement field) from the last Insert
-
-    sql = "SELECT Last_Insert_ID();"
-    try:
-        cursor.execute(sql)
-    except Exception as ex:
-        print("sql error {err}:{sql} ".format(err=ex, sql=sql))
-    lid = cursor.fetchone()
-    cursor.close()
-    return lid[0]
 
 
 def _btnPost(event):
@@ -70,7 +21,7 @@ def _btnPost(event):
     #
 
     rec = frm.RECORDS.current()
-    lid = posttogl(
+    lid = fnFinancial.fnposttogl(ChurchDB.DBConnection,
         {
             "LedgerID": rec["LedgerID"],
             "ChurchID": rec["ChurchID"],
@@ -96,7 +47,7 @@ def _btnPostAll(event):
     frm.RECORDS.first()
     for r in range(len(frm.RECORDS._record)):
         cr = frm.RECORDS.current()
-        lid = posttogl(
+        lid = fnFinancial.fnposttogl(ChurchDB.DBConnection,
             {
                 "LedgerID": cr["LedgerID"],
                 "ChurchID": cr["ChurchID"],
