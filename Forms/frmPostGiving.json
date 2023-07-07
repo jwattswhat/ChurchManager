@@ -2,7 +2,7 @@
     "frmPostGivingFORM": {
         "FORM": {
             "type": "Panel",
-            "title": "frmPostCheck: Post Giving Journal to General Ledger",
+            "title": "frmPostGiving: Post Giving Journal to General Ledger",
             "table": {
                 "name": "tblGivingRegister",
                 "fields": [
@@ -18,14 +18,15 @@
             ],
             "sizech": [
                 38,
-            25
+                25
             ],
             "readonlyfields": [
                 "ChurchID",
                 "EnvelopeID",
                 "CreditAccountID",
                 "DebitAccountID",
-                "Amount","Date"
+                "Amount",
+                "Date"
             ]
         },
         "CONTROLS": {
@@ -68,10 +69,42 @@
                     3
                 ]
             },
-            "Date":{
-                "type":"DatePickerCtrl",
-                "name":"Date",
-                "posch":[9,3]
+            "Date": {
+                "type": "DatePickerCtrl",
+                "name": "Date",
+                "posch": [
+                    9,
+                    3
+                ]
+            },
+            "lblEnvelopeID": {
+                "type": "StaticText",
+                "label": "Envelope:",
+                "name": "lblEnvelopeID",
+                "posch": [
+                    1,
+                    5
+                ]
+            },
+            "EnvelopeID": {
+                "type": "ComboBox",
+                "name": "Envelope",
+                "lookupchoices": {
+                    "name": "tblEnvelope",
+                    "fields": [
+                        "ID",
+                        "Envelope"
+                    ],
+                    "orderby": "Envelope"
+                },
+                "posch": [
+                    9,
+                    5
+                ],
+                "sizech": [
+                    25,
+                    2
+                ]
             },
             "lblAmount": {
                 "type": "StaticText",
@@ -79,7 +112,7 @@
                 "name": "lblAmount",
                 "posch": [
                     1,
-                    9
+                    7
                 ]
             },
             "Amount": {
@@ -87,14 +120,41 @@
                 "name": "Amount",
                 "posch": [
                     9,
-                    9
+                    7
                 ],
                 "sizech": [
                     10,
                     2
                 ],
                 "stylelist": [
-                    "JUSTIFYRIGHT","READONLY"
+                    "JUSTIFYRIGHT",
+                    "READONLY"
+                ]
+            },
+            "lblDebitAccountID": {
+                "type": "StaticText",
+                "label": "Debit Account:",
+                "name": "lblAccountID",
+                "posch": [
+                    1,
+                    9
+                ]
+            },
+            "DebitAccountID": {
+                "type": "ComboBox",
+                "name": "AccountID",
+                "lookupchoices": {
+                    "name": "tblFund",
+                    "fields": [
+                        "ID",
+                        "CONCAT(AccountNumber,'-',Description,' (',AccountType,')')"
+                    ],
+                    "condition": "SummaryAccount <> 1",
+                    "orderby": "AccountNumber"
+                },
+                "posch": [
+                    9,
+                    9
                 ]
             },
             "lblCreditAccountID": {
@@ -113,40 +173,14 @@
                     "name": "tblFund",
                     "fields": [
                         "ID",
-                        "CONCAT(AccountNumber,'-',Description)"
+                        "CONCAT(AccountNumber,'-',Description,' (',AccountType,')')"
                     ],
-                    "condition": "AccountType = 'Expense' AND NOT SummaryAccount",
+                    "condition": "SummaryAccount <> 1",
                     "orderby": "AccountNumber"
                 },
                 "posch": [
                     9,
                     11
-                ]
-            },
-            "lblDebitAccountID": {
-                "type": "StaticText",
-                "label": "Debit Account:",
-                "name": "lblAccountID",
-                "posch": [
-                    1,
-                    13
-                ]
-            },
-            "DebitAccountID": {
-                "type": "ComboBox",
-                "name": "AccountID",
-                "lookupchoices": {
-                    "name": "tblFund",
-                    "fields": [
-                        "ID",
-                        "CONCAT(AccountNumber,'-',Description)"
-                    ],
-                    "condition": "AccountType = 'Cash' AND NOT SummaryAccount",
-                    "orderby": "AccountNumber"
-                },
-                "posch": [
-                    9,
-                    13
                 ]
             },
             "lblNote": {
@@ -155,7 +189,7 @@
                 "name": "lblNote",
                 "posch": [
                     1,
-                    15
+                    13
                 ]
             },
             "Note": {
@@ -163,11 +197,12 @@
                 "type": "MultiLine",
                 "stylelist": [
                     "MULTILINE",
-                    "WORDWRAP","READONLY"
+                    "WORDWRAP",
+                    "READONLY"
                 ],
                 "posch": [
                     9,
-                    15
+                    13
                 ],
                 "sizech": [
                     24,
@@ -179,8 +214,8 @@
                 "type": "Button",
                 "label": "Post",
                 "posch": [
-                    9,20
-
+                    9,
+                    20
                 ]
             },
             "btnPostAll": {
@@ -188,11 +223,10 @@
                 "type": "Button",
                 "label": "Post All",
                 "posch": [
-                    15,20
-
+                    15,
+                    20
                 ]
             }
-
         }
     }
 }

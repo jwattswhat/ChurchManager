@@ -18,15 +18,17 @@
             ],
             "sizech": [
                 38,
-            25
+                25
             ],
             "readonlyfields": [
                 "ChurchID",
                 "CreditAccountID",
                 "DebitAccountID",
-                "CheckNumber","VendorID","Amount","Date"
+                "CheckNumber",
+                "VendorID",
+                "Amount",
+                "Date"
             ]
-
         },
         "CONTROLS": {
             "lblChurchID": {
@@ -68,10 +70,13 @@
                     3
                 ]
             },
-            "Date":{
-                "type":"DatePickerCtrl",
-                "name":"Date",
-                "posch":[9,3]
+            "Date": {
+                "type": "DatePickerCtrl",
+                "name": "Date",
+                "posch": [
+                    9,
+                    3
+                ]
             },
             "lblChechNumber": {
                 "type": "StaticText",
@@ -89,7 +94,9 @@
                     9,
                     5
                 ],
-                "stylelist":["READONLY"]
+                "stylelist": [
+                    "READONLY"
+                ]
             },
             "lblVendorID": {
                 "type": "StaticText",
@@ -100,9 +107,9 @@
                     7
                 ]
             },
-            "VendorID":{
-                "type":"ComboBox",
-                "name":"Vendor",
+            "VendorID": {
+                "type": "ComboBox",
+                "name": "Vendor",
                 "lookupchoices": {
                     "name": "tblVendor",
                     "fields": [
@@ -111,8 +118,14 @@
                     ],
                     "orderby": "Name"
                 },
-                "posch":[9,7],
-                "sizech":[25,2]
+                "posch": [
+                    9,
+                    7
+                ],
+                "sizech": [
+                    25,
+                    2
+                ]
             },
             "lblAmount": {
                 "type": "StaticText",
@@ -135,7 +148,8 @@
                     2
                 ],
                 "stylelist": [
-                    "JUSTIFYRIGHT","READONLY"
+                    "JUSTIFYRIGHT",
+                    "READONLY"
                 ]
             },
             "lblCreditAccountID": {
@@ -154,9 +168,9 @@
                     "name": "tblFund",
                     "fields": [
                         "ID",
-                        "CONCAT(AccountNumber,'-',Description)"
+                        "CONCAT(AccountNumber,'-',Description,' (',AccountType,')')"
                     ],
-                    "condition": "AccountType = 'Expense' AND NOT SummaryAccount",
+                    "condition": "SummaryAccount <> 1",
                     "orderby": "AccountNumber"
                 },
                 "posch": [
@@ -180,9 +194,9 @@
                     "name": "tblFund",
                     "fields": [
                         "ID",
-                        "CONCAT(AccountNumber,'-',Description)"
+                        "CONCAT(AccountNumber,'-',Description,' (',AccountType,')')"
                     ],
-                    "condition": "AccountType = 'Cash' AND NOT SummaryAccount",
+                    "condition": "SummaryAccount <> 1",
                     "orderby": "AccountNumber"
                 },
                 "posch": [
@@ -204,7 +218,8 @@
                 "type": "MultiLine",
                 "stylelist": [
                     "MULTILINE",
-                    "WORDWRAP","READONLY"
+                    "WORDWRAP",
+                    "READONLY"
                 ],
                 "posch": [
                     9,
@@ -220,8 +235,8 @@
                 "type": "Button",
                 "label": "Post",
                 "posch": [
-                    9,20
-
+                    9,
+                    20
                 ]
             },
             "btnPostAll": {
@@ -229,11 +244,10 @@
                 "type": "Button",
                 "label": "Post All",
                 "posch": [
-                    15,20
-
+                    15,
+                    20
                 ]
             }
-
         }
     }
 }

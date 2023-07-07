@@ -12,6 +12,7 @@ import fnFinancial
 
 import fnCMargParse
 
+
 def _btnPost(event):
     field = event.GetEventObject().GetName()
 
@@ -20,16 +21,17 @@ def _btnPost(event):
     #
 
     rec = frm.RECORDS.current()
-    lid = fnFinancial.fnposttogl(ChurchDB.DBConnection,
+    lid = fnFinancial.fnposttogl(
+        ChurchDB.DBConnection,
         {
             "LedgerID": rec["LedgerID"],
             "ChurchID": rec["ChurchID"],
             "DebitAccountID": rec["DebitAccountID"],
             "CreditAccountID": rec["CreditAccountID"],
-            "Description": "Check #" + rec["CheckNumber"],
+            "Description": "from Giving Journal",
             "Amount": rec["Amount"],
             "Note": rec["Note"],
-        }
+        },
     )
     if lid:
         frm.RECORDS.setfieldvalue("LedgerID", lid)
@@ -46,22 +48,22 @@ def _btnPostAll(event):
     frm.RECORDS.first()
     for r in range(len(frm.RECORDS._record)):
         cr = frm.RECORDS.current()
-        lid = fnFinancial.fnposttogl(ChurchDB.DBConnection,
+        lid = fnFinancial.fnposttogl(
+            ChurchDB.DBConnection,
             {
                 "LedgerID": cr["LedgerID"],
                 "ChurchID": cr["ChurchID"],
                 "DebitAccountID": cr["DebitAccountID"],
                 "CreditAccountID": cr["CreditAccountID"],
-                "Description": "Check #" + cr["CheckNumber"],
+                "Description": "from Giving Journal",
                 "Amount": cr["Amount"],
                 "Note": cr["Note"],
-            }
+            },
         )
         if lid:
             frm.RECORDS.setfieldvalue("LedgerID", lid)
             frm.RECORDS.update_current_record_in_DB()
         frm.RECORDS.next()
-
 
 
 app = wx.App(0)

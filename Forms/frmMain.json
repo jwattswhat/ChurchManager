@@ -39,8 +39,6 @@
                 ],
                 "label": "Churches"
             },
-
-
             "ServiceBox": {
                 "type": "StaticBox",
                 "name": "ServiceBox",
@@ -144,7 +142,6 @@
                 ],
                 "label": "Attendance Event"
             },
-
             "MemberBox": {
                 "name": "MemberBox",
                 "label": "Membership",
@@ -176,8 +173,7 @@
                 ],
                 "label": "Families"
             },
-
-            "AttendanceBox":{
+            "AttendanceBox": {
                 "name": "MemberBox",
                 "label": "Membership",
                 "type": "StaticBox",
@@ -199,7 +195,6 @@
                 ],
                 "label": "Record Attendance"
             },
-
             "ProjectBox": {
                 "type": "StaticBox",
                 "name": "ProjectBox",
@@ -231,28 +226,33 @@
                 ],
                 "label": "Task"
             },
-
-            "lblDocument":{
+            "lblDocument": {
                 "name": "lblDocument",
-                "type":"StaticText",
+                "type": "StaticText",
                 "label": "Documents",
-                "posch":[1,27]
+                "posch": [
+                    1,
+                    27
+                ]
             },
-            "lblAnnouncement":{
+            "lblAnnouncement": {
                 "name": "lblAnnouncement",
                 "type": "StaticText",
                 "label": "Announcement",
-                "posch": [1,28]
+                "posch": [
+                    1,
+                    28
+                ]
             },
-            "lblJournal":{
-                "name":"lblJournal",
-                "type":"StaticText",
-                "posch":[1,29],
-                "label":"Journal"
+            "lblJournal": {
+                "name": "lblJournal",
+                "type": "StaticText",
+                "posch": [
+                    1,
+                    29
+                ],
+                "label": "Journal"
             },
-
-
-
             "ReportBox": {
                 "type": "StaticBox",
                 "name": "ReportBox",
@@ -311,7 +311,6 @@
                     6
                 ]
             },
-
             "UtilitiesBox": {
                 "name": "UtilitiesBox",
                 "type": "StaticBox",
@@ -361,9 +360,7 @@
                 ],
                 "label": "CheckLists"
             },
-
-
-            "JSFormUtilitiesBox":{
+            "JSFormUtilitiesBox": {
                 "name": "JSFormUtilitiesBox",
                 "type": "StaticBox",
                 "label": "JSForm Utilities",
@@ -376,14 +373,16 @@
                     5
                 ]
             },
-            "lblBackupDB":{
-                "name":"lblBackupDB",
+            "lblBackupDB": {
+                "name": "lblBackupDB",
                 "type": "StaticText",
                 "label": "Backup DBs {OPTION:Backup:LastDate}",
-                "posch": [19,27]
+                "posch": [
+                    19,
+                    27
+                ]
             },
-
-            "EnhancementsBox":{
+            "EnhancementsBox": {
                 "name": "EnhancementsBox",
                 "type": "StaticBox",
                 "label": "Enhancements / Bugs",
@@ -396,18 +395,16 @@
                     3
                 ]
             },
-            "lblEnhancements":{
+            "lblEnhancements": {
                 "name": "lblEnhancements",
                 "type": "StaticText",
                 "label": "Enhancements / Bugs",
-                "posch": [19,32]
+                "posch": [
+                    19,
+                    32
+                ]
             },
-
-
-
-
-
-            "AccountingBox":{
+            "AccountingBox": {
                 "name": "AccountingBox",
                 "type": "StaticBox",
                 "label": "Accounting",
@@ -420,43 +417,60 @@
                     10
                 ]
             },
-            "lblChartofAccounts":{
-                "name":"lblChartofAccounts",
-                "type":"StaticText",
-                "label":"Chart of Accounts",
-                "posch":[36,2]
+            "lblChartofAccounts": {
+                "name": "lblChartofAccounts",
+                "type": "StaticText",
+                "label": "Chart of Accounts",
+                "posch": [
+                    36,
+                    2
+                ]
             },
-            "lblBudget":{
-                "name":"lblBudget",
-                "type":"StaticText",
-                "label":"Account Budget",
-                "posch":[36,3]
+            "lblBudget": {
+                "name": "lblBudget",
+                "type": "StaticText",
+                "label": "Account Budget",
+                "posch": [
+                    36,
+                    3
+                ]
             },
-            "lblLedger":{
-                "name":"lblLedger",
-                "type":"StaticText",
-                "label":"General Ledger",
-                "posch":[36,4]
+            "lblLedger": {
+                "name": "lblLedger",
+                "type": "StaticText",
+                "label": "General Ledger",
+                "posch": [
+                    36,
+                    4
+                ]
             },
-            "lblCheckRegister":{
-                "name":"lblCheckRegister",
-                "type":"StaticText",
-                "label":"Check Register",
-                "posch":[36,5]
+            "lblCheckRegister": {
+                "name": "lblCheckRegister",
+                "type": "StaticText",
+                "label": "Check Register",
+                "posch": [
+                    36,
+                    5
+                ]
             },
-            "lblEnvelope":{
-                "name":"lblEnvelope",
-                "type":"StaticText",
-                "label":"Envelopes",
-                "posch":[36,6]
+            "lblEnvelope": {
+                "name": "lblEnvelope",
+                "type": "StaticText",
+                "label": "Envelopes",
+                "posch": [
+                    36,
+                    6
+                ]
             },
-            "lblGivingJournal":{
-                "name":"lblGivingJournal",
-                "type":"StaticText",
-                "label":"Giving Journal",
-                "posch":[36,7]
+            "lblGivingRegister": {
+                "name": "lblGivingRegister",
+                "type": "StaticText",
+                "label": "Giving Journal",
+                "posch": [
+                    36,
+                    7
+                ]
             },
-
             "DonorBox": {
                 "type": "StaticBox",
                 "name": "DonorBox",
@@ -470,27 +484,24 @@
                 ],
                 "label": "Donor"
             },
-            "lblDonor":{
-                "name":"lblDonor",
-                "type":"StaticText",
-                "label":"Donors",
-                "posch":[
+            "lblDonor": {
+                "name": "lblDonor",
+                "type": "StaticText",
+                "label": "Donors",
+                "posch": [
                     36,
                     12
                 ]
             },
-            "lblDonorGift":{
-                "name":"lblDonorGift",
-                "type":"StaticText",
-                "label":"Donor Gifts",
-                "posch":[
+            "lblDonorGift": {
+                "name": "lblDonorGift",
+                "type": "StaticText",
+                "label": "Donor Gifts",
+                "posch": [
                     36,
                     13
                 ]
             }
-
- 
- 
         }
     }
 }

@@ -1,15 +1,15 @@
 {
-    "frmGivingJournalFORM": {
+    "frmGivingRegisterFORM": {
         "FORM": {
-            "name": "frmGivingJournal",
+            "name": "frmGivingRegister",
             "type": "Panel",
-            "title": "frmGivingJournal: Giving Journal Edit Form",
+            "title": "frmGivingRegister: Giving Journal Edit Form",
             "table": {
-                "name": "tblGivingJournal",
+                "name": "tblGivingRegister",
                 "fields": [
                     "*"
                 ],
-                "condition":"LedgerID is NULL",
+                "condition": "LedgerID is NULL",
                 "Orderby": "ID"
             },
             "stylelist": [
@@ -54,7 +54,7 @@
                     2
                 ]
             },
-            "lblDate":{
+            "lblDate": {
                 "type": "StaticText",
                 "label": "Date:",
                 "name": "lblDate",
@@ -63,23 +63,47 @@
                     3
                 ]
             },
-            "Date":{
-                "type":"DatePickerCtrl",
-                "name":"Date",
-                "posch":[9,3]
+            "Date": {
+                "type": "DatePickerCtrl",
+                "name": "Date",
+                "posch": [
+                    9,
+                    3
+                ]
             },
-            "lblEnvelopeID":{
+            "lblFiscalYear": {
                 "type": "StaticText",
-                "label": "Envelope:",
-                "name": "lblEnvelopeID",
+                "label": "Fiscal Year:",
+                "name": "lblFiscalYear",
                 "posch": [
                     1,
                     5
                 ]
             },
-            "EnvelopeID":{
-                "type":"ComboBox",
-                "name":"Envelope",
+            "FiscalYear": {
+                "type": "TextCtrl",
+                "name": "FiscalYear",
+                "posch": [
+                    9,
+                    5
+                ],
+                "sizech": [
+                    4,
+                    2
+                ]
+            },
+            "lblEnvelopeID": {
+                "type": "StaticText",
+                "label": "Envelope:",
+                "name": "lblEnvelopeID",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "EnvelopeID": {
+                "type": "ComboBox",
+                "name": "Envelope",
                 "lookupchoices": {
                     "name": "tblEnvelope",
                     "fields": [
@@ -88,71 +112,90 @@
                     ],
                     "orderby": "Envelope"
                 },
-                "posch":[9,5],
-                "sizech":[25,2]
+                "posch": [
+                    9,
+                    7
+                ],
+                "sizech": [
+                    25,
+                    2
+                ]
             },
-            "lblAmount":{
+            "lblAmount": {
                 "type": "StaticText",
                 "label": "Amount:",
                 "name": "lblAmount",
                 "posch": [
                     1,
-                    7
-                ]
-            },
-            "Amount":{
-                "type":"Currency",
-                "name":"Amount",
-                "posch":[9,7],
-                "sizech":[10,2],
-                "stylelist": ["JUSTIFYRIGHT"]
-            },
-
-            "lblDebitAccountID":{
-                "type": "StaticText",
-                "label": "Debit\nAccount:",
-                "name": "lblAccountID",
-                "posch": [
-                    1,
                     9
                 ]
             },
-            "DebitAccountID":{
-                "type":"ComboBox",
-                "name":"AccountID",
-                "lookupchoices": {
-                    "name": "tblFund",
-                    "fields": [
-                        "ID",
-                        "CONCAT(AccountNumber,'-',Description)"
-                    ],
-                    "condition":"AccountType = 'Cash' AND NOT SummaryAccount",
-                    "orderby": "AccountNumber"
-                },
-                "posch":[9,9]
+            "Amount": {
+                "type": "Currency",
+                "name": "Amount",
+                "posch": [
+                    9,
+                    9
+                ],
+                "sizech": [
+                    10,
+                    2
+                ],
+                "stylelist": [
+                    "JUSTIFYRIGHT"
+                ]
             },
-            "lblCreditAccountID":{
+            "lblDebitAccountID": {
                 "type": "StaticText",
-                "label": "Credit\nAccount:",
+                "label": "Debit Account:",
                 "name": "lblAccountID",
                 "posch": [
                     1,
                     11
                 ]
             },
-            "CreditAccountID":{
-                "type":"ComboBox",
-                "name":"AccountID",
+            "DebitAccountID": {
+                "type": "ComboBox",
+                "name": "AccountID",
                 "lookupchoices": {
                     "name": "tblFund",
                     "fields": [
                         "ID",
-                        "CONCAT(AccountNumber,'-',Description)"
+                        "CONCAT(AccountNumber,'-',Description,' (',AccountType,')')"
                     ],
-                    "condition":"AccountType = 'Expense' AND NOT SummaryAccount",
+                    "condition": "SummaryAccount <> 1",
                     "orderby": "AccountNumber"
                 },
-                "posch":[9,11]
+                "posch": [
+                    9,
+                    11
+                ]
+            },
+            "lblCreditAccountID": {
+                "type": "StaticText",
+                "label": "Credit Account:",
+                "name": "lblAccountID",
+                "posch": [
+                    1,
+                    13
+                ]
+            },
+            "CreditAccountID": {
+                "type": "ComboBox",
+                "name": "AccountID",
+                "lookupchoices": {
+                    "name": "tblFund",
+                    "fields": [
+                        "ID",
+                        "CONCAT(AccountNumber,'-',Description,' (',AccountType,')')"
+                    ],
+                    "condition": "SummaryAccount <> 1",
+                    "orderby": "AccountNumber"
+                },
+                "posch": [
+                    9,
+                    13
+                ]
             },
             "lblNote": {
                 "type": "StaticText",
@@ -160,7 +203,7 @@
                 "name": "lblNote",
                 "posch": [
                     1,
-                    13
+                    15
                 ]
             },
             "Note": {
@@ -172,14 +215,13 @@
                 ],
                 "posch": [
                     9,
-                    13
+                    15
                 ],
                 "sizech": [
                     24,
                     5
                 ]
             }
-
         }
     }
 }

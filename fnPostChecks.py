@@ -21,7 +21,8 @@ def _btnPost(event):
     #
 
     rec = frm.RECORDS.current()
-    lid = fnFinancial.fnposttogl(ChurchDB.DBConnection,
+    lid = fnFinancial.fnposttogl(
+        ChurchDB.DBConnection,
         {
             "LedgerID": rec["LedgerID"],
             "ChurchID": rec["ChurchID"],
@@ -30,7 +31,7 @@ def _btnPost(event):
             "Description": "Check #" + rec["CheckNumber"],
             "Amount": rec["Amount"],
             "Note": rec["Note"],
-        }
+        },
     )
     if lid:
         frm.RECORDS.setfieldvalue("LedgerID", lid)
@@ -47,7 +48,8 @@ def _btnPostAll(event):
     frm.RECORDS.first()
     for r in range(len(frm.RECORDS._record)):
         cr = frm.RECORDS.current()
-        lid = fnFinancial.fnposttogl(ChurchDB.DBConnection,
+        lid = fnFinancial.fnposttogl(
+            ChurchDB.DBConnection,
             {
                 "LedgerID": cr["LedgerID"],
                 "ChurchID": cr["ChurchID"],
@@ -56,7 +58,7 @@ def _btnPostAll(event):
                 "Description": "Check #" + cr["CheckNumber"],
                 "Amount": cr["Amount"],
                 "Note": cr["Note"],
-            }
+            },
         )
         if lid:
             frm.RECORDS.setfieldvalue("LedgerID", lid)
