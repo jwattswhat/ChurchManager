@@ -32,7 +32,6 @@ def strtolist(st):
     li = st.split("\r")
     return li
 
-
 def ScheduleParticipants(ServiceID):
 
     ChurchDB = JSForm.clsDB("192.168.3.200", "ChurchDB", "church", "Church99")
@@ -93,6 +92,7 @@ def ScheduleParticipants(ServiceID):
     participantpos = 0
 
     #   Service Schedule Constants
+    SS_ID = 0
     SS_Desc = 1
     SS_Time = 2
     SS_DOW = 3
@@ -103,12 +103,13 @@ def ScheduleParticipants(ServiceID):
     #   Service Schedule
     scheduleTable = {"name": "tblSchedule", "fields": ["*"], "orderby": "ID"}
     schedulerows = readallrecords(ChurchDB.DBConnection, scheduleTable)
-    schedulepos = 0
+    scheduleID = {}
     scheduleTime = {}
     scheduleMonth = {}
     scheduleDOW = {}
     scheduleSeason = {}
     for s in range(len(schedulerows)):
+        scheduleID.update({s:str(schedulerows[s][SS_ID])})
         dt = datetime.datetime(2022, 1, 1) + schedulerows[s][SS_Time]
         scheduleTime.update({s: dt.strftime("%I:%M %p")})
         scheduleDOW.update({s: strtolist(schedulerows[s][SS_DOW])})
@@ -122,24 +123,24 @@ def ScheduleParticipants(ServiceID):
         if psched == None:
             continue
 
-        for p in range(len(psched)):
-            psched[p] = int(psched[p])
-        # print(participant[P_Name], "roles", prole, "schedule", psched)
-        # print(ServiceTime, ServiceDOW, ServiceMonth, ServiceSeason)
-        for s in range(len(schedulerows)):
-            # print(scheduleTime[s], scheduleDOW[s], scheduleMonth[s], scheduleSeason[s])
-            thisservice = False
+        for ps in psched:
+            for s in range(len(scheduleID)):
+                if ps == scheduleID[s]:
+                    break 
+
+            sTime = False
+            DOW = False
+            sMonth = False
+            sSeason = False
             if ServiceTime == scheduleTime[s]:
-                if ServiceDOW in scheduleDOW[s]:
-                    if scheduleMonth[s] != None:
-                        if ServiceMonth in scheduleMonth[s]:
-                            thisservice = True
-                    elif scheduleSeason[s] != None:
-                        if ServiceSeason in scheduleSeason[s]:
-                            thisservice = True
-                    else:
-                        thisservice = True
-            if thisservice:
+                sTime = True
+            if (not scheduleDOW[s]) or (ServiceDOW in scheduleDOW[s]):
+                DOW = True
+            if (not scheduleMonth[s]) or (ServiceMonth in scheduleMonth[s]):
+                sMonth = True
+            if (not scheduleSeason[s]) or (ServiceSeason in scheduleSeason[s]):
+                sSeason = True
+            if sTime and DOW and sMonth and sSeason:
                 for role in prole:
                     sql = "INSERT INTO tblServiceRole (ServiceID,ParticipantID,Role) VALUES ({ServiceID},{ParticipantID},'{Role}');"
                     sql = sql.format(

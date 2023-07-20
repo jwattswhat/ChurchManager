@@ -8,6 +8,7 @@
                 "name": "tblService",
                 "fields": [
                     "ID AS ServiceID",
+                    "LiturgicalDate",
                     "DateTime"
                 ],
                 "orderby": "DateTIme DESC"
@@ -19,6 +20,7 @@
                 "Navigation",
                 "Close"
             ],
+            "readonlyfields":["ServiceID","DateTime"],
             "posch": [
                 -1,
                 -1
@@ -32,7 +34,7 @@
             "lblServiceID": {
                 "name": "lblServiceID",
                 "type": "StaticText",
-                "label": "ServiceID:",
+                "label": "Service:",
                 "posch": [
                     1,
                     3
@@ -40,9 +42,17 @@
             },
             "ServiceID": {
                 "name": "ServiceID",
-                "type": "TextNumber",
-                "format": "{:n}",
-                "readonly": true,
+                "type":"ComboBox",
+                "lookupchoices": {
+                    "name": "tblService",
+                    "fields": [
+                        "ID",
+                        "ID",
+                        "DateTime",
+                        "LiturgicalDate"
+                    ],
+                    "orderby": "DateTime DESC"
+                },
                 "posch": [
                     10,
                     3
