@@ -1,0 +1,20 @@
+{
+    "database_settings": {
+        "host": "192.168.3.200",
+        "port": 3306,
+        "user": "church",
+        "database": "ChurchDB",
+        "jsform_database": "JSForm",
+        "credential_target": "ChurchManager/Production"
+    },
+    "testing": {
+        "database": "ChurchDBTest",
+        "jsform_database": "JSFormTest",
+        "credential_target": "ChurchManager/Test",
+        "override_today": null
+    },
+    "security": {
+        "production_enabled": false,
+        "testing_enabled": true
+    }
+}

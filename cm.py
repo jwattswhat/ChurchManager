@@ -7,15 +7,23 @@
 """
 import os
 import wx
-import mysql
-import subprocess
-import json
-import argparse
-import datetime
 
 import JSForm
 import fnSchedule
-import fnCMargParse
+from application_context import ApplicationContext
+from form_factory import ChurchManagerFormFactory
+from main_menu import FORM_ROUTES, MENU_CONTROLS
+from backup_service import BackupError, BackupService
+from process_service import ProcessService
+from report_service import ChurchManagerReportService
+from types import SimpleNamespace
+
+
+arguments = None
+app = None
+ChurchDB = None
+cmfrm = None
+context = None
 
 
 class clsForm(JSForm.clsForm):
@@ -301,27 +309,29 @@ class clsForm(JSForm.clsForm):
 
 def _buttonclick(event):
     def _runSPrpt(event):
-        JSForm.RunReport(2, frm, ChurchDB.DBConnection)
+        context.services.reports.run_catalog_report(2, frm, context.connection)
 
     def _runOSrpt(event):
         ID = frm.CONTROLID["ServiceID"].GetValue()
         if ID == None:
             return
-        cmdline = "python rptOrderofService.py -I={ID}".format(ID=ID)
-        subprocess.Popen(cmdline, shell=True)
+        context.services.reports.start_python_report(
+            "rptOrderofService.py", arguments, ["--ID", str(ID)]
+        )
         frm.FORM.Close()
 
     def _runSchedule(event):
         ID = int(frm.CONTROLID["ServiceID"].GetValue())
         if ID == None:
             return
-        fnSchedule.ScheduleParticipants(ID)
+        fnSchedule.ScheduleParticipants(ID, ChurchDB.DBConnection)
 
     def _runNotify(event):
         ID = int(frm.CONTROLID["ServiceID"].GetValue())
         if ID == None:
             return
-        fnSchedule.notifyviaeMail(ID)
+        #JSForm.RunReport(2, frm, ChurchDB.DBConnection)
+        fnSchedule.notifyviaeMail(ID, ChurchDB.DBConnection)
         frm.FORM.Close()
 
     def _runPrayerRequests():
@@ -330,27 +340,25 @@ def _buttonclick(event):
         )
         report = JSForm.CONFIG.get_Config_Value("Location", "Report")
         limedir = JSForm.CONFIG.get_Config_Value("Location", "LimeReport")
-        try:
-            os.remove("{report}CMPR01.pdf".format(report=report))
-        except:
-            pass
-        cmdline = "{limedir}limereport -s{reportdescription}CMPR01.lrxml -d{report}CMPR01.pdf".format(
-            limedir=limedir, reportdescription=reportdescription, report=report
+        source_template = "{reportdescription}CMPR01.lrxml".format(reportdescription=reportdescription)
+        context.services.reports.run_lime_report(
+            source_template, "{report}CMPR01.pdf".format(report=report),
+            arguments["database"], limedir,
         )
-        sb = subprocess.Popen(cmdline)
-        sb.wait()
-        cmdline = "{report}CMPR01.pdf".format(report=report)
-        sb = subprocess.Popen(cmdline, shell=True)
 
     def _runSundayPrayers():
-        sb = subprocess.Popen("python rptPrayers.py", shell=True)
+        context.services.reports.start_python_report(
+            "rptPrayers.py", arguments, ["--reportdate", "now"]
+        )
 
     def _runSundayAnnouncements():
-        sb = subprocess.Popen("python rptAnnouncement.py")
+        context.services.reports.start_python_report(
+            "rptAnnouncement.py", arguments, ["--reportdate", "now"]
+        )
 
     def _runReports(event):
         reportid = frm.CONTROLID["ReportID"].GetValue()
-        JSForm.RunReport(reportid, frm, ChurchDB.DBConnection)
+        context.services.reports.run_catalog_report(reportid, frm, context.connection)
         frm.FORM.Close()
 
     def _runBackupDB():
@@ -372,60 +380,34 @@ def _buttonclick(event):
                     pos=(10, 75),
                 )
 
-        stamp = datetime.datetime.now().strftime("%Y-%m-%d.%H%M")
         mysqldump = JSForm.CONFIG.get_Config_Value("Location", "MySQLDump")
         dbbackup = JSForm.CONFIG.get_Config_Value("Location", "DBBackup")
-        cmdline = "{mysqldump}mysqldump -uchurch -pChurch99 -h192.168.3.200 ChurchDB > {dbbackup}.ChurchDB.Backup.{stamp}.SQL".format(
-            mysqldump=mysqldump, dbbackup=dbbackup, stamp=stamp
-        )
-        sb = subprocess.Popen(cmdline, shell=True)
-        sb.wait()
-        JSForm.OPTION.set_Option_Value("Backup", "LastDate", stamp)
+        try:
+            result = context.services.backups.create(arguments, mysqldump, dbbackup)
+        except BackupError as error:
+            wx.MessageBox(str(error), "Backup failed", wx.OK | wx.ICON_ERROR)
+            return
+        JSForm.OPTION.set_Option_Value("Backup", "LastDate", result.timestamp)
         dlg = _backupcomplete(
             None,
             title="Backup Complete",
-            formlabel="Backup Complete.\n{stamp}".format(stamp=stamp),
+            formlabel="Backup Complete.\n{stamp}".format(stamp=result.timestamp),
         )
         result = dlg.ShowModal()
         dlg.Destroy()
 
     select = event.GetEventObject().GetName()
-    formname = None
+    if select in FORM_ROUTES:
+        context.form_factory.open(FORM_ROUTES[select])
+        return
     match select:
-        case "lblChurch":
-            formname = "frmChurch"
-        case "lblService":
-            formname = "frmService"
-        case "lblSermon":
-            formname = "frmSermon"
-        case "lblPropers":
-            formname = "frmPropers"
-        case "lblWorshipPlan":
-            frm = (
-                cmfrm,
-                ChurchDB.DBConnection,
-                "frmGenerateWorshipPlanning",
-                ["Close"],
-            )
-            frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runSPrpt)
-            frm.show()
-            return
-        case "lblPrayers":
-            formname = "frmPrayer"
-        case "lblOSList":
-            formname = "frmOSList"
-        case "lblOS":
-            formname = "frmOS"
-        case "lblCheckList":
-            formname = "frmCheckList"
         case "lblGenerateOS":
-            frm = clsForm(cmfrm, ChurchDB.DBConnection, "frmGenerateOS", ["Close"])
-
+            frm = context.form_factory.create("frmGenerateOS", ["Close"])
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runOSrpt)
             frm.show()
             return
         case "lblNotifyParticipants":
-            frm = clsForm(cmfrm, ChurchDB.DBConnection, "frmNotifyviaeMail")
+            frm = context.form_factory.create("frmNotifyviaeMail")
             frm.CONTROLID["btnNotify"].Bind(wx.EVT_LEFT_DOWN, _runNotify)
             frm.show()
             return
@@ -433,22 +415,15 @@ def _buttonclick(event):
             _runSundayPrayers()
         case "lblAnnouncements":
             _runSundayAnnouncements()
-        case "lblPrayerRequests":
-            _runPrayerRequests()
-        case "lblMemberDirectory":
-            subprocess.Popen("python rptMemberDirectory.py", shell=True)
         case "lblServiceSchedule":
-            frm = clsForm(
-                cmfrm,
-                ChurchDB.DBConnection,
-                "frmServiceSchedule",
-                ["Navigation", "Close"],
+            frm = context.form_factory.create(
+                "frmServiceSchedule", ["Navigation", "Close"]
             )
             frm.CONTROLID["btnRunSchedule"].Bind(wx.EVT_LEFT_DOWN, _runSchedule)
             frm.show()
             return
         case "lblReports":
-            frm = clsForm(cmfrm, ChurchDB.DBConnection, "frmReports", ["Close"])
+            frm = context.form_factory.create("frmReports", ["Close"])
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runReports)
             frm.disable_all_buttons()
             frm.enable_button("ReportID")
@@ -456,144 +431,43 @@ def _buttonclick(event):
             frm.enable_button("btnClose")
             frm.show()
             return
-        case "lblEnhancements":
-            formname = "frmEnhancement"
-        case "lblFamily":
-            formname = "frmFamily"
-        case "lblPerson":
-            formname = "frmPerson"
-        case "lblAttendanceEvent":
-            formname = "frmAttendanceEvent"
-        case "lblRecordAttendance":
-            formname = "frmRecordAttendance"
-
-        case "lblParticipant":
-            formname = "frmParticipant"
-        case "lblSchedule":
-            formname = "frmSchedule"
-        case "lblConfig":
-            formname = "frmConfig"
-        case "lblOptions":
-            formname = "frmOptions"
-        case "lblChoices":
-            formname = "frmChoices"
-        case "lblJournal":
-            formname = "frmJournal"
-
-        case "lblProject":
-            formname = "frmProject"
-        case "lblTask":
-            formname = "frmTask"
-        case "lblDonor":
-            formname = "frmDonor"
-        case "lblDonorGift":
-            formname = "frmDonorGift"
-
-        case "lblChartofAccounts":
-            formname = "frmFund"
-        case "lblBudget":
-            formname = "frmBudget"
-        case "lblLedger":
-            formname = "frmLedger"
-        case "lblEnvelope":
-            formname = "frmEnvelope"
-        case "lblCheckRegister":
-            formname = "frmCheckRegister"
-        case "lblGivingRegister":
-            formname = "frmGivingRegister"
-
-        case "lblDocument":
-            formname = "frmDocument"
-
         case "lblBackupDB":
             _runBackupDB()
-        case "lblAnnouncement":
-            formname = "frmAnnouncement"
         case _:
-            print("form name not found found. {}".format(formname))
-
-    if formname != None:
-        form = clsForm(cmfrm, ChurchDB.DBConnection, formname)
-        form.show()
+            raise KeyError("No ChurchManager menu route for {}".format(select))
 
 
-#   Get arguments
-host, database, user, password = fnCMargParse.CMargs(
-    prog="ChurchManager", description="ChurchManager v.01"
-)
+def main(argv=None):
+    global arguments, app, ChurchDB, cmfrm, context
+    from startup import build_runtime
 
-app = wx.App(0)
+    runtime = build_runtime(clsForm, argv)
+    arguments = runtime.arguments
+    app = runtime.wx_app
+    ChurchDB = runtime.database
+    cmfrm = runtime.main_form
+    context = ApplicationContext(
+        arguments, ChurchDB, cmfrm,
+        session=runtime.session, authorization=runtime.authorization,
+    )
+    context.form_factory = ChurchManagerFormFactory(
+        clsForm, context.connection, cmfrm,
+        authorization_policy=context.authorization,
+    )
+    processes = ProcessService()
+    context.services = SimpleNamespace(
+        processes=processes,
+        backups=BackupService(),
+        reports=ChurchManagerReportService(JSForm, processes),
+    )
 
-#
-# 	Connect to DataBase
-#
-ChurchDB = JSForm.clsDB(host, database, user, password)
-JSForm.CONFIG.set_Config_DBConnection(ChurchDB)
-JSForm.OPTION.set_Option_DBConnection(ChurchDB)
-JSForm.FONT.set_Font_DBConnection(ChurchDB)
-JSForm.FONT.Get_Config_Font()
-JSForm.CONST.btnNavigationCONTROLS = JSForm.convertNavButtons(
-    JSForm.CONST.btnNavigationCONTROLS
-)
+    for control_name in MENU_CONTROLS:
+        if control_name in cmfrm.CONTROLID:
+            cmfrm.CONTROLID[control_name].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
-#
-# 	Main form
-#
-cmfrm = clsForm(None, ChurchDB.DBConnection, "frmMain", ["Close"])
+    cmfrm.show()
+    app.MainLoop()
 
-#
-# bind application events
-#
-cmfrm.CONTROLID["lblChurch"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
 
-cmfrm.CONTROLID["lblService"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblSermon"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblPropers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblOSList"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblOS"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblCheckList"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblGenerateOS"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblNotifyParticipants"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblSundayPrayers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblPrayers"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblReports"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblAnnouncements"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblEnhancements"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-
-cmfrm.CONTROLID["lblParticipant"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblSchedule"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblServiceSchedule"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-
-cmfrm.CONTROLID["lblFamily"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblPerson"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblAttendanceEvent"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-
-cmfrm.CONTROLID["lblConfig"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblOptions"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblChoices"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblJournal"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-# cmfrm.CONTROLID["lblBackupDB"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-
-cmfrm.CONTROLID["lblProject"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblTask"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-
-cmfrm.CONTROLID["lblDonor"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblDonorGift"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-
-cmfrm.CONTROLID["lblRecordAttendance"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-
-cmfrm.CONTROLID["lblChartofAccounts"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblBudget"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblLedger"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblEnvelope"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblCheckRegister"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblGivingRegister"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-
-cmfrm.CONTROLID["lblDocument"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-
-cmfrm.CONTROLID["lblBackupDB"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-cmfrm.CONTROLID["lblAnnouncement"].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
-
-PARENTRECORD = {}
-cmfrm.show()
-app.MainLoop()
+if __name__ == "__main__":
+    main()

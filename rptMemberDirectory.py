@@ -3,6 +3,8 @@ from datetime import datetime
 import mysql
 import mysql.connector
 import subprocess
+import fnCMargParse
+from churchmanager_mode import resolve_database
 
 #   ChurchManager Classes
 import JSForm
@@ -408,7 +410,12 @@ class PDF(FPDF):
         self.set_x(self.ic.out())
 
 
-ChurchDB = JSForm.clsDB("localhost", "ChurchDB", "church", "Church99")
+arguments = fnCMargParse.CMargs(
+    "rptMemberDirectory", "Member Directory",
+    ["server", "database", "user", "test_mode", "jsform_database"],
+)
+arguments = resolve_database(arguments)
+ChurchDB = JSForm.clsDB(arguments["server"], arguments["database"], arguments["user"], arguments["password"], arguments["jsform_database"])
 JSForm.CONFIG.set_Config_DBConnection(ChurchDB.DBConnection)
 PictureLocation = JSForm.CONFIG.get_Config_Value("Location", "Picture")
 DefaultPicture = PictureLocation + "Default.jpg"
@@ -449,6 +456,4 @@ fname = ReportLocation + rptMemberDir["Report"]["ReportName"]
 # + "."
 pdf.output(fname)
 
-subprocess.Popen(
-    '"C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe" ' + fname, shell=True
-)
+os.startfile(fname)

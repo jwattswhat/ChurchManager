@@ -1,0 +1,9 @@
+CHURCHMANAGER DEVELOPMENT WORKSPACE
+
+This folder is reserved for ChurchManager development.
+
+ChurchManager.bat delegates production use to the frozen Legacy installation:
+    C:\Users\Pastor\Documents\ChurchManager-Legacy
+
+Use ChurchManager-Test.bat for development and testing against ChurchDBTest.
+Do not change the development launcher to connect to production ChurchDB.

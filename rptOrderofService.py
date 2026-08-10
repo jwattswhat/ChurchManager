@@ -8,12 +8,13 @@ import json
 import subprocess
 
 import JSForm
+from churchmanager_mode import resolve_database
 
 #   Service Constants
 S_ID = 0
 S_Date = 2
-S_Propers = 3
-S_OS = 6
+S_Propers = 4
+S_OS = 7
 
 #   Order of Service Constants
 OS_Line = 2
@@ -87,12 +88,20 @@ parser.add_argument(
     nargs=1,
     help="Enter Service ID",
 )
+parser.add_argument("-s", "--server", default="localhost")
+parser.add_argument("-d", "--database", default="ChurchDB")
+parser.add_argument("-u", "--user")
+parser.add_argument("--test", dest="test_mode", action="store_true")
+parser.add_argument("--jsform-database", default=None)
 args = parser.parse_args()
 if not args.ID:
     print("no Service ID")
     exit()
 
-ChurchDB = JSForm.clsDB("192.168.3.200", "ChurchDB", "church", "Church99")
+connection_arguments = vars(args)
+connection_arguments["password"] = None
+connection = resolve_database(connection_arguments)
+ChurchDB = JSForm.clsDB(connection["server"], connection["database"], connection["user"], connection["password"], connection["jsform_database"])
 JSForm.CONFIG.set_Config_DBConnection(ChurchDB)
 
 #   Service
@@ -204,7 +213,7 @@ for row in osrows:
     match imbed:
 
         #   Hymns
-        case ("Entrance" | "Processional" | "Office Hymn" | "Of the Day" | "Communion" |"Hymn" | "Closing"):
+        case ("Entrance" | "Processional" | "Office Hymn" | "Of the Day" | "Communion" |"Hymn" | "Closing"| "Gloria in Excelsis"|"Sanctus"|"Agnus Dei"| "Creed"|"Post Communion"|"Kyrie"):
             useage = searchrecrods(imbed, hrows)
             sql = "SELECT * FROM tblHymn WHERE ID = {id};".format(id=useage[HU_HymnID])
             cursor = ChurchDB.DBConnection.cursor()
@@ -239,8 +248,18 @@ OS_Line += 1
 #    License=JSForm.CONFIG.get_Config_Value("License", "Liturgy")
 #)
 
+try:
+    os.remove("OS.txt")
+except:
+    pass
+
 with open("OS.json", "w") as jsonfile:
     json.dump(jsondict, jsonfile)
+
+try:
+    os.remove("OS.txt")
+except:
+    pass
 
 with open("OS.txt", "w") as osfile:
     for line in prnt:

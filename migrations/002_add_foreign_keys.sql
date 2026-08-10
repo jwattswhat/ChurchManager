@@ -1,0 +1,35 @@
+-- Required child records cascade; optional references become NULL; church roots restrict.
+ALTER TABLE tblAltReading ADD CONSTRAINT fk_altreading_service FOREIGN KEY (ServiceID) REFERENCES tblService(ID) ON DELETE CASCADE;
+ALTER TABLE tblAnnouncement ADD CONSTRAINT fk_announcement_church FOREIGN KEY (ChurchID) REFERENCES tblChurch(ID);
+ALTER TABLE tblAsset ADD CONSTRAINT fk_asset_church FOREIGN KEY (ChurchID) REFERENCES tblChurch(ID) ON DELETE SET NULL;
+ALTER TABLE tblAttendance ADD CONSTRAINT fk_attendance_person FOREIGN KEY (PersonID) REFERENCES tblPerson(ID) ON DELETE CASCADE, ADD CONSTRAINT fk_attendance_event FOREIGN KEY (AttendanceEventID) REFERENCES tblAttendanceEvent(ID) ON DELETE CASCADE;
+ALTER TABLE tblAttendanceEvent ADD CONSTRAINT fk_attendevent_church FOREIGN KEY (ChurchID) REFERENCES tblChurch(ID), ADD CONSTRAINT fk_attendevent_service FOREIGN KEY (ServiceID) REFERENCES tblService(ID) ON DELETE SET NULL;
+ALTER TABLE tblChurchinfo ADD CONSTRAINT fk_churchinfo_church FOREIGN KEY (ChurchID) REFERENCES tblChurch(ID) ON DELETE SET NULL;
+ALTER TABLE tblDocument ADD CONSTRAINT fk_document_church FOREIGN KEY (ChurchID) REFERENCES tblChurch(ID);
+ALTER TABLE tblDocuments ADD CONSTRAINT fk_documents_church FOREIGN KEY (ChurchID) REFERENCES tblChurch(ID) ON DELETE SET NULL;
+ALTER TABLE tblFamily ADD CONSTRAINT fk_family_church FOREIGN KEY (ChurchID) REFERENCES tblChurch(ID) ON DELETE SET NULL;
+ALTER TABLE tblFamilyAddress ADD CONSTRAINT fk_familyaddress_family FOREIGN KEY (FamilyID) REFERENCES tblFamily(ID) ON DELETE CASCADE;
+ALTER TABLE tblFamilyContact ADD CONSTRAINT fk_familycontact_family FOREIGN KEY (FamilyID) REFERENCES tblFamily(ID) ON DELETE CASCADE;
+ALTER TABLE tblFamilyDate ADD CONSTRAINT fk_familydate_family FOREIGN KEY (FamilyID) REFERENCES tblFamily(ID) ON DELETE CASCADE;
+ALTER TABLE tblGroup ADD CONSTRAINT fk_group_church FOREIGN KEY (ChurchID) REFERENCES tblChurch(ID);
+ALTER TABLE tblGroupMember ADD CONSTRAINT fk_groupmember_group FOREIGN KEY (GroupID) REFERENCES tblGroup(ID) ON DELETE CASCADE, ADD CONSTRAINT fk_groupmember_person FOREIGN KEY (PersonID) REFERENCES tblPerson(ID) ON DELETE CASCADE;
+ALTER TABLE tblHymn ADD CONSTRAINT fk_hymn_hymnal FOREIGN KEY (HymnalID) REFERENCES tblHymnal(ID);
+ALTER TABLE tblHymnUsage ADD CONSTRAINT fk_hymnusage_church FOREIGN KEY (ChurchID) REFERENCES tblChurch(ID), ADD CONSTRAINT fk_hymnusage_service FOREIGN KEY (ServiceID) REFERENCES tblService(ID) ON DELETE CASCADE, ADD CONSTRAINT fk_hymnusage_hymn FOREIGN KEY (HymnID) REFERENCES tblHymn(ID) ON DELETE CASCADE;
+ALTER TABLE tblJournal ADD CONSTRAINT fk_journal_church FOREIGN KEY (ChurchID) REFERENCES tblChurch(ID);
+ALTER TABLE tblParticipant ADD CONSTRAINT fk_participant_person FOREIGN KEY (PersonID) REFERENCES tblPerson(ID) ON DELETE SET NULL;
+ALTER TABLE tblPastor ADD CONSTRAINT fk_pastor_church FOREIGN KEY (ChurchID) REFERENCES tblChurch(ID);
+ALTER TABLE tblPerson ADD CONSTRAINT fk_person_church FOREIGN KEY (ChurchID) REFERENCES tblChurch(ID) ON DELETE SET NULL, ADD CONSTRAINT fk_person_family FOREIGN KEY (FamilyID) REFERENCES tblFamily(ID) ON DELETE SET NULL;
+ALTER TABLE tblPersonAddress ADD CONSTRAINT fk_personaddress_person FOREIGN KEY (PersonID) REFERENCES tblPerson(ID) ON DELETE CASCADE;
+ALTER TABLE tblPersonContact ADD CONSTRAINT fk_personcontact_person FOREIGN KEY (PersonID) REFERENCES tblPerson(ID) ON DELETE CASCADE;
+ALTER TABLE tblPersonDate ADD CONSTRAINT fk_persondate_person FOREIGN KEY (PersonID) REFERENCES tblPerson(ID) ON DELETE CASCADE;
+ALTER TABLE tblPrayer ADD CONSTRAINT fk_prayer_church FOREIGN KEY (ChurchID) REFERENCES tblChurch(ID);
+ALTER TABLE tblProject ADD CONSTRAINT fk_project_church FOREIGN KEY (ChurchID) REFERENCES tblChurch(ID);
+ALTER TABLE tblReading ADD CONSTRAINT fk_reading_propers FOREIGN KEY (PropersID) REFERENCES tblPropers(ID) ON DELETE CASCADE;
+ALTER TABLE tblService ADD CONSTRAINT fk_service_church FOREIGN KEY (ChurchID) REFERENCES tblChurch(ID) ON DELETE SET NULL, ADD CONSTRAINT fk_service_propers FOREIGN KEY (PropersID) REFERENCES tblPropers(ID) ON DELETE SET NULL, ADD CONSTRAINT fk_service_sermon FOREIGN KEY (SermonID) REFERENCES tblSermon(ID) ON DELETE SET NULL, ADD CONSTRAINT fk_service_checklist FOREIGN KEY (CheckListID) REFERENCES tblCheckList(ID) ON DELETE SET NULL;
+ALTER TABLE tblServiceRole ADD CONSTRAINT fk_servicerole_service FOREIGN KEY (ServiceID) REFERENCES tblService(ID) ON DELETE CASCADE, ADD CONSTRAINT fk_servicerole_participant FOREIGN KEY (ParticipantID) REFERENCES tblParticipant(ID) ON DELETE CASCADE;
+ALTER TABLE tblTask ADD CONSTRAINT fk_task_project FOREIGN KEY (ProjectID) REFERENCES tblProject(ID) ON DELETE CASCADE;
+ALTER TABLE tblTaskWorker ADD CONSTRAINT fk_taskworker_task FOREIGN KEY (TaskID) REFERENCES tblTask(ID) ON DELETE CASCADE, ADD CONSTRAINT fk_taskworker_person FOREIGN KEY (PersonID) REFERENCES tblPerson(ID) ON DELETE SET NULL;
+
+ALTER TABLE tblReports ADD CONSTRAINT uq_reports_report UNIQUE (Report);
+ALTER TABLE tblAttendance ADD CONSTRAINT uq_attendance_person_event UNIQUE (PersonID, AttendanceEventID);
+ALTER TABLE tblServiceRole ADD CONSTRAINT uq_servicerole_assignment UNIQUE (ServiceID, ParticipantID, Role);
