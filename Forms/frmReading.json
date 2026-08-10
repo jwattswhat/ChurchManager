@@ -57,7 +57,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the propers."
             },
             "lblReading": {
                 "type": "StaticText",
@@ -78,7 +79,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the reading."
             },
             "lblReference": {
                 "type": "StaticText",
@@ -99,7 +101,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the reference."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -123,7 +126,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

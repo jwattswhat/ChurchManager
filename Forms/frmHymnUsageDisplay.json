@@ -12,7 +12,9 @@
                 ],
                 "orderby": "DateTime DESC"
             },
-            "stylelist": ["CAPTION"],
+            "stylelist": [
+                "CAPTION"
+            ],
             "linkedform": {
                 "frmHymnSearch": {
                     "table": {
@@ -84,7 +86,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the date and time."
             },
             "boxHymns": {
                 "name": "boxHymns",
@@ -152,7 +155,8 @@
                 "sizech": [
                     58,
                     13
-                ]
+                ],
+                "tooltip": "View the hymn usage records and select a row when needed."
             },
             "btnHymnUsageAdd": {
                 "name": "btnHymnUsageAdd",
@@ -161,7 +165,8 @@
                 "posch": [
                     1,
                     21
-                ]
+                ],
+                "tooltip": "Add a hymn to this service."
             },
             "btnHymnDelete": {
                 "name": "btnHymnDelete",
@@ -170,7 +175,8 @@
                 "posch": [
                     9,
                     21
-                ]
+                ],
+                "tooltip": "Remove the selected hymn usage record."
             },
             "btnChangeNote": {
                 "name": "btnChangeNote",
@@ -180,7 +186,8 @@
                 "posch": [
                     16,
                     21
-                ]
+                ],
+                "tooltip": "Edit the note for the selected hymn usage record."
             }
         }
     }

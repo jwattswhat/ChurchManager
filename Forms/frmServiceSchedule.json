@@ -20,7 +20,10 @@
                 "Navigation",
                 "Close"
             ],
-            "readonlyfields":["ServiceID","DateTime"],
+            "readonlyfields": [
+                "ServiceID",
+                "DateTime"
+            ],
             "posch": [
                 -1,
                 -1
@@ -42,7 +45,7 @@
             },
             "ServiceID": {
                 "name": "ServiceID",
-                "type":"ComboBox",
+                "type": "ComboBox",
                 "lookupchoices": {
                     "name": "tblService",
                     "fields": [
@@ -60,7 +63,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the service."
             },
             "lblDateTime": {
                 "name": "lblDateTime",
@@ -82,7 +86,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the date and time."
             },
             "btnRunSchedule": {
                 "name": "btnRunSchedule",
@@ -91,7 +96,8 @@
                 "posch": [
                     35,
                     5
-                ]
+                ],
+                "tooltip": "Build the participant schedule for the selected service."
             },
             "dvlParticipantSchedule": {
                 "name": "dvlParticipantSchedule",
@@ -129,7 +135,8 @@
                 "sizech": [
                     41,
                     24
-                ]
+                ],
+                "tooltip": "View the participant schedule records and select a row when needed."
             }
         }
     }

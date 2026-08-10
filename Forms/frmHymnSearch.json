@@ -39,7 +39,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the words or reference to search for."
             },
             "btnHymnSearchByHymn": {
                 "type": "Button",
@@ -52,7 +53,8 @@
                 "sizech": [
                     8,
                     2
-                ]
+                ],
+                "tooltip": "Search for hymns by hymn number."
             },
             "btnHymnSearchByTitle": {
                 "type": "Button",
@@ -65,7 +67,8 @@
                 "sizech": [
                     8,
                     2
-                ]
+                ],
+                "tooltip": "Search for hymns by title."
             },
             "btnHymnSearchByBible": {
                 "type": "Button",
@@ -78,7 +81,8 @@
                 "sizech": [
                     8,
                     2
-                ]
+                ],
+                "tooltip": "Search for hymns by Bible reference."
             },
             "btnHymnSearchByCategory": {
                 "type": "Button",
@@ -91,7 +95,8 @@
                 "sizech": [
                     8,
                     2
-                ]
+                ],
+                "tooltip": "Search for hymns by category."
             },
             "btnHymnSearchByNote": {
                 "type": "Button",
@@ -104,7 +109,8 @@
                 "sizech": [
                     8,
                     2
-                ]
+                ],
+                "tooltip": "Search within hymn notes."
             },
             "dvlHymnList": {
                 "name": "dvlHymnList",
@@ -118,7 +124,8 @@
                         "BibleText",
                         "Category",
                         "Note"
-                    ]
+                    ],
+                    "orderby": "Hymn"
                 },
                 "posch": [
                     1,
@@ -159,7 +166,8 @@
                         "label": "Note",
                         "widthch": 30
                     }
-                ]
+                ],
+                "tooltip": "View the hymn list records and select a row when needed."
             },
             "UsedAs": {
                 "name": "UsedAs",
@@ -171,7 +179,8 @@
                 "sizech": [
                     8,
                     2
-                ]
+                ],
+                "tooltip": "Select the hymn usage."
             },
             "btnHymnSearchAdd": {
                 "name": "btnHymnSearchAdd",
@@ -184,7 +193,8 @@
                 "sizech": [
                     4,
                     2
-                ]
+                ],
+                "tooltip": "Add the selected hymn to the service."
             }
         }
     }

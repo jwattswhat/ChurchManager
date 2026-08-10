@@ -43,7 +43,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the hymnal."
             },
             "lblTitle": {
                 "type": "StaticText",
@@ -64,7 +65,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the title."
             },
             "lblPublisher": {
                 "type": "StaticText",
@@ -85,7 +87,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the publisher."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -109,7 +112,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

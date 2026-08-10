@@ -52,7 +52,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the church."
             },
             "lblLabel": {
                 "type": "StaticText",
@@ -73,19 +74,32 @@
                 "sizech": [
                     24,
                     2
+                ],
+                "tooltip": "Enter the label."
+            },
+            "lblPriority": {
+                "type": "StaticText",
+                "label": "Priority",
+                "name": "lblAnnouncement",
+                "posch": [
+                    1,
+                    5
                 ]
             },
-            "lblPriority":{
-                "type":"StaticText",
-                "label":"Priority",
-                "name":"lblAnnouncement",
-                "posch": [1,5]
-            },
-            "Priority":{
-                "type":"ComboBox",
-                "choices":["1","2","3","4"],
-                "name":"Priority",
-                "posch": [9,5]
+            "Priority": {
+                "type": "ComboBox",
+                "choices": [
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ],
+                "name": "Priority",
+                "posch": [
+                    9,
+                    5
+                ],
+                "tooltip": "Select the priority."
             },
             "lblAnnouncement": {
                 "type": "StaticText",
@@ -95,7 +109,10 @@
                     1,
                     7
                 ],
-                "sizech": [10,2]
+                "sizech": [
+                    10,
+                    2
+                ]
             },
             "Announcement": {
                 "type": "MultiLine",
@@ -110,7 +127,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the announcement. Multiple lines are allowed."
             },
             "lblRequestBy": {
                 "type": "StaticText",
@@ -131,7 +149,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the request by."
             },
             "Continuous": {
                 "type": "CheckBox",
@@ -140,60 +159,89 @@
                 "posch": [
                     9,
                     17
+                ],
+                "tooltip": "Keep displaying this announcement until it is manually ended."
+            },
+            "lblOr1": {
+                "type": "StaticText",
+                "name": "lblOr1",
+                "label": "OR",
+                "posch": [
+                    22,
+                    17
                 ]
             },
-            "lblOr1":{
-                "type":"StaticText",
-                "name":"lblOr1",
-                "label":"OR",
-                "posch":[22,17]
-            },
-            "lblOr2":{
-                "type":"StaticText",
-                "name":"lblOr2",
+            "lblOr2": {
+                "type": "StaticText",
+                "name": "lblOr2",
                 "label": "OR",
-                "posch": [10,18.5]
+                "posch": [
+                    10,
+                    18.5
+                ]
             },
-
-
-            "lblStartDate":{
-                "type":"StaticText",
+            "lblStartDate": {
+                "type": "StaticText",
                 "name": "lblStartDate",
-                "label":"Start:",
-                "posch": [9,20]
+                "label": "Start:",
+                "posch": [
+                    9,
+                    20
+                ]
             },
             "StartDate": {
-                "name":"StartDate",
-                "type":"DatePickerCtrl",
-                "posch": [12,20],
-                "sizech": [10,2],
+                "name": "StartDate",
+                "type": "DatePickerCtrl",
+                "posch": [
+                    12,
+                    20
+                ],
+                "sizech": [
+                    10,
+                    2
+                ],
                 "stylelist": [
                     "ALLOWNONE"
-                ]
+                ],
+                "tooltip": "Select the start date."
             },
-            "lblEndDate":{
-                "type":"StaticText",
+            "lblEndDate": {
+                "type": "StaticText",
                 "name": "lblEndDate",
                 "label": "End:",
-                "posch": [9,22]
-            },
-            "EndDate": {
-                "type":"DatePickerCtrl",
-                "name": "EndDate",
-                "posch": [12,22],
-                "sizech": [10,2],
-                "stylelist": [
-                    "ALLOWNONE"
+                "posch": [
+                    9,
+                    22
                 ]
             },
-
-
-            "WeekofMonthBox":{
-                "type":"StaticBox",
-                "name":"WeekofMonthBox",
+            "EndDate": {
+                "type": "DatePickerCtrl",
+                "name": "EndDate",
+                "posch": [
+                    12,
+                    22
+                ],
+                "sizech": [
+                    10,
+                    2
+                ],
+                "stylelist": [
+                    "ALLOWNONE"
+                ],
+                "tooltip": "Select the end date."
+            },
+            "WeekofMonthBox": {
+                "type": "StaticBox",
+                "name": "WeekofMonthBox",
                 "label": "Week of Month",
-                "posch": [24,17],
-                "sizech": [9,12]
+                "posch": [
+                    24,
+                    17
+                ],
+                "sizech": [
+                    9,
+                    12
+                ]
             },
             "First": {
                 "type": "CheckBox",
@@ -202,7 +250,8 @@
                 "posch": [
                     25,
                     18
-                ]
+                ],
+                "tooltip": "Include the first Sunday of the month."
             },
             "Second": {
                 "type": "CheckBox",
@@ -211,7 +260,8 @@
                 "posch": [
                     25,
                     20
-                ]
+                ],
+                "tooltip": "Include the second Sunday of the month."
             },
             "Third": {
                 "type": "CheckBox",
@@ -220,7 +270,8 @@
                 "posch": [
                     25,
                     22
-                ]
+                ],
+                "tooltip": "Include the third Sunday of the month."
             },
             "Fourth": {
                 "type": "CheckBox",
@@ -229,7 +280,8 @@
                 "posch": [
                     25,
                     24
-                ]
+                ],
+                "tooltip": "Include the fourth Sunday of the month."
             },
             "Fifth": {
                 "type": "CheckBox",
@@ -238,13 +290,18 @@
                 "posch": [
                     25,
                     26
-                ]
+                ],
+                "tooltip": "Include the fifth Sunday of the month."
             },
             "eDisplayOnly": {
-                "type":"CheckBox",
+                "type": "CheckBox",
                 "name": "eDisplayOnly",
                 "label": "eDisplay Only",
-                "posch": [9,25]
+                "posch": [
+                    9,
+                    25
+                ],
+                "tooltip": "Show this announcement electronically without including it in printed output."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -268,7 +325,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

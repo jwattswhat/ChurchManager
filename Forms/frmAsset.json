@@ -52,7 +52,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the church."
             },
             "lblAssetID": {
                 "type": "StaticText",
@@ -73,7 +74,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the asset."
             },
             "lblDescription": {
                 "type": "StaticText",
@@ -94,7 +96,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the description."
             },
             "lblPurchaseDate": {
                 "type": "StaticText",
@@ -115,7 +118,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the purchase date."
             },
             "lblDepreciate": {
                 "type": "StaticText",
@@ -132,7 +136,8 @@
                 "posch": [
                     9,
                     9
-                ]
+                ],
+                "tooltip": "Select this if depreciate applies."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -156,7 +161,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

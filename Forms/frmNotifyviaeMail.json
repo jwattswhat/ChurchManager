@@ -1,1 +1,62 @@
-{"frmNotifyviaeMailFORM": {"FORM": {"name": "frmMain", "type": "Dialog", "title": "frmNotifyviaeMail: Notify Participants", "posch": [-1, -1], "sizech": [40, 10], "stylelist": ["CAPTION"], "controls": ["Close"]}, "CONTROLS": {"lblService": {"name": "lblService", "type": "StaticText", "label": "Service", "posch": [2, 2]}, "ServiceID": {"name": "ServiceID", "type": "ComboBox", "lookupchoices": {"name": "tblService", "fields": ["ID", "DateTime", "LiturgicalDate"], "orderby": "DateTime DESC"}, "posch": [9, 2]}, "btnNotify": {"name": "btnRun", "type": "Button", "label": "Notify via eMail", "posch": [2, 6]}}}}
+{
+    "frmNotifyviaeMailFORM": {
+        "FORM": {
+            "name": "frmMain",
+            "type": "Dialog",
+            "title": "frmNotifyviaeMail: Notify Participants",
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                40,
+                10
+            ],
+            "stylelist": [
+                "CAPTION"
+            ],
+            "controls": [
+                "Close"
+            ]
+        },
+        "CONTROLS": {
+            "lblService": {
+                "name": "lblService",
+                "type": "StaticText",
+                "label": "Service",
+                "posch": [
+                    2,
+                    2
+                ]
+            },
+            "ServiceID": {
+                "name": "ServiceID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblService",
+                    "fields": [
+                        "ID",
+                        "DateTime",
+                        "LiturgicalDate"
+                    ],
+                    "orderby": "DateTime DESC"
+                },
+                "posch": [
+                    9,
+                    2
+                ],
+                "tooltip": "Select the service."
+            },
+            "btnNotify": {
+                "name": "btnRun",
+                "type": "Button",
+                "label": "Notify via eMail",
+                "posch": [
+                    2,
+                    6
+                ],
+                "tooltip": "Email the participants scheduled for the selected service."
+            }
+        }
+    }
+}

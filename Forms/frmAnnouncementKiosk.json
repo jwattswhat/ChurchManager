@@ -35,7 +35,8 @@
                     125,
                     75
                 ],
-                "name": "HTMLCtrl"
+                "name": "HTMLCtrl",
+                "tooltip": "View the announcement."
             }
         }
     }

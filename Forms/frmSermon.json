@@ -9,11 +9,16 @@
                 "fields": [
                     "*"
                 ],
-                "orderby": "Date,Reference,Title DESC"
+                "orderby": "Date DESC,Reference,Title DESC"
             },
             "stylelist": [
                 "CAPTION"
             ],
+            "layout": {
+                "type": "responsive",
+                "border": 2,
+                "gap": 2
+            },
             "posch": [
                 -1,
                 -1
@@ -43,7 +48,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the reference."
             },
             "lblTitle": {
                 "type": "StaticText",
@@ -64,7 +70,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the title."
             },
             "lblPreacher": {
                 "type": "StaticText",
@@ -85,7 +92,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the preacher."
             },
             "lblAuthor": {
                 "type": "StaticText",
@@ -106,7 +114,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the author."
             },
             "lblSeries": {
                 "type": "StaticText",
@@ -127,7 +136,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the series."
             },
             "lblDate": {
                 "type": "StaticText",
@@ -151,7 +161,8 @@
                 ],
                 "stylelist": [
                     "ALLOWNONE"
-                ]
+                ],
+                "tooltip": "Select the date."
             },
             "lblSermon": {
                 "type": "StaticText",
@@ -180,7 +191,8 @@
                 "sizech": [
                     31,
                     2
-                ]
+                ],
+                "tooltip": "Select the sermon file."
             },
             "btnOpenSermon": {
                 "name": "btnOpenSermon",
@@ -198,7 +210,8 @@
                 "action": [
                     "openfile",
                     "Sermon"
-                ]
+                ],
+                "tooltip": "Open the selected sermon file."
             },
             "btnAddSermonID": {
                 "name": "btnAddSermonID",
@@ -211,7 +224,8 @@
                 "sizech": [
                     6,
                     2
-                ]
+                ],
+                "tooltip": "Add the record ID to the selected sermon filename."
             },
             "lblOutline": {
                 "type": "StaticText",
@@ -240,7 +254,8 @@
                 "sizech": [
                     31,
                     2
-                ]
+                ],
+                "tooltip": "Select the outline file."
             },
             "btnOpenOutline": {
                 "name": "btnOpenOutline",
@@ -258,7 +273,8 @@
                 "action": [
                     "openfile",
                     "Outline"
-                ]
+                ],
+                "tooltip": "Open the selected outline file."
             },
             "btnAddOutlineID": {
                 "name": "btnAddOutlineID",
@@ -271,7 +287,8 @@
                 "sizech": [
                     6,
                     2
-                ]
+                ],
+                "tooltip": "Add the record ID to the selected outline filename."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -295,7 +312,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

@@ -1,1 +1,102 @@
-{"frmOSListFORM": {"FORM": {"name": "frmOrderofService", "type": "Panel", "title": "frmOrderofService: AltOrderofService Edit Form", "table": {"name": "tblOrderOfService", "fields": ["UNIQUE OrderofService"], "orderby": "OrderofService"}, "stylelist": ["CAPTION"], "controls": ["Close", "Navigation"], "posch": [0, 0], "sizech": [73, 62]}, "CONTROLS": {"lblOrderofService": {"name": "lblOrderofServiceID", "type": "StaticText", "label": "OrderofService:", "posch": [0, 2]}, "OrderofService": {"name": "OrderofService", "type": "TextCtrl", "readonly": true, "posch": [10, 2], "sizech": [24, 2]}, "dvlOS": {"name": "dvlReadings", "type": "DataViewListCtrl", "table": {"name": "tblOrderOfService", "fields": ["Line", "Content", "Page", "Note"], "condition": "OrderofService = '{OrderofService}'", "orderby": "Line"}, "column": [{"name": "Line", "label": "Line", "width": 75}, {"name": "Content", "label": "Content", "width": 300}, {"name": "Page", "label": "Page", "width": 75}, {"name": "Note", "label": "Note", "width": 100}], "posch": [0, 4], "sizech": [70, 49]}}}}
+{
+    "frmOSListFORM": {
+        "FORM": {
+            "name": "frmOrderofService",
+            "type": "Panel",
+            "title": "frmOrderofService: AltOrderofService Edit Form",
+            "table": {
+                "name": "tblOrderOfService",
+                "fields": [
+                    "UNIQUE OrderofService"
+                ],
+                "orderby": "OrderofService"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "controls": [
+                "Close",
+                "Navigation"
+            ],
+            "posch": [
+                0,
+                0
+            ],
+            "sizech": [
+                73,
+                62
+            ]
+        },
+        "CONTROLS": {
+            "lblOrderofService": {
+                "name": "lblOrderofServiceID",
+                "type": "StaticText",
+                "label": "OrderofService:",
+                "posch": [
+                    0,
+                    2
+                ]
+            },
+            "OrderofService": {
+                "name": "OrderofService",
+                "type": "TextCtrl",
+                "readonly": true,
+                "posch": [
+                    10,
+                    2
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the order of service."
+            },
+            "dvlOS": {
+                "name": "dvlReadings",
+                "type": "DataViewListCtrl",
+                "table": {
+                    "name": "tblOrderOfService",
+                    "fields": [
+                        "Line",
+                        "Content",
+                        "Page",
+                        "Note"
+                    ],
+                    "condition": "OrderofService = '{OrderofService}'",
+                    "orderby": "Line"
+                },
+                "column": [
+                    {
+                        "name": "Line",
+                        "label": "Line",
+                        "width": 75
+                    },
+                    {
+                        "name": "Content",
+                        "label": "Content",
+                        "width": 300
+                    },
+                    {
+                        "name": "Page",
+                        "label": "Page",
+                        "width": 75
+                    },
+                    {
+                        "name": "Note",
+                        "label": "Note",
+                        "width": 100
+                    }
+                ],
+                "posch": [
+                    0,
+                    4
+                ],
+                "sizech": [
+                    70,
+                    49
+                ],
+                "tooltip": "View the order-of-service records and select a row when needed."
+            }
+        }
+    }
+}

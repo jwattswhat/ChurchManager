@@ -49,7 +49,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the family."
             },
             "lblLabel": {
                 "type": "StaticText",
@@ -70,7 +71,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the contact label."
             },
             "lblType": {
                 "type": "StaticText",
@@ -91,7 +93,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the type."
             },
             "lblContact": {
                 "type": "StaticText",
@@ -112,7 +115,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the contact."
             },
             "lblUnlisted": {
                 "type": "StaticText",
@@ -129,7 +133,8 @@
                 "posch": [
                     10,
                     9
-                ]
+                ],
+                "tooltip": "Select this if unlisted applies."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -154,7 +159,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

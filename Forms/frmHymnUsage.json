@@ -67,7 +67,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the church."
             },
             "lblServiceID": {
                 "name": "lblServiceID",
@@ -97,7 +98,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the service."
             },
             "lblHymnID": {
                 "name": "lblHymnID",
@@ -127,7 +129,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the hymn."
             },
             "btnOpenHymnSearch": {
                 "name": "btnOpenHymnSearch",
@@ -140,7 +143,8 @@
                 "posch": [
                     39,
                     7
-                ]
+                ],
+                "tooltip": "Open hymn search and select a hymn."
             },
             "lblUsedAs": {
                 "name": "lblUsedAs",
@@ -161,7 +165,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the hymn usage."
             },
             "btnDisplayUsage": {
                 "name": "btnDisplayUsage",
@@ -174,7 +179,8 @@
                 "posch": [
                     39,
                     9
-                ]
+                ],
+                "tooltip": "Display the usage history for the selected hymn."
             },
             "lblNote": {
                 "name": "lblNote",
@@ -198,7 +204,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

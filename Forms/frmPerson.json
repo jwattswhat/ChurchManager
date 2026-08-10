@@ -25,6 +25,11 @@
             "stylelist": [
                 "CAPTION"
             ],
+            "layout": {
+                "type": "responsive",
+                "border": 2,
+                "gap": 2
+            },
             "linkedform": {
                 "frmPersonAddress": {
                     "controls": [
@@ -111,7 +116,8 @@
                 "posch": [
                     37,
                     2
-                ]
+                ],
+                "tooltip": "Open the person's addresses form."
             },
             "btnPersonContact": {
                 "type": "Button",
@@ -124,7 +130,8 @@
                 "posch": [
                     37,
                     4
-                ]
+                ],
+                "tooltip": "Open the person's contacts form."
             },
             "btnPersonDate": {
                 "type": "Button",
@@ -137,7 +144,8 @@
                 "posch": [
                     37,
                     6
-                ]
+                ],
+                "tooltip": "Open the person's significant dates form."
             },
             "lblChurchID": {
                 "type": "StaticText",
@@ -167,7 +175,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the church."
             },
             "lblFamilyID": {
                 "type": "StaticText",
@@ -196,7 +205,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the family."
             },
             "lblFirstName": {
                 "type": "StaticText",
@@ -217,7 +227,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the first name."
             },
             "lblMiddleName": {
                 "type": "StaticText",
@@ -238,7 +249,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the middle name."
             },
             "lblLastName": {
                 "type": "StaticText",
@@ -259,7 +271,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the last name."
             },
             "lblStatus": {
                 "label": "Status",
@@ -280,7 +293,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the status."
             },
             "lblBaptized": {
                 "type": "StaticText",
@@ -297,7 +311,8 @@
                 "posch": [
                     10,
                     13
-                ]
+                ],
+                "tooltip": "Select this if baptized applies."
             },
             "lblConfirmed": {
                 "type": "StaticText",
@@ -314,7 +329,8 @@
                 "posch": [
                     10,
                     15
-                ]
+                ],
+                "tooltip": "Select this if confirmed applies."
             },
             "lblMember": {
                 "type": "StaticText",
@@ -331,7 +347,8 @@
                 "posch": [
                     10,
                     17
-                ]
+                ],
+                "tooltip": "Select this if member applies."
             },
             "lblAssociateMember": {
                 "type": "StaticText",
@@ -348,7 +365,8 @@
                 "posch": [
                     10,
                     19
-                ]
+                ],
+                "tooltip": "Select this if associate member applies."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -372,7 +390,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

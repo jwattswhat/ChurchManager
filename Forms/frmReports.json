@@ -45,7 +45,8 @@
                     25,
                     30
                 ],
-                "value": "Life in Christ Lutheran Church"
+                "value": "Life in Christ Lutheran Church",
+                "tooltip": "Select the church."
             },
             "lblReports": {
                 "name": "lblReports",
@@ -70,13 +71,14 @@
                         "Title",
                         "CONCAT('(',Report,')')"
                     ],
+                    "condition": "Report NOT IN ('CFCA01','CFCR01','CFGR01','CMDN01','CMDN02')",
                     "orderby": "Title"
                 },
-                "value": "Worship Planning Worksheet (CMWP01)",
                 "action": [
                     "onchange",
                     "enablebuttons"
-                ]
+                ],
+                "tooltip": "Select the report to run; its required parameters will be enabled."
             },
             "ParameterBox": {
                 "name": "ParameterBox",
@@ -115,7 +117,8 @@
                         "LiturgicalDate"
                     ],
                     "orderby": "DateTime DESC"
-                }
+                },
+                "tooltip": "Select the service."
             },
             "lblPerson": {
                 "name": "lblPerson",
@@ -141,7 +144,8 @@
                         "FirstName"
                     ],
                     "orderby": "LastName,FirstName"
-                }
+                },
+                "tooltip": "Select the person."
             },
             "lblHymn": {
                 "name": "lblHymn",
@@ -167,7 +171,8 @@
                         "Title"
                     ],
                     "orderby": "Hymn"
-                }
+                },
+                "tooltip": "Select the hymn."
             },
             "lblStartDate": {
                 "name": "lblStartDate",
@@ -185,7 +190,8 @@
                     9,
                     19
                 ],
-                "format": "%Y/%m/%d"
+                "format": "%Y/%m/%d",
+                "tooltip": "Select the start date."
             },
             "lblEndDate": {
                 "name": "lblEndDate",
@@ -203,7 +209,8 @@
                     9,
                     22
                 ],
-                "format": "%Y/%m/%d"
+                "format": "%Y/%m/%d",
+                "tooltip": "Select the end date."
             },
             "lblAttendanceType": {
                 "name": "lblAttendanceType",
@@ -225,7 +232,8 @@
                     30,
                     3
                 ],
-                "value": "All"
+                "value": "All",
+                "tooltip": "Select the attendance type."
             },
             "lblDetail": {
                 "name": "lblDetail",
@@ -243,7 +251,8 @@
                     9,
                     28
                 ],
-                "value": 0
+                "value": 0,
+                "tooltip": "Include detailed information in reports that support it."
             },
             "lblProjectID": {
                 "name": "lblProjectID",
@@ -269,7 +278,8 @@
                     ],
                     "orderby": "Description"
                 },
-                "value": "All"
+                "value": "All",
+                "tooltip": "Select the project."
             },
             "btnRun": {
                 "name": "btnRun",
@@ -278,7 +288,8 @@
                 "posch": [
                     35,
                     33
-                ]
+                ],
+                "tooltip": "Run the selected report using the entered parameters."
             }
         }
     }

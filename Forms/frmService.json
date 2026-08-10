@@ -10,7 +10,7 @@
             ],
             "sizech": [
                 50,
-                46
+                50
             ],
             "table": {
                 "name": "tblService",
@@ -18,6 +18,7 @@
                     "ID",
                     "ChurchID",
                     "DateTime",
+                    "Location",
                     "PropersID",
                     "LiturgicalDate",
                     "HolyCommunion",
@@ -76,7 +77,10 @@
                     "name": "frmHymnUsage",
                     "title": "frmHymnUsage - Add/Edit/Delete Hymns Used",
                     "type": "Panel",
-                    "posch":[10,1],
+                    "posch": [
+                        10,
+                        1
+                    ],
                     "table": {
                         "name": "tblHymnUsage",
                         "fields": [
@@ -183,7 +187,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the church."
             },
             "btnServiceHymns": {
                 "name": "btnServiceHymns",
@@ -196,7 +201,8 @@
                 "posch": [
                     41,
                     1
-                ]
+                ],
+                "tooltip": "Open the hymns form."
             },
             "lblDateTime": {
                 "name": "lblDateTime",
@@ -217,7 +223,30 @@
                 "sizech": [
                     24,
                     2
+                ],
+                "tooltip": "Select the date and time."
+            },
+            "lblLocation": {
+                "name": "lblLocation",
+                "type": "StaticText",
+                "label": "Location:",
+                "posch": [
+                    1,
+                    5
                 ]
+            },
+            "Location": {
+                "name": "Location",
+                "type": "ComboBox",
+                "posch": [
+                    12,
+                    5
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Select the location."
             },
             "lblPropersID": {
                 "name": "lblPropersID",
@@ -225,7 +254,7 @@
                 "label": "Propers:",
                 "posch": [
                     1,
-                    5
+                    7
                 ]
             },
             "PropersID": {
@@ -246,12 +275,13 @@
                 ],
                 "posch": [
                     12,
-                    5
+                    7
                 ],
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the propers."
             },
             "btnEditPropers": {
                 "name": "btnEditPropers",
@@ -263,8 +293,9 @@
                 ],
                 "posch": [
                     41,
-                    5
-                ]
+                    7
+                ],
+                "tooltip": "Open the propers form."
             },
             "lblLiturgicalDate": {
                 "name": "lblLiturgicalDate",
@@ -272,7 +303,7 @@
                 "label": "Liturgical Date:",
                 "posch": [
                     1,
-                    7
+                    9
                 ]
             },
             "LiturgicalDate": {
@@ -280,12 +311,13 @@
                 "type": "TextCtrl",
                 "posch": [
                     12,
-                    7
+                    9
                 ],
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the liturgical date."
             },
             "btnChangeLectionary": {
                 "name": "btnChangeLectionary",
@@ -297,8 +329,9 @@
                 ],
                 "posch": [
                     41,
-                    7
-                ]
+                    9
+                ],
+                "tooltip": "Open the lectionary form."
             },
             "lblHolyCommunion": {
                 "name": "lblHolyCommunion",
@@ -306,7 +339,7 @@
                 "label": "Holy Communion:",
                 "posch": [
                     1,
-                    9
+                    11
                 ]
             },
             "HolyCommunion": {
@@ -314,9 +347,9 @@
                 "type": "CheckBox",
                 "posch": [
                     12,
-                    9
-                ]
-
+                    11
+                ],
+                "tooltip": "Select this if holy communion applies."
             },
             "btnServiceAltReading": {
                 "name": "btnServiceAltReading",
@@ -328,8 +361,9 @@
                 ],
                 "posch": [
                     41,
-                    9
-                ]
+                    11
+                ],
+                "tooltip": "Open the alt readings form."
             },
             "lblOrderofService": {
                 "name": "lblOrderofService",
@@ -337,7 +371,7 @@
                 "label": "OrderofService:",
                 "posch": [
                     1,
-                    11
+                    13
                 ]
             },
             "OrderofService": {
@@ -345,12 +379,13 @@
                 "type": "ComboBox",
                 "posch": [
                     12,
-                    11
+                    13
                 ],
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the order of service."
             },
             "lblOSNote": {
                 "name": "lblOSNote",
@@ -358,7 +393,7 @@
                 "label": "OSNote:",
                 "posch": [
                     1,
-                    13
+                    15
                 ]
             },
             "OSNote": {
@@ -369,12 +404,13 @@
                 ],
                 "posch": [
                     12,
-                    13
+                    15
                 ],
                 "sizech": [
                     24,
                     5
-                ]
+                ],
+                "tooltip": "Enter the order-of-service note. Multiple lines are allowed."
             },
             "lblPsalmorIntroit": {
                 "name": "lblPsalmorIntroit",
@@ -382,7 +418,7 @@
                 "label": "Psalm or Introit:",
                 "posch": [
                     1,
-                    18
+                    21
                 ]
             },
             "PsalmorIntroit": {
@@ -390,12 +426,13 @@
                 "type": "ComboBox",
                 "posch": [
                     12,
-                    18
+                    21
                 ],
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the psalm or introit."
             },
             "lblSermonID": {
                 "name": "lblSermonID",
@@ -403,7 +440,7 @@
                 "label": "Sermon:",
                 "posch": [
                     1,
-                    20
+                    23
                 ]
             },
             "SermonID": {
@@ -421,12 +458,13 @@
                 },
                 "posch": [
                     12,
-                    20
+                    23
                 ],
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the sermon."
             },
             "btnOpenSermonForm": {
                 "name": "btnOpenSermonForm",
@@ -438,8 +476,9 @@
                 ],
                 "posch": [
                     41,
-                    20
-                ]
+                    23
+                ],
+                "tooltip": "Open the selected sermon record."
             },
             "lblBulletin": {
                 "name": "lblBulletin",
@@ -447,7 +486,7 @@
                 "label": "Bulletin:",
                 "posch": [
                     1,
-                    22
+                    25
                 ]
             },
             "Bulletin": {
@@ -463,12 +502,13 @@
                 ],
                 "posch": [
                     12,
-                    22
+                    25
                 ],
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the bulletin file."
             },
             "btnOpenBulletin": {
                 "name": "btnOpenBulletin",
@@ -480,8 +520,9 @@
                 ],
                 "posch": [
                     41,
-                    22
-                ]
+                    25
+                ],
+                "tooltip": "Open the selected bulletin file."
             },
             "lblCheckListComplete": {
                 "name": "lblCheckListComplete",
@@ -489,7 +530,7 @@
                 "label": "Check List Complete:",
                 "posch": [
                     1,
-                    24
+                    27
                 ]
             },
             "CheckListComplete": {
@@ -497,16 +538,17 @@
                 "type": "CheckBox",
                 "posch": [
                     12,
-                    24
-                ]
+                    27
+                ],
+                "tooltip": "Mark the entire service checklist complete."
             },
             "lblCheckList": {
                 "name": "lblCheckList",
                 "type": "StaticText",
                 "label": "CheckList:",
                 "posch": [
-                    1,
-                    26
+                    41,
+                    29
                 ]
             },
             "CheckList": {
@@ -514,12 +556,13 @@
                 "type": "CheckListBox",
                 "posch": [
                     12,
-                    26
+                    29
                 ],
                 "sizech": [
                     24,
                     10
-                ]
+                ],
+                "tooltip": "Check completed service-preparation items."
             },
             "btnEditCheckList": {
                 "type": "Button",
@@ -531,8 +574,9 @@
                 ],
                 "posch": [
                     1,
-                    28
-                ]
+                    29
+                ],
+                "tooltip": "Open the edit checklist form."
             },
             "lblNote": {
                 "name": "lblNote",
@@ -540,7 +584,7 @@
                 "label": "Note:",
                 "posch": [
                     1,
-                    36
+                    39
                 ]
             },
             "Note": {
@@ -552,12 +596,13 @@
                 ],
                 "posch": [
                     12,
-                    36
+                    39
                 ],
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

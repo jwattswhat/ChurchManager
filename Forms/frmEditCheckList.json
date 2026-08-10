@@ -48,7 +48,8 @@
                 "sizech": [
                     20,
                     10
-                ]
+                ],
+                "tooltip": "Edit the items in the check list."
             },
             "CheckListID": {
                 "name": "CheckListID",
@@ -68,7 +69,8 @@
                 "sizech": [
                     20,
                     3
-                ]
+                ],
+                "tooltip": "Select the saved checklist used for the merge or replace operation."
             },
             "btnMerge": {
                 "name": "btnMerge",
@@ -83,7 +85,8 @@
                     "mergelist",
                     "CheckList",
                     "CheckListID"
-                ]
+                ],
+                "tooltip": "Add the selected saved checklist items to the current checklist."
             },
             "btnReplace": {
                 "name": "btnReplace",
@@ -98,7 +101,8 @@
                     "replacelist",
                     "CheckList",
                     "CheckListID"
-                ]
+                ],
+                "tooltip": "Replace the current checklist with the selected saved checklist."
             },
             "btnClear": {
                 "name": "btnClear",
@@ -112,7 +116,8 @@
                     "editchecklist",
                     "clearlist",
                     "CheckList"
-                ]
+                ],
+                "tooltip": "Remove every item from the current checklist."
             }
         }
     }

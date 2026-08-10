@@ -52,7 +52,8 @@
                     24,
                     2
                 ],
-                "defaultvalue": "Life in Christ Lutheran Church"
+                "defaultvalue": "Life in Christ Lutheran Church",
+                "tooltip": "Select the church."
             },
             "lblTitle": {
                 "type": "StaticText",
@@ -73,7 +74,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the title."
             },
             "lblDocument": {
                 "type": "StaticText",
@@ -102,7 +104,8 @@
                 "sizech": [
                     31,
                     2
-                ]
+                ],
+                "tooltip": "Select the document file."
             },
             "btnOpenDocument": {
                 "name": "btnOpenDocument",
@@ -120,7 +123,8 @@
                 "action": [
                     "openfile",
                     "Document"
-                ]
+                ],
+                "tooltip": "Open the selected document file."
             },
             "lblDocumentType": {
                 "type": "StaticText",
@@ -141,7 +145,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the document type."
             },
             "lblDate": {
                 "type": "StaticText",
@@ -165,7 +170,8 @@
                 ],
                 "stylelist": [
                     "ALLOWNONE"
-                ]
+                ],
+                "tooltip": "Select the date."
             },
             "lblDescription": {
                 "type": "StaticText",
@@ -189,7 +195,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the description. Multiple lines are allowed."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -213,7 +220,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

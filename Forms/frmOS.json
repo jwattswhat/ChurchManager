@@ -1,1 +1,193 @@
-{"frmOSFORM": {"FORM": {"name": "frmOS", "type": "Panel", "title": "frmOrderofService: AltOrderofService Edit Form", "table": {"name": "tblOrderOfService", "fields": ["*"], "Orderby": "OrderofService,Line"}, "stylelist": ["CAPTION"], "controls": ["Navigation", "Close"], "posch": [0, 0], "sizech": [51, 37]}, "CONTROLS": {"lblOrderofService": {"name": "lblOrderofServiceID", "type": "StaticText", "label": "OrderofService:", "posch": [0, 2]}, "OrderofService": {"name": "OrderofService", "type": "ComboBox", "posch": [10, 2], "sizech": [24, 2]}, "lblLine": {"name": "lblLine", "type": "StaticText", "label": "Line", "posch": [0, 4]}, "Line": {"name": "Line", "type": "TextNumber", "format": "{:04.1f}", "posch": [10, 4], "sizech": [24, 2]}, "lblTitle": {"name": "lblTitle", "type": "StaticText", "label": "Title", "posch": [0, 7]}, "Title": {"name": "Title", "type": "TextCtrl", "posch": [10, 7], "sizech": [24, 2]}, "lblContent": {"name": "lblContent", "label": "Content", "type": "StaticText", "posch": [0, 9]}, "Content": {"name": "Content", "type": "TextCtrl", "posch": [10, 9], "sizech": [24, 2]}, "lblPage": {"name": "lblPage", "type": "StaticText", "label": "Page", "posch": [0, 12]}, "Page": {"name": "Page", "type": "TextNumber", "format": "{:03d}", "posch": [10, 12], "sizech": [24, 2]}, "lblFile": {"name": "lblFile", "type": "StaticText", "label": "File", "posch": [0, 14]}, "File": {"name": "File", "type": "TextCtrl", "posch": [10, 14], "sizech": [24, 2]}, "lblNote": {"name": "lblNote", "type": "StaticText", "label": "Note", "posch": [0, 17]}, "Note": {"name": "Note", "type": "MultiLine", "stylelist": ["MULTILINE", "WORDWRAP"], "posch": [10, 17], "sizech": [24, 8]}}}}
+{
+    "frmOSFORM": {
+        "FORM": {
+            "name": "frmOS",
+            "type": "Panel",
+            "title": "frmOrderofService: AltOrderofService Edit Form",
+            "table": {
+                "name": "tblOrderOfService",
+                "fields": [
+                    "*"
+                ],
+                "Orderby": "OrderofService,Line"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "controls": [
+                "Navigation",
+                "Close"
+            ],
+            "posch": [
+                0,
+                0
+            ],
+            "sizech": [
+                51,
+                37
+            ]
+        },
+        "CONTROLS": {
+            "lblOrderofService": {
+                "name": "lblOrderofServiceID",
+                "type": "StaticText",
+                "label": "OrderofService:",
+                "posch": [
+                    0,
+                    2
+                ]
+            },
+            "OrderofService": {
+                "name": "OrderofService",
+                "type": "ComboBox",
+                "posch": [
+                    10,
+                    2
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Select the order of service."
+            },
+            "lblLine": {
+                "name": "lblLine",
+                "type": "StaticText",
+                "label": "Line",
+                "posch": [
+                    0,
+                    4
+                ]
+            },
+            "Line": {
+                "name": "Line",
+                "type": "TextNumber",
+                "format": "{:04.1f}",
+                "posch": [
+                    10,
+                    4
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the line."
+            },
+            "lblTitle": {
+                "name": "lblTitle",
+                "type": "StaticText",
+                "label": "Title",
+                "posch": [
+                    0,
+                    7
+                ]
+            },
+            "Title": {
+                "name": "Title",
+                "type": "TextCtrl",
+                "posch": [
+                    10,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the title."
+            },
+            "lblContent": {
+                "name": "lblContent",
+                "label": "Content",
+                "type": "StaticText",
+                "posch": [
+                    0,
+                    9
+                ]
+            },
+            "Content": {
+                "name": "Content",
+                "type": "TextCtrl",
+                "posch": [
+                    10,
+                    9
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the content."
+            },
+            "lblPage": {
+                "name": "lblPage",
+                "type": "StaticText",
+                "label": "Page",
+                "posch": [
+                    0,
+                    12
+                ]
+            },
+            "Page": {
+                "name": "Page",
+                "type": "TextNumber",
+                "format": "{:03d}",
+                "posch": [
+                    10,
+                    12
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the page."
+            },
+            "lblFile": {
+                "name": "lblFile",
+                "type": "StaticText",
+                "label": "File",
+                "posch": [
+                    0,
+                    14
+                ]
+            },
+            "File": {
+                "name": "File",
+                "type": "TextCtrl",
+                "posch": [
+                    10,
+                    14
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the file."
+            },
+            "lblNote": {
+                "name": "lblNote",
+                "type": "StaticText",
+                "label": "Note",
+                "posch": [
+                    0,
+                    17
+                ]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE",
+                    "WORDWRAP"
+                ],
+                "posch": [
+                    10,
+                    17
+                ],
+                "sizech": [
+                    24,
+                    8
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
+            }
+        }
+    }
+}

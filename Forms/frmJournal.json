@@ -9,7 +9,7 @@
                 "fields": [
                     "*"
                 ],
-                "Orderby": "StartDate DESC"
+                "orderby": "Complete, StartDate DESC"
             },
             "stylelist": [
                 "CAPTION"
@@ -51,51 +51,90 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the church."
             },
             "lblStartDate": {
-                "name":"lblStartDate",
-                "type":"StaticText",
-                "posch":[1,3],
-                "label":"Start Date:"
+                "name": "lblStartDate",
+                "type": "StaticText",
+                "posch": [
+                    1,
+                    3
+                ],
+                "label": "Start Date:"
             },
-            "StartDate":{
-                "name":"StartDate",
-                "type":"DateTime",
-                "posch":[12,3],
-                "sizech":[20,2],
-                "stylelist":["ALLOWNONE"]
+            "StartDate": {
+                "name": "StartDate",
+                "type": "DateTime",
+                "posch": [
+                    12,
+                    3
+                ],
+                "sizech": [
+                    20,
+                    2
+                ],
+                "stylelist": [
+                    "ALLOWNONE"
+                ],
+                "tooltip": "Select the start date."
             },
             "lblEndDate": {
-                "name":"lblEndDate",
-                "type":"StaticText",
-                "posch":[1,5],
-                "label":"End Date:"
+                "name": "lblEndDate",
+                "type": "StaticText",
+                "posch": [
+                    1,
+                    5
+                ],
+                "label": "End Date:"
             },
-            "EndDate":{
-                "name":"EndDate",
-                "type":"DateTime",
-                "posch":[12,5],
-                "sizech":[20,2],
-                "stylelist":["ALLOWNONE"]
+            "EndDate": {
+                "name": "EndDate",
+                "type": "DateTime",
+                "posch": [
+                    12,
+                    5
+                ],
+                "sizech": [
+                    20,
+                    2
+                ],
+                "stylelist": [
+                    "ALLOWNONE"
+                ],
+                "tooltip": "Select the end date."
             },
-            "lblEvent":{
-                "name":"lblEvent",
-                "type":"StaticText",
-                "posch":[1,7],
-                "label":"Event:"
+            "lblEvent": {
+                "name": "lblEvent",
+                "type": "StaticText",
+                "posch": [
+                    1,
+                    7
+                ],
+                "label": "Event:"
             },
-            "Event":{
-                "name":"Event",
-                "type":"TextCtrl",
-                "posch":[12,7],
-                "sizech": [25,2]
+            "Event": {
+                "name": "Event",
+                "type": "TextCtrl",
+                "posch": [
+                    12,
+                    7
+                ],
+                "sizech": [
+                    25,
+                    2
+                ],
+                "tooltip": "Enter the event."
             },
-            "Complete":{
-                "name":"Complete",
-                "type":"CheckBox",
-                "posch":[12,9],
-                "label":"Complete"
+            "Complete": {
+                "name": "Complete",
+                "type": "CheckBox",
+                "posch": [
+                    12,
+                    9
+                ],
+                "label": "Complete",
+                "tooltip": "Select this if complete applies."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -120,7 +159,8 @@
                 "sizech": [
                     24,
                     10
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

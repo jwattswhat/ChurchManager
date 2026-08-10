@@ -1,1 +1,88 @@
-{"frmMembershipMainFORM": {"FORM": {"type": "Panel", "title": "Church Manager - Membership (v0.1)", "name": "frmMembershipMain", "stylelist": ["CAPTION"], "linkedform": {"frmChurch": {"bindbtn": "btnEditChurch", "controls": ["Close", "Navigation"], "SQL": "SELECT * FROM tblChurch ORDER BY Church;"}, "frmPerson": {"bindbtn": "btnEditPerson", "controls": ["Close", "Navigation"], "SQL": "SELECT ID,ChurchID,FamilyID,FirstName,MiddleName,LastName,Status,Baptized,Confirmed,Member,AssociateMember,Note FROM tblPerson ORDER BY LastName"}, "frmFamily": {"bindbtn": "btnEditFamily", "controls": ["Close", "Navigation"], "SQL": "SELECT ID, ChurchID, FamilyName, MarriageStatus, Directory, Note FROM tblFamily ORDER BY FamilyName;"}}, "posch": [0, 0], "sizech": [49, 41]}, "CONTROLS": {"btnEditChurch": {"type": "Button", "label": "Add/Edit/Delete Church", "name": "btnEditChurch", "posch": [0, 2]}, "btnEditPerson": {"type": "Button", "label": "Add/EditDelete Person", "name": "btnEditPerson", "posch": [0, 7]}, "btnEditFamily": {"type": "Button", "label": "Add/Edit/Delete Family", "name": "btnEditFamily", "posch": [0, 10]}, "btnClose": {"type": "Button", "label": "Close", "name": "btnClose", "posch": [41, 33]}}}}
+{
+    "frmMembershipMainFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "Church Manager - Membership (v0.1)",
+            "name": "frmMembershipMain",
+            "stylelist": [
+                "CAPTION"
+            ],
+            "linkedform": {
+                "frmChurch": {
+                    "bindbtn": "btnEditChurch",
+                    "controls": [
+                        "Close",
+                        "Navigation"
+                    ],
+                    "SQL": "SELECT * FROM tblChurch ORDER BY Church;"
+                },
+                "frmPerson": {
+                    "bindbtn": "btnEditPerson",
+                    "controls": [
+                        "Close",
+                        "Navigation"
+                    ],
+                    "SQL": "SELECT ID,ChurchID,FamilyID,FirstName,MiddleName,LastName,Status,Baptized,Confirmed,Member,AssociateMember,Note FROM tblPerson ORDER BY LastName"
+                },
+                "frmFamily": {
+                    "bindbtn": "btnEditFamily",
+                    "controls": [
+                        "Close",
+                        "Navigation"
+                    ],
+                    "SQL": "SELECT ID, ChurchID, FamilyName, MarriageStatus, Directory, Note FROM tblFamily ORDER BY FamilyName;"
+                }
+            },
+            "posch": [
+                0,
+                0
+            ],
+            "sizech": [
+                49,
+                41
+            ]
+        },
+        "CONTROLS": {
+            "btnEditChurch": {
+                "type": "Button",
+                "label": "Add/Edit/Delete Church",
+                "name": "btnEditChurch",
+                "posch": [
+                    0,
+                    2
+                ],
+                "tooltip": "Open the church records form."
+            },
+            "btnEditPerson": {
+                "type": "Button",
+                "label": "Add/EditDelete Person",
+                "name": "btnEditPerson",
+                "posch": [
+                    0,
+                    7
+                ],
+                "tooltip": "Open the person records form."
+            },
+            "btnEditFamily": {
+                "type": "Button",
+                "label": "Add/Edit/Delete Family",
+                "name": "btnEditFamily",
+                "posch": [
+                    0,
+                    10
+                ],
+                "tooltip": "Open the family records form."
+            },
+            "btnClose": {
+                "type": "Button",
+                "label": "Close",
+                "name": "btnClose",
+                "posch": [
+                    41,
+                    33
+                ],
+                "tooltip": "Close the membership menu."
+            }
+        }
+    }
+}

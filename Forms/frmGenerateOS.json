@@ -41,7 +41,8 @@
                 "posch": [
                     9,
                     2
-                ]
+                ],
+                "tooltip": "Select the service."
             },
             "btnRun": {
                 "name": "btnRun",
@@ -50,7 +51,8 @@
                 "posch": [
                     2,
                     6
-                ]
+                ],
+                "tooltip": "Generate the selected order of service."
             }
         }
     }

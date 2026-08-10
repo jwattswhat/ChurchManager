@@ -28,7 +28,11 @@
                     15,
                     3
                 ],
-                "label": "Church"
+                "label": "Church",
+                "layout": {
+                    "row": 0,
+                    "column": 0
+                }
             },
             "lblChurch": {
                 "name": "lblChurch",
@@ -37,7 +41,8 @@
                     2,
                     2
                 ],
-                "label": "Churches"
+                "label": "Churches",
+                "tooltip": "Open the churches form."
             },
             "ServiceBox": {
                 "type": "StaticBox",
@@ -50,7 +55,11 @@
                     15,
                     12
                 ],
-                "label": "Service"
+                "label": "Worship",
+                "layout": {
+                    "row": 1,
+                    "column": 0
+                }
             },
             "lblService": {
                 "name": "lblService",
@@ -59,88 +68,98 @@
                     2,
                     5
                 ],
-                "label": "Worship Service"
+                "label": "Worship Service",
+                "tooltip": "Open the worship service form."
             },
             "lblSermon": {
                 "name": "lblSermon",
                 "type": "StaticText",
                 "posch": [
-                    3,
+                    2,
                     6
                 ],
-                "label": "Sermons"
+                "label": "   Sermons",
+                "tooltip": "Open the sermons form."
             },
             "lblPropers": {
                 "name": "lblPropers",
                 "type": "StaticText",
                 "posch": [
-                    3,
+                    2,
                     7
                 ],
-                "label": "Propers"
+                "label": "   Propers",
+                "tooltip": "Open the propers form."
             },
             "lblOS": {
                 "name": "lblOS",
                 "type": "StaticText",
                 "posch": [
-                    3,
+                    2,
                     8
                 ],
-                "label": "OS"
+                "label": "   OS",
+                "tooltip": "Open the os form."
             },
             "lblPrayers": {
                 "name": "lblPrayers",
-                "label": "Prayers",
+                "label": "   Prayers",
                 "posch": [
-                    3,
+                    2,
                     9
                 ],
-                "type": "StaticText"
+                "type": "StaticText",
+                "tooltip": "Open the prayers form."
             },
             "lblParticipant": {
                 "name": "lblParticipant",
-                "label": "Participant",
+                "label": "   Participant",
                 "posch": [
-                    3,
+                    2,
                     10
                 ],
-                "type": "StaticText"
+                "type": "StaticText",
+                "tooltip": "Open the participant form."
             },
             "lblSchedule": {
                 "name": "lblSchedule",
                 "type": "StaticText",
                 "posch": [
-                    3,
+                    2,
                     11
                 ],
-                "label": "Schedule"
+                "label": "   Schedule",
+                "tooltip": "Open the schedule form."
             },
             "lblServiceSchedule": {
                 "name": "lblServiceSchedule",
                 "type": "StaticText",
                 "posch": [
-                    3,
+                    2,
                     12
                 ],
-                "label": "Schedule Participants"
+                "label": "   Schedule Participants",
+                "tooltip": "Open the schedule participants form."
             },
             "lblOSList": {
                 "name": "lblOSList",
                 "type": "StaticText",
                 "posch": [
-                    3,
+                    2,
                     13
                 ],
-                "label": "OS List"
+                "label": "   OS List",
+                "tooltip": "Open the os list form."
             },
             "lblAttendanceEvent": {
                 "type": "StaticText",
                 "name": "lblAttendanceEvent",
                 "posch": [
-                    3,
+                    2,
                     14
                 ],
-                "label": "Attendance Event"
+                "label": "   Attendance Event",
+                "tooltip": "Open the attendance event form."
             },
             "MemberBox": {
                 "name": "MemberBox",
@@ -150,6 +169,10 @@
                     1,
                     16
                 ],
+                "layout": {
+                    "row": 2,
+                    "column": 0
+                },
                 "sizech": [
                     15,
                     4
@@ -162,7 +185,8 @@
                     2,
                     17
                 ],
-                "label": "Person"
+                "label": "Person",
+                "tooltip": "Open the person form."
             },
             "lblFamily": {
                 "name": "lblFamily",
@@ -171,11 +195,16 @@
                     2,
                     18
                 ],
-                "label": "Families"
+                "label": "Families",
+                "tooltip": "Open the families form."
             },
             "AttendanceBox": {
                 "name": "MemberBox",
-                "label": "Membership",
+                "label": "Attendance",
+                "layout": {
+                    "row": 1,
+                    "column": 1
+                },
                 "type": "StaticBox",
                 "posch": [
                     1,
@@ -193,7 +222,8 @@
                     2,
                     21
                 ],
-                "label": "Record Attendance"
+                "label": "Record Attendance",
+                "tooltip": "Open the record attendance form."
             },
             "ProjectBox": {
                 "type": "StaticBox",
@@ -206,7 +236,11 @@
                     15,
                     4
                 ],
-                "label": "Project"
+                "label": "Projects and Tasks",
+                "layout": {
+                    "row": 2,
+                    "column": 1
+                }
             },
             "lblProject": {
                 "name": "lblProject",
@@ -215,43 +249,65 @@
                     2,
                     24
                 ],
-                "label": "Project"
+                "label": "Project",
+                "tooltip": "Open the project form."
             },
             "lblTask": {
                 "name": "lblTask",
                 "type": "StaticText",
                 "posch": [
-                    3,
+                    2,
                     25
                 ],
-                "label": "Task"
+                "label": "   Task",
+                "tooltip": "Open the task form."
+            },
+            "AdministrationBox": {
+                "type": "StaticBox",
+                "name": "AdministrationBox",
+                "label": "Administration",
+                "posch": [
+                    1,
+                    27
+                ],
+                "sizech": [
+                    15,
+                    5
+                ],
+                "layout": {
+                    "row": 3,
+                    "column": 1
+                }
             },
             "lblDocument": {
                 "name": "lblDocument",
                 "type": "StaticText",
                 "label": "Documents",
                 "posch": [
-                    1,
-                    27
-                ]
+                    2,
+                    28
+                ],
+                "tooltip": "Open the documents form."
             },
             "lblAnnouncement": {
                 "name": "lblAnnouncement",
                 "type": "StaticText",
                 "label": "Announcement",
                 "posch": [
-                    1,
-                    28
-                ]
+                    2,
+                    29
+                ],
+                "tooltip": "Open the announcement form."
             },
             "lblJournal": {
                 "name": "lblJournal",
                 "type": "StaticText",
                 "posch": [
-                    1,
-                    29
+                    2,
+                    30
                 ],
-                "label": "Journal"
+                "label": "Journal",
+                "tooltip": "Open the journal form."
             },
             "ReportBox": {
                 "type": "StaticBox",
@@ -264,7 +320,11 @@
                     15,
                     7
                 ],
-                "label": "Reports"
+                "label": "Reports and Weekly Output",
+                "layout": {
+                    "row": 0,
+                    "column": 1
+                }
             },
             "lblReports": {
                 "name": "lblReports",
@@ -273,7 +333,8 @@
                     19,
                     2
                 ],
-                "label": "Reports"
+                "label": "Reports",
+                "tooltip": "Open the reports form."
             },
             "lblGenerateOS": {
                 "name": "lblGenerateOS",
@@ -282,7 +343,8 @@
                     19,
                     3
                 ],
-                "label": "Generate OS"
+                "label": "Generate OS",
+                "tooltip": "Generate the order-of-service output."
             },
             "lblNotifyParticipants": {
                 "name": "lblNotifyParticipants",
@@ -291,7 +353,8 @@
                     19,
                     4
                 ],
-                "label": "Notify Participants"
+                "label": "Notify Participants",
+                "tooltip": "Notify scheduled service participants by email."
             },
             "lblSundayPrayers": {
                 "name": "lblSundayPrayers",
@@ -300,7 +363,8 @@
                     19,
                     5
                 ],
-                "type": "StaticText"
+                "type": "StaticText",
+                "tooltip": "Generate the Sunday prayer list."
             },
             "lblAnnouncements": {
                 "name": "lblAnnouncements",
@@ -309,12 +373,17 @@
                 "posch": [
                     19,
                     6
-                ]
+                ],
+                "tooltip": "Generate the Sunday announcements."
             },
             "UtilitiesBox": {
                 "name": "UtilitiesBox",
                 "type": "StaticBox",
-                "label": "Utilities",
+                "label": "ChurchManager Settings",
+                "layout": {
+                    "row": 0,
+                    "column": 2
+                },
                 "posch": [
                     18,
                     19
@@ -331,7 +400,8 @@
                 "posch": [
                     19,
                     20
-                ]
+                ],
+                "tooltip": "Open the config form."
             },
             "lblOptions": {
                 "name": "lblOptions",
@@ -340,7 +410,8 @@
                 "posch": [
                     19,
                     21
-                ]
+                ],
+                "tooltip": "Open the options form."
             },
             "lblChoices": {
                 "name": "lblChoices",
@@ -349,7 +420,8 @@
                 "posch": [
                     19,
                     22
-                ]
+                ],
+                "tooltip": "Open the choices form."
             },
             "lblCheckList": {
                 "name": "lblCheckList",
@@ -358,12 +430,17 @@
                     19,
                     23
                 ],
-                "label": "CheckLists"
+                "label": "CheckLists",
+                "tooltip": "Open the checklists form."
             },
             "JSFormUtilitiesBox": {
                 "name": "JSFormUtilitiesBox",
                 "type": "StaticBox",
-                "label": "JSForm Utilities",
+                "label": "Database Utilities",
+                "layout": {
+                    "row": 1,
+                    "column": 2
+                },
                 "posch": [
                     18,
                     26
@@ -380,12 +457,17 @@
                 "posch": [
                     19,
                     27
-                ]
+                ],
+                "tooltip": "Back up the ChurchManager databases."
             },
             "EnhancementsBox": {
                 "name": "EnhancementsBox",
                 "type": "StaticBox",
-                "label": "Enhancements / Bugs",
+                "label": "Enhancements and Bugs",
+                "layout": {
+                    "row": 2,
+                    "column": 2
+                },
                 "posch": [
                     18,
                     31
@@ -402,105 +484,8 @@
                 "posch": [
                     19,
                     32
-                ]
-            },
-            "AccountingBox": {
-                "name": "AccountingBox",
-                "type": "StaticBox",
-                "label": "Accounting",
-                "posch": [
-                    35,
-                    1
                 ],
-                "sizech": [
-                    15,
-                    10
-                ]
-            },
-            "lblChartofAccounts": {
-                "name": "lblChartofAccounts",
-                "type": "StaticText",
-                "label": "Chart of Accounts",
-                "posch": [
-                    36,
-                    2
-                ]
-            },
-            "lblBudget": {
-                "name": "lblBudget",
-                "type": "StaticText",
-                "label": "Account Budget",
-                "posch": [
-                    36,
-                    3
-                ]
-            },
-            "lblLedger": {
-                "name": "lblLedger",
-                "type": "StaticText",
-                "label": "General Ledger",
-                "posch": [
-                    36,
-                    4
-                ]
-            },
-            "lblCheckRegister": {
-                "name": "lblCheckRegister",
-                "type": "StaticText",
-                "label": "Check Register",
-                "posch": [
-                    36,
-                    5
-                ]
-            },
-            "lblEnvelope": {
-                "name": "lblEnvelope",
-                "type": "StaticText",
-                "label": "Envelopes",
-                "posch": [
-                    36,
-                    6
-                ]
-            },
-            "lblGivingRegister": {
-                "name": "lblGivingRegister",
-                "type": "StaticText",
-                "label": "Giving Journal",
-                "posch": [
-                    36,
-                    7
-                ]
-            },
-            "DonorBox": {
-                "type": "StaticBox",
-                "name": "DonorBox",
-                "posch": [
-                    35,
-                    11
-                ],
-                "sizech": [
-                    15,
-                    4
-                ],
-                "label": "Donor"
-            },
-            "lblDonor": {
-                "name": "lblDonor",
-                "type": "StaticText",
-                "label": "Donors",
-                "posch": [
-                    36,
-                    12
-                ]
-            },
-            "lblDonorGift": {
-                "name": "lblDonorGift",
-                "type": "StaticText",
-                "label": "Donor Gifts",
-                "posch": [
-                    36,
-                    13
-                ]
+                "tooltip": "Open the enhancements and bug-tracking form."
             }
         }
     }

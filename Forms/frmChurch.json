@@ -43,7 +43,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the church."
             },
             "lblAddress": {
                 "name": "lblAddress",
@@ -64,7 +65,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the address."
             },
             "Address2": {
                 "name": "Address2",
@@ -76,7 +78,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the second address line."
             },
             "lblCity": {
                 "name": "lblCity",
@@ -98,7 +101,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the city."
             },
             "lblState": {
                 "name": "lblState",
@@ -119,7 +123,8 @@
                 "sizech": [
                     4,
                     2
-                ]
+                ],
+                "tooltip": "Select the state."
             },
             "lblZip": {
                 "name": "lblZip",
@@ -140,7 +145,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the zip."
             },
             "lblPastor": {
                 "name": "lblPastor",
@@ -161,7 +167,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the pastor."
             },
             "lblPhone": {
                 "name": "lblPhone",
@@ -182,7 +189,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the phone."
             },
             "lbleMail": {
                 "name": "lbleMail",
@@ -203,7 +211,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the email address."
             },
             "lblNote": {
                 "name": "lblNote",
@@ -227,7 +236,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

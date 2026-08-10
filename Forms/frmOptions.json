@@ -2,7 +2,7 @@
     "frmOptionsFORM": {
         "FORM": {
             "type": "Panel",
-            "name":"frmOptions",
+            "name": "frmOptions",
             "title": "frmOptions : Options Edit Form",
             "table": {
                 "name": "tblOptions",
@@ -43,7 +43,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the option for."
             },
             "lblOptionType": {
                 "type": "StaticText",
@@ -65,7 +66,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the option type."
             },
             "lblOptionValue": {
                 "type": "StaticText",
@@ -87,7 +89,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the option value."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -111,7 +114,8 @@
                 "sizech": [
                     24,
                     16
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

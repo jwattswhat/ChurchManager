@@ -56,28 +56,8 @@
                 "sizech": [
                     24,
                     2
-                ]
-            },
-            "lblRequest": {
-                "type": "StaticText",
-                "label": "Request:",
-                "name": "lblRequest",
-                "posch": [
-                    1,
-                    3
-                ]
-            },
-            "Request": {
-                "type": "TextCtrl",
-                "name": "Request",
-                "posch": [
-                    9,
-                    3
                 ],
-                "sizech": [
-                    24,
-                    2
-                ]
+                "tooltip": "Select the church."
             },
             "lblPrayerCategory": {
                 "type": "StaticText",
@@ -98,7 +78,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the prayer category."
             },
             "lblRequestFor": {
                 "type": "StaticText",
@@ -119,7 +100,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the request for."
             },
             "lblRequestBy": {
                 "type": "StaticText",
@@ -140,7 +122,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the request by."
             },
             "lblContinuous": {
                 "type": "StaticText",
@@ -157,7 +140,8 @@
                 "posch": [
                     9,
                     11
-                ]
+                ],
+                "tooltip": "Select this if continuous applies."
             },
             "lblSunday": {
                 "name": "lblSunday",
@@ -165,7 +149,7 @@
                 "label": "Sunday:",
                 "posch": [
                     1,
-                    1
+                    13
                 ]
             },
             "First": {
@@ -175,7 +159,8 @@
                 "posch": [
                     9,
                     13
-                ]
+                ],
+                "tooltip": "Include the first Sunday of the month."
             },
             "Second": {
                 "name": "Second",
@@ -184,7 +169,8 @@
                 "posch": [
                     9,
                     15
-                ]
+                ],
+                "tooltip": "Include the second Sunday of the month."
             },
             "Third": {
                 "name": "Third",
@@ -193,7 +179,8 @@
                 "posch": [
                     9,
                     17
-                ]
+                ],
+                "tooltip": "Include the third Sunday of the month."
             },
             "Fourth": {
                 "name": "Fourth",
@@ -202,7 +189,8 @@
                 "posch": [
                     9,
                     19
-                ]
+                ],
+                "tooltip": "Include the fourth Sunday of the month."
             },
             "Fifth": {
                 "name": "Fifth",
@@ -211,7 +199,8 @@
                 "posch": [
                     9,
                     21
-                ]
+                ],
+                "tooltip": "Include the fifth Sunday of the month."
             },
             "lblStartDate": {
                 "name": "lblStartDate",
@@ -232,7 +221,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the start date."
             },
             "lblEndDate": {
                 "name": "lblEndDate",
@@ -253,7 +243,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the end date."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -277,7 +268,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

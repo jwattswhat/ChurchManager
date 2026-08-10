@@ -52,7 +52,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the hymnal."
             },
             "lblHymn": {
                 "name": "lblHymn",
@@ -73,7 +74,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the hymn."
             },
             "lblTitle": {
                 "name": "lblTitle",
@@ -94,7 +96,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the title."
             },
             "lblBibleText": {
                 "name": "lblBibleText",
@@ -115,7 +118,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the bible text."
             },
             "lblCategory": {
                 "name": "lblCategory",
@@ -136,7 +140,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the category."
             },
             "lblNote": {
                 "name": "lblNote",
@@ -160,7 +165,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

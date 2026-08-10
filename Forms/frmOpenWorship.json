@@ -1,1 +1,103 @@
-{"frmOpenWorshipFORM": {"FORM": {"type": "Panel", "title": "frmOpenWorship: Worship", "name": "frmForms", "stylelist": ["CAPTION"], "posch": [0, 0], "sizech": [51, 37]}, "CONTROLS": {"lblForms": {"type": "StaticText", "label": "Forms:", "name": "lblForms", "posch": [0, 2]}, "Forms": {"type": "ComboBox", "name": "Forms", "choices": ["frmService", "frmHymnUsage", "frmPropers", "frmSermon", "frmBugs", "frmAsset", "frmNote", "frmAltReading", "frmChoices", "frmChurch", "frmConfig", "frmOptions", "frmHymn", "frmHymnal", "frmHymnSearch", "frmReading"], "fullchoices": ["frmBugs", "frmAltReading", "frmAttendance", "frmChoices", "frmChurch", "frmConfig", "frmFamily", "frmFamilyAddress", "frmFamilyContact", "frmFamilyDate", "frmHymn", "frmHymnal", "frmHymnUsage", "frmHymnHistory", "frmHymnSearch", "frmHymnUsageDisplay", "frmPerson", "frmPersonAddress", "frmPersonContact", "frmPersonDate", "frmPersonDateGrid", "frmPropers", "frmReading", "frmService", "frmUtility"], "posch": [10, 2], "sizech": [24, 2]}, "btnOpen": {"type": "Button", "label": "Open Form", "name": "btnOpen", "posch": [10, 4], "sizech": [24, 4]}}}}
+{
+    "frmOpenWorshipFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmOpenWorship: Worship",
+            "name": "frmForms",
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                0,
+                0
+            ],
+            "sizech": [
+                51,
+                37
+            ]
+        },
+        "CONTROLS": {
+            "lblForms": {
+                "type": "StaticText",
+                "label": "Forms:",
+                "name": "lblForms",
+                "posch": [
+                    0,
+                    2
+                ]
+            },
+            "Forms": {
+                "type": "ComboBox",
+                "name": "Forms",
+                "choices": [
+                    "frmService",
+                    "frmHymnUsage",
+                    "frmPropers",
+                    "frmSermon",
+                    "frmBugs",
+                    "frmAsset",
+                    "frmNote",
+                    "frmAltReading",
+                    "frmChoices",
+                    "frmChurch",
+                    "frmConfig",
+                    "frmOptions",
+                    "frmHymn",
+                    "frmHymnal",
+                    "frmHymnSearch",
+                    "frmReading"
+                ],
+                "fullchoices": [
+                    "frmBugs",
+                    "frmAltReading",
+                    "frmAttendance",
+                    "frmChoices",
+                    "frmChurch",
+                    "frmConfig",
+                    "frmFamily",
+                    "frmFamilyAddress",
+                    "frmFamilyContact",
+                    "frmFamilyDate",
+                    "frmHymn",
+                    "frmHymnal",
+                    "frmHymnUsage",
+                    "frmHymnHistory",
+                    "frmHymnSearch",
+                    "frmHymnUsageDisplay",
+                    "frmPerson",
+                    "frmPersonAddress",
+                    "frmPersonContact",
+                    "frmPersonDate",
+                    "frmPersonDateGrid",
+                    "frmPropers",
+                    "frmReading",
+                    "frmService",
+                    "frmUtility"
+                ],
+                "posch": [
+                    10,
+                    2
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Select the forms."
+            },
+            "btnOpen": {
+                "type": "Button",
+                "label": "Open Form",
+                "name": "btnOpen",
+                "posch": [
+                    10,
+                    4
+                ],
+                "sizech": [
+                    24,
+                    4
+                ],
+                "tooltip": "Open the selected worship form."
+            }
+        }
+    }
+}

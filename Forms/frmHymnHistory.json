@@ -48,7 +48,8 @@
                 "sizech": [
                     58,
                     13
-                ]
+                ],
+                "tooltip": "View the hymn usage records and select a row when needed."
             }
         }
     }

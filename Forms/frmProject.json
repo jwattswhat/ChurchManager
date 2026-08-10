@@ -79,7 +79,8 @@
                 "posch": [
                     6,
                     1
-                ]
+                ],
+                "tooltip": "Select the church."
             },
             "lblComplete": {
                 "type": "StaticText",
@@ -96,7 +97,8 @@
                 "posch": [
                     6,
                     3
-                ]
+                ],
+                "tooltip": "Select this if complete applies."
             },
             "lblCompletionDate": {
                 "type": "StaticText",
@@ -121,7 +123,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the completion date."
             },
             "lblProject": {
                 "type": "StaticText",
@@ -142,7 +145,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the project."
             },
             "btnTask": {
                 "name": "btnTask",
@@ -155,7 +159,8 @@
                 "posch": [
                     31,
                     7
-                ]
+                ],
+                "tooltip": "Open the tasks form."
             },
             "lblDescription": {
                 "type": "StaticText",
@@ -176,7 +181,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the description."
             },
             "lblProjectCategory": {
                 "type": "StaticText",
@@ -197,7 +203,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the project category."
             },
             "lblPriority": {
                 "type": "StaticText",
@@ -218,7 +225,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the priority."
             },
             "lblStartDate": {
                 "type": "StaticText",
@@ -243,7 +251,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the start date."
             },
             "lblEndDate": {
                 "type": "StaticText",
@@ -268,7 +277,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the end date."
             },
             "lblAssignedTo": {
                 "type": "StaticText",
@@ -298,7 +308,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the assigned to."
             },
             "lblAssignedToText": {
                 "type": "StaticText",
@@ -319,7 +330,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the alternate assignee name."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -343,7 +355,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

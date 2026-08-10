@@ -19,6 +19,11 @@
             "stylelist": [
                 "CAPTION"
             ],
+            "layout": {
+                "type": "responsive",
+                "border": 2,
+                "gap": 2
+            },
             "linkedform": {
                 "frmFamilyAddress": {
                     "name": "frmFamilyAddress",
@@ -145,7 +150,8 @@
                 "posch": [
                     37,
                     1
-                ]
+                ],
+                "tooltip": "Open the family addresses form."
             },
             "btnFamilyContact": {
                 "type": "Button",
@@ -158,7 +164,8 @@
                 "posch": [
                     37,
                     3
-                ]
+                ],
+                "tooltip": "Open the family contacts form."
             },
             "btnFamilyDate": {
                 "type": "Button",
@@ -171,7 +178,8 @@
                 "posch": [
                     37,
                     5
-                ]
+                ],
+                "tooltip": "Open the family dates form."
             },
             "btnPerson": {
                 "type": "Button",
@@ -184,7 +192,8 @@
                 "posch": [
                     37,
                     7
-                ]
+                ],
+                "tooltip": "Open the family members form."
             },
             "lblChurchID": {
                 "type": "StaticText",
@@ -213,7 +222,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the church."
             },
             "lblFamilyName": {
                 "type": "StaticText",
@@ -235,7 +245,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the family name."
             },
             "lblMarriageStatus": {
                 "type": "StaticText",
@@ -256,7 +267,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the marriage status."
             },
             "lblDirectory": {
                 "type": "StaticText",
@@ -273,14 +285,15 @@
                 "posch": [
                     10,
                     7
-                ]
+                ],
+                "tooltip": "Select this if directory applies."
             },
             "lblNote": {
                 "type": "StaticText",
                 "label": "Note:",
                 "name": "lblNote",
                 "posch": [
-                    0,
+                    1,
                     9
                 ]
             },
@@ -297,7 +310,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

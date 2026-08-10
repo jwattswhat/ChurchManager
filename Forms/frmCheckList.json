@@ -1,29 +1,45 @@
 {
     "frmCheckListFORM": {
-        "FORM":{
+        "FORM": {
             "name": "frmChecklist",
-            "type":"Panel",
-            "title":"CheckList",
+            "type": "Panel",
+            "title": "CheckList",
             "table": {
-                "name":"tblCheckList",
-                "fields": ["*"],
+                "name": "tblCheckList",
+                "fields": [
+                    "*"
+                ],
                 "orderby": "Name"
             },
-            "posch" : [10,10],
-            "sizech": [35,25],
-            "stylelist":["CAPTION"],
-            "controls": ["Navigation","Close"]
+            "posch": [
+                10,
+                10
+            ],
+            "sizech": [
+                35,
+                25
+            ],
+            "stylelist": [
+                "CAPTION"
+            ],
+            "controls": [
+                "Navigation",
+                "Close"
+            ]
         },
-        "CONTROLS":{
-            "lblName":{
-                "type":"StaticText",
-                "label":"Name:",
-                "posch":[1,1],
-                "name":"lblName"
+        "CONTROLS": {
+            "lblName": {
+                "type": "StaticText",
+                "label": "Name:",
+                "posch": [
+                    1,
+                    1
+                ],
+                "name": "lblName"
             },
-            "Name":{
-                "name":"Name",
-                "type":"ComboBox",
+            "Name": {
+                "name": "Name",
+                "type": "ComboBox",
                 "lookupchoices": {
                     "name": "tblCheckList",
                     "fields": [
@@ -32,20 +48,37 @@
                     ],
                     "orderby": "Name"
                 },
-                "posch":[10,1],
-                "sizech":[20,2]
+                "posch": [
+                    10,
+                    1
+                ],
+                "sizech": [
+                    20,
+                    2
+                ],
+                "tooltip": "Select the name."
             },
-            "lblCheckList":{
-                "type":"StaticText",
-                "label":"CheckList:",
-                "posch":[1,3],
-                "name":"lblCheckList"
+            "lblCheckList": {
+                "type": "StaticText",
+                "label": "CheckList:",
+                "posch": [
+                    1,
+                    3
+                ],
+                "name": "lblCheckList"
             },
-            "CheckList":{
-                "type":"CheckListEdit",
+            "CheckList": {
+                "type": "CheckListEdit",
                 "name": "CheckList",
-                "posch": [10,3],
-                "sizech": [20,10]
+                "posch": [
+                    10,
+                    3
+                ],
+                "sizech": [
+                    20,
+                    10
+                ],
+                "tooltip": "Edit the items belonging to the selected checklist."
             }
         }
     }

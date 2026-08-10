@@ -43,7 +43,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the lectionary."
             },
             "lblTheme": {
                 "type": "StaticText",
@@ -68,7 +69,8 @@
                 "sizech": [
                     30,
                     10
-                ]
+                ],
+                "tooltip": "Enter the theme. Multiple lines are allowed."
             },
             "lblSort": {
                 "type": "StaticText",
@@ -89,7 +91,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the sort."
             },
             "lblSeason": {
                 "type": "StaticText",
@@ -110,7 +113,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the season."
             },
             "lblLiturgicalDate": {
                 "type": "StaticText",
@@ -131,7 +135,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the liturgical date."
             },
             "lblHymnSug": {
                 "type": "StaticText",
@@ -156,7 +161,8 @@
                 "sizech": [
                     30,
                     10
-                ]
+                ],
+                "tooltip": "Enter the hymn sug. Multiple lines are allowed."
             },
             "lblColor": {
                 "type": "StaticText",
@@ -177,7 +183,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the color."
             },
             "lblAltColor": {
                 "type": "StaticText",
@@ -198,7 +205,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the alt color."
             },
             "dvlReadings": {
                 "name": "dvlReadings",
@@ -237,7 +245,8 @@
                 "sizech": [
                     33,
                     10
-                ]
+                ],
+                "tooltip": "View the readings records and select a row when needed."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -261,7 +270,8 @@
                 "sizech": [
                     24,
                     10
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             },
             "lblIntroit": {
                 "type": "StaticText",
@@ -285,7 +295,8 @@
                 "sizech": [
                     30,
                     26
-                ]
+                ],
+                "tooltip": "Enter the introit. Multiple lines are allowed."
             }
         }
     }

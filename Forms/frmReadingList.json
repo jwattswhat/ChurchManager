@@ -21,7 +21,7 @@
         },
         "CONTROLS": {
             "dvlReadings": {
-                "name":"dvlReadings",
+                "name": "dvlReadings",
                 "type": "DataViewListCtrl",
                 "column": [
                     [
@@ -46,7 +46,8 @@
                 "sizech": [
                     63,
                     20
-                ]
+                ],
+                "tooltip": "View the readings records and select a row when needed."
             }
         }
     }

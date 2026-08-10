@@ -51,7 +51,8 @@
                     ],
                     "orderby": "LastName"
                 },
-                "name": "PersonID"
+                "name": "PersonID",
+                "tooltip": "Select the person."
             },
             "lblAttendanceEventID": {
                 "type": "StaticText",
@@ -81,7 +82,8 @@
                     ],
                     "orderby": "DateTime"
                 },
-                "name": "AttendanceEventID"
+                "name": "AttendanceEventID",
+                "tooltip": "Select the attendance event."
             },
             "lblCommunion": {
                 "type": "StaticText",
@@ -98,7 +100,8 @@
                     15,
                     5
                 ],
-                "name": "Communion"
+                "name": "Communion",
+                "tooltip": "Select this if communion applies."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -122,7 +125,8 @@
                 "stylelist": [
                     "MULTILINE"
                 ],
-                "name": "Note"
+                "name": "Note",
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

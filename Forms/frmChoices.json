@@ -43,7 +43,8 @@
                 "sizech": [
                     30,
                     2
-                ]
+                ],
+                "tooltip": "Enter the field."
             },
             "lblChoices": {
                 "name": "lblChoices",
@@ -69,7 +70,8 @@
                 "stylelist": [
                     "MULTILINE",
                     "DONTWRAP"
-                ]
+                ],
+                "tooltip": "Enter the choices. Multiple lines are allowed."
             },
             "lblNote": {
                 "name": "lblNote",
@@ -89,11 +91,13 @@
                 ],
                 "sizech": [
                     30,
-                    8],
+                    8
+                ],
                 "stylelist": [
                     "MULTILINE",
                     "WORDWRAP"
-                ]
+                ],
+                "tooltip": "Enter the note."
             }
         }
     }

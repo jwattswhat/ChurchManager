@@ -1,1 +1,73 @@
-{"frmOpenMembershipFORM": {"FORM": {"type": "Panel", "title": "frmMembership: Membership", "name": "frmOpenMembership", "stylelist": ["CAPTION"], "posch": [0, 0], "sizech": [51, 37]}, "CONTROLS": {"lblForms": {"type": "StaticText", "label": "Forms:", "name": "lblForms", "posch": [0, 2]}, "Forms": {"type": "ComboBox", "name": "Forms", "choices": ["frmChoices", "frmChurch", "frmConfig", "frmFamily", "frmFamilyAddress", "frmFamilyContact", "frmFamilyDate", "frmPerson", "frmPersonAddress", "frmPersonContact", "frmPersonDate", "frmPersonDateGrid", "frmAttendance"], "posch": [10, 2], "sizech": [24, 2]}, "btnOpen": {"type": "Button", "label": "Open Form", "name": "btnOpen", "posch": [10, 4], "sizech": [24, 4]}}}}
+{
+    "frmOpenMembershipFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmMembership: Membership",
+            "name": "frmOpenMembership",
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                0,
+                0
+            ],
+            "sizech": [
+                51,
+                37
+            ]
+        },
+        "CONTROLS": {
+            "lblForms": {
+                "type": "StaticText",
+                "label": "Forms:",
+                "name": "lblForms",
+                "posch": [
+                    0,
+                    2
+                ]
+            },
+            "Forms": {
+                "type": "ComboBox",
+                "name": "Forms",
+                "choices": [
+                    "frmChoices",
+                    "frmChurch",
+                    "frmConfig",
+                    "frmFamily",
+                    "frmFamilyAddress",
+                    "frmFamilyContact",
+                    "frmFamilyDate",
+                    "frmPerson",
+                    "frmPersonAddress",
+                    "frmPersonContact",
+                    "frmPersonDate",
+                    "frmPersonDateGrid",
+                    "frmAttendance"
+                ],
+                "posch": [
+                    10,
+                    2
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Select the forms."
+            },
+            "btnOpen": {
+                "type": "Button",
+                "label": "Open Form",
+                "name": "btnOpen",
+                "posch": [
+                    10,
+                    4
+                ],
+                "sizech": [
+                    24,
+                    4
+                ],
+                "tooltip": "Open the selected membership form."
+            }
+        }
+    }
+}

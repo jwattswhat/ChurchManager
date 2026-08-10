@@ -55,7 +55,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the task."
             },
             "lblPersonID": {
                 "type": "StaticText",
@@ -85,7 +86,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the person."
             },
             "lblPersonText": {
                 "type": "StaticText",
@@ -106,7 +108,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the alternate worker name."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -130,7 +133,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

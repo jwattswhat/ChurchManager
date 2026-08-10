@@ -51,7 +51,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the name."
             },
             "lblRoles": {
                 "type": "StaticText",
@@ -73,7 +74,8 @@
                 "sizech": [
                     29,
                     16
-                ]
+                ],
+                "tooltip": "Select one or more roles."
             },
             "lblSchedule": {
                 "type": "StaticText",
@@ -113,7 +115,8 @@
                 "sizech": [
                     24,
                     16
-                ]
+                ],
+                "tooltip": "Select one or more schedule."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -138,7 +141,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

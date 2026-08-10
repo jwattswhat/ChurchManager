@@ -51,7 +51,8 @@
                     30,
                     2
                 ],
-                "name": "ChurchID"
+                "name": "ChurchID",
+                "tooltip": "Select the church."
             },
             "lblDescription": {
                 "type": "StaticText",
@@ -72,7 +73,8 @@
                     30,
                     2
                 ],
-                "name": "Description"
+                "name": "Description",
+                "tooltip": "Enter the description."
             },
             "lblServiceID": {
                 "type": "StaticText",
@@ -102,7 +104,8 @@
                     ],
                     "orderby": "DateTime DESC"
                 },
-                "name": "ServicID"
+                "name": "ServicID",
+                "tooltip": "Select the service."
             },
             "lblDateTime": {
                 "type": "StaticText",
@@ -126,7 +129,8 @@
                 "name": "DateTime",
                 "stylelist": [
                     "ALLOWNONE"
-                ]
+                ],
+                "tooltip": "Select the date and time."
             },
             "lblAttendanceType": {
                 "type": "StaticText",
@@ -143,7 +147,8 @@
                     17,
                     9
                 ],
-                "name": "AttendanceType"
+                "name": "AttendanceType",
+                "tooltip": "Select the attendance type."
             },
             "lblCommunionOffered": {
                 "type": "StaticText",
@@ -160,7 +165,8 @@
                     17,
                     11
                 ],
-                "name": "HolyCommunionOffered"
+                "name": "HolyCommunionOffered",
+                "tooltip": "Select this if communion offered applies."
             },
             "lblHandCount": {
                 "type": "StaticText",
@@ -181,7 +187,8 @@
                     5,
                     2
                 ],
-                "name": "HandCount"
+                "name": "HandCount",
+                "tooltip": "Enter the total attendance counted for this event."
             },
             "lblHandCountCommunion": {
                 "type": "StaticText",
@@ -202,7 +209,8 @@
                     5,
                     2
                 ],
-                "name": "HandCountCommunion"
+                "name": "HandCountCommunion",
+                "tooltip": "Enter the number who received Holy Communion."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -227,7 +235,8 @@
                     "MULTILINE",
                     "WORDWRAP"
                 ],
-                "name": "Note"
+                "name": "Note",
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

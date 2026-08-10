@@ -49,7 +49,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the person."
             },
             "lblUnlisted": {
                 "type": "StaticText",
@@ -70,7 +71,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select this if unlisted applies."
             },
             "lblLabel": {
                 "type": "StaticText",
@@ -91,7 +93,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the address label."
             },
             "lblAddress": {
                 "type": "StaticText",
@@ -112,7 +115,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the address."
             },
             "Address2": {
                 "type": "TextCtrl",
@@ -124,7 +128,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the second address line."
             },
             "lblCity": {
                 "type": "StaticText",
@@ -145,7 +150,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the city."
             },
             "lblState": {
                 "type": "StaticText",
@@ -166,7 +172,8 @@
                 "sizech": [
                     4,
                     2
-                ]
+                ],
+                "tooltip": "Select the state."
             },
             "lblZip": {
                 "type": "StaticText",
@@ -187,7 +194,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the zip."
             },
             "lblStartDate": {
                 "type": "StaticText",
@@ -208,7 +216,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the start date."
             },
             "lblEndDate": {
                 "type": "StaticText",
@@ -229,7 +238,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the end date."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -253,7 +263,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

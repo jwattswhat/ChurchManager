@@ -50,10 +50,11 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the person."
             },
             "dvlPersonDate": {
-                "name":"dvlPersonDate",
+                "name": "dvlPersonDate",
                 "type": "DataViewListCtrl",
                 "column": [
                     [
@@ -78,7 +79,8 @@
                 "sizech": [
                     49,
                     24
-                ]
+                ],
+                "tooltip": "View the person date records and select a row when needed."
             }
         }
     }

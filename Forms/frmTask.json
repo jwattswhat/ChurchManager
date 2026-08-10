@@ -74,7 +74,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the task."
             },
             "btnTaskWorker": {
                 "type": "Button",
@@ -87,7 +88,8 @@
                 "posch": [
                     37,
                     1
-                ]
+                ],
+                "tooltip": "Open the workers form."
             },
             "lblDescription": {
                 "type": "StaticText",
@@ -108,7 +110,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the description."
             },
             "lblPriority": {
                 "type": "StaticText",
@@ -129,7 +132,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the priority."
             },
             "lblComplete": {
                 "type": "StaticText",
@@ -150,7 +154,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select this if complete applies."
             },
             "lblCompletionDate": {
                 "type": "StaticText",
@@ -175,7 +180,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the completion date."
             },
             "lblProjectID": {
                 "type": "StaticText",
@@ -204,7 +210,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the project."
             },
             "lblDependencyID": {
                 "type": "StaticText",
@@ -225,7 +232,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Enter the task dependency."
             },
             "lblStartDate": {
                 "name": "lblStartDate",
@@ -250,7 +258,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the start date."
             },
             "lblEndDate": {
                 "name": "lblEndDate",
@@ -275,7 +284,8 @@
                 "sizech": [
                     24,
                     2
-                ]
+                ],
+                "tooltip": "Select the end date."
             },
             "lblNote": {
                 "type": "StaticText",
@@ -299,7 +309,8 @@
                 "sizech": [
                     24,
                     8
-                ]
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }
     }

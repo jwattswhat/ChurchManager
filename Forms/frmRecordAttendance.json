@@ -45,7 +45,8 @@
                         "AttendanceType"
                     ],
                     "orderby": "dt DESC"
-                }
+                },
+                "tooltip": "Select the attendance event."
             },
             "lblMembers": {
                 "name": "lblMembers",
@@ -75,7 +76,10 @@
                     ],
                     "condition": "Member = 1"
                 },
-                "stylelist": ["MULTIPLE"]
+                "stylelist": [
+                    "MULTIPLE"
+                ],
+                "tooltip": "Check each member who attended this event."
             },
             "lblVisitors": {
                 "name": "lblMembers",
@@ -105,7 +109,10 @@
                     ],
                     "condition": "Member = 0"
                 },
-                "stylelist": ["MULTIPLE"]
+                "stylelist": [
+                    "MULTIPLE"
+                ],
+                "tooltip": "Check each visitor who attended this event."
             },
             "btnRecordAttendance": {
                 "type": "Button",
@@ -121,7 +128,8 @@
                 ],
                 "action": [
                     "process"
-                ]
+                ],
+                "tooltip": "Save the selected member and visitor attendance."
             }
         }
     }
