@@ -112,7 +112,7 @@
                 "label": "Effective from:", "posch": [1, 22]
             },
             "EffectiveFrom": {
-                "name": "EffectiveFrom", "type": "DateTime",
+                "name": "EffectiveFrom", "type": "DatePickerCtrl",
                 "posch": [12, 22], "sizech": [20, 2],
                 "stylelist": ["ALLOWNONE"]
             },
@@ -121,7 +121,7 @@
                 "label": "Effective until:", "posch": [1, 24]
             },
             "EffectiveUntil": {
-                "name": "EffectiveUntil", "type": "DateTime",
+                "name": "EffectiveUntil", "type": "DatePickerCtrl",
                 "posch": [12, 24], "sizech": [20, 2],
                 "stylelist": ["ALLOWNONE"]
             },
@@ -130,7 +130,7 @@
                 "label": "Closed date:", "posch": [1, 26]
             },
             "ClosedDate": {
-                "name": "ClosedDate", "type": "DateTime",
+                "name": "ClosedDate", "type": "DatePickerCtrl",
                 "posch": [12, 26], "sizech": [20, 2],
                 "stylelist": ["ALLOWNONE"],
                 "tooltip": "A closed fund cannot receive later postings."

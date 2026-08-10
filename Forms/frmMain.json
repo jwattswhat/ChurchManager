@@ -535,7 +535,7 @@
                 "type": "StaticBox",
                 "label": "Current User",
                 "posch": [34, 1],
-                "sizech": [15, 6]
+                "sizech": [15, 9]
             },
             "lblCurrentUser": {
                 "name": "lblCurrentUser",
@@ -562,7 +562,7 @@
                 "type": "StaticBox",
                 "label": "Accounting",
                 "posch": [34, 8],
-                "sizech": [15, 6]
+                "sizech": [15, 8]
             },
             "lblAccountingSetup": {
                 "name": "lblAccountingSetup",
@@ -594,6 +594,18 @@
                 "label": "Functional Classifications",
                 "posch": [35, 12],
                 "tooltip": "Review and maintain accounting functional classifications.",
+                "security": { "invoke": "accounting.master_data.manage" }
+            },
+            "lblAccountingYears": {
+                "name": "lblAccountingYears", "type": "StaticText",
+                "label": "Fiscal Years", "posch": [35, 13],
+                "tooltip": "Review and maintain accounting fiscal years.",
+                "security": { "invoke": "accounting.master_data.manage" }
+            },
+            "lblAccountingPeriods": {
+                "name": "lblAccountingPeriods", "type": "StaticText",
+                "label": "Fiscal Periods", "posch": [35, 14],
+                "tooltip": "Review and maintain accounting fiscal periods.",
                 "security": { "invoke": "accounting.master_data.manage" }
             }
         }

@@ -1,0 +1,78 @@
+{
+    "frmAccountingFiscalPeriodFORM": {
+        "FORM": {
+            "name": "frmAccountingFiscalPeriod", "type": "Panel",
+            "title": "Accounting Fiscal Periods", "posch": [-1, -1],
+            "sizech": [48, 24], "stylelist": ["CAPTION"],
+            "layout": { "type": "legacy" },
+            "table": {
+                "name": "tblAccountingFiscalPeriod", "fields": ["*"],
+                "orderby": "FiscalYearID, PeriodNumber"
+            },
+            "security": {
+                "open": "accounting.master_data.manage",
+                "create": "accounting.master_data.manage",
+                "update": "accounting.master_data.manage",
+                "delete": "accounting.master_data.manage"
+            }
+        },
+        "CONTROLS": {
+            "lblFiscalYearID": {
+                "name": "lblFiscalYearID", "type": "StaticText",
+                "label": "Fiscal year:", "posch": [1, 1]
+            },
+            "FiscalYearID": {
+                "name": "FiscalYearID", "type": "ComboBox",
+                "posch": [12, 1], "sizech": [30, 2],
+                "lookupchoices": {
+                    "name": "tblAccountingFiscalYear",
+                    "fields": ["ID", "Name", "StartDate", "EndDate"],
+                    "orderby": "StartDate DESC"
+                }
+            },
+            "lblPeriodNumber": {
+                "name": "lblPeriodNumber", "type": "StaticText",
+                "label": "Period number:", "posch": [1, 3]
+            },
+            "PeriodNumber": {
+                "name": "PeriodNumber", "type": "TextNumber",
+                "posch": [12, 3], "sizech": [10, 2]
+            },
+            "lblName": {
+                "name": "lblName", "type": "StaticText",
+                "label": "Period name:", "posch": [1, 5]
+            },
+            "Name": {
+                "name": "Name", "type": "TextCtrl",
+                "posch": [12, 5], "sizech": [24, 2]
+            },
+            "lblStartDate": {
+                "name": "lblStartDate", "type": "StaticText",
+                "label": "Start date:", "posch": [1, 7]
+            },
+            "StartDate": {
+                "name": "StartDate", "type": "DatePickerCtrl",
+                "posch": [12, 7], "sizech": [20, 2]
+            },
+            "lblEndDate": {
+                "name": "lblEndDate", "type": "StaticText",
+                "label": "End date:", "posch": [1, 9]
+            },
+            "EndDate": {
+                "name": "EndDate", "type": "DatePickerCtrl",
+                "posch": [12, 9], "sizech": [20, 2]
+            },
+            "lblStatus": {
+                "name": "lblStatus", "type": "StaticText",
+                "label": "Status:", "posch": [1, 11]
+            },
+            "Status": {
+                "name": "Status", "type": "ComboBox",
+                "posch": [12, 11], "sizech": [14, 2],
+                "choices": ["OPEN", "CLOSED"],
+                "security": { "edit": "accounting.periods.override" },
+                "tooltip": "Closing or reopening a period requires override authority."
+            }
+        }
+    }
+}

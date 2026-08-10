@@ -117,7 +117,7 @@
                 "label": "Effective from:", "posch": [1, 19]
             },
             "EffectiveFrom": {
-                "name": "EffectiveFrom", "type": "DateTime",
+                "name": "EffectiveFrom", "type": "DatePickerCtrl",
                 "posch": [10, 19], "sizech": [18, 2],
                 "stylelist": ["ALLOWNONE"],
                 "tooltip": "Optionally select the first active date."
@@ -127,7 +127,7 @@
                 "label": "Effective until:", "posch": [1, 21]
             },
             "EffectiveUntil": {
-                "name": "EffectiveUntil", "type": "DateTime",
+                "name": "EffectiveUntil", "type": "DatePickerCtrl",
                 "posch": [10, 21], "sizech": [18, 2],
                 "stylelist": ["ALLOWNONE"],
                 "tooltip": "Optionally select the final active date."
