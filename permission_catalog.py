@@ -36,4 +36,5 @@ MAIN_MENU_PERMISSIONS = {
     "lblAccountingSetup": "accounting.master_data.manage",
     "lblAccountingAccounts": "accounting.master_data.manage",
     "lblAccountingFunds": "accounting.master_data.manage",
+    "lblAccountingFunctions": "accounting.master_data.manage",
 }
