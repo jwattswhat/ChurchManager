@@ -3,6 +3,7 @@
 import wx
 
 from .review_service import AccountingReviewService
+from .formatting import money
 
 
 class AccountingReviewDialog(wx.Dialog):
@@ -57,7 +58,7 @@ class AccountingReviewDialog(wx.Dialog):
         for item in self.rows:
             row = self.transactions.InsertItem(self.transactions.GetItemCount(), str(item[0]))
             values = (item[1], str(item[2]), type_labels.get(item[3], item[3]),
-                      item[4] or "", item[5] or "", "{:.2f}".format(item[8]))
+                      item[4] or "", item[5] or "", money(item[8]))
             for column, value in enumerate(values, 1):
                 self.transactions.SetItem(row, column, str(value))
 
@@ -65,8 +66,7 @@ class AccountingReviewDialog(wx.Dialog):
         self.lines.DeleteAllItems()
         for item in self.service.lines(self.rows[event.GetIndex()][0]):
             row = self.lines.InsertItem(self.lines.GetItemCount(), str(item[0]))
-            values = (item[1], item[2], item[3] or "", "{:.2f}".format(item[4]),
-                      "{:.2f}".format(item[5]))
+            values = (item[1], item[2], item[3] or "", money(item[4]), money(item[5]))
             for column, value in enumerate(values, 1):
                 self.lines.SetItem(row, column, str(value))
 

@@ -4,6 +4,7 @@ from decimal import Decimal
 import wx
 import wx.adv
 from .position_service import FinancialPositionService
+from .formatting import money
 
 class FinancialPositionDialog(wx.Dialog):
     def __init__(self,parent,service):
@@ -25,7 +26,7 @@ class FinancialPositionDialog(wx.Dialog):
         root=wx.BoxSizer(wx.VERTICAL); root.Add(header,0,wx.ALL|wx.EXPAND,10); root.Add(self.list,1,wx.LEFT|wx.RIGHT|wx.EXPAND,10); root.Add(footer,0,wx.ALL|wx.EXPAND,10)
         self.SetSizer(root); self.refresh()
     def _add(self,section,code,name,amount):
-        row=self.list.InsertItem(self.list.GetItemCount(),section); self.list.SetItem(row,1,code); self.list.SetItem(row,2,name); self.list.SetItem(row,3,"{:.2f}".format(amount))
+        row=self.list.InsertItem(self.list.GetItemCount(),section); self.list.SetItem(row,1,code); self.list.SetItem(row,2,name); self.list.SetItem(row,3,money(amount))
     def refresh(self,event=None):
         self.list.DeleteAllItems()
         if self.organization.GetSelection()==wx.NOT_FOUND:return
@@ -42,7 +43,7 @@ class FinancialPositionDialog(wx.Dialog):
         self._add("Current activity","","Without donor restrictions",activity["WITHOUT_DONOR_RESTRICTIONS"])
         self._add("Current activity","","With donor restrictions",activity["WITH_DONOR_RESTRICTIONS"])
         total_net=without+with_restrictions; difference=total_assets-total_liabilities-total_net
-        self.status.SetLabel("Assets ${:.2f}    Liabilities + net assets ${:.2f}    Difference ${:.2f}".format(total_assets,total_liabilities+total_net,difference))
+        self.status.SetLabel("Assets {}    Liabilities + net assets {}    Difference {}".format(money(total_assets,True),money(total_liabilities+total_net,True),money(difference,True)))
 
 def show_financial_position(parent,connection,session,authorization):
     authorization.require("accounting.reports.run","run accounting reports")

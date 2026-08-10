@@ -4,6 +4,7 @@ from decimal import Decimal
 import wx
 import wx.adv
 from .trial_balance_service import TrialBalanceService
+from .formatting import money
 
 class TrialBalanceDialog(wx.Dialog):
     def __init__(self, parent, service):
@@ -43,10 +44,10 @@ class TrialBalanceDialog(wx.Dialog):
         debit_balances = credit_balances = Decimal("0")
         for item in rows:
             row = self.list.InsertItem(self.list.GetItemCount(), str(item[0]))
-            values = (item[1], item[2], item[3], *["{:.2f}".format(value) for value in item[4:]])
+            values = (item[1], item[2], item[3], *[money(value) for value in item[4:]])
             for column, text in enumerate(values, 1): self.list.SetItem(row, column, str(text))
             debit_balances += item[6]; credit_balances += item[7]
-        self.totals.SetLabel("Debit balances ${:.2f}    Credit balances ${:.2f}    Difference ${:.2f}".format(debit_balances, credit_balances, debit_balances-credit_balances))
+        self.totals.SetLabel("Debit balances {}    Credit balances {}    Difference {}".format(money(debit_balances,True),money(credit_balances,True),money(debit_balances-credit_balances,True)))
         if rows:
             self.status.SetLabel(
                 "Trial balance completed through {}: {} account(s).".format(as_of, len(rows))

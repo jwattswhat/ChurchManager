@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import date
 
 import wx
+from .formatting import money
 
 from .setup_service import AccountingSetupService, FundClassification
 from .starter_data import STARTER_FUNDS
@@ -96,8 +97,8 @@ class AccountingSetupDialog(wx.Dialog):
         for organization in self.service.list_organizations():
             row = self.list.InsertItem(self.list.GetItemCount(), organization[1])
             values = (
-                organization[2], "${:.2f}".format(organization[3]),
-                "${:.2f}".format(organization[4]), str(organization[6]),
+                organization[2], money(organization[3], True),
+                money(organization[4], True), str(organization[6]),
                 str(organization[7]), "Yes" if organization[5] else "No",
             )
             for column, value in enumerate(values, start=1):

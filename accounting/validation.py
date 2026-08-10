@@ -6,6 +6,7 @@ from collections import defaultdict
 from decimal import Decimal
 
 from .models import JournalTransaction, ZERO
+from .formatting import money
 
 
 class AccountingValidationError(ValueError):
@@ -48,13 +49,13 @@ def validate_transaction(transaction: JournalTransaction) -> None:
 
     difference = _money(debit_total - credit_total)
     if difference:
-        errors.append("Transaction is out of balance by ${:.2f}.".format(abs(difference)))
+        errors.append("Transaction is out of balance by {}.".format(money(abs(difference), True)))
     for fund_id, (debits, credits) in sorted(fund_totals.items()):
         difference = _money(debits - credits)
         if difference:
             errors.append(
-                "Fund {} is out of balance by ${:.2f}.".format(
-                    fund_id, abs(difference)
+                "Fund {} is out of balance by {}.".format(
+                    fund_id, money(abs(difference), True)
                 )
             )
     if errors:

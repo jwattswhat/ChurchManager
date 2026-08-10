@@ -5,6 +5,7 @@ import wx.adv
 from datetime import date
 
 from .register_service import AccountingRegisterService
+from .formatting import money
 
 
 class ReversalDialog(wx.Dialog):
@@ -59,14 +60,14 @@ class AccountingRegisterDialog(wx.Dialog):
         self.rows = self.service.transactions(); self.transactions.DeleteAllItems(); self.lines.DeleteAllItems()
         for item in self.rows:
             row = self.transactions.InsertItem(self.transactions.GetItemCount(), str(item[1]))
-            values = (item[2], str(item[3]), item[4], item[5], item[6] or "", item[7] or "", "{:.2f}".format(item[8]))
+            values = (item[2], str(item[3]), item[4], item[5], item[6] or "", item[7] or "", money(item[8]))
             for column, value in enumerate(values, 1): self.transactions.SetItem(row, column, str(value))
 
     def on_select(self, event):
         self.lines.DeleteAllItems()
         for item in self.service.lines(self.rows[event.GetIndex()][0]):
             row = self.lines.InsertItem(self.lines.GetItemCount(), str(item[0]))
-            values = (*item[1:6], "{:.2f}".format(item[6]), "{:.2f}".format(item[7]))
+            values = (*item[1:6], money(item[6]), money(item[7]))
             for column, value in enumerate(values, 1): self.lines.SetItem(row, column, str(value))
 
     def on_reverse(self, event):

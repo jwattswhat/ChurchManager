@@ -10,6 +10,7 @@ import wx.adv
 
 from .draft_service import AccountingDraftService
 from .models import JournalLine, JournalTransaction, ZERO
+from .formatting import money
 
 
 def _date_value(control):
@@ -378,17 +379,17 @@ class AccountingDraftDialog(wx.Dialog):
             row = self.list.InsertItem(self.list.GetItemCount(), str(number))
             values = (
                 line["account"], line["fund"], line["function"], line["payee"],
-                line["description"], "{:.2f}".format(line["debit"] or ZERO),
-                "{:.2f}".format(line["credit"] or ZERO),
+                line["description"], money(line["debit"] or ZERO),
+                money(line["credit"] or ZERO),
             )
             for column, value in enumerate(values, start=1):
                 self.list.SetItem(row, column, value)
             debit_total += line["debit"]
             credit_total += line["credit"]
         self.totals.SetLabel(
-            "Debits ${:.2f}    Credits ${:.2f}    Difference ${:.2f}".format(
-                debit_total, credit_total, debit_total - credit_total
-            )
+            "Debits {}    Credits {}    Difference {}".format(
+                money(debit_total, True), money(credit_total, True),
+                money(debit_total - credit_total, True))
         )
 
     def transaction(self):
