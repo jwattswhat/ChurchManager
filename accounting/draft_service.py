@@ -208,6 +208,64 @@ class AccountingDraftService:
         finally:
             cursor.close()
 
+    def submit(self, transaction_id, expected_version, can_edit_any=False):
+        """Lock and move a stored balanced draft to READY for review."""
+        cursor = self.connection.cursor()
+        try:
+            self._execute(
+                cursor,
+                "SELECT OrganizationID, TransactionDate, TransactionType, Description, "
+                "Reference, Version, CreatedByUserID, Status "
+                "FROM tblAccountingTransaction WHERE ID=? FOR UPDATE",
+                (transaction_id,),
+            )
+            row = cursor.fetchone()
+            if row is None or row[7] != "DRAFT":
+                raise AccountingDraftError("The selected draft is no longer editable.")
+            if row[6] != self.acting_user_id and not can_edit_any:
+                raise AccountingDraftError("You may submit only drafts that you created.")
+            if row[5] != expected_version:
+                raise AccountingDraftError(
+                    "This draft changed after you opened it. Reload before submitting."
+                )
+            self._execute(
+                cursor,
+                "SELECT LineNumber, AccountID, FundID, Debit, Credit, FunctionID, "
+                "PayeeID, Description FROM tblAccountingTransactionLine "
+                "WHERE TransactionID=? ORDER BY LineNumber FOR UPDATE",
+                (transaction_id,),
+            )
+            lines = tuple(
+                JournalLine(
+                    item[0], item[1], item[2], Decimal(item[3]), Decimal(item[4]),
+                    item[5], item[6], item[7] or "",
+                )
+                for item in cursor.fetchall()
+            )
+            transaction = JournalTransaction(
+                row[0], row[1], row[3], lines, row[4] or "", row[2]
+            )
+            self._validate_for_draft(transaction)
+            self._fiscal_period_id(cursor, transaction)
+            self._execute(
+                cursor,
+                "UPDATE tblAccountingTransaction SET Status='READY', "
+                "Version=Version+1 WHERE ID=? AND Version=? AND Status='DRAFT'",
+                (transaction_id, expected_version),
+            )
+            if cursor.rowcount != 1:
+                raise AccountingDraftError(
+                    "This draft changed after you opened it. Reload before submitting."
+                )
+            self._audit(cursor, transaction_id, "DRAFT_MARKED_READY", transaction)
+            self.connection.commit()
+            return expected_version + 1
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
     @staticmethod
     def _validate_for_draft(transaction):
         validate_transaction(transaction)

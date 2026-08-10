@@ -49,6 +49,33 @@ class Connection:
         self.rollbacks += 1
 
 
+class SubmitCursor(Cursor):
+    def execute(self, sql, values=()):
+        self.statements.append((sql, values))
+        if sql.startswith("SELECT OrganizationID"):
+            self.one = (1, date(2027, 1, 15), "CASH_DISBURSEMENT",
+                        "Office supplies", "Invoice 17", 2, 7, "DRAFT")
+            self.rows = []
+        elif sql.startswith("SELECT LineNumber"):
+            self.rows = [
+                (1, 20, 3, Decimal("25.00"), Decimal("0.00"), None, None, ""),
+                (2, 10, 3, Decimal("0.00"), Decimal("25.00"), None, None, ""),
+            ]
+        elif sql.startswith("SELECT p.ID"):
+            self.rows = self.period_rows
+        elif sql.startswith("UPDATE tblAccountingTransaction"):
+            self.rowcount = 1
+            self.rows = []
+        else:
+            self.rows = []
+
+
+class SubmitConnection(Connection):
+    def __init__(self):
+        super().__init__()
+        self.cursor_value = SubmitCursor()
+
+
 def balanced(transaction_type="CASH_DISBURSEMENT", reference="Invoice 17"):
     return JournalTransaction(
         organization_id=1,
@@ -140,6 +167,29 @@ class TestAccountingDraftService(unittest.TestCase):
         self.assertIn('label="Open Draft"', source)
         self.assertIn('self.save.SetLabel("Update Draft")', source)
         self.assertIn("self.service.update(", source)
+
+    def test_submit_rereads_and_locks_draft_before_marking_ready(self):
+        connection = SubmitConnection()
+        version = AccountingDraftService(connection, 7).submit(41, 2)
+        self.assertEqual(version, 3)
+        self.assertEqual(connection.commits, 1)
+        sql = "\n".join(item[0] for item in connection.cursor_value.statements)
+        self.assertIn("WHERE ID=? FOR UPDATE", sql)
+        self.assertIn("ORDER BY LineNumber FOR UPDATE", sql)
+        self.assertIn("SET Status='READY'", sql)
+        audit = next(item for item in connection.cursor_value.statements
+                     if "INSERT INTO tblAccountingAuditEvent" in item[0])
+        self.assertIn("DRAFT_MARKED_READY", audit[1])
+
+    def test_dialog_submits_only_a_loaded_draft_for_review(self):
+        from pathlib import Path
+
+        source = (Path(__file__).parents[1] / "accounting" / "draft_dialog.py").read_text(
+            encoding="utf-8-sig"
+        )
+        self.assertIn('label="Submit for Review"', source)
+        self.assertIn("self.service.submit(", source)
+        self.assertIn("self.submit.Enable(False)", source)
 
     def test_transaction_date_requires_one_open_period(self):
         connection = Connection(period_rows=())

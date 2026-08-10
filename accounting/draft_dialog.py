@@ -154,10 +154,11 @@ class DraftListDialog(wx.Dialog):
 
 
 class AccountingDraftDialog(wx.Dialog):
-    def __init__(self, parent, service, can_edit_any=False):
+    def __init__(self, parent, service, can_edit_any=False, can_mark_ready=False):
         super().__init__(parent, title="Accounting Transaction Entry", size=(980, 650))
         self.service = service
         self.can_edit_any = can_edit_any
+        self.can_mark_ready = can_mark_ready
         self.current_id = None
         self.current_version = None
         self.lines = []
@@ -205,10 +206,13 @@ class AccountingDraftDialog(wx.Dialog):
         new = wx.Button(self, label="New Draft")
         open_draft = wx.Button(self, label="Open Draft")
         self.save = wx.Button(self, label="Save Draft")
+        self.submit = wx.Button(self, label="Submit for Review")
+        self.submit.Enable(False)
         close = wx.Button(self, wx.ID_CLOSE, "Close")
         new.Bind(wx.EVT_BUTTON, self.on_new)
         open_draft.Bind(wx.EVT_BUTTON, self.on_open)
         self.save.Bind(wx.EVT_BUTTON, self.on_save)
+        self.submit.Bind(wx.EVT_BUTTON, self.on_submit)
         close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
         buttons = wx.BoxSizer(wx.HORIZONTAL)
         for button in (add, edit, remove):
@@ -218,6 +222,7 @@ class AccountingDraftDialog(wx.Dialog):
         buttons.Add(new, 0, wx.RIGHT, 6)
         buttons.Add(open_draft, 0, wx.RIGHT, 6)
         buttons.Add(self.save, 0, wx.RIGHT, 6)
+        buttons.Add(self.submit, 0, wx.RIGHT, 6)
         buttons.Add(close)
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(header, 0, wx.ALL | wx.EXPAND, 12)
@@ -256,6 +261,7 @@ class AccountingDraftDialog(wx.Dialog):
         self.description.SetValue("")
         self.reference.SetValue("")
         self.save.SetLabel("Save Draft")
+        self.submit.Enable(False)
         self.refresh()
 
     def on_open(self, event=None):
@@ -303,7 +309,30 @@ class AccountingDraftDialog(wx.Dialog):
         self.current_id = selected_id
         self.current_version = version
         self.save.SetLabel("Update Draft")
+        self.submit.Enable(self.can_mark_ready)
         self.refresh()
+
+    def on_submit(self, event=None):
+        if self.current_id is None:
+            return
+        answer = wx.MessageBox(
+            "Submit this draft for review? Its lines will be locked.",
+            "Submit for Review", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION,
+        )
+        if answer != wx.YES:
+            return
+        try:
+            self.service.submit(
+                self.current_id, self.current_version, self.can_edit_any
+            )
+        except ValueError as error:
+            wx.MessageBox(str(error), "Draft not submitted", wx.OK | wx.ICON_WARNING)
+            return
+        wx.MessageBox(
+            "Draft {} is ready for review.".format(self.current_id),
+            "Submitted", wx.OK | wx.ICON_INFORMATION,
+        )
+        self.on_new()
 
     def _line_dialog(self, initial=None):
         if not self.master_choices or not self.master_choices["accounts"]:
@@ -405,6 +434,9 @@ def show_accounting_draft_entry(parent, connection, session, authorization):
         parent, AccountingDraftService(connection, session.user_id),
         can_edit_any=authorization.has_permission(
             "accounting.transactions.edit_any_draft"
+        ),
+        can_mark_ready=authorization.has_permission(
+            "accounting.transactions.mark_ready"
         ),
     )
     try:
