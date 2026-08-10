@@ -34,4 +34,5 @@ MAIN_MENU_PERMISSIONS = {
     "lblBackupDB": "application.backup.run",
     "lblEnhancements": "application.enhancements.manage",
     "lblAccountingSetup": "accounting.master_data.manage",
+    "lblAccountingAccounts": "accounting.master_data.manage",
 }

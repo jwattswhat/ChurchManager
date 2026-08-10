@@ -372,6 +372,20 @@ class TestChurchManagerForms(unittest.TestCase):
         self.assertIn("lblCurrentUser", controls)
         self.assertIn("LOGOUT", (ROOT / "cm.py").read_text(encoding="utf-8-sig"))
 
+    def test_chart_of_accounts_is_a_protected_jsform_route(self):
+        from main_menu import FORM_ROUTES
+
+        self.assertEqual(FORM_ROUTES["lblAccountingAccounts"], "frmAccountingAccount")
+        definition = load_json(FORMS / "frmAccountingAccount.json")[
+            "frmAccountingAccountFORM"
+        ]
+        security = definition["FORM"]["security"]
+        self.assertEqual(
+            set(security.values()), {"accounting.master_data.manage"}
+        )
+        fields = definition["FORM"]["table"]["fields"]
+        self.assertEqual(fields, ["*"])
+
     def test_forms_match_jsform_canonical_schema(self):
         from jsonschema import validate
 
