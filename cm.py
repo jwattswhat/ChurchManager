@@ -27,6 +27,7 @@ from accounting.review_dialog import show_accounting_review
 from accounting.posting_dialog import show_accounting_posting
 from accounting.register_dialog import show_accounting_register
 from accounting.trial_balance_dialog import show_trial_balance
+from accounting.position_dialog import show_financial_position
 from types import SimpleNamespace
 
 
@@ -490,6 +491,10 @@ def _buttonclick(event):
             )
         case "lblAccountingTrialBalance":
             show_trial_balance(
+                cmfrm.FRAME, context.connection, context.session, context.authorization
+            )
+        case "lblAccountingPosition":
+            show_financial_position(
                 cmfrm.FRAME, context.connection, context.session, context.authorization
             )
         case _:

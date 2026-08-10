@@ -545,6 +545,14 @@ class TestChurchManagerForms(unittest.TestCase):
         controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
         self.assertEqual(controls["lblAccountingTrialBalance"]["security"]["invoke"], "accounting.reports.run")
 
+    def test_financial_position_is_a_protected_special_workflow(self):
+        from main_menu import SPECIAL_CONTROLS
+        from permission_catalog import MAIN_MENU_PERMISSIONS
+        self.assertIn("lblAccountingPosition",SPECIAL_CONTROLS)
+        self.assertEqual(MAIN_MENU_PERMISSIONS["lblAccountingPosition"],"accounting.reports.run")
+        controls=load_json(FORMS/"frmMain.json")["frmMainFORM"]["CONTROLS"]
+        self.assertEqual(controls["lblAccountingPosition"]["security"]["invoke"],"accounting.reports.run")
+
     def test_forms_match_jsform_canonical_schema(self):
         from jsonschema import validate
 

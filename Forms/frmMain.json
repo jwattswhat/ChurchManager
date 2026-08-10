@@ -535,7 +535,7 @@
                 "type": "StaticBox",
                 "label": "Current User",
                 "posch": [34, 1],
-                "sizech": [15, 13]
+                "sizech": [15, 14]
             },
             "lblCurrentUser": {
                 "name": "lblCurrentUser",
@@ -636,6 +636,12 @@
                 "name": "lblAccountingTrialBalance", "type": "StaticText",
                 "label": "Trial Balance", "posch": [35, 19],
                 "tooltip": "Run an as-of-date trial balance from posted transactions.",
+                "security": { "invoke": "accounting.reports.run" }
+            },
+            "lblAccountingPosition": {
+                "name": "lblAccountingPosition", "type": "StaticText",
+                "label": "Financial Position", "posch": [35, 20],
+                "tooltip": "Run a statement of financial position as of a selected date.",
                 "security": { "invoke": "accounting.reports.run" }
             }
         }
