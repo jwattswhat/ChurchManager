@@ -43,4 +43,5 @@ MAIN_MENU_PERMISSIONS = {
     "lblAccountingReview": "accounting.transactions.approve",
     "lblAccountingPosting": "accounting.transactions.post",
     "lblAccountingRegister": "accounting.transactions.view",
+    "lblAccountingTrialBalance": "accounting.reports.run",
 }
