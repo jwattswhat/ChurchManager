@@ -59,6 +59,15 @@ class TestAccountingSetup(unittest.TestCase):
         self.assertIn("Unrestricted", labels)
         self.assertTrue(any("purpose and time" in label for label in labels))
 
+    def test_setup_dialog_uses_a_growing_two_column_grid(self):
+        from pathlib import Path
+
+        source = (
+            Path(__file__).parents[1] / "accounting" / "setup_dialog.py"
+        ).read_text(encoding="utf-8-sig")
+        self.assertIn("wx.FlexGridSizer(cols=2", source)
+        self.assertNotIn("wx.FlexGridSizer(2, 2", source)
+
 
 if __name__ == "__main__":
     unittest.main()

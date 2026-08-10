@@ -22,7 +22,7 @@ CLASSIFICATION_CHOICES = (
 class StarterSetupDialog(wx.Dialog):
     def __init__(self, parent):
         super().__init__(parent, title="Create Starter Accounting Setup")
-        grid = wx.FlexGridSizer(2, 2, 8, 8)
+        grid = wx.FlexGridSizer(cols=2, hgap=8, vgap=8)
         grid.AddGrowableCol(1, 1)
         grid.Add(wx.StaticText(self, label="Organization legal name"))
         self.legal_name = wx.TextCtrl(self, size=(360, -1))
