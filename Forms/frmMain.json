@@ -42,7 +42,8 @@
                     2
                 ],
                 "label": "Churches",
-                "tooltip": "Open the churches form."
+                "tooltip": "Open the churches form.",
+                "security": { "invoke": "church.manage" }
             },
             "ServiceBox": {
                 "type": "StaticBox",
@@ -69,7 +70,8 @@
                     5
                 ],
                 "label": "Worship Service",
-                "tooltip": "Open the worship service form."
+                "tooltip": "Open the worship service form.",
+                "security": { "invoke": "worship.manage" }
             },
             "lblSermon": {
                 "name": "lblSermon",
@@ -79,7 +81,8 @@
                     6
                 ],
                 "label": "   Sermons",
-                "tooltip": "Open the sermons form."
+                "tooltip": "Open the sermons form.",
+                "security": { "invoke": "worship.manage" }
             },
             "lblPropers": {
                 "name": "lblPropers",
@@ -89,7 +92,8 @@
                     7
                 ],
                 "label": "   Propers",
-                "tooltip": "Open the propers form."
+                "tooltip": "Open the propers form.",
+                "security": { "invoke": "worship.manage" }
             },
             "lblOS": {
                 "name": "lblOS",
@@ -99,7 +103,8 @@
                     8
                 ],
                 "label": "   OS",
-                "tooltip": "Open the os form."
+                "tooltip": "Open the os form.",
+                "security": { "invoke": "worship.manage" }
             },
             "lblPrayers": {
                 "name": "lblPrayers",
@@ -109,7 +114,8 @@
                     9
                 ],
                 "type": "StaticText",
-                "tooltip": "Open the prayers form."
+                "tooltip": "Open the prayers form.",
+                "security": { "invoke": "worship.manage" }
             },
             "lblParticipant": {
                 "name": "lblParticipant",
@@ -119,7 +125,8 @@
                     10
                 ],
                 "type": "StaticText",
-                "tooltip": "Open the participant form."
+                "tooltip": "Open the participant form.",
+                "security": { "invoke": "worship.manage" }
             },
             "lblSchedule": {
                 "name": "lblSchedule",
@@ -129,7 +136,8 @@
                     11
                 ],
                 "label": "   Schedule",
-                "tooltip": "Open the schedule form."
+                "tooltip": "Open the schedule form.",
+                "security": { "invoke": "worship.manage" }
             },
             "lblServiceSchedule": {
                 "name": "lblServiceSchedule",
@@ -139,7 +147,8 @@
                     12
                 ],
                 "label": "   Schedule Participants",
-                "tooltip": "Open the schedule participants form."
+                "tooltip": "Open the schedule participants form.",
+                "security": { "invoke": "worship.manage" }
             },
             "lblOSList": {
                 "name": "lblOSList",
@@ -149,7 +158,8 @@
                     13
                 ],
                 "label": "   OS List",
-                "tooltip": "Open the os list form."
+                "tooltip": "Open the os list form.",
+                "security": { "invoke": "worship.manage" }
             },
             "lblAttendanceEvent": {
                 "type": "StaticText",
@@ -159,7 +169,8 @@
                     14
                 ],
                 "label": "   Attendance Event",
-                "tooltip": "Open the attendance event form."
+                "tooltip": "Open the attendance event form.",
+                "security": { "invoke": "attendance.events.manage" }
             },
             "MemberBox": {
                 "name": "MemberBox",
@@ -186,7 +197,8 @@
                     17
                 ],
                 "label": "Person",
-                "tooltip": "Open the person form."
+                "tooltip": "Open the person form.",
+                "security": { "invoke": "membership.manage" }
             },
             "lblFamily": {
                 "name": "lblFamily",
@@ -196,7 +208,8 @@
                     18
                 ],
                 "label": "Families",
-                "tooltip": "Open the families form."
+                "tooltip": "Open the families form.",
+                "security": { "invoke": "membership.manage" }
             },
             "AttendanceBox": {
                 "name": "MemberBox",
@@ -223,7 +236,8 @@
                     21
                 ],
                 "label": "Record Attendance",
-                "tooltip": "Open the record attendance form."
+                "tooltip": "Open the record attendance form.",
+                "security": { "invoke": "attendance.record" }
             },
             "ProjectBox": {
                 "type": "StaticBox",
@@ -250,7 +264,8 @@
                     24
                 ],
                 "label": "Project",
-                "tooltip": "Open the project form."
+                "tooltip": "Open the project form.",
+                "security": { "invoke": "ministry.manage" }
             },
             "lblTask": {
                 "name": "lblTask",
@@ -260,7 +275,8 @@
                     25
                 ],
                 "label": "   Task",
-                "tooltip": "Open the task form."
+                "tooltip": "Open the task form.",
+                "security": { "invoke": "ministry.manage" }
             },
             "AdministrationBox": {
                 "type": "StaticBox",
@@ -287,7 +303,8 @@
                     2,
                     28
                 ],
-                "tooltip": "Open the documents form."
+                "tooltip": "Open the documents form.",
+                "security": { "invoke": "ministry.manage" }
             },
             "lblAnnouncement": {
                 "name": "lblAnnouncement",
@@ -297,7 +314,8 @@
                     2,
                     29
                 ],
-                "tooltip": "Open the announcement form."
+                "tooltip": "Open the announcement form.",
+                "security": { "invoke": "ministry.manage" }
             },
             "lblJournal": {
                 "name": "lblJournal",
@@ -307,7 +325,8 @@
                     30
                 ],
                 "label": "Journal",
-                "tooltip": "Open the journal form."
+                "tooltip": "Open the journal form.",
+                "security": { "invoke": "ministry.manage" }
             },
             "ReportBox": {
                 "type": "StaticBox",
@@ -334,7 +353,8 @@
                     2
                 ],
                 "label": "Reports",
-                "tooltip": "Open the reports form."
+                "tooltip": "Open the reports form.",
+                "security": { "invoke": "reports.run" }
             },
             "lblGenerateOS": {
                 "name": "lblGenerateOS",
@@ -344,7 +364,8 @@
                     3
                 ],
                 "label": "Generate OS",
-                "tooltip": "Generate the order-of-service output."
+                "tooltip": "Generate the order-of-service output.",
+                "security": { "invoke": "worship.manage" }
             },
             "lblNotifyParticipants": {
                 "name": "lblNotifyParticipants",
@@ -354,7 +375,8 @@
                     4
                 ],
                 "label": "Notify Participants",
-                "tooltip": "Notify scheduled service participants by email."
+                "tooltip": "Notify scheduled service participants by email.",
+                "security": { "invoke": "worship.manage" }
             },
             "lblSundayPrayers": {
                 "name": "lblSundayPrayers",
@@ -364,7 +386,8 @@
                     5
                 ],
                 "type": "StaticText",
-                "tooltip": "Generate the Sunday prayer list."
+                "tooltip": "Generate the Sunday prayer list.",
+                "security": { "invoke": "worship.manage" }
             },
             "lblAnnouncements": {
                 "name": "lblAnnouncements",
@@ -374,7 +397,8 @@
                     19,
                     6
                 ],
-                "tooltip": "Generate the Sunday announcements."
+                "tooltip": "Generate the Sunday announcements.",
+                "security": { "invoke": "worship.manage" }
             },
             "UtilitiesBox": {
                 "name": "UtilitiesBox",
@@ -401,7 +425,8 @@
                     19,
                     20
                 ],
-                "tooltip": "Open the config form."
+                "tooltip": "Open the config form.",
+                "security": { "invoke": "application.config.manage" }
             },
             "lblOptions": {
                 "name": "lblOptions",
@@ -411,7 +436,8 @@
                     19,
                     21
                 ],
-                "tooltip": "Open the options form."
+                "tooltip": "Open the options form.",
+                "security": { "invoke": "application.config.manage" }
             },
             "lblChoices": {
                 "name": "lblChoices",
@@ -421,7 +447,8 @@
                     19,
                     22
                 ],
-                "tooltip": "Open the choices form."
+                "tooltip": "Open the choices form.",
+                "security": { "invoke": "application.config.manage" }
             },
             "lblCheckList": {
                 "name": "lblCheckList",
@@ -431,7 +458,8 @@
                     23
                 ],
                 "label": "CheckLists",
-                "tooltip": "Open the checklists form."
+                "tooltip": "Open the checklists form.",
+                "security": { "invoke": "application.config.manage" }
             },
             "lblUsers": {
                 "name": "lblUsers",
@@ -471,7 +499,8 @@
                     19,
                     27
                 ],
-                "tooltip": "Back up the ChurchManager databases."
+                "tooltip": "Back up the ChurchManager databases.",
+                "security": { "invoke": "application.backup.run" }
             },
             "EnhancementsBox": {
                 "name": "EnhancementsBox",
@@ -498,7 +527,8 @@
                     19,
                     32
                 ],
-                "tooltip": "Open the enhancements and bug-tracking form."
+                "tooltip": "Open the enhancements and bug-tracking form.",
+                "security": { "invoke": "application.enhancements.manage" }
             }
         }
     }

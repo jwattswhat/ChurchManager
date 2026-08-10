@@ -148,3 +148,7 @@ class TestChurchManagerDatabase(unittest.TestCase):
             "SELECT version FROM schema_migrations WHERE version='003_add_user_security.sql'"
         )
         self.assertEqual(rows, [("003_add_user_security.sql",)])
+
+    def test_record_attendance_compatibility_views_are_readable(self):
+        self.query("SELECT ID, dt, Description, AttendanceType FROM vwattendance LIMIT 1")
+        self.query("SELECT ID, FirstName, LastName, Member FROM vmperson LIMIT 1")

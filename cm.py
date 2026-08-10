@@ -13,6 +13,7 @@ import fnSchedule
 from application_context import ApplicationContext
 from form_factory import ChurchManagerFormFactory
 from main_menu import FORM_ROUTES, MENU_CONTROLS
+from permission_catalog import MAIN_MENU_PERMISSIONS
 from backup_service import BackupError, BackupService
 from process_service import ProcessService
 from report_service import ChurchManagerReportService
@@ -398,6 +399,9 @@ def _buttonclick(event):
         dlg.Destroy()
 
     select = event.GetEventObject().GetName()
+    context.authorization.require(
+        MAIN_MENU_PERMISSIONS[select], "use {}".format(select)
+    )
     if select in FORM_ROUTES:
         context.form_factory.open(FORM_ROUTES[select])
         return

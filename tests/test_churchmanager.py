@@ -347,6 +347,23 @@ class TestChurchManagerForms(unittest.TestCase):
         from main_menu import MENU_CONTROLS
         self.assertIn("lblUsers", MENU_CONTROLS)
 
+    def test_every_main_menu_action_declares_its_catalog_permission(self):
+        from main_menu import MENU_CONTROLS
+        from permission_catalog import MAIN_MENU_PERMISSIONS
+
+        controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
+        self.assertEqual(set(MENU_CONTROLS), set(MAIN_MENU_PERMISSIONS))
+        for control_name, permission in MAIN_MENU_PERMISSIONS.items():
+            self.assertEqual(
+                controls[control_name]["security"]["invoke"], permission,
+                control_name,
+            )
+
+    def test_main_menu_dispatch_rechecks_permissions(self):
+        source = (ROOT / "cm.py").read_text(encoding="utf-8-sig")
+        self.assertIn("MAIN_MENU_PERMISSIONS[select]", source)
+        self.assertIn("context.authorization.require(", source)
+
     def test_forms_match_jsform_canonical_schema(self):
         from jsonschema import validate
 
