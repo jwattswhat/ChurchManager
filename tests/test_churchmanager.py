@@ -512,6 +512,21 @@ class TestChurchManagerForms(unittest.TestCase):
             "accounting.transactions.approve",
         )
 
+    def test_transaction_posting_is_a_protected_special_workflow(self):
+        from main_menu import SPECIAL_CONTROLS
+        from permission_catalog import MAIN_MENU_PERMISSIONS
+
+        self.assertIn("lblAccountingPosting", SPECIAL_CONTROLS)
+        self.assertEqual(
+            MAIN_MENU_PERMISSIONS["lblAccountingPosting"],
+            "accounting.transactions.post",
+        )
+        controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
+        self.assertEqual(
+            controls["lblAccountingPosting"]["security"]["invoke"],
+            "accounting.transactions.post",
+        )
+
     def test_forms_match_jsform_canonical_schema(self):
         from jsonschema import validate
 

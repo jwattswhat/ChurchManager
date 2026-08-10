@@ -1,0 +1,65 @@
+from decimal import Decimal
+import unittest
+
+from accounting.draft_service import AccountingDraftError
+from accounting.posting_service import AccountingPostingService
+
+
+class Cursor:
+    def __init__(self, status="APPROVED", creator=7, reviewer=8, total=Decimal("500")):
+        self.status, self.creator, self.reviewer, self.total = status, creator, reviewer, total
+        self.statements, self.one, self.rows, self.rowcount = [], None, [], 0
+    def execute(self, sql, values=()):
+        self.statements.append((sql, values))
+        if sql.startswith("SELECT t.OrganizationID"):
+            self.one = (1, 12, self.status, 4, self.creator, self.reviewer,
+                        Decimal("500"), 27)
+        elif sql.startswith("SELECT p.Status"):
+            self.one = ("OPEN", "OPEN")
+        elif sql.startswith("SELECT l.Debit"):
+            self.rows = [(self.total, 0, 1, 1, 1, None, "OPTIONAL", None),
+                         (0, self.total, 1, 1, 1, None, "OPTIONAL", None)]
+        elif sql.startswith("UPDATE"):
+            self.rowcount = 1
+    def fetchone(self): return self.one
+    def fetchall(self): return self.rows
+    def close(self): pass
+
+class Connection:
+    def __init__(self, **values):
+        self.cursor_value, self.commits, self.rollbacks = Cursor(**values), 0, 0
+    def cursor(self): return self.cursor_value
+    def commit(self): self.commits += 1
+    def rollback(self): self.rollbacks += 1
+
+class TestAccountingPosting(unittest.TestCase):
+    def test_posting_screen_is_read_only_and_permission_protected(self):
+        from pathlib import Path
+        source = (Path(__file__).parents[1] / "accounting" / "posting_dialog.py").read_text(
+            encoding="utf-8-sig")
+        self.assertIn('label="Post Transaction"', source)
+        self.assertIn("Transaction lines (read only)", source)
+        self.assertIn('authorization.require("accounting.transactions.post"', source)
+        self.assertNotIn("Add Line", source)
+        self.assertIn('("Description", 255)', source)
+
+    def test_posting_assigns_number_and_commits_everything_together(self):
+        connection = Connection()
+        self.assertEqual(AccountingPostingService(connection, 9).post(41, 4), 27)
+        self.assertEqual(connection.commits, 1)
+        sql = "\n".join(item[0] for item in connection.cursor_value.statements)
+        self.assertIn("NextTransactionNumber", sql)
+        self.assertIn("Status='POSTED'", sql)
+        self.assertIn("TRANSACTION_POSTED", sql)
+
+    def test_ready_transaction_at_threshold_requires_independent_approval(self):
+        connection = Connection(status="READY", reviewer=None)
+        with self.assertRaisesRegex(AccountingDraftError, "different user"):
+            AccountingPostingService(connection, 9).post(41, 4)
+        self.assertEqual(connection.rollbacks, 1)
+
+    def test_ready_transaction_below_threshold_can_post_without_approval(self):
+        connection = Connection(status="READY", reviewer=None, total=Decimal("25"))
+        self.assertEqual(AccountingPostingService(connection, 9).post(41, 4), 27)
+
+if __name__ == "__main__": unittest.main()

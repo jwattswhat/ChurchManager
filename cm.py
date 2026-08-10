@@ -24,6 +24,7 @@ from user_admin import show_user_administration
 from accounting.setup_dialog import show_accounting_setup
 from accounting.draft_dialog import show_accounting_draft_entry
 from accounting.review_dialog import show_accounting_review
+from accounting.posting_dialog import show_accounting_posting
 from types import SimpleNamespace
 
 
@@ -475,6 +476,10 @@ def _buttonclick(event):
             )
         case "lblAccountingReview":
             show_accounting_review(
+                cmfrm.FRAME, context.connection, context.session, context.authorization
+            )
+        case "lblAccountingPosting":
+            show_accounting_posting(
                 cmfrm.FRAME, context.connection, context.session, context.authorization
             )
         case _:
