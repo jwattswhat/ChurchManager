@@ -32,6 +32,17 @@ REQUIRED_TABLES = {
     "tblUserRole",
     "tblRolePermission",
     "tblSecurityAuditEvent",
+    "tblAccountingOrganization",
+    "tblAccountingAccount",
+    "tblAccountingFund",
+    "tblAccountingFunction",
+    "tblAccountingFiscalYear",
+    "tblAccountingFiscalPeriod",
+    "tblAccountingPayee",
+    "tblAccountingTransaction",
+    "tblAccountingTransactionLine",
+    "tblAccountingAttachment",
+    "tblAccountingAuditEvent",
 }
 REMOVED_REPORT_CODES = {"CFCA01", "CFCR01", "CFGR01", "CMDN01", "CMDN02"}
 
@@ -152,3 +163,20 @@ class TestChurchManagerDatabase(unittest.TestCase):
     def test_record_attendance_compatibility_views_are_readable(self):
         self.query("SELECT ID, dt, Description, AttendanceType FROM vwattendance LIMIT 1")
         self.query("SELECT ID, FirstName, LastName, Member FROM vmperson LIMIT 1")
+
+    def test_accounting_foundation_and_role_defaults_are_installed(self):
+        rows = self.query(
+            "SELECT version FROM schema_migrations "
+            "WHERE version='006_add_accounting_ledger_foundation.sql'"
+        )
+        self.assertEqual(rows, [("006_add_accounting_ledger_foundation.sql",)])
+        permissions = {
+            row[0] for row in self.query(
+                "SELECT p.Name FROM tblRole r "
+                "JOIN tblRolePermission rp ON rp.RoleID=r.ID "
+                "JOIN tblPermission p ON p.ID=rp.PermissionID "
+                "WHERE r.Name='Accounting Entry Clerk'"
+            )
+        }
+        self.assertIn("accounting.transactions.create", permissions)
+        self.assertNotIn("accounting.transactions.post", permissions)
