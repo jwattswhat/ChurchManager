@@ -66,8 +66,8 @@ class WorshipRepository:
         return None if row is None else Service(row[0], row[2], row[4])
 
     def season(self, propers_id):
-        row = self._one("SELECT * FROM tblPropers WHERE ID=%s", (propers_id,))
-        return None if row is None else row[3]
+        row = self._one("SELECT Season FROM tblPropers WHERE ID=%s", (propers_id,))
+        return None if row is None else row[0]
 
     def participants(self):
         return [

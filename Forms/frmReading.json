@@ -41,12 +41,12 @@
                 "name": "PropersID",
                 "type": "ComboBox",
                 "lookupchoices": {
-                    "name": "tblPropers",
+                    "name": "vwPropersLookup",
                     "fields": [
                         "ID",
-                        "CONCAT(Lectionary,' ',LiturgicalDate)"
+                        "DisplayName"
                     ],
-                    "orderby": "Lectionary, Sort",
+                    "orderby": "SystemName, Cycle, Sort",
                     "condition": "ID={PropersID}"
                 },
                 "readonly": true,

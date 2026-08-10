@@ -340,6 +340,34 @@ class TestChurchManagerConfiguration(unittest.TestCase):
 
 
 class TestChurchManagerForms(unittest.TestCase):
+    def test_service_propers_lookup_displays_text_and_stores_id(self):
+        definition = load_json(FORMS / "frmService.json")["frmServiceFORM"]
+        control = definition["CONTROLS"]["PropersID"]
+        lookup = control["lookupchoices"]
+        self.assertEqual(control["type"], "ComboBox")
+        self.assertEqual(lookup["name"], "vwPropersLookup")
+        self.assertEqual(lookup["fields"], ["ID", "DisplayName"])
+        self.assertNotIn("condition", lookup)
+        self.assertNotIn("btnChangeLectionary", definition["CONTROLS"])
+        self.assertNotIn("frmOptions", definition["FORM"]["linkedform"])
+
+    def test_propers_use_reusable_lectionary_system_and_optional_cycle(self):
+        definition = load_json(FORMS / "frmPropers.json")["frmPropersFORM"]
+        controls = definition["CONTROLS"]
+        self.assertIn("LectionarySystemID", controls)
+        self.assertEqual(controls["Cycle"]["choices"], ["A", "B", "C"])
+        self.assertNotIn("Lectionary", controls)
+        self.assertEqual(
+            controls["LectionarySystemID"]["lookupchoices"]["name"],
+            "tblLectionarySystem",
+        )
+        self.assertIn("frmLectionarySystem", definition["FORM"]["linkedform"])
+
+    def test_schedule_reads_season_by_name_not_propers_column_position(self):
+        source = (ROOT / "fnSchedule.py").read_text(encoding="utf-8-sig")
+        self.assertIn("SELECT Season FROM tblPropers", source)
+        self.assertNotIn("SELECT * FROM tblPropers WHERE ID=%s", source)
+
     def test_user_administration_is_a_protected_main_menu_action(self):
         definition = next(iter(load_json(FORMS / "frmMain.json").values()))
         control = definition["CONTROLS"]["lblUsers"]
@@ -418,6 +446,35 @@ class TestChurchManagerForms(unittest.TestCase):
         self.assertEqual(
             choices, ["PROGRAM", "MANAGEMENT_GENERAL", "FUNDRAISING"]
         )
+
+    def test_fiscal_years_and_periods_protect_status_overrides(self):
+        from main_menu import FORM_ROUTES
+
+        expected = {
+            "lblAccountingYears": "frmAccountingFiscalYear",
+            "lblAccountingPeriods": "frmAccountingFiscalPeriod",
+        }
+        for control_name, form_name in expected.items():
+            self.assertEqual(FORM_ROUTES[control_name], form_name)
+            definition = load_json(FORMS / (form_name + ".json"))[
+                form_name + "FORM"
+            ]
+            self.assertEqual(
+                definition["CONTROLS"]["Status"]["security"]["edit"],
+                "accounting.periods.override",
+            )
+            self.assertEqual(
+                set(definition["FORM"]["security"].values()),
+                {"accounting.master_data.manage"},
+            )
+        main_controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
+        box = main_controls["FundAccountingBox"]
+        left, top = box["posch"]
+        width, height = box["sizech"]
+        for name in ("lblAccountingYears", "lblAccountingPeriods"):
+            x, y = main_controls[name]["posch"]
+            self.assertTrue(left < x < left + width, name)
+            self.assertTrue(top < y < top + height, name)
 
     def test_forms_match_jsform_canonical_schema(self):
         from jsonschema import validate

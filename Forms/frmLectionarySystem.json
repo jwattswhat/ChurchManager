@@ -1,0 +1,53 @@
+{
+    "frmLectionarySystemFORM": {
+        "FORM": {
+            "name": "frmLectionarySystem",
+            "type": "Panel",
+            "title": "Lectionary Systems",
+            "posch": [-1, -1],
+            "sizech": [46, 18],
+            "stylelist": ["CAPTION"],
+            "table": {
+                "name": "tblLectionarySystem",
+                "fields": ["*"],
+                "orderby": "Name"
+            }
+        },
+        "CONTROLS": {
+            "lblName": {
+                "name": "lblName", "type": "StaticText",
+                "label": "System name:", "posch": [1, 1]
+            },
+            "Name": {
+                "name": "Name", "type": "TextCtrl",
+                "posch": [13, 1], "sizech": [29, 2],
+                "tooltip": "Enter a congregation-neutral lectionary system name."
+            },
+            "lblCycleType": {
+                "name": "lblCycleType", "type": "StaticText",
+                "label": "Cycle type:", "posch": [1, 3]
+            },
+            "CycleType": {
+                "name": "CycleType", "type": "ComboBox",
+                "choices": ["None", "ABC", "Custom"],
+                "posch": [13, 3], "sizech": [16, 2],
+                "tooltip": "Choose whether this system has no cycle, A/B/C years, or custom labels."
+            },
+            "Active": {
+                "name": "Active", "type": "CheckBox", "label": "Active",
+                "posch": [13, 5],
+                "tooltip": "Include this system in Proper selections."
+            },
+            "lblNote": {
+                "name": "lblNote", "type": "StaticText",
+                "label": "Note:", "posch": [1, 7]
+            },
+            "Note": {
+                "name": "Note", "type": "MultiLine",
+                "stylelist": ["MULTILINE", "WORDWRAP"],
+                "posch": [13, 7], "sizech": [29, 6],
+                "tooltip": "Enter optional notes about this lectionary system."
+            }
+        }
+    }
+}

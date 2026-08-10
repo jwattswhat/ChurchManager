@@ -37,26 +37,6 @@
                 "CAPTION"
             ],
             "linkedform": {
-                "frmOptions": {
-                    "name": "frmOptions",
-                    "type": "Panel",
-                    "title": "frmOptions: Change Lectionary",
-                    "table": {
-                        "name": "tblOptions",
-                        "fields": [
-                            "*"
-                        ],
-                        "condition": "OptionFor = 'Lectionary' and OptionType = 'Current'"
-                    },
-                    "controls": [
-                        "Update",
-                        "Close"
-                    ],
-                    "readonlyfields": [
-                        "OptionFor",
-                        "OptionType"
-                    ]
-                },
                 "frmSermon": {
                     "name": "frmSermon",
                     "title": "frmSermon - Add/Edit/Delete Sermon",
@@ -119,7 +99,8 @@
                         "Close"
                     ],
                     "readonlyfields": [
-                        "Lectionary",
+                        "LectionarySystemID",
+                        "Cycle",
                         "Sort",
                         "Season",
                         "LiturgicalDate"
@@ -261,14 +242,12 @@
                 "name": "PropersID",
                 "type": "ComboBox",
                 "lookupchoices": {
-                    "name": "tblPropers",
+                    "name": "vwPropersLookup",
                     "fields": [
                         "ID",
-                        "Lectionary",
-                        "LiturgicalDate"
+                        "DisplayName"
                     ],
-                    "condition": "Lectionary = {OPTION:Current:Lectionary}",
-                    "orderby": "Lectionary,Sort"
+                    "orderby": "SystemName,Cycle,Sort"
                 },
                 "action": [
                     "refreshform"
@@ -318,20 +297,6 @@
                     2
                 ],
                 "tooltip": "Enter the liturgical date."
-            },
-            "btnChangeLectionary": {
-                "name": "btnChangeLectionary",
-                "type": "Button",
-                "label": "Lectionary",
-                "action": [
-                    "openlinkedform",
-                    "frmOptions"
-                ],
-                "posch": [
-                    41,
-                    9
-                ],
-                "tooltip": "Open the lectionary form."
             },
             "lblHolyCommunion": {
                 "name": "lblHolyCommunion",

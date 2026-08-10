@@ -43,6 +43,7 @@ REQUIRED_TABLES = {
     "tblAccountingTransactionLine",
     "tblAccountingAttachment",
     "tblAccountingAuditEvent",
+    "tblLectionarySystem",
 }
 REMOVED_REPORT_CODES = {"CFCA01", "CFCR01", "CFGR01", "CMDN01", "CMDN02"}
 
@@ -163,6 +164,36 @@ class TestChurchManagerDatabase(unittest.TestCase):
     def test_record_attendance_compatibility_views_are_readable(self):
         self.query("SELECT ID, dt, Description, AttendanceType FROM vwattendance LIMIT 1")
         self.query("SELECT ID, FirstName, LastName, Member FROM vmperson LIMIT 1")
+
+    def test_propers_use_lectionary_systems_and_lookup_labels(self):
+        migration = self.query(
+            "SELECT version FROM schema_migrations "
+            "WHERE version='007_normalize_lectionary_systems.sql'"
+        )
+        self.assertEqual(migration, [("007_normalize_lectionary_systems.sql",)])
+        orphan_count = self.query(
+            "SELECT COUNT(*) FROM tblPropers p "
+            "LEFT JOIN tblLectionarySystem ls ON ls.ID=p.LectionarySystemID "
+            "WHERE ls.ID IS NULL"
+        )[0][0]
+        self.assertEqual(orphan_count, 0)
+        proper_count = self.query("SELECT COUNT(*) FROM tblPropers")[0][0]
+        lookup_count = self.query(
+            "SELECT COUNT(*) FROM vwPropersLookup "
+            "WHERE DisplayName IS NOT NULL AND TRIM(DisplayName) <> ''"
+        )[0][0]
+        self.assertEqual(lookup_count, proper_count)
+        old_column = self.query(
+            "SELECT COUNT(*) FROM information_schema.COLUMNS "
+            "WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tblPropers' "
+            "AND COLUMN_NAME='Lectionary'"
+        )[0][0]
+        self.assertEqual(old_column, 0)
+        obsolete_option = self.query(
+            "SELECT COUNT(*) FROM tblOptions "
+            "WHERE OptionFor='Lectionary' AND OptionType='Current'"
+        )[0][0]
+        self.assertEqual(obsolete_option, 0)
 
     def test_accounting_foundation_and_role_defaults_are_installed(self):
         rows = self.query(
