@@ -535,7 +535,7 @@
                 "type": "StaticBox",
                 "label": "Current User",
                 "posch": [34, 1],
-                "sizech": [15, 9]
+                "sizech": [15, 10]
             },
             "lblCurrentUser": {
                 "name": "lblCurrentUser",
@@ -613,6 +613,12 @@
                 "label": "Transaction Entry", "posch": [35, 15],
                 "tooltip": "Create a balanced accounting draft.",
                 "security": { "invoke": "accounting.transactions.create" }
+            },
+            "lblAccountingReview": {
+                "name": "lblAccountingReview", "type": "StaticText",
+                "label": "Transaction Review", "posch": [35, 16],
+                "tooltip": "Review and approve accounting transactions awaiting approval.",
+                "security": { "invoke": "accounting.transactions.approve" }
             }
         }
     }

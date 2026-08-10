@@ -40,4 +40,5 @@ MAIN_MENU_PERMISSIONS = {
     "lblAccountingYears": "accounting.master_data.manage",
     "lblAccountingPeriods": "accounting.master_data.manage",
     "lblAccountingTransactions": "accounting.transactions.create",
+    "lblAccountingReview": "accounting.transactions.approve",
 }

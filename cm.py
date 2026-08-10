@@ -23,6 +23,7 @@ from report_service import ChurchManagerReportService
 from user_admin import show_user_administration
 from accounting.setup_dialog import show_accounting_setup
 from accounting.draft_dialog import show_accounting_draft_entry
+from accounting.review_dialog import show_accounting_review
 from types import SimpleNamespace
 
 
@@ -470,6 +471,10 @@ def _buttonclick(event):
             )
         case "lblAccountingTransactions":
             show_accounting_draft_entry(
+                cmfrm.FRAME, context.connection, context.session, context.authorization
+            )
+        case "lblAccountingReview":
+            show_accounting_review(
                 cmfrm.FRAME, context.connection, context.session, context.authorization
             )
         case _:

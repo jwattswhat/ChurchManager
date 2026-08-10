@@ -497,6 +497,21 @@ class TestChurchManagerForms(unittest.TestCase):
         source = (ROOT / "cm.py").read_text(encoding="utf-8-sig")
         self.assertIn("show_accounting_draft_entry(", source)
 
+    def test_transaction_review_is_a_protected_special_workflow(self):
+        from main_menu import SPECIAL_CONTROLS
+        from permission_catalog import MAIN_MENU_PERMISSIONS
+
+        self.assertIn("lblAccountingReview", SPECIAL_CONTROLS)
+        self.assertEqual(
+            MAIN_MENU_PERMISSIONS["lblAccountingReview"],
+            "accounting.transactions.approve",
+        )
+        controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
+        self.assertEqual(
+            controls["lblAccountingReview"]["security"]["invoke"],
+            "accounting.transactions.approve",
+        )
+
     def test_forms_match_jsform_canonical_schema(self):
         from jsonschema import validate
 
