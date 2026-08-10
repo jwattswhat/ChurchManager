@@ -6,9 +6,10 @@ from .review_service import AccountingReviewService
 
 
 class AccountingReviewDialog(wx.Dialog):
-    def __init__(self, parent, service):
+    def __init__(self, parent, service, can_override=False):
         super().__init__(parent, title="Accounting Transaction Review", size=(950, 620))
         self.service = service
+        self.can_override = can_override
         self.rows = []
         self.transactions = wx.ListCtrl(self, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         for index, (label, width) in enumerate((
@@ -25,14 +26,18 @@ class AccountingReviewDialog(wx.Dialog):
         self.transactions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select)
         refresh = wx.Button(self, label="Refresh")
         approve = wx.Button(self, label="Approve")
+        override = wx.Button(self, label="Solo Override")
+        override.Enable(can_override)
         close = wx.Button(self, wx.ID_CLOSE, "Close")
         refresh.Bind(wx.EVT_BUTTON, self.refresh)
         approve.Bind(wx.EVT_BUTTON, self.on_approve)
+        override.Bind(wx.EVT_BUTTON, self.on_override)
         close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
         buttons = wx.BoxSizer(wx.HORIZONTAL)
         buttons.Add(refresh, 0, wx.RIGHT, 6)
         buttons.AddStretchSpacer()
         buttons.Add(approve, 0, wx.RIGHT, 6)
+        buttons.Add(override, 0, wx.RIGHT, 6)
         buttons.Add(close)
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(wx.StaticText(self, label="Transactions awaiting review"), 0, wx.ALL, 10)
@@ -82,11 +87,28 @@ class AccountingReviewDialog(wx.Dialog):
         wx.MessageBox("Transaction {} was approved.".format(item[0]), "Approved")
         self.refresh()
 
+    def on_override(self, event):
+        index = self.transactions.GetFirstSelected()
+        if index == -1:
+            wx.MessageBox("Select a transaction to approve.", "Solo Override"); return
+        dialog = wx.TextEntryDialog(self, "Explain why independent approval is unavailable.", "Solo Approval Override")
+        try:
+            if dialog.ShowModal() != wx.ID_OK: return
+            reason = dialog.GetValue()
+        finally: dialog.Destroy()
+        item = self.rows[index]
+        try: self.service.approve(item[0], item[6], reason, can_override=True)
+        except ValueError as error:
+            wx.MessageBox(str(error), "Transaction not approved", wx.OK | wx.ICON_WARNING); return
+        wx.MessageBox("Transaction {} was approved with an audited override.".format(item[0]), "Override Recorded")
+        self.refresh()
+
 
 def show_accounting_review(parent, connection, session, authorization):
     authorization.require("accounting.transactions.approve", "approve accounting transactions")
     dialog = AccountingReviewDialog(
-        parent, AccountingReviewService(connection, session.user_id)
+        parent, AccountingReviewService(connection, session.user_id),
+        can_override=authorization.has_permission("accounting.approval.override")
     )
     try:
         dialog.ShowModal()

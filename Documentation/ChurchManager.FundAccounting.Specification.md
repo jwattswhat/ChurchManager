@@ -776,10 +776,13 @@ not assumptions about Life in Christ or any other specific congregation.
    Missions, Pastoral Care and Mercy, Fellowship, Management and General, and
    Fundraising. Congregations may rename, add, or deactivate them.
 6. Transactions below $500 may be posted by an authorized Treasurer without a
-   second user. Transactions of $500 or more require approval by a different
-   authorized user. The creator cannot approve when independent approval is
-   required. Reversals, restricted-fund releases, period reopening, and year-end
-   closing always require independent approval. The threshold is configurable.
+   second user. Transactions of $500 or more normally require approval by a
+   different authorized user. Reversals, restricted-fund releases, period
+   reopening, and year-end closing also normally require independent approval.
+   Each organization chooses either `INDEPENDENT_REQUIRED` or
+   `INDEPENDENT_PREFERRED`. Under the preferred policy, an authorized solo
+   operator may approve with a required written reason; the audit event and
+   reports must identify the override. The threshold is configurable.
 7. Every disbursement requires a source-document reference. A digital receipt,
    invoice, or voucher is required at $250 or more. An authorized exception must
    include an audited reason. The threshold is configurable.

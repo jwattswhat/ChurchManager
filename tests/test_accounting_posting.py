@@ -6,14 +6,16 @@ from accounting.posting_service import AccountingPostingService
 
 
 class Cursor:
-    def __init__(self, status="APPROVED", creator=7, reviewer=8, total=Decimal("500")):
+    def __init__(self, status="APPROVED", creator=7, reviewer=8, total=Decimal("500"),
+                 original_id=None, override=False):
         self.status, self.creator, self.reviewer, self.total = status, creator, reviewer, total
+        self.original_id, self.override = original_id, override
         self.statements, self.one, self.rows, self.rowcount = [], None, [], 0
     def execute(self, sql, values=()):
         self.statements.append((sql, values))
         if sql.startswith("SELECT t.OrganizationID"):
             self.one = (1, 12, self.status, 4, self.creator, self.reviewer,
-                        Decimal("500"), 27, None)
+                        Decimal("500"), 27, self.original_id, self.override)
         elif sql.startswith("SELECT p.Status"):
             self.one = ("OPEN", "OPEN")
         elif sql.startswith("SELECT l.Debit"):
@@ -61,5 +63,19 @@ class TestAccountingPosting(unittest.TestCase):
     def test_ready_transaction_below_threshold_can_post_without_approval(self):
         connection = Connection(status="READY", reviewer=None, total=Decimal("25"))
         self.assertEqual(AccountingPostingService(connection, 9).post(41, 4), 27)
+
+    def test_reversal_can_post_after_audited_solo_override(self):
+        connection = Connection(status="APPROVED", creator=7, reviewer=7,
+                                total=Decimal("25"), original_id=41, override=True)
+        self.assertEqual(AccountingPostingService(connection, 7).post(52, 4), 27)
+        header_query = connection.cursor_value.statements[0][0]
+        self.assertIn("CAST(ae.EntityID AS UNSIGNED)=t.ID", header_query)
+        self.assertNotIn("CAST(t.ID AS CHAR)", header_query)
+
+    def test_reversal_rejects_same_user_without_override_audit(self):
+        connection = Connection(status="APPROVED", creator=7, reviewer=7,
+                                total=Decimal("25"), original_id=41, override=False)
+        with self.assertRaisesRegex(AccountingDraftError, "different user"):
+            AccountingPostingService(connection, 7).post(52, 4)
 
 if __name__ == "__main__": unittest.main()

@@ -18,7 +18,8 @@ class Cursor:
     def execute(self, sql, values=()):
         self.statements.append((sql, values))
         if sql.startswith("SELECT t.OrganizationID"):
-            self.one = (1, self.creator, "READY", 3, self.threshold, "JOURNAL")
+            self.one = (1, self.creator, "READY", 3, self.threshold, "JOURNAL",
+                        "INDEPENDENT_PREFERRED")
         elif sql.startswith("SELECT Debit, Credit"):
             self.rows = [(self.total, Decimal("0")), (Decimal("0"), self.total)]
         elif sql.startswith("UPDATE tblAccountingTransaction"):
@@ -60,7 +61,7 @@ class TestAccountingReview(unittest.TestCase):
         self.assertIn("ReviewedByUserID", sql)
         audit = next(item for item in connection.cursor_value.statements
                      if "INSERT INTO tblAccountingAuditEvent" in item[0])
-        self.assertIn("TRANSACTION_APPROVED", audit[0])
+        self.assertIn("TRANSACTION_APPROVED", audit[1])
 
     def test_creator_cannot_approve_at_or_above_threshold(self):
         connection = Connection(creator=7)
@@ -80,10 +81,37 @@ class TestAccountingReview(unittest.TestCase):
         def execute(sql, values=()):
             original(sql, values)
             if sql.startswith("SELECT t.OrganizationID"):
-                connection.cursor_value.one = (1, 7, "READY", 3, Decimal("500"), "REVERSAL")
+                connection.cursor_value.one = (1, 7, "READY", 3, Decimal("500"), "REVERSAL",
+                                               "INDEPENDENT_PREFERRED")
         connection.cursor_value.execute = execute
         with self.assertRaisesRegex(AccountingDraftError, "cannot approve"):
             AccountingReviewService(connection, 7).approve(52, 3)
+
+    def test_authorized_solo_override_requires_and_audits_reason(self):
+        connection = Connection(creator=7, total=Decimal("25"))
+        original = connection.cursor_value.execute
+        def execute(sql, values=()):
+            original(sql, values)
+            if sql.startswith("SELECT t.OrganizationID"):
+                connection.cursor_value.one = (1, 7, "READY", 3, Decimal("500"), "REVERSAL",
+                                               "INDEPENDENT_PREFERRED")
+        connection.cursor_value.execute = execute
+        with self.assertRaisesRegex(AccountingDraftError, "Enter a reason"):
+            AccountingReviewService(connection, 7).approve(52, 3, can_override=True)
+        connection = Connection(creator=7, total=Decimal("25"))
+        original = connection.cursor_value.execute
+        def execute_reason(sql, values=()):
+            original(sql, values)
+            if sql.startswith("SELECT t.OrganizationID"):
+                connection.cursor_value.one = (1, 7, "READY", 3, Decimal("500"), "REVERSAL",
+                                               "INDEPENDENT_PREFERRED")
+        connection.cursor_value.execute = execute_reason
+        AccountingReviewService(connection, 7).approve(
+            52, 3, "Only accounting operator available", can_override=True)
+        audit = next(item for item in connection.cursor_value.statements
+                     if "INSERT INTO tblAccountingAuditEvent" in item[0])
+        self.assertIn("TRANSACTION_APPROVED_OVERRIDE", audit[1])
+        self.assertIn("Only accounting operator available", audit[1])
 
     def test_review_is_a_separate_protected_read_only_screen(self):
         from pathlib import Path

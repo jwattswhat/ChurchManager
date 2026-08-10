@@ -54,7 +54,12 @@ class AccountingPostingService:
             self._execute(cursor,
                 "SELECT t.OrganizationID, t.FiscalPeriodID, t.Status, t.Version, "
                 "t.CreatedByUserID, t.ReviewedByUserID, o.ApprovalThreshold, "
-                "o.NextTransactionNumber, t.OriginalTransactionID FROM tblAccountingTransaction t "
+                "o.NextTransactionNumber, t.OriginalTransactionID, "
+                "EXISTS(SELECT 1 FROM tblAccountingAuditEvent ae WHERE "
+                "ae.EntityType='TRANSACTION' AND CAST(ae.EntityID AS UNSIGNED)=t.ID "
+                "AND ae.Action='TRANSACTION_APPROVED_OVERRIDE' "
+                "AND ae.UserID=t.ReviewedByUserID) AS HasApprovalOverride "
+                "FROM tblAccountingTransaction t "
                 "JOIN tblAccountingOrganization o ON o.ID=t.OrganizationID "
                 "WHERE t.ID=? FOR UPDATE", (transaction_id,))
             header = cursor.fetchone()
@@ -95,9 +100,12 @@ class AccountingPostingService:
                 if row[6] == "PROHIBITED" and row[7] is not None:
                     raise AccountingDraftError("A prohibited functional classification is present.")
             threshold = Decimal(header[6])
-            if (debit >= threshold or header[8] is not None) and (
-                header[2] != "APPROVED" or header[5] is None or header[5] == header[4]
-            ):
+            independent_required = debit >= threshold or header[8] is not None
+            valid_independent_approval = (
+                header[2] == "APPROVED" and header[5] is not None
+                and (header[5] != header[4] or bool(header[9]))
+            )
+            if independent_required and not valid_independent_approval:
                 raise AccountingDraftError(
                     "This transaction requires approval by a different user before posting."
                 )
