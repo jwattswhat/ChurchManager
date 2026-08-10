@@ -18,7 +18,7 @@ class Cursor:
     def execute(self, sql, values=()):
         self.statements.append((sql, values))
         if sql.startswith("SELECT t.OrganizationID"):
-            self.one = (1, self.creator, "READY", 3, self.threshold)
+            self.one = (1, self.creator, "READY", 3, self.threshold, "JOURNAL")
         elif sql.startswith("SELECT Debit, Credit"):
             self.rows = [(self.total, Decimal("0")), (Decimal("0"), self.total)]
         elif sql.startswith("UPDATE tblAccountingTransaction"):
@@ -73,6 +73,17 @@ class TestAccountingReview(unittest.TestCase):
         connection = Connection(creator=7, total=Decimal("499.99"))
         AccountingReviewService(connection, 7).approve(41, 3)
         self.assertEqual(connection.commits, 1)
+
+    def test_reversal_always_requires_an_independent_reviewer(self):
+        connection = Connection(creator=7, total=Decimal("25"))
+        original = connection.cursor_value.execute
+        def execute(sql, values=()):
+            original(sql, values)
+            if sql.startswith("SELECT t.OrganizationID"):
+                connection.cursor_value.one = (1, 7, "READY", 3, Decimal("500"), "REVERSAL")
+        connection.cursor_value.execute = execute
+        with self.assertRaisesRegex(AccountingDraftError, "cannot approve"):
+            AccountingReviewService(connection, 7).approve(52, 3)
 
     def test_review_is_a_separate_protected_read_only_screen(self):
         from pathlib import Path

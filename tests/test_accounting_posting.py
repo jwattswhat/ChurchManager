@@ -13,7 +13,7 @@ class Cursor:
         self.statements.append((sql, values))
         if sql.startswith("SELECT t.OrganizationID"):
             self.one = (1, 12, self.status, 4, self.creator, self.reviewer,
-                        Decimal("500"), 27)
+                        Decimal("500"), 27, None)
         elif sql.startswith("SELECT p.Status"):
             self.one = ("OPEN", "OPEN")
         elif sql.startswith("SELECT l.Debit"):

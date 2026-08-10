@@ -61,7 +61,7 @@ class AccountingReviewService:
             self._execute(
                 cursor,
                 "SELECT t.OrganizationID, t.CreatedByUserID, t.Status, t.Version, "
-                "o.ApprovalThreshold FROM tblAccountingTransaction t "
+                "o.ApprovalThreshold, t.TransactionType FROM tblAccountingTransaction t "
                 "JOIN tblAccountingOrganization o ON o.ID=t.OrganizationID "
                 "WHERE t.ID=? FOR UPDATE",
                 (transaction_id,),
@@ -85,7 +85,7 @@ class AccountingReviewService:
             if len(lines) < 2 or debit <= 0 or debit != credit:
                 raise AccountingDraftError("The stored transaction is not balanced.")
             threshold = Decimal(header[4])
-            if debit >= threshold and header[1] == self.acting_user_id:
+            if (debit >= threshold or header[5] == "REVERSAL") and header[1] == self.acting_user_id:
                 raise AccountingDraftError(
                     "You cannot approve a transaction you created under the current approval policy."
                 )

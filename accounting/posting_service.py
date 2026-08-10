@@ -54,7 +54,7 @@ class AccountingPostingService:
             self._execute(cursor,
                 "SELECT t.OrganizationID, t.FiscalPeriodID, t.Status, t.Version, "
                 "t.CreatedByUserID, t.ReviewedByUserID, o.ApprovalThreshold, "
-                "o.NextTransactionNumber FROM tblAccountingTransaction t "
+                "o.NextTransactionNumber, t.OriginalTransactionID FROM tblAccountingTransaction t "
                 "JOIN tblAccountingOrganization o ON o.ID=t.OrganizationID "
                 "WHERE t.ID=? FOR UPDATE", (transaction_id,))
             header = cursor.fetchone()
@@ -95,7 +95,7 @@ class AccountingPostingService:
                 if row[6] == "PROHIBITED" and row[7] is not None:
                     raise AccountingDraftError("A prohibited functional classification is present.")
             threshold = Decimal(header[6])
-            if debit >= threshold and (
+            if (debit >= threshold or header[8] is not None) and (
                 header[2] != "APPROVED" or header[5] is None or header[5] == header[4]
             ):
                 raise AccountingDraftError(
@@ -117,6 +117,9 @@ class AccountingPostingService:
                 raise AccountingDraftError(
                     "This transaction changed after you opened it. Reload before posting."
                 )
+            if header[8] is not None:
+                self._execute(cursor, "UPDATE tblAccountingTransaction SET Status='REVERSED', ReversalTransactionID=?, Version=Version+1 WHERE ID=? AND Status='POSTED' AND ReversalTransactionID IS NULL", (transaction_id, header[8]))
+                if cursor.rowcount != 1: raise AccountingDraftError("The original transaction can no longer be reversed.")
             after = json.dumps({"status":"POSTED", "transaction_number":number,
                                 "total":str(debit)}, separators=(",", ":"))
             self._execute(cursor,
