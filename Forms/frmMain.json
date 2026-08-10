@@ -562,7 +562,7 @@
                 "type": "StaticBox",
                 "label": "Accounting",
                 "posch": [34, 8],
-                "sizech": [15, 4]
+                "sizech": [15, 5]
             },
             "lblAccountingSetup": {
                 "name": "lblAccountingSetup",
@@ -578,6 +578,14 @@
                 "label": "Chart of Accounts",
                 "posch": [35, 10],
                 "tooltip": "Review and maintain the chart of accounts.",
+                "security": { "invoke": "accounting.master_data.manage" }
+            },
+            "lblAccountingFunds": {
+                "name": "lblAccountingFunds",
+                "type": "StaticText",
+                "label": "Funds and Restrictions",
+                "posch": [35, 11],
+                "tooltip": "Review and maintain accounting funds and restrictions.",
                 "security": { "invoke": "accounting.master_data.manage" }
             }
         }

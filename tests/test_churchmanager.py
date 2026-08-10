@@ -386,6 +386,21 @@ class TestChurchManagerForms(unittest.TestCase):
         fields = definition["FORM"]["table"]["fields"]
         self.assertEqual(fields, ["*"])
 
+    def test_funds_are_a_protected_jsform_route(self):
+        from main_menu import FORM_ROUTES
+
+        self.assertEqual(FORM_ROUTES["lblAccountingFunds"], "frmAccountingFund")
+        definition = load_json(FORMS / "frmAccountingFund.json")[
+            "frmAccountingFundFORM"
+        ]
+        self.assertEqual(
+            set(definition["FORM"]["security"].values()),
+            {"accounting.master_data.manage"},
+        )
+        controls = definition["CONTROLS"]
+        self.assertIn("WITH_DONOR_RESTRICTIONS", controls["NetAssetClass"]["choices"])
+        self.assertIn("BoardDesignated", controls)
+
     def test_forms_match_jsform_canonical_schema(self):
         from jsonschema import validate
 

@@ -26,6 +26,7 @@ FORM_ROUTES = {
     "lblDocument": "frmDocument",
     "lblAnnouncement": "frmAnnouncement",
     "lblAccountingAccounts": "frmAccountingAccount",
+    "lblAccountingFunds": "frmAccountingFund",
 }
 
 SPECIAL_CONTROLS = {

@@ -1,0 +1,140 @@
+{
+    "frmAccountingFundFORM": {
+        "FORM": {
+            "name": "frmAccountingFund",
+            "type": "Panel",
+            "title": "Funds and Restrictions",
+            "posch": [-1, -1],
+            "sizech": [52, 34],
+            "stylelist": ["CAPTION"],
+            "layout": { "type": "legacy" },
+            "table": {
+                "name": "tblAccountingFund",
+                "fields": ["*"],
+                "orderby": "OrganizationID, Code"
+            },
+            "security": {
+                "open": "accounting.master_data.manage",
+                "create": "accounting.master_data.manage",
+                "update": "accounting.master_data.manage",
+                "delete": "accounting.master_data.manage"
+            }
+        },
+        "CONTROLS": {
+            "lblOrganizationID": {
+                "name": "lblOrganizationID", "type": "StaticText",
+                "label": "Organization:", "posch": [1, 1]
+            },
+            "OrganizationID": {
+                "name": "OrganizationID", "type": "ComboBox",
+                "posch": [12, 1], "sizech": [36, 2],
+                "lookupchoices": {
+                    "name": "tblAccountingOrganization",
+                    "fields": ["ID", "LegalName"],
+                    "condition": "Active = 1", "orderby": "LegalName"
+                },
+                "tooltip": "Select the accounting organization."
+            },
+            "lblCode": {
+                "name": "lblCode", "type": "StaticText",
+                "label": "Fund code:", "posch": [1, 3]
+            },
+            "Code": {
+                "name": "Code", "type": "TextCtrl",
+                "posch": [12, 3], "sizech": [14, 2],
+                "tooltip": "Enter the stable fund code."
+            },
+            "lblName": {
+                "name": "lblName", "type": "StaticText",
+                "label": "Fund name:", "posch": [1, 5]
+            },
+            "Name": {
+                "name": "Name", "type": "TextCtrl",
+                "posch": [12, 5], "sizech": [36, 2],
+                "tooltip": "Enter the fund name."
+            },
+            "lblNetAssetClass": {
+                "name": "lblNetAssetClass", "type": "StaticText",
+                "label": "Net asset class:", "posch": [1, 7]
+            },
+            "NetAssetClass": {
+                "name": "NetAssetClass", "type": "ComboBox",
+                "posch": [12, 7], "sizech": [30, 2],
+                "choices": ["WITHOUT_DONOR_RESTRICTIONS", "WITH_DONOR_RESTRICTIONS"],
+                "tooltip": "Choose whether donor restrictions apply."
+            },
+            "lblRestrictionType": {
+                "name": "lblRestrictionType", "type": "StaticText",
+                "label": "Restriction type:", "posch": [1, 9]
+            },
+            "RestrictionType": {
+                "name": "RestrictionType", "type": "ComboBox",
+                "posch": [12, 9], "sizech": [24, 2],
+                "choices": ["NONE", "PURPOSE", "TIME", "PURPOSE_AND_TIME"],
+                "tooltip": "Choose the donor restriction type."
+            },
+            "BoardDesignated": {
+                "name": "BoardDesignated", "type": "CheckBox",
+                "label": "Board-designated", "posch": [12, 11],
+                "tooltip": "Use only for net assets without donor restrictions."
+            },
+            "Active": {
+                "name": "Active", "type": "CheckBox",
+                "label": "Active", "posch": [26, 11],
+                "tooltip": "Make this fund available for current use."
+            },
+            "lblNetAssetAccountID": {
+                "name": "lblNetAssetAccountID", "type": "StaticText",
+                "label": "Net asset account:", "posch": [1, 13]
+            },
+            "NetAssetAccountID": {
+                "name": "NetAssetAccountID", "type": "ComboBox",
+                "posch": [12, 13], "sizech": [36, 2],
+                "lookupchoices": {
+                    "name": "tblAccountingAccount",
+                    "fields": ["ID", "Code", "Name"],
+                    "condition": "AccountType = 'NET_ASSET' AND Active = 1",
+                    "orderby": "Code"
+                },
+                "tooltip": "Select the net-asset account for this fund."
+            },
+            "lblRestrictionText": {
+                "name": "lblRestrictionText", "type": "StaticText",
+                "label": "Restriction or designation:", "posch": [1, 15]
+            },
+            "RestrictionText": {
+                "name": "RestrictionText", "type": "MultiLine",
+                "posch": [12, 15], "sizech": [36, 6],
+                "tooltip": "Describe the donor restriction or board designation."
+            },
+            "lblEffectiveFrom": {
+                "name": "lblEffectiveFrom", "type": "StaticText",
+                "label": "Effective from:", "posch": [1, 22]
+            },
+            "EffectiveFrom": {
+                "name": "EffectiveFrom", "type": "DateTime",
+                "posch": [12, 22], "sizech": [20, 2],
+                "stylelist": ["ALLOWNONE"]
+            },
+            "lblEffectiveUntil": {
+                "name": "lblEffectiveUntil", "type": "StaticText",
+                "label": "Effective until:", "posch": [1, 24]
+            },
+            "EffectiveUntil": {
+                "name": "EffectiveUntil", "type": "DateTime",
+                "posch": [12, 24], "sizech": [20, 2],
+                "stylelist": ["ALLOWNONE"]
+            },
+            "lblClosedDate": {
+                "name": "lblClosedDate", "type": "StaticText",
+                "label": "Closed date:", "posch": [1, 26]
+            },
+            "ClosedDate": {
+                "name": "ClosedDate", "type": "DateTime",
+                "posch": [12, 26], "sizech": [20, 2],
+                "stylelist": ["ALLOWNONE"],
+                "tooltip": "A closed fund cannot receive later postings."
+            }
+        }
+    }
+}
