@@ -1,7 +1,7 @@
 # ChurchManager Double-Entry Fund Accounting Specification
 
-**Status:** Draft for review  
-**Version:** 0.1  
+**Status:** Approved
+**Version:** 1.0
 **Date:** August 10, 2026  
 **Target application:** ChurchManager  
 **Application framework:** JSForm  
@@ -739,25 +739,58 @@ The MVP is accepted only when all of the following are demonstrated:
 - Accounts payable/check workflow.
 - Recurring entries, fixed assets, bank import, or payroll import as separately approved work.
 
-## 24. Decisions required before implementation
+## 24. Approved starter policies
 
-The following choices remain intentionally open:
+ChurchManager is congregation-neutral. These are configurable starter defaults,
+not assumptions about Life in Christ or any other specific congregation.
 
-1. The church's fiscal year.
-2. Cash, modified cash, or accrual reporting policy used in practice.
-3. Initial chart of accounts and numbering convention.
-4. Initial fund list and which funds represent donor restrictions versus board designations.
-5. Required functional classifications.
-6. Whether each transaction needs independent approval or only transactions above a threshold.
-7. Approval thresholds and authorized roles.
-8. Whether attachments are mandatory for disbursements and above what amount.
-9. Whether the MVP includes accounts payable or uses direct cash-disbursement entries.
-10. Whether individual contribution tracking belongs in the first release or a later release.
-11. Required comparative reports and congregational presentation format.
-12. Data-retention and attachment-retention policy.
-13. Exact deployment target and backup location.
+1. The fiscal year is January 1 through December 31.
+2. Operational reporting uses modified cash basis while the double-entry ledger
+   remains accrual-capable.
+3. The starter account ranges are 1000-1999 Assets, 2000-2999 Liabilities,
+   3000-3999 Net Assets, 4000-4999 Revenue, 5000-7999 Expenses, and 8000-8999
+   Interfund Transfers and Other Activity.
+4. The starter funds are General Operating, Operating Reserve, Building / Capital
+   Projects, Missions / Outreach, Benevolence, Memorials / Special Gifts, and an
+   optional inactive Endowment. General Operating begins without donor
+   restrictions and Operating Reserve begins board-designated without donor
+   restrictions. Every other special-purpose fund requires an explicit
+   classification during setup; classification is never inferred from its name.
+5. The starter functions are Worship, Christian Education, Outreach and
+   Missions, Pastoral Care and Mercy, Fellowship, Management and General, and
+   Fundraising. Congregations may rename, add, or deactivate them.
+6. Transactions below $500 may be posted by an authorized Treasurer without a
+   second user. Transactions of $500 or more require approval by a different
+   authorized user. The creator cannot approve when independent approval is
+   required. Reversals, restricted-fund releases, period reopening, and year-end
+   closing always require independent approval. The threshold is configurable.
+7. Every disbursement requires a source-document reference. A digital receipt,
+   invoice, or voucher is required at $250 or more. An authorized exception must
+   include an audited reason. The threshold is configurable.
+8. The first release uses direct cash-disbursement entries. Full accounts payable
+   is deferred.
+9. Individual contribution tracking is deferred to a confidential subledger.
+   The first release records summarized contribution deposits in the ledger.
+10. Initial reports are actual-versus-budget for month and year to date,
+    current-versus-prior year, statement of financial position, statement of
+    activities, fund activity and balances, general ledger, trial balance,
+    transaction register, and bank reconciliation summary. Reports support
+    congregation-friendly and accountant-detail presentation where appropriate.
+11. Posted ledger entries, reversals, audit history, annual statements, closing
+    records, restriction and endowment records, and relevant property-basis
+    records are permanent. Routine financial support records are retained for
+    seven years after fiscal-year close. The first release never deletes records
+    automatically; authorized disposition is documented and congregation policy,
+    law, grant terms, insurance requirements, and legal holds may extend retention.
+12. The initial deployment is a Windows desktop client with MariaDB/MySQL on the
+    same computer or a congregation-controlled server. Attachments use a protected
+    configurable folder outside source code. Backups include a local copy and an
+    encrypted second copy on a different device or approved cloud service. Test
+    databases and attachment folders remain separate. No server address, account,
+    drive, or cloud provider is assumed.
 
-These decisions affect configuration and release scope, but they do not change the core requirement for an immutable, balanced, auditable double-entry ledger.
+These defaults do not change the core requirement for an immutable, balanced,
+auditable double-entry ledger.
 
 ## 25. Authoritative references
 
@@ -767,4 +800,3 @@ These decisions affect configuration and release scope, but they do not change t
 - Internal Revenue Service, Publication 1828, *Tax Guide for Churches and Religious Organizations*.
 
 These references establish reporting and recordkeeping context. The church's accountant, governing documents, adopted policies, donor instruments, grant terms, and applicable law remain authoritative for the church's particular accounting decisions.
-
