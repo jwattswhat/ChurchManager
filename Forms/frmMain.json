@@ -433,6 +433,19 @@
                 "label": "CheckLists",
                 "tooltip": "Open the checklists form."
             },
+            "lblUsers": {
+                "name": "lblUsers",
+                "type": "StaticText",
+                "label": "Users and Roles",
+                "posch": [
+                    19,
+                    24
+                ],
+                "tooltip": "Manage ChurchManager users and role assignments.",
+                "security": {
+                    "invoke": "security.users.manage"
+                }
+            },
             "JSFormUtilitiesBox": {
                 "name": "JSFormUtilitiesBox",
                 "type": "StaticBox",

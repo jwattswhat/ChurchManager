@@ -173,5 +173,19 @@ class TestAuthorizationPolicy(unittest.TestCase):
         self.assertTrue(session.must_change_password)
 
 
+class TestUserAdministrationRules(unittest.TestCase):
+    def test_last_active_master_cannot_be_disabled(self):
+        from user_admin import UserAdministrationService
+
+        with self.assertRaisesRegex(ValueError, "last active master"):
+            UserAdministrationService.ensure_can_disable(True, 1)
+
+    def test_ordinary_or_redundant_master_accounts_can_be_disabled(self):
+        from user_admin import UserAdministrationService
+
+        UserAdministrationService.ensure_can_disable(False, 1)
+        UserAdministrationService.ensure_can_disable(True, 2)
+
+
 if __name__ == "__main__":
     unittest.main()

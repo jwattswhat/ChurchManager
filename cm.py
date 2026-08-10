@@ -16,6 +16,7 @@ from main_menu import FORM_ROUTES, MENU_CONTROLS
 from backup_service import BackupError, BackupService
 from process_service import ProcessService
 from report_service import ChurchManagerReportService
+from user_admin import show_user_administration
 from types import SimpleNamespace
 
 
@@ -433,6 +434,10 @@ def _buttonclick(event):
             return
         case "lblBackupDB":
             _runBackupDB()
+        case "lblUsers":
+            show_user_administration(
+                cmfrm.FRAME, context.connection, context.session, context.authorization
+            )
         case _:
             raise KeyError("No ChurchManager menu route for {}".format(select))
 

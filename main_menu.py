@@ -30,6 +30,7 @@ FORM_ROUTES = {
 SPECIAL_CONTROLS = {
     "lblGenerateOS", "lblNotifyParticipants", "lblSundayPrayers",
     "lblAnnouncements", "lblServiceSchedule", "lblReports", "lblBackupDB",
+    "lblUsers",
 }
 MENU_CONTROLS = frozenset(FORM_ROUTES) | SPECIAL_CONTROLS
 

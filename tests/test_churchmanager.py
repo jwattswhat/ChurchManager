@@ -41,6 +41,7 @@ OPERATIONAL_MODULES = (
     "main_menu.py",
     "startup.py",
     "login_dialog.py",
+    "user_admin.py",
     "process_service.py",
     "backup_service.py",
     "report_service.py",
@@ -339,6 +340,13 @@ class TestChurchManagerConfiguration(unittest.TestCase):
 
 
 class TestChurchManagerForms(unittest.TestCase):
+    def test_user_administration_is_a_protected_main_menu_action(self):
+        definition = next(iter(load_json(FORMS / "frmMain.json").values()))
+        control = definition["CONTROLS"]["lblUsers"]
+        self.assertEqual(control["security"]["invoke"], "security.users.manage")
+        from main_menu import MENU_CONTROLS
+        self.assertIn("lblUsers", MENU_CONTROLS)
+
     def test_forms_match_jsform_canonical_schema(self):
         from jsonschema import validate
 
