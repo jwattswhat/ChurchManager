@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 
 import wx
@@ -82,6 +83,82 @@ class UserAdministrationService:
                 (user_id,),
             )
             return {row[0] for row in cursor.fetchall()}
+        finally:
+            cursor.close()
+
+    def list_editable_roles(self):
+        cursor = self._cursor()
+        try:
+            self.repository._execute(
+                cursor,
+                "SELECT ID, Name, Description FROM tblRole "
+                "WHERE Active=1 AND Name <> 'Master Administrator' ORDER BY Name",
+            )
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def list_permissions(self):
+        cursor = self._cursor()
+        try:
+            self.repository._execute(
+                cursor,
+                "SELECT ID, Name, Description, IsSensitive FROM tblPermission "
+                "WHERE Active=1 ORDER BY Name",
+            )
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def permission_ids_for_role(self, role_id):
+        cursor = self._cursor()
+        try:
+            self.repository._execute(
+                cursor, "SELECT PermissionID FROM tblRolePermission WHERE RoleID=?",
+                (role_id,),
+            )
+            return {row[0] for row in cursor.fetchall()}
+        finally:
+            cursor.close()
+
+    def set_role_permissions(self, role_id, permission_ids):
+        cursor = self._cursor()
+        try:
+            self.repository._execute(
+                cursor, "SELECT Name FROM tblRole WHERE ID=? AND Active=1", (role_id,)
+            )
+            row = cursor.fetchone()
+            if not row:
+                raise ValueError("The selected role no longer exists.")
+            if row[0] == "Master Administrator":
+                raise ValueError("Master Administrator permissions are inherent and cannot be edited.")
+            before = sorted(self.permission_ids_for_role(role_id))
+            requested = sorted(set(permission_ids))
+            self.repository._execute(
+                cursor, "DELETE FROM tblRolePermission WHERE RoleID=?", (role_id,)
+            )
+            for permission_id in requested:
+                self.repository._execute(
+                    cursor,
+                    "INSERT INTO tblRolePermission "
+                    "(RoleID, PermissionID, AssignedByUserID) "
+                    "SELECT ?, ID, ? FROM tblPermission WHERE ID=? AND Active=1",
+                    (role_id, self.acting_user_id, permission_id),
+                )
+            self.repository._execute(
+                cursor,
+                "INSERT INTO tblSecurityAuditEvent "
+                "(UserID, Action, EntityType, EntityID, BeforeJSON, AfterJSON) "
+                "VALUES (?, 'ROLE_PERMISSIONS_CHANGED', 'Role', ?, ?, ?)",
+                (
+                    self.acting_user_id, str(role_id), json.dumps(before),
+                    json.dumps(requested),
+                ),
+            )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
         finally:
             cursor.close()
 
@@ -268,10 +345,58 @@ class NewUserDialog(PasswordEntryDialog):
         self.SetSizerAndFit(root)
 
 
-class UserAdministrationDialog(wx.Dialog):
+class RolePermissionDialog(wx.Dialog):
     def __init__(self, parent, service):
+        super().__init__(parent, title="Role Permissions", size=(760, 560))
+        self.service = service
+        self.roles = service.list_editable_roles()
+        self.permissions = service.list_permissions()
+        self.role = wx.Choice(self, choices=[role[1] for role in self.roles])
+        self.role.Bind(wx.EVT_CHOICE, self.on_role_changed)
+        self.permission_list = wx.CheckListBox(
+            self,
+            choices=[
+                "{}{} — {}".format("Sensitive: " if item[3] else "", item[1], item[2] or "")
+                for item in self.permissions
+            ],
+        )
+        buttons = self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL)
+        root = wx.BoxSizer(wx.VERTICAL)
+        root.Add(wx.StaticText(self, label="Role"), 0, wx.LEFT | wx.TOP, 12)
+        root.Add(self.role, 0, wx.ALL | wx.EXPAND, 10)
+        root.Add(wx.StaticText(self, label="Permissions"), 0, wx.LEFT, 12)
+        root.Add(self.permission_list, 1, wx.ALL | wx.EXPAND, 10)
+        root.Add(buttons, 0, wx.ALL | wx.EXPAND, 10)
+        self.SetSizer(root)
+        if self.roles:
+            self.role.SetSelection(0)
+            self.load_permissions()
+
+    def on_role_changed(self, event):
+        self.load_permissions()
+
+    def load_permissions(self):
+        role_id = self.roles[self.role.GetSelection()][0]
+        assigned = self.service.permission_ids_for_role(role_id)
+        for index, permission in enumerate(self.permissions):
+            self.permission_list.Check(index, permission[0] in assigned)
+
+    def save(self):
+        if not self.roles:
+            return
+        role_id = self.roles[self.role.GetSelection()][0]
+        selected = [
+            permission[0] for index, permission in enumerate(self.permissions)
+            if self.permission_list.IsChecked(index)
+        ]
+        self.service.set_role_permissions(role_id, selected)
+
+
+class UserAdministrationDialog(wx.Dialog):
+    def __init__(self, parent, service, authorization):
         super().__init__(parent, title="ChurchManager User Administration", size=(850, 430))
         self.service = service
+        self.authorization = authorization
         self.users = []
         self.list = wx.ListCtrl(self, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         for index, (label, width) in enumerate((
@@ -284,6 +409,7 @@ class UserAdministrationDialog(wx.Dialog):
             ("New User", self.on_new), ("Roles", self.on_roles),
             ("Enable/Disable", self.on_active), ("Unlock", self.on_unlock),
             ("Reset Password", self.on_reset),
+            ("Role Permissions", self.on_role_permissions),
         )
         for label, handler in actions:
             button = wx.Button(self, label=label)
@@ -389,11 +515,28 @@ class UserAdministrationDialog(wx.Dialog):
             dialog.Destroy()
         self.refresh()
 
+    def on_role_permissions(self, event):
+        try:
+            self.authorization.require(
+                "security.roles.manage", "manage role permissions"
+            )
+        except PermissionError as error:
+            self.show_error(error)
+            return
+        dialog = RolePermissionDialog(self, self.service)
+        try:
+            if dialog.ShowModal() == wx.ID_OK:
+                dialog.save()
+        except (ValueError, RuntimeError) as error:
+            self.show_error(error)
+        finally:
+            dialog.Destroy()
+
 
 def show_user_administration(parent, connection, session, authorization):
     authorization.require("security.users.manage", "manage ChurchManager users")
     service = UserAdministrationService(connection, session.user_id)
-    dialog = UserAdministrationDialog(parent, service)
+    dialog = UserAdministrationDialog(parent, service, authorization)
     try:
         dialog.ShowModal()
     finally:

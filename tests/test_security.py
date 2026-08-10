@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 import unittest
 
 from authentication import (
@@ -185,6 +186,14 @@ class TestUserAdministrationRules(unittest.TestCase):
 
         UserAdministrationService.ensure_can_disable(False, 1)
         UserAdministrationService.ensure_can_disable(True, 2)
+
+    def test_role_permission_editor_preserves_inherent_master_access(self):
+        source = (Path(__file__).parents[1] / "user_admin.py").read_text(
+            encoding="utf-8-sig"
+        )
+        self.assertIn("Master Administrator permissions are inherent", source)
+        self.assertIn("ROLE_PERMISSIONS_CHANGED", source)
+        self.assertIn('"security.roles.manage"', source)
 
 
 if __name__ == "__main__":
