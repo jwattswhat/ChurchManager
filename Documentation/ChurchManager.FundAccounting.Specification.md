@@ -115,6 +115,22 @@ Every account has a stable code, name, type, normal balance, report grouping, an
 4. Revenue.
 5. Expense.
 
+The congregation-neutral starter chart is:
+
+| Range | Starter accounts |
+| --- | --- |
+| Assets | 1000 Checking; 1100 Savings; 1200 Accounts Receivable; 1300 Prepaid Expenses; 1500 Property and Equipment; 1590 Accumulated Depreciation |
+| Liabilities | 2000 Accounts Payable; 2100 Payroll and Other Withholdings; 2200 Accrued Expenses; 2300 Deferred Revenue; 2500 Loans Payable |
+| Net assets | 3000 Net Assets Without Donor Restrictions; 3100 Board-Designated Net Assets; 3200 Net Assets With Donor Restrictions |
+| Revenue | 4000 General Contributions; 4100 Restricted Contributions; 4200 Grants; 4300 Program and Event Income; 4400 Interest and Investment Income; 4900 Other Income |
+| Expenses | 5000 Pastoral Compensation; 5100 Other Salaries and Wages; 5200 Employee Benefits; 5300 Worship; 5400 Christian Education; 5500 Missions and Benevolence; 5600 Property and Utilities; 5700 Office and Administration; 5800 Insurance and Professional Services; 5900 Fundraising; 6000 Depreciation; 6900 Other Expenses |
+| Transfers | 8000 Transfers Out; 8100 Transfers In |
+
+Accounts Receivable, Accounts Payable, Deferred Revenue, Accumulated
+Depreciation, and Depreciation begin inactive under the modified-cash starter
+policy. A congregation reviews, renames, subdivides, activates, or deactivates
+the starter accounts during setup.
+
 Account codes are strings, not integers, so codes such as `1000`, `1000.10`, or `01-1000` retain their formatting. Codes must be unique within the organization.
 
 An account may be a posting account or a heading. Only posting accounts may appear on journal lines. Accounts with posted activity cannot be deleted; they may be deactivated.
