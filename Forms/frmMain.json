@@ -562,7 +562,7 @@
                 "type": "StaticBox",
                 "label": "Accounting",
                 "posch": [34, 8],
-                "sizech": [15, 8]
+                "sizech": [15, 9]
             },
             "lblAccountingSetup": {
                 "name": "lblAccountingSetup",
@@ -607,6 +607,12 @@
                 "label": "Fiscal Periods", "posch": [35, 14],
                 "tooltip": "Review and maintain accounting fiscal periods.",
                 "security": { "invoke": "accounting.master_data.manage" }
+            },
+            "lblAccountingTransactions": {
+                "name": "lblAccountingTransactions", "type": "StaticText",
+                "label": "Transaction Entry", "posch": [35, 15],
+                "tooltip": "Create a balanced accounting draft.",
+                "security": { "invoke": "accounting.transactions.create" }
             }
         }
     }

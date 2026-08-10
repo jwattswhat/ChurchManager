@@ -603,9 +603,14 @@ class UserAdministrationDialog(wx.Dialog):
             dialog.Destroy()
 
 
-def show_user_administration(parent, connection, session, authorization):
+def show_user_administration(
+    parent, connection, session, authorization, minimum_length=12
+):
     authorization.require("security.users.manage", "manage ChurchManager users")
-    service = UserAdministrationService(connection, session.user_id)
+    service = UserAdministrationService(
+        connection, session.user_id,
+        passwords=PasswordService(minimum_length=minimum_length),
+    )
     dialog = UserAdministrationDialog(parent, service, authorization)
     try:
         dialog.ShowModal()

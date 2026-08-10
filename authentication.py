@@ -16,7 +16,7 @@ class AuthenticationError(RuntimeError):
 class PasswordService:
     """Argon2id password hashing isolated behind a small application interface."""
 
-    def __init__(self, hasher=None):
+    def __init__(self, hasher=None, minimum_length=12):
         if hasher is None:
             try:
                 from argon2 import PasswordHasher
@@ -26,10 +26,15 @@ class PasswordService:
                 ) from error
             hasher = PasswordHasher()
         self._hasher = hasher
+        self.minimum_length = int(minimum_length)
 
     def hash(self, password: str) -> str:
-        if len(password) < 12:
-            raise ValueError("A ChurchManager password must contain at least 12 characters.")
+        if len(password) < self.minimum_length:
+            raise ValueError(
+                "A ChurchManager password must contain at least {} characters.".format(
+                    self.minimum_length
+                )
+            )
         return self._hasher.hash(password)
 
     def verify(self, password_hash: str, password: str) -> bool:

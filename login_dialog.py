@@ -129,10 +129,10 @@ def require_password_change(repository, passwords, session, parent=None):
             _message(parent, str(error), "Change password")
 
 
-def change_own_password(connection, session, parent=None):
+def change_own_password(connection, session, parent=None, minimum_length=12):
     """Change the signed-in user's password after verifying the current one."""
     repository = MariaDBUserRepository(connection)
-    passwords = PasswordService()
+    passwords = PasswordService(minimum_length=minimum_length)
     dialog = ChangeOwnPasswordDialog(parent)
     try:
         if dialog.ShowModal() != wx.ID_OK:
@@ -161,10 +161,10 @@ def change_own_password(connection, session, parent=None):
     return True
 
 
-def authenticate_user(connection, parent=None):
+def authenticate_user(connection, parent=None, minimum_length=12):
     """Run initial setup if needed, then return an authenticated session or None."""
     repository = MariaDBUserRepository(connection)
-    passwords = PasswordService()
+    passwords = PasswordService(minimum_length=minimum_length)
     if not ensure_initial_master(repository, passwords, parent):
         return None
     service = AuthenticationService(repository, passwords)

@@ -1,0 +1,172 @@
+from datetime import date
+from decimal import Decimal
+import unittest
+
+from accounting.draft_service import AccountingDraftError, AccountingDraftService
+from accounting.models import JournalLine, JournalTransaction
+
+
+class Cursor:
+    def __init__(self, period_rows=((12,),)):
+        self.period_rows = period_rows
+        self.rows = []
+        self.statements = []
+        self.lastrowid = 41
+        self.rowcount = 0
+        self.one = None
+
+    def execute(self, sql, values=()):
+        self.statements.append((sql, values))
+        self.rows = self.period_rows if sql.startswith("SELECT p.ID") else []
+        if sql.startswith("SELECT Version"):
+            self.one = (2, 7, "DRAFT")
+        elif sql.startswith("UPDATE tblAccountingTransaction"):
+            self.rowcount = 1
+
+    def fetchone(self):
+        return self.one
+
+    def fetchall(self):
+        return self.rows
+
+    def close(self):
+        pass
+
+
+class Connection:
+    def __init__(self, period_rows=((12,),)):
+        self.cursor_value = Cursor(period_rows)
+        self.commits = 0
+        self.rollbacks = 0
+
+    def cursor(self):
+        return self.cursor_value
+
+    def commit(self):
+        self.commits += 1
+
+    def rollback(self):
+        self.rollbacks += 1
+
+
+def balanced(transaction_type="CASH_DISBURSEMENT", reference="Invoice 17"):
+    return JournalTransaction(
+        organization_id=1,
+        transaction_date=date(2027, 1, 15),
+        transaction_type=transaction_type,
+        description="Office supplies",
+        reference=reference,
+        lines=(
+            JournalLine(1, 20, 3, debit=Decimal("25.00")),
+            JournalLine(2, 10, 3, credit=Decimal("25.00")),
+        ),
+    )
+
+
+class TestAccountingDraftService(unittest.TestCase):
+    def test_line_dialog_uses_one_amount_and_a_debit_credit_selector(self):
+        from pathlib import Path
+
+        source = (Path(__file__).parents[1] / "accounting" / "draft_dialog.py").read_text(
+            encoding="utf-8-sig"
+        )
+        self.assertIn('choices=["Debit", "Credit"]', source)
+        self.assertIn("Enter one positive amount", source)
+        self.assertIn("debit = amount if", source)
+        self.assertNotIn("self.credit = wx.TextCtrl", source)
+
+    def test_transaction_grid_columns_fit_inside_dialog(self):
+        from pathlib import Path
+
+        source = (Path(__file__).parents[1] / "accounting" / "draft_dialog.py").read_text(
+            encoding="utf-8-sig"
+        )
+        self.assertIn('size=(980, 650)', source)
+        widths = (35, 175, 135, 120, 110, 150, 80, 80)
+        self.assertLess(sum(widths), 980 - 40)
+
+    def test_balanced_draft_saves_header_lines_and_audit_atomically(self):
+        connection = Connection()
+        transaction_id = AccountingDraftService(connection, 7).create(balanced())
+        self.assertEqual(transaction_id, 41)
+        self.assertEqual(connection.commits, 1)
+        self.assertEqual(connection.rollbacks, 0)
+        sql = "\n".join(item[0] for item in connection.cursor_value.statements)
+        self.assertIn("INSERT INTO tblAccountingTransaction ", sql)
+        self.assertEqual(sql.count("INSERT INTO tblAccountingTransactionLine "), 2)
+        audit = next(item for item in connection.cursor_value.statements
+                     if "INSERT INTO tblAccountingAuditEvent" in item[0])
+        self.assertIn("DRAFT_CREATED", audit[1])
+
+    def test_update_replaces_lines_and_increments_version_atomically(self):
+        connection = Connection()
+        version = AccountingDraftService(connection, 7).update(41, 2, balanced())
+        self.assertEqual(version, 3)
+        self.assertEqual(connection.commits, 1)
+        sql = "\n".join(item[0] for item in connection.cursor_value.statements)
+        self.assertIn("WHERE ID=? FOR UPDATE", sql)
+        self.assertIn("Version=Version+1", sql)
+        self.assertIn("DELETE FROM tblAccountingTransactionLine", sql)
+        audit = next(item for item in connection.cursor_value.statements
+                     if "INSERT INTO tblAccountingAuditEvent" in item[0])
+        self.assertIn("DRAFT_UPDATED", audit[1])
+
+    def test_update_rejects_stale_version_and_rolls_back(self):
+        connection = Connection()
+        with self.assertRaisesRegex(AccountingDraftError, "changed after"):
+            AccountingDraftService(connection, 7).update(41, 1, balanced())
+        self.assertEqual(connection.commits, 0)
+        self.assertEqual(connection.rollbacks, 1)
+
+    def test_update_rejects_another_users_draft(self):
+        connection = Connection()
+        connection.cursor_value.one = (2, 8, "DRAFT")
+        original_execute = connection.cursor_value.execute
+        def execute(sql, values=()):
+            original_execute(sql, values)
+            if sql.startswith("SELECT Version"):
+                connection.cursor_value.one = (2, 8, "DRAFT")
+        connection.cursor_value.execute = execute
+        with self.assertRaisesRegex(AccountingDraftError, "only drafts"):
+            AccountingDraftService(connection, 7).update(41, 2, balanced())
+        self.assertEqual(connection.rollbacks, 1)
+
+    def test_dialog_includes_open_and_update_workflow(self):
+        from pathlib import Path
+
+        source = (Path(__file__).parents[1] / "accounting" / "draft_dialog.py").read_text(
+            encoding="utf-8-sig"
+        )
+        self.assertIn('label="Open Draft"', source)
+        self.assertIn('self.save.SetLabel("Update Draft")', source)
+        self.assertIn("self.service.update(", source)
+
+    def test_transaction_date_requires_one_open_period(self):
+        connection = Connection(period_rows=())
+        with self.assertRaisesRegex(AccountingDraftError, "exactly one open"):
+            AccountingDraftService(connection, 7).create(balanced())
+        self.assertEqual(connection.commits, 0)
+        self.assertEqual(connection.rollbacks, 1)
+
+    def test_disbursement_requires_source_document_reference(self):
+        with self.assertRaisesRegex(AccountingDraftError, "source-document"):
+            AccountingDraftService(Connection(), 7).create(balanced(reference=""))
+
+    def test_unbalanced_draft_never_reaches_database(self):
+        transaction = balanced()
+        transaction = JournalTransaction(
+            transaction.organization_id,
+            transaction.transaction_date,
+            transaction.description,
+            (transaction.lines[0],),
+            transaction.reference,
+            transaction.transaction_type,
+        )
+        connection = Connection()
+        with self.assertRaises(ValueError):
+            AccountingDraftService(connection, 7).create(transaction)
+        self.assertEqual(connection.cursor_value.statements, [])
+
+
+if __name__ == "__main__":
+    unittest.main()

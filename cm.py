@@ -22,6 +22,7 @@ from process_service import ProcessService
 from report_service import ChurchManagerReportService
 from user_admin import show_user_administration
 from accounting.setup_dialog import show_accounting_setup
+from accounting.draft_dialog import show_accounting_draft_entry
 from types import SimpleNamespace
 
 
@@ -404,7 +405,10 @@ def _buttonclick(event):
 
     select = event.GetEventObject().GetName()
     if select == "lblChangePassword":
-        change_own_password(context.connection, context.session, cmfrm.FRAME)
+        change_own_password(
+            context.connection, context.session, cmfrm.FRAME,
+            minimum_length=4 if context.test_mode else 12,
+        )
         return
     if select == "lblLogout":
         MariaDBUserRepository(context.connection).record_auth_event(
@@ -457,10 +461,15 @@ def _buttonclick(event):
             _runBackupDB()
         case "lblUsers":
             show_user_administration(
-                cmfrm.FRAME, context.connection, context.session, context.authorization
+                cmfrm.FRAME, context.connection, context.session, context.authorization,
+                minimum_length=4 if context.test_mode else 12,
             )
         case "lblAccountingSetup":
             show_accounting_setup(
+                cmfrm.FRAME, context.connection, context.session, context.authorization
+            )
+        case "lblAccountingTransactions":
+            show_accounting_draft_entry(
                 cmfrm.FRAME, context.connection, context.session, context.authorization
             )
         case _:

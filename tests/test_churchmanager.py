@@ -338,6 +338,10 @@ class TestChurchManagerConfiguration(unittest.TestCase):
         self.assertTrue(security_enabled({"test_mode": True}, config))
         self.assertFalse(security_enabled({"test_mode": False}, config))
 
+    def test_test_mode_uses_relaxed_password_length_only_at_composition_root(self):
+        source = (ROOT / "startup.py").read_text(encoding="utf-8-sig")
+        self.assertIn('minimum_length=4 if arguments["test_mode"] else 12', source)
+
 
 class TestChurchManagerForms(unittest.TestCase):
     def test_service_propers_lookup_displays_text_and_stores_id(self):
@@ -475,6 +479,23 @@ class TestChurchManagerForms(unittest.TestCase):
             x, y = main_controls[name]["posch"]
             self.assertTrue(left < x < left + width, name)
             self.assertTrue(top < y < top + height, name)
+
+    def test_transaction_entry_is_a_protected_special_workflow(self):
+        from main_menu import SPECIAL_CONTROLS
+        from permission_catalog import MAIN_MENU_PERMISSIONS
+
+        self.assertIn("lblAccountingTransactions", SPECIAL_CONTROLS)
+        self.assertEqual(
+            MAIN_MENU_PERMISSIONS["lblAccountingTransactions"],
+            "accounting.transactions.create",
+        )
+        controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
+        self.assertEqual(
+            controls["lblAccountingTransactions"]["security"]["invoke"],
+            "accounting.transactions.create",
+        )
+        source = (ROOT / "cm.py").read_text(encoding="utf-8-sig")
+        self.assertIn("show_accounting_draft_entry(", source)
 
     def test_forms_match_jsform_canonical_schema(self):
         from jsonschema import validate

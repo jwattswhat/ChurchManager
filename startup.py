@@ -52,7 +52,10 @@ def build_runtime(form_class, argv=None, login_provider=authenticate_user):
     session = None
     authorization = None
     if security_enabled(arguments):
-        session = login_provider(database.DBConnection)
+        session = login_provider(
+            database.DBConnection,
+            minimum_length=4 if arguments["test_mode"] else 12,
+        )
         if session is None:
             database.DBConnection.close()
             database.JSConnection.close()

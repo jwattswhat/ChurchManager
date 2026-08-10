@@ -62,6 +62,12 @@ def account(**overrides):
 
 
 class TestPasswordService(unittest.TestCase):
+    def test_testing_policy_can_temporarily_allow_four_characters(self):
+        service = PasswordService(FakeHasher(), minimum_length=4)
+        self.assertTrue(service.hash("test"))
+        with self.assertRaisesRegex(ValueError, "at least 4"):
+            service.hash("abc")
+
     def test_passwords_require_twelve_characters(self):
         service = PasswordService(FakeHasher())
         with self.assertRaises(ValueError):
