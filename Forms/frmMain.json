@@ -556,6 +556,21 @@
                 "label": "Log Out",
                 "posch": [35, 5],
                 "tooltip": "End the current ChurchManager session."
+            },
+            "FundAccountingBox": {
+                "name": "FundAccountingBox",
+                "type": "StaticBox",
+                "label": "Accounting",
+                "posch": [34, 8],
+                "sizech": [15, 3]
+            },
+            "lblAccountingSetup": {
+                "name": "lblAccountingSetup",
+                "type": "StaticText",
+                "label": "Accounting Setup",
+                "posch": [35, 9],
+                "tooltip": "Review or create an accounting configuration.",
+                "security": { "invoke": "accounting.master_data.manage" }
             }
         }
     }

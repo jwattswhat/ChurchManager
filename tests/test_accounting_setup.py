@@ -4,6 +4,7 @@ import unittest
 from accounting.setup_service import (
     FundClassification, calendar_periods, validated_fund_classifications,
 )
+from accounting.setup_dialog import CLASSIFICATION_CHOICES
 
 
 def classified_special_funds():
@@ -51,6 +52,12 @@ class TestAccountingSetup(unittest.TestCase):
         result = validated_fund_classifications(classified_special_funds())
         self.assertEqual(result["GENERAL"].net_asset_class, "WITHOUT_DONOR_RESTRICTIONS")
         self.assertTrue(result["RESERVE"].board_designated)
+
+    def test_setup_dialog_offers_explicit_safe_classifications(self):
+        labels = {label for label, unused in CLASSIFICATION_CHOICES}
+        self.assertIn("Board-designated", labels)
+        self.assertIn("Unrestricted", labels)
+        self.assertTrue(any("purpose and time" in label for label in labels))
 
 
 if __name__ == "__main__":

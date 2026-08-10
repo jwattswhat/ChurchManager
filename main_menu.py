@@ -31,6 +31,7 @@ SPECIAL_CONTROLS = {
     "lblGenerateOS", "lblNotifyParticipants", "lblSundayPrayers",
     "lblAnnouncements", "lblServiceSchedule", "lblReports", "lblBackupDB",
     "lblUsers",
+    "lblAccountingSetup",
 }
 MENU_CONTROLS = frozenset(FORM_ROUTES) | SPECIAL_CONTROLS
 SESSION_CONTROLS = frozenset({"lblChangePassword", "lblLogout"})

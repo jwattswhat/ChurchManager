@@ -88,6 +88,23 @@ class AccountingSetupService:
     def _execute(self, cursor, sql, values=()):
         return cursor.execute(sql.replace("?", self.marker), values)
 
+    def list_organizations(self):
+        cursor = self.connection.cursor()
+        try:
+            self._execute(
+                cursor,
+                "SELECT o.ID, o.LegalName, o.ReportingBasis, o.ApprovalThreshold, "
+                "o.AttachmentThreshold, o.Active, "
+                "(SELECT COUNT(*) FROM tblAccountingAccount a "
+                " WHERE a.OrganizationID=o.ID), "
+                "(SELECT COUNT(*) FROM tblAccountingFund f "
+                " WHERE f.OrganizationID=o.ID) "
+                "FROM tblAccountingOrganization o ORDER BY o.LegalName",
+            )
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
     def create_starter_organization(
         self, legal_name, fiscal_year, fund_classifications, church_id=None
     ):

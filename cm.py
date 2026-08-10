@@ -21,6 +21,7 @@ from backup_service import BackupError, BackupService
 from process_service import ProcessService
 from report_service import ChurchManagerReportService
 from user_admin import show_user_administration
+from accounting.setup_dialog import show_accounting_setup
 from types import SimpleNamespace
 
 
@@ -456,6 +457,10 @@ def _buttonclick(event):
             _runBackupDB()
         case "lblUsers":
             show_user_administration(
+                cmfrm.FRAME, context.connection, context.session, context.authorization
+            )
+        case "lblAccountingSetup":
+            show_accounting_setup(
                 cmfrm.FRAME, context.connection, context.session, context.authorization
             )
         case _:
