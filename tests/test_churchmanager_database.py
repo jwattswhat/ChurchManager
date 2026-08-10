@@ -180,3 +180,24 @@ class TestChurchManagerDatabase(unittest.TestCase):
         }
         self.assertIn("accounting.transactions.create", permissions)
         self.assertNotIn("accounting.transactions.post", permissions)
+
+    def test_sample_accounting_setup_is_complete(self):
+        rows = self.query(
+            "SELECT o.ID, "
+            "(SELECT COUNT(*) FROM tblAccountingAccount a WHERE a.OrganizationID=o.ID), "
+            "(SELECT COUNT(*) FROM tblAccountingFund f WHERE f.OrganizationID=o.ID), "
+            "(SELECT COUNT(*) FROM tblAccountingFunction fn WHERE fn.OrganizationID=o.ID), "
+            "(SELECT COUNT(*) FROM tblAccountingFiscalPeriod p "
+            " JOIN tblAccountingFiscalYear y ON y.ID=p.FiscalYearID "
+            " WHERE y.OrganizationID=o.ID) "
+            "FROM tblAccountingOrganization o "
+            "WHERE o.LegalName='ChurchManager Sample Congregation'"
+        )
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0][1:], (34, 7, 7, 12))
+        audit = self.query(
+            "SELECT Action FROM tblAccountingAuditEvent "
+            "WHERE OrganizationID=? AND Action='ACCOUNTING_SETUP_CREATED'",
+            (rows[0][0],),
+        )
+        self.assertEqual(audit, [("ACCOUNTING_SETUP_CREATED",)])
