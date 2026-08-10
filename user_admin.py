@@ -22,6 +22,16 @@ class UserSummary:
     roles: tuple[str, ...]
 
 
+@dataclass(frozen=True)
+class SecurityAuditSummary:
+    occurred_at: object
+    username: str
+    action: str
+    entity_type: str
+    entity_id: str
+    reason: str
+
+
 class UserAdministrationService:
     def __init__(self, connection, acting_user_id, passwords=None):
         self.connection = connection
@@ -159,6 +169,23 @@ class UserAdministrationService:
         except Exception:
             self.connection.rollback()
             raise
+        finally:
+            cursor.close()
+
+    def list_security_audit(self, limit=500):
+        limit = max(1, min(int(limit), 1000))
+        cursor = self._cursor()
+        try:
+            self.repository._execute(
+                cursor,
+                "SELECT a.OccurredAt, COALESCE(u.Username, '[system]'), a.Action, "
+                "COALESCE(a.EntityType, ''), COALESCE(a.EntityID, ''), "
+                "COALESCE(a.Reason, '') "
+                "FROM tblSecurityAuditEvent a "
+                "LEFT JOIN tblUser u ON u.ID=a.UserID "
+                "ORDER BY a.OccurredAt DESC, a.ID DESC LIMIT {}".format(limit),
+            )
+            return [SecurityAuditSummary(*row) for row in cursor.fetchall()]
         finally:
             cursor.close()
 
@@ -392,9 +419,37 @@ class RolePermissionDialog(wx.Dialog):
         self.service.set_role_permissions(role_id, selected)
 
 
+class SecurityAuditDialog(wx.Dialog):
+    def __init__(self, parent, service):
+        super().__init__(parent, title="Security Audit", size=(980, 560))
+        records = service.list_security_audit()
+        audit_list = wx.ListCtrl(self, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        columns = (
+            ("When", 165), ("User", 120), ("Action", 210),
+            ("Type", 90), ("Record", 90), ("Reason", 260),
+        )
+        for index, (label, width) in enumerate(columns):
+            audit_list.InsertColumn(index, label, width=width)
+        for record in records:
+            row = audit_list.InsertItem(
+                audit_list.GetItemCount(), str(record.occurred_at)
+            )
+            for column, value in enumerate((
+                record.username, record.action, record.entity_type,
+                record.entity_id, record.reason,
+            ), start=1):
+                audit_list.SetItem(row, column, str(value))
+        close = wx.Button(self, wx.ID_CLOSE, "Close")
+        close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
+        root = wx.BoxSizer(wx.VERTICAL)
+        root.Add(audit_list, 1, wx.ALL | wx.EXPAND, 10)
+        root.Add(close, 0, wx.ALIGN_RIGHT | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        self.SetSizer(root)
+
+
 class UserAdministrationDialog(wx.Dialog):
     def __init__(self, parent, service, authorization):
-        super().__init__(parent, title="ChurchManager User Administration", size=(850, 430))
+        super().__init__(parent, title="ChurchManager User Administration", size=(1080, 430))
         self.service = service
         self.authorization = authorization
         self.users = []
@@ -410,6 +465,7 @@ class UserAdministrationDialog(wx.Dialog):
             ("Enable/Disable", self.on_active), ("Unlock", self.on_unlock),
             ("Reset Password", self.on_reset),
             ("Role Permissions", self.on_role_permissions),
+            ("Security Audit", self.on_security_audit),
         )
         for label, handler in actions:
             button = wx.Button(self, label=label)
@@ -529,6 +585,20 @@ class UserAdministrationDialog(wx.Dialog):
                 dialog.save()
         except (ValueError, RuntimeError) as error:
             self.show_error(error)
+        finally:
+            dialog.Destroy()
+
+    def on_security_audit(self, event):
+        try:
+            self.authorization.require(
+                "security.audit.view", "view the security audit"
+            )
+        except PermissionError as error:
+            self.show_error(error)
+            return
+        dialog = SecurityAuditDialog(self, self.service)
+        try:
+            dialog.ShowModal()
         finally:
             dialog.Destroy()
 

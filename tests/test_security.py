@@ -195,6 +195,18 @@ class TestUserAdministrationRules(unittest.TestCase):
         self.assertIn("ROLE_PERMISSIONS_CHANGED", source)
         self.assertIn('"security.roles.manage"', source)
 
+    def test_security_audit_viewer_is_read_only_and_permission_protected(self):
+        source = (Path(__file__).parents[1] / "user_admin.py").read_text(
+            encoding="utf-8-sig"
+        )
+        self.assertIn('"security.audit.view"', source)
+        self.assertIn("class SecurityAuditDialog", source)
+        audit_dialog = source.split("class SecurityAuditDialog", 1)[1].split(
+            "class UserAdministrationDialog", 1
+        )[0]
+        self.assertNotIn("DELETE FROM", audit_dialog)
+        self.assertNotIn("UPDATE ", audit_dialog)
+
 
 if __name__ == "__main__":
     unittest.main()
