@@ -6,13 +6,16 @@
     
 """
 import os
+from datetime import datetime, timezone
 import wx
 
 import JSForm
 import fnSchedule
 from application_context import ApplicationContext
 from form_factory import ChurchManagerFormFactory
-from main_menu import FORM_ROUTES, MENU_CONTROLS
+from main_menu import FORM_ROUTES, MENU_CONTROLS, SESSION_CONTROLS
+from login_dialog import change_own_password
+from authentication import MariaDBUserRepository
 from permission_catalog import MAIN_MENU_PERMISSIONS
 from backup_service import BackupError, BackupService
 from process_service import ProcessService
@@ -399,6 +402,19 @@ def _buttonclick(event):
         dlg.Destroy()
 
     select = event.GetEventObject().GetName()
+    if select == "lblChangePassword":
+        change_own_password(context.connection, context.session, cmfrm.FRAME)
+        return
+    if select == "lblLogout":
+        MariaDBUserRepository(context.connection).record_auth_event(
+            context.session.user_id,
+            "LOGOUT",
+            context.session.workstation,
+            datetime.now(timezone.utc).replace(tzinfo=None),
+            context.session.username,
+        )
+        cmfrm.FRAME.Close()
+        return
     context.authorization.require(
         MAIN_MENU_PERMISSIONS[select], "use {}".format(select)
     )
@@ -473,6 +489,15 @@ def main(argv=None):
     for control_name in MENU_CONTROLS:
         if control_name in cmfrm.CONTROLID:
             cmfrm.CONTROLID[control_name].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+    if context.session is not None:
+        for control_name in SESSION_CONTROLS:
+            cmfrm.CONTROLID[control_name].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+        cmfrm.CONTROLID["lblCurrentUser"].SetLabel(
+            "Signed in: {}".format(context.session.display_name)
+        )
+    else:
+        for control_name in SESSION_CONTROLS | {"lblCurrentUser", "SessionBox"}:
+            cmfrm.CONTROLID[control_name].Hide()
 
     cmfrm.show()
     app.MainLoop()

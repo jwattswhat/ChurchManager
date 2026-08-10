@@ -529,6 +529,33 @@
                 ],
                 "tooltip": "Open the enhancements and bug-tracking form.",
                 "security": { "invoke": "application.enhancements.manage" }
+            },
+            "SessionBox": {
+                "name": "SessionBox",
+                "type": "StaticBox",
+                "label": "Current User",
+                "posch": [34, 1],
+                "sizech": [15, 6]
+            },
+            "lblCurrentUser": {
+                "name": "lblCurrentUser",
+                "type": "StaticText",
+                "label": "Signed in",
+                "posch": [35, 2]
+            },
+            "lblChangePassword": {
+                "name": "lblChangePassword",
+                "type": "StaticText",
+                "label": "Change Password",
+                "posch": [35, 4],
+                "tooltip": "Change your ChurchManager password."
+            },
+            "lblLogout": {
+                "name": "lblLogout",
+                "type": "StaticText",
+                "label": "Log Out",
+                "posch": [35, 5],
+                "tooltip": "End the current ChurchManager session."
             }
         }
     }

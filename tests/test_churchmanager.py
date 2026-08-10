@@ -364,6 +364,14 @@ class TestChurchManagerForms(unittest.TestCase):
         self.assertIn("MAIN_MENU_PERMISSIONS[select]", source)
         self.assertIn("context.authorization.require(", source)
 
+    def test_main_menu_provides_current_user_password_change_and_logout(self):
+        from main_menu import SESSION_CONTROLS
+
+        controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
+        self.assertEqual(SESSION_CONTROLS, {"lblChangePassword", "lblLogout"})
+        self.assertIn("lblCurrentUser", controls)
+        self.assertIn("LOGOUT", (ROOT / "cm.py").read_text(encoding="utf-8-sig"))
+
     def test_forms_match_jsform_canonical_schema(self):
         from jsonschema import validate
 

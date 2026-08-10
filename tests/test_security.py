@@ -208,5 +208,14 @@ class TestUserAdministrationRules(unittest.TestCase):
         self.assertNotIn("UPDATE ", audit_dialog)
 
 
+class TestOwnPasswordChange(unittest.TestCase):
+    def test_voluntary_change_requires_the_current_password(self):
+        source = (Path(__file__).parents[1] / "login_dialog.py").read_text(
+            encoding="utf-8-sig"
+        )
+        self.assertIn("account.password_hash, current", source)
+        self.assertIn("repository.change_password(session.user_id", source)
+
+
 if __name__ == "__main__":
     unittest.main()

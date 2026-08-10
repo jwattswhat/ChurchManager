@@ -60,6 +60,17 @@ class ChangePasswordDialog(_CredentialDialog):
         self.finish(fields)
 
 
+class ChangeOwnPasswordDialog(_CredentialDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent, title="Change ChurchManager Password")
+        fields = wx.FlexGridSizer(3, 2, 10, 10)
+        fields.AddGrowableCol(1, 1)
+        self.current = self.add_field(fields, "Current password", wx.TE_PASSWORD)
+        self.password = self.add_field(fields, "New password", wx.TE_PASSWORD)
+        self.confirmation = self.add_field(fields, "Confirm password", wx.TE_PASSWORD)
+        self.finish(fields)
+
+
 def _message(parent, text, title, style=wx.OK | wx.ICON_ERROR):
     dialog = wx.MessageDialog(parent, text, title, style)
     try:
@@ -116,6 +127,38 @@ def require_password_change(repository, passwords, session, parent=None):
             return True
         except (ValueError, RuntimeError) as error:
             _message(parent, str(error), "Change password")
+
+
+def change_own_password(connection, session, parent=None):
+    """Change the signed-in user's password after verifying the current one."""
+    repository = MariaDBUserRepository(connection)
+    passwords = PasswordService()
+    dialog = ChangeOwnPasswordDialog(parent)
+    try:
+        if dialog.ShowModal() != wx.ID_OK:
+            return False
+        current = dialog.current.GetValue()
+        password = dialog.password.GetValue()
+        confirmation = dialog.confirmation.GetValue()
+    finally:
+        dialog.Destroy()
+    account = repository.find_by_username(session.username)
+    if account is None or not passwords.verify(account.password_hash, current):
+        _message(parent, "The current password is incorrect.", "Change password")
+        return False
+    if password != confirmation:
+        _message(parent, "The new passwords do not match.", "Change password")
+        return False
+    try:
+        repository.change_password(session.user_id, passwords.hash(password))
+    except (ValueError, RuntimeError) as error:
+        _message(parent, str(error), "Change password")
+        return False
+    _message(
+        parent, "Your ChurchManager password has been changed.",
+        "Change password", wx.OK | wx.ICON_INFORMATION,
+    )
+    return True
 
 
 def authenticate_user(connection, parent=None):

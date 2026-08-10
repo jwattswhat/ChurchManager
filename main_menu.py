@@ -33,6 +33,7 @@ SPECIAL_CONTROLS = {
     "lblUsers",
 }
 MENU_CONTROLS = frozenset(FORM_ROUTES) | SPECIAL_CONTROLS
+SESSION_CONTROLS = frozenset({"lblChangePassword", "lblLogout"})
 
 
 class MainMenuRouter:
