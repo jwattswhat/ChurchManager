@@ -535,7 +535,7 @@
                 "type": "StaticBox",
                 "label": "Current User",
                 "posch": [34, 1],
-                "sizech": [15, 11]
+                "sizech": [15, 12]
             },
             "lblCurrentUser": {
                 "name": "lblCurrentUser",
@@ -625,6 +625,12 @@
                 "label": "Transaction Posting", "posch": [35, 17],
                 "tooltip": "Post reviewed accounting transactions permanently.",
                 "security": { "invoke": "accounting.transactions.post" }
+            },
+            "lblAccountingRegister": {
+                "name": "lblAccountingRegister", "type": "StaticText",
+                "label": "Posted Register", "posch": [35, 18],
+                "tooltip": "View posted accounting transactions and their lines.",
+                "security": { "invoke": "accounting.transactions.view" }
             }
         }
     }
