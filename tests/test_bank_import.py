@@ -1,0 +1,19 @@
+from decimal import Decimal
+import unittest
+from accounting.bank_import import BankImportError,CsvMapping,file_hash,parse_csv
+
+class TestBankImport(unittest.TestCase):
+    def test_single_amount_csv_is_parsed_without_posting(self):
+        content=b"Date,Description,Amount,ID\n01/15/2027,Offering,1000.00,A1\n01/16/2027,Utility,-250.00,A2\n"
+        rows=parse_csv(content,CsvMapping("Date","Description",amount_column="Amount",external_id_column="ID"))
+        self.assertEqual((rows[0].amount,rows[1].amount),(Decimal("1000.00"),Decimal("-250.00")))
+        self.assertEqual(len(rows[0].fingerprint),64);self.assertEqual(len(file_hash(content)),64)
+    def test_debit_credit_columns_become_signed_bank_amount(self):
+        content=b"Date,Memo,Debit,Credit\n01/15/2027,Check,25.00,\n01/16/2027,Deposit,,50.00\n"
+        rows=parse_csv(content,CsvMapping("Date","Memo",debit_column="Debit",credit_column="Credit"))
+        self.assertEqual((rows[0].amount,rows[1].amount),(Decimal("-25.00"),Decimal("50.00")))
+    def test_missing_mapping_column_is_readable_error(self):
+        with self.assertRaisesRegex(BankImportError,"missing"):
+            parse_csv(b"Date,Memo\n01/15/2027,Test\n",CsvMapping("Date","Memo",amount_column="Amount"))
+
+if __name__=="__main__":unittest.main()

@@ -514,6 +514,14 @@ Required workflow:
 
 Draft or reversed transactions are never eligible. A reversal and its original remain separately visible.
 
+Bank statements may be imported into a non-posting staging area. The initial
+formats are mapped CSV and OFX-family downloads (`OFX`, `QFX`, and `QBO`), with
+ISO 20022 `camt.053` reserved for a later adapter. Imports never create or post
+ledger entries automatically. File hashes and bank transaction identifiers or
+row fingerprints prevent duplicates. Users confirm proposed matches to posted
+cash-account lines; unmatched rows may suggest a new draft. The original file
+name, hash, mapping, importing user, timestamp, and match decisions are audited.
+
 ## 13. Budgeting
 
 Budgets are entered by fiscal period, natural account, fund, and optional function. Revenue budgets are stored as positive planning amounts and expense budgets as positive planning amounts; report formulas interpret the account type so users do not enter credits as negative numbers.
