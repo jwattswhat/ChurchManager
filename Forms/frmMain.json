@@ -562,7 +562,7 @@
                 "type": "StaticBox",
                 "label": "Accounting",
                 "posch": [34, 8],
-                "sizech": [15, 23]
+                "sizech": [15, 24]
             },
             "lblAccountingSetup": {
                 "name": "lblAccountingSetup",
@@ -697,6 +697,12 @@
                 "label": "Close Checklist", "posch": [35, 29],
                 "tooltip": "Identify unresolved items before closing a fiscal period.",
                 "security": { "invoke": "accounting.reports.run" }
+            },
+            "lblAccountingBudgets": {
+                "name": "lblAccountingBudgets", "type": "StaticText",
+                "label": "Budgets", "posch": [35, 30],
+                "tooltip": "Create account-only or detailed draft budgets.",
+                "security": { "invoke": "accounting.budgets.manage" }
             }
         }
     }
