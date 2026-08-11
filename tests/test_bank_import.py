@@ -9,6 +9,8 @@ class TestBankImport(unittest.TestCase):
         self.assertIn("Staged Bank Activity", source)
         self.assertIn("LIST_FORMAT_RIGHT", source)
         self.assertIn("staged_rows", source)
+        self.assertIn("Only exact amounts within seven days", source)
+        self.assertIn("Confirm Bank Match", source)
     def test_csv_headers_support_utf8_bom(self):
         self.assertEqual(csv_headers(b"\xef\xbb\xbfDate,Memo,Amount\n"), ("Date", "Memo", "Amount"))
 

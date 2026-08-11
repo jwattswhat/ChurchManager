@@ -10,6 +10,46 @@ from .bank_import_service import BankImportService
 from .formatting import money
 
 
+class BankMatchDialog(wx.Dialog):
+    def __init__(self, parent, candidates):
+        super().__init__(parent, title="Match Posted Transaction", size=(820, 430))
+        self.candidates = candidates
+        self.list = wx.ListCtrl(self, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        for index, (label, width) in enumerate((
+            ("Number", 75), ("Date", 95), ("Description", 280),
+            ("Reference", 150), ("Amount", 115),
+        )):
+            self.list.InsertColumn(index, label, width=width)
+        amount_column = self.list.GetColumn(4)
+        amount_column.SetAlign(wx.LIST_FORMAT_RIGHT)
+        self.list.SetColumn(4, amount_column)
+        for item in candidates:
+            row = self.list.InsertItem(self.list.GetItemCount(), str(item[1]))
+            values = (item[2], item[3], item[4] or "", money(item[5]))
+            for column, value in enumerate(values, 1):
+                self.list.SetItem(row, column, str(value))
+        message = wx.StaticText(
+            self,
+            label=(
+                "Select the posted bank-account line represented by this bank row. "
+                "Only exact amounts within seven days are shown."
+            ),
+        )
+        message.Wrap(780)
+        root = wx.BoxSizer(wx.VERTICAL)
+        root.Add(message, 0, wx.ALL | wx.EXPAND, 10)
+        root.Add(self.list, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+        root.Add(
+            self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL),
+            0, wx.ALL | wx.EXPAND, 10,
+        )
+        self.SetSizer(root)
+
+    def selected_line_id(self):
+        index = self.list.GetFirstSelected()
+        return None if index == -1 else self.candidates[index][0]
+
+
 class StagedBankActivityDialog(wx.Dialog):
     def __init__(self, parent, service):
         super().__init__(parent, title="Staged Bank Activity", size=(980, 650))
@@ -40,18 +80,26 @@ class StagedBankActivityDialog(wx.Dialog):
         refresh = wx.Button(self, label="Refresh")
         self.ignore = wx.Button(self, label="Ignore Selected Row")
         self.restore = wx.Button(self, label="Restore Selected Row")
+        self.match = wx.Button(self, label="Find Match")
+        self.unmatch = wx.Button(self, label="Remove Match")
         self.ignore.Enable(False)
         self.restore.Enable(False)
+        self.match.Enable(False)
+        self.unmatch.Enable(False)
         close = wx.Button(self, wx.ID_CLOSE, "Close")
         refresh.Bind(wx.EVT_BUTTON, self.refresh)
         self.ignore.Bind(wx.EVT_BUTTON, lambda event: self.change_ignored(True))
         self.restore.Bind(wx.EVT_BUTTON, lambda event: self.change_ignored(False))
+        self.match.Bind(wx.EVT_BUTTON, self.on_match)
+        self.unmatch.Bind(wx.EVT_BUTTON, self.on_unmatch)
         close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
         buttons = wx.BoxSizer(wx.HORIZONTAL)
         buttons.Add(refresh)
         buttons.AddStretchSpacer()
         buttons.Add(self.ignore, 0, wx.RIGHT, 8)
         buttons.Add(self.restore, 0, wx.RIGHT, 8)
+        buttons.Add(self.match, 0, wx.RIGHT, 8)
+        buttons.Add(self.unmatch, 0, wx.RIGHT, 8)
         buttons.Add(close)
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(wx.StaticText(self, label="Imported bank files"), 0, wx.ALL, 10)
@@ -76,6 +124,8 @@ class StagedBankActivityDialog(wx.Dialog):
         self.row_list.DeleteAllItems()
         self.ignore.Enable(False)
         self.restore.Enable(False)
+        self.match.Enable(False)
+        self.unmatch.Enable(False)
         for item in self.batches:
             row = self.batch_list.InsertItem(
                 self.batch_list.GetItemCount(), str(item[0])
@@ -91,6 +141,8 @@ class StagedBankActivityDialog(wx.Dialog):
         self.row_list.DeleteAllItems()
         self.ignore.Enable(False)
         self.restore.Enable(False)
+        self.match.Enable(False)
+        self.unmatch.Enable(False)
         batch_id = self.batches[self.selected_batch_index][0]
         self.rows = self.service.staged_rows(batch_id)
         for item in self.rows:
@@ -103,6 +155,8 @@ class StagedBankActivityDialog(wx.Dialog):
         status = self.rows[event.GetIndex()][6]
         self.ignore.Enable(status == "UNMATCHED")
         self.restore.Enable(status == "IGNORED")
+        self.match.Enable(status == "UNMATCHED")
+        self.unmatch.Enable(status == "MATCHED")
 
     def change_ignored(self, ignored):
         index = self.row_list.GetFirstSelected()
@@ -112,6 +166,59 @@ class StagedBankActivityDialog(wx.Dialog):
             self.service.set_row_ignored(self.rows[index][0], ignored)
         except ValueError as error:
             wx.MessageBox(str(error), "Bank row not changed", wx.OK | wx.ICON_WARNING)
+            return
+        self.load_selected_batch()
+
+    def on_match(self, event=None):
+        index = self.row_list.GetFirstSelected()
+        if index == -1:
+            return
+        row_id = self.rows[index][0]
+        candidates = self.service.match_candidates(row_id)
+        if not candidates:
+            wx.MessageBox(
+                "No unused posted line has the same amount within seven days.",
+                "No Match Candidates", wx.OK | wx.ICON_INFORMATION,
+            )
+            return
+        dialog = BankMatchDialog(self, candidates)
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            line_id = dialog.selected_line_id()
+        finally:
+            dialog.Destroy()
+        if line_id is None:
+            wx.MessageBox(
+                "Select a posted transaction line.",
+                "Match not selected", wx.OK | wx.ICON_WARNING,
+            )
+            return
+        if wx.MessageBox(
+            "Link this bank row to the selected posted transaction?",
+            "Confirm Bank Match", wx.YES_NO | wx.ICON_QUESTION,
+        ) != wx.YES:
+            return
+        try:
+            self.service.match_row(row_id, line_id)
+        except ValueError as error:
+            wx.MessageBox(str(error), "Bank row not matched", wx.OK | wx.ICON_WARNING)
+            return
+        self.load_selected_batch()
+
+    def on_unmatch(self, event=None):
+        index = self.row_list.GetFirstSelected()
+        if index == -1:
+            return
+        if wx.MessageBox(
+            "Remove this bank row's match?",
+            "Confirm Remove Match", wx.YES_NO | wx.ICON_QUESTION,
+        ) != wx.YES:
+            return
+        try:
+            self.service.unmatch_row(self.rows[index][0])
+        except ValueError as error:
+            wx.MessageBox(str(error), "Match not removed", wx.OK | wx.ICON_WARNING)
             return
         self.load_selected_batch()
 

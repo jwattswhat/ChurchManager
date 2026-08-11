@@ -91,6 +91,139 @@ class BankImportService:
             raise
         finally:
             cursor.close()
+
+    def match_candidates(self, import_row_id):
+        cursor = self.connection.cursor()
+        try:
+            self._execute(
+                cursor,
+                "SELECT l.ID, t.TransactionNumber, t.TransactionDate, "
+                "t.Description, t.Reference, l.Debit-l.Credit "
+                "FROM tblAccountingBankImportRow r "
+                "JOIN tblAccountingBankImportBatch i ON i.ID=r.ImportBatchID "
+                "JOIN tblAccountingBankAccount b ON b.ID=i.BankAccountID "
+                "JOIN tblAccountingTransactionLine l ON l.AccountID=b.AccountID "
+                "JOIN tblAccountingTransaction t ON t.ID=l.TransactionID "
+                "LEFT JOIN tblAccountingBankImportRow used "
+                " ON used.MatchedTransactionLineID=l.ID "
+                "WHERE r.ID=? AND r.MatchStatus='UNMATCHED' "
+                "AND t.Status='POSTED' AND l.Debit-l.Credit=r.Amount "
+                "AND t.TransactionDate BETWEEN DATE_SUB(r.TransactionDate, INTERVAL 7 DAY) "
+                "AND DATE_ADD(r.TransactionDate, INTERVAL 7 DAY) "
+                "AND used.ID IS NULL "
+                "ORDER BY ABS(DATEDIFF(t.TransactionDate,r.TransactionDate)), "
+                "t.TransactionDate,t.TransactionNumber,l.LineNumber",
+                (import_row_id,),
+            )
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def match_row(self, import_row_id, transaction_line_id):
+        cursor = self.connection.cursor()
+        try:
+            self._execute(
+                cursor,
+                "SELECT r.MatchStatus, r.Amount, b.AccountID, b.OrganizationID "
+                "FROM tblAccountingBankImportRow r "
+                "JOIN tblAccountingBankImportBatch i ON i.ID=r.ImportBatchID "
+                "JOIN tblAccountingBankAccount b ON b.ID=i.BankAccountID "
+                "WHERE r.ID=? FOR UPDATE",
+                (import_row_id,),
+            )
+            imported = cursor.fetchone()
+            if imported is None:
+                raise ValueError("The staged bank row no longer exists.")
+            if imported[0] != "UNMATCHED":
+                raise ValueError("Only an unmatched bank row can be matched.")
+            self._execute(
+                cursor,
+                "SELECT l.ID FROM tblAccountingTransactionLine l "
+                "JOIN tblAccountingTransaction t ON t.ID=l.TransactionID "
+                "LEFT JOIN tblAccountingBankImportRow used "
+                " ON used.MatchedTransactionLineID=l.ID "
+                "WHERE l.ID=? AND l.AccountID=? AND t.Status='POSTED' "
+                "AND l.Debit-l.Credit=? AND used.ID IS NULL FOR UPDATE",
+                (transaction_line_id, imported[2], imported[1]),
+            )
+            if cursor.fetchone() is None:
+                raise ValueError(
+                    "The selected posted line is unavailable or its amount does not match."
+                )
+            self._execute(
+                cursor,
+                "UPDATE tblAccountingBankImportRow "
+                "SET MatchStatus='MATCHED',MatchedTransactionLineID=? WHERE ID=?",
+                (transaction_line_id, import_row_id),
+            )
+            self._audit_match(
+                cursor, imported[3], import_row_id, "BANK_ROW_MATCHED",
+                "UNMATCHED", "MATCHED", transaction_line_id,
+            )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
+    def unmatch_row(self, import_row_id):
+        cursor = self.connection.cursor()
+        try:
+            self._execute(
+                cursor,
+                "SELECT r.MatchStatus,r.MatchedTransactionLineID,b.OrganizationID "
+                "FROM tblAccountingBankImportRow r "
+                "JOIN tblAccountingBankImportBatch i ON i.ID=r.ImportBatchID "
+                "JOIN tblAccountingBankAccount b ON b.ID=i.BankAccountID "
+                "LEFT JOIN tblAccountingReconciliationItem x ON x.ImportRowID=r.ID "
+                "WHERE r.ID=? AND x.ID IS NULL FOR UPDATE",
+                (import_row_id,),
+            )
+            imported = cursor.fetchone()
+            if imported is None or imported[0] != "MATCHED":
+                raise ValueError(
+                    "Only an unreconciled matched bank row can be unmatched."
+                )
+            self._execute(
+                cursor,
+                "UPDATE tblAccountingBankImportRow "
+                "SET MatchStatus='UNMATCHED',MatchedTransactionLineID=NULL WHERE ID=?",
+                (import_row_id,),
+            )
+            self._audit_match(
+                cursor, imported[2], import_row_id, "BANK_ROW_UNMATCHED",
+                "MATCHED", "UNMATCHED", imported[1],
+            )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
+    def _audit_match(self, cursor, organization_id, row_id, action,
+                     before_status, after_status, transaction_line_id):
+        self._execute(
+            cursor,
+            "INSERT INTO tblAccountingAuditEvent "
+            "(OrganizationID,EntityType,EntityID,Action,BeforeJSON,AfterJSON,UserID) "
+            "VALUES (?,'BANK_IMPORT_ROW',?,?,?,?,?)",
+            (
+                organization_id, str(row_id), action,
+                json.dumps(
+                    {"match_status": before_status}, separators=(",", ":")
+                ),
+                json.dumps(
+                    {
+                        "match_status": after_status,
+                        "transaction_line_id": transaction_line_id,
+                    },
+                    separators=(",", ":"),
+                ),
+                self.acting_user_id,
+            ),
+        )
     def stage_csv(self,bank_account_id,source,mapping:CsvMapping):
         path=Path(source);content=path.read_bytes();rows=parse_csv(content,mapping);digest=file_hash(content)
         cursor=self.connection.cursor()

@@ -1,5 +1,6 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from decimal import Decimal
 import unittest
 from accounting.bank_import import CsvMapping
 from accounting.bank_import_service import BankImportService
@@ -9,7 +10,12 @@ class Cursor:
     def execute(self,sql,values=()):
         self.statements.append((sql,values))
         if sql.startswith("SELECT OrganizationID"):self.one=(1,)
+        elif sql.startswith("SELECT r.MatchStatus, r.Amount"):
+            self.one=("UNMATCHED",Decimal("100.00"),8,1)
+        elif sql.startswith("SELECT r.MatchStatus,r.Matched"):
+            self.one=("MATCHED",99,1)
         elif sql.startswith("SELECT r.MatchStatus"):self.one=("UNMATCHED",1)
+        elif sql.startswith("SELECT l.ID FROM"):self.one=(99,)
         elif sql.startswith("SELECT ID FROM tblAccountingBankImportBatch"):self.one=None
     def fetchone(self):return self.one
     def fetchall(self):return []
@@ -64,5 +70,32 @@ class TestBankImportService(unittest.TestCase):
             BankImportService(connection, 7).set_row_ignored(42, True)
         self.assertEqual(connection.commits, 0)
         self.assertEqual(connection.rollbacks, 1)
+
+    def test_match_requires_posted_same_account_same_amount_line(self):
+        connection = Connection()
+        BankImportService(connection, 7).match_row(42, 99)
+        self.assertEqual(connection.commits, 1)
+        sql = "\n".join(value[0] for value in connection.cursor_value.statements)
+        self.assertIn("t.Status='POSTED'", sql)
+        self.assertIn("l.AccountID=?", sql)
+        self.assertIn("l.Debit-l.Credit=?", sql)
+        self.assertIn("BANK_IMPORT_ROW", sql)
+
+    def test_match_candidates_are_exact_unused_posted_lines_within_seven_days(self):
+        connection = Connection()
+        BankImportService(connection, 7).match_candidates(42)
+        sql = connection.cursor_value.statements[-1][0]
+        self.assertIn("t.Status='POSTED'", sql)
+        self.assertIn("l.Debit-l.Credit=r.Amount", sql)
+        self.assertIn("INTERVAL 7 DAY", sql)
+        self.assertIn("used.ID IS NULL", sql)
+
+    def test_unmatch_is_audited_and_clears_the_line(self):
+        connection = Connection()
+        BankImportService(connection, 7).unmatch_row(42)
+        self.assertEqual(connection.commits, 1)
+        sql = "\n".join(value[0] for value in connection.cursor_value.statements)
+        self.assertIn("MatchedTransactionLineID=NULL", sql)
+        self.assertIn("BANK_IMPORT_ROW", sql)
 
 if __name__=="__main__":unittest.main()
