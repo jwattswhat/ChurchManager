@@ -47,6 +47,22 @@ class AccountingDraftService:
                     "SELECT ID, Name FROM tblAccountingPayee "
                     "WHERE OrganizationID=? AND Active=1 ORDER BY Name"
                 ),
+                "cash_accounts": (
+                    "SELECT a.ID, CONCAT(a.Code, ' - ', a.Name), a.FunctionRequirement "
+                    "FROM tblAccountingBankAccount b JOIN tblAccountingAccount a ON a.ID=b.AccountID "
+                    "WHERE b.OrganizationID=? AND b.Active=1 AND a.Active=1 "
+                    "AND a.PostingAllowed=1 ORDER BY a.Code"
+                ),
+                "revenue_accounts": (
+                    "SELECT ID, CONCAT(Code, ' - ', Name), FunctionRequirement "
+                    "FROM tblAccountingAccount WHERE OrganizationID=? AND Active=1 "
+                    "AND PostingAllowed=1 AND AccountType='REVENUE' ORDER BY Code"
+                ),
+                "expense_accounts": (
+                    "SELECT ID, CONCAT(Code, ' - ', Name), FunctionRequirement "
+                    "FROM tblAccountingAccount WHERE OrganizationID=? AND Active=1 "
+                    "AND PostingAllowed=1 AND AccountType='EXPENSE' ORDER BY Code"
+                ),
             }
             for name, sql in queries.items():
                 self._execute(cursor, sql, (organization_id,))

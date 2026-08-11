@@ -122,6 +122,104 @@ class LineDialog(wx.Dialog):
         }
 
 
+class GuidedCashDialog(wx.Dialog):
+    def __init__(self, parent, choices, receipt):
+        title = "Guided Cash Receipt" if receipt else "Guided Cash Disbursement"
+        super().__init__(parent, title=title)
+        self.receipt = receipt
+        self.cash = wx.Choice(self)
+        self.offset = wx.Choice(self)
+        self.fund = wx.Choice(self)
+        self.function = wx.Choice(self)
+        self.payee = wx.Choice(self)
+        self.amount = wx.TextCtrl(self)
+        self.description = wx.TextCtrl(self)
+        self.reference = wx.TextCtrl(self)
+        LineDialog._load_choice(self.cash, choices["cash_accounts"], required=True)
+        LineDialog._load_choice(
+            self.offset,
+            choices["revenue_accounts" if receipt else "expense_accounts"],
+            required=True,
+        )
+        self.offset_rows = choices["revenue_accounts" if receipt else "expense_accounts"]
+        LineDialog._load_choice(self.fund, choices["funds"], required=True)
+        LineDialog._load_choice(self.function, choices["functions"])
+        LineDialog._load_choice(self.payee, choices["payees"])
+        offset_label = "Revenue account" if receipt else "Expense account"
+        grid = wx.FlexGridSizer(cols=2, hgap=8, vgap=8)
+        grid.AddGrowableCol(1, 1)
+        for label, control in (
+            ("Bank account", self.cash), (offset_label, self.offset),
+            ("Fund", self.fund), ("Function", self.function),
+            ("Payee / payer", self.payee), ("Amount", self.amount),
+            ("Description", self.description), ("Source/reference", self.reference),
+        ):
+            grid.Add(wx.StaticText(self, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+            grid.Add(control, 1, wx.EXPAND)
+        root = wx.BoxSizer(wx.VERTICAL)
+        root.Add(wx.StaticText(self, label=(
+            "This guide creates an ordinary balanced two-line journal entry for review."
+        )), 0, wx.ALL, 12)
+        root.Add(grid, 1, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 12)
+        root.Add(self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL),
+                 0, wx.ALL | wx.EXPAND, 10)
+        self.SetSizerAndFit(root)
+        self.SetMinSize((590, self.GetSize().height))
+
+    @staticmethod
+    def _selected(control, message):
+        index = control.GetSelection()
+        if index == wx.NOT_FOUND:
+            raise ValueError(message)
+        return control.GetClientData(index), control.GetStringSelection()
+
+    def values(self):
+        cash_id, cash_label = self._selected(self.cash, "Select a bank account.")
+        offset_id, offset_label = self._selected(
+            self.offset, "Select a revenue or expense account."
+        )
+        fund_id, fund_label = self._selected(self.fund, "Select a fund.")
+        try:
+            amount = LineDialog._money(self.amount)
+        except InvalidOperation as error:
+            raise ValueError("Amount must be a valid dollar amount.") from error
+        if amount <= ZERO:
+            raise ValueError("Enter a positive amount.")
+        description = self.description.GetValue().strip()
+        if not description:
+            raise ValueError("Enter a description.")
+        function_id, function_label = self._selected(self.function, "Select a function.")
+        payee_id, payee_label = self._selected(self.payee, "Select a payee or payer.")
+        requirement = self.offset_rows[self.offset.GetSelection()][2]
+        if requirement == "REQUIRED" and function_id is None:
+            raise ValueError("Select a functional classification for this account.")
+        if requirement == "PROHIBITED" and function_id is not None:
+            raise ValueError("This account does not allow a functional classification.")
+        cash_line = {
+            "account_id": cash_id, "account": cash_label,
+            "fund_id": fund_id, "fund": fund_label,
+            "function_id": None, "function": "(none)",
+            "payee_id": payee_id, "payee": payee_label,
+            "description": description,
+            "debit": amount if self.receipt else ZERO,
+            "credit": ZERO if self.receipt else amount,
+        }
+        offset_line = {
+            "account_id": offset_id, "account": offset_label,
+            "fund_id": fund_id, "fund": fund_label,
+            "function_id": function_id, "function": function_label,
+            "payee_id": payee_id, "payee": payee_label,
+            "description": description,
+            "debit": ZERO if self.receipt else amount,
+            "credit": amount if self.receipt else ZERO,
+        }
+        reference = self.reference.GetValue().strip()
+        if not self.receipt and not reference:
+            raise ValueError("Enter the receipt, invoice, or voucher reference.")
+        lines = [cash_line, offset_line] if self.receipt else [offset_line, cash_line]
+        return lines, description, reference
+
+
 class DraftListDialog(wx.Dialog):
     def __init__(self, parent, rows):
         super().__init__(parent, title="Open Accounting Draft", size=(850, 430))
@@ -316,11 +414,15 @@ class AccountingDraftDialog(wx.Dialog):
         edit = wx.Button(self, label="Edit Line")
         remove = wx.Button(self, label="Remove Line")
         self.attachments = wx.Button(self, label="Source Documents")
+        guided_receipt = wx.Button(self, label="Guided Receipt")
+        guided_disbursement = wx.Button(self, label="Guided Disbursement")
         self.attachments.Enable(False)
         add.Bind(wx.EVT_BUTTON, self.on_add)
         edit.Bind(wx.EVT_BUTTON, self.on_edit)
         remove.Bind(wx.EVT_BUTTON, self.on_remove)
         self.attachments.Bind(wx.EVT_BUTTON, self.on_attachments)
+        guided_receipt.Bind(wx.EVT_BUTTON, lambda event: self.on_guided_cash(True))
+        guided_disbursement.Bind(wx.EVT_BUTTON, lambda event: self.on_guided_cash(False))
         self.totals = wx.StaticText(self, label="Debits $0.00    Credits $0.00    Difference $0.00")
         new = wx.Button(self, label="New Draft")
         open_draft = wx.Button(self, label="Open Draft")
@@ -337,10 +439,14 @@ class AccountingDraftDialog(wx.Dialog):
         self.delete.Bind(wx.EVT_BUTTON, self.on_delete)
         close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
         line_buttons = wx.BoxSizer(wx.HORIZONTAL)
-        for button in (add, edit, remove, self.attachments):
+        for button in (add, edit, remove):
             line_buttons.Add(button, 0, wx.RIGHT, 6)
         line_buttons.AddStretchSpacer()
         line_buttons.Add(self.totals, 0, wx.ALIGN_CENTER_VERTICAL)
+        guided_buttons = wx.BoxSizer(wx.HORIZONTAL)
+        guided_buttons.Add(guided_receipt, 0, wx.RIGHT, 6)
+        guided_buttons.Add(guided_disbursement, 0, wx.RIGHT, 6)
+        guided_buttons.Add(self.attachments)
         workflow_buttons = wx.BoxSizer(wx.HORIZONTAL)
         workflow_buttons.AddStretchSpacer()
         workflow_buttons.Add(new, 0, wx.RIGHT, 6)
@@ -353,6 +459,7 @@ class AccountingDraftDialog(wx.Dialog):
         root.Add(header, 0, wx.ALL | wx.EXPAND, 12)
         root.Add(self.list, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 12)
         root.Add(line_buttons, 0, wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, 12)
+        root.Add(guided_buttons, 0, wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, 12)
         root.Add(workflow_buttons, 0, wx.ALL | wx.EXPAND, 12)
         self.SetSizer(root)
         self.on_organization()
@@ -531,6 +638,37 @@ class AccountingDraftDialog(wx.Dialog):
             dialog.ShowModal()
         finally:
             dialog.Destroy()
+
+    def on_guided_cash(self, receipt):
+        if self.current_id is not None or self.lines:
+            if wx.MessageBox(
+                "Start a new guided transaction and discard the current unsaved screen values?",
+                "Guided Transaction", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION,
+            ) != wx.YES:
+                return
+            self.on_new()
+        if not self.master_choices or not self.master_choices["cash_accounts"]:
+            wx.MessageBox(
+                "Configure an active Bank Account before using a guided cash transaction.",
+                "Guided Transaction", wx.OK | wx.ICON_WARNING,
+            )
+            return
+        dialog = GuidedCashDialog(self, self.master_choices, receipt)
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            lines, description, reference = dialog.values()
+        except ValueError as error:
+            wx.MessageBox(str(error), "Guided transaction not created",
+                          wx.OK | wx.ICON_WARNING)
+            return
+        finally:
+            dialog.Destroy()
+        self.lines = lines
+        self.description.SetValue(description)
+        self.reference.SetValue(reference)
+        self.transaction_type.SetSelection(1 if receipt else 0)
+        self.refresh()
 
     def refresh(self):
         self.list.DeleteAllItems()
