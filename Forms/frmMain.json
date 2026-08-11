@@ -562,7 +562,7 @@
                 "type": "StaticBox",
                 "label": "Accounting",
                 "posch": [34, 8],
-                "sizech": [15, 21]
+                "sizech": [15, 22]
             },
             "lblAccountingSetup": {
                 "name": "lblAccountingSetup",
@@ -684,6 +684,12 @@
                 "name": "lblAccountingFundBalances", "type": "StaticText",
                 "label": "Fund Balances", "posch": [35, 27],
                 "tooltip": "Run beginning, activity, and ending balances by fund.",
+                "security": { "invoke": "accounting.reports.run" }
+            },
+            "lblAccountingReconciliationReport": {
+                "name": "lblAccountingReconciliationReport", "type": "StaticText",
+                "label": "Reconciliation Report", "posch": [35, 28],
+                "tooltip": "Review completed reconciliation proof and outstanding items.",
                 "security": { "invoke": "accounting.reports.run" }
             }
         }

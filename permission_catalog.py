@@ -52,4 +52,5 @@ MAIN_MENU_PERMISSIONS = {
     "lblAccountingAudit": "accounting.audit.view",
     "lblAccountingGeneralLedger": "accounting.reports.run",
     "lblAccountingFundBalances": "accounting.reports.run",
+    "lblAccountingReconciliationReport": "accounting.reports.run",
 }

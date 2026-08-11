@@ -33,6 +33,7 @@ from accounting.bank_import_dialog import show_bank_import
 from accounting.audit_dialog import show_accounting_audit
 from accounting.general_ledger_dialog import show_general_ledger
 from accounting.fund_balance_dialog import show_fund_balances
+from accounting.reconciliation_report_dialog import show_reconciliation_report
 from types import SimpleNamespace
 
 
@@ -521,6 +522,10 @@ def _buttonclick(event):
             )
         case "lblAccountingFundBalances":
             show_fund_balances(
+                cmfrm.FRAME, context.connection, context.session, context.authorization
+            )
+        case "lblAccountingReconciliationReport":
+            show_reconciliation_report(
                 cmfrm.FRAME, context.connection, context.session, context.authorization
             )
         case _:
