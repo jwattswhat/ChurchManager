@@ -17,6 +17,28 @@ class BankRow:
     amount:Decimal; external_id:str; fingerprint:str
 
 def file_hash(content:bytes)->str:return hashlib.sha256(content).hexdigest()
+
+
+def csv_headers(content: bytes):
+    """Return CSV column headings using the same supported encodings as parsing."""
+    try:
+        text = content.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        try:
+            text = content.decode("cp1252")
+        except UnicodeDecodeError as error:
+            raise BankImportError("The CSV text encoding is not supported.") from error
+    reader = csv.reader(io.StringIO(text))
+    try:
+        headings = next(reader)
+    except StopIteration as error:
+        raise BankImportError("The CSV file has no header row.") from error
+    headings = tuple(value.strip() for value in headings)
+    if not headings or any(not value for value in headings):
+        raise BankImportError("Every CSV column must have a heading.")
+    if len(set(headings)) != len(headings):
+        raise BankImportError("CSV column headings must be unique.")
+    return headings
 def _amount(row,mapping):
     def number(text):
         clean=(text or "").strip().replace(",","").replace("$","")

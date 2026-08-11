@@ -1,8 +1,14 @@
 from decimal import Decimal
 import unittest
-from accounting.bank_import import BankImportError,CsvMapping,file_hash,parse_csv
+from accounting.bank_import import BankImportError,CsvMapping,csv_headers,file_hash,parse_csv
 
 class TestBankImport(unittest.TestCase):
+    def test_csv_headers_support_utf8_bom(self):
+        self.assertEqual(csv_headers(b"\xef\xbb\xbfDate,Memo,Amount\n"), ("Date", "Memo", "Amount"))
+
+    def test_csv_headers_must_be_unique(self):
+        with self.assertRaisesRegex(BankImportError, "unique"):
+            csv_headers(b"Date,Memo,Memo\n")
     def test_single_amount_csv_is_parsed_without_posting(self):
         content=b"Date,Description,Amount,ID\n01/15/2027,Offering,1000.00,A1\n01/16/2027,Utility,-250.00,A2\n"
         rows=parse_csv(content,CsvMapping("Date","Description",amount_column="Amount",external_id_column="ID"))

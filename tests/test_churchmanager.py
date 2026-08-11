@@ -578,6 +578,21 @@ class TestChurchManagerForms(unittest.TestCase):
         box=controls["FundAccountingBox"]; top=box["posch"][1]; bottom=top+box["sizech"][1]
         self.assertTrue(top < controls["lblAccountingActivities"]["posch"][1] < bottom)
 
+    def test_bank_import_is_a_protected_special_workflow(self):
+        from main_menu import SPECIAL_CONTROLS
+        from permission_catalog import MAIN_MENU_PERMISSIONS
+
+        controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
+        self.assertIn("lblAccountingBankImport", SPECIAL_CONTROLS)
+        self.assertEqual(
+            MAIN_MENU_PERMISSIONS["lblAccountingBankImport"],
+            "accounting.reconciliation.manage",
+        )
+        self.assertEqual(
+            controls["lblAccountingBankImport"]["security"]["invoke"],
+            "accounting.reconciliation.manage",
+        )
+
     def test_forms_match_jsform_canonical_schema(self):
         from jsonschema import validate
 

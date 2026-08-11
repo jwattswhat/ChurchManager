@@ -655,6 +655,12 @@
                 "label": "Statement of Activities", "posch": [35, 22],
                 "tooltip": "Run revenue, expense, transfer, and net-asset activity by restriction class.",
                 "security": { "invoke": "accounting.reports.run" }
+            },
+            "lblAccountingBankImport": {
+                "name": "lblAccountingBankImport", "type": "StaticText",
+                "label": "Bank File Import", "posch": [35, 23],
+                "tooltip": "Preview and stage a CSV bank file without posting transactions.",
+                "security": { "invoke": "accounting.reconciliation.manage" }
             }
         }
     }

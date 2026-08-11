@@ -47,4 +47,5 @@ MAIN_MENU_PERMISSIONS = {
     "lblAccountingTrialBalance": "accounting.reports.run",
     "lblAccountingPosition": "accounting.reports.run",
     "lblAccountingActivities": "accounting.reports.run",
+    "lblAccountingBankImport": "accounting.reconciliation.manage",
 }

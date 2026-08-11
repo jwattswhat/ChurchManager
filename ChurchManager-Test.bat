@@ -3,7 +3,7 @@ cd /d C:\Users\Pastor\Documents\ChurchManager
 if not exist ".runtime-venv\Scripts\python.exe" goto runtime_missing
 ".runtime-venv\Scripts\python.exe" -c "import wx, mariadb, JSForm" >nul 2>&1
 if errorlevel 1 goto runtime_missing
-".runtime-venv\Scripts\python.exe" cm.py --server 192.168.3.200 --user church --test
+".runtime-venv\Scripts\python.exe" cm.py --server 127.0.0.1 --user church --test
 exit /b %errorlevel%
 
 :runtime_missing
