@@ -709,6 +709,12 @@
                 "label": "Budget to Actual", "posch": [35, 31],
                 "tooltip": "Compare adopted budget totals with posted actual activity.",
                 "security": { "invoke": "accounting.reports.run" }
+            },
+            "lblAccountingFunctionalExpenses": {
+                "name": "lblAccountingFunctionalExpenses", "type": "StaticText",
+                "label": "Functional Expenses", "posch": [35, 32],
+                "tooltip": "Report expenses by natural account and ministry function.",
+                "security": { "invoke": "accounting.reports.run" }
             }
         }
     }
