@@ -43,6 +43,8 @@ REQUIRED_TABLES = {
     "tblAccountingTransactionLine",
     "tblAccountingAttachment",
     "tblAccountingAuditEvent",
+    "tblAccountingBudget",
+    "tblAccountingBudgetLine",
     "tblLectionarySystem",
 }
 REMOVED_REPORT_CODES = {"CFCA01", "CFCR01", "CFGR01", "CMDN01", "CMDN02"}
