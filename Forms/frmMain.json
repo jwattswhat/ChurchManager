@@ -562,7 +562,7 @@
                 "type": "StaticBox",
                 "label": "Accounting",
                 "posch": [34, 8],
-                "sizech": [15, 16]
+                "sizech": [15, 18]
             },
             "lblAccountingSetup": {
                 "name": "lblAccountingSetup",
@@ -661,6 +661,12 @@
                 "label": "Bank File Import", "posch": [35, 23],
                 "tooltip": "Preview and stage a CSV bank file without posting transactions.",
                 "security": { "invoke": "accounting.reconciliation.manage" }
+            },
+            "lblAccountingAudit": {
+                "name": "lblAccountingAudit", "type": "StaticText",
+                "label": "Audit History", "posch": [35, 24],
+                "tooltip": "Review the read-only accounting audit trail.",
+                "security": { "invoke": "accounting.audit.view" }
             }
         }
     }
