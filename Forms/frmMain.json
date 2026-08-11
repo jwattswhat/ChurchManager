@@ -562,7 +562,7 @@
                 "type": "StaticBox",
                 "label": "Accounting",
                 "posch": [34, 8],
-                "sizech": [15, 24]
+                "sizech": [15, 25]
             },
             "lblAccountingSetup": {
                 "name": "lblAccountingSetup",
@@ -703,6 +703,12 @@
                 "label": "Budgets", "posch": [35, 30],
                 "tooltip": "Create account-only or detailed draft budgets.",
                 "security": { "invoke": "accounting.budgets.manage" }
+            },
+            "lblAccountingBudgetActual": {
+                "name": "lblAccountingBudgetActual", "type": "StaticText",
+                "label": "Budget to Actual", "posch": [35, 31],
+                "tooltip": "Compare adopted budget totals with posted actual activity.",
+                "security": { "invoke": "accounting.reports.run" }
             }
         }
     }
