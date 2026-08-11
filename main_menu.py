@@ -51,6 +51,7 @@ SPECIAL_CONTROLS = {
     "lblAccountingGeneralLedger",
     "lblAccountingFundBalances",
     "lblAccountingReconciliationReport",
+    "lblAccountingCloseChecklist",
 }
 MENU_CONTROLS = frozenset(FORM_ROUTES) | SPECIAL_CONTROLS
 SESSION_CONTROLS = frozenset({"lblChangePassword", "lblLogout"})

@@ -34,6 +34,7 @@ from accounting.audit_dialog import show_accounting_audit
 from accounting.general_ledger_dialog import show_general_ledger
 from accounting.fund_balance_dialog import show_fund_balances
 from accounting.reconciliation_report_dialog import show_reconciliation_report
+from accounting.close_checklist_dialog import show_close_checklist
 from types import SimpleNamespace
 
 
@@ -526,6 +527,10 @@ def _buttonclick(event):
             )
         case "lblAccountingReconciliationReport":
             show_reconciliation_report(
+                cmfrm.FRAME, context.connection, context.session, context.authorization
+            )
+        case "lblAccountingCloseChecklist":
+            show_close_checklist(
                 cmfrm.FRAME, context.connection, context.session, context.authorization
             )
         case _:

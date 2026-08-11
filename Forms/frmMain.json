@@ -562,7 +562,7 @@
                 "type": "StaticBox",
                 "label": "Accounting",
                 "posch": [34, 8],
-                "sizech": [15, 22]
+                "sizech": [15, 23]
             },
             "lblAccountingSetup": {
                 "name": "lblAccountingSetup",
@@ -690,6 +690,12 @@
                 "name": "lblAccountingReconciliationReport", "type": "StaticText",
                 "label": "Reconciliation Report", "posch": [35, 28],
                 "tooltip": "Review completed reconciliation proof and outstanding items.",
+                "security": { "invoke": "accounting.reports.run" }
+            },
+            "lblAccountingCloseChecklist": {
+                "name": "lblAccountingCloseChecklist", "type": "StaticText",
+                "label": "Close Checklist", "posch": [35, 29],
+                "tooltip": "Identify unresolved items before closing a fiscal period.",
                 "security": { "invoke": "accounting.reports.run" }
             }
         }
