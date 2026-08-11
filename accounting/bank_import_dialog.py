@@ -224,9 +224,10 @@ class StagedBankActivityDialog(wx.Dialog):
 
 
 class BankImportDialog(wx.Dialog):
-    def __init__(self, parent, service):
+    def __init__(self, parent, service, reconciliation_service=None):
         super().__init__(parent, title="Bank File Import", size=(690, 520))
         self.service = service
+        self.reconciliation_service = reconciliation_service
         self.accounts = service.bank_accounts()
 
         self.account = wx.Choice(self)
@@ -277,15 +278,19 @@ class BankImportDialog(wx.Dialog):
         )
         explanation.Wrap(640)
         review = wx.Button(self, label="Review Staged Activity")
+        reconcile = wx.Button(self, label="Reconcile Statement")
+        reconcile.Enable(reconciliation_service is not None)
         stage = wx.Button(self, label="Preview and Stage")
         close = wx.Button(self, wx.ID_CLOSE, "Close")
         review.Bind(wx.EVT_BUTTON, self.on_review)
+        reconcile.Bind(wx.EVT_BUTTON, self.on_reconcile)
         stage.Bind(wx.EVT_BUTTON, self.on_stage)
         close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
         self.file.Bind(wx.EVT_FILEPICKER_CHANGED, self.on_file_selected)
 
         buttons = wx.BoxSizer(wx.HORIZONTAL)
         buttons.Add(review)
+        buttons.Add(reconcile, 0, wx.LEFT, 8)
         buttons.AddStretchSpacer()
         buttons.Add(stage, 0, wx.RIGHT, 8)
         buttons.Add(close)
@@ -299,6 +304,14 @@ class BankImportDialog(wx.Dialog):
 
     def on_review(self, event=None):
         dialog = StagedBankActivityDialog(self, self.service)
+        try:
+            dialog.ShowModal()
+        finally:
+            dialog.Destroy()
+
+    def on_reconcile(self, event=None):
+        from .reconciliation_dialog import BankReconciliationDialog
+        dialog = BankReconciliationDialog(self, self.reconciliation_service)
         try:
             dialog.ShowModal()
         finally:
@@ -404,8 +417,11 @@ def show_bank_import(parent, connection, session, authorization):
     authorization.require(
         "accounting.reconciliation.manage", "import and reconcile bank activity"
     )
+    from .reconciliation_service import BankReconciliationService
     dialog = BankImportDialog(
-        parent, BankImportService(connection, session.user_id)
+        parent,
+        BankImportService(connection, session.user_id),
+        BankReconciliationService(connection, session.user_id),
     )
     try:
         dialog.ShowModal()
