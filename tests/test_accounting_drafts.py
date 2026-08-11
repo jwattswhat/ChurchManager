@@ -178,9 +178,11 @@ class TestAccountingDraftService(unittest.TestCase):
         self.assertIn('label="Guided Receipt"', source)
         self.assertIn('label="Guided Disbursement"', source)
         self.assertIn('label="Guided Transfer"', source)
+        self.assertIn('label="Guided Deposit"', source)
         self.assertIn("lines = [cash_line, offset_line] if self.receipt", source)
         self.assertIn("self.transaction_type.SetSelection(1 if receipt else 0)", source)
         self.assertIn("Configure an active Bank Account", source)
+        self.assertIn("Add at least two receipt components", source)
 
     def test_master_choices_include_template_account_groups(self):
         from pathlib import Path
@@ -260,6 +262,9 @@ class TestAccountingDraftService(unittest.TestCase):
         self.assertIn('label="Open Draft"', source)
         self.assertIn('self.save.SetLabel("Update Draft")', source)
         self.assertIn("self.service.update(", source)
+        self.assertIn("wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit", source)
+        self.assertIn("DepositReceiptDialog(self, self.choices, self.items[index])", source)
+        self.assertIn("wx.EVT_LIST_ITEM_ACTIVATED, self.on_verify", source)
 
     def test_submit_rereads_and_locks_draft_before_marking_ready(self):
         connection = SubmitConnection()

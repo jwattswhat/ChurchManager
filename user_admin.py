@@ -459,6 +459,7 @@ class UserAdministrationDialog(wx.Dialog):
             ("Master", 70), ("Roles", 280),
         )):
             self.list.InsertColumn(index, label, width=width)
+        self.list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_roles)
         buttons = wx.BoxSizer(wx.HORIZONTAL)
         actions = (
             ("New User", self.on_new), ("Roles", self.on_roles),
