@@ -15,6 +15,8 @@ class StagedBankActivityDialog(wx.Dialog):
         super().__init__(parent, title="Staged Bank Activity", size=(980, 650))
         self.service = service
         self.batches = []
+        self.rows = []
+        self.selected_batch_index = None
         self.batch_list = wx.ListCtrl(
             self, style=wx.LC_REPORT | wx.LC_SINGLE_SEL
         )
@@ -33,14 +35,23 @@ class StagedBankActivityDialog(wx.Dialog):
         amount_column.SetAlign(wx.LIST_FORMAT_RIGHT)
         self.row_list.SetColumn(4, amount_column)
         self.batch_list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_batch_selected)
+        self.row_list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_row_selected)
 
         refresh = wx.Button(self, label="Refresh")
+        self.ignore = wx.Button(self, label="Ignore Selected Row")
+        self.restore = wx.Button(self, label="Restore Selected Row")
+        self.ignore.Enable(False)
+        self.restore.Enable(False)
         close = wx.Button(self, wx.ID_CLOSE, "Close")
         refresh.Bind(wx.EVT_BUTTON, self.refresh)
+        self.ignore.Bind(wx.EVT_BUTTON, lambda event: self.change_ignored(True))
+        self.restore.Bind(wx.EVT_BUTTON, lambda event: self.change_ignored(False))
         close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
         buttons = wx.BoxSizer(wx.HORIZONTAL)
         buttons.Add(refresh)
         buttons.AddStretchSpacer()
+        buttons.Add(self.ignore, 0, wx.RIGHT, 8)
+        buttons.Add(self.restore, 0, wx.RIGHT, 8)
         buttons.Add(close)
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(wx.StaticText(self, label="Imported bank files"), 0, wx.ALL, 10)
@@ -59,8 +70,12 @@ class StagedBankActivityDialog(wx.Dialog):
 
     def refresh(self, event=None):
         self.batches = self.service.staged_batches()
+        self.rows = []
+        self.selected_batch_index = None
         self.batch_list.DeleteAllItems()
         self.row_list.DeleteAllItems()
+        self.ignore.Enable(False)
+        self.restore.Enable(False)
         for item in self.batches:
             row = self.batch_list.InsertItem(
                 self.batch_list.GetItemCount(), str(item[0])
@@ -69,13 +84,36 @@ class StagedBankActivityDialog(wx.Dialog):
                 self.batch_list.SetItem(row, column, str(value))
 
     def on_batch_selected(self, event):
+        self.selected_batch_index = event.GetIndex()
+        self.load_selected_batch()
+
+    def load_selected_batch(self):
         self.row_list.DeleteAllItems()
-        batch_id = self.batches[event.GetIndex()][0]
-        for item in self.service.staged_rows(batch_id):
-            row = self.row_list.InsertItem(self.row_list.GetItemCount(), str(item[0]))
-            values = (item[1], item[2], item[3] or "", money(item[4]), item[5])
+        self.ignore.Enable(False)
+        self.restore.Enable(False)
+        batch_id = self.batches[self.selected_batch_index][0]
+        self.rows = self.service.staged_rows(batch_id)
+        for item in self.rows:
+            row = self.row_list.InsertItem(self.row_list.GetItemCount(), str(item[1]))
+            values = (item[2], item[3], item[4] or "", money(item[5]), item[6])
             for column, value in enumerate(values, 1):
                 self.row_list.SetItem(row, column, str(value))
+
+    def on_row_selected(self, event):
+        status = self.rows[event.GetIndex()][6]
+        self.ignore.Enable(status == "UNMATCHED")
+        self.restore.Enable(status == "IGNORED")
+
+    def change_ignored(self, ignored):
+        index = self.row_list.GetFirstSelected()
+        if index == -1:
+            return
+        try:
+            self.service.set_row_ignored(self.rows[index][0], ignored)
+        except ValueError as error:
+            wx.MessageBox(str(error), "Bank row not changed", wx.OK | wx.ICON_WARNING)
+            return
+        self.load_selected_batch()
 
 
 class BankImportDialog(wx.Dialog):

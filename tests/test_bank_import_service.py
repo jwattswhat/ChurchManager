@@ -9,6 +9,7 @@ class Cursor:
     def execute(self,sql,values=()):
         self.statements.append((sql,values))
         if sql.startswith("SELECT OrganizationID"):self.one=(1,)
+        elif sql.startswith("SELECT r.MatchStatus"):self.one=("UNMATCHED",1)
         elif sql.startswith("SELECT ID FROM tblAccountingBankImportBatch"):self.one=None
     def fetchone(self):return self.one
     def fetchall(self):return []
@@ -39,5 +40,29 @@ class TestBankImportService(unittest.TestCase):
         self.assertIn("FROM tblAccountingBankImportRow", sql)
         self.assertNotIn("INSERT", sql)
         self.assertNotIn("UPDATE", sql)
+
+    def test_ignoring_row_updates_status_and_writes_audit(self):
+        connection = Connection()
+        changed = BankImportService(connection, 7).set_row_ignored(42, True)
+        self.assertTrue(changed)
+        self.assertEqual(connection.commits, 1)
+        sql = "\n".join(value[0] for value in connection.cursor_value.statements)
+        self.assertIn("UPDATE tblAccountingBankImportRow", sql)
+        self.assertIn("BANK_IMPORT_ROW", sql)
+        self.assertIn("BeforeJSON", sql)
+
+    def test_matched_row_cannot_be_ignored(self):
+        connection = Connection()
+        connection.cursor_value.one = ("MATCHED", 1)
+        original_execute = connection.cursor_value.execute
+        def execute(sql, values=()):
+            original_execute(sql, values)
+            if sql.startswith("SELECT r.MatchStatus"):
+                connection.cursor_value.one = ("MATCHED", 1)
+        connection.cursor_value.execute = execute
+        with self.assertRaisesRegex(ValueError, "matched"):
+            BankImportService(connection, 7).set_row_ignored(42, True)
+        self.assertEqual(connection.commits, 0)
+        self.assertEqual(connection.rollbacks, 1)
 
 if __name__=="__main__":unittest.main()

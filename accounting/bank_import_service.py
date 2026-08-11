@@ -36,12 +36,59 @@ class BankImportService:
         try:
             self._execute(
                 cursor,
-                "SELECT RowNumber, TransactionDate, Description, Reference, "
+                "SELECT ID, RowNumber, TransactionDate, Description, Reference, "
                 "Amount, MatchStatus FROM tblAccountingBankImportRow "
                 "WHERE ImportBatchID=? ORDER BY RowNumber",
                 (batch_id,),
             )
             return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def set_row_ignored(self, import_row_id, ignored):
+        cursor = self.connection.cursor()
+        try:
+            self._execute(
+                cursor,
+                "SELECT r.MatchStatus, b.OrganizationID "
+                "FROM tblAccountingBankImportRow r "
+                "JOIN tblAccountingBankImportBatch i ON i.ID=r.ImportBatchID "
+                "JOIN tblAccountingBankAccount b ON b.ID=i.BankAccountID "
+                "WHERE r.ID=? FOR UPDATE",
+                (import_row_id,),
+            )
+            current = cursor.fetchone()
+            if current is None:
+                raise ValueError("The staged bank row no longer exists.")
+            if current[0] == "MATCHED":
+                raise ValueError("A matched bank row cannot be ignored or restored.")
+            desired = "IGNORED" if ignored else "UNMATCHED"
+            if current[0] == desired:
+                self.connection.rollback()
+                return False
+            self._execute(
+                cursor,
+                "UPDATE tblAccountingBankImportRow SET MatchStatus=? WHERE ID=?",
+                (desired, import_row_id),
+            )
+            action = "BANK_ROW_IGNORED" if ignored else "BANK_ROW_RESTORED"
+            self._execute(
+                cursor,
+                "INSERT INTO tblAccountingAuditEvent "
+                "(OrganizationID,EntityType,EntityID,Action,BeforeJSON,AfterJSON,UserID) "
+                "VALUES (?,'BANK_IMPORT_ROW',?,?,?,?,?)",
+                (
+                    current[1], str(import_row_id), action,
+                    json.dumps({"match_status": current[0]}, separators=(",", ":")),
+                    json.dumps({"match_status": desired}, separators=(",", ":")),
+                    self.acting_user_id,
+                ),
+            )
+            self.connection.commit()
+            return True
+        except Exception:
+            self.connection.rollback()
+            raise
         finally:
             cursor.close()
     def stage_csv(self,bank_account_id,source,mapping:CsvMapping):
