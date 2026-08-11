@@ -177,6 +177,7 @@ class TestAccountingDraftService(unittest.TestCase):
         )
         self.assertIn('label="Guided Receipt"', source)
         self.assertIn('label="Guided Disbursement"', source)
+        self.assertIn('label="Guided Transfer"', source)
         self.assertIn("lines = [cash_line, offset_line] if self.receipt", source)
         self.assertIn("self.transaction_type.SetSelection(1 if receipt else 0)", source)
         self.assertIn("Configure an active Bank Account", source)
@@ -190,6 +191,8 @@ class TestAccountingDraftService(unittest.TestCase):
         self.assertIn('"cash_accounts"', source)
         self.assertIn('"revenue_accounts"', source)
         self.assertIn('"expense_accounts"', source)
+        self.assertIn('"transfer_out_accounts"', source)
+        self.assertIn('"transfer_in_accounts"', source)
         self.assertIn("FROM tblAccountingBankAccount", source)
 
     def test_transaction_grid_columns_fit_inside_dialog(self):

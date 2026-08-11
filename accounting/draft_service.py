@@ -63,6 +63,18 @@ class AccountingDraftService:
                     "FROM tblAccountingAccount WHERE OrganizationID=? AND Active=1 "
                     "AND PostingAllowed=1 AND AccountType='EXPENSE' ORDER BY Code"
                 ),
+                "transfer_out_accounts": (
+                    "SELECT ID, CONCAT(Code, ' - ', Name), FunctionRequirement "
+                    "FROM tblAccountingAccount WHERE OrganizationID=? AND Active=1 "
+                    "AND PostingAllowed=1 AND AccountType='TRANSFER' "
+                    "AND NormalBalance='DEBIT' ORDER BY Code"
+                ),
+                "transfer_in_accounts": (
+                    "SELECT ID, CONCAT(Code, ' - ', Name), FunctionRequirement "
+                    "FROM tblAccountingAccount WHERE OrganizationID=? AND Active=1 "
+                    "AND PostingAllowed=1 AND AccountType='TRANSFER' "
+                    "AND NormalBalance='CREDIT' ORDER BY Code"
+                ),
             }
             for name, sql in queries.items():
                 self._execute(cursor, sql, (organization_id,))

@@ -220,6 +220,87 @@ class GuidedCashDialog(wx.Dialog):
         return lines, description, reference
 
 
+class GuidedTransferDialog(wx.Dialog):
+    def __init__(self, parent, choices):
+        super().__init__(parent, title="Guided Fund Transfer")
+        self.cash = wx.Choice(self)
+        self.from_fund = wx.Choice(self)
+        self.to_fund = wx.Choice(self)
+        self.transfer_out = wx.Choice(self)
+        self.transfer_in = wx.Choice(self)
+        self.amount = wx.TextCtrl(self)
+        self.description = wx.TextCtrl(self)
+        self.reference = wx.TextCtrl(self)
+        for control, rows in (
+            (self.cash, choices["cash_accounts"]),
+            (self.from_fund, choices["funds"]),
+            (self.to_fund, choices["funds"]),
+            (self.transfer_out, choices["transfer_out_accounts"]),
+            (self.transfer_in, choices["transfer_in_accounts"]),
+        ):
+            LineDialog._load_choice(control, rows, required=True)
+        grid = wx.FlexGridSizer(cols=2, hgap=8, vgap=8)
+        grid.AddGrowableCol(1, 1)
+        for label, control in (
+            ("Bank account", self.cash), ("From fund", self.from_fund),
+            ("To fund", self.to_fund), ("Transfer-out account", self.transfer_out),
+            ("Transfer-in account", self.transfer_in), ("Amount", self.amount),
+            ("Description", self.description), ("Reference", self.reference),
+        ):
+            grid.Add(wx.StaticText(self, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+            grid.Add(control, 1, wx.EXPAND)
+        root = wx.BoxSizer(wx.VERTICAL)
+        root.Add(wx.StaticText(self, label=(
+            "The guide creates four lines so both funds remain individually balanced."
+        )), 0, wx.ALL, 12)
+        root.Add(grid, 1, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 12)
+        root.Add(self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL),
+                 0, wx.ALL | wx.EXPAND, 10)
+        self.SetSizerAndFit(root)
+        self.SetMinSize((590, self.GetSize().height))
+
+    def values(self):
+        cash_id, cash_label = GuidedCashDialog._selected(
+            self.cash, "Select a bank account."
+        )
+        from_id, from_label = GuidedCashDialog._selected(
+            self.from_fund, "Select the fund providing the money."
+        )
+        to_id, to_label = GuidedCashDialog._selected(
+            self.to_fund, "Select the fund receiving the money."
+        )
+        if from_id == to_id:
+            raise ValueError("The From fund and To fund must be different.")
+        out_id, out_label = GuidedCashDialog._selected(
+            self.transfer_out, "Select the transfer-out account."
+        )
+        in_id, in_label = GuidedCashDialog._selected(
+            self.transfer_in, "Select the transfer-in account."
+        )
+        try:
+            amount = LineDialog._money(self.amount)
+        except InvalidOperation as error:
+            raise ValueError("Amount must be a valid dollar amount.") from error
+        if amount <= ZERO:
+            raise ValueError("Enter a positive amount.")
+        description = self.description.GetValue().strip()
+        if not description:
+            raise ValueError("Enter a description.")
+        none = {"function_id": None, "function": "(none)",
+                "payee_id": None, "payee": "(none)", "description": description}
+        lines = [
+            {**none, "account_id": out_id, "account": out_label,
+             "fund_id": from_id, "fund": from_label, "debit": amount, "credit": ZERO},
+            {**none, "account_id": cash_id, "account": cash_label,
+             "fund_id": from_id, "fund": from_label, "debit": ZERO, "credit": amount},
+            {**none, "account_id": cash_id, "account": cash_label,
+             "fund_id": to_id, "fund": to_label, "debit": amount, "credit": ZERO},
+            {**none, "account_id": in_id, "account": in_label,
+             "fund_id": to_id, "fund": to_label, "debit": ZERO, "credit": amount},
+        ]
+        return lines, description, self.reference.GetValue().strip()
+
+
 class DraftListDialog(wx.Dialog):
     def __init__(self, parent, rows):
         super().__init__(parent, title="Open Accounting Draft", size=(850, 430))
@@ -416,6 +497,7 @@ class AccountingDraftDialog(wx.Dialog):
         self.attachments = wx.Button(self, label="Source Documents")
         guided_receipt = wx.Button(self, label="Guided Receipt")
         guided_disbursement = wx.Button(self, label="Guided Disbursement")
+        guided_transfer = wx.Button(self, label="Guided Transfer")
         self.attachments.Enable(False)
         add.Bind(wx.EVT_BUTTON, self.on_add)
         edit.Bind(wx.EVT_BUTTON, self.on_edit)
@@ -423,7 +505,16 @@ class AccountingDraftDialog(wx.Dialog):
         self.attachments.Bind(wx.EVT_BUTTON, self.on_attachments)
         guided_receipt.Bind(wx.EVT_BUTTON, lambda event: self.on_guided_cash(True))
         guided_disbursement.Bind(wx.EVT_BUTTON, lambda event: self.on_guided_cash(False))
-        self.totals = wx.StaticText(self, label="Debits $0.00    Credits $0.00    Difference $0.00")
+        guided_transfer.Bind(wx.EVT_BUTTON, self.on_guided_transfer)
+        self.debit_total = wx.StaticText(
+            self, label="$0.00", size=(135, -1), style=wx.ALIGN_RIGHT
+        )
+        self.credit_total = wx.StaticText(
+            self, label="$0.00", size=(135, -1), style=wx.ALIGN_RIGHT
+        )
+        self.difference_total = wx.StaticText(
+            self, label="$0.00", size=(135, -1), style=wx.ALIGN_RIGHT
+        )
         new = wx.Button(self, label="New Draft")
         open_draft = wx.Button(self, label="Open Draft")
         self.save = wx.Button(self, label="Save Draft")
@@ -442,11 +533,19 @@ class AccountingDraftDialog(wx.Dialog):
         for button in (add, edit, remove):
             line_buttons.Add(button, 0, wx.RIGHT, 6)
         line_buttons.AddStretchSpacer()
-        line_buttons.Add(self.totals, 0, wx.ALIGN_CENTER_VERTICAL)
         guided_buttons = wx.BoxSizer(wx.HORIZONTAL)
         guided_buttons.Add(guided_receipt, 0, wx.RIGHT, 6)
         guided_buttons.Add(guided_disbursement, 0, wx.RIGHT, 6)
+        guided_buttons.Add(guided_transfer, 0, wx.RIGHT, 6)
         guided_buttons.Add(self.attachments)
+        totals_row = wx.BoxSizer(wx.HORIZONTAL)
+        totals_row.AddStretchSpacer()
+        for label, value in (("Debits", self.debit_total),
+                             ("Credits", self.credit_total),
+                             ("Difference", self.difference_total)):
+            totals_row.Add(wx.StaticText(self, label=label), 0,
+                           wx.LEFT | wx.ALIGN_CENTER_VERTICAL, 12)
+            totals_row.Add(value, 0, wx.LEFT | wx.ALIGN_CENTER_VERTICAL, 4)
         workflow_buttons = wx.BoxSizer(wx.HORIZONTAL)
         workflow_buttons.AddStretchSpacer()
         workflow_buttons.Add(new, 0, wx.RIGHT, 6)
@@ -459,6 +558,7 @@ class AccountingDraftDialog(wx.Dialog):
         root.Add(header, 0, wx.ALL | wx.EXPAND, 12)
         root.Add(self.list, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 12)
         root.Add(line_buttons, 0, wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, 12)
+        root.Add(totals_row, 0, wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, 12)
         root.Add(guided_buttons, 0, wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, 12)
         root.Add(workflow_buttons, 0, wx.ALL | wx.EXPAND, 12)
         self.SetSizer(root)
@@ -670,6 +770,38 @@ class AccountingDraftDialog(wx.Dialog):
         self.transaction_type.SetSelection(1 if receipt else 0)
         self.refresh()
 
+    def on_guided_transfer(self, event):
+        if self.current_id is not None or self.lines:
+            if wx.MessageBox(
+                "Start a new guided transfer and discard the current unsaved screen values?",
+                "Guided Transfer", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION,
+            ) != wx.YES:
+                return
+            self.on_new()
+        required = ("cash_accounts", "transfer_out_accounts", "transfer_in_accounts")
+        if not self.master_choices or any(not self.master_choices[name] for name in required):
+            wx.MessageBox(
+                "A bank account and active transfer-in and transfer-out accounts are required.",
+                "Guided Transfer", wx.OK | wx.ICON_WARNING,
+            )
+            return
+        dialog = GuidedTransferDialog(self, self.master_choices)
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            lines, description, reference = dialog.values()
+        except ValueError as error:
+            wx.MessageBox(str(error), "Guided transfer not created",
+                          wx.OK | wx.ICON_WARNING)
+            return
+        finally:
+            dialog.Destroy()
+        self.lines = lines
+        self.description.SetValue(description)
+        self.reference.SetValue(reference)
+        self.transaction_type.SetSelection(2)
+        self.refresh()
+
     def refresh(self):
         self.list.DeleteAllItems()
         debit_total = ZERO
@@ -685,11 +817,9 @@ class AccountingDraftDialog(wx.Dialog):
                 self.list.SetItem(row, column, value)
             debit_total += line["debit"]
             credit_total += line["credit"]
-        self.totals.SetLabel(
-            "Debits {}    Credits {}    Difference {}".format(
-                money(debit_total, True), money(credit_total, True),
-                money(debit_total - credit_total, True))
-        )
+        self.debit_total.SetLabel(money(debit_total, True))
+        self.credit_total.SetLabel(money(credit_total, True))
+        self.difference_total.SetLabel(money(debit_total - credit_total, True))
 
     def transaction(self):
         type_codes = ("CASH_DISBURSEMENT", "CASH_RECEIPT", "JOURNAL")
