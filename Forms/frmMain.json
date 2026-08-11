@@ -562,7 +562,7 @@
                 "type": "StaticBox",
                 "label": "Accounting",
                 "posch": [34, 8],
-                "sizech": [15, 18]
+                "sizech": [15, 19]
             },
             "lblAccountingSetup": {
                 "name": "lblAccountingSetup",
@@ -614,57 +614,63 @@
                 "tooltip": "Configure cash accounts for bank imports and reconciliation.",
                 "security": { "invoke": "accounting.master_data.manage" }
             },
+            "lblAccountingPayees": {
+                "name": "lblAccountingPayees", "type": "StaticText",
+                "label": "Payees", "posch": [35, 16],
+                "tooltip": "Maintain transaction payees and vendors.",
+                "security": { "invoke": "accounting.master_data.manage" }
+            },
             "lblAccountingTransactions": {
                 "name": "lblAccountingTransactions", "type": "StaticText",
-                "label": "Transaction Entry", "posch": [35, 16],
+                "label": "Transaction Entry", "posch": [35, 17],
                 "tooltip": "Create a balanced accounting draft.",
                 "security": { "invoke": "accounting.transactions.create" }
             },
             "lblAccountingReview": {
                 "name": "lblAccountingReview", "type": "StaticText",
-                "label": "Transaction Review", "posch": [35, 17],
+                "label": "Transaction Review", "posch": [35, 18],
                 "tooltip": "Review and approve accounting transactions awaiting approval.",
                 "security": { "invoke": "accounting.transactions.approve" }
             },
             "lblAccountingPosting": {
                 "name": "lblAccountingPosting", "type": "StaticText",
-                "label": "Transaction Posting", "posch": [35, 18],
+                "label": "Transaction Posting", "posch": [35, 19],
                 "tooltip": "Post reviewed accounting transactions permanently.",
                 "security": { "invoke": "accounting.transactions.post" }
             },
             "lblAccountingRegister": {
                 "name": "lblAccountingRegister", "type": "StaticText",
-                "label": "Posted Register", "posch": [35, 19],
+                "label": "Posted Register", "posch": [35, 20],
                 "tooltip": "View posted accounting transactions and their lines.",
                 "security": { "invoke": "accounting.transactions.view" }
             },
             "lblAccountingTrialBalance": {
                 "name": "lblAccountingTrialBalance", "type": "StaticText",
-                "label": "Trial Balance", "posch": [35, 20],
+                "label": "Trial Balance", "posch": [35, 21],
                 "tooltip": "Run an as-of-date trial balance from posted transactions.",
                 "security": { "invoke": "accounting.reports.run" }
             },
             "lblAccountingPosition": {
                 "name": "lblAccountingPosition", "type": "StaticText",
-                "label": "Financial Position", "posch": [35, 21],
+                "label": "Financial Position", "posch": [35, 22],
                 "tooltip": "Run a statement of financial position as of a selected date.",
                 "security": { "invoke": "accounting.reports.run" }
             },
             "lblAccountingActivities": {
                 "name": "lblAccountingActivities", "type": "StaticText",
-                "label": "Statement of Activities", "posch": [35, 22],
+                "label": "Statement of Activities", "posch": [35, 23],
                 "tooltip": "Run revenue, expense, transfer, and net-asset activity by restriction class.",
                 "security": { "invoke": "accounting.reports.run" }
             },
             "lblAccountingBankImport": {
                 "name": "lblAccountingBankImport", "type": "StaticText",
-                "label": "Bank File Import", "posch": [35, 23],
+                "label": "Bank File Import", "posch": [35, 24],
                 "tooltip": "Preview and stage a CSV bank file without posting transactions.",
                 "security": { "invoke": "accounting.reconciliation.manage" }
             },
             "lblAccountingAudit": {
                 "name": "lblAccountingAudit", "type": "StaticText",
-                "label": "Audit History", "posch": [35, 24],
+                "label": "Audit History", "posch": [35, 25],
                 "tooltip": "Review the read-only accounting audit trail.",
                 "security": { "invoke": "accounting.audit.view" }
             }

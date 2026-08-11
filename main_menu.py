@@ -31,6 +31,7 @@ FORM_ROUTES = {
     "lblAccountingYears": "frmAccountingFiscalYear",
     "lblAccountingPeriods": "frmAccountingFiscalPeriod",
     "lblAccountingBankAccounts": "frmAccountingBankAccount",
+    "lblAccountingPayees": "frmAccountingPayee",
 }
 
 SPECIAL_CONTROLS = {

@@ -578,6 +578,20 @@ class TestChurchManagerForms(unittest.TestCase):
         box=controls["FundAccountingBox"]; top=box["posch"][1]; bottom=top+box["sizech"][1]
         self.assertTrue(top < controls["lblAccountingActivities"]["posch"][1] < bottom)
 
+    def test_payees_are_protected_jsform_master_data(self):
+        from main_menu import FORM_ROUTES
+        from permission_catalog import MAIN_MENU_PERMISSIONS
+
+        self.assertEqual(FORM_ROUTES["lblAccountingPayees"], "frmAccountingPayee")
+        self.assertEqual(
+            MAIN_MENU_PERMISSIONS["lblAccountingPayees"],
+            "accounting.master_data.manage",
+        )
+        form = load_json(FORMS / "frmAccountingPayee.json")["frmAccountingPayeeFORM"]
+        self.assertEqual(form["FORM"]["table"]["name"], "tblAccountingPayee")
+        self.assertEqual(form["CONTROLS"]["OrganizationID"]["type"], "ComboBox")
+        self.assertEqual(form["CONTROLS"]["ContactData"]["type"], "MultiLine")
+
     def test_bank_import_is_a_protected_special_workflow(self):
         from main_menu import SPECIAL_CONTROLS
         from permission_catalog import MAIN_MENU_PERMISSIONS
