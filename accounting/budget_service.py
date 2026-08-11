@@ -77,3 +77,31 @@ class BudgetService:
             self.connection.commit()
         except Exception:self.connection.rollback();raise
         finally:c.close()
+
+    def propose(self,budget_id):
+        c=self.connection.cursor()
+        try:
+            self._execute(c,"SELECT OrganizationID,Status FROM tblAccountingBudget WHERE ID=? FOR UPDATE",(budget_id,));row=c.fetchone()
+            if row is None or row[1]!="DRAFT":raise ValueError("Only a draft budget can be proposed.")
+            self._execute(c,"SELECT COUNT(*) FROM tblAccountingBudgetLine WHERE BudgetID=? AND Amount>0",(budget_id,))
+            if c.fetchone()[0]<1:raise ValueError("Add at least one positive budget line before proposing the budget.")
+            self._execute(c,"UPDATE tblAccountingBudget SET Status='PROPOSED',ProposedByUserID=?,ProposedAt=CURRENT_TIMESTAMP(6) WHERE ID=? AND Status='DRAFT'",(self.acting_user_id,budget_id))
+            self._execute(c,"INSERT INTO tblAccountingAuditEvent (OrganizationID,EntityType,EntityID,Action,AfterJSON,UserID) VALUES (?,'BUDGET',?,'BUDGET_PROPOSED','{\"status\":\"PROPOSED\"}',?)",(row[0],str(budget_id),self.acting_user_id));self.connection.commit()
+        except Exception:self.connection.rollback();raise
+        finally:c.close()
+
+    def adopt(self,budget_id,reason=None,can_override=False):
+        c=self.connection.cursor();reason=(reason or "").strip()
+        try:
+            self._execute(c,"SELECT b.OrganizationID,b.FiscalYearID,b.Status,b.CreatedByUserID,o.ApprovalPolicy FROM tblAccountingBudget b JOIN tblAccountingOrganization o ON o.ID=b.OrganizationID WHERE b.ID=? FOR UPDATE",(budget_id,));row=c.fetchone()
+            if row is None or row[2]!="PROPOSED":raise ValueError("Only a proposed budget can be adopted.")
+            same=row[3]==self.acting_user_id
+            if same:
+                if row[4]!="INDEPENDENT_PREFERRED" or not can_override:raise ValueError("A different authorized user must adopt this budget under the current policy.")
+                if not reason:raise ValueError("Enter a reason for the solo budget-adoption override.")
+            self._execute(c,"UPDATE tblAccountingBudget SET Status='SUPERSEDED' WHERE FiscalYearID=? AND Status='ADOPTED' AND ID<>?",(row[1],budget_id))
+            self._execute(c,"UPDATE tblAccountingBudget SET Status='ADOPTED',AdoptedByUserID=?,AdoptedAt=CURRENT_TIMESTAMP(6) WHERE ID=? AND Status='PROPOSED'",(self.acting_user_id,budget_id))
+            action="BUDGET_ADOPTED_OVERRIDE" if same else "BUDGET_ADOPTED"
+            self._execute(c,"INSERT INTO tblAccountingAuditEvent (OrganizationID,EntityType,EntityID,Action,AfterJSON,Reason,UserID) VALUES (?,'BUDGET',?,?,'{\"status\":\"ADOPTED\"}',?,?)",(row[0],str(budget_id),action,reason or None,self.acting_user_id));self.connection.commit()
+        except Exception:self.connection.rollback();raise
+        finally:c.close()
