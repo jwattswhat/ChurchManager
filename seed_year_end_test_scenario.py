@@ -88,6 +88,13 @@ def main():
             year_status, closing_transaction_id = cursor.fetchone()
             print("year_status", year_status)
             print("closing_transaction_id", closing_transaction_id)
+            cursor.execute("SELECT PeriodNumber,Status FROM tblAccountingFiscalPeriod WHERE FiscalYearID=? ORDER BY PeriodNumber DESC LIMIT 1", (year[0],))
+            final_period_number, final_period_status = cursor.fetchone()
+            print("final_period", final_period_number)
+            print("final_period_status", final_period_status)
+            cursor.execute("SELECT TransactionNumber,TransactionType,Status,OriginalTransactionID,ReversalTransactionID FROM tblAccountingTransaction WHERE OrganizationID=? AND TransactionType IN ('YEAR_END_CLOSE','REVERSAL') ORDER BY TransactionNumber", (existing[0],))
+            for transaction_number, transaction_type, transaction_status, original_id, reversal_id in cursor.fetchall():
+                print("year_end_transaction", transaction_number, transaction_type, transaction_status, "original", original_id, "reversal", reversal_id)
             if closing_transaction_id is not None:
                 cursor.execute("SELECT TransactionNumber,Status FROM tblAccountingTransaction WHERE ID=?", (closing_transaction_id,))
                 closing_number, closing_status = cursor.fetchone()

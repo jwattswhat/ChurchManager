@@ -21,6 +21,7 @@ class YearEndPreviewTests(unittest.TestCase):
         self.assertIn('title="Year-End Close Preview"', source)
         self.assertIn('authorization.require("accounting.periods.override"', source)
         self.assertIn('label="Close Fiscal Year"', source)
+        self.assertIn('label="Reopen Fiscal Year"', source)
 
     def test_close_is_atomic_numbered_and_audited(self):
         source = (Path(__file__).parents[1] / "accounting" / "year_end_service.py").read_text(encoding="utf-8")
@@ -29,6 +30,13 @@ class YearEndPreviewTests(unittest.TestCase):
         self.assertIn("ClosingTransactionID", source)
         self.assertIn("FISCAL_YEAR_CLOSED_OVERRIDE", source)
         self.assertIn("generated year-end closing transaction is not balanced", source)
+
+    def test_reopen_reverses_close_and_reopens_final_period(self):
+        source = (Path(__file__).parents[1] / "accounting" / "year_end_service.py").read_text(encoding="utf-8")
+        self.assertIn("FISCAL_YEAR_REOPENED_OVERRIDE", source)
+        self.assertIn("YEAR_END_CLOSE_REVERSED", source)
+        self.assertIn("SET Status='OPEN',ClosingTransactionID=NULL", source)
+        self.assertIn("SET Status='OPEN' WHERE ID=? AND Status='CLOSED'", source)
 
 
 if __name__ == "__main__":

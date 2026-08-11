@@ -23,12 +23,16 @@ class YearEndDialog(wx.Dialog):
         self.close_year = wx.Button(self, label="Close Fiscal Year")
         self.close_year.Enable(False)
         self.close_year.Bind(wx.EVT_BUTTON, self.on_close_year)
+        self.reopen_year = wx.Button(self, label="Reopen Fiscal Year")
+        self.reopen_year.Enable(False)
+        self.reopen_year.Bind(wx.EVT_BUTTON, self.on_reopen_year)
         header = wx.BoxSizer(wx.HORIZONTAL)
         for label, control in (("Organization", self.organization), ("Fiscal year", self.year)):
             header.Add(wx.StaticText(self, label=label), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
             header.Add(control, 0, wx.RIGHT, 12)
         header.Add(preview, 0, wx.RIGHT, 8)
         header.Add(self.close_year)
+        header.Add(self.reopen_year, 0, wx.LEFT, 8)
         self.list = wx.ListCtrl(self, style=wx.LC_REPORT)
         for index, (label, width) in enumerate((("Fund", 185), ("Revenue", 115), ("Expenses", 115), ("Transfers", 115), ("Change", 115), ("Net-asset account", 250))):
             self.list.InsertColumn(index, label, format=wx.LIST_FORMAT_RIGHT if 1 <= index <= 4 else wx.LIST_FORMAT_LEFT, width=width)
@@ -70,10 +74,12 @@ class YearEndDialog(wx.Dialog):
             self.status.SetLabel("Ready for year-end close")
             self.blockers.SetValue("All periods are closed, all transactions are posted, the ledger balances, and affected funds have net-asset accounts.")
             self.close_year.Enable(self.can_override)
+            self.reopen_year.Enable(False)
         else:
             self.status.SetLabel("Not ready for year-end close")
             self.blockers.SetValue("\r\n".join("- " + item for item in report["blockers"]))
             self.close_year.Enable(False)
+            self.reopen_year.Enable(report["year"][3] == "CLOSED" and report["year"][4] is not None and self.can_override)
 
     def on_close_year(self, event):
         if self.organization.GetSelection() == wx.NOT_FOUND or self.year.GetSelection() == wx.NOT_FOUND:
@@ -89,6 +95,23 @@ class YearEndDialog(wx.Dialog):
             self.load_years(); self.list.DeleteAllItems(); self.close_year.Enable(False)
         except ValueError as error:
             wx.MessageBox(str(error), "Fiscal year not closed", wx.OK | wx.ICON_WARNING)
+        finally:
+            reason_dialog.Destroy()
+
+    def on_reopen_year(self, event):
+        if self.organization.GetSelection() == wx.NOT_FOUND or self.year.GetSelection() == wx.NOT_FOUND:
+            return
+        reason_dialog = wx.TextEntryDialog(self, "Explain why this fiscal year must be reopened.", "Reopen Fiscal Year")
+        try:
+            if reason_dialog.ShowModal() != wx.ID_OK:
+                return
+            if wx.MessageBox("Reverse the closing transaction and reopen the final fiscal period for adjustments?", "Confirm Fiscal-Year Reopen", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING) != wx.YES:
+                return
+            number = self.service.reopen(self.organization.GetClientData(self.organization.GetSelection()), self.year.GetClientData(self.year.GetSelection()), reason_dialog.GetValue(), self.can_override)
+            wx.MessageBox("Fiscal year reopened with reversal transaction {}.".format(number), "Fiscal Year Reopened", wx.OK | wx.ICON_INFORMATION)
+            self.load_years(); self.list.DeleteAllItems(); self.close_year.Enable(False); self.reopen_year.Enable(False)
+        except ValueError as error:
+            wx.MessageBox(str(error), "Fiscal year not reopened", wx.OK | wx.ICON_WARNING)
         finally:
             reason_dialog.Destroy()
 

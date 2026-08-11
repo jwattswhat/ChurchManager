@@ -173,3 +173,67 @@ class YearEndService:
             raise
         finally:
             cursor.close()
+
+    def reopen(self, organization_id, year_id, reason, can_override=False):
+        reason = (reason or "").strip()
+        if not reason:
+            raise ValueError("Enter a reason for reopening the fiscal year.")
+        if self.acting_user_id is None:
+            raise ValueError("An authenticated user is required to reopen a fiscal year.")
+        cursor = self.connection.cursor()
+        try:
+            self._execute(cursor,
+                "SELECT y.Name,y.EndDate,y.Status,y.ClosingTransactionID,o.ApprovalPolicy,o.NextTransactionNumber "
+                "FROM tblAccountingFiscalYear y JOIN tblAccountingOrganization o ON o.ID=y.OrganizationID "
+                "WHERE y.ID=? AND y.OrganizationID=? FOR UPDATE", (year_id, organization_id))
+            year = cursor.fetchone()
+            if year is None or year[2] != "CLOSED" or year[3] is None:
+                raise ValueError("Select a closed fiscal year with a closing transaction.")
+            if year[4] == "INDEPENDENT_REQUIRED":
+                raise ValueError("This organization requires a different authorized user to approve reopening the fiscal year.")
+            if not can_override:
+                raise ValueError("Reopening a fiscal year requires approval-override authority under the current policy.")
+            self._execute(cursor,
+                "SELECT FiscalPeriodID,TransactionNumber,Status,ReversalTransactionID FROM tblAccountingTransaction WHERE ID=? AND OrganizationID=? FOR UPDATE",
+                (year[3], organization_id))
+            closing = cursor.fetchone()
+            if closing is None or closing[2] != "POSTED" or closing[3] is not None:
+                raise ValueError("The closing transaction is not available to reverse.")
+            self._execute(cursor, "SELECT Status FROM tblAccountingFiscalPeriod WHERE ID=? AND FiscalYearID=? FOR UPDATE", (closing[0], year_id))
+            period = cursor.fetchone()
+            if period is None or period[0] != "CLOSED":
+                raise ValueError("The closing fiscal period is not closed.")
+            number = year[5]
+            self._execute(cursor, "UPDATE tblAccountingOrganization SET NextTransactionNumber=? WHERE ID=? AND NextTransactionNumber=?", (number + 1, organization_id, number))
+            if cursor.rowcount != 1:
+                raise ValueError("The next transaction number changed. Try again.")
+            self._execute(cursor,
+                "INSERT INTO tblAccountingTransaction (OrganizationID,TransactionNumber,TransactionDate,FiscalPeriodID,TransactionType,Status,Description,Reference,OriginalTransactionID,CreatedByUserID,ReviewedByUserID,ReviewedAt,PostedByUserID,PostedAt) "
+                "VALUES (?,?,?,?, 'REVERSAL','POSTED',?,?,?, ?,?,CURRENT_TIMESTAMP(6),?,CURRENT_TIMESTAMP(6))",
+                (organization_id, number, year[1], closing[0], "Reopen fiscal year {}".format(year[0]), "Reversal of closing transaction {}".format(closing[1]), year[3], self.acting_user_id, self.acting_user_id, self.acting_user_id))
+            reversal_id = cursor.lastrowid
+            self._execute(cursor,
+                "INSERT INTO tblAccountingTransactionLine (TransactionID,LineNumber,AccountID,FundID,FunctionID,PayeeID,Description,Debit,Credit,ClearedState) "
+                "SELECT ?,LineNumber,AccountID,FundID,FunctionID,PayeeID,'Reverse year-end close',Credit,Debit,'UNCLEARED' FROM tblAccountingTransactionLine WHERE TransactionID=? ORDER BY LineNumber",
+                (reversal_id, year[3]))
+            if cursor.rowcount < 2:
+                raise ValueError("The closing transaction does not contain enough lines to reverse.")
+            self._execute(cursor, "UPDATE tblAccountingTransaction SET Status='REVERSED',ReversalTransactionID=?,Version=Version+1 WHERE ID=? AND Status='POSTED' AND ReversalTransactionID IS NULL", (reversal_id, year[3]))
+            if cursor.rowcount != 1:
+                raise ValueError("The closing transaction changed. Reload before reopening.")
+            self._execute(cursor, "UPDATE tblAccountingFiscalPeriod SET Status='OPEN' WHERE ID=? AND Status='CLOSED'", (closing[0],))
+            if cursor.rowcount != 1:
+                raise ValueError("The closing period changed. Reload before reopening.")
+            self._execute(cursor, "UPDATE tblAccountingFiscalYear SET Status='OPEN',ClosingTransactionID=NULL WHERE ID=? AND Status='CLOSED' AND ClosingTransactionID=?", (year_id, year[3]))
+            if cursor.rowcount != 1:
+                raise ValueError("The fiscal year changed. Reload before reopening.")
+            after = json.dumps({"status":"OPEN","reversal_transaction_id":reversal_id,"transaction_number":number,"reopened_period_id":closing[0],"solo_override":True}, separators=(",",":"))
+            self._execute(cursor, "INSERT INTO tblAccountingAuditEvent (OrganizationID,EntityType,EntityID,Action,AfterJSON,Reason,UserID) VALUES (?,'FISCAL_YEAR',?,'FISCAL_YEAR_REOPENED_OVERRIDE',?,?,?)", (organization_id, str(year_id), after, reason, self.acting_user_id))
+            self._execute(cursor, "INSERT INTO tblAccountingAuditEvent (OrganizationID,EntityType,EntityID,Action,AfterJSON,Reason,UserID) VALUES (?,'TRANSACTION',?,'YEAR_END_CLOSE_REVERSED',?,?,?)", (organization_id, str(reversal_id), after, reason, self.acting_user_id))
+            self.connection.commit()
+            return number
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
