@@ -266,6 +266,77 @@ class AccountingDraftService:
         finally:
             cursor.close()
 
+    def delete(self, transaction_id, expected_version):
+        """Delete only the acting user's unchanged, unposted draft with audit."""
+        cursor = self.connection.cursor()
+        try:
+            self._execute(
+                cursor,
+                "SELECT OrganizationID,TransactionDate,TransactionType,Description,"
+                "Reference,Version,CreatedByUserID,Status "
+                "FROM tblAccountingTransaction WHERE ID=? FOR UPDATE",
+                (transaction_id,),
+            )
+            row = cursor.fetchone()
+            if row is None or row[7] != "DRAFT":
+                raise AccountingDraftError("Only an unposted draft can be deleted.")
+            if row[6] != self.acting_user_id:
+                raise AccountingDraftError("You may delete only drafts that you created.")
+            if row[5] != expected_version:
+                raise AccountingDraftError(
+                    "This draft changed after you opened it. Reload before deleting."
+                )
+            self._execute(
+                cursor,
+                "SELECT COUNT(*) FROM tblAccountingAttachment WHERE TransactionID=?",
+                (transaction_id,),
+            )
+            if cursor.fetchone()[0]:
+                raise AccountingDraftError(
+                    "Remove the draft's attachments before deleting the draft."
+                )
+            before = json.dumps(
+                {
+                    "organization_id": row[0],
+                    "transaction_date": str(row[1]),
+                    "transaction_type": row[2],
+                    "description": row[3],
+                    "reference": row[4],
+                    "version": row[5],
+                    "created_by_user_id": row[6],
+                    "status": row[7],
+                },
+                separators=(",", ":"), sort_keys=True,
+            )
+            self._execute(
+                cursor,
+                "DELETE FROM tblAccountingTransactionLine WHERE TransactionID=?",
+                (transaction_id,),
+            )
+            self._execute(
+                cursor,
+                "DELETE FROM tblAccountingTransaction WHERE ID=? AND Version=? "
+                "AND Status='DRAFT' AND CreatedByUserID=?",
+                (transaction_id, expected_version, self.acting_user_id),
+            )
+            if cursor.rowcount != 1:
+                raise AccountingDraftError(
+                    "This draft changed after you opened it. Reload before deleting."
+                )
+            self._execute(
+                cursor,
+                "INSERT INTO tblAccountingAuditEvent "
+                "(OrganizationID,EntityType,EntityID,Action,BeforeJSON,UserID) "
+                "VALUES (?,'TRANSACTION',?,'DRAFT_DELETED',?,?)",
+                (row[0], str(transaction_id), before, self.acting_user_id),
+            )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
     @staticmethod
     def _validate_for_draft(transaction):
         validate_transaction(transaction)

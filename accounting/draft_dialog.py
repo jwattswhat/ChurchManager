@@ -155,11 +155,13 @@ class DraftListDialog(wx.Dialog):
 
 
 class AccountingDraftDialog(wx.Dialog):
-    def __init__(self, parent, service, can_edit_any=False, can_mark_ready=False):
+    def __init__(self, parent, service, can_edit_any=False, can_mark_ready=False,
+                 can_delete=False):
         super().__init__(parent, title="Accounting Transaction Entry", size=(980, 650))
         self.service = service
         self.can_edit_any = can_edit_any
         self.can_mark_ready = can_mark_ready
+        self.can_delete = can_delete
         self.current_id = None
         self.current_version = None
         self.lines = []
@@ -208,27 +210,34 @@ class AccountingDraftDialog(wx.Dialog):
         open_draft = wx.Button(self, label="Open Draft")
         self.save = wx.Button(self, label="Save Draft")
         self.submit = wx.Button(self, label="Submit for Review")
+        self.delete = wx.Button(self, label="Delete Draft")
         self.submit.Enable(False)
+        self.delete.Enable(False)
         close = wx.Button(self, wx.ID_CLOSE, "Close")
         new.Bind(wx.EVT_BUTTON, self.on_new)
         open_draft.Bind(wx.EVT_BUTTON, self.on_open)
         self.save.Bind(wx.EVT_BUTTON, self.on_save)
         self.submit.Bind(wx.EVT_BUTTON, self.on_submit)
+        self.delete.Bind(wx.EVT_BUTTON, self.on_delete)
         close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
-        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        line_buttons = wx.BoxSizer(wx.HORIZONTAL)
         for button in (add, edit, remove):
-            buttons.Add(button, 0, wx.RIGHT, 6)
-        buttons.AddStretchSpacer()
-        buttons.Add(self.totals, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 16)
-        buttons.Add(new, 0, wx.RIGHT, 6)
-        buttons.Add(open_draft, 0, wx.RIGHT, 6)
-        buttons.Add(self.save, 0, wx.RIGHT, 6)
-        buttons.Add(self.submit, 0, wx.RIGHT, 6)
-        buttons.Add(close)
+            line_buttons.Add(button, 0, wx.RIGHT, 6)
+        line_buttons.AddStretchSpacer()
+        line_buttons.Add(self.totals, 0, wx.ALIGN_CENTER_VERTICAL)
+        workflow_buttons = wx.BoxSizer(wx.HORIZONTAL)
+        workflow_buttons.AddStretchSpacer()
+        workflow_buttons.Add(new, 0, wx.RIGHT, 6)
+        workflow_buttons.Add(open_draft, 0, wx.RIGHT, 6)
+        workflow_buttons.Add(self.save, 0, wx.RIGHT, 6)
+        workflow_buttons.Add(self.submit, 0, wx.RIGHT, 6)
+        workflow_buttons.Add(self.delete, 0, wx.RIGHT, 6)
+        workflow_buttons.Add(close)
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(header, 0, wx.ALL | wx.EXPAND, 12)
         root.Add(self.list, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 12)
-        root.Add(buttons, 0, wx.ALL | wx.EXPAND, 12)
+        root.Add(line_buttons, 0, wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, 12)
+        root.Add(workflow_buttons, 0, wx.ALL | wx.EXPAND, 12)
         self.SetSizer(root)
         self.on_organization()
 
@@ -263,6 +272,7 @@ class AccountingDraftDialog(wx.Dialog):
         self.reference.SetValue("")
         self.save.SetLabel("Save Draft")
         self.submit.Enable(False)
+        self.delete.Enable(False)
         self.refresh()
 
     def on_open(self, event=None):
@@ -280,7 +290,7 @@ class AccountingDraftDialog(wx.Dialog):
             if dialog.ShowModal() != wx.ID_OK or dialog.selected_id() is None:
                 return
             selected_id = dialog.selected_id()
-            transaction, version, _creator = self.service.load(
+            transaction, version, creator = self.service.load(
                 selected_id, self.can_edit_any
             )
         except ValueError as error:
@@ -311,6 +321,7 @@ class AccountingDraftDialog(wx.Dialog):
         self.current_version = version
         self.save.SetLabel("Update Draft")
         self.submit.Enable(self.can_mark_ready)
+        self.delete.Enable(self.can_delete and creator == self.service.acting_user_id)
         self.refresh()
 
     def on_submit(self, event=None):
@@ -332,6 +343,26 @@ class AccountingDraftDialog(wx.Dialog):
         wx.MessageBox(
             "Draft {} is ready for review.".format(self.current_id),
             "Submitted", wx.OK | wx.ICON_INFORMATION,
+        )
+        self.on_new()
+
+    def on_delete(self, event=None):
+        if self.current_id is None:
+            return
+        if wx.MessageBox(
+            "Permanently delete this unposted draft? This cannot be undone.",
+            "Confirm Draft Deletion",
+            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING,
+        ) != wx.YES:
+            return
+        try:
+            self.service.delete(self.current_id, self.current_version)
+        except ValueError as error:
+            wx.MessageBox(str(error), "Draft not deleted", wx.OK | wx.ICON_WARNING)
+            return
+        wx.MessageBox(
+            "Draft {} was deleted. The deletion was audited.".format(self.current_id),
+            "Draft Deleted", wx.OK | wx.ICON_INFORMATION,
         )
         self.on_new()
 
@@ -438,6 +469,9 @@ def show_accounting_draft_entry(parent, connection, session, authorization):
         ),
         can_mark_ready=authorization.has_permission(
             "accounting.transactions.mark_ready"
+        ),
+        can_delete=authorization.has_permission(
+            "accounting.transactions.delete_draft"
         ),
     )
     try:

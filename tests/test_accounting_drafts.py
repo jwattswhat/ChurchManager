@@ -76,6 +76,32 @@ class SubmitConnection(Connection):
         self.cursor_value = SubmitCursor()
 
 
+class DeleteCursor(Cursor):
+    def __init__(self, status="DRAFT", creator=7, attachments=0):
+        super().__init__()
+        self.status = status
+        self.creator = creator
+        self.attachments = attachments
+
+    def execute(self, sql, values=()):
+        self.statements.append((sql, values))
+        if sql.startswith("SELECT OrganizationID,TransactionDate"):
+            self.one = (
+                1, date(2027, 1, 15), "JOURNAL", "Test draft", None,
+                2, self.creator, self.status,
+            )
+        elif sql.startswith("SELECT COUNT(*) FROM tblAccountingAttachment"):
+            self.one = (self.attachments,)
+        elif sql.startswith("DELETE FROM tblAccountingTransaction WHERE"):
+            self.rowcount = 1
+
+
+class DeleteConnection(Connection):
+    def __init__(self, status="DRAFT", creator=7, attachments=0):
+        super().__init__()
+        self.cursor_value = DeleteCursor(status, creator, attachments)
+
+
 def balanced(transaction_type="CASH_DISBURSEMENT", reference="Invoice 17"):
     return JournalTransaction(
         organization_id=1,
@@ -91,6 +117,36 @@ def balanced(transaction_type="CASH_DISBURSEMENT", reference="Invoice 17"):
 
 
 class TestAccountingDraftService(unittest.TestCase):
+    def test_own_unposted_draft_deletes_lines_header_and_audits_atomically(self):
+        connection = DeleteConnection()
+        AccountingDraftService(connection, 7).delete(41, 2)
+        self.assertEqual(connection.commits, 1)
+        sql = "\n".join(item[0] for item in connection.cursor_value.statements)
+        self.assertIn("DELETE FROM tblAccountingTransactionLine", sql)
+        self.assertIn("DELETE FROM tblAccountingTransaction WHERE", sql)
+        self.assertIn("DRAFT_DELETED", sql)
+
+    def test_ready_or_posted_transaction_cannot_be_deleted(self):
+        connection = DeleteConnection(status="READY")
+        with self.assertRaisesRegex(AccountingDraftError, "unposted draft"):
+            AccountingDraftService(connection, 7).delete(41, 2)
+        self.assertEqual(connection.commits, 0)
+
+    def test_another_users_draft_cannot_be_deleted(self):
+        connection = DeleteConnection(creator=8)
+        with self.assertRaisesRegex(AccountingDraftError, "only drafts"):
+            AccountingDraftService(connection, 7).delete(41, 2)
+
+    def test_draft_with_attachment_must_be_cleaned_up_first(self):
+        connection = DeleteConnection(attachments=1)
+        with self.assertRaisesRegex(AccountingDraftError, "attachments"):
+            AccountingDraftService(connection, 7).delete(41, 2)
+
+    def test_dialog_requires_confirmation_for_draft_deletion(self):
+        from pathlib import Path
+        source = (Path(__file__).parents[1] / "accounting" / "draft_dialog.py").read_text(encoding="utf-8-sig")
+        self.assertIn("Confirm Draft Deletion", source)
+        self.assertIn("accounting.transactions.delete_draft", source)
     def test_line_dialog_uses_one_amount_and_a_debit_credit_selector(self):
         from pathlib import Path
 
