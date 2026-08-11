@@ -39,6 +39,16 @@ class AccountingDraftService:
                     "SELECT ID, CONCAT(Code, ' - ', Name) FROM tblAccountingFund "
                     "WHERE OrganizationID=? AND Active=1 ORDER BY Code"
                 ),
+                "restricted_funds": (
+                    "SELECT ID, CONCAT(Code, ' - ', Name) FROM tblAccountingFund "
+                    "WHERE OrganizationID=? AND Active=1 "
+                    "AND NetAssetClass='WITH_DONOR_RESTRICTIONS' ORDER BY Code"
+                ),
+                "unrestricted_funds": (
+                    "SELECT ID, CONCAT(Code, ' - ', Name) FROM tblAccountingFund "
+                    "WHERE OrganizationID=? AND Active=1 "
+                    "AND NetAssetClass='WITHOUT_DONOR_RESTRICTIONS' ORDER BY Code"
+                ),
                 "functions": (
                     "SELECT ID, CONCAT(Code, ' - ', Name) FROM tblAccountingFunction "
                     "WHERE OrganizationID=? AND Active=1 ORDER BY DisplayOrder, Code"
@@ -275,7 +285,7 @@ class AccountingDraftService:
             )
             self._validate_for_draft(transaction)
             self._fiscal_period_id(cursor, transaction)
-            if transaction.transaction_type == "CASH_DISBURSEMENT":
+            if transaction.transaction_type in {"CASH_DISBURSEMENT", "RESTRICTION_RELEASE"}:
                 total = sum((line.debit for line in transaction.lines), Decimal("0"))
                 self._execute(
                     cursor,
@@ -285,7 +295,11 @@ class AccountingDraftService:
                 threshold_row = cursor.fetchone()
                 if threshold_row is None:
                     raise AccountingDraftError("The accounting organization is unavailable.")
-                if total >= Decimal(threshold_row[0]):
+                attachment_required = (
+                    transaction.transaction_type == "RESTRICTION_RELEASE"
+                    or total >= Decimal(threshold_row[0])
+                )
+                if attachment_required:
                     self._execute(
                         cursor,
                         "SELECT COUNT(*) FROM tblAccountingAttachment WHERE TransactionID=?",
@@ -293,8 +307,8 @@ class AccountingDraftService:
                     )
                     if cursor.fetchone()[0] < 1:
                         raise AccountingDraftError(
-                            "Add a receipt, invoice, or voucher before submitting "
-                            "this disbursement for review."
+                            "Add a receipt, invoice, or voucher, or the required "
+                            "supporting authority, before submitting this transaction."
                         )
             self._execute(
                 cursor,
@@ -390,7 +404,7 @@ class AccountingDraftService:
     def _validate_for_draft(transaction):
         validate_transaction(transaction)
         if transaction.transaction_type not in {
-            "JOURNAL", "CASH_RECEIPT", "CASH_DISBURSEMENT"
+            "JOURNAL", "CASH_RECEIPT", "CASH_DISBURSEMENT", "RESTRICTION_RELEASE"
         }:
             raise AccountingDraftError("This transaction type is not available yet.")
         if (

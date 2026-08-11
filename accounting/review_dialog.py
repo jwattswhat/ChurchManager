@@ -54,7 +54,8 @@ class AccountingReviewDialog(wx.Dialog):
         self.transactions.DeleteAllItems()
         self.lines.DeleteAllItems()
         type_labels = {"CASH_DISBURSEMENT": "Cash disbursement",
-                       "CASH_RECEIPT": "Cash receipt", "JOURNAL": "General journal"}
+                       "CASH_RECEIPT": "Cash receipt", "JOURNAL": "General journal",
+                       "RESTRICTION_RELEASE": "Restriction release"}
         for item in self.rows:
             row = self.transactions.InsertItem(self.transactions.GetItemCount(), str(item[0]))
             values = (item[1], str(item[2]), type_labels.get(item[3], item[3]),

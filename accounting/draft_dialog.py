@@ -221,8 +221,13 @@ class GuidedCashDialog(wx.Dialog):
 
 
 class GuidedTransferDialog(wx.Dialog):
-    def __init__(self, parent, choices):
-        super().__init__(parent, title="Guided Fund Transfer")
+    def __init__(self, parent, choices, restriction_release=False):
+        self.restriction_release = restriction_release
+        super().__init__(
+            parent,
+            title=("Guided Restriction Release" if restriction_release
+                   else "Guided Fund Transfer"),
+        )
         self.cash = wx.Choice(self)
         self.from_fund = wx.Choice(self)
         self.to_fund = wx.Choice(self)
@@ -233,8 +238,10 @@ class GuidedTransferDialog(wx.Dialog):
         self.reference = wx.TextCtrl(self)
         for control, rows in (
             (self.cash, choices["cash_accounts"]),
-            (self.from_fund, choices["funds"]),
-            (self.to_fund, choices["funds"]),
+            (self.from_fund, choices["restricted_funds"] if restriction_release
+             else choices["funds"]),
+            (self.to_fund, choices["unrestricted_funds"] if restriction_release
+             else choices["funds"]),
             (self.transfer_out, choices["transfer_out_accounts"]),
             (self.transfer_in, choices["transfer_in_accounts"]),
         ):
@@ -251,7 +258,10 @@ class GuidedTransferDialog(wx.Dialog):
             grid.Add(control, 1, wx.EXPAND)
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(wx.StaticText(self, label=(
-            "The guide creates four lines so both funds remain individually balanced."
+            ("This records an explicit release from a donor-restricted fund into an "
+             "unrestricted fund. Supporting authority must be attached."
+             if restriction_release else
+             "The guide creates four lines so both funds remain individually balanced.")
         )), 0, wx.ALL, 12)
         root.Add(grid, 1, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 12)
         root.Add(self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL),
@@ -298,7 +308,10 @@ class GuidedTransferDialog(wx.Dialog):
             {**none, "account_id": in_id, "account": in_label,
              "fund_id": to_id, "fund": to_label, "debit": ZERO, "credit": amount},
         ]
-        return lines, description, self.reference.GetValue().strip()
+        reference = self.reference.GetValue().strip()
+        if self.restriction_release and not reference:
+            raise ValueError("Enter the authority or source-document reference.")
+        return lines, description, reference
 
 
 class DepositReceiptDialog(wx.Dialog):
@@ -494,6 +507,7 @@ class DraftListDialog(wx.Dialog):
             "CASH_DISBURSEMENT": "Cash disbursement",
             "CASH_RECEIPT": "Cash receipt",
             "JOURNAL": "General journal",
+            "RESTRICTION_RELEASE": "Restriction release",
         }
         for item in rows:
             self.ids.append(item[0])
@@ -646,7 +660,8 @@ class AccountingDraftDialog(wx.Dialog):
         self.organization.Bind(wx.EVT_CHOICE, self.on_organization)
         self.transaction_date = wx.adv.DatePickerCtrl(self)
         self.transaction_type = wx.Choice(
-            self, choices=["Cash disbursement", "Cash receipt", "General journal"]
+            self, choices=["Cash disbursement", "Cash receipt", "General journal",
+                           "Restriction release"]
         )
         self.transaction_type.SetSelection(0)
         self.description = wx.TextCtrl(self)
@@ -680,6 +695,7 @@ class AccountingDraftDialog(wx.Dialog):
         guided_disbursement = wx.Button(self, label="Guided Disbursement")
         guided_transfer = wx.Button(self, label="Guided Transfer")
         guided_deposit = wx.Button(self, label="Guided Deposit")
+        guided_release = wx.Button(self, label="Restriction Release")
         self.attachments.Enable(False)
         add.Bind(wx.EVT_BUTTON, self.on_add)
         edit.Bind(wx.EVT_BUTTON, self.on_edit)
@@ -689,6 +705,7 @@ class AccountingDraftDialog(wx.Dialog):
         guided_disbursement.Bind(wx.EVT_BUTTON, lambda event: self.on_guided_cash(False))
         guided_transfer.Bind(wx.EVT_BUTTON, self.on_guided_transfer)
         guided_deposit.Bind(wx.EVT_BUTTON, self.on_guided_deposit)
+        guided_release.Bind(wx.EVT_BUTTON, self.on_guided_release)
         self.debit_total = wx.StaticText(
             self, label="$0.00", size=(135, -1), style=wx.ALIGN_RIGHT
         )
@@ -716,12 +733,10 @@ class AccountingDraftDialog(wx.Dialog):
         for button in (add, edit, remove):
             line_buttons.Add(button, 0, wx.RIGHT, 6)
         line_buttons.AddStretchSpacer()
-        guided_buttons = wx.BoxSizer(wx.HORIZONTAL)
-        guided_buttons.Add(guided_receipt, 0, wx.RIGHT, 6)
-        guided_buttons.Add(guided_disbursement, 0, wx.RIGHT, 6)
-        guided_buttons.Add(guided_transfer, 0, wx.RIGHT, 6)
-        guided_buttons.Add(guided_deposit, 0, wx.RIGHT, 6)
-        guided_buttons.Add(self.attachments)
+        guided_buttons = wx.GridSizer(cols=3, hgap=6, vgap=6)
+        for button in (guided_receipt, guided_disbursement, guided_transfer,
+                       guided_deposit, guided_release, self.attachments):
+            guided_buttons.Add(button, 0, wx.EXPAND)
         totals_row = wx.BoxSizer(wx.HORIZONTAL)
         totals_row.AddStretchSpacer()
         for label, value in (("Debits", self.debit_total),
@@ -814,7 +829,7 @@ class AccountingDraftDialog(wx.Dialog):
             transaction.transaction_date.day, transaction.transaction_date.month - 1,
             transaction.transaction_date.year,
         ))
-        type_codes = ("CASH_DISBURSEMENT", "CASH_RECEIPT", "JOURNAL")
+        type_codes = ("CASH_DISBURSEMENT", "CASH_RECEIPT", "JOURNAL", "RESTRICTION_RELEASE")
         self.transaction_type.SetSelection(type_codes.index(transaction.transaction_type))
         self.description.SetValue(transaction.description)
         self.reference.SetValue(transaction.reference)
@@ -1018,6 +1033,42 @@ class AccountingDraftDialog(wx.Dialog):
         self.transaction_type.SetSelection(1)
         self.refresh()
 
+    def on_guided_release(self, event):
+        if self.current_id is not None or self.lines:
+            if wx.MessageBox(
+                "Start a new restriction release and discard the current unsaved values?",
+                "Restriction Release", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION,
+            ) != wx.YES:
+                return
+            self.on_new()
+        required = (
+            "cash_accounts", "transfer_out_accounts", "transfer_in_accounts",
+            "restricted_funds", "unrestricted_funds",
+        )
+        if not self.master_choices or any(not self.master_choices[name] for name in required):
+            wx.MessageBox(
+                "This guide requires a bank account, transfer accounts, and both "
+                "restricted and unrestricted funds.",
+                "Restriction Release", wx.OK | wx.ICON_WARNING,
+            )
+            return
+        dialog = GuidedTransferDialog(self, self.master_choices, restriction_release=True)
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            lines, description, reference = dialog.values()
+        except ValueError as error:
+            wx.MessageBox(str(error), "Restriction release not created",
+                          wx.OK | wx.ICON_WARNING)
+            return
+        finally:
+            dialog.Destroy()
+        self.lines = lines
+        self.description.SetValue(description)
+        self.reference.SetValue(reference)
+        self.transaction_type.SetSelection(3)
+        self.refresh()
+
     def refresh(self):
         self.list.DeleteAllItems()
         debit_total = ZERO
@@ -1038,7 +1089,7 @@ class AccountingDraftDialog(wx.Dialog):
         self.difference_total.SetLabel(money(debit_total - credit_total, True))
 
     def transaction(self):
-        type_codes = ("CASH_DISBURSEMENT", "CASH_RECEIPT", "JOURNAL")
+        type_codes = ("CASH_DISBURSEMENT", "CASH_RECEIPT", "JOURNAL", "RESTRICTION_RELEASE")
         lines = tuple(
             JournalLine(
                 number, line["account_id"], line["fund_id"], line["debit"],

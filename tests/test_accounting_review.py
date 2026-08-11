@@ -6,10 +6,13 @@ from accounting.review_service import AccountingReviewService
 
 
 class Cursor:
-    def __init__(self, creator=8, threshold=Decimal("500.00"), total=Decimal("500.00")):
+    def __init__(self, creator=8, threshold=Decimal("500.00"), total=Decimal("500.00"),
+                 transaction_type="JOURNAL", policy="INDEPENDENT_PREFERRED"):
         self.creator = creator
         self.threshold = threshold
         self.total = total
+        self.transaction_type = transaction_type
+        self.policy = policy
         self.statements = []
         self.one = None
         self.rows = []
@@ -18,8 +21,8 @@ class Cursor:
     def execute(self, sql, values=()):
         self.statements.append((sql, values))
         if sql.startswith("SELECT t.OrganizationID"):
-            self.one = (1, self.creator, "READY", 3, self.threshold, "JOURNAL",
-                        "INDEPENDENT_PREFERRED")
+            self.one = (1, self.creator, "READY", 3, self.threshold,
+                        self.transaction_type, self.policy)
         elif sql.startswith("SELECT Debit, Credit"):
             self.rows = [(self.total, Decimal("0")), (Decimal("0"), self.total)]
         elif sql.startswith("UPDATE tblAccountingTransaction"):
@@ -122,6 +125,27 @@ class TestAccountingReview(unittest.TestCase):
         self.assertIn("Transaction lines (read only)", source)
         self.assertIn('authorization.require("accounting.transactions.approve"', source)
         self.assertNotIn("Add Line", source)
+
+    def test_restriction_release_can_use_audited_solo_override_when_preferred(self):
+        connection = Connection(
+            creator=7, total=Decimal("25"), transaction_type="RESTRICTION_RELEASE"
+        )
+        AccountingReviewService(connection, 7).approve(
+            61, 3, "Only authorized accounting operator available", can_override=True
+        )
+        audit = next(item for item in connection.cursor_value.statements
+                     if "INSERT INTO tblAccountingAuditEvent" in item[0])
+        self.assertIn("TRANSACTION_APPROVED_OVERRIDE", audit[1])
+
+    def test_restriction_release_cannot_use_solo_override_when_required(self):
+        connection = Connection(
+            creator=7, total=Decimal("25"), transaction_type="RESTRICTION_RELEASE",
+            policy="INDEPENDENT_REQUIRED",
+        )
+        with self.assertRaisesRegex(AccountingDraftError, "current approval policy"):
+            AccountingReviewService(connection, 7).approve(
+                61, 3, "Only operator available", can_override=True
+            )
 
 
 if __name__ == "__main__":

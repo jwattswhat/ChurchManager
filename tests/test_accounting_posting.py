@@ -97,4 +97,17 @@ class TestAccountingPosting(unittest.TestCase):
                                 total=Decimal("25"), attachments=0)
         self.assertEqual(AccountingPostingService(connection, 9).post(41, 4), 27)
 
+    def test_restriction_release_always_requires_supporting_document(self):
+        connection = Connection(transaction_type="RESTRICTION_RELEASE",
+                                total=Decimal("25"), attachments=0)
+        with self.assertRaisesRegex(AccountingDraftError, "supporting authority"):
+            AccountingPostingService(connection, 9).post(41, 4)
+
+    def test_restriction_release_always_requires_independent_approval(self):
+        connection = Connection(status="READY", reviewer=None,
+                                transaction_type="RESTRICTION_RELEASE",
+                                total=Decimal("25"), attachments=1)
+        with self.assertRaisesRegex(AccountingDraftError, "different user"):
+            AccountingPostingService(connection, 9).post(41, 4)
+
 if __name__ == "__main__": unittest.main()

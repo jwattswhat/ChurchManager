@@ -100,7 +100,11 @@ class AccountingPostingService:
                     raise AccountingDraftError("A required functional classification is missing.")
                 if row[6] == "PROHIBITED" and row[7] is not None:
                     raise AccountingDraftError("A prohibited functional classification is present.")
-            if header[10] == "CASH_DISBURSEMENT" and debit >= Decimal(header[11]):
+            attachment_required = (
+                header[10] == "RESTRICTION_RELEASE"
+                or (header[10] == "CASH_DISBURSEMENT" and debit >= Decimal(header[11]))
+            )
+            if attachment_required:
                 self._execute(
                     cursor,
                     "SELECT COUNT(*) FROM tblAccountingAttachment WHERE TransactionID=?",
@@ -108,11 +112,14 @@ class AccountingPostingService:
                 )
                 if cursor.fetchone()[0] < 1:
                     raise AccountingDraftError(
-                        "This disbursement requires a receipt, invoice, or voucher "
-                        "before it can be posted."
+                        "This transaction requires a receipt, invoice, or voucher, "
+                        "or its supporting authority, before it can be posted."
                     )
             threshold = Decimal(header[6])
-            independent_required = debit >= threshold or header[8] is not None
+            independent_required = (
+                debit >= threshold or header[8] is not None
+                or header[10] == "RESTRICTION_RELEASE"
+            )
             valid_independent_approval = (
                 header[2] == "APPROVED" and header[5] is not None
                 and (header[5] != header[4] or bool(header[9]))
