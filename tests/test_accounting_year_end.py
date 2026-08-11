@@ -9,6 +9,7 @@ class YearEndPreviewTests(unittest.TestCase):
         self.assertIn("unposted transaction(s) remain", source)
         self.assertIn("posted ledger is out of balance", source)
         self.assertIn("no net-asset account", source)
+        self.assertIn('account_type != "NET_ASSET"', source)
         self.assertIn("AccountType IN ('REVENUE','EXPENSE','TRANSFER')", source)
 
     def test_preview_is_registered_with_override_permission(self):
@@ -19,6 +20,15 @@ class YearEndPreviewTests(unittest.TestCase):
         source = (Path(__file__).parents[1] / "accounting" / "year_end_dialog.py").read_text(encoding="utf-8")
         self.assertIn('title="Year-End Close Preview"', source)
         self.assertIn('authorization.require("accounting.periods.override"', source)
+        self.assertIn('label="Close Fiscal Year"', source)
+
+    def test_close_is_atomic_numbered_and_audited(self):
+        source = (Path(__file__).parents[1] / "accounting" / "year_end_service.py").read_text(encoding="utf-8")
+        self.assertIn("NextTransactionNumber", source)
+        self.assertIn("'YEAR_END_CLOSE','POSTED'", source)
+        self.assertIn("ClosingTransactionID", source)
+        self.assertIn("FISCAL_YEAR_CLOSED_OVERRIDE", source)
+        self.assertIn("generated year-end closing transaction is not balanced", source)
 
 
 if __name__ == "__main__":
