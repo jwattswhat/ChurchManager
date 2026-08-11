@@ -38,6 +38,7 @@ from accounting.close_checklist_dialog import show_close_checklist
 from accounting.budget_dialog import show_budgets
 from accounting.budget_actual_dialog import show_budget_actual
 from accounting.functional_expense_dialog import show_functional_expenses
+from accounting.year_end_dialog import show_year_end
 from types import SimpleNamespace
 
 
@@ -546,6 +547,10 @@ def _buttonclick(event):
             )
         case "lblAccountingFunctionalExpenses":
             show_functional_expenses(
+                cmfrm.FRAME, context.connection, context.session, context.authorization
+            )
+        case "lblAccountingYearEnd":
+            show_year_end(
                 cmfrm.FRAME, context.connection, context.session, context.authorization
             )
         case _:

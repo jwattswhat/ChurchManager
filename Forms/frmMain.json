@@ -10,7 +10,7 @@
             ],
             "sizech": [
                 50,
-                33
+                35
             ],
             "stylelist": [
                 "CAPTION"
@@ -562,7 +562,7 @@
                 "type": "StaticBox",
                 "label": "Accounting",
                 "posch": [34, 8],
-                "sizech": [15, 25]
+                "sizech": [15, 27]
             },
             "lblAccountingSetup": {
                 "name": "lblAccountingSetup",
@@ -715,6 +715,12 @@
                 "label": "Functional Expenses", "posch": [35, 32],
                 "tooltip": "Report expenses by natural account and ministry function.",
                 "security": { "invoke": "accounting.reports.run" }
+            },
+            "lblAccountingYearEnd": {
+                "name": "lblAccountingYearEnd", "type": "StaticText",
+                "label": "Year-End Close", "posch": [35, 33],
+                "tooltip": "Preview the controlled fiscal-year closing process.",
+                "security": { "invoke": "accounting.periods.override" }
             }
         }
     }
