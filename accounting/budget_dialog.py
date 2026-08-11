@@ -56,9 +56,10 @@ class BudgetDialog(wx.Dialog):
         col=self.lines.GetColumn(5);col.SetAlign(wx.LIST_FORMAT_RIGHT);self.lines.SetColumn(5,col)
         self.budgets.Bind(wx.EVT_LIST_ITEM_SELECTED,self.on_budget);self.lines.Bind(wx.EVT_LIST_ITEM_ACTIVATED,self.on_edit)
         self.can_adopt=can_adopt;self.can_override=can_override
-        new=wx.Button(self,label="New Budget");add=wx.Button(self,label="Add Line");edit=wx.Button(self,label="Edit Line");propose=wx.Button(self,label="Propose");adopt=wx.Button(self,label="Adopt");solo=wx.Button(self,label="Solo Adopt");close=wx.Button(self,wx.ID_CLOSE,"Close")
-        new.Bind(wx.EVT_BUTTON,self.on_new);add.Bind(wx.EVT_BUTTON,self.on_add);edit.Bind(wx.EVT_BUTTON,self.on_edit);propose.Bind(wx.EVT_BUTTON,self.on_propose);adopt.Bind(wx.EVT_BUTTON,self.on_adopt);solo.Bind(wx.EVT_BUTTON,self.on_solo_adopt);close.Bind(wx.EVT_BUTTON,lambda e:self.EndModal(wx.ID_CLOSE));adopt.Enable(can_adopt);solo.Enable(can_adopt and can_override)
-        buttons=wx.BoxSizer(wx.HORIZONTAL);buttons.Add(new);buttons.Add(add,0,wx.LEFT,8);buttons.Add(edit,0,wx.LEFT,8);buttons.Add(propose,0,wx.LEFT,8);buttons.AddStretchSpacer();buttons.Add(adopt,0,wx.RIGHT,8);buttons.Add(solo,0,wx.RIGHT,8);buttons.Add(close)
+        new=wx.Button(self,label="New Budget");amend=wx.Button(self,label="Create Amendment");delete_budget=wx.Button(self,label="Delete Draft Budget");add=wx.Button(self,label="Add Line");edit=wx.Button(self,label="Edit Line");delete=wx.Button(self,label="Delete Line");propose=wx.Button(self,label="Propose");adopt=wx.Button(self,label="Adopt");solo=wx.Button(self,label="Solo Adopt");close=wx.Button(self,wx.ID_CLOSE,"Close")
+        new.Bind(wx.EVT_BUTTON,self.on_new);amend.Bind(wx.EVT_BUTTON,self.on_amend);delete_budget.Bind(wx.EVT_BUTTON,self.on_delete_budget);add.Bind(wx.EVT_BUTTON,self.on_add);edit.Bind(wx.EVT_BUTTON,self.on_edit);delete.Bind(wx.EVT_BUTTON,self.on_delete);propose.Bind(wx.EVT_BUTTON,self.on_propose);adopt.Bind(wx.EVT_BUTTON,self.on_adopt);solo.Bind(wx.EVT_BUTTON,self.on_solo_adopt);close.Bind(wx.EVT_BUTTON,lambda e:self.EndModal(wx.ID_CLOSE));adopt.Enable(can_adopt);solo.Enable(can_adopt and can_override);amend.Enable(can_adopt)
+        buttons=wx.GridSizer(cols=5,hgap=6,vgap=6)
+        for button in (new,amend,delete_budget,add,edit,delete,propose,adopt,solo,close):buttons.Add(button,0,wx.EXPAND)
         root=wx.BoxSizer(wx.VERTICAL);root.Add(self.budgets,1,wx.ALL|wx.EXPAND,10);root.Add(self.lines,2,wx.LEFT|wx.RIGHT|wx.EXPAND,10);root.Add(buttons,0,wx.ALL|wx.EXPAND,10);self.SetSizer(root);self.refresh()
     def refresh(self):
         self.rows=self.service.budgets();self.budgets.DeleteAllItems();self.lines.DeleteAllItems();self.current=None
@@ -107,6 +108,26 @@ class BudgetDialog(wx.Dialog):
             self.service.adopt(self.current,d.GetValue(),True);self.refresh()
         except ValueError as e:wx.MessageBox(str(e),"Budget not adopted",wx.OK|wx.ICON_WARNING)
         finally:d.Destroy()
+    def on_amend(self,event):
+        if self.current is None:return
+        d=wx.TextEntryDialog(self,"Explain why this adopted budget must be amended.","Create Budget Amendment")
+        try:
+            if d.ShowModal()!=wx.ID_OK:return
+            self.service.create_amendment(self.current,d.GetValue());self.refresh()
+        except ValueError as e:wx.MessageBox(str(e),"Amendment not created",wx.OK|wx.ICON_WARNING)
+        finally:d.Destroy()
+    def on_delete(self,event):
+        if self.current is None:return
+        i=self.lines.GetFirstSelected()
+        if i<0:return
+        if wx.MessageBox("Delete this draft budget line?","Delete Budget Line",wx.YES_NO|wx.NO_DEFAULT|wx.ICON_WARNING)!=wx.YES:return
+        try:self.service.delete_line(self.current,self.line_rows[i][0]);self.reload_lines()
+        except ValueError as e:wx.MessageBox(str(e),"Budget line not deleted",wx.OK|wx.ICON_WARNING)
+    def on_delete_budget(self,event):
+        if self.current is None:return
+        if wx.MessageBox("Delete this draft budget and all of its lines?","Delete Draft Budget",wx.YES_NO|wx.NO_DEFAULT|wx.ICON_WARNING)!=wx.YES:return
+        try:self.service.delete_budget(self.current);self.refresh()
+        except ValueError as e:wx.MessageBox(str(e),"Budget not deleted",wx.OK|wx.ICON_WARNING)
 
 def show_budgets(parent,connection,session,authorization):
     authorization.require("accounting.budgets.manage","manage accounting budgets")

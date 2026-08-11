@@ -10,6 +10,9 @@ class BudgetEditorTests(unittest.TestCase):
         self.assertIn("wx.EVT_LIST_ITEM_ACTIVATED,self.on_edit",source)
         self.assertIn('label="Propose"',source)
         self.assertIn('label="Solo Adopt"',source)
+        self.assertIn('label="Create Amendment"',source)
+        self.assertIn('label="Delete Line"',source)
+        self.assertIn('label="Delete Draft Budget"',source)
         self.assertIn("accounting.budgets.adopt",source)
 
     def test_service_locks_adopted_budget_and_audits_override(self):
@@ -18,6 +21,10 @@ class BudgetEditorTests(unittest.TestCase):
         self.assertIn("BUDGET_PROPOSED",source)
         self.assertIn("BUDGET_ADOPTED_OVERRIDE",source)
         self.assertIn("Status='SUPERSEDED'",source)
+        self.assertIn("BUDGET_AMENDMENT_CREATED",source)
+        self.assertIn("BasedOnBudgetID",source)
+        self.assertIn("Only a draft budget can be deleted",source)
+        self.assertIn("BUDGET_DRAFT_DELETED",source)
     def test_budget_menu_has_manage_permission(self):
         from main_menu import SPECIAL_CONTROLS
         from permission_catalog import MAIN_MENU_PERMISSIONS

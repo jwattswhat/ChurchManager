@@ -105,3 +105,44 @@ class BudgetService:
             self._execute(c,"INSERT INTO tblAccountingAuditEvent (OrganizationID,EntityType,EntityID,Action,AfterJSON,Reason,UserID) VALUES (?,'BUDGET',?,?,'{\"status\":\"ADOPTED\"}',?,?)",(row[0],str(budget_id),action,reason or None,self.acting_user_id));self.connection.commit()
         except Exception:self.connection.rollback();raise
         finally:c.close()
+
+    def create_amendment(self,budget_id,reason):
+        reason=(reason or "").strip()
+        if not reason:raise ValueError("Enter a reason for creating the budget amendment.")
+        c=self.connection.cursor()
+        try:
+            self._execute(c,"SELECT OrganizationID,FiscalYearID,Name,VersionNumber,DetailMode,Status FROM tblAccountingBudget WHERE ID=? FOR UPDATE",(budget_id,));row=c.fetchone()
+            if row is None or row[5]!="ADOPTED":raise ValueError("Only an adopted budget can be amended.")
+            self._execute(c,"SELECT COALESCE(MAX(VersionNumber),0)+1 FROM tblAccountingBudget WHERE FiscalYearID=? AND Name=?",(row[1],row[2]));version=c.fetchone()[0]
+            self._execute(c,"INSERT INTO tblAccountingBudget (OrganizationID,FiscalYearID,Name,DetailMode,VersionNumber,BasedOnBudgetID,CreatedByUserID) VALUES (?,?,?,?,?,?,?)",(row[0],row[1],row[2],row[4],version,budget_id,self.acting_user_id));new_id=c.lastrowid
+            self._execute(c,"INSERT INTO tblAccountingBudgetLine (BudgetID,FiscalPeriodID,AccountID,FundID,FunctionID,LineItemName,Amount,Note,DisplayOrder) SELECT ?,FiscalPeriodID,AccountID,FundID,FunctionID,LineItemName,Amount,Note,DisplayOrder FROM tblAccountingBudgetLine WHERE BudgetID=?",(new_id,budget_id))
+            after=json.dumps({"based_on_budget_id":budget_id,"version":version,"status":"DRAFT"},separators=(",",":"))
+            self._execute(c,"INSERT INTO tblAccountingAuditEvent (OrganizationID,EntityType,EntityID,Action,AfterJSON,Reason,UserID) VALUES (?,'BUDGET',?,'BUDGET_AMENDMENT_CREATED',?,?,?)",(row[0],str(new_id),after,reason,self.acting_user_id));self.connection.commit();return new_id
+        except Exception:self.connection.rollback();raise
+        finally:c.close()
+
+    def delete_line(self,budget_id,line_id):
+        c=self.connection.cursor()
+        try:
+            self._execute(c,"SELECT OrganizationID,Status FROM tblAccountingBudget WHERE ID=? FOR UPDATE",(budget_id,));row=c.fetchone()
+            if row is None or row[1]!="DRAFT":raise ValueError("Only a draft budget can be edited.")
+            self._execute(c,"DELETE FROM tblAccountingBudgetLine WHERE ID=? AND BudgetID=?",(line_id,budget_id))
+            if c.rowcount!=1:raise ValueError("The budget line is no longer available.")
+            self._execute(c,"INSERT INTO tblAccountingAuditEvent (OrganizationID,EntityType,EntityID,Action,AfterJSON,UserID) VALUES (?,'BUDGET',?,'BUDGET_LINE_DELETED',?,?)",(row[0],str(budget_id),json.dumps({"line_id":line_id},separators=(",",":")),self.acting_user_id));self.connection.commit()
+        except Exception:self.connection.rollback();raise
+        finally:c.close()
+
+    def delete_budget(self,budget_id):
+        c=self.connection.cursor()
+        try:
+            self._execute(c,"SELECT OrganizationID,Name,VersionNumber,Status FROM tblAccountingBudget WHERE ID=? FOR UPDATE",(budget_id,));row=c.fetchone()
+            if row is None:raise ValueError("The budget is no longer available.")
+            if row[3]!="DRAFT":raise ValueError("Only a draft budget can be deleted.")
+            self._execute(c,"SELECT COUNT(*) FROM tblAccountingBudgetLine WHERE BudgetID=?",(budget_id,));line_count=c.fetchone()[0]
+            self._execute(c,"DELETE FROM tblAccountingBudgetLine WHERE BudgetID=?",(budget_id,))
+            self._execute(c,"DELETE FROM tblAccountingBudget WHERE ID=? AND Status='DRAFT'",(budget_id,))
+            if c.rowcount!=1:raise ValueError("The draft budget could not be deleted.")
+            before=json.dumps({"name":row[1],"version":row[2],"status":"DRAFT","line_count":line_count},separators=(",",":"))
+            self._execute(c,"INSERT INTO tblAccountingAuditEvent (OrganizationID,EntityType,EntityID,Action,BeforeJSON,UserID) VALUES (?,'BUDGET',?,'BUDGET_DRAFT_DELETED',?,?)",(row[0],str(budget_id),before,self.acting_user_id));self.connection.commit()
+        except Exception:self.connection.rollback();raise
+        finally:c.close()
