@@ -16,6 +16,34 @@ class BankImportService:
             self._execute(cursor,"SELECT b.ID,CONCAT(b.Name,' - ',a.Code,' ',a.Name) FROM tblAccountingBankAccount b JOIN tblAccountingAccount a ON a.ID=b.AccountID WHERE b.Active=1 ORDER BY b.Name")
             return cursor.fetchall()
         finally:cursor.close()
+
+    def staged_batches(self):
+        cursor = self.connection.cursor()
+        try:
+            self._execute(
+                cursor,
+                "SELECT i.ID, b.Name, i.OriginalName, i.ImportedAt, i.RowCount "
+                "FROM tblAccountingBankImportBatch i "
+                "JOIN tblAccountingBankAccount b ON b.ID=i.BankAccountID "
+                "ORDER BY i.ImportedAt DESC, i.ID DESC",
+            )
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def staged_rows(self, batch_id):
+        cursor = self.connection.cursor()
+        try:
+            self._execute(
+                cursor,
+                "SELECT RowNumber, TransactionDate, Description, Reference, "
+                "Amount, MatchStatus FROM tblAccountingBankImportRow "
+                "WHERE ImportBatchID=? ORDER BY RowNumber",
+                (batch_id,),
+            )
+            return cursor.fetchall()
+        finally:
+            cursor.close()
     def stage_csv(self,bank_account_id,source,mapping:CsvMapping):
         path=Path(source);content=path.read_bytes();rows=parse_csv(content,mapping);digest=file_hash(content)
         cursor=self.connection.cursor()

@@ -10,6 +10,74 @@ from .bank_import_service import BankImportService
 from .formatting import money
 
 
+class StagedBankActivityDialog(wx.Dialog):
+    def __init__(self, parent, service):
+        super().__init__(parent, title="Staged Bank Activity", size=(980, 650))
+        self.service = service
+        self.batches = []
+        self.batch_list = wx.ListCtrl(
+            self, style=wx.LC_REPORT | wx.LC_SINGLE_SEL
+        )
+        for index, (label, width) in enumerate((
+            ("Batch", 65), ("Bank account", 180), ("File", 260),
+            ("Imported", 150), ("Rows", 70),
+        )):
+            self.batch_list.InsertColumn(index, label, width=width)
+        self.row_list = wx.ListCtrl(self, style=wx.LC_REPORT)
+        for index, (label, width) in enumerate((
+            ("Row", 55), ("Date", 95), ("Description", 310),
+            ("Reference", 150), ("Amount", 115), ("Status", 100),
+        )):
+            self.row_list.InsertColumn(index, label, width=width)
+        amount_column = self.row_list.GetColumn(4)
+        amount_column.SetAlign(wx.LIST_FORMAT_RIGHT)
+        self.row_list.SetColumn(4, amount_column)
+        self.batch_list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_batch_selected)
+
+        refresh = wx.Button(self, label="Refresh")
+        close = wx.Button(self, wx.ID_CLOSE, "Close")
+        refresh.Bind(wx.EVT_BUTTON, self.refresh)
+        close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        buttons.Add(refresh)
+        buttons.AddStretchSpacer()
+        buttons.Add(close)
+        root = wx.BoxSizer(wx.VERTICAL)
+        root.Add(wx.StaticText(self, label="Imported bank files"), 0, wx.ALL, 10)
+        root.Add(self.batch_list, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+        root.Add(
+            wx.StaticText(
+                self,
+                label="Staged rows (read only; no accounting transactions have been posted)",
+            ),
+            0, wx.ALL, 10,
+        )
+        root.Add(self.row_list, 2, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+        root.Add(buttons, 0, wx.ALL | wx.EXPAND, 10)
+        self.SetSizer(root)
+        self.refresh()
+
+    def refresh(self, event=None):
+        self.batches = self.service.staged_batches()
+        self.batch_list.DeleteAllItems()
+        self.row_list.DeleteAllItems()
+        for item in self.batches:
+            row = self.batch_list.InsertItem(
+                self.batch_list.GetItemCount(), str(item[0])
+            )
+            for column, value in enumerate(item[1:], 1):
+                self.batch_list.SetItem(row, column, str(value))
+
+    def on_batch_selected(self, event):
+        self.row_list.DeleteAllItems()
+        batch_id = self.batches[event.GetIndex()][0]
+        for item in self.service.staged_rows(batch_id):
+            row = self.row_list.InsertItem(self.row_list.GetItemCount(), str(item[0]))
+            values = (item[1], item[2], item[3] or "", money(item[4]), item[5])
+            for column, value in enumerate(values, 1):
+                self.row_list.SetItem(row, column, str(value))
+
+
 class BankImportDialog(wx.Dialog):
     def __init__(self, parent, service):
         super().__init__(parent, title="Bank File Import", size=(690, 520))
@@ -63,13 +131,16 @@ class BankImportDialog(wx.Dialog):
             ),
         )
         explanation.Wrap(640)
+        review = wx.Button(self, label="Review Staged Activity")
         stage = wx.Button(self, label="Preview and Stage")
         close = wx.Button(self, wx.ID_CLOSE, "Close")
+        review.Bind(wx.EVT_BUTTON, self.on_review)
         stage.Bind(wx.EVT_BUTTON, self.on_stage)
         close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
         self.file.Bind(wx.EVT_FILEPICKER_CHANGED, self.on_file_selected)
 
         buttons = wx.BoxSizer(wx.HORIZONTAL)
+        buttons.Add(review)
         buttons.AddStretchSpacer()
         buttons.Add(stage, 0, wx.RIGHT, 8)
         buttons.Add(close)
@@ -80,6 +151,13 @@ class BankImportDialog(wx.Dialog):
         root.AddStretchSpacer()
         root.Add(buttons, 0, wx.ALL | wx.EXPAND, 12)
         self.SetSizer(root)
+
+    def on_review(self, event=None):
+        dialog = StagedBankActivityDialog(self, self.service)
+        try:
+            dialog.ShowModal()
+        finally:
+            dialog.Destroy()
 
     def on_file_selected(self, event=None):
         try:

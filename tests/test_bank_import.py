@@ -1,8 +1,14 @@
 from decimal import Decimal
 import unittest
+from pathlib import Path
 from accounting.bank_import import BankImportError,CsvMapping,csv_headers,file_hash,parse_csv
 
 class TestBankImport(unittest.TestCase):
+    def test_staged_activity_review_is_read_only_and_right_aligned(self):
+        source = (Path(__file__).parents[1] / "accounting" / "bank_import_dialog.py").read_text(encoding="utf-8")
+        self.assertIn("Staged Bank Activity", source)
+        self.assertIn("LIST_FORMAT_RIGHT", source)
+        self.assertIn("staged_rows", source)
     def test_csv_headers_support_utf8_bom(self):
         self.assertEqual(csv_headers(b"\xef\xbb\xbfDate,Memo,Amount\n"), ("Date", "Memo", "Amount"))
 

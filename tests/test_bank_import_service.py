@@ -29,4 +29,15 @@ class TestBankImportService(unittest.TestCase):
         self.assertIn("tblAccountingBankImportBatch",sql);self.assertIn("tblAccountingBankImportRow",sql);self.assertIn("BANK_FILE_STAGED",sql)
         self.assertNotIn("tblAccountingTransaction (",sql);self.assertNotIn("Status='POSTED'",sql)
 
+    def test_staged_review_queries_are_read_only(self):
+        connection = Connection()
+        service = BankImportService(connection, 7)
+        service.staged_batches()
+        service.staged_rows(31)
+        sql = "\n".join(value[0] for value in connection.cursor_value.statements)
+        self.assertIn("FROM tblAccountingBankImportBatch", sql)
+        self.assertIn("FROM tblAccountingBankImportRow", sql)
+        self.assertNotIn("INSERT", sql)
+        self.assertNotIn("UPDATE", sql)
+
 if __name__=="__main__":unittest.main()
