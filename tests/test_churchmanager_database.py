@@ -104,8 +104,9 @@ class TestChurchManagerDatabase(unittest.TestCase):
         rows = self.query(
             "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()"
         )
-        available = {row[0] for row in rows}
-        self.assertEqual(REQUIRED_TABLES - available, set())
+        available = {row[0].casefold() for row in rows}
+        required = {name.casefold() for name in REQUIRED_TABLES}
+        self.assertEqual(required - available, set())
 
     def test_sermon_ids_are_present_and_unique(self):
         missing = self.query("SELECT COUNT(*) FROM tblSermon WHERE ID IS NULL")[0][0]

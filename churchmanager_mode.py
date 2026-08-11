@@ -24,19 +24,25 @@ def resolve_database(arguments, config=None, credential_reader=read_credential):
     )
 
     if resolved.get("test_mode"):
-        test_database = config.get("testing", {}).get("database")
+        testing = config.get("testing", {})
+        test_host = testing.get("host")
+        if not test_host:
+            raise RuntimeError("Test mode is not configured with a test database host.")
+        resolved["server"] = test_host
+        resolved["port"] = int(testing.get("port", 3306))
+        test_database = testing.get("database")
         if not test_database:
             raise RuntimeError("Test mode is not configured with a test database.")
         if test_database.casefold() == production_database.casefold():
             raise RuntimeError("Safety stop: the test database matches the production database.")
-        test_jsform = config.get("testing", {}).get("jsform_database")
+        test_jsform = testing.get("jsform_database")
         if not test_jsform:
             raise RuntimeError("Test mode is not configured with a JSForm test database.")
         if test_jsform.casefold() == production_jsform.casefold():
             raise RuntimeError("Safety stop: the JSForm test database matches production.")
         resolved["database"] = test_database
         resolved["jsform_database"] = test_jsform
-        credential_target = config.get("testing", {}).get(
+        credential_target = testing.get(
             "credential_target", "ChurchManager/Test"
         )
     else:

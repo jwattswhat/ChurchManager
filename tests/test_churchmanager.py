@@ -255,6 +255,8 @@ class TestChurchManagerConfiguration(unittest.TestCase):
         )
         self.assertEqual(resolved["database"], "ChurchDBTest")
         self.assertEqual(resolved["jsform_database"], "JSFormTest")
+        self.assertEqual(resolved["server"], "127.0.0.1")
+        self.assertEqual(resolved["credential_target"], "ChurchManager/LocalTestAdmin")
         self.assertNotEqual(
             resolved["database"].casefold(),
             config["database_settings"]["database"].casefold(),
@@ -265,7 +267,7 @@ class TestChurchManagerConfiguration(unittest.TestCase):
 
         unsafe_config = {
             "database_settings": {"database": "ChurchDB"},
-            "testing": {"database": "churchdb"},
+            "testing": {"host": "127.0.0.1", "database": "churchdb"},
         }
         with self.assertRaisesRegex(RuntimeError, "production database"):
             resolve_database(
@@ -282,6 +284,7 @@ class TestChurchManagerConfiguration(unittest.TestCase):
                 "jsform_database": "JSForm",
             },
             "testing": {
+                "host": "127.0.0.1",
                 "database": "ChurchDBTest",
                 "jsform_database": "jsform",
             },
