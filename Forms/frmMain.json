@@ -562,7 +562,7 @@
                 "type": "StaticBox",
                 "label": "Accounting",
                 "posch": [34, 8],
-                "sizech": [15, 20]
+                "sizech": [15, 21]
             },
             "lblAccountingSetup": {
                 "name": "lblAccountingSetup",
@@ -678,6 +678,12 @@
                 "name": "lblAccountingGeneralLedger", "type": "StaticText",
                 "label": "General Ledger", "posch": [35, 26],
                 "tooltip": "Run account detail with opening and running balances.",
+                "security": { "invoke": "accounting.reports.run" }
+            },
+            "lblAccountingFundBalances": {
+                "name": "lblAccountingFundBalances", "type": "StaticText",
+                "label": "Fund Balances", "posch": [35, 27],
+                "tooltip": "Run beginning, activity, and ending balances by fund.",
                 "security": { "invoke": "accounting.reports.run" }
             }
         }
