@@ -128,6 +128,23 @@ def balanced(transaction_type="CASH_DISBURSEMENT", reference="Invoice 17"):
 
 
 class TestAccountingDraftService(unittest.TestCase):
+    def test_opening_balance_type_requires_source_reference(self):
+        transaction = balanced("OPENING_BALANCE", "")
+        with self.assertRaisesRegex(AccountingDraftError, "source-document reference"):
+            AccountingDraftService._validate_for_draft(transaction)
+        AccountingDraftService._validate_for_draft(
+            balanced("OPENING_BALANCE", "Approved cutover report")
+        )
+
+    def test_opening_balance_ui_and_account_filter_are_available(self):
+        from pathlib import Path
+        dialog = (Path(__file__).parents[1] / "accounting" / "draft_dialog.py").read_text(encoding="utf-8-sig")
+        service = (Path(__file__).parents[1] / "accounting" / "draft_service.py").read_text(encoding="utf-8-sig")
+        self.assertIn('label="Opening Balances"', dialog)
+        self.assertIn('"OPENING_BALANCE"', dialog)
+        self.assertIn('"opening_accounts"', service)
+        self.assertIn("AccountType IN ('ASSET','LIABILITY','NET_ASSET')", service)
+
     def test_own_unposted_draft_deletes_lines_header_and_audits_atomically(self):
         connection = DeleteConnection()
         AccountingDraftService(connection, 7).delete(41, 2)

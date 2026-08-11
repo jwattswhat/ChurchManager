@@ -101,7 +101,7 @@ class AccountingPostingService:
                 if row[6] == "PROHIBITED" and row[7] is not None:
                     raise AccountingDraftError("A prohibited functional classification is present.")
             attachment_required = (
-                header[10] == "RESTRICTION_RELEASE"
+                header[10] in {"RESTRICTION_RELEASE", "OPENING_BALANCE"}
                 or (header[10] == "CASH_DISBURSEMENT" and debit >= Decimal(header[11]))
             )
             if attachment_required:
@@ -118,7 +118,7 @@ class AccountingPostingService:
             threshold = Decimal(header[6])
             independent_required = (
                 debit >= threshold or header[8] is not None
-                or header[10] == "RESTRICTION_RELEASE"
+                or header[10] in {"RESTRICTION_RELEASE", "OPENING_BALANCE"}
             )
             valid_independent_approval = (
                 header[2] == "APPROVED" and header[5] is not None

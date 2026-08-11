@@ -73,6 +73,12 @@ class AccountingDraftService:
                     "FROM tblAccountingAccount WHERE OrganizationID=? AND Active=1 "
                     "AND PostingAllowed=1 AND AccountType='EXPENSE' ORDER BY Code"
                 ),
+                "opening_accounts": (
+                    "SELECT ID, CONCAT(Code, ' - ', Name), FunctionRequirement "
+                    "FROM tblAccountingAccount WHERE OrganizationID=? AND Active=1 "
+                    "AND PostingAllowed=1 AND AccountType IN ('ASSET','LIABILITY','NET_ASSET') "
+                    "ORDER BY DisplayOrder,Code"
+                ),
                 "transfer_out_accounts": (
                     "SELECT ID, CONCAT(Code, ' - ', Name), FunctionRequirement "
                     "FROM tblAccountingAccount WHERE OrganizationID=? AND Active=1 "
@@ -181,6 +187,7 @@ class AccountingDraftService:
         self._validate_for_draft(transaction)
         cursor = self.connection.cursor()
         try:
+            self._validate_opening_accounts(cursor, transaction)
             period_id = self._fiscal_period_id(cursor, transaction)
             self._insert_header(cursor, transaction, period_id)
             transaction_id = cursor.lastrowid
@@ -213,6 +220,7 @@ class AccountingDraftService:
                 raise AccountingDraftError(
                     "This draft changed after you opened it. Reload before saving."
                 )
+            self._validate_opening_accounts(cursor, transaction)
             period_id = self._fiscal_period_id(cursor, transaction)
             self._execute(
                 cursor,
@@ -284,8 +292,9 @@ class AccountingDraftService:
                 row[0], row[1], row[3], lines, row[4] or "", row[2]
             )
             self._validate_for_draft(transaction)
+            self._validate_opening_accounts(cursor, transaction)
             self._fiscal_period_id(cursor, transaction)
-            if transaction.transaction_type in {"CASH_DISBURSEMENT", "RESTRICTION_RELEASE"}:
+            if transaction.transaction_type in {"CASH_DISBURSEMENT", "RESTRICTION_RELEASE", "OPENING_BALANCE"}:
                 total = sum((line.debit for line in transaction.lines), Decimal("0"))
                 self._execute(
                     cursor,
@@ -296,7 +305,7 @@ class AccountingDraftService:
                 if threshold_row is None:
                     raise AccountingDraftError("The accounting organization is unavailable.")
                 attachment_required = (
-                    transaction.transaction_type == "RESTRICTION_RELEASE"
+                    transaction.transaction_type in {"RESTRICTION_RELEASE", "OPENING_BALANCE"}
                     or total >= Decimal(threshold_row[0])
                 )
                 if attachment_required:
@@ -404,7 +413,8 @@ class AccountingDraftService:
     def _validate_for_draft(transaction):
         validate_transaction(transaction)
         if transaction.transaction_type not in {
-            "JOURNAL", "CASH_RECEIPT", "CASH_DISBURSEMENT", "RESTRICTION_RELEASE"
+            "JOURNAL", "CASH_RECEIPT", "CASH_DISBURSEMENT", "RESTRICTION_RELEASE",
+            "OPENING_BALANCE"
         }:
             raise AccountingDraftError("This transaction type is not available yet.")
         if (
@@ -414,6 +424,21 @@ class AccountingDraftService:
             raise AccountingDraftError(
                 "A source-document reference is required for a cash disbursement."
             )
+        if transaction.transaction_type == "OPENING_BALANCE" and not transaction.reference.strip():
+            raise AccountingDraftError("A source-document reference is required for opening balances.")
+
+    def _validate_opening_accounts(self, cursor, transaction):
+        if transaction.transaction_type != "OPENING_BALANCE":
+            return
+        account_ids = sorted({line.account_id for line in transaction.lines})
+        placeholders = ",".join("?" for _ in account_ids)
+        self._execute(cursor,
+            "SELECT COUNT(*) FROM tblAccountingAccount WHERE OrganizationID=? "
+            "AND ID IN ({}) AND Active=1 AND PostingAllowed=1 "
+            "AND AccountType IN ('ASSET','LIABILITY','NET_ASSET')".format(placeholders),
+            (transaction.organization_id, *account_ids))
+        if cursor.fetchone()[0] != len(account_ids):
+            raise AccountingDraftError("Opening balances may use only active asset, liability, and net-asset accounts.")
 
     def _insert_header(self, cursor, transaction, period_id):
         self._execute(

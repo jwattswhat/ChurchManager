@@ -508,6 +508,7 @@ class DraftListDialog(wx.Dialog):
             "CASH_RECEIPT": "Cash receipt",
             "JOURNAL": "General journal",
             "RESTRICTION_RELEASE": "Restriction release",
+            "OPENING_BALANCE": "Opening balances",
         }
         for item in rows:
             self.ids.append(item[0])
@@ -661,7 +662,7 @@ class AccountingDraftDialog(wx.Dialog):
         self.transaction_date = wx.adv.DatePickerCtrl(self)
         self.transaction_type = wx.Choice(
             self, choices=["Cash disbursement", "Cash receipt", "General journal",
-                           "Restriction release"]
+                           "Restriction release", "Opening balances"]
         )
         self.transaction_type.SetSelection(0)
         self.description = wx.TextCtrl(self)
@@ -696,6 +697,7 @@ class AccountingDraftDialog(wx.Dialog):
         guided_transfer = wx.Button(self, label="Guided Transfer")
         guided_deposit = wx.Button(self, label="Guided Deposit")
         guided_release = wx.Button(self, label="Restriction Release")
+        guided_opening = wx.Button(self, label="Opening Balances")
         self.attachments.Enable(False)
         add.Bind(wx.EVT_BUTTON, self.on_add)
         edit.Bind(wx.EVT_BUTTON, self.on_edit)
@@ -706,6 +708,7 @@ class AccountingDraftDialog(wx.Dialog):
         guided_transfer.Bind(wx.EVT_BUTTON, self.on_guided_transfer)
         guided_deposit.Bind(wx.EVT_BUTTON, self.on_guided_deposit)
         guided_release.Bind(wx.EVT_BUTTON, self.on_guided_release)
+        guided_opening.Bind(wx.EVT_BUTTON, self.on_guided_opening)
         self.debit_total = wx.StaticText(
             self, label="$0.00", size=(135, -1), style=wx.ALIGN_RIGHT
         )
@@ -735,7 +738,7 @@ class AccountingDraftDialog(wx.Dialog):
         line_buttons.AddStretchSpacer()
         guided_buttons = wx.GridSizer(cols=3, hgap=6, vgap=6)
         for button in (guided_receipt, guided_disbursement, guided_transfer,
-                       guided_deposit, guided_release, self.attachments):
+                       guided_deposit, guided_release, guided_opening, self.attachments):
             guided_buttons.Add(button, 0, wx.EXPAND)
         totals_row = wx.BoxSizer(wx.HORIZONTAL)
         totals_row.AddStretchSpacer()
@@ -829,7 +832,7 @@ class AccountingDraftDialog(wx.Dialog):
             transaction.transaction_date.day, transaction.transaction_date.month - 1,
             transaction.transaction_date.year,
         ))
-        type_codes = ("CASH_DISBURSEMENT", "CASH_RECEIPT", "JOURNAL", "RESTRICTION_RELEASE")
+        type_codes = ("CASH_DISBURSEMENT", "CASH_RECEIPT", "JOURNAL", "RESTRICTION_RELEASE", "OPENING_BALANCE")
         self.transaction_type.SetSelection(type_codes.index(transaction.transaction_type))
         self.description.SetValue(transaction.description)
         self.reference.SetValue(transaction.reference)
@@ -894,7 +897,11 @@ class AccountingDraftDialog(wx.Dialog):
         if not self.master_choices or not self.master_choices["accounts"]:
             wx.MessageBox("No active posting accounts are available.", "Transaction Entry")
             return None
-        dialog = LineDialog(self, self.master_choices, initial)
+        choices = self.master_choices
+        if self.transaction_type.GetSelection() == 4:
+            choices = dict(self.master_choices)
+            choices["accounts"] = self.master_choices["opening_accounts"]
+        dialog = LineDialog(self, choices, initial)
         try:
             if dialog.ShowModal() != wx.ID_OK:
                 return None
@@ -1069,6 +1076,25 @@ class AccountingDraftDialog(wx.Dialog):
         self.transaction_type.SetSelection(3)
         self.refresh()
 
+    def on_guided_opening(self, event):
+        if self.current_id is not None or self.lines:
+            if wx.MessageBox(
+                "Start a new opening-balance transaction and discard the current unsaved values?",
+                "Opening Balances", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION,
+            ) != wx.YES:
+                return
+            self.on_new()
+        if not self.master_choices or not self.master_choices["opening_accounts"]:
+            wx.MessageBox("No active balance-sheet accounts are available.", "Opening Balances", wx.OK | wx.ICON_WARNING)
+            return
+        self.transaction_type.SetSelection(4)
+        self.description.SetValue("Opening balances")
+        wx.MessageBox(
+            "Add each approved asset and liability balance by fund, then add the corresponding net-asset lines so total debits equal total credits. Save the draft before attaching the source balance report.",
+            "Opening Balances", wx.OK | wx.ICON_INFORMATION,
+        )
+        self.refresh()
+
     def refresh(self):
         self.list.DeleteAllItems()
         debit_total = ZERO
@@ -1089,7 +1115,7 @@ class AccountingDraftDialog(wx.Dialog):
         self.difference_total.SetLabel(money(debit_total - credit_total, True))
 
     def transaction(self):
-        type_codes = ("CASH_DISBURSEMENT", "CASH_RECEIPT", "JOURNAL", "RESTRICTION_RELEASE")
+        type_codes = ("CASH_DISBURSEMENT", "CASH_RECEIPT", "JOURNAL", "RESTRICTION_RELEASE", "OPENING_BALANCE")
         lines = tuple(
             JournalLine(
                 number, line["account_id"], line["fund_id"], line["debit"],

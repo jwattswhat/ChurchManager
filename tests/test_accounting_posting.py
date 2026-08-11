@@ -110,4 +110,12 @@ class TestAccountingPosting(unittest.TestCase):
         with self.assertRaisesRegex(AccountingDraftError, "different user"):
             AccountingPostingService(connection, 9).post(41, 4)
 
+    def test_opening_balance_requires_source_document_and_approval(self):
+        missing = Connection(transaction_type="OPENING_BALANCE", total=Decimal("25"), attachments=0)
+        with self.assertRaisesRegex(AccountingDraftError, "supporting authority"):
+            AccountingPostingService(missing, 9).post(41, 4)
+        unapproved = Connection(status="READY", reviewer=None, transaction_type="OPENING_BALANCE", total=Decimal("25"), attachments=1)
+        with self.assertRaisesRegex(AccountingDraftError, "different user"):
+            AccountingPostingService(unapproved, 9).post(41, 4)
+
 if __name__ == "__main__": unittest.main()

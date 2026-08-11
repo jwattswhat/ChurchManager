@@ -147,6 +147,15 @@ class TestAccountingReview(unittest.TestCase):
                 61, 3, "Only operator available", can_override=True
             )
 
+    def test_opening_balance_always_uses_independent_or_audited_override(self):
+        connection = Connection(creator=7, total=Decimal("25"), transaction_type="OPENING_BALANCE")
+        AccountingReviewService(connection, 7).approve(
+            61, 3, "Approved cutover records; only accounting operator available", can_override=True
+        )
+        audit = next(item for item in connection.cursor_value.statements
+                     if "INSERT INTO tblAccountingAuditEvent" in item[0])
+        self.assertIn("TRANSACTION_APPROVED_OVERRIDE", audit[1])
+
 
 if __name__ == "__main__":
     unittest.main()

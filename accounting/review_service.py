@@ -88,7 +88,7 @@ class AccountingReviewService:
             threshold = Decimal(header[4])
             independent = (
                 debit >= threshold
-                or header[5] in {"REVERSAL", "RESTRICTION_RELEASE"}
+                or header[5] in {"REVERSAL", "RESTRICTION_RELEASE", "OPENING_BALANCE"}
             )
             override_used = independent and header[1] == self.acting_user_id
             reason = (override_reason or "").strip()
