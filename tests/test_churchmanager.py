@@ -561,6 +561,20 @@ class TestChurchManagerForms(unittest.TestCase):
         controls=load_json(FORMS/"frmMain.json")["frmMainFORM"]["CONTROLS"]
         self.assertEqual(controls["lblAccountingActivities"]["security"]["invoke"],"accounting.reports.run")
 
+    def test_bank_accounts_are_protected_jsform_master_data(self):
+        from main_menu import FORM_ROUTES
+        from permission_catalog import MAIN_MENU_PERMISSIONS
+        self.assertEqual(FORM_ROUTES["lblAccountingBankAccounts"],"frmAccountingBankAccount")
+        self.assertEqual(MAIN_MENU_PERMISSIONS["lblAccountingBankAccounts"],"accounting.master_data.manage")
+        form=load_json(FORMS/"frmAccountingBankAccount.json")["frmAccountingBankAccountFORM"]
+        self.assertEqual(form["FORM"]["table"]["name"],"tblAccountingBankAccount")
+        lookup=form["CONTROLS"]["AccountID"]["lookupchoices"]
+        self.assertIn("AccountType = 'ASSET'",lookup["condition"])
+        self.assertIn("last four digits",form["CONTROLS"]["AccountLastFour"]["tooltip"])
+        controls=load_json(FORMS/"frmMain.json")["frmMainFORM"]["CONTROLS"]
+        box=controls["FundAccountingBox"]; top=box["posch"][1]; bottom=top+box["sizech"][1]
+        self.assertTrue(top < controls["lblAccountingActivities"]["posch"][1] < bottom)
+
     def test_forms_match_jsform_canonical_schema(self):
         from jsonschema import validate
 
