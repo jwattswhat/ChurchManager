@@ -56,6 +56,17 @@ def database_tests_enabled() -> bool:
 
 @unittest.skipUnless(database_tests_enabled(), "Set CHURCHMANAGER_RUN_DB_TESTS=1 for read-only test-database checks")
 class TestChurchManagerDatabase(unittest.TestCase):
+    def test_used_fiscal_period_boundary_trigger_exists(self):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT COUNT(*) FROM information_schema.TRIGGERS "
+                "WHERE TRIGGER_SCHEMA=DATABASE() "
+                "AND TRIGGER_NAME='trg_acct_period_lock_used_boundaries'"
+            )
+            self.assertEqual(cursor.fetchone()[0], 1)
+        finally:
+            cursor.close()
     @classmethod
     def setUpClass(cls):
         config = json.loads((ROOT / "churchmanager.json").read_text(encoding="utf-8-sig"))

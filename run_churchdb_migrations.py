@@ -21,8 +21,28 @@ def migration_files():
 
 
 def statements(sql):
-    lines = [line for line in sql.splitlines() if not line.lstrip().startswith("--")]
-    return [statement.strip() for statement in "\n".join(lines).split(";") if statement.strip()]
+    delimiter = ";"
+    buffer = []
+    result = []
+    for line in sql.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("--"):
+            continue
+        if stripped.upper().startswith("DELIMITER "):
+            delimiter = stripped.split(None, 1)[1]
+            continue
+        buffer.append(line)
+        joined = "\n".join(buffer).rstrip()
+        if joined.endswith(delimiter):
+            statement = joined[:-len(delimiter)].strip()
+            if statement:
+                result.append(statement)
+            buffer = []
+    if buffer:
+        statement = "\n".join(buffer).strip()
+        if statement:
+            result.append(statement)
+    return result
 
 
 def settings():
