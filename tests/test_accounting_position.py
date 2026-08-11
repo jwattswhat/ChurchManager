@@ -30,5 +30,6 @@ class TestFinancialPosition(unittest.TestCase):
         self.assertIn('title="Statement of Financial Position"',source)
         self.assertIn("Liabilities + net assets",source)
         self.assertIn('authorization.require("accounting.reports.run"',source)
+        self.assertIn("format=wx.LIST_FORMAT_RIGHT if index==3",source)
 
 if __name__=="__main__":unittest.main()

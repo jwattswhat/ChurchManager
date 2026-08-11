@@ -19,7 +19,7 @@ class FinancialPositionDialog(wx.Dialog):
             header.Add(wx.StaticText(self,label=label),0,wx.ALIGN_CENTER_VERTICAL|wx.RIGHT,5); header.Add(control,0,wx.RIGHT,15)
         header.Add(run)
         self.list=wx.ListCtrl(self,style=wx.LC_REPORT)
-        for index,(label,width) in enumerate((("Section",190),("Code",80),("Account",300),("Amount",120))): self.list.InsertColumn(index,label,width=width)
+        for index,(label,width) in enumerate((("Section",190),("Code",80),("Account",300),("Amount",120))): self.list.InsertColumn(index,label,format=wx.LIST_FORMAT_RIGHT if index==3 else wx.LIST_FORMAT_LEFT,width=width)
         self.status=wx.StaticText(self,label="")
         close=wx.Button(self,wx.ID_CLOSE,"Close"); close.Bind(wx.EVT_BUTTON,lambda event:self.EndModal(wx.ID_CLOSE))
         footer=wx.BoxSizer(wx.HORIZONTAL); footer.Add(self.status,0,wx.ALIGN_CENTER_VERTICAL); footer.AddStretchSpacer(); footer.Add(close)

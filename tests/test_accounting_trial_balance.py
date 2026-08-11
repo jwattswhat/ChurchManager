@@ -31,5 +31,6 @@ class TestTrialBalance(unittest.TestCase):
         self.assertNotIn("Add Line", source)
         self.assertIn('("Account",180)', source)
         self.assertIn("All posted activity nets to zero", source)
+        self.assertIn("format=wx.LIST_FORMAT_RIGHT if index >= 4", source)
 
 if __name__ == "__main__": unittest.main()

@@ -25,7 +25,11 @@ class TrialBalanceDialog(wx.Dialog):
         for index, (label, width) in enumerate((
             ("Code",75), ("Account",180), ("Type",90), ("Normal",70),
             ("Debits",85), ("Credits",85), ("Debit Balance",95), ("Credit Balance",95),
-        )): self.list.InsertColumn(index, label, width=width)
+        )): self.list.InsertColumn(
+            index, label,
+            format=wx.LIST_FORMAT_RIGHT if index >= 4 else wx.LIST_FORMAT_LEFT,
+            width=width,
+        )
         self.totals = wx.StaticText(self, label="Debit balances $0.00    Credit balances $0.00    Difference $0.00")
         self.status = wx.StaticText(self, label="Choose an as-of date and run the report.")
         close = wx.Button(self, wx.ID_CLOSE, "Close")

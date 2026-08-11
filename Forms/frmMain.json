@@ -535,7 +535,7 @@
                 "type": "StaticBox",
                 "label": "Current User",
                 "posch": [34, 1],
-                "sizech": [15, 14]
+                "sizech": [15, 15]
             },
             "lblCurrentUser": {
                 "name": "lblCurrentUser",
@@ -642,6 +642,12 @@
                 "name": "lblAccountingPosition", "type": "StaticText",
                 "label": "Financial Position", "posch": [35, 20],
                 "tooltip": "Run a statement of financial position as of a selected date.",
+                "security": { "invoke": "accounting.reports.run" }
+            },
+            "lblAccountingActivities": {
+                "name": "lblAccountingActivities", "type": "StaticText",
+                "label": "Statement of Activities", "posch": [35, 21],
+                "tooltip": "Run revenue, expense, transfer, and net-asset activity by restriction class.",
                 "security": { "invoke": "accounting.reports.run" }
             }
         }
