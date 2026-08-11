@@ -31,6 +31,7 @@ from accounting.position_dialog import show_financial_position
 from accounting.activities_dialog import show_activities
 from accounting.bank_import_dialog import show_bank_import
 from accounting.audit_dialog import show_accounting_audit
+from accounting.general_ledger_dialog import show_general_ledger
 from types import SimpleNamespace
 
 
@@ -511,6 +512,10 @@ def _buttonclick(event):
             )
         case "lblAccountingAudit":
             show_accounting_audit(
+                cmfrm.FRAME, context.connection, context.session, context.authorization
+            )
+        case "lblAccountingGeneralLedger":
+            show_general_ledger(
                 cmfrm.FRAME, context.connection, context.session, context.authorization
             )
         case _:

@@ -562,7 +562,7 @@
                 "type": "StaticBox",
                 "label": "Accounting",
                 "posch": [34, 8],
-                "sizech": [15, 19]
+                "sizech": [15, 20]
             },
             "lblAccountingSetup": {
                 "name": "lblAccountingSetup",
@@ -673,6 +673,12 @@
                 "label": "Audit History", "posch": [35, 25],
                 "tooltip": "Review the read-only accounting audit trail.",
                 "security": { "invoke": "accounting.audit.view" }
+            },
+            "lblAccountingGeneralLedger": {
+                "name": "lblAccountingGeneralLedger", "type": "StaticText",
+                "label": "General Ledger", "posch": [35, 26],
+                "tooltip": "Run account detail with opening and running balances.",
+                "security": { "invoke": "accounting.reports.run" }
             }
         }
     }
