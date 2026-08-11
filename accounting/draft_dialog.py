@@ -11,6 +11,9 @@ import wx.adv
 from .draft_service import AccountingDraftService
 from .models import JournalLine, JournalTransaction, ZERO
 from .formatting import money
+from .attachment_service import (
+    AccountingAttachmentService, AttachmentStore, load_attachment_policy,
+)
 
 
 def _date_value(control):
@@ -154,14 +157,124 @@ class DraftListDialog(wx.Dialog):
         return None if index == -1 else self.ids[index]
 
 
+class AttachmentDialog(wx.Dialog):
+    def __init__(self, parent, service, transaction_id, can_edit_any=False):
+        super().__init__(parent, title="Source Documents", size=(760, 440))
+        self.service = service
+        self.transaction_id = transaction_id
+        self.can_edit_any = can_edit_any
+        self.rows = []
+        self.list = wx.ListCtrl(self, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        for index, (label, width) in enumerate((
+            ("File", 245), ("Document type", 120), ("Added", 145), ("Added by", 150),
+        )):
+            self.list.InsertColumn(index, label, width=width)
+        add = wx.Button(self, label="Add Document")
+        verify = wx.Button(self, label="Verify / Open")
+        remove = wx.Button(self, label="Remove")
+        close = wx.Button(self, wx.ID_CLOSE, "Close")
+        add.Bind(wx.EVT_BUTTON, self.on_add)
+        verify.Bind(wx.EVT_BUTTON, self.on_verify)
+        remove.Bind(wx.EVT_BUTTON, self.on_remove)
+        close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        buttons.Add(add, 0, wx.RIGHT, 6)
+        buttons.Add(verify, 0, wx.RIGHT, 6)
+        buttons.Add(remove)
+        buttons.AddStretchSpacer()
+        buttons.Add(close)
+        root = wx.BoxSizer(wx.VERTICAL)
+        root.Add(wx.StaticText(self, label=(
+            "Files are copied into protected ChurchManager storage and checked for later changes."
+        )), 0, wx.ALL, 10)
+        root.Add(self.list, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+        root.Add(buttons, 0, wx.ALL | wx.EXPAND, 10)
+        self.SetSizer(root)
+        self.refresh()
+
+    def refresh(self):
+        try:
+            self.rows = self.service.list(self.transaction_id, self.can_edit_any)
+        except ValueError as error:
+            wx.MessageBox(str(error), "Source Documents", wx.OK | wx.ICON_WARNING)
+            return
+        self.list.DeleteAllItems()
+        for item in self.rows:
+            row = self.list.InsertItem(self.list.GetItemCount(), str(item[1]))
+            values = (item[2] or "Other", str(item[5]), item[6])
+            for column, value in enumerate(values, 1):
+                self.list.SetItem(row, column, str(value))
+
+    def _selected(self):
+        index = self.list.GetFirstSelected()
+        if index == -1:
+            wx.MessageBox("Select a source document first.", "Source Documents")
+            return None
+        return self.rows[index]
+
+    def on_add(self, event):
+        picker = wx.FileDialog(
+            self, "Select a receipt, invoice, or other source document",
+            wildcard=("Supported documents|*.pdf;*.jpg;*.jpeg;*.png;*.tif;*.tiff;"
+                      "*.doc;*.docx;*.xls;*.xlsx;*.csv;*.txt|All files|*.*"),
+            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST,
+        )
+        try:
+            if picker.ShowModal() != wx.ID_OK:
+                return
+            choices = ["Receipt", "Invoice", "Voucher", "Bank document", "Other"]
+            kind = wx.SingleChoiceDialog(self, "What kind of document is this?",
+                                         "Document Type", choices)
+            try:
+                if kind.ShowModal() != wx.ID_OK:
+                    return
+                document_type = kind.GetStringSelection()
+            finally:
+                kind.Destroy()
+            self.service.add(
+                self.transaction_id, picker.GetPath(), document_type, self.can_edit_any
+            )
+            self.refresh()
+        except ValueError as error:
+            wx.MessageBox(str(error), "Document not added", wx.OK | wx.ICON_WARNING)
+        finally:
+            picker.Destroy()
+
+    def on_verify(self, event):
+        item = self._selected()
+        if item is None:
+            return
+        try:
+            path = self.service.verify(self.transaction_id, item[0], self.can_edit_any)
+            wx.LaunchDefaultApplication(str(path))
+        except ValueError as error:
+            wx.MessageBox(str(error), "Document verification failed", wx.OK | wx.ICON_WARNING)
+
+    def on_remove(self, event):
+        item = self._selected()
+        if item is None:
+            return
+        if wx.MessageBox(
+            "Remove this source document from the draft? The action will be audited.",
+            "Remove Source Document", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING,
+        ) != wx.YES:
+            return
+        try:
+            self.service.remove(self.transaction_id, item[0], self.can_edit_any)
+            self.refresh()
+        except ValueError as error:
+            wx.MessageBox(str(error), "Document not removed", wx.OK | wx.ICON_WARNING)
+
+
 class AccountingDraftDialog(wx.Dialog):
     def __init__(self, parent, service, can_edit_any=False, can_mark_ready=False,
-                 can_delete=False):
+                 can_delete=False, attachment_service=None):
         super().__init__(parent, title="Accounting Transaction Entry", size=(980, 650))
         self.service = service
         self.can_edit_any = can_edit_any
         self.can_mark_ready = can_mark_ready
         self.can_delete = can_delete
+        self.attachment_service = attachment_service
         self.current_id = None
         self.current_version = None
         self.lines = []
@@ -202,9 +315,12 @@ class AccountingDraftDialog(wx.Dialog):
         add = wx.Button(self, label="Add Line")
         edit = wx.Button(self, label="Edit Line")
         remove = wx.Button(self, label="Remove Line")
+        self.attachments = wx.Button(self, label="Source Documents")
+        self.attachments.Enable(False)
         add.Bind(wx.EVT_BUTTON, self.on_add)
         edit.Bind(wx.EVT_BUTTON, self.on_edit)
         remove.Bind(wx.EVT_BUTTON, self.on_remove)
+        self.attachments.Bind(wx.EVT_BUTTON, self.on_attachments)
         self.totals = wx.StaticText(self, label="Debits $0.00    Credits $0.00    Difference $0.00")
         new = wx.Button(self, label="New Draft")
         open_draft = wx.Button(self, label="Open Draft")
@@ -221,7 +337,7 @@ class AccountingDraftDialog(wx.Dialog):
         self.delete.Bind(wx.EVT_BUTTON, self.on_delete)
         close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
         line_buttons = wx.BoxSizer(wx.HORIZONTAL)
-        for button in (add, edit, remove):
+        for button in (add, edit, remove, self.attachments):
             line_buttons.Add(button, 0, wx.RIGHT, 6)
         line_buttons.AddStretchSpacer()
         line_buttons.Add(self.totals, 0, wx.ALIGN_CENTER_VERTICAL)
@@ -273,6 +389,7 @@ class AccountingDraftDialog(wx.Dialog):
         self.save.SetLabel("Save Draft")
         self.submit.Enable(False)
         self.delete.Enable(False)
+        self.attachments.Enable(False)
         self.refresh()
 
     def on_open(self, event=None):
@@ -322,6 +439,7 @@ class AccountingDraftDialog(wx.Dialog):
         self.save.SetLabel("Update Draft")
         self.submit.Enable(self.can_mark_ready)
         self.delete.Enable(self.can_delete and creator == self.service.acting_user_id)
+        self.attachments.Enable(self.attachment_service is not None)
         self.refresh()
 
     def on_submit(self, event=None):
@@ -402,6 +520,18 @@ class AccountingDraftDialog(wx.Dialog):
             self.lines.pop(index)
             self.refresh()
 
+    def on_attachments(self, event):
+        if self.current_id is None or self.attachment_service is None:
+            wx.MessageBox("Save the draft before adding source documents.", "Source Documents")
+            return
+        dialog = AttachmentDialog(
+            self, self.attachment_service, self.current_id, self.can_edit_any
+        )
+        try:
+            dialog.ShowModal()
+        finally:
+            dialog.Destroy()
+
     def refresh(self):
         self.list.DeleteAllItems()
         debit_total = ZERO
@@ -444,6 +574,8 @@ class AccountingDraftDialog(wx.Dialog):
             if self.current_id is None:
                 transaction_id = self.service.create(self.transaction())
                 message = "Draft {} was saved. It has not been posted.".format(transaction_id)
+                self.current_id = transaction_id
+                self.current_version = 1
             else:
                 self.current_version = self.service.update(
                     self.current_id, self.current_version, self.transaction(), self.can_edit_any
@@ -457,11 +589,22 @@ class AccountingDraftDialog(wx.Dialog):
             message,
             "Draft saved", wx.OK | wx.ICON_INFORMATION,
         )
-        self.on_new()
+        self.save.SetLabel("Update Draft")
+        self.submit.Enable(self.can_mark_ready)
+        self.delete.Enable(self.can_delete)
+        self.attachments.Enable(self.attachment_service is not None)
 
 
-def show_accounting_draft_entry(parent, connection, session, authorization):
+def show_accounting_draft_entry(parent, connection, session, authorization,
+                                test_mode=False, config=None):
     authorization.require("accounting.transactions.create", "create accounting drafts")
+    if config is None:
+        from churchmanager_mode import load_config
+        config = load_config()
+    attachment_service = AccountingAttachmentService(
+        connection, session.user_id,
+        AttachmentStore(load_attachment_policy(config, test_mode)),
+    )
     dialog = AccountingDraftDialog(
         parent, AccountingDraftService(connection, session.user_id),
         can_edit_any=authorization.has_permission(
@@ -473,6 +616,7 @@ def show_accounting_draft_entry(parent, connection, session, authorization):
         can_delete=authorization.has_permission(
             "accounting.transactions.delete_draft"
         ),
+        attachment_service=attachment_service,
     )
     try:
         dialog.ShowModal()

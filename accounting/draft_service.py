@@ -247,6 +247,27 @@ class AccountingDraftService:
             )
             self._validate_for_draft(transaction)
             self._fiscal_period_id(cursor, transaction)
+            if transaction.transaction_type == "CASH_DISBURSEMENT":
+                total = sum((line.debit for line in transaction.lines), Decimal("0"))
+                self._execute(
+                    cursor,
+                    "SELECT AttachmentThreshold FROM tblAccountingOrganization WHERE ID=?",
+                    (transaction.organization_id,),
+                )
+                threshold_row = cursor.fetchone()
+                if threshold_row is None:
+                    raise AccountingDraftError("The accounting organization is unavailable.")
+                if total >= Decimal(threshold_row[0]):
+                    self._execute(
+                        cursor,
+                        "SELECT COUNT(*) FROM tblAccountingAttachment WHERE TransactionID=?",
+                        (transaction_id,),
+                    )
+                    if cursor.fetchone()[0] < 1:
+                        raise AccountingDraftError(
+                            "Add a receipt, invoice, or voucher before submitting "
+                            "this disbursement for review."
+                        )
             self._execute(
                 cursor,
                 "UPDATE tblAccountingTransaction SET Status='READY', "

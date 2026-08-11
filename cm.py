@@ -478,7 +478,8 @@ def _buttonclick(event):
             )
         case "lblAccountingTransactions":
             show_accounting_draft_entry(
-                cmfrm.FRAME, context.connection, context.session, context.authorization
+                cmfrm.FRAME, context.connection, context.session, context.authorization,
+                test_mode=context.test_mode,
             )
         case "lblAccountingReview":
             show_accounting_review(

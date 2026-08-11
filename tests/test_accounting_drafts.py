@@ -50,6 +50,11 @@ class Connection:
 
 
 class SubmitCursor(Cursor):
+    def __init__(self, total=Decimal("25.00"), attachments=0):
+        super().__init__()
+        self.total = total
+        self.attachments = attachments
+
     def execute(self, sql, values=()):
         self.statements.append((sql, values))
         if sql.startswith("SELECT OrganizationID"):
@@ -58,11 +63,17 @@ class SubmitCursor(Cursor):
             self.rows = []
         elif sql.startswith("SELECT LineNumber"):
             self.rows = [
-                (1, 20, 3, Decimal("25.00"), Decimal("0.00"), None, None, ""),
-                (2, 10, 3, Decimal("0.00"), Decimal("25.00"), None, None, ""),
+                (1, 20, 3, self.total, Decimal("0.00"), None, None, ""),
+                (2, 10, 3, Decimal("0.00"), self.total, None, None, ""),
             ]
         elif sql.startswith("SELECT p.ID"):
             self.rows = self.period_rows
+        elif sql.startswith("SELECT AttachmentThreshold"):
+            self.one = (Decimal("250.00"),)
+            self.rows = []
+        elif sql.startswith("SELECT COUNT(*) FROM tblAccountingAttachment"):
+            self.one = (self.attachments,)
+            self.rows = []
         elif sql.startswith("UPDATE tblAccountingTransaction"):
             self.rowcount = 1
             self.rows = []
@@ -71,9 +82,9 @@ class SubmitCursor(Cursor):
 
 
 class SubmitConnection(Connection):
-    def __init__(self):
+    def __init__(self, total=Decimal("25.00"), attachments=0):
         super().__init__()
-        self.cursor_value = SubmitCursor()
+        self.cursor_value = SubmitCursor(total, attachments)
 
 
 class DeleteCursor(Cursor):
@@ -246,6 +257,15 @@ class TestAccountingDraftService(unittest.TestCase):
         self.assertIn('label="Submit for Review"', source)
         self.assertIn("self.service.submit(", source)
         self.assertIn("self.submit.Enable(False)", source)
+
+    def test_large_disbursement_requires_attachment_before_submit(self):
+        connection = SubmitConnection(total=Decimal("250.00"), attachments=0)
+        with self.assertRaisesRegex(AccountingDraftError, "receipt, invoice, or voucher"):
+            AccountingDraftService(connection, 7).submit(41, 2)
+
+    def test_large_disbursement_with_attachment_can_submit(self):
+        connection = SubmitConnection(total=Decimal("250.00"), attachments=1)
+        self.assertEqual(AccountingDraftService(connection, 7).submit(41, 2), 3)
 
     def test_transaction_date_requires_one_open_period(self):
         connection = Connection(period_rows=())

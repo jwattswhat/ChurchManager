@@ -18,5 +18,11 @@
     "security": {
         "production_enabled": false,
         "testing_enabled": true
+    },
+    "attachments": {
+        "production_root": "%LOCALAPPDATA%\\ChurchManager\\Attachments",
+        "test_root": "%LOCALAPPDATA%\\ChurchManager\\TestAttachments",
+        "allowed_extensions": [".pdf", ".jpg", ".jpeg", ".png", ".tif", ".tiff", ".doc", ".docx", ".xls", ".xlsx", ".csv", ".txt"],
+        "maximum_megabytes": 20
     }
 }

@@ -59,6 +59,7 @@ class AccountingPostingService:
                 "ae.EntityType='TRANSACTION' AND CAST(ae.EntityID AS UNSIGNED)=t.ID "
                 "AND ae.Action='TRANSACTION_APPROVED_OVERRIDE' "
                 "AND ae.UserID=t.ReviewedByUserID) AS HasApprovalOverride "
+                ", t.TransactionType, o.AttachmentThreshold "
                 "FROM tblAccountingTransaction t "
                 "JOIN tblAccountingOrganization o ON o.ID=t.OrganizationID "
                 "WHERE t.ID=? FOR UPDATE", (transaction_id,))
@@ -99,6 +100,17 @@ class AccountingPostingService:
                     raise AccountingDraftError("A required functional classification is missing.")
                 if row[6] == "PROHIBITED" and row[7] is not None:
                     raise AccountingDraftError("A prohibited functional classification is present.")
+            if header[10] == "CASH_DISBURSEMENT" and debit >= Decimal(header[11]):
+                self._execute(
+                    cursor,
+                    "SELECT COUNT(*) FROM tblAccountingAttachment WHERE TransactionID=?",
+                    (transaction_id,),
+                )
+                if cursor.fetchone()[0] < 1:
+                    raise AccountingDraftError(
+                        "This disbursement requires a receipt, invoice, or voucher "
+                        "before it can be posted."
+                    )
             threshold = Decimal(header[6])
             independent_required = debit >= threshold or header[8] is not None
             valid_independent_approval = (
