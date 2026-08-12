@@ -382,6 +382,18 @@ class TestChurchManagerForms(unittest.TestCase):
         from main_menu import MENU_CONTROLS
         self.assertIn("lblUsers", MENU_CONTROLS)
 
+    def test_report_designer_is_a_separately_protected_main_menu_action(self):
+        definition = next(iter(load_json(FORMS / "frmMain.json").values()))
+        control = definition["CONTROLS"]["lblReportDesigner"]
+        self.assertEqual(control["security"]["invoke"], "reports.design")
+        from main_menu import MENU_CONTROLS
+        self.assertIn("lblReportDesigner", MENU_CONTROLS)
+        source = (ROOT / "cm.py").read_text(encoding="utf-8-sig")
+        self.assertIn('case "lblReportDesigner":', source)
+        self.assertIn(
+            "open_directory_designer(authorization=context.authorization)", source
+        )
+
     def test_every_main_menu_action_declares_its_catalog_permission(self):
         from main_menu import MENU_CONTROLS
         from permission_catalog import MAIN_MENU_PERMISSIONS
@@ -726,18 +738,41 @@ class TestChurchManagerReportAssets(unittest.TestCase):
         function = load_function_without_importing(
             Path(r"C:\Users\Pastor\Documents\JSForm\fnReport.py"),
             "prepare_lime_report_template",
-            {"Path": Path, "re": re, "tempfile": tempfile},
+            {"Path": Path, "re": re, "tempfile": tempfile, "escape": lambda value: value},
         )
         with tempfile.TemporaryDirectory(prefix="lime_report_mode_") as folder:
             source = Path(folder) / "sample.lrxml"
-            original = '<databaseName Type="QString">ChurchDB</databaseName>'
+            original = (
+                '<databaseName Type="QString">ChurchDB</databaseName>'
+                '<host Type="QString">192.0.2.10</host>'
+            )
             source.write_text(original, encoding="utf-8")
             staged_name, temporary = function(source, "ChurchDBTest")
             staged = Path(staged_name)
             self.assertEqual(source.read_text(encoding="utf-8"), original)
-            self.assertIn(">ChurchDBTest</databaseName>", staged.read_text(encoding="utf-8"))
+            staged_text = staged.read_text(encoding="utf-8")
+            self.assertIn(">ChurchDBTest</databaseName>", staged_text)
+            self.assertIn(">localhost</host>", staged_text)
             self.assertIsNotNone(temporary)
             temporary.unlink(missing_ok=True)
+
+    def test_lime_report_production_staging_preserves_template_host(self):
+        function = load_function_without_importing(
+            Path(r"C:\Users\Pastor\Documents\JSForm\fnReport.py"),
+            "prepare_lime_report_template",
+            {"Path": Path, "re": re, "tempfile": tempfile, "escape": lambda value: value},
+        )
+        with tempfile.TemporaryDirectory(prefix="lime_report_mode_") as folder:
+            source = Path(folder) / "sample.lrxml"
+            original = (
+                '<databaseName Type="QString">ChurchDB</databaseName>'
+                '<host Type="QString">192.0.2.10</host>'
+            )
+            source.write_text(original, encoding="utf-8")
+            staged_name, temporary = function(source, "ChurchDB")
+            self.assertEqual(staged_name, str(source))
+            self.assertIsNone(temporary)
+            self.assertEqual(source.read_text(encoding="utf-8"), original)
 
     def test_report_patterns_are_well_formed_xml(self):
         files = sorted(REPORTS.glob("*.lrxml")) + sorted(REPORTS.glob("*.lrsml"))
@@ -750,6 +785,113 @@ class TestChurchManagerReportAssets(unittest.TestCase):
         files = sorted(REPORTS.glob("*.lrxml")) + sorted(REPORTS.glob("*.lrsml"))
         codes = [path.stem.casefold() for path in files]
         self.assertEqual(len(codes), len(set(codes)), "Duplicate ChurchManager report code")
+
+    def test_report_templates_do_not_regress_known_standardization_defects(self):
+        files = sorted(REPORTS.glob("*.lrxml")) + sorted(REPORTS.glob("*.lrsml"))
+        combined = "\n".join(
+            path.read_text(encoding="utf-8-sig") for path in files
+        )
+        for obsolete in (
+            "Purchaced",
+            "Atttendance",
+            'dateTimeFormat(now(),"d-MMM-yy hh:ssa")',
+            'dateTimeFormat(now(),"d-MMM-yy hh:ss a")',
+            'dateTimeFormat(now(),"dd-MMM-yy hh:ss a")',
+            "Life in Christ\n\nMember Directory",
+        ):
+            with self.subTest(obsolete=obsolete):
+                self.assertNotIn(obsolete, combined)
+
+        expected_codes = {
+            "CMAD01.lrsml": "CMAD01",
+            "CMAT02.lrxml": "CMAT02",
+            "CMPJ02.lrxml": "CMPJ02",
+        }
+        for filename, code in expected_codes.items():
+            with self.subTest(report=filename):
+                text = (REPORTS / filename).read_text(encoding="utf-8-sig")
+                self.assertIn('<content Type="QString">{}</content>'.format(code), text)
+
+    def test_church_form_exposes_database_logo_image_picker(self):
+        church = next(iter(load_json(FORMS / "frmChurch.json").values()))
+        logo = church["CONTROLS"]["Logo"]
+        self.assertEqual(logo["type"], "ImagePickerCtrl")
+        self.assertEqual(logo["name"], "Logo")
+        self.assertGreater(logo["maxbytes"], 0)
+
+
+class TestNonAccountingTestDataset(unittest.TestCase):
+    def test_safe_report_views_filter_unlisted_and_non_directory_records(self):
+        source = (ROOT / "migrations" / "017_add_nonaccounting_report_views.sql").read_text(
+            encoding="utf-8-sig"
+        )
+        for view in (
+            "rpt_person_contact", "rpt_person_address",
+            "rpt_family_contact", "rpt_family_address",
+        ):
+            start = source.index(f"VIEW {view}")
+            statement = source[start:source.index(";", start)]
+            with self.subTest(view=view):
+                self.assertIn("WHERE Unlisted=0", statement)
+        start = source.index("VIEW rpt_directory_family")
+        statement = source[start:source.index(";", start)]
+        self.assertIn("WHERE Directory=1", statement)
+
+    def test_seeder_is_local_test_only_and_excludes_accounting_writes(self):
+        source = (ROOT / "seed_nonaccounting_test_data.py").read_text(
+            encoding="utf-8-sig"
+        )
+        self.assertIn('database.casefold() != "churchdbtest"', source)
+        self.assertIn("LOCAL_HOSTS", source)
+        self.assertIn('parser.add_argument("--apply"', source)
+        self.assertIn("connection.rollback()", source)
+        self.assertNotIn("INSERT INTO tblAccounting", source)
+
+    def test_seeder_uses_fictional_church_logo_and_runtime_password_prompt(self):
+        source = (ROOT / "seed_nonaccounting_test_data.py").read_text(
+            encoding="utf-8-sig"
+        )
+        self.assertIn('CHURCH_NAME = "Reformation Lutheran Church"', source)
+        self.assertIn("Reformation-Lutheran-Church-Test-Logo.png", source)
+        self.assertIn("getpass.getpass", source)
+        self.assertNotIn("Password123", source)
+
+    def test_report_permission_migration_categorizes_every_current_report(self):
+        source = (ROOT / "migrations" / "015_add_report_permissions.sql").read_text(
+            encoding="utf-8-sig"
+        )
+        self.assertIn("RequiredPermissionID", source)
+        self.assertIn("fk_reports_required_permission", source)
+        self.assertIn("ALTER TABLE tblReports MODIFY RequiredPermissionID", source)
+        for code in (
+            "CMAS01", "CMAT01", "CMBATCH00", "CMDO01", "CMEN01",
+            "CMHU01", "CMHU02", "CMHU03", "CMHU04", "CMJR01",
+            "CMMD01", "CMMI01", "CMMI02", "CMMI03", "CMML01",
+            "CMML02", "CMPA01", "CMPE01", "CMPH02", "CMPJ01",
+            "CMPJ02", "CMPJ03", "CMPJ04", "CMPR01", "CMRP01",
+            "CMSM01", "CMWP01", "CMWS01",
+        ):
+            with self.subTest(report=code):
+                self.assertIn("'{}'".format(code), source)
+
+    def test_report_category_roles_can_open_the_report_picker(self):
+        source = (
+            ROOT / "migrations" / "016_grant_report_screen_access.sql"
+        ).read_text(encoding="utf-8-sig")
+        self.assertIn("p.Name='reports.run'", source)
+        for role in ("Master Administrator", "Pastor/Staff", "Volunteer", "Auditor"):
+            self.assertIn("'{}'".format(role), source)
+
+    def test_report_screen_uses_compact_explicit_layout(self):
+        report_form = next(iter(load_json(FORMS / "frmReports.json").values()))
+        form = report_form["FORM"]
+        controls = report_form["CONTROLS"]
+        self.assertEqual(form["layout"]["type"], "responsive")
+        self.assertEqual(controls["ChurchID"]["value"], "Reformation Lutheran Church")
+        self.assertLessEqual(controls["ChurchID"]["sizech"][1], 2)
+        self.assertGreaterEqual(controls["ParameterBox"]["sizech"][1], 24)
+        self.assertEqual(controls["ParameterBox"]["layout"]["column_span"], 2)
+        self.assertEqual(controls["btnRun"]["layout"]["row"], 3)
 
 
 if __name__ == "__main__":

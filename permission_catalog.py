@@ -22,6 +22,7 @@ MAIN_MENU_PERMISSIONS = {
     "lblAnnouncement": "ministry.manage",
     "lblJournal": "ministry.manage",
     "lblReports": "reports.run",
+    "lblReportDesigner": "reports.design",
     "lblGenerateOS": "worship.manage",
     "lblNotifyParticipants": "worship.manage",
     "lblSundayPrayers": "worship.manage",

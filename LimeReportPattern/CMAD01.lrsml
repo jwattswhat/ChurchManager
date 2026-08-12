@@ -413,7 +413,7 @@
                   <itemLocation Type="enumAndFlags" Value="0"/>
                   <stretchToMaxHeight Type="bool" Value="0"/>
                   <itemAlign Type="enumAndFlags" Value="4"/>
-                  <content Type="QString">CMPH02</content>
+                  <content Type="QString">CMAD01</content>
                   <margin Type="int" Value="4"/>
                   <alignment Type="enumAndFlags" Value="33"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
@@ -503,7 +503,7 @@
                   <itemLocation Type="enumAndFlags" Value="0"/>
                   <stretchToMaxHeight Type="bool" Value="0"/>
                   <itemAlign Type="enumAndFlags" Value="4"/>
-                  <content Type="QString">$S{dateTimeFormat(now(),"d-MMM-yy hh:ssa")}</content>
+                  <content Type="QString">$S{dateTimeFormat(now(),"d-MMM-yy hh:mm a")}</content>
                   <margin Type="int" Value="4"/>
                   <alignment Type="enumAndFlags" Value="34"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
@@ -780,9 +780,9 @@
           <objectName Type="QString"></objectName>
           <name Type="QString">ChurchDB</name>
           <driver Type="QString">QMYSQL</driver>
-          <databaseName Type="QString">ChurchDB</databaseName>
-          <userName Type="QString">church</userName>
-          <password Type="QString" Value="dJlfSRL7RII="/>
+          <databaseName Type="QString"></databaseName>
+          <userName Type="QString"></userName>
+          <password Type="QString" Value=""/>
           <host Type="QString"></host>
           <autoconnect Type="bool" Value="1"/>
           <keepDBCredentials Type="bool" Value="1"/>
@@ -793,13 +793,13 @@
         <item ClassName="LimeReport::QueryDesc" Type="Object">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">church</queryName>
-          <queryText Type="QString">SELECT * FROM tblChurch WHERE ID = $V{churchID};</queryText>
+          <queryText Type="QString">SELECT * FROM rpt_church_identity WHERE ID = $V{churchID};</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
         </item>
         <item ClassName="LimeReport::QueryDesc" Type="Object">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">person</queryName>
-          <queryText Type="QString">SELECT DISTINCT LastName FROM tblperson
+          <queryText Type="QString">SELECT DISTINCT LastName FROM rpt_membership_person
 WHERE ChurchID = $V{churchID} AND Member =  1
 ORDER BY LastName;</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
@@ -810,8 +810,8 @@ ORDER BY LastName;</queryText>
           <objectName Type="QString"></objectName>
           <queryName Type="QString">phonenumber</queryName>
           <queryText Type="QString">SELECT P.FamilyID, P.LastName, P.FirstName, P.Member, C.Type, C.ContactLabel, C.Contact, C.Unlisted 
-FROM tblPersonContact AS C
-LEFT JOIN tblPerson AS P ON P.ID = C.PersonID
+FROM rpt_person_contact AS C
+LEFT JOIN rpt_membership_person AS P ON P.ID = C.PersonID
 WHERE (P.LastName = $D{person.LastName} AND Unlisted = 0) AND P.ChurchID = $V{churchID}
 ORDER BY P.FirstName, C.Type</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
@@ -832,8 +832,8 @@ ORDER BY P.FirstName, C.Type</queryText>
 	A.State,
 	A.Zip, 
 	A.Unlisted 
-FROM tblPersonAddress AS A
-LEFT JOIN tblPerson AS P
+FROM rpt_person_address AS A
+LEFT JOIN rpt_membership_person AS P
 	ON P.ID = A.PersonID
 WHERE (P.LastName = $D{person.LastName} AND A.Unlisted = 0)
 ORDER BY P.FirstName, A.AddressLabel
@@ -854,8 +854,8 @@ ORDER BY P.FirstName, A.AddressLabel
 	A.State, 
 	A.Zip, 
 	A.Unlisted
-FROM tblFamilyAddress AS A
-LEFT JOIN tblFamily AS F
+FROM rpt_family_address AS A
+LEFT JOIN rpt_directory_family AS F
 	ON F.ID = A.FamilyID
 WHERE INSTR(F.FamilyName, $D{Person.LastName})  AND A.Unlisted = 0
 
@@ -872,8 +872,8 @@ WHERE INSTR(F.FamilyName, $D{Person.LastName})  AND A.Unlisted = 0
 	C.ContactLabel, 
 	C.Contact, 
 	C.Unlisted 
-FROM tblFamilyContact AS C
-LEFT JOIN tblFamily AS F 
+FROM rpt_family_contact AS C
+LEFT JOIN rpt_directory_family AS F 
 	ON F.ID = C.FamilyID
 WHERE INSTR(F.FamilyName, $D{Person.LastName}) AND C.Unlisted = 0 AND F.Directory=True
 ORDER BY F.FamilyName</queryText>

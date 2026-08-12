@@ -483,7 +483,7 @@ else
                   <itemLocation Type="enumAndFlags" Value="0"/>
                   <stretchToMaxHeight Type="bool" Value="0"/>
                   <itemAlign Type="enumAndFlags" Value="4"/>
-                  <content Type="QString">Purchaced</content>
+                  <content Type="QString">Purchased</content>
                   <margin Type="int" Value="4"/>
                   <alignment Type="enumAndFlags" Value="33"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
@@ -1055,10 +1055,10 @@ else
           <objectName Type="QString"></objectName>
           <name Type="QString">ChurchDB</name>
           <driver Type="QString">QMYSQL</driver>
-          <databaseName Type="QString">ChurchDB</databaseName>
-          <userName Type="QString">church</userName>
-          <password Type="QString" Value="dJlfSRL7RII="/>
-          <host Type="QString">192.168.3.200</host>
+          <databaseName Type="QString"></databaseName>
+          <userName Type="QString"></userName>
+          <password Type="QString" Value=""/>
+          <host Type="QString"></host>
           <autoconnect Type="bool" Value="1"/>
           <keepDBCredentials Type="bool" Value="1"/>
           <port Type="int" Value="-1"/>
@@ -1068,14 +1068,14 @@ else
         <item Type="Object" ClassName="LimeReport::QueryDesc">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">Church</queryName>
-          <queryText Type="QString">SELECT * FROM tblChurch 
+          <queryText Type="QString">SELECT * FROM rpt_church_identity 
 WHERE ID = $V{ChurchID};</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
         </item>
         <item Type="Object" ClassName="LimeReport::QueryDesc">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">Asset</queryName>
-          <queryText Type="QString">SELECT * FROM tblAsset
+          <queryText Type="QString">SELECT * FROM rpt_asset
 WHERE ChurchID = $V{ChurchID};</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
         </item>

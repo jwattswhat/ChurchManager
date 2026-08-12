@@ -838,7 +838,7 @@ else
                   <itemLocation Type="enumAndFlags" Value="0"/>
                   <stretchToMaxHeight Type="bool" Value="0"/>
                   <itemAlign Type="enumAndFlags" Value="4"/>
-                  <content Type="QString">$S{dateTimeFormat(now(),"d-MMM-yy hh:ss a")}</content>
+                  <content Type="QString">$S{dateTimeFormat(now(),"d-MMM-yy hh:mm a")}</content>
                   <margin Type="int" Value="4"/>
                   <alignment Type="enumAndFlags" Value="130"/>
                   <autoWidth Type="enumAndFlags" Value="0"/>
@@ -2458,10 +2458,10 @@ else
           <objectName Type="QString"></objectName>
           <name Type="QString">ChurchDB</name>
           <driver Type="QString">QMYSQL</driver>
-          <databaseName Type="QString">ChurchDB</databaseName>
-          <userName Type="QString">church</userName>
-          <password Type="QString" Value="dJlfSRL7RII="/>
-          <host Type="QString">192.168.3.200</host>
+          <databaseName Type="QString"></databaseName>
+          <userName Type="QString"></userName>
+          <password Type="QString" Value=""/>
+          <host Type="QString"></host>
           <autoconnect Type="bool" Value="1"/>
           <keepDBCredentials Type="bool" Value="1"/>
           <port Type="int" Value="-1"/>
@@ -2471,21 +2471,21 @@ else
         <item ClassName="LimeReport::QueryDesc" Type="Object">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">church</queryName>
-          <queryText Type="QString">SELECT * FROM tblChurch WHERE ID = $V{ChurchID};</queryText>
+          <queryText Type="QString">SELECT * FROM rpt_church_identity WHERE ID = $V{ChurchID};</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
         </item>
         <item ClassName="LimeReport::QueryDesc" Type="Object">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">sermon</queryName>
-          <queryText Type="QString">SELECT sr.Sermon FROM tblSermon AS sr
-INNER JOIN tblService AS s
+          <queryText Type="QString">SELECT sr.Sermon FROM rpt_sermon AS sr
+INNER JOIN rpt_service AS s
 ON sr.ID = s.SermonID AND s.ID = $V{ServiceID};</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
         </item>
         <item ClassName="LimeReport::QueryDesc" Type="Object">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">service</queryName>
-          <queryText Type="QString">SELECT * FROM tblService WHERE ID = $V{ServiceID} AND ChurchID = $V{ChurchID};</queryText>
+          <queryText Type="QString">SELECT * FROM rpt_service WHERE ID = $V{ServiceID} AND ChurchID = $V{ChurchID};</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
         </item>
       </queries>
@@ -2494,8 +2494,8 @@ ON sr.ID = s.SermonID AND s.ID = $V{ServiceID};</queryText>
           <objectName Type="QString"></objectName>
           <queryName Type="QString">propers</queryName>
           <queryText Type="QString">SELECT p.* 
-FROM tblPropers AS p
-INNER JOIN tblService as s 
+FROM rpt_propers AS p
+INNER JOIN rpt_service as s 
 ON p.ID = $D{service.PropersID};
 </queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
@@ -2504,8 +2504,8 @@ ON p.ID = $D{service.PropersID};
         <item ClassName="LimeReport::SubQueryDesc" Type="Object">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">hymnusage</queryName>
-          <queryText Type="QString">SELECT u.UsedAs, h.Hymn, h.Title, u.Note FROM tblHymnUsage as u
-INNER JOIN tblHymn as h 
+          <queryText Type="QString">SELECT u.UsedAs, h.Hymn, h.Title, u.Note FROM rpt_hymn_usage as u
+INNER JOIN rpt_hymn as h 
 ON u.HymnID=h.ID and u.ServiceID = $D{service.ID};</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
           <master Type="QString">service</master>
@@ -2513,8 +2513,8 @@ ON u.HymnID=h.ID and u.ServiceID = $D{service.ID};</queryText>
         <item ClassName="LimeReport::SubQueryDesc" Type="Object">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">reading</queryName>
-          <queryText Type="QString">SELECT r.* FROM tblReading AS r 
-INNER JOIN tblPropers AS p
+          <queryText Type="QString">SELECT r.* FROM rpt_reading AS r 
+INNER JOIN rpt_propers AS p
 on  $D{service.PropersID} = p.ID AND r.PropersID = p.ID;</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
           <master Type="QString">service</master>
@@ -2522,7 +2522,7 @@ on  $D{service.PropersID} = p.ID AND r.PropersID = p.ID;</queryText>
         <item ClassName="LimeReport::SubQueryDesc" Type="Object">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">altreading</queryName>
-          <queryText Type="QString">SELECT * FROM tblAltReading
+          <queryText Type="QString">SELECT * FROM rpt_alt_reading
 WHERE ServiceID = $D{service.ID};</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
           <master Type="QString">service</master>
@@ -2531,8 +2531,8 @@ WHERE ServiceID = $D{service.ID};</queryText>
           <objectName Type="QString"></objectName>
           <queryName Type="QString">servicerole</queryName>
           <queryText Type="QString">SELECT sr.ServiceID, p.Name, sr.Role
-FROM tblServiceRole as sr
-INNER JOIN tblParticipant as p
+FROM rpt_service_role as sr
+INNER JOIN rpt_participant as p
 ON sr.ParticipantID = p.ID
 WHERE sr.ServiceID = $V{ServiceID};</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>

@@ -38,12 +38,24 @@ class TestBackupService(unittest.TestCase):
 
 class TestReportService(unittest.TestCase):
     def test_catalog_reports_stay_on_jsform(self):
+        checked = []
         class JSFormStub:
             @staticmethod
             def RunReport(*arguments):
                 return arguments
-        service = ChurchManagerReportService(JSFormStub, object())
-        self.assertEqual(service.run_catalog_report(7, "form", "connection"), (7, "form", "connection"))
+        class AccessStub:
+            @staticmethod
+            def require_report(report_id):
+                checked.append(report_id)
+        settings = {"database": "ChurchDBTest"}
+        service = ChurchManagerReportService(
+            JSFormStub, object(), AccessStub(), connection_settings=settings
+        )
+        self.assertEqual(
+            service.run_catalog_report(7, "form", "connection"),
+            (7, "form", "connection", settings),
+        )
+        self.assertEqual(checked, [7])
 
 
 if __name__ == "__main__":

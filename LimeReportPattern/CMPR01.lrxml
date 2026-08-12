@@ -214,7 +214,7 @@
                   <itemLocation Value="0" Type="enumAndFlags"/>
                   <stretchToMaxHeight Value="0" Type="bool"/>
                   <itemAlign Value="4" Type="enumAndFlags"/>
-                  <content Type="QString">$S{dateTimeFormat(now(),"d-MMM-yy hh:ss a")}</content>
+                  <content Type="QString">$S{dateTimeFormat(now(),"d-MMM-yy hh:mm a")}</content>
                   <margin Value="4" Type="int"/>
                   <alignment Value="34" Type="enumAndFlags"/>
                   <autoWidth Value="0" Type="enumAndFlags"/>
@@ -1329,9 +1329,9 @@ else
           <objectName Type="QString"></objectName>
           <name Type="QString">ChurchDB</name>
           <driver Type="QString">QMYSQL</driver>
-          <databaseName Type="QString">ChurchDB</databaseName>
-          <userName Type="QString">church</userName>
-          <password Value="dJlfSRL7RII=" Type="QString"/>
+          <databaseName Type="QString"></databaseName>
+          <userName Type="QString"></userName>
+          <password Value="" Type="QString"/>
           <host Type="QString"></host>
           <autoconnect Value="1" Type="bool"/>
           <keepDBCredentials Value="1" Type="bool"/>
@@ -1342,21 +1342,21 @@ else
         <item ClassName="LimeReport::QueryDesc" Type="Object">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">OfficeVisit</queryName>
-          <queryText Type="QString">SELECT COUNT(ID) FROM tblAttendanceEvent
+          <queryText Type="QString">SELECT COUNT(ID) FROM rpt_attendance_event
 WHERE AttendanceType = "Visit" AND Description LIKE "%Office Visit%";</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
         </item>
         <item ClassName="LimeReport::QueryDesc" Type="Object">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">hospitalvisits</queryName>
-          <queryText Type="QString">SELECT COUNT(ID) FROM tblAttendanceEvent
+          <queryText Type="QString">SELECT COUNT(ID) FROM rpt_attendance_event
 WHERE AttendanceType = "Visit" AND Description = "Hospital Visit";</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
         </item>
         <item ClassName="LimeReport::QueryDesc" Type="Object">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">homevisit</queryName>
-          <queryText Type="QString">SELECT COUNT(ID) FROM tblAttendanceEvent
+          <queryText Type="QString">SELECT COUNT(ID) FROM rpt_attendance_event
 WHERE AttendanceType = "Visit" AND Description LIKE "%Home Visit%"
 
 </queryText>
@@ -1367,12 +1367,12 @@ WHERE AttendanceType = "Visit" AND Description LIKE "%Home Visit%"
           <queryName Type="QString">personatteneance</queryName>
           <queryText Type="QString">SELECT 
 COUNT(DISTINCT a.PersonID) AS people
-FROM tblAttendance AS a
-LEFT JOIN tblPerson AS p
+FROM rpt_attendance AS a
+LEFT JOIN rpt_membership_person AS p
 ON p.ID = a.PersonID
-LEFT JOIN tblAttendanceEvent AS ae
+LEFT JOIN rpt_attendance_event AS ae
 ON ae.ID = a.AttendanceEventID
-LEFT JOIN tblService AS s
+LEFT JOIN rpt_service AS s
 ON s.ID = ae.ServiceID
 WHERE ae.ChurchID = $V{ChurchID}
 AND p.Member = 1
@@ -1385,7 +1385,7 @@ AND (IF(ae.DateTime=NULL,ae.DateTime,s.DateTime) BETWEEN $V{StartDate} AND $V{En
           <objectName Type="QString"></objectName>
           <queryName Type="QString">services</queryName>
           <queryText Type="QString">SELECT COUNT(*)
-FROM tblService
+FROM rpt_service
 WHERE ChurchID = $V{ChurchID}
 AND DateTime BETWEEN $V{StartDate} AND $V{EndDate}
 </queryText>
@@ -1395,7 +1395,7 @@ AND DateTime BETWEEN $V{StartDate} AND $V{EndDate}
           <objectName Type="QString"></objectName>
           <queryName Type="QString">communionservices</queryName>
           <queryText Type="QString">SELECT SUM(HolyCommunion) 
-FROM tblService
+FROM rpt_service
 WHERE ChurchID = $V{ChurchID}
 AND DateTime BETWEEN $V{StartDate} AND $V{EndDate}
 
@@ -1405,7 +1405,7 @@ AND DateTime BETWEEN $V{StartDate} AND $V{EndDate}
         <item ClassName="LimeReport::QueryDesc" Type="Object">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">church</queryName>
-          <queryText Type="QString">SELECT * FROM tblChurch WHERE ID = $V{ChurchID};</queryText>
+          <queryText Type="QString">SELECT * FROM rpt_church_identity WHERE ID = $V{ChurchID};</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
         </item>
       </queries>
@@ -1414,7 +1414,7 @@ AND DateTime BETWEEN $V{StartDate} AND $V{EndDate}
           <objectName Type="QString"></objectName>
           <queryName Type="QString">journal</queryName>
           <queryText Type="QString">SELECT *
-FROM tblJournal
+FROM rpt_journal
 WHERE ChurchID = $D{church.ID}
 AND (Startdate BETWEEN $V{StartDate} AND $V{EndDate})
 OR (EndDate BETWEEN $V{StartDate} AND $V{EndDate});</queryText>

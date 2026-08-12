@@ -160,7 +160,7 @@
                   <itemAlign Value="4" Type="enumAndFlags"/>
                   <content Type="QString">$S{dateTimeFormat(
 $D{usage.DateTime},
-"dd-MMM-yy hh:ss a")}</content>
+"dd-MMM-yy hh:mm a")}</content>
                   <margin Value="4" Type="int"/>
                   <alignment Value="33" Type="enumAndFlags"/>
                   <autoWidth Value="0" Type="enumAndFlags"/>
@@ -647,10 +647,10 @@ $D{usage.DateTime},
           <objectName Type="QString"></objectName>
           <name Type="QString">churchdb</name>
           <driver Type="QString">QMYSQL</driver>
-          <databaseName Type="QString">ChurchDB</databaseName>
-          <userName Type="QString">church</userName>
-          <password Value="dJlfSRL7RII=" Type="QString"/>
-          <host Type="QString">192.168.3.200</host>
+          <databaseName Type="QString"></databaseName>
+          <userName Type="QString"></userName>
+          <password Value="" Type="QString"/>
+          <host Type="QString"></host>
           <autoconnect Value="1" Type="bool"/>
           <keepDBCredentials Value="1" Type="bool"/>
           <port Value="-1" Type="int"/>
@@ -661,8 +661,8 @@ $D{usage.DateTime},
           <objectName Type="QString"></objectName>
           <queryName Type="QString">hymn</queryName>
           <queryText Type="QString">SELECT UNIQUE(Hymn), h.ID, Title
-FROM tblHymnUsage as u
-INNER JOIN tblHymn as h 
+FROM rpt_hymn_usage as u
+INNER JOIN rpt_hymn as h 
 ON h.ID = u.HymnID
 WHERE h.ID = $V{HymnID}
 ORDER BY Hymn;</queryText>
@@ -671,7 +671,7 @@ ORDER BY Hymn;</queryText>
         <item ClassName="LimeReport::QueryDesc" Type="Object">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">service</queryName>
-          <queryText Type="QString">SELECT * FROM tblService WHERE ChurchID = $V{ChurchID};</queryText>
+          <queryText Type="QString">SELECT * FROM rpt_service WHERE ChurchID = $V{ChurchID};</queryText>
           <connectionName Type="QString">churchdb</connectionName>
         </item>
       </queries>
@@ -680,10 +680,10 @@ ORDER BY Hymn;</queryText>
           <objectName Type="QString"></objectName>
           <queryName Type="QString">usage</queryName>
           <queryText Type="QString">SELECT Hymn, Title, UsedAs,  ServiceID, s.DateTime
-FROM tblHymnUsage as u
-INNER JOIN tblHymn as h 
+FROM rpt_hymn_usage as u
+INNER JOIN rpt_hymn as h 
 ON h.ID = u.HymnID
-INNER JOIN tblService as s
+INNER JOIN rpt_service as s
 ON  s.ID = u.ServiceID
 WHERE Hymn = $D{hymn.Hymn}
 ORDER BY Hymn;</queryText>

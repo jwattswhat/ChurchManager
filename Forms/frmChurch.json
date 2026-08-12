@@ -238,6 +238,29 @@
                     8
                 ],
                 "tooltip": "Enter the note. Multiple lines are allowed."
+            },
+            "lblLogo": {
+                "name": "lblLogo",
+                "type": "StaticText",
+                "label": "Report logo:",
+                "posch": [
+                    1,
+                    28
+                ]
+            },
+            "Logo": {
+                "name": "Logo",
+                "type": "ImagePickerCtrl",
+                "posch": [
+                    8,
+                    28
+                ],
+                "sizech": [
+                    22,
+                    10
+                ],
+                "maxbytes": 5242880,
+                "tooltip": "Choose the church logo printed on reports. PNG or JPEG is recommended."
             }
         }
     }

@@ -34,7 +34,7 @@
                   <itemLocation Value="0" Type="enumAndFlags"/>
                   <stretchToMaxHeight Value="0" Type="bool"/>
                   <itemAlign Value="4" Type="enumAndFlags"/>
-                  <content Type="QString">CMAT01</content>
+                  <content Type="QString">CMAT02</content>
                   <margin Value="4" Type="int"/>
                   <alignment Value="33" Type="enumAndFlags"/>
                   <autoWidth Value="0" Type="enumAndFlags"/>
@@ -1245,7 +1245,7 @@ $D{weeklyattendance.HandCount},"WeeklyAttendance")},"f",0)
                   <itemLocation Value="0" Type="enumAndFlags"/>
                   <stretchToMaxHeight Value="0" Type="bool"/>
                   <itemAlign Value="4" Type="enumAndFlags"/>
-                  <content Type="QString">Total Atttendance</content>
+                  <content Type="QString">Total Attendance</content>
                   <margin Value="4" Type="int"/>
                   <alignment Value="34" Type="enumAndFlags"/>
                   <autoWidth Value="0" Type="enumAndFlags"/>
@@ -1841,10 +1841,10 @@ MAX($D{weeklyattendance.HandCount},"WeeklyAttendance")},"f",0)
           <objectName Type="QString"></objectName>
           <name Type="QString">ChurchDB</name>
           <driver Type="QString">QMYSQL</driver>
-          <databaseName Type="QString">ChurchDB</databaseName>
-          <userName Type="QString">church</userName>
-          <password Value="dJlfSRL7RII=" Type="QString"/>
-          <host Type="QString">192.168.3.200</host>
+          <databaseName Type="QString"></databaseName>
+          <userName Type="QString"></userName>
+          <password Value="" Type="QString"/>
+          <host Type="QString"></host>
           <autoconnect Value="1" Type="bool"/>
           <keepDBCredentials Value="1" Type="bool"/>
           <port Value="-1" Type="int"/>
@@ -1854,14 +1854,14 @@ MAX($D{weeklyattendance.HandCount},"WeeklyAttendance")},"f",0)
         <item ClassName="LimeReport::QueryDesc" Type="Object">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">church</queryName>
-          <queryText Type="QString">SELECT * FROM tblChurch WHERE ID = $V{ChurchID};</queryText>
+          <queryText Type="QString">SELECT * FROM rpt_church_identity WHERE ID = $V{ChurchID};</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
         </item>
         <item ClassName="LimeReport::QueryDesc" Type="Object">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">weeklyattendance</queryName>
-          <queryText Type="QString">select s.datetime, s.Location, s.LiturgicalDate, s.holycommunion, e.AttendanceType, e.HandCount, e.HandCountCommunion from tblService as s
-join tblAttendanceEvent as e on s.ID = e.ServiceID
+          <queryText Type="QString">select s.datetime, s.Location, s.LiturgicalDate, s.holycommunion, e.AttendanceType, e.HandCount, e.HandCountCommunion from rpt_service as s
+join rpt_attendance_event as e on s.ID = e.ServiceID
 where (s.ChurchID = $V{ChurchID})
 	and (($V{Location} = "All") or (s.Location = $V{Location}))
 	and (s.datetime between "2022-12-31" and "2024-01-01")

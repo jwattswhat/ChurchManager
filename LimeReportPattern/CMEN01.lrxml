@@ -827,10 +827,10 @@ else
           <objectName Type="QString"></objectName>
           <name Type="QString">ChurchDB</name>
           <driver Type="QString">QMYSQL</driver>
-          <databaseName Type="QString">ChurchDB</databaseName>
-          <userName Type="QString">church</userName>
-          <password Type="QString" Value="dJlfSRL7RII="/>
-          <host Type="QString">192.168.3.200</host>
+          <databaseName Type="QString"></databaseName>
+          <userName Type="QString"></userName>
+          <password Type="QString" Value=""/>
+          <host Type="QString"></host>
           <autoconnect Type="bool" Value="1"/>
           <keepDBCredentials Type="bool" Value="1"/>
           <port Type="int" Value="-1"/>
@@ -840,7 +840,7 @@ else
         <item Type="Object" ClassName="LimeReport::QueryDesc">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">complete</queryName>
-          <queryText Type="QString">SELECT UNIQUE Complete FROM tblEnhancement ORDER BY Complete;</queryText>
+          <queryText Type="QString">SELECT UNIQUE Complete FROM rpt_enhancement ORDER BY Complete;</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
         </item>
       </queries>
@@ -848,7 +848,7 @@ else
         <item Type="Object" ClassName="LimeReport::SubQueryDesc">
           <objectName Type="QString"></objectName>
           <queryName Type="QString">enhancement</queryName>
-          <queryText Type="QString">SELECT * FROM tblEnhancement WHERE Complete = $D{complete.Complete} ORDER BY Priority, CompleteDate</queryText>
+          <queryText Type="QString">SELECT * FROM rpt_enhancement WHERE Complete = $D{complete.Complete} ORDER BY Priority, CompleteDate</queryText>
           <connectionName Type="QString">ChurchDB</connectionName>
           <master Type="QString">complete</master>
         </item>

@@ -728,7 +728,7 @@ def printmessage(
 
 
 print("\nChecking forms for Errors\n")
-DB = clsDB.clsDB("localhost", "ChurchDB", "church", "Church99")
+DB = clsDB.clsDB("localhost", "ChurchDB", "church", None)
 DBConnection = mysql.connector.connect(**DB.DB)
 CONFIG.set_Config_DBConnection(DBConnection)
 

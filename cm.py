@@ -20,6 +20,8 @@ from permission_catalog import MAIN_MENU_PERMISSIONS
 from backup_service import BackupError, BackupService
 from process_service import ProcessService
 from report_service import ChurchManagerReportService
+from report_access import ReportAccessService
+from visual_reports.designer import open_directory_designer
 from user_admin import show_user_administration
 from accounting.setup_dialog import show_accounting_setup
 from accounting.draft_dialog import show_accounting_draft_entry
@@ -466,12 +468,16 @@ def _buttonclick(event):
             return
         case "lblReports":
             frm = context.form_factory.create("frmReports", ["Close"])
+            context.services.reports.configure_catalog_picker(frm.CONTROLID["ReportID"])
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runReports)
             frm.disable_all_buttons()
             frm.enable_button("ReportID")
             frm.enable_button("btnRun")
             frm.enable_button("btnClose")
             frm.show()
+            return
+        case "lblReportDesigner":
+            open_directory_designer(authorization=context.authorization)
             return
         case "lblBackupDB":
             _runBackupDB()
@@ -578,7 +584,11 @@ def main(argv=None):
     context.services = SimpleNamespace(
         processes=processes,
         backups=BackupService(),
-        reports=ChurchManagerReportService(JSForm, processes),
+        reports=ChurchManagerReportService(
+            JSForm, processes,
+            ReportAccessService(context.connection, context.authorization),
+            connection_settings=context.settings,
+        ),
     )
 
     for control_name in MENU_CONTROLS:
