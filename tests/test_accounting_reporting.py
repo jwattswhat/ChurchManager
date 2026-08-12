@@ -10,6 +10,9 @@ from authorization import AuthorizationDenied
 from accounting.reporting import (
     AccountingVisualReportService, ACTIVITIES_CONTRACT, ACTIVITIES_MANIFEST,
     ActivitiesDatasetProvider, FUND_CONTRACT, FUND_MANIFEST, FundDatasetProvider,
+    FUNCTIONAL_CONTRACT, FUNCTIONAL_MANIFEST, FunctionalExpenseDatasetProvider,
+    ADOPTED_BUDGET_CONTRACT, ADOPTED_BUDGET_MANIFEST,
+    BUDGET_ACTUAL_CONTRACT, BUDGET_ACTUAL_MANIFEST, BudgetDatasetProvider,
     POSITION_CONTRACT, POSITION_MANIFEST, FinancialPositionDatasetProvider,
     TRIAL_BALANCE_CONTRACT, TRIAL_BALANCE_MANIFEST, TrialBalanceDatasetProvider,
 )
@@ -96,6 +99,38 @@ class FundService:
                  Decimal("50"),Decimal("25"),Decimal("0"),Decimal("5"),Decimal("130"))]
 
 
+class FunctionalService:
+    @staticmethod
+    def report(organization_id,date_from,date_to):
+        return {"functions":[(1,"Worship"),(2,"Education")],
+                "rows":[("5000","Supplies",[Decimal("125"),Decimal("25")],Decimal("150"))],
+                "totals":[Decimal("125"),Decimal("25")],"grand_total":Decimal("150")}
+
+
+class BudgetCursor(Cursor):
+    def execute(self,sql,values=()):
+        self.executed.append((sql,values));self.sql=sql
+    def fetchone(self):
+        if "tblAccountingBudget" in self.sql:
+            return (1,"Ministry Budget","2027",12,"December","DETAILED")
+        return super().fetchone()
+
+
+class BudgetConnection(Connection):
+    def cursor(self):
+        cursor=BudgetCursor(self.identity);self.cursors.append(cursor);return cursor
+
+
+class BudgetActualServiceStub:
+    @staticmethod
+    def report(budget_id,period_id):
+        return {"mode":"DETAILED","rows":[
+            ("5000 - Ministry","GEN - General","Worship",Decimal("100"),Decimal("75"),
+             Decimal("25"),Decimal("75.0"),Decimal("1200"),Decimal("900"),Decimal("300"),Decimal("75.0"))],
+            "details":[("January","5000 - Ministry","GEN - General","Worship",
+                        "Altar supplies",Decimal("100"),"Annual plan")]}
+
+
 class Session:
     display_name = "Jonathan Watt"
 
@@ -179,6 +214,9 @@ class TestAccountingVisualReports(unittest.TestCase):
             ("ACCT-FP",POSITION_CONTRACT,POSITION_MANIFEST),
             ("ACCT-ACT",ACTIVITIES_CONTRACT,ACTIVITIES_MANIFEST),
             ("ACCT-FUND",FUND_CONTRACT,FUND_MANIFEST),
+            ("ACCT-FUNC",FUNCTIONAL_CONTRACT,FUNCTIONAL_MANIFEST),
+            ("ACCT-BVA",BUDGET_ACTUAL_CONTRACT,BUDGET_ACTUAL_MANIFEST),
+            ("ACCT-BUD",ADOPTED_BUDGET_CONTRACT,ADOPTED_BUDGET_MANIFEST),
         ):
             definition=loader.load(root / f"{code}.json")
             self.assertEqual(definition.dataset_name,contract.name)
@@ -210,6 +248,29 @@ class TestAccountingVisualReports(unittest.TestCase):
         self.assertEqual(totals["Beginning"],Decimal("100"))
         self.assertEqual(totals["Ending"],Decimal("130"))
 
+    def test_functional_expense_dataset_flattens_dynamic_matrix_values(self):
+        dataset=FunctionalExpenseDatasetProvider(
+            Connection(),Authorization(),FunctionalService(),
+        ).build(1,date(2027,1,1),date(2027,8,12))
+        self.assertEqual([row["Function"] for row in dataset.collections["records"]],
+                         ["Worship","Education"])
+        self.assertEqual(dataset.collections["totals"][0]["GrandTotal"],Decimal("150"))
+
+    def test_budget_dataset_keeps_general_summary_and_optional_details(self):
+        provider=BudgetDatasetProvider(BudgetConnection(),Authorization(),BudgetActualServiceStub())
+        dataset=provider.build(3,12)
+        self.assertEqual(dataset.collections["parameters"][0]["Mode"],"DETAILED")
+        self.assertTrue(dataset.collections["parameters"][0]["ShowDetails"])
+        self.assertEqual(dataset.collections["summary"][0]["YTDVariance"],Decimal("300"))
+        self.assertEqual(dataset.collections["details"][0]["LineItem"],"Altar supplies")
+
+    def test_budget_summary_columns_fit_printable_landscape_width(self):
+        root=Path(__file__).parents[1]/"accounting"/"report_definitions"
+        for code in ("ACCT-BVA","ACCT-BUD"):
+            definition=JSForm.ReportDefinitionLoader().load(root/f"{code}.json")
+            columns=definition.controls["Records"]["columns"]
+            self.assertEqual(sum(column["width"] for column in columns),720)
+
     def test_core_statement_starters_render_to_pdf(self):
         root=Path(__file__).parents[1]/"accounting"/"report_definitions"
         providers=(
@@ -219,6 +280,10 @@ class TestAccountingVisualReports(unittest.TestCase):
              (1,date(2027,1,1),date(2027,8,12))),
             ("ACCT-FUND",FundDatasetProvider(Connection(),Authorization(),FundService()),
              (1,date(2027,1,1),date(2027,8,12))),
+            ("ACCT-FUNC",FunctionalExpenseDatasetProvider(Connection(),Authorization(),FunctionalService()),
+             (1,date(2027,1,1),date(2027,8,12))),
+            ("ACCT-BVA",BudgetDatasetProvider(BudgetConnection(),Authorization(),BudgetActualServiceStub()),
+             (3,12)),
         )
         with tempfile.TemporaryDirectory() as folder:
             for code,provider,arguments in providers:

@@ -71,6 +71,39 @@ def definition(code, title, dataset, columns, totals, orientation="landscape"):
     return {code + "REPORT":{"REPORT":report,"CONTROLS":controls}}
 
 
+def budget_definition(code,title,dataset):
+    summary=(
+        column("Account","General account",117),column("Fund","Fund",76),column("Function","Function",63),
+        column("PeriodBudget","Period budget",68,"currency","right"),column("PeriodActual","Period actual",68,"currency","right"),
+        column("PeriodVariance","Variance",63,"currency","right"),column("PeriodPercent","%",36,"decimal","right"),
+        column("YTDBudget","YTD budget",68,"currency","right"),column("YTDActual","YTD actual",68,"currency","right"),
+        column("YTDVariance","Variance",63,"currency","right"),column("YTDPercent","%",30,"decimal","right"),
+    )
+    item=definition(code,title,dataset,summary,(
+        ("PeriodBudgetTotal","Period budget","PeriodBudget"),("PeriodActualTotal","Period actual","PeriodActual"),
+        ("YTDBudgetTotal","YTD budget","YTDBudget"),("YTDActualTotal","YTD actual","YTDActual"),
+    ))
+    root=item[code+"REPORT"]
+    root["REPORT"]["bands"]["Detail"]["height"]=76
+    root["CONTROLS"]["Records"]["repeatcollection"]="summary"
+    for value in root["CONTROLS"]["Records"]["columns"]:value["collection"]="summary"
+    root["CONTROLS"]["Records"]["size"]=[720,38]
+    root["CONTROLS"]["Details"]={
+        "type":"table","band":"Detail","position":[0,40],"size":[720,34],
+        "repeatcollection":"details","visiblewhen":{"collection":"parameters","field":"ShowDetails","operator":"equals","value":True},
+        "columns":[
+            {**column("Period","Period",65),"collection":"details"},
+            {**column("Account","General account",140),"collection":"details"},
+            {**column("Fund","Fund",95),"collection":"details"},
+            {**column("Function","Function",80),"collection":"details"},
+            {**column("LineItem","Detailed line item",150),"collection":"details"},
+            {**column("Budget","Budget",75,"currency","right"),"collection":"details"},
+            {**column("Note","Note",115),"collection":"details"},
+        ],
+    }
+    return item
+
+
 REPORTS = (
     definition("ACCT-FP", "Statement of Financial Position", "accounting.position", (
         column("Section","Section",170), column("Code","Code",70),
@@ -92,6 +125,8 @@ REPORTS = (
         column("Expense","Expense",70,"currency","right"), column("Transfers","Transfers",75,"currency","right"),
         column("Other","Other",65,"currency","right"), column("Ending","Ending",85,"currency","right"),
     ), (("BeginningTotal","Total beginning","Beginning"), ("EndingTotal","Total ending","Ending"))),
+    budget_definition("ACCT-BVA","Budget to Actual","accounting.budgetactual"),
+    budget_definition("ACCT-BUD","Adopted Budget","accounting.adoptedbudget"),
 )
 
 

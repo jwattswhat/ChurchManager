@@ -13,9 +13,10 @@ def _date(control):
 
 
 class FunctionalExpenseDialog(wx.Dialog):
-    def __init__(self, parent, service):
+    def __init__(self, parent, service, report_service=None):
         super().__init__(parent, title="Functional Expense Report", size=(1050, 650))
         self.service = service
+        self.report_service = report_service
         self.organization = wx.Choice(self)
         for key, name in service.organizations():
             self.organization.Append(name, key)
@@ -37,7 +38,10 @@ class FunctionalExpenseDialog(wx.Dialog):
         footer = wx.BoxSizer(wx.HORIZONTAL)
         footer.Add(self.status, 0, wx.ALIGN_CENTER_VERTICAL)
         footer.AddStretchSpacer()
-        footer.Add(close)
+        preview=wx.Button(self,label="Preview PDF");preview.Bind(wx.EVT_BUTTON,self.preview_pdf);preview.Enable(report_service is not None)
+        customize=wx.Button(self,label="Customize Layout");customize.Bind(wx.EVT_BUTTON,self.customize_layout)
+        customize.Enable(report_service is not None and report_service.authorization.has_permission("accounting.reports.design"))
+        footer.Add(preview,0,wx.RIGHT,8);footer.Add(customize,0,wx.RIGHT,8);footer.Add(close)
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(header, 0, wx.ALL | wx.EXPAND, 10)
         root.Add(self.list, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
@@ -73,10 +77,22 @@ class FunctionalExpenseDialog(wx.Dialog):
         self.list.SetItem(row, total_column, money(report["grand_total"]))
         self.status.SetLabel("Total expenses: {}".format(money(report["grand_total"], True)))
 
+    def _selection(self):
+        return (self.organization.GetClientData(self.organization.GetSelection()),_date(self.start),_date(self.end))
+
+    def preview_pdf(self,event=None):
+        try:self.report_service.run_functional_expenses(*self._selection())
+        except Exception as error:wx.MessageBox(str(error),"Functional Expense Report",wx.OK|wx.ICON_ERROR,self)
+
+    def customize_layout(self,event=None):
+        try:self.report_service.design_functional_expenses(*self._selection())
+        except Exception as error:wx.MessageBox(str(error),"Functional Expense Report Designer",wx.OK|wx.ICON_ERROR,self)
+
 
 def show_functional_expenses(parent, connection, session, authorization):
     authorization.require("accounting.reports.run", "run accounting reports")
-    dialog = FunctionalExpenseDialog(parent, FunctionalExpenseService(connection))
+    from .reporting import AccountingVisualReportService
+    dialog = FunctionalExpenseDialog(parent, FunctionalExpenseService(connection),AccountingVisualReportService(connection,authorization,session))
     try:
         dialog.ShowModal()
     finally:

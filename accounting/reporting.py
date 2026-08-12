@@ -14,6 +14,8 @@ from .trial_balance_service import TrialBalanceService
 from .position_service import FinancialPositionService
 from .activities_service import ActivitiesService
 from .fund_balance_service import FundBalanceService
+from .functional_expense_service import FunctionalExpenseService
+from .budget_actual_service import BudgetActualService
 
 
 ACCOUNTING_DEFINITIONS = Path(__file__).resolve().parent / "report_definitions"
@@ -184,6 +186,68 @@ FUND_MANIFEST = _manifest("ACCT-FUND", "accounting.funds", {
     "EndingTotal": {"collection": "totals", "field": "Ending"},
 })
 
+FUNCTIONAL_CONTRACT = JSForm.ReportDatasetContract(
+    "accounting.functionalexpenses", 1, "accounting.reports.run",
+    _common_collections((
+        field("Account", "Natural Expense Account"), field("Function", "Ministry Function"),
+        field("Amount", "Amount", "currency"),
+    ), (field("GrandTotal", "Grand Total", "currency"),), date_range=True),
+)
+FUNCTIONAL_MANIFEST = _manifest("ACCT-FUNC", "accounting.functionalexpenses", {
+    "ExpenseMatrix": {"repeatcollection":"records", "rowfield":"Account",
+                      "columnfield":"Function", "valuefield":"Amount"},
+    "GrandTotal": {"collection":"totals", "field":"GrandTotal"},
+})
+
+BUDGET_SUMMARY_FIELDS = (
+    field("Account", "General Account"), field("Fund", "Fund"), field("Function", "Function"),
+    field("PeriodBudget", "Period Budget", "currency"), field("PeriodActual", "Period Actual", "currency"),
+    field("PeriodVariance", "Period Variance", "currency"), field("PeriodPercent", "Period Percent", "decimal"),
+    field("YTDBudget", "YTD Budget", "currency"), field("YTDActual", "YTD Actual", "currency"),
+    field("YTDVariance", "YTD Variance", "currency"), field("YTDPercent", "YTD Percent", "decimal"),
+)
+BUDGET_DETAIL_FIELDS = (
+    field("Period", "Period"), field("Account", "General Account"), field("Fund", "Fund"),
+    field("Function", "Function"), field("LineItem", "Detailed Line Item"),
+    field("Budget", "Budget", "currency"), field("Note", "Note"),
+)
+
+
+def _budget_contract(name):
+    return JSForm.ReportDatasetContract(name,1,"accounting.reports.run",(
+        JSForm.ReportCollection("church","Church",(
+            field("ID","Church ID","integer"),field("Church","Church Name"),field("Logo","Church Logo","image"))),
+        JSForm.ReportCollection("organization","Accounting Organization",(
+            field("ID","Organization ID","integer"),field("LegalName","Legal Name"),
+            field("ReportingBasis","Reporting Basis"),field("BaseCurrency","Base Currency"))),
+        JSForm.ReportCollection("parameters","Parameters",(
+            field("Display","Selected Parameters"),field("Mode","Budget Detail Mode"),
+            field("ShowDetails","Show Details","boolean"))),
+        JSForm.ReportCollection("summary","General Account Summary",BUDGET_SUMMARY_FIELDS),
+        JSForm.ReportCollection("details","Detailed Budget Lines",BUDGET_DETAIL_FIELDS),
+        JSForm.ReportCollection("totals","Protected Totals",(
+            field("PeriodBudget","Total Period Budget","currency"),field("PeriodActual","Total Period Actual","currency"),
+            field("PeriodVariance","Total Period Variance","currency"),field("YTDBudget","Total YTD Budget","currency"),
+            field("YTDActual","Total YTD Actual","currency"),field("YTDVariance","Total YTD Variance","currency"))),
+    ))
+
+
+BUDGET_ACTUAL_CONTRACT=_budget_contract("accounting.budgetactual")
+ADOPTED_BUDGET_CONTRACT=_budget_contract("accounting.adoptedbudget")
+
+
+def _budget_manifest(code,dataset):
+    return _manifest(code,dataset,{
+        "PeriodBudgetTotal":{"collection":"totals","field":"PeriodBudget"},
+        "PeriodActualTotal":{"collection":"totals","field":"PeriodActual"},
+        "YTDBudgetTotal":{"collection":"totals","field":"YTDBudget"},
+        "YTDActualTotal":{"collection":"totals","field":"YTDActual"},
+    })
+
+
+BUDGET_ACTUAL_MANIFEST=_budget_manifest("ACCT-BVA","accounting.budgetactual")
+ADOPTED_BUDGET_MANIFEST=_budget_manifest("ACCT-BUD","accounting.adoptedbudget")
+
 
 class _AccountingDatasetProvider:
     def __init__(self, connection, authorization):
@@ -299,6 +363,78 @@ class FundDatasetProvider(_AccountingDatasetProvider):
             "records": records, "totals": [totals],
         })
         return JSForm.ReportDataset.create(FUND_CONTRACT, collections)
+
+
+class FunctionalExpenseDatasetProvider(_AccountingDatasetProvider):
+    def __init__(self, connection, authorization, service=None):
+        super().__init__(connection, authorization)
+        self.service=service or FunctionalExpenseService(connection)
+
+    def build(self, organization_id, date_from, date_to):
+        self.authorization.require("accounting.reports.run", "Create Functional Expense dataset")
+        collections=self._identity(organization_id)
+        result=self.service.report(organization_id,date_from,date_to)
+        records=[]
+        for code,name,values,total in result["rows"]:
+            for index,(_,function_name) in enumerate(result["functions"]):
+                records.append({"Account":f"{code} - {name}","Function":function_name,
+                                "Amount":values[index]})
+        collections.update({
+            "parameters":[{"FromDate":date_from,"ThroughDate":date_to,
+                           "Display":f"{date_from.strftime('%B %d, %Y')} through {date_to.strftime('%B %d, %Y')}"}],
+            "records":records,"totals":[{"GrandTotal":result["grand_total"]}],
+        })
+        return JSForm.ReportDataset.create(FUNCTIONAL_CONTRACT,collections)
+
+
+class BudgetDatasetProvider(_AccountingDatasetProvider):
+    def __init__(self,connection,authorization,service=None):
+        super().__init__(connection,authorization);self.service=service or BudgetActualService(connection)
+
+    def _selection(self,budget_id,period_id=None):
+        cursor=self.connection.cursor()
+        try:
+            if period_id is None:
+                cursor.execute(
+                    "SELECT b.OrganizationID,b.Name,y.Name,p.ID,p.Name,b.DetailMode "
+                    "FROM tblAccountingBudget b JOIN tblAccountingFiscalYear y ON y.ID=b.FiscalYearID "
+                    "JOIN tblAccountingFiscalPeriod p ON p.FiscalYearID=b.FiscalYearID "
+                    f"WHERE b.ID={self.marker} AND b.Status='ADOPTED' ORDER BY p.PeriodNumber DESC LIMIT 1",
+                    (budget_id,),)
+            else:
+                cursor.execute(
+                    "SELECT b.OrganizationID,b.Name,y.Name,p.ID,p.Name,b.DetailMode "
+                    "FROM tblAccountingBudget b JOIN tblAccountingFiscalYear y ON y.ID=b.FiscalYearID "
+                    "JOIN tblAccountingFiscalPeriod p ON p.FiscalYearID=b.FiscalYearID "
+                    f"WHERE b.ID={self.marker} AND b.Status='ADOPTED' AND p.ID={self.marker}",
+                    (budget_id,period_id),)
+            row=cursor.fetchone()
+        finally:cursor.close()
+        if row is None:raise ValueError("Select a period from an adopted budget.")
+        return row
+
+    def build(self,budget_id,period_id=None,adopted_budget=False):
+        self.authorization.require("accounting.reports.run","Create adopted budget report dataset")
+        selected=self._selection(budget_id,period_id)
+        collections=self._identity(selected[0]);result=self.service.report(budget_id,selected[3])
+        summary=[{
+            "Account":r[0],"Fund":r[1],"Function":r[2],"PeriodBudget":r[3],"PeriodActual":r[4],
+            "PeriodVariance":r[5],"PeriodPercent":r[6],"YTDBudget":r[7],"YTDActual":r[8],
+            "YTDVariance":r[9],"YTDPercent":r[10],
+        } for r in result["rows"]]
+        details=[{"Period":r[0],"Account":r[1],"Fund":r[2],"Function":r[3],
+                  "LineItem":r[4],"Budget":r[5],"Note":r[6] or ""} for r in result["details"]]
+        def total(name):return sum((row[name] for row in summary),Decimal("0"))
+        label=(f"{selected[2]} - {selected[1]} (Adopted Budget)" if adopted_budget
+               else f"{selected[2]} - {selected[1]} through {selected[4]}")
+        collections.update({
+            "parameters":[{"Display":label,"Mode":result["mode"],"ShowDetails":bool(details)}],
+            "summary":summary,"details":details,
+            "totals":[{name:total(name) for name in (
+                "PeriodBudget","PeriodActual","PeriodVariance","YTDBudget","YTDActual","YTDVariance")}],
+        })
+        contract=ADOPTED_BUDGET_CONTRACT if adopted_budget else BUDGET_ACTUAL_CONTRACT
+        return JSForm.ReportDataset.create(contract,collections)
 
 
 class TrialBalanceDatasetProvider:
@@ -464,6 +600,34 @@ class AccountingVisualReportService:
             FundDatasetProvider(self.connection,self.authorization),
             organization_id,date_from,date_to,
         )
+
+    def run_functional_expenses(self, organization_id, date_from, date_to):
+        return self._run(
+            "ACCT-FUNC",FUNCTIONAL_CONTRACT,FUNCTIONAL_MANIFEST,
+            FunctionalExpenseDatasetProvider(self.connection,self.authorization),
+            organization_id,date_from,date_to,
+        )
+
+    def design_functional_expenses(self, organization_id, date_from, date_to):
+        return self._design(
+            "ACCT-FUNC",FUNCTIONAL_CONTRACT,FUNCTIONAL_MANIFEST,
+            FunctionalExpenseDatasetProvider(self.connection,self.authorization),
+            organization_id,date_from,date_to,
+        )
+
+    def run_budget_actual(self,budget_id,period_id):
+        return self._run("ACCT-BVA",BUDGET_ACTUAL_CONTRACT,BUDGET_ACTUAL_MANIFEST,
+                         BudgetDatasetProvider(self.connection,self.authorization),budget_id,period_id)
+
+    def design_budget_actual(self,budget_id,period_id):
+        return self._design("ACCT-BVA",BUDGET_ACTUAL_CONTRACT,BUDGET_ACTUAL_MANIFEST,
+                            BudgetDatasetProvider(self.connection,self.authorization),budget_id,period_id)
+
+    def run_adopted_budget(self,budget_id):
+        provider=BudgetDatasetProvider(self.connection,self.authorization)
+        class Adopted:
+            def build(inner,*arguments):return provider.build(*arguments,adopted_budget=True)
+        return self._run("ACCT-BUD",ADOPTED_BUDGET_CONTRACT,ADOPTED_BUDGET_MANIFEST,Adopted(),budget_id)
 
     def design_trial_balance(self, organization_id, as_of_date):
         self.authorization.require("accounting.reports.run", "view Trial Balance data")
