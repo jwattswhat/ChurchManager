@@ -189,25 +189,20 @@ Other output is created by dedicated Python scripts, including:
 | Path | Purpose |
 | --- | --- |
 | `cm.py` | Main ChurchManager application and menu dispatch. |
-| `ChurchManager.bat` | Windows launcher that activates the virtual environment and starts ChurchManager. |
+| `ChurchManager.bat` | Compatibility launcher for the frozen legacy installation. |
+| `ChurchManager-Test.bat` | Development/test launcher; requires a locally rebuilt `.runtime-venv`. |
 | `Forms/` | JSON definitions for application screens. |
 | `SQL/` | Database schema fragments, table dumps, views, imports, and maintenance queries. |
 | `LimeReportPattern/` | LimeReport report definitions. |
 | `Documentation/` | Application and form documentation. |
-| `Reports/` | Generated reports; normally excluded from source control. |
-| `Sermons/` | Sermon working files; normally excluded from source control. |
-| `Outlines/` | Sermon outline material. |
-| `Bulletins/` | Bulletin output; normally excluded from source control. |
-| `Pictures/` | Image assets; normally excluded from source control. |
-| `Documents/` | Congregational administrative documents and archives. |
-| `Inserts/` | Bulletin and worship inserts. |
-| `BackupDB/` | MariaDB/MySQL database dumps. These are sensitive. |
-| `Convert/` | Historical import and conversion utilities. |
-| `DevelopmentTesting/` | Experimental scripts and manual tests. |
-| `Archive/` | Older application classes, forms, and code retained for reference. |
+| `assets/` | Source artwork and other application-owned static assets. |
+| `migrations/` | Versioned ChurchDBTest schema migrations. |
+| `tests/` | Active automated ChurchManager tests. |
+| `tools/` | Maintained development and report-conversion tools. |
+| `visual_reports/` | ChurchManager integration for the JSForm visual report system. |
 | `schema/` | JSON Schema used or considered for validating ChurchManager form definitions. |
 
-Files ending in `.save.py`, names containing `copy`, and files under `Archive` generally represent older or alternate implementations and are not the normal runtime entry points.
+Operational sermons, pictures, outlines, inserts, bulletins, and the frozen runtime are stored with the independent legacy installation. Congregational administrative documents are stored in `C:\Users\Pastor\Documents\Church Documents`. Historical database dumps are stored in `D:\Backup.ChurchManager\DatabaseArchive`.
 
 ## 4. Requirements
 

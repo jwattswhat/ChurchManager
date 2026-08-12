@@ -1,8 +1,16 @@
 __pycache__/
 .venv/
+.runtime-venv/
 Bulletins/
 Reports/
 Pictures/
 Sermons/
 *.pyc
 LocalTestMigrationBackups/
+BackupDB/
+tmp/
+Log.txt
+.local-mariadb.ini
+mariadb-service-localhost.ini
+token.json
+client_secret_*.json
