@@ -1,0 +1,56 @@
+{
+  "CMMD01REPORT": {
+    "REPORT": {
+      "schema_version": 1,
+      "name": "CMMD01",
+      "title": "Member Directory",
+      "dataset": "membership.directory",
+      "datasetversion": 1,
+      "pagesize": "letter",
+      "orientation": "portrait",
+      "margins": {"top": 36, "right": 36, "bottom": 36, "left": 36},
+      "theme": "churchmanager.standard",
+      "bands": {
+        "ReportHeader": {"type": "reportheader", "height": 90},
+        "PageHeader": {"type": "pageheader", "height": 24, "repeat": true},
+        "DirectoryDetail": {"type": "detail", "height": 58},
+        "PageFooter": {"type": "pagefooter", "height": 24, "repeat": true}
+      },
+      "sort": [
+        {"collection": "families", "field": "FamilyName", "direction": "ascending"}
+      ]
+    },
+    "CONTROLS": {
+      "ChurchLogo": {
+        "type": "image", "band": "ReportHeader", "position": [0, 0], "size": [64, 64],
+        "collection": "church", "field": "Logo"
+      },
+      "ChurchName": {
+        "type": "text", "band": "ReportHeader", "position": [76, 4], "size": [428, 24],
+        "collection": "church", "field": "Church", "fontsize": 16, "bold": true, "align": "center"
+      },
+      "ReportTitle": {
+        "type": "label", "band": "ReportHeader", "position": [76, 34], "size": [428, 22],
+        "label": "Member Directory", "fontsize": 14, "bold": true, "align": "center"
+      },
+      "FamilyDirectoryEntry": {
+        "type": "repeater", "band": "DirectoryDetail", "position": [0, 0], "size": [540, 54],
+        "repeatcollection": "directory_entries", "itemheight": 58,
+        "items": [
+          {"name": "FamilyName", "field": "FamilyName", "position": [4, 4], "size": [220, 16], "fontsize": 10, "bold": true},
+          {"name": "MemberNames", "field": "MemberNames", "position": [4, 23], "size": [220, 14], "fontsize": 8, "italic": true},
+          {"name": "AddressLines", "field": "AddressLines", "position": [236, 4], "size": [145, 14], "fontsize": 8},
+          {"name": "ContactLines", "field": "ContactLines", "position": [392, 4], "size": [144, 14], "fontsize": 8}
+        ]
+      },
+      "FooterLine": {
+        "type": "line", "band": "PageFooter", "position": [0, 0], "size": [540, 1],
+        "bordercolor": "#808080", "borderwidth": 0.5
+      },
+      "FooterText": {
+        "type": "label", "band": "PageFooter", "position": [0, 6], "size": [540, 14],
+        "label": "ChurchManager Member Directory", "fontsize": 8, "color": "#555555", "align": "center"
+      }
+    }
+  }
+}
