@@ -17,6 +17,7 @@ from .fund_balance_service import FundBalanceService
 from .functional_expense_service import FunctionalExpenseService
 from .budget_actual_service import BudgetActualService
 from .general_ledger_service import GeneralLedgerService
+from .register_service import AccountingRegisterService
 
 
 ACCOUNTING_DEFINITIONS = Path(__file__).resolve().parent / "report_definitions"
@@ -269,6 +270,26 @@ GENERAL_LEDGER_MANIFEST=_manifest("ACCT-GL","accounting.generalledger",{
     "EndingBalance":{"collection":"totals","field":"EndingBalance"},
 })
 
+REGISTER_CONTRACT=JSForm.ReportDatasetContract(
+    "accounting.register",1,"accounting.transactions.view",(
+        JSForm.ReportCollection("church","Church",(
+            field("ID","Church ID","integer"),field("Church","Church Name"),field("Logo","Church Logo","image"))),
+        JSForm.ReportCollection("organization","Accounting Organization",(
+            field("ID","Organization ID","integer"),field("LegalName","Legal Name"),
+            field("ReportingBasis","Reporting Basis"),field("BaseCurrency","Base Currency"))),
+        JSForm.ReportCollection("parameters","Parameters",(field("Display","Selected Parameters"),)),
+        JSForm.ReportCollection("records","Posted Transactions",(
+            field("Number","Number","integer"),field("Organization","Organization"),field("Date","Date","date"),
+            field("Type","Type"),field("Status","Status"),field("Description","Description"),
+            field("Reference","Reference"),field("Total","Total","currency"))),
+        JSForm.ReportCollection("totals","Protected Totals",(
+            field("TransactionCount","Transaction Count","integer"),field("Total","Register Total","currency"))),
+    ))
+REGISTER_MANIFEST=_manifest("ACCT-REG","accounting.register",{
+    "TransactionCount":{"collection":"totals","field":"TransactionCount"},
+    "RegisterTotal":{"collection":"totals","field":"Total"},
+})
+
 
 class _AccountingDatasetProvider:
     def __init__(self, connection, authorization):
@@ -480,6 +501,31 @@ class GeneralLedgerDatasetProvider(_AccountingDatasetProvider):
                 "DebitTotal":debit,"CreditTotal":credit,"EndingBalance":ending}],
         })
         return JSForm.ReportDataset.create(GENERAL_LEDGER_CONTRACT,collections)
+
+
+class RegisterDatasetProvider(_AccountingDatasetProvider):
+    def __init__(self,connection,authorization,service=None):
+        super().__init__(connection,authorization);self.service=service or AccountingRegisterService(connection)
+
+    def build(self):
+        self.authorization.require("accounting.transactions.view","Create Posted Transaction Register dataset")
+        source=self.service.transactions()
+        cursor=self.connection.cursor()
+        try:
+            cursor.execute("SELECT ID FROM tblAccountingOrganization WHERE Active=1 ORDER BY ID LIMIT 1")
+            selected=cursor.fetchone()
+        finally:cursor.close()
+        if selected is None:raise ValueError("No active accounting organization is available.")
+        collections=self._identity(selected[0])
+        if len({str(row[2]) for row in source})>1:
+            collections["organization"][0]["LegalName"]="All accounting organizations"
+        records=[{"Number":r[1],"Organization":r[2],"Date":r[3],
+                  "Type":str(r[4]).replace("_"," ").title(),"Status":str(r[5]).title(),
+                  "Description":r[6] or "","Reference":r[7] or "","Total":r[8]} for r in source]
+        collections.update({"parameters":[{"Display":"Posted and reversed transactions"}],
+                            "records":records,"totals":[{"TransactionCount":len(records),
+                            "Total":sum((r["Total"] for r in records),Decimal("0"))}]})
+        return JSForm.ReportDataset.create(REGISTER_CONTRACT,collections)
 
 
 class TrialBalanceDatasetProvider:
@@ -694,6 +740,14 @@ class AccountingVisualReportService:
         return self._design("ACCT-GL",GENERAL_LEDGER_CONTRACT,GENERAL_LEDGER_MANIFEST,
                             GeneralLedgerDatasetProvider(self.connection,self.authorization),
                             organization_id,account_id,date_from,date_to,fund_id)
+
+    def run_register(self):
+        return self._run("ACCT-REG",REGISTER_CONTRACT,REGISTER_MANIFEST,
+                         RegisterDatasetProvider(self.connection,self.authorization))
+
+    def design_register(self):
+        return self._design("ACCT-REG",REGISTER_CONTRACT,REGISTER_MANIFEST,
+                            RegisterDatasetProvider(self.connection,self.authorization))
 
     def design_trial_balance(self, organization_id, as_of_date):
         self.authorization.require("accounting.reports.run", "view Trial Balance data")

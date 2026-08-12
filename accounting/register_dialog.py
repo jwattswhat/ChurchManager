@@ -28,9 +28,9 @@ class ReversalDialog(wx.Dialog):
 
 
 class AccountingRegisterDialog(wx.Dialog):
-    def __init__(self, parent, service, reversal_service=None):
+    def __init__(self, parent, service, reversal_service=None, report_service=None):
         super().__init__(parent, title="Posted Transaction Register", size=(1000, 650))
-        self.service, self.reversal_service, self.rows = service, reversal_service, []
+        self.service, self.reversal_service, self.report_service, self.rows = service, reversal_service, report_service, []
         self.transactions = wx.ListCtrl(self, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         for index, (label, width) in enumerate((
             ("Number",70), ("Organization",150), ("Date",90), ("Type",115),
@@ -46,13 +46,16 @@ class AccountingRegisterDialog(wx.Dialog):
         refresh = wx.Button(self, label="Refresh")
         reverse = wx.Button(self, label="Create Reversal")
         journal = wx.Button(self, label="Journal Entry Report")
+        preview = wx.Button(self, label="Preview Register PDF")
+        preview.Bind(wx.EVT_BUTTON, self.on_preview)
+        preview.Enable(report_service is not None)
         reverse.Enable(reversal_service is not None)
         close = wx.Button(self, wx.ID_CLOSE, "Close")
         refresh.Bind(wx.EVT_BUTTON, self.refresh)
         reverse.Bind(wx.EVT_BUTTON, self.on_reverse)
         journal.Bind(wx.EVT_BUTTON, self.on_journal_entry)
         close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
-        buttons = wx.BoxSizer(wx.HORIZONTAL); buttons.Add(refresh); buttons.AddStretchSpacer(); buttons.Add(journal, 0, wx.RIGHT, 6); buttons.Add(reverse, 0, wx.RIGHT, 6); buttons.Add(close)
+        buttons = wx.BoxSizer(wx.HORIZONTAL); buttons.Add(refresh); buttons.AddStretchSpacer();buttons.Add(preview,0,wx.RIGHT,6); buttons.Add(journal, 0, wx.RIGHT, 6); buttons.Add(reverse, 0, wx.RIGHT, 6); buttons.Add(close)
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(wx.StaticText(self, label="Posted transactions"), 0, wx.ALL, 10)
         root.Add(self.transactions, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
@@ -103,6 +106,10 @@ class AccountingRegisterDialog(wx.Dialog):
         try: dialog.ShowModal()
         finally: dialog.Destroy()
 
+    def on_preview(self,event=None):
+        try:self.report_service.run_register()
+        except Exception as error:wx.MessageBox(str(error),"Transaction Register Report",wx.OK|wx.ICON_ERROR,self)
+
 
 def show_accounting_register(parent, connection, session, authorization):
     authorization.require("accounting.transactions.view", "view posted accounting transactions")
@@ -110,6 +117,8 @@ def show_accounting_register(parent, connection, session, authorization):
     if authorization.has_permission("accounting.transactions.reverse"):
         from .reversal_service import AccountingReversalService
         reversal_service = AccountingReversalService(connection, session.user_id)
-    dialog = AccountingRegisterDialog(parent, AccountingRegisterService(connection), reversal_service)
+    from .reporting import AccountingVisualReportService
+    dialog = AccountingRegisterDialog(parent, AccountingRegisterService(connection), reversal_service,
+                                      AccountingVisualReportService(connection,authorization,session))
     try: dialog.ShowModal()
     finally: dialog.Destroy()

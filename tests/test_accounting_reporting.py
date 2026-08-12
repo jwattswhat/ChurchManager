@@ -15,6 +15,7 @@ from accounting.reporting import (
     ADOPTED_BUDGET_CONTRACT, ADOPTED_BUDGET_MANIFEST,
     BUDGET_ACTUAL_CONTRACT, BUDGET_ACTUAL_MANIFEST, BudgetDatasetProvider,
     GENERAL_LEDGER_CONTRACT, GENERAL_LEDGER_MANIFEST, GeneralLedgerDatasetProvider,
+    REGISTER_CONTRACT, REGISTER_MANIFEST,
     POSITION_CONTRACT, POSITION_MANIFEST, FinancialPositionDatasetProvider,
     TRIAL_BALANCE_CONTRACT, TRIAL_BALANCE_MANIFEST, TrialBalanceDatasetProvider,
 )
@@ -229,6 +230,7 @@ class TestAccountingVisualReports(unittest.TestCase):
             ("ACCT-BVA",BUDGET_ACTUAL_CONTRACT,BUDGET_ACTUAL_MANIFEST),
             ("ACCT-BUD",ADOPTED_BUDGET_CONTRACT,ADOPTED_BUDGET_MANIFEST),
             ("ACCT-GL",GENERAL_LEDGER_CONTRACT,GENERAL_LEDGER_MANIFEST),
+            ("ACCT-REG",REGISTER_CONTRACT,REGISTER_MANIFEST),
         ):
             definition=loader.load(root / f"{code}.json")
             self.assertEqual(definition.dataset_name,contract.name)

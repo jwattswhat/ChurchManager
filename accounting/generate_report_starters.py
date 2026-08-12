@@ -47,13 +47,15 @@ def definition(code, title, dataset, columns, totals, orientation="landscape", p
     }
     count = len(totals)
     item_width = width / count
-    for index, (name, label, field_name) in enumerate(totals):
+    for index, total in enumerate(totals):
+        name,label,field_name=total[:3]
+        data_format=total[3] if len(total)>3 else "currency"
         x = item_width * index
         controls[name + "Label"] = {"type":"label","band":"ReportFooter","position":[x,10],
                                      "size":[item_width,14],"label":label,"fontsize":8,"bold":True,"align":"right"}
         controls[name] = {"type":"text","band":"ReportFooter","position":[x,28],
                           "size":[item_width,17],"collection":"totals","field":field_name,
-                          "format":"currency","fontsize":9,"bold":True,"align":"right"}
+                          "format":data_format,"fontsize":9,"bold":True,"align":"right"}
     report = {
         "schema_version":1,"name":code,"title":title,"dataset":dataset,"datasetversion":1,
         "pagesize":page_size,"orientation":orientation,
@@ -134,6 +136,13 @@ REPORTS = (
         column("Credit","Credit",60,"currency","right"),column("Balance","Balance",60,"currency","right"),
     ),(("OpeningBalance","Opening balance","OpeningBalance"),("DebitTotal","Debits","DebitTotal"),
        ("CreditTotal","Credits","CreditTotal"),("EndingBalance","Ending balance","EndingBalance")),
+       page_size="legal",content_width=900),
+    definition("ACCT-REG","Posted Transaction Register","accounting.register",(
+        column("Number","No.",55,"integer"),column("Organization","Organization",165),
+        column("Date","Date",65,"date"),column("Type","Type",100),column("Status","Status",65),
+        column("Description","Description",250),column("Reference","Reference",120),
+        column("Total","Total",80,"currency","right"),
+    ),(("TransactionCount","Transactions","TransactionCount","integer"),("RegisterTotal","Register total","Total")),
        page_size="legal",content_width=900),
 )
 
