@@ -115,6 +115,17 @@ def ensure_user_definition(report_code, local_app_data=None, starter_directory=N
     return target
 
 
+def resolve_report_definition(report_code, local_app_data=None, starter_directory=None):
+    """Use a customization when present; otherwise read the current starter directly."""
+    starter = Path(starter_directory or STARTERS) / f"{report_code}.json"
+    custom = user_definition_path(report_code, local_app_data)
+    selected = custom if custom.is_file() else starter
+    if not selected.is_file():
+        raise FileNotFoundError(f"Report definition not found: {report_code}")
+    JSForm.ReportDefinitionLoader().load(selected)
+    return selected
+
+
 def open_directory_designer(local_app_data=None, authorization=None):
     authorization = authorization or DirectoryDesignerAuthorization()
     authorization.require("reports.design", operation="Open Report Designer")

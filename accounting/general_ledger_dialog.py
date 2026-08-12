@@ -15,9 +15,10 @@ def _date(control):
 
 
 class GeneralLedgerDialog(wx.Dialog):
-    def __init__(self, parent, service):
+    def __init__(self, parent, service, report_service=None):
         super().__init__(parent, title="General Ledger", size=(1180, 680))
         self.service = service
+        self.report_service = report_service
         self.organization = wx.Choice(self)
         self.account = wx.Choice(self)
         self.fund = wx.Choice(self)
@@ -54,12 +55,16 @@ class GeneralLedgerDialog(wx.Dialog):
             self.list.SetColumn(index, column)
         close = wx.Button(self, wx.ID_CLOSE, "Close")
         close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
+        preview=wx.Button(self,label="Preview PDF");preview.Bind(wx.EVT_BUTTON,self.preview_pdf);preview.Enable(report_service is not None)
+        customize=wx.Button(self,label="Customize Layout");customize.Bind(wx.EVT_BUTTON,self.customize_layout)
+        customize.Enable(report_service is not None and report_service.authorization.has_permission("accounting.reports.design"))
         top = wx.BoxSizer(wx.VERTICAL)
         top.Add(filters, 0, wx.ALL | wx.EXPAND, 10)
         top.Add(run, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.ALIGN_RIGHT, 10)
         top.Add(self.heading, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
         top.Add(self.list, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
-        top.Add(close, 0, wx.ALL | wx.ALIGN_RIGHT, 10)
+        actions=wx.BoxSizer(wx.HORIZONTAL);actions.AddStretchSpacer();actions.Add(preview,0,wx.RIGHT,8);actions.Add(customize,0,wx.RIGHT,8);actions.Add(close)
+        top.Add(actions, 0, wx.ALL | wx.EXPAND, 10)
         self.SetSizer(top)
         self.on_organization()
 
@@ -108,10 +113,26 @@ class GeneralLedgerDialog(wx.Dialog):
             for column, value in enumerate(values, 1):
                 self.list.SetItem(row, column, str(value))
 
+    def _selection(self):
+        oi=self.organization.GetSelection();ai=self.account.GetSelection();fi=self.fund.GetSelection()
+        if oi==wx.NOT_FOUND or ai==wx.NOT_FOUND:raise ValueError("Select an organization and account.")
+        fund_id=None if fi==wx.NOT_FOUND else self.fund.GetClientData(fi)
+        return (self.organization.GetClientData(oi),self.account.GetClientData(ai),
+                _date(self.date_from),_date(self.date_to),fund_id)
+
+    def preview_pdf(self,event=None):
+        try:self.report_service.run_general_ledger(*self._selection())
+        except Exception as error:wx.MessageBox(str(error),"General Ledger Report",wx.OK|wx.ICON_ERROR,self)
+
+    def customize_layout(self,event=None):
+        try:self.report_service.design_general_ledger(*self._selection())
+        except Exception as error:wx.MessageBox(str(error),"General Ledger Designer",wx.OK|wx.ICON_ERROR,self)
+
 
 def show_general_ledger(parent, connection, session, authorization):
     authorization.require("accounting.reports.run", "run the general ledger")
-    dialog = GeneralLedgerDialog(parent, GeneralLedgerService(connection))
+    from .reporting import AccountingVisualReportService
+    dialog = GeneralLedgerDialog(parent, GeneralLedgerService(connection),AccountingVisualReportService(connection,authorization,session))
     try:
         dialog.ShowModal()
     finally:

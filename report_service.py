@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from visual_reports.designer import ensure_user_definition
+from visual_reports.designer import ensure_user_definition, resolve_report_definition
 from visual_reports.report_inventory import OFFICIAL_CODES
 from visual_reports.tabular_dataset import TabularDatasetProvider
 
@@ -26,7 +26,7 @@ class ChurchManagerReportService:
         )
 
     def _run_visual_report(self, code, form, connection):
-        definition_path = ensure_user_definition(code)
+        definition_path = resolve_report_definition(code)
         definition = self.jsform.ReportDefinitionLoader().load(definition_path)
         controls = form.CONTROLID
         church_id = controls["ChurchID"].GetValue()

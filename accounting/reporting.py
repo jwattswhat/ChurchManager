@@ -1,6 +1,6 @@
 """Secure visual-report boundary for ChurchManager accounting reports."""
 
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
 import tempfile
@@ -8,7 +8,7 @@ import tempfile
 import JSForm
 
 from process_service import ProcessService
-from visual_reports.designer import ensure_user_definition
+from visual_reports.designer import ensure_user_definition, resolve_report_definition
 
 from .trial_balance_service import TrialBalanceService
 from .position_service import FinancialPositionService
@@ -16,6 +16,7 @@ from .activities_service import ActivitiesService
 from .fund_balance_service import FundBalanceService
 from .functional_expense_service import FunctionalExpenseService
 from .budget_actual_service import BudgetActualService
+from .general_ledger_service import GeneralLedgerService
 
 
 ACCOUNTING_DEFINITIONS = Path(__file__).resolve().parent / "report_definitions"
@@ -248,6 +249,26 @@ def _budget_manifest(code,dataset):
 BUDGET_ACTUAL_MANIFEST=_budget_manifest("ACCT-BVA","accounting.budgetactual")
 ADOPTED_BUDGET_MANIFEST=_budget_manifest("ACCT-BUD","accounting.adoptedbudget")
 
+GENERAL_LEDGER_CONTRACT=JSForm.ReportDatasetContract(
+    "accounting.generalledger",1,"accounting.reports.run",
+    _common_collections((
+        field("Date","Transaction Date","date"),field("Number","Transaction Number","integer"),
+        field("Type","Transaction Type"),field("Transaction","Transaction Description"),
+        field("Reference","Reference"),field("Fund","Fund"),field("Description","Line Description"),
+        field("Debit","Debit","currency"),field("Credit","Credit","currency"),
+        field("Balance","Running Normal Balance","currency"),
+    ),(
+        field("OpeningBalance","Opening Balance","currency"),field("DebitTotal","Total Debits","currency"),
+        field("CreditTotal","Total Credits","currency"),field("EndingBalance","Ending Balance","currency"),
+    ),date_range=True),
+)
+GENERAL_LEDGER_MANIFEST=_manifest("ACCT-GL","accounting.generalledger",{
+    "OpeningBalance":{"collection":"totals","field":"OpeningBalance"},
+    "DebitTotal":{"collection":"totals","field":"DebitTotal"},
+    "CreditTotal":{"collection":"totals","field":"CreditTotal"},
+    "EndingBalance":{"collection":"totals","field":"EndingBalance"},
+})
+
 
 class _AccountingDatasetProvider:
     def __init__(self, connection, authorization):
@@ -270,7 +291,8 @@ class _AccountingDatasetProvider:
             raise ValueError("The selected accounting organization is unavailable.")
         return {
             "church": [{"ID": row[4] or 0, "Church": row[5] or row[1], "Logo": row[6]}],
-            "organization": [{"ID": row[0], "LegalName": row[1],
+            "organization": [{"ID": row[0],
+                              "LegalName": "" if (row[5] or row[1]) == row[1] else row[1],
                               "ReportingBasis": row[2], "BaseCurrency": row[3]}],
         }
 
@@ -437,6 +459,29 @@ class BudgetDatasetProvider(_AccountingDatasetProvider):
         return JSForm.ReportDataset.create(contract,collections)
 
 
+class GeneralLedgerDatasetProvider(_AccountingDatasetProvider):
+    def __init__(self,connection,authorization,service=None):
+        super().__init__(connection,authorization);self.service=service or GeneralLedgerService(connection)
+
+    def build(self,organization_id,account_id,date_from,date_to,fund_id=None):
+        self.authorization.require("accounting.reports.run","Create General Ledger report dataset")
+        collections=self._identity(organization_id)
+        result=self.service.report(organization_id,account_id,date_from,date_to,fund_id)
+        records=[{"Date":r[0],"Number":r[1],"Type":str(r[2]).replace("_"," ").title(),"Transaction":r[3] or "",
+                  "Reference":r[4] or "","Fund":r[5],
+                  "Description":"" if str(r[6] or "").strip().casefold()==str(r[3] or "").strip().casefold() else (r[6] or ""),
+                  "Debit":r[7],"Credit":r[8],"Balance":r[9]} for r in result["rows"]]
+        debit=sum((row["Debit"] for row in records),Decimal("0"));credit=sum((row["Credit"] for row in records),Decimal("0"))
+        ending=records[-1]["Balance"] if records else result["opening_balance"]
+        collections.update({
+            "parameters":[{"FromDate":date_from,"ThroughDate":date_to,
+                           "Display":f"{result['account']} - {date_from.strftime('%B %d, %Y')} through {date_to.strftime('%B %d, %Y')}"}],
+            "records":records,"totals":[{"OpeningBalance":result["opening_balance"],
+                "DebitTotal":debit,"CreditTotal":credit,"EndingBalance":ending}],
+        })
+        return JSForm.ReportDataset.create(GENERAL_LEDGER_CONTRACT,collections)
+
+
 class TrialBalanceDatasetProvider:
     def __init__(self, connection, authorization, service=None):
         self.connection = connection
@@ -526,19 +571,30 @@ class AccountingVisualReportService:
 
     def _run(self, code, contract, manifest, provider, *parameters):
         self.authorization.require(contract.required_permission, f"run the {code} report")
-        definition_path = ensure_user_definition(
+        definition_path = resolve_report_definition(
             code, local_app_data=self.local_app_data, starter_directory=ACCOUNTING_DEFINITIONS,
         )
         definition = JSForm.ReportDefinitionLoader().load(definition_path)
         manifest.validate(definition)
         dataset = provider.build(*parameters)
         self.output_directory.mkdir(parents=True, exist_ok=True)
-        output = self.output_directory / f"{code}.pdf"
+        output = self._available_output(code)
         rendered = JSForm.PDFReportRenderer().render(
             definition, dataset, output, context={"run_user": self.session.display_name},
         )
         self.processes.open_file(rendered)
         return rendered
+
+    def _available_output(self, code):
+        output=self.output_directory/f"{code}.pdf"
+        if not output.exists():return output
+        try:
+            with output.open("ab"):
+                pass
+            return output
+        except PermissionError:
+            stamp=datetime.now().strftime("%Y%m%d-%H%M%S")
+            return self.output_directory/f"{code}-{stamp}.pdf"
 
     def _design(self, code, contract, manifest, provider, *parameters):
         self.authorization.require(contract.required_permission, f"view {code} report data")
@@ -628,6 +684,16 @@ class AccountingVisualReportService:
         class Adopted:
             def build(inner,*arguments):return provider.build(*arguments,adopted_budget=True)
         return self._run("ACCT-BUD",ADOPTED_BUDGET_CONTRACT,ADOPTED_BUDGET_MANIFEST,Adopted(),budget_id)
+
+    def run_general_ledger(self,organization_id,account_id,date_from,date_to,fund_id=None):
+        return self._run("ACCT-GL",GENERAL_LEDGER_CONTRACT,GENERAL_LEDGER_MANIFEST,
+                         GeneralLedgerDatasetProvider(self.connection,self.authorization),
+                         organization_id,account_id,date_from,date_to,fund_id)
+
+    def design_general_ledger(self,organization_id,account_id,date_from,date_to,fund_id=None):
+        return self._design("ACCT-GL",GENERAL_LEDGER_CONTRACT,GENERAL_LEDGER_MANIFEST,
+                            GeneralLedgerDatasetProvider(self.connection,self.authorization),
+                            organization_id,account_id,date_from,date_to,fund_id)
 
     def design_trial_balance(self, organization_id, as_of_date):
         self.authorization.require("accounting.reports.run", "view Trial Balance data")

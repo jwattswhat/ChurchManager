@@ -15,8 +15,8 @@ def column(name, label, width, data_type=None, align=None):
     return result
 
 
-def definition(code, title, dataset, columns, totals, orientation="landscape"):
-    width = 720 if orientation == "landscape" else 540
+def definition(code, title, dataset, columns, totals, orientation="landscape", page_size="letter", content_width=None):
+    width = content_width or (720 if orientation == "landscape" else 540)
     controls = {
         "ChurchLogo": {"type":"image","band":"ReportHeader","position":[0,0],"size":[68,68],
                        "collection":"church","field":"Logo"},
@@ -56,7 +56,7 @@ def definition(code, title, dataset, columns, totals, orientation="landscape"):
                           "format":"currency","fontsize":9,"bold":True,"align":"right"}
     report = {
         "schema_version":1,"name":code,"title":title,"dataset":dataset,"datasetversion":1,
-        "pagesize":"letter","orientation":orientation,
+        "pagesize":page_size,"orientation":orientation,
         "margins":{"top":30,"right":36,"bottom":30,"left":36},
         "theme":"churchmanager.accounting","classification":"official",
         "emptytext":"No posted activity matches the selected reporting period.",
@@ -127,6 +127,14 @@ REPORTS = (
     ), (("BeginningTotal","Total beginning","Beginning"), ("EndingTotal","Total ending","Ending"))),
     budget_definition("ACCT-BVA","Budget to Actual","accounting.budgetactual"),
     budget_definition("ACCT-BUD","Adopted Budget","accounting.adoptedbudget"),
+    definition("ACCT-GL","General Ledger","accounting.generalledger",(
+        column("Date","Date",60,"date"),column("Number","No.",40,"integer"),column("Type","Type",95),
+        column("Transaction","Transaction",150),column("Reference","Reference",100),column("Fund","Fund",140),
+        column("Description","Line description",135),column("Debit","Debit",60,"currency","right"),
+        column("Credit","Credit",60,"currency","right"),column("Balance","Balance",60,"currency","right"),
+    ),(("OpeningBalance","Opening balance","OpeningBalance"),("DebitTotal","Debits","DebitTotal"),
+       ("CreditTotal","Credits","CreditTotal"),("EndingBalance","Ending balance","EndingBalance")),
+       page_size="legal",content_width=900),
 )
 
 

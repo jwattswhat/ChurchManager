@@ -1,8 +1,9 @@
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import JSForm
 
@@ -13,6 +14,7 @@ from accounting.reporting import (
     FUNCTIONAL_CONTRACT, FUNCTIONAL_MANIFEST, FunctionalExpenseDatasetProvider,
     ADOPTED_BUDGET_CONTRACT, ADOPTED_BUDGET_MANIFEST,
     BUDGET_ACTUAL_CONTRACT, BUDGET_ACTUAL_MANIFEST, BudgetDatasetProvider,
+    GENERAL_LEDGER_CONTRACT, GENERAL_LEDGER_MANIFEST, GeneralLedgerDatasetProvider,
     POSITION_CONTRACT, POSITION_MANIFEST, FinancialPositionDatasetProvider,
     TRIAL_BALANCE_CONTRACT, TRIAL_BALANCE_MANIFEST, TrialBalanceDatasetProvider,
 )
@@ -131,6 +133,15 @@ class BudgetActualServiceStub:
                         "Altar supplies",Decimal("100"),"Annual plan")]}
 
 
+class GeneralLedgerServiceStub:
+    @staticmethod
+    def report(organization_id,account_id,date_from,date_to,fund_id=None):
+        return {"account":"1000 - Checking","normal_balance":"DEBIT",
+                "opening_balance":Decimal("100"),"rows":[
+                    (date(2027,1,5),1,"RECEIPT","Offering","DEP-1","GEN - General","Sunday",
+                     Decimal("50"),Decimal("0"),Decimal("150"))]}
+
+
 class Session:
     display_name = "Jonathan Watt"
 
@@ -217,6 +228,7 @@ class TestAccountingVisualReports(unittest.TestCase):
             ("ACCT-FUNC",FUNCTIONAL_CONTRACT,FUNCTIONAL_MANIFEST),
             ("ACCT-BVA",BUDGET_ACTUAL_CONTRACT,BUDGET_ACTUAL_MANIFEST),
             ("ACCT-BUD",ADOPTED_BUDGET_CONTRACT,ADOPTED_BUDGET_MANIFEST),
+            ("ACCT-GL",GENERAL_LEDGER_CONTRACT,GENERAL_LEDGER_MANIFEST),
         ):
             definition=loader.load(root / f"{code}.json")
             self.assertEqual(definition.dataset_name,contract.name)
@@ -271,6 +283,20 @@ class TestAccountingVisualReports(unittest.TestCase):
             columns=definition.controls["Records"]["columns"]
             self.assertEqual(sum(column["width"] for column in columns),720)
 
+    def test_general_ledger_dataset_preserves_opening_and_running_balances(self):
+        dataset=GeneralLedgerDatasetProvider(
+            Connection(),Authorization(),GeneralLedgerServiceStub(),
+        ).build(1,10,date(2027,1,1),date(2027,1,31))
+        self.assertEqual(dataset.collections["totals"][0]["OpeningBalance"],Decimal("100"))
+        self.assertEqual(dataset.collections["totals"][0]["EndingBalance"],Decimal("150"))
+        self.assertEqual(dataset.collections["records"][0]["Balance"],Decimal("150"))
+        self.assertEqual(dataset.collections["records"][0]["Type"],"Receipt")
+        self.assertEqual(dataset.collections["organization"][0]["LegalName"],"")
+        definition=JSForm.ReportDefinitionLoader().load(
+            Path(__file__).parents[1]/"accounting"/"report_definitions"/"ACCT-GL.json")
+        self.assertEqual(definition.settings["pagesize"],"legal")
+        self.assertEqual(sum(column["width"] for column in definition.controls["Records"]["columns"]),900)
+
     def test_core_statement_starters_render_to_pdf(self):
         root=Path(__file__).parents[1]/"accounting"/"report_definitions"
         providers=(
@@ -284,6 +310,8 @@ class TestAccountingVisualReports(unittest.TestCase):
              (1,date(2027,1,1),date(2027,8,12))),
             ("ACCT-BVA",BudgetDatasetProvider(BudgetConnection(),Authorization(),BudgetActualServiceStub()),
              (3,12)),
+            ("ACCT-GL",GeneralLedgerDatasetProvider(Connection(),Authorization(),GeneralLedgerServiceStub()),
+             (1,10,date(2027,1,1),date(2027,1,31))),
         )
         with tempfile.TemporaryDirectory() as folder:
             for code,provider,arguments in providers:
@@ -302,6 +330,22 @@ class TestAccountingVisualReports(unittest.TestCase):
         with self.assertRaises(AuthorizationDenied):
             service.design_trial_balance(1, date(2026, 8, 12))
         self.assertEqual(authorization.checked, ["accounting.reports.run"])
+
+    def test_open_report_uses_timestamped_name_when_previous_pdf_is_locked(self):
+        with tempfile.TemporaryDirectory() as folder:
+            service=AccountingVisualReportService(Connection(),Authorization(),Session(),
+                                                   output_directory=folder)
+            original=Path(folder)/"ACCT-GL.pdf";original.write_bytes(b"open report")
+            real_open=Path.open
+            def locked(path,*args,**kwargs):
+                if path==original and args and args[0]=="ab":raise PermissionError("locked")
+                return real_open(path,*args,**kwargs)
+            with patch.object(Path,"open",locked),patch(
+                "accounting.reporting.datetime"
+            ) as clock:
+                clock.now.return_value=datetime(2026,8,12,17,6,7)
+                self.assertEqual(service._available_output("ACCT-GL").name,
+                                 "ACCT-GL-20260812-170607.pdf")
 
 
 if __name__ == "__main__":

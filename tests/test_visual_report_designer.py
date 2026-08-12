@@ -3,12 +3,20 @@ import tempfile
 import unittest
 
 from visual_reports.designer import (
-    ensure_user_definition, open_directory_designer, user_definition_directory,
+    ensure_user_definition, open_directory_designer, resolve_report_definition, user_definition_directory,
     user_definition_path,
 )
 
 
 class TestVisualReportDesignerStorage(unittest.TestCase):
+    def test_current_starter_is_used_until_a_custom_definition_exists(self):
+        with tempfile.TemporaryDirectory() as folder:
+            starter=resolve_report_definition("CMMD01",folder)
+            self.assertEqual(starter.name,"CMMD01.json")
+            self.assertNotEqual(starter.parent,user_definition_directory(folder))
+            custom=ensure_user_definition("CMMD01",folder)
+            self.assertEqual(resolve_report_definition("CMMD01",folder),custom)
+
     def test_starter_is_copied_without_being_overwritten(self):
         with tempfile.TemporaryDirectory() as folder:
             first = ensure_user_definition("CMMD01", folder)
