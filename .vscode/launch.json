@@ -6,17 +6,12 @@
     "configurations": [
         {
             "name": "Python: Current File",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args":[
-                "-s", "192.168.3.200",
-                "-d","ChurchDB",
-                "-u","church",
-                "-p","Church99"
-            ]        
+            "args": ["--ID","275"]
         }
     ]
 }

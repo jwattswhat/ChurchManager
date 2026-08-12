@@ -4,12 +4,12 @@ import JSForm
 host = "192.168.3.200"
 database = "ChurchDB"
 user = "church"
-password = "Church99"
+password = None
 
 def fnResetAutoIncrement(host,database,user,password):
     ChurchDB = JSForm.clsDB(host, database, user, password)
 
-    sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = '{}';".format(database)
+    sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = '{}' ORDER BY table_name;".format(database)
     cursor = ChurchDB.DBConnection.cursor()
     try:
         cursor.execute(sql)
@@ -18,8 +18,8 @@ def fnResetAutoIncrement(host,database,user,password):
     tbls = cursor.fetchall()
     
     for t in tbls:
-        print (t[0])
         sql = "ALTER TABLE {} AUTO_INCREMENT = 1;".format(t[0])
+        print (sql)
         try:
             cursor.execute(sql)
         except Exception as ex:

@@ -14,3 +14,9 @@ Log.txt
 mariadb-service-localhost.ini
 token.json
 client_secret_*.json
+OS.json
+OS.txt
+announcement.txt
+prayers.txt
+.vscode/launch.save*.json
+.vscode/temp
