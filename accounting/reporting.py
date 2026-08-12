@@ -20,6 +20,7 @@ from .general_ledger_service import GeneralLedgerService
 from .register_service import AccountingRegisterService
 from .journal_entry_service import JournalEntryService
 from .reconciliation_report_service import ReconciliationReportService
+from .close_checklist_service import CloseChecklistService
 
 
 ACCOUNTING_DEFINITIONS = Path(__file__).resolve().parent / "report_definitions"
@@ -346,6 +347,25 @@ RECONCILIATION_MANIFEST=_manifest("ACCT-REC","accounting.reconciliation",{
     "Outstanding":{"collection":"totals","field":"Outstanding"},
 })
 
+CLOSE_CONTRACT=JSForm.ReportDatasetContract(
+    "accounting.closechecklist",1,"accounting.reports.run",(
+        JSForm.ReportCollection("church","Church",(
+            field("ID","Church ID","integer"),field("Church","Church Name"),field("Logo","Church Logo","image"))),
+        JSForm.ReportCollection("organization","Accounting Organization",(
+            field("ID","Organization ID","integer"),field("LegalName","Legal Name"),field("ReportingBasis","Reporting Basis"),field("BaseCurrency","Base Currency"))),
+        JSForm.ReportCollection("parameters","Close Period",(
+            field("Display","Fiscal Period"),field("Start","Start","date"),field("End","End","date"),
+            field("PeriodStatus","Period Status"),field("Conclusion","Conclusion"))),
+        JSForm.ReportCollection("records","Readiness Checks",(
+            field("Check","Check"),field("Status","Status"),field("Detail","Explanation"))),
+        JSForm.ReportCollection("totals","Protected Conclusion",(
+            field("Conclusion","Conclusion"),field("Ready","Ready","boolean"))),
+    ))
+CLOSE_MANIFEST=_manifest("ACCT-CLOSE","accounting.closechecklist",{
+    "PeriodStatus":{"collection":"parameters","field":"PeriodStatus"},
+    "Conclusion":{"collection":"totals","field":"Conclusion"},
+})
+
 
 class _AccountingDatasetProvider:
     def __init__(self, connection, authorization):
@@ -644,6 +664,26 @@ class ReconciliationDatasetProvider(_AccountingDatasetProvider):
         return JSForm.ReportDataset.create(RECONCILIATION_CONTRACT,collections)
 
 
+class CloseChecklistDatasetProvider(_AccountingDatasetProvider):
+    def __init__(self,connection,authorization,service=None):
+        super().__init__(connection,authorization);self.service=service or CloseChecklistService(connection)
+
+    def build(self,organization_id,period_id):
+        self.authorization.require("accounting.reports.run","Create Fiscal Period Close Checklist dataset")
+        collections=self._identity(organization_id);result=self.service.run(organization_id,period_id)
+        conclusion=("PERIOD CLOSED" if result["status"]=="CLOSED" else
+                    "READY TO CLOSE" if result["ready"] else "NOT READY TO CLOSE")
+        collections.update({
+            "parameters":[{"Display":f"{result['period']} ({result['start']} through {result['end']})",
+                           "Start":result["start"],"End":result["end"],
+                           "PeriodStatus":result["status"],"Conclusion":conclusion}],
+            "records":[{"Check":r["check"],"Status":r["status"],"Detail":r["detail"]}
+                       for r in result["checks"]],
+            "totals":[{"Conclusion":conclusion,"Ready":result["ready"]}],
+        })
+        return JSForm.ReportDataset.create(CLOSE_CONTRACT,collections)
+
+
 class TrialBalanceDatasetProvider:
     def __init__(self, connection, authorization, service=None):
         self.connection = connection
@@ -880,6 +920,14 @@ class AccountingVisualReportService:
     def design_reconciliation(self,reconciliation_id):
         return self._design("ACCT-REC",RECONCILIATION_CONTRACT,RECONCILIATION_MANIFEST,
                             ReconciliationDatasetProvider(self.connection,self.authorization),reconciliation_id)
+
+    def run_close_checklist(self,organization_id,period_id):
+        return self._run("ACCT-CLOSE",CLOSE_CONTRACT,CLOSE_MANIFEST,
+                         CloseChecklistDatasetProvider(self.connection,self.authorization),organization_id,period_id)
+
+    def design_close_checklist(self,organization_id,period_id):
+        return self._design("ACCT-CLOSE",CLOSE_CONTRACT,CLOSE_MANIFEST,
+                            CloseChecklistDatasetProvider(self.connection,self.authorization),organization_id,period_id)
 
     def design_trial_balance(self, organization_id, as_of_date):
         self.authorization.require("accounting.reports.run", "view Trial Balance data")

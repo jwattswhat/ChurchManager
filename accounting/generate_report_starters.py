@@ -151,6 +151,16 @@ def reconciliation_definition():
     return item
 
 
+def close_definition():
+    item=definition("ACCT-CLOSE","Fiscal Period Close Checklist","accounting.closechecklist",(
+        column("Check","Check",180),column("Status","Status",90),column("Detail","Explanation",450),
+    ),(("Conclusion","Close readiness conclusion","Conclusion","text"),))
+    controls=item["ACCT-CLOSEREPORT"]["CONTROLS"]
+    controls["PeriodStatus"]={"type":"text","band":"ReportHeader","position":[80,89],"size":[200,14],
+                              "collection":"parameters","field":"PeriodStatus","prefix":"Period status: ","fontsize":8}
+    return item
+
+
 REPORTS = (
     definition("ACCT-FP", "Statement of Financial Position", "accounting.position", (
         column("Section","Section",170), column("Code","Code",70),
@@ -191,6 +201,7 @@ REPORTS = (
        page_size="legal",content_width=900),
     journal_definition(),
     reconciliation_definition(),
+    close_definition(),
 )
 
 

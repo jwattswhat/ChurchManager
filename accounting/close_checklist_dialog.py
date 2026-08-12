@@ -7,10 +7,11 @@ from .period_close_service import PeriodCloseService
 
 
 class CloseChecklistDialog(wx.Dialog):
-    def __init__(self, parent, service, period_close=None):
+    def __init__(self, parent, service, period_close=None, report_service=None):
         super().__init__(parent, title="Accounting Close Checklist", size=(900, 570))
         self.service = service
         self.period_close = period_close
+        self.report_service = report_service
         self.organization = wx.Choice(self); self.period = wx.Choice(self)
         for item_id, label in service.organizations(): self.organization.Append(str(label), item_id)
         if self.organization.GetCount(): self.organization.SetSelection(0)
@@ -31,9 +32,10 @@ class CloseChecklistDialog(wx.Dialog):
         close_period.Bind(wx.EVT_BUTTON,self.on_close_period)
         reopen_period.Bind(wx.EVT_BUTTON,self.on_reopen_period)
         close=wx.Button(self,wx.ID_CLOSE,"Close")
+        preview=wx.Button(self,label="Preview Checklist PDF");preview.Bind(wx.EVT_BUTTON,self.on_preview);preview.Enable(report_service is not None)
         close.Bind(wx.EVT_BUTTON,lambda event:self.EndModal(wx.ID_CLOSE))
         buttons=wx.BoxSizer(wx.HORIZONTAL);buttons.Add(close_period,0,wx.RIGHT,8)
-        buttons.Add(reopen_period);buttons.AddStretchSpacer();buttons.Add(close)
+        buttons.Add(reopen_period);buttons.AddStretchSpacer();buttons.Add(preview,0,wx.RIGHT,8);buttons.Add(close)
         root=wx.BoxSizer(wx.VERTICAL);root.Add(filters,0,wx.ALL|wx.EXPAND,10)
         root.Add(self.status,0,wx.LEFT|wx.RIGHT|wx.BOTTOM,10)
         root.Add(self.list,1,wx.LEFT|wx.RIGHT|wx.EXPAND,10)
@@ -95,12 +97,20 @@ class CloseChecklistDialog(wx.Dialog):
         wx.MessageBox("The fiscal period was reopened and the action was audited.","Period Reopened")
         self.on_run(None)
 
+    def on_preview(self,event=None):
+        selected=self._selection()
+        if selected is None:return
+        try:self.report_service.run_close_checklist(*selected)
+        except Exception as error:wx.MessageBox(str(error),"Close Checklist Report",wx.OK|wx.ICON_ERROR,self)
+
 
 def show_close_checklist(parent,connection,session,authorization):
     authorization.require("accounting.reports.run","run the accounting close checklist")
     period_close = None
     if authorization.has_permission("accounting.periods.override"):
         period_close = PeriodCloseService(connection, session.user_id)
-    dialog=CloseChecklistDialog(parent,CloseChecklistService(connection),period_close)
+    from .reporting import AccountingVisualReportService
+    dialog=CloseChecklistDialog(parent,CloseChecklistService(connection),period_close,
+                                AccountingVisualReportService(connection,authorization,session))
     try:dialog.ShowModal()
     finally:dialog.Destroy()
