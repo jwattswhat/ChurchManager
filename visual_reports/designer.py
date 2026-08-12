@@ -62,8 +62,12 @@ def build_directory_preview(definition, authorization):
 
 
 def user_definition_path(report_code, local_app_data=None):
+    return user_definition_directory(local_app_data) / f"{report_code}.json"
+
+
+def user_definition_directory(local_app_data=None):
     base = Path(local_app_data or os.environ["LOCALAPPDATA"])
-    return base / "ChurchManager" / "ReportDefinitions" / f"{report_code}.json"
+    return base / "ChurchManager" / "ReportDefinitions"
 
 
 def ensure_user_definition(report_code, local_app_data=None):
@@ -87,10 +91,18 @@ def open_directory_designer(local_app_data=None, authorization=None):
     def preview(definition):
         return build_directory_preview(definition, authorization)
 
-    return JSForm.open_report_designer(
-        ensure_user_definition("CMMD01", local_app_data),
-        dataset_contract=DIRECTORY_CONTRACT,
-        preview_handler=preview,
-        starter_definition_path=STARTERS / "CMMD01.json",
-        export_directory=ROOT.parent / "Reports",
+    ensure_user_definition("CMMD01", local_app_data)
+
+    def open_definition(path):
+        starter = STARTERS / path.name
+        JSForm.open_report_designer(
+            path,
+            dataset_contract=DIRECTORY_CONTRACT,
+            preview_handler=preview,
+            starter_definition_path=starter if starter.is_file() else None,
+            export_directory=ROOT.parent / "Reports",
+        )
+
+    return JSForm.open_report_catalog(
+        user_definition_directory(local_app_data), STARTERS, open_definition,
     )
