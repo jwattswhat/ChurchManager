@@ -35,9 +35,9 @@ def journal_entry_html(report):
 
 
 class JournalEntryDialog(wx.Dialog):
-    def __init__(self, parent, report):
+    def __init__(self, parent, report, report_service=None):
         super().__init__(parent, title="Journal Entry Report", size=(1050, 700))
-        self.report = report; h = report["header"]
+        self.report = report; self.report_service=report_service; h = report["header"]
         details = wx.StaticText(self, label="Transaction #{}    {}    {}    {}\n{}\nReference: {}\nCreated by {}    Reviewed by {}    Posted by {}\nOriginal: {}    Reversal: {}".format(h[1], h[2], h[3], h[5], h[6], h[7], h[9], h[11] or "(none)", h[13] or "(none)", h[14] or "(none)", h[15] or "(none)"))
         self.lines = wx.ListCtrl(self, style=wx.LC_REPORT)
         for i,(label,width) in enumerate((("#",35),("Account",190),("Fund",135),("Function",110),("Payee",100),("Description",180),("Debit",90),("Credit",90))):
@@ -47,9 +47,9 @@ class JournalEntryDialog(wx.Dialog):
             for column,value in enumerate((*item[1:6],money(item[6]),money(item[7])),1): self.lines.SetItem(row,column,str(value))
         names = ", ".join(item[0] for item in report["attachments"]) or "None"
         attachments = wx.StaticText(self,label="Attachments: " + names)
-        save = wx.Button(self,label="Save / Print Report"); close=wx.Button(self,wx.ID_CLOSE,"Close")
-        save.Bind(wx.EVT_BUTTON,self.on_save); close.Bind(wx.EVT_BUTTON,lambda event:self.EndModal(wx.ID_CLOSE))
-        buttons=wx.BoxSizer(wx.HORIZONTAL);buttons.Add(save);buttons.AddStretchSpacer();buttons.Add(close)
+        save = wx.Button(self,label="Save / Print Report (HTML)");pdf=wx.Button(self,label="Preview PDF"); close=wx.Button(self,wx.ID_CLOSE,"Close")
+        save.Bind(wx.EVT_BUTTON,self.on_save);pdf.Bind(wx.EVT_BUTTON,self.on_pdf);pdf.Enable(report_service is not None); close.Bind(wx.EVT_BUTTON,lambda event:self.EndModal(wx.ID_CLOSE))
+        buttons=wx.BoxSizer(wx.HORIZONTAL);buttons.Add(save);buttons.Add(pdf,0,wx.LEFT,8);buttons.AddStretchSpacer();buttons.Add(close)
         root=wx.BoxSizer(wx.VERTICAL);root.Add(details,0,wx.ALL|wx.EXPAND,10);root.Add(self.lines,1,wx.LEFT|wx.RIGHT|wx.EXPAND,10);root.Add(attachments,0,wx.ALL|wx.EXPAND,10);root.Add(buttons,0,wx.ALL|wx.EXPAND,10);self.SetSizer(root)
     def on_save(self,event):
         number=self.report["header"][1]
@@ -58,3 +58,6 @@ class JournalEntryDialog(wx.Dialog):
             if dialog.ShowModal()!=wx.ID_OK:return
             path=Path(dialog.GetPath());path.write_text(journal_entry_html(self.report),encoding="utf-8");os.startfile(str(path))
         finally:dialog.Destroy()
+    def on_pdf(self,event):
+        try:self.report_service.run_journal_entry(self.report["header"][0])
+        except Exception as error:wx.MessageBox(str(error),"Journal Entry PDF",wx.OK|wx.ICON_ERROR,self)

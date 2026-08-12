@@ -102,7 +102,7 @@ class AccountingRegisterDialog(wx.Dialog):
             report = JournalEntryService(self.service.connection).report(self.rows[index][0])
         except ValueError as error:
             wx.MessageBox(str(error), "Journal Entry Report", wx.OK | wx.ICON_WARNING); return
-        dialog = JournalEntryDialog(self, report)
+        dialog = JournalEntryDialog(self, report, self.report_service)
         try: dialog.ShowModal()
         finally: dialog.Destroy()
 

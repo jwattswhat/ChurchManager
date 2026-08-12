@@ -106,6 +106,51 @@ def budget_definition(code,title,dataset):
     return item
 
 
+def journal_definition():
+    item=definition("ACCT-JE","Journal Entry","accounting.journalentry",(
+        column("Line","#",30,"integer"),column("Account","Account",165),column("Fund","Fund",120),
+        column("Function","Function",90),column("Payee","Payee",90),column("Description","Description",175),
+        column("Debit","Debit",70,"currency","right"),column("Credit","Credit",70,"currency","right"),
+    ),(("DebitTotal","Debits","Debit"),("CreditTotal","Credits","Credit"),("Difference","Difference","Difference")),
+       page_size="legal",content_width=810)
+    root=item["ACCT-JEREPORT"]
+    root["REPORT"]["bands"]["ReportHeader"]["height"]=154
+    root["REPORT"]["bands"]["Detail"]["height"]=76
+    controls=root["CONTROLS"]
+    controls["ChurchName"]["size"]=[650,22];controls["OrganizationName"]["size"]=[650,17]
+    controls["ReportTitle"]["size"]=[650,20];controls["Period"]["size"]=[650,16]
+    controls["RunUser"]["position"]=[600,89]
+    for name,label,field_name,y in (
+        ("Created","Created","Created",106),("Reviewed","Reviewed","Reviewed",121),("Posted","Posted","Posted",136)):
+        controls[name]={"type":"text","band":"ReportHeader","position":[80,y],"size":[650,14],
+                        "collection":"parameters","field":field_name,"prefix":label+": ","fontsize":8}
+    controls["Attachments"]={"type":"table","band":"Detail","position":[0,40],"size":[810,34],
+        "repeatcollection":"attachments","visiblewhen":{"collection":"parameters","field":"HasAttachments","operator":"equals","value":True},
+        "columns":[
+            {**column("Name","Attachment",180),"collection":"attachments"},
+            {**column("Type","Type",100),"collection":"attachments"},
+            {**column("Hash","SHA-256 hash",390),"collection":"attachments"},
+            {**column("AddedAt","Added",140,"datetime"),"collection":"attachments"}]}
+    return item
+
+
+def reconciliation_definition():
+    item=definition("ACCT-REC","Bank Reconciliation Report","accounting.reconciliation",(
+        column("Status","Status",80),column("Date","Transaction date",85,"date"),column("Number","No.",55,"integer"),
+        column("Description","Description",260),column("Reference","Reference",145),
+        column("Amount","Amount",100,"currency","right"),column("ClearedDate","Cleared date",95,"date"),
+    ),(("Beginning","Beginning","Beginning"),("Cleared","Cleared activity","Cleared"),
+       ("Ending","Statement ending","Ending"),("Difference","Difference","Difference"),
+       ("Outstanding","Outstanding","Outstanding")),page_size="legal",content_width=820)
+    root=item["ACCT-RECREPORT"];root["REPORT"]["bands"]["ReportHeader"]["height"]=132
+    controls=root["CONTROLS"]
+    controls["PreparedBy"]={"type":"text","band":"ReportHeader","position":[80,106],"size":[300,14],
+                            "collection":"parameters","field":"PreparedBy","prefix":"Prepared by: ","fontsize":8}
+    controls["CompletedAt"]={"type":"text","band":"ReportHeader","position":[440,106],"size":[300,14],
+                             "collection":"parameters","field":"CompletedAt","format":"datetime","prefix":"Completed: ","fontsize":8,"align":"right"}
+    return item
+
+
 REPORTS = (
     definition("ACCT-FP", "Statement of Financial Position", "accounting.position", (
         column("Section","Section",170), column("Code","Code",70),
@@ -144,6 +189,8 @@ REPORTS = (
         column("Total","Total",80,"currency","right"),
     ),(("TransactionCount","Transactions","TransactionCount","integer"),("RegisterTotal","Register total","Total")),
        page_size="legal",content_width=900),
+    journal_definition(),
+    reconciliation_definition(),
 )
 
 

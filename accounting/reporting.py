@@ -18,6 +18,8 @@ from .functional_expense_service import FunctionalExpenseService
 from .budget_actual_service import BudgetActualService
 from .general_ledger_service import GeneralLedgerService
 from .register_service import AccountingRegisterService
+from .journal_entry_service import JournalEntryService
+from .reconciliation_report_service import ReconciliationReportService
 
 
 ACCOUNTING_DEFINITIONS = Path(__file__).resolve().parent / "report_definitions"
@@ -290,6 +292,60 @@ REGISTER_MANIFEST=_manifest("ACCT-REG","accounting.register",{
     "RegisterTotal":{"collection":"totals","field":"Total"},
 })
 
+JOURNAL_CONTRACT=JSForm.ReportDatasetContract(
+    "accounting.journalentry",1,"accounting.transactions.view",(
+        JSForm.ReportCollection("church","Church",(
+            field("ID","Church ID","integer"),field("Church","Church Name"),field("Logo","Church Logo","image"))),
+        JSForm.ReportCollection("organization","Accounting Organization",(
+            field("ID","Organization ID","integer"),field("LegalName","Legal Name"),field("ReportingBasis","Reporting Basis"),field("BaseCurrency","Base Currency"))),
+        JSForm.ReportCollection("parameters","Transaction Metadata",(
+            field("Display","Transaction"),field("Number","Number","integer"),field("Date","Date","date"),
+            field("TypeStatus","Type and Status"),field("Description","Description"),field("Reference","Reference"),
+            field("Created","Created Attribution"),field("Reviewed","Reviewed Attribution"),field("Posted","Posted Attribution"),
+            field("ReversalLinks","Original and Reversal Links"),field("HasAttachments","Has Attachments","boolean"))),
+        JSForm.ReportCollection("records","Journal Lines",(
+            field("Line","Line","integer"),field("Account","Account"),field("Fund","Fund"),field("Function","Function"),
+            field("Payee","Payee"),field("Description","Description"),field("Debit","Debit","currency"),field("Credit","Credit","currency"))),
+        JSForm.ReportCollection("attachments","Attachments",(
+            field("Name","File Name"),field("Type","Document Type"),field("Hash","SHA-256 Hash"),field("AddedAt","Added","datetime"))),
+        JSForm.ReportCollection("totals","Protected Totals",(
+            field("Debit","Total Debits","currency"),field("Credit","Total Credits","currency"),field("Difference","Difference","currency"))),
+    ))
+JOURNAL_MANIFEST=_manifest("ACCT-JE","accounting.journalentry",{
+    "Created":{"collection":"parameters","field":"Created"},
+    "Reviewed":{"collection":"parameters","field":"Reviewed"},
+    "Posted":{"collection":"parameters","field":"Posted"},
+    "DebitTotal":{"collection":"totals","field":"Debit"},
+    "CreditTotal":{"collection":"totals","field":"Credit"},
+    "Difference":{"collection":"totals","field":"Difference"},
+})
+
+RECONCILIATION_CONTRACT=JSForm.ReportDatasetContract(
+    "accounting.reconciliation",1,"accounting.reports.run",(
+        JSForm.ReportCollection("church","Church",(
+            field("ID","Church ID","integer"),field("Church","Church Name"),field("Logo","Church Logo","image"))),
+        JSForm.ReportCollection("organization","Accounting Organization",(
+            field("ID","Organization ID","integer"),field("LegalName","Legal Name"),field("ReportingBasis","Reporting Basis"),field("BaseCurrency","Base Currency"))),
+        JSForm.ReportCollection("parameters","Reconciliation Metadata",(
+            field("Display","Selection"),field("BankAccount","Bank Account"),field("StatementDate","Statement Date","date"),
+            field("PreparedBy","Prepared By"),field("CompletedAt","Completed At","datetime"))),
+        JSForm.ReportCollection("records","Reconciliation Items",(
+            field("Status","Status"),field("Date","Transaction Date","date"),field("Number","Number","integer"),
+            field("Description","Description"),field("Reference","Reference"),field("Amount","Amount","currency"),
+            field("ClearedDate","Cleared Date","date"))),
+        JSForm.ReportCollection("totals","Protected Reconciliation Proof",(
+            field("Beginning","Beginning Balance","currency"),field("Cleared","Cleared Activity","currency"),
+            field("Ending","Statement Ending Balance","currency"),field("Difference","Difference","currency"),
+            field("Outstanding","Outstanding Total","currency"))),
+    ))
+RECONCILIATION_MANIFEST=_manifest("ACCT-REC","accounting.reconciliation",{
+    "PreparedBy":{"collection":"parameters","field":"PreparedBy"},
+    "CompletedAt":{"collection":"parameters","field":"CompletedAt"},
+    "Beginning":{"collection":"totals","field":"Beginning"},"Cleared":{"collection":"totals","field":"Cleared"},
+    "Ending":{"collection":"totals","field":"Ending"},"Difference":{"collection":"totals","field":"Difference"},
+    "Outstanding":{"collection":"totals","field":"Outstanding"},
+})
+
 
 class _AccountingDatasetProvider:
     def __init__(self, connection, authorization):
@@ -528,6 +584,66 @@ class RegisterDatasetProvider(_AccountingDatasetProvider):
         return JSForm.ReportDataset.create(REGISTER_CONTRACT,collections)
 
 
+class JournalEntryDatasetProvider(_AccountingDatasetProvider):
+    def __init__(self,connection,authorization,service=None):
+        super().__init__(connection,authorization);self.service=service or JournalEntryService(connection)
+
+    def build(self,transaction_id):
+        self.authorization.require("accounting.transactions.view","Create Journal Entry report dataset")
+        result=self.service.report(transaction_id);header=result["header"]
+        cursor=self.connection.cursor()
+        try:
+            cursor.execute(f"SELECT ID FROM tblAccountingOrganization WHERE LegalName={self.marker}",(header[2],))
+            selected=cursor.fetchone()
+        finally:cursor.close()
+        if selected is None:raise ValueError("The transaction organization is unavailable.")
+        collections=self._identity(selected[0])
+        def attribution(at,name):return f"{at or '(not recorded)'} by {name or '(none)'}"
+        metadata={"Display":f"Journal Entry #{header[1]}","Number":header[1],"Date":header[3],
+                  "TypeStatus":f"{str(header[4]).replace('_',' ').title()} / {str(header[5]).title()}",
+                  "Description":header[6] or "","Reference":header[7] or "",
+                  "Created":attribution(header[8],header[9]),"Reviewed":attribution(header[10],header[11]),
+                  "Posted":attribution(header[12],header[13]),
+                  "ReversalLinks":f"Original: {header[14] or '(none)'}    Reversal: {header[15] or '(none)'}",
+                  "HasAttachments":bool(result["attachments"])}
+        records=[{"Line":r[0],"Account":r[1],"Fund":r[2],"Function":r[3],"Payee":r[4],
+                  "Description":r[5],"Debit":r[6],"Credit":r[7]} for r in result["lines"]]
+        attachments=[{"Name":r[0],"Type":r[1],"Hash":r[2],"AddedAt":r[3]} for r in result["attachments"]]
+        debit=sum((r["Debit"] for r in records),Decimal("0"));credit=sum((r["Credit"] for r in records),Decimal("0"))
+        collections.update({"parameters":[metadata],"records":records,"attachments":attachments,
+                            "totals":[{"Debit":debit,"Credit":credit,"Difference":debit-credit}]})
+        return JSForm.ReportDataset.create(JOURNAL_CONTRACT,collections)
+
+
+class ReconciliationDatasetProvider(_AccountingDatasetProvider):
+    def __init__(self,connection,authorization,service=None):
+        super().__init__(connection,authorization);self.service=service or ReconciliationReportService(connection)
+
+    def build(self,reconciliation_id):
+        self.authorization.require("accounting.reports.run","Create Bank Reconciliation report dataset")
+        cursor=self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT b.OrganizationID,u.DisplayName,r.CompletedAt FROM tblAccountingReconciliation r "
+                "JOIN tblAccountingBankAccount b ON b.ID=r.BankAccountID JOIN tblUser u ON u.ID=r.PreparedByUserID "
+                f"WHERE r.ID={self.marker} AND r.Status='COMPLETED'",(reconciliation_id,))
+            metadata=cursor.fetchone()
+        finally:cursor.close()
+        if metadata is None:raise ValueError("Select a completed reconciliation.")
+        result=self.service.detail(reconciliation_id);collections=self._identity(metadata[0])
+        records=[{"Status":r[0],"Date":r[1],"Number":r[2],"Description":r[3] or "",
+                  "Reference":r[4] or "","Amount":r[5],"ClearedDate":r[6]} for r in result["items"]]
+        collections.update({
+            "parameters":[{"Display":f"{result['bank_account']} - statement date {result['statement_date']}",
+                           "BankAccount":result["bank_account"],"StatementDate":result["statement_date"],
+                           "PreparedBy":metadata[1],"CompletedAt":metadata[2]}],
+            "records":records,"totals":[{"Beginning":result["beginning"],"Cleared":result["cleared_total"],
+                "Ending":result["ending"],"Difference":result["difference"],
+                "Outstanding":result["outstanding_total"]}],
+        })
+        return JSForm.ReportDataset.create(RECONCILIATION_CONTRACT,collections)
+
+
 class TrialBalanceDatasetProvider:
     def __init__(self, connection, authorization, service=None):
         self.connection = connection
@@ -748,6 +864,22 @@ class AccountingVisualReportService:
     def design_register(self):
         return self._design("ACCT-REG",REGISTER_CONTRACT,REGISTER_MANIFEST,
                             RegisterDatasetProvider(self.connection,self.authorization))
+
+    def run_journal_entry(self,transaction_id):
+        return self._run("ACCT-JE",JOURNAL_CONTRACT,JOURNAL_MANIFEST,
+                         JournalEntryDatasetProvider(self.connection,self.authorization),transaction_id)
+
+    def design_journal_entry(self,transaction_id):
+        return self._design("ACCT-JE",JOURNAL_CONTRACT,JOURNAL_MANIFEST,
+                            JournalEntryDatasetProvider(self.connection,self.authorization),transaction_id)
+
+    def run_reconciliation(self,reconciliation_id):
+        return self._run("ACCT-REC",RECONCILIATION_CONTRACT,RECONCILIATION_MANIFEST,
+                         ReconciliationDatasetProvider(self.connection,self.authorization),reconciliation_id)
+
+    def design_reconciliation(self,reconciliation_id):
+        return self._design("ACCT-REC",RECONCILIATION_CONTRACT,RECONCILIATION_MANIFEST,
+                            ReconciliationDatasetProvider(self.connection,self.authorization),reconciliation_id)
 
     def design_trial_balance(self, organization_id, as_of_date):
         self.authorization.require("accounting.reports.run", "view Trial Balance data")

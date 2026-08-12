@@ -7,9 +7,9 @@ from .reconciliation_report_service import ReconciliationReportService
 
 
 class ReconciliationReportDialog(wx.Dialog):
-    def __init__(self, parent, service):
+    def __init__(self, parent, service, report_service=None):
         super().__init__(parent, title="Bank Reconciliation Report", size=(1050, 680))
-        self.service, self.rows = service, []
+        self.service, self.report_service, self.rows = service, report_service, []
         self.reconciliations = wx.ListCtrl(self, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         for index, (label, width) in enumerate((
             ("Bank account", 180), ("Statement date", 100), ("Beginning", 100),
@@ -32,10 +32,11 @@ class ReconciliationReportDialog(wx.Dialog):
         self.items.SetColumn(5, amount_column)
         refresh = wx.Button(self, label="Refresh")
         refresh.Bind(wx.EVT_BUTTON, self.refresh)
+        preview=wx.Button(self,label="Preview PDF");preview.Bind(wx.EVT_BUTTON,self.on_preview);preview.Enable(report_service is not None)
         close = wx.Button(self, wx.ID_CLOSE, "Close")
         close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
         buttons = wx.BoxSizer(wx.HORIZONTAL); buttons.Add(refresh)
-        buttons.AddStretchSpacer(); buttons.Add(close)
+        buttons.AddStretchSpacer();buttons.Add(preview,0,wx.RIGHT,8); buttons.Add(close)
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(wx.StaticText(self, label="Completed reconciliations"), 0, wx.ALL, 10)
         root.Add(self.reconciliations, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
@@ -70,9 +71,17 @@ class ReconciliationReportDialog(wx.Dialog):
                       money(item[5]), item[6] or "")
             for column, value in enumerate(values, 1): self.items.SetItem(row, column, str(value))
 
+    def on_preview(self,event=None):
+        index=self.reconciliations.GetFirstSelected()
+        if index<0:wx.MessageBox("Select a completed reconciliation.","Reconciliation Report");return
+        try:self.report_service.run_reconciliation(self.rows[index][0])
+        except Exception as error:wx.MessageBox(str(error),"Reconciliation Report",wx.OK|wx.ICON_ERROR,self)
+
 
 def show_reconciliation_report(parent, connection, session, authorization):
     authorization.require("accounting.reports.run", "run bank reconciliation reports")
-    dialog = ReconciliationReportDialog(parent, ReconciliationReportService(connection))
+    from .reporting import AccountingVisualReportService
+    dialog = ReconciliationReportDialog(parent, ReconciliationReportService(connection),
+                                        AccountingVisualReportService(connection,authorization,session))
     try: dialog.ShowModal()
     finally: dialog.Destroy()

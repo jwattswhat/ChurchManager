@@ -16,6 +16,8 @@ from accounting.reporting import (
     BUDGET_ACTUAL_CONTRACT, BUDGET_ACTUAL_MANIFEST, BudgetDatasetProvider,
     GENERAL_LEDGER_CONTRACT, GENERAL_LEDGER_MANIFEST, GeneralLedgerDatasetProvider,
     REGISTER_CONTRACT, REGISTER_MANIFEST,
+    JOURNAL_CONTRACT, JOURNAL_MANIFEST, JournalEntryDatasetProvider,
+    RECONCILIATION_CONTRACT, RECONCILIATION_MANIFEST,
     POSITION_CONTRACT, POSITION_MANIFEST, FinancialPositionDatasetProvider,
     TRIAL_BALANCE_CONTRACT, TRIAL_BALANCE_MANIFEST, TrialBalanceDatasetProvider,
 )
@@ -143,6 +145,20 @@ class GeneralLedgerServiceStub:
                      Decimal("50"),Decimal("0"),Decimal("150"))]}
 
 
+class JournalServiceStub:
+    @staticmethod
+    def report(transaction_id):
+        return {"header":(transaction_id,7,"Reformation Lutheran Church",date(2027,1,11),
+                "CASH_DISBURSEMENT","POSTED","Test payment","CHK-7",datetime(2027,1,11,9),
+                "Jonathan Watt",datetime(2027,1,11,10),"Sarah Johnson",datetime(2027,1,11,11),
+                "Jonathan Watt",None,None),
+                "lines":[(1,"1000 - Checking","GEN - General","","Vendor","Payment",
+                           Decimal("0"),Decimal("25")),
+                         (2,"5000 - Expense","GEN - General","","Vendor","Payment",
+                           Decimal("25"),Decimal("0"))],
+                "attachments":[("receipt.pdf","application/pdf","abc123",datetime(2027,1,11,9,30))]}
+
+
 class Session:
     display_name = "Jonathan Watt"
 
@@ -231,6 +247,8 @@ class TestAccountingVisualReports(unittest.TestCase):
             ("ACCT-BUD",ADOPTED_BUDGET_CONTRACT,ADOPTED_BUDGET_MANIFEST),
             ("ACCT-GL",GENERAL_LEDGER_CONTRACT,GENERAL_LEDGER_MANIFEST),
             ("ACCT-REG",REGISTER_CONTRACT,REGISTER_MANIFEST),
+            ("ACCT-JE",JOURNAL_CONTRACT,JOURNAL_MANIFEST),
+            ("ACCT-REC",RECONCILIATION_CONTRACT,RECONCILIATION_MANIFEST),
         ):
             definition=loader.load(root / f"{code}.json")
             self.assertEqual(definition.dataset_name,contract.name)
@@ -299,6 +317,14 @@ class TestAccountingVisualReports(unittest.TestCase):
         self.assertEqual(definition.settings["pagesize"],"legal")
         self.assertEqual(sum(column["width"] for column in definition.controls["Records"]["columns"]),900)
 
+    def test_journal_entry_dataset_preserves_attribution_hashes_and_balance(self):
+        dataset=JournalEntryDatasetProvider(
+            Connection(),Authorization(),JournalServiceStub(),
+        ).build(7)
+        self.assertIn("Sarah Johnson",dataset.collections["parameters"][0]["Reviewed"])
+        self.assertEqual(dataset.collections["attachments"][0]["Hash"],"abc123")
+        self.assertEqual(dataset.collections["totals"][0]["Difference"],Decimal("0"))
+
     def test_core_statement_starters_render_to_pdf(self):
         root=Path(__file__).parents[1]/"accounting"/"report_definitions"
         providers=(
@@ -314,6 +340,7 @@ class TestAccountingVisualReports(unittest.TestCase):
              (3,12)),
             ("ACCT-GL",GeneralLedgerDatasetProvider(Connection(),Authorization(),GeneralLedgerServiceStub()),
              (1,10,date(2027,1,1),date(2027,1,31))),
+            ("ACCT-JE",JournalEntryDatasetProvider(Connection(),Authorization(),JournalServiceStub()),(7,)),
         )
         with tempfile.TemporaryDirectory() as folder:
             for code,provider,arguments in providers:
