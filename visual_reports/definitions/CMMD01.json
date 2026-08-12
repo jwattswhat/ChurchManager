@@ -13,7 +13,9 @@
       "bands": {
         "ReportHeader": {"type": "reportheader", "height": 112},
         "PageHeader": {"type": "pageheader", "height": 22, "repeat": true},
-        "HouseholdHeader": {"type": "groupheader", "height": 96},
+        "HouseholdHeader": {
+          "type": "groupheader", "height": 96, "minimumheight": 42, "autofit": true
+        },
         "PersonDetail": {"type": "detail", "height": 42},
         "HouseholdFooter": {"type": "groupfooter", "height": 9},
         "PageFooter": {"type": "pagefooter", "height": 24, "repeat": true}
@@ -64,7 +66,7 @@
       },
       "FamilyImage": {
         "type": "image", "band": "HouseholdHeader", "position": [0, 7], "size": [80, 72],
-        "collection": "directory_people", "field": "FamilyImage"
+        "collection": "directory_people", "field": "FamilyImage", "affectautofit": false
       },
       "FamilyName": {
         "type": "text", "band": "HouseholdHeader", "position": [94, 4], "size": [250, 19],
