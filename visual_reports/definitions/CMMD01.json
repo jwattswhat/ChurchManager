@@ -13,11 +13,20 @@
       "bands": {
         "ReportHeader": {"type": "reportheader", "height": 112},
         "PageHeader": {"type": "pageheader", "height": 22, "repeat": true},
-        "DirectoryDetail": {"type": "detail", "height": 104},
+        "HouseholdHeader": {"type": "groupheader", "height": 96},
+        "PersonDetail": {"type": "detail", "height": 42},
+        "HouseholdFooter": {"type": "groupfooter", "height": 9},
         "PageFooter": {"type": "pagefooter", "height": 24, "repeat": true}
       },
       "sort": [
-        {"collection": "directory_entries", "field": "FamilyName", "direction": "ascending"}
+        {"collection": "directory_people", "field": "FamilyName", "direction": "ascending"},
+        {"collection": "directory_people", "field": "PersonName", "direction": "ascending"}
+      ],
+      "groups": [
+        {
+          "name": "Household", "collection": "directory_people", "field": "FamilyID",
+          "headerband": "HouseholdHeader", "footerband": "HouseholdFooter", "keeptogether": true
+        }
       ]
     },
     "CONTROLS": {
@@ -53,17 +62,40 @@
         "type": "label", "band": "PageHeader", "position": [0, 1], "size": [540, 15],
         "label": "Household Directory", "fontsize": 9, "bold": true, "color": "#46525C"
       },
-      "FamilyDirectoryEntry": {
-        "type": "repeater", "band": "DirectoryDetail", "position": [0, 0], "size": [540, 100],
-        "repeatcollection": "directory_entries", "itemheight": 100,
+      "FamilyImage": {
+        "type": "image", "band": "HouseholdHeader", "position": [0, 7], "size": [80, 72],
+        "collection": "directory_people", "field": "FamilyImage"
+      },
+      "FamilyName": {
+        "type": "text", "band": "HouseholdHeader", "position": [94, 4], "size": [250, 19],
+        "collection": "directory_people", "field": "FamilyName", "fontsize": 11,
+        "bold": true, "color": "#1F4058"
+      },
+      "MarriageStatus": {
+        "type": "text", "band": "HouseholdHeader", "position": [350, 5], "size": [186, 16],
+        "collection": "directory_people", "field": "MarriageStatus", "fontsize": 8,
+        "italic": true, "align": "right", "color": "#555555"
+      },
+      "FamilyAddress": {
+        "type": "text", "band": "HouseholdHeader", "position": [94, 30], "size": [250, 52],
+        "collection": "directory_people", "field": "FamilyAddressLines", "format": "address", "fontsize": 8
+      },
+      "FamilyContacts": {
+        "type": "text", "band": "HouseholdHeader", "position": [358, 30], "size": [178, 52],
+        "collection": "directory_people", "field": "FamilyContactLines", "fontsize": 8
+      },
+      "Individuals": {
+        "type": "repeater", "band": "PersonDetail", "position": [94, 0], "size": [442, 38],
+        "repeatcollection": "directory_people", "itemheight": 42,
         "items": [
-          {"name": "FamilyImage", "type": "image", "field": "FamilyImage", "position": [4, 6], "size": [80, 72]},
-          {"name": "FamilyName", "field": "FamilyName", "position": [94, 4], "size": [250, 18], "fontsize": 11, "bold": true, "color": "#1F4058"},
-          {"name": "MarriageStatus", "field": "MarriageStatus", "position": [350, 5], "size": [186, 15], "fontsize": 8, "italic": true, "align": "right", "color": "#555555"},
-          {"name": "MemberDetails", "field": "MemberDetails", "position": [94, 27], "size": [252, 14], "fontsize": 8},
-          {"name": "FamilyAddressLines", "field": "FamilyAddressLines", "position": [358, 27], "size": [178, 14], "fontsize": 8, "format": "address"},
-          {"name": "FamilyContactLines", "field": "FamilyContactLines", "position": [358, 72], "size": [178, 14], "fontsize": 8}
+          {"name": "PersonName", "field": "PersonName", "position": [0, 1], "size": [250, 16], "fontsize": 9, "bold": true},
+          {"name": "Relationship", "field": "Relationship", "position": [264, 1], "size": [174, 15], "fontsize": 8, "italic": true, "align": "right", "color": "#555555"},
+          {"name": "PersonalDetails", "field": "PersonalDetails", "position": [20, 20], "size": [418, 14], "fontsize": 8, "color": "#333333"}
         ]
+      },
+      "HouseholdRule": {
+        "type": "line", "band": "HouseholdFooter", "position": [0, 4], "size": [540, 1],
+        "bordercolor": "#C5CBD0", "borderwidth": 0.5
       },
       "FooterLine": {
         "type": "line", "band": "PageFooter", "position": [0, 0], "size": [540, 1],
@@ -71,7 +103,8 @@
       },
       "FooterText": {
         "type": "label", "band": "PageFooter", "position": [0, 6], "size": [540, 14],
-        "label": "CMMD01 - ChurchManager Member Directory", "fontsize": 8, "color": "#555555", "align": "center"
+        "label": "CMMD01 - ChurchManager Member Directory", "fontsize": 8,
+        "color": "#555555", "align": "center"
       }
     }
   }

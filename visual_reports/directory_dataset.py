@@ -9,6 +9,12 @@ def field(name, label, data_type="text", sensitivity="ordinary"):
     return ReportField(name, label, data_type, sensitivity)
 
 
+def contact_line(contact):
+    label = contact.get("ContactLabel") or contact.get("Type") or "Contact"
+    value = contact.get("Contact") or ""
+    return f"{value} ({label})"
+
+
 DIRECTORY_CONTRACT = ReportDatasetContract(
     name="membership.directory",
     version=1,
@@ -74,6 +80,16 @@ DIRECTORY_CONTRACT = ReportDatasetContract(
             field("MemberDetails", "Member Details", "text", "contact"),
             field("FamilyAddressLines", "Family Addresses", "address", "contact"),
             field("FamilyContactLines", "Family Contacts", "text", "contact"),
+        )),
+        ReportCollection("directory_people", "Directory Households and People", (
+            field("FamilyID", "Family ID", "integer"), field("FamilyName", "Family Name"),
+            field("FamilyImage", "Family Photograph", "image"),
+            field("MarriageStatus", "Marriage Status"),
+            field("FamilyAddressLines", "Family Addresses", "address", "contact"),
+            field("FamilyContactLines", "Family Contacts", "text", "contact"),
+            field("PersonID", "Person ID", "integer"), field("PersonName", "Individual Name"),
+            field("Relationship", "Membership Relationship"),
+            field("PersonalDetails", "Individual Contact Details", "text", "contact"),
         )),
     ),
 )
@@ -162,8 +178,7 @@ class DirectoryDatasetProvider:
             addresses.setdefault(address["FamilyID"], []).append("\n".join(str(line) for line in lines if line))
         contacts = {}
         for contact in collections["family_contacts"]:
-            label = contact.get("ContactLabel") or contact.get("Type") or "Contact"
-            contacts.setdefault(contact["FamilyID"], []).append(f"{label}: {contact.get('Contact') or ''}")
+            contacts.setdefault(contact["FamilyID"], []).append(contact_line(contact))
         person_addresses = {}
         for address in collections["person_addresses"]:
             city_line = ", ".join(part for part in (address.get("City"), address.get("State")) if part)
@@ -176,10 +191,9 @@ class DirectoryDatasetProvider:
                 person_addresses.setdefault(address["PersonID"], []).append(f"{label}: {value}")
         person_contacts = {}
         for contact in collections["person_contacts"]:
-            label = contact.get("ContactLabel") or contact.get("Type") or "Contact"
             if contact.get("Contact"):
                 person_contacts.setdefault(contact["PersonID"], []).append(
-                    f"{label}: {contact['Contact']}"
+                    contact_line(contact)
                 )
 
         def member_detail(person):
@@ -193,6 +207,13 @@ class DirectoryDatasetProvider:
             lines.extend(f"  {value}" for value in person_addresses.get(person["ID"], []))
             lines.extend(f"  {value}" for value in person_contacts.get(person["ID"], []))
             return "\n".join(lines)
+
+        def relationship(person):
+            if person.get("Member"):
+                return "Member"
+            if person.get("AssociateMember"):
+                return "Associate Member"
+            return "Non-Member"
 
         collections["directory_entries"] = [{
             "FamilyID": family["ID"], "FamilyName": family.get("FamilyName") or "",
@@ -209,4 +230,24 @@ class DirectoryDatasetProvider:
             "FamilyAddressLines": "\n".join(addresses.get(family["ID"], [])),
             "FamilyContactLines": "\n".join(contacts.get(family["ID"], [])),
         } for family in collections["families"]]
+        collections["directory_people"] = []
+        for family in collections["families"]:
+            family_people = people.get(family["ID"], []) or [None]
+            for person in family_people:
+                personal_details = []
+                if person is not None:
+                    personal_details.extend(person_addresses.get(person["ID"], []))
+                    personal_details.extend(person_contacts.get(person["ID"], []))
+                collections["directory_people"].append({
+                    "FamilyID": family["ID"],
+                    "FamilyName": family.get("FamilyName") or "",
+                    "FamilyImage": family.get("Image"),
+                    "MarriageStatus": family.get("MarriageStatus") or "",
+                    "FamilyAddressLines": "\n".join(addresses.get(family["ID"], [])),
+                    "FamilyContactLines": "\n".join(contacts.get(family["ID"], [])),
+                    "PersonID": person.get("ID") if person is not None else 0,
+                    "PersonName": person.get("DisplayName") if person is not None else "No individuals listed",
+                    "Relationship": relationship(person) if person is not None else "",
+                    "PersonalDetails": "\n".join(personal_details),
+                })
         return ReportDataset.create(DIRECTORY_CONTRACT, collections)

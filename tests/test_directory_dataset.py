@@ -6,7 +6,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT.parent / "JSForm"))
 
-from visual_reports.directory_dataset import DIRECTORY_CONTRACT, DirectoryDatasetProvider
+from visual_reports.directory_dataset import (
+    DIRECTORY_CONTRACT, DirectoryDatasetProvider, contact_line,
+)
 
 
 class FakeAuthorization:
@@ -49,6 +51,16 @@ class FakeConnection:
 
 
 class TestDirectoryDatasetProvider(unittest.TestCase):
+    def test_contact_label_follows_value(self):
+        self.assertEqual(
+            contact_line({"Contact": "555-0100", "ContactLabel": "Home", "Type": "Phone"}),
+            "555-0100 (Home)",
+        )
+        self.assertEqual(
+            contact_line({"Contact": "name@example.com", "ContactLabel": "", "Type": "Email"}),
+            "name@example.com (Email)",
+        )
+
     def test_permission_is_required_before_database_access(self):
         connection = FakeConnection()
         with self.assertRaises(PermissionError):
