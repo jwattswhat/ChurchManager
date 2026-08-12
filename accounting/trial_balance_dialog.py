@@ -7,7 +7,7 @@ from .trial_balance_service import TrialBalanceService
 from .formatting import money
 
 class TrialBalanceDialog(wx.Dialog):
-    def __init__(self, parent, service):
+    def __init__(self, parent, service, report_service=None):
         super().__init__(parent, title="Trial Balance", size=(900, 620))
         self.service = service
         self.organization = wx.Choice(self)
@@ -16,11 +16,24 @@ class TrialBalanceDialog(wx.Dialog):
         self.as_of = wx.adv.DatePickerCtrl(self)
         run = wx.Button(self, label="Run Trial Balance")
         run.Bind(wx.EVT_BUTTON, self.refresh)
+        preview = wx.Button(self, label="Preview PDF")
+        preview.Bind(wx.EVT_BUTTON, self.preview_pdf)
+        preview.Enable(report_service is not None)
+        customize = wx.Button(self, label="Customize Layout")
+        customize.Bind(wx.EVT_BUTTON, self.customize_layout)
+        can_design = (
+            report_service is not None
+            and report_service.authorization.has_permission("accounting.reports.design")
+        )
+        customize.Enable(can_design)
+        self.report_service = report_service
         header = wx.BoxSizer(wx.HORIZONTAL)
         for label, control in (("Organization", self.organization), ("As of", self.as_of)):
             header.Add(wx.StaticText(self, label=label), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
             header.Add(control, 0, wx.RIGHT, 15)
-        header.Add(run)
+        header.Add(run, 0, wx.RIGHT, 8)
+        header.Add(preview, 0, wx.RIGHT, 8)
+        header.Add(customize)
         self.list = wx.ListCtrl(self, style=wx.LC_REPORT)
         for index, (label, width) in enumerate((
             ("Code",75), ("Account",180), ("Type",90), ("Normal",70),
@@ -60,9 +73,36 @@ class TrialBalanceDialog(wx.Dialog):
             self.status.SetLabel(
                 "Trial balance completed through {}. All posted activity nets to zero, or no transactions have been posted.".format(as_of)
             )
+    def preview_pdf(self, event=None):
+        if self.report_service is None or self.organization.GetSelection() == wx.NOT_FOUND:
+            return
+        value = self.as_of.GetValue()
+        as_of = date(value.GetYear(), value.GetMonth()+1, value.GetDay())
+        try:
+            self.report_service.run_trial_balance(
+                self.organization.GetClientData(self.organization.GetSelection()), as_of,
+            )
+            self.status.SetLabel("The Trial Balance PDF opened in your default viewer.")
+        except Exception as error:
+            wx.MessageBox(str(error), "Trial Balance Report", wx.OK | wx.ICON_ERROR, self)
+    def customize_layout(self, event=None):
+        if self.report_service is None or self.organization.GetSelection() == wx.NOT_FOUND:
+            return
+        value = self.as_of.GetValue()
+        as_of = date(value.GetYear(), value.GetMonth()+1, value.GetDay())
+        try:
+            self.report_service.design_trial_balance(
+                self.organization.GetClientData(self.organization.GetSelection()), as_of,
+            )
+        except Exception as error:
+            wx.MessageBox(str(error), "Trial Balance Report Designer", wx.OK | wx.ICON_ERROR, self)
 
 def show_trial_balance(parent, connection, session, authorization):
     authorization.require("accounting.reports.run", "run accounting reports")
-    dialog = TrialBalanceDialog(parent, TrialBalanceService(connection))
+    from .reporting import AccountingVisualReportService
+    dialog = TrialBalanceDialog(
+        parent, TrialBalanceService(connection),
+        AccountingVisualReportService(connection, authorization, session),
+    )
     try: dialog.ShowModal()
     finally: dialog.Destroy()

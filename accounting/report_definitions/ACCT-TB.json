@@ -1,0 +1,117 @@
+{
+  "ACCT-TBREPORT": {
+    "REPORT": {
+      "schema_version": 1,
+      "name": "ACCT-TB",
+      "title": "Trial Balance",
+      "dataset": "accounting.trialbalance",
+      "datasetversion": 1,
+      "pagesize": "letter",
+      "orientation": "landscape",
+      "margins": {"top": 30, "right": 36, "bottom": 30, "left": 36},
+      "theme": "churchmanager.accounting",
+      "classification": "official",
+      "emptytext": "No posted account activity exists through the selected as-of date.",
+      "bands": {
+        "ReportHeader": {"type": "reportheader", "height": 104},
+        "PageHeader": {"type": "pageheader", "height": 8, "repeat": true},
+        "Detail": {"type": "detail", "height": 42},
+        "ReportFooter": {"type": "reportfooter", "height": 58},
+        "PageFooter": {"type": "pagefooter", "height": 24, "repeat": true}
+      },
+      "sort": [{"collection": "accounts", "field": "Code", "direction": "ascending"}]
+    },
+    "CONTROLS": {
+      "ChurchLogo": {
+        "type": "image", "band": "ReportHeader", "position": [0, 0], "size": [68, 68],
+        "collection": "church", "field": "Logo"
+      },
+      "ChurchName": {
+        "type": "text", "band": "ReportHeader", "position": [80, 0], "size": [560, 22],
+        "collection": "church", "field": "Church", "fontsize": 15, "bold": true, "align": "center"
+      },
+      "OrganizationName": {
+        "type": "text", "band": "ReportHeader", "position": [80, 25], "size": [560, 17],
+        "collection": "organization", "field": "LegalName", "fontsize": 9, "align": "center"
+      },
+      "ReportTitle": {
+        "type": "systemtext", "band": "ReportHeader", "position": [80, 45], "size": [560, 20],
+        "systemvalue": "report_title", "fontsize": 13, "bold": true, "align": "center"
+      },
+      "AsOfLabel": {
+        "type": "label", "band": "ReportHeader", "position": [80, 71], "size": [65, 16],
+        "label": "As of date:", "fontsize": 8, "bold": true
+      },
+      "AsOfDate": {
+        "type": "text", "band": "ReportHeader", "position": [145, 71], "size": [100, 16],
+        "collection": "parameters", "field": "AsOfDate", "format": "date", "fontsize": 8
+      },
+      "RunUser": {
+        "type": "systemtext", "band": "ReportHeader", "position": [450, 71], "size": [190, 16],
+        "systemvalue": "run_user", "prefix": "Run by: ", "fontsize": 8, "align": "right", "color": "#555555"
+      },
+      "HeaderRule": {
+        "type": "line", "band": "PageHeader", "position": [0, 4], "size": [720, 1],
+        "bordercolor": "#6D7780", "borderwidth": 0.7
+      },
+      "Accounts": {
+        "type": "table", "band": "Detail", "position": [0, 0], "size": [720, 40],
+        "repeatcollection": "accounts",
+        "columns": [
+          {"name": "Code", "label": "Code", "collection": "accounts", "field": "Code", "width": 55},
+          {"name": "Name", "label": "Account", "collection": "accounts", "field": "Name", "width": 175},
+          {"name": "AccountType", "label": "Type", "collection": "accounts", "field": "AccountType", "width": 75},
+          {"name": "NormalBalance", "label": "Normal", "collection": "accounts", "field": "NormalBalance", "width": 65},
+          {"name": "DebitActivity", "label": "Debit Activity", "collection": "accounts", "field": "DebitActivity", "width": 87.5, "format": "currency", "align": "right"},
+          {"name": "CreditActivity", "label": "Credit Activity", "collection": "accounts", "field": "CreditActivity", "width": 87.5, "format": "currency", "align": "right"},
+          {"name": "DebitBalance", "label": "Debit Balance", "collection": "accounts", "field": "DebitBalance", "width": 87.5, "format": "currency", "align": "right"},
+          {"name": "CreditBalance", "label": "Credit Balance", "collection": "accounts", "field": "CreditBalance", "width": 87.5, "format": "currency", "align": "right"}
+        ]
+      },
+      "TotalsRule": {
+        "type": "line", "band": "ReportFooter", "position": [370, 3], "size": [350, 1],
+        "bordercolor": "#202020", "borderwidth": 0.8
+      },
+      "DebitTotalLabel": {
+        "type": "label", "band": "ReportFooter", "position": [370, 10], "size": [120, 16],
+        "label": "Debit balances", "fontsize": 9, "bold": true
+      },
+      "DebitTotal": {
+        "type": "text", "band": "ReportFooter", "position": [490, 10], "size": [110, 16],
+        "collection": "totals", "field": "DebitBalance", "format": "currency", "fontsize": 9, "bold": true, "align": "right"
+      },
+      "CreditTotalLabel": {
+        "type": "label", "band": "ReportFooter", "position": [370, 28], "size": [120, 16],
+        "label": "Credit balances", "fontsize": 9, "bold": true
+      },
+      "CreditTotal": {
+        "type": "text", "band": "ReportFooter", "position": [490, 28], "size": [110, 16],
+        "collection": "totals", "field": "CreditBalance", "format": "currency", "fontsize": 9, "bold": true, "align": "right"
+      },
+      "DifferenceLabel": {
+        "type": "label", "band": "ReportFooter", "position": [610, 10], "size": [55, 16],
+        "label": "Difference", "fontsize": 9, "bold": true
+      },
+      "Difference": {
+        "type": "text", "band": "ReportFooter", "position": [610, 28], "size": [110, 16],
+        "collection": "totals", "field": "Difference", "format": "currency", "fontsize": 9, "bold": true, "align": "right"
+      },
+      "FooterLine": {
+        "type": "line", "band": "PageFooter", "position": [0, 0], "size": [720, 1],
+        "bordercolor": "#808080", "borderwidth": 0.5
+      },
+      "ReportCode": {
+        "type": "systemtext", "band": "PageFooter", "position": [0, 6], "size": [180, 14],
+        "systemvalue": "report_code", "prefix": "ChurchManager report ", "fontsize": 8, "color": "#555555"
+      },
+      "Classification": {
+        "type": "systemtext", "band": "PageFooter", "position": [270, 6], "size": [180, 14],
+        "systemvalue": "classification", "fontsize": 8, "bold": true, "align": "center", "color": "#555555"
+      },
+      "PageNumber": {
+        "type": "systemtext", "band": "PageFooter", "position": [630, 6], "size": [90, 14],
+        "systemvalue": "page_number", "prefix": "Page ", "fontsize": 8, "align": "right", "color": "#555555"
+      }
+    }
+  }
+}

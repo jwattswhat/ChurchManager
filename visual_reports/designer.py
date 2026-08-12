@@ -101,8 +101,8 @@ def user_definition_directory(local_app_data=None):
     return base / "ChurchManager" / "ReportDefinitions"
 
 
-def ensure_user_definition(report_code, local_app_data=None):
-    starter = STARTERS / f"{report_code}.json"
+def ensure_user_definition(report_code, local_app_data=None, starter_directory=None):
+    starter = Path(starter_directory or STARTERS) / f"{report_code}.json"
     if not starter.is_file():
         raise FileNotFoundError(f"Starter report definition not found: {report_code}")
     target = user_definition_path(report_code, local_app_data)
