@@ -1,0 +1,401 @@
+{
+  "ACCT-ACTREPORT": {
+    "REPORT": {
+      "schema_version": 1,
+      "name": "ACCT-ACT",
+      "title": "Statement of Activities",
+      "dataset": "accounting.activities",
+      "datasetversion": 1,
+      "pagesize": "letter",
+      "orientation": "landscape",
+      "margins": {
+        "top": 30,
+        "right": 36,
+        "bottom": 30,
+        "left": 36
+      },
+      "theme": "churchmanager.accounting",
+      "classification": "official",
+      "emptytext": "No posted activity matches the selected reporting period.",
+      "bands": {
+        "ReportHeader": {
+          "type": "reportheader",
+          "height": 108
+        },
+        "PageHeader": {
+          "type": "pageheader",
+          "height": 8,
+          "repeat": true
+        },
+        "Detail": {
+          "type": "detail",
+          "height": 42
+        },
+        "ReportFooter": {
+          "type": "reportfooter",
+          "height": 54
+        },
+        "PageFooter": {
+          "type": "pagefooter",
+          "height": 24,
+          "repeat": true
+        }
+      }
+    },
+    "CONTROLS": {
+      "ChurchLogo": {
+        "type": "image",
+        "band": "ReportHeader",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          68,
+          68
+        ],
+        "collection": "church",
+        "field": "Logo"
+      },
+      "ChurchName": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          0
+        ],
+        "size": [
+          560,
+          22
+        ],
+        "collection": "church",
+        "field": "Church",
+        "fontsize": 15,
+        "bold": true,
+        "align": "center"
+      },
+      "OrganizationName": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          25
+        ],
+        "size": [
+          560,
+          17
+        ],
+        "collection": "organization",
+        "field": "LegalName",
+        "fontsize": 9,
+        "align": "center"
+      },
+      "ReportTitle": {
+        "type": "systemtext",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          45
+        ],
+        "size": [
+          560,
+          20
+        ],
+        "systemvalue": "report_title",
+        "fontsize": 13,
+        "bold": true,
+        "align": "center"
+      },
+      "Period": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          71
+        ],
+        "size": [
+          560,
+          16
+        ],
+        "collection": "parameters",
+        "field": "Display",
+        "fontsize": 8,
+        "align": "center"
+      },
+      "RunUser": {
+        "type": "systemtext",
+        "band": "ReportHeader",
+        "position": [
+          510,
+          89
+        ],
+        "size": [
+          210,
+          14
+        ],
+        "systemvalue": "run_user",
+        "prefix": "Run by: ",
+        "fontsize": 8,
+        "align": "right",
+        "color": "#555555"
+      },
+      "HeaderRule": {
+        "type": "line",
+        "band": "PageHeader",
+        "position": [
+          0,
+          4
+        ],
+        "size": [
+          720,
+          1
+        ],
+        "bordercolor": "#6D7780",
+        "borderwidth": 0.7
+      },
+      "Records": {
+        "type": "table",
+        "band": "Detail",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          720,
+          40
+        ],
+        "repeatcollection": "records",
+        "columns": [
+          {
+            "name": "Section",
+            "label": "Section",
+            "collection": "records",
+            "field": "Section",
+            "width": 90
+          },
+          {
+            "name": "Code",
+            "label": "Code",
+            "collection": "records",
+            "field": "Code",
+            "width": 55
+          },
+          {
+            "name": "Name",
+            "label": "Account",
+            "collection": "records",
+            "field": "Name",
+            "width": 245
+          },
+          {
+            "name": "WithoutRestrictions",
+            "label": "Without restrictions",
+            "collection": "records",
+            "field": "WithoutRestrictions",
+            "width": 110,
+            "format": "currency",
+            "align": "right"
+          },
+          {
+            "name": "WithRestrictions",
+            "label": "With restrictions",
+            "collection": "records",
+            "field": "WithRestrictions",
+            "width": 110,
+            "format": "currency",
+            "align": "right"
+          },
+          {
+            "name": "Total",
+            "label": "Total",
+            "collection": "records",
+            "field": "Total",
+            "width": 110,
+            "format": "currency",
+            "align": "right"
+          }
+        ]
+      },
+      "TotalsRule": {
+        "type": "line",
+        "band": "ReportFooter",
+        "position": [
+          0,
+          3
+        ],
+        "size": [
+          720,
+          1
+        ],
+        "bordercolor": "#202020",
+        "borderwidth": 0.8
+      },
+      "FooterLine": {
+        "type": "line",
+        "band": "PageFooter",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          720,
+          1
+        ],
+        "bordercolor": "#808080",
+        "borderwidth": 0.5
+      },
+      "ReportCode": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          0,
+          6
+        ],
+        "size": [
+          180,
+          14
+        ],
+        "systemvalue": "report_code",
+        "prefix": "ChurchManager report ",
+        "fontsize": 8,
+        "color": "#555555"
+      },
+      "Classification": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          270.0,
+          6
+        ],
+        "size": [
+          180,
+          14
+        ],
+        "systemvalue": "classification",
+        "fontsize": 8,
+        "bold": true,
+        "align": "center",
+        "color": "#555555"
+      },
+      "PageNumber": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          630,
+          6
+        ],
+        "size": [
+          90,
+          14
+        ],
+        "systemvalue": "page_number",
+        "prefix": "Page ",
+        "fontsize": 8,
+        "align": "right",
+        "color": "#555555"
+      },
+      "ChangeWithoutLabel": {
+        "type": "label",
+        "band": "ReportFooter",
+        "position": [
+          0.0,
+          10
+        ],
+        "size": [
+          240.0,
+          14
+        ],
+        "label": "Change without restrictions",
+        "fontsize": 8,
+        "bold": true,
+        "align": "right"
+      },
+      "ChangeWithout": {
+        "type": "text",
+        "band": "ReportFooter",
+        "position": [
+          0.0,
+          28
+        ],
+        "size": [
+          240.0,
+          17
+        ],
+        "collection": "totals",
+        "field": "WithoutRestrictions",
+        "format": "currency",
+        "fontsize": 9,
+        "bold": true,
+        "align": "right"
+      },
+      "ChangeWithLabel": {
+        "type": "label",
+        "band": "ReportFooter",
+        "position": [
+          240.0,
+          10
+        ],
+        "size": [
+          240.0,
+          14
+        ],
+        "label": "Change with restrictions",
+        "fontsize": 8,
+        "bold": true,
+        "align": "right"
+      },
+      "ChangeWith": {
+        "type": "text",
+        "band": "ReportFooter",
+        "position": [
+          240.0,
+          28
+        ],
+        "size": [
+          240.0,
+          17
+        ],
+        "collection": "totals",
+        "field": "WithRestrictions",
+        "format": "currency",
+        "fontsize": 9,
+        "bold": true,
+        "align": "right"
+      },
+      "ChangeTotalLabel": {
+        "type": "label",
+        "band": "ReportFooter",
+        "position": [
+          480.0,
+          10
+        ],
+        "size": [
+          240.0,
+          14
+        ],
+        "label": "Change in net assets",
+        "fontsize": 8,
+        "bold": true,
+        "align": "right"
+      },
+      "ChangeTotal": {
+        "type": "text",
+        "band": "ReportFooter",
+        "position": [
+          480.0,
+          28
+        ],
+        "size": [
+          240.0,
+          17
+        ],
+        "collection": "totals",
+        "field": "Total",
+        "format": "currency",
+        "fontsize": 9,
+        "bold": true,
+        "align": "right"
+      }
+    }
+  }
+}

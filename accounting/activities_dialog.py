@@ -9,7 +9,7 @@ from .formatting import money
 def _date(control):
     value=control.GetValue();return date(value.GetYear(),value.GetMonth()+1,value.GetDay())
 class ActivitiesDialog(wx.Dialog):
-    def __init__(self,parent,service):
+    def __init__(self,parent,service,report_service=None):
         super().__init__(parent,title="Statement of Activities",size=(900,650));self.service=service
         self.organization=wx.Choice(self)
         for key,name in service.organizations():self.organization.Append(name,key)
@@ -22,9 +22,12 @@ class ActivitiesDialog(wx.Dialog):
         header.Add(run)
         self.list=wx.ListCtrl(self,style=wx.LC_REPORT)
         for index,(label,width) in enumerate((("Section",105),("Code",70),("Account",250),("Without restrictions",145),("With restrictions",135),("Total",105))):self.list.InsertColumn(index,label,format=wx.LIST_FORMAT_RIGHT if index>=3 else wx.LIST_FORMAT_LEFT,width=width)
-        self.status=wx.StaticText(self,label="")
+        self.status=wx.StaticText(self,label="");self.report_service=report_service
+        preview=wx.Button(self,label="Preview PDF");preview.Bind(wx.EVT_BUTTON,self.preview_pdf);preview.Enable(report_service is not None)
+        customize=wx.Button(self,label="Customize Layout");customize.Bind(wx.EVT_BUTTON,self.customize_layout)
+        customize.Enable(report_service is not None and report_service.authorization.has_permission("accounting.reports.design"))
         close=wx.Button(self,wx.ID_CLOSE,"Close");close.Bind(wx.EVT_BUTTON,lambda event:self.EndModal(wx.ID_CLOSE))
-        footer=wx.BoxSizer(wx.HORIZONTAL);footer.Add(self.status,0,wx.ALIGN_CENTER_VERTICAL);footer.AddStretchSpacer();footer.Add(close)
+        footer=wx.BoxSizer(wx.HORIZONTAL);footer.Add(self.status,0,wx.ALIGN_CENTER_VERTICAL);footer.AddStretchSpacer();footer.Add(preview,0,wx.RIGHT,8);footer.Add(customize,0,wx.RIGHT,8);footer.Add(close)
         root=wx.BoxSizer(wx.VERTICAL);root.Add(header,0,wx.ALL|wx.EXPAND,10);root.Add(self.list,1,wx.LEFT|wx.RIGHT|wx.EXPAND,10);root.Add(footer,0,wx.ALL|wx.EXPAND,10)
         self.SetSizer(root)
     def _add(self,section,code,name,without,with_restrictions):
@@ -43,8 +46,18 @@ class ActivitiesDialog(wx.Dialog):
         change=[revenue[i]-expense[i]+transfer[i] for i in (0,1)]
         self._add("Change","","Change in net assets",*change)
         self.status.SetLabel("Change in net assets: {}".format(money(sum(change),True)))
+    def preview_pdf(self,event=None):
+        if self.organization.GetSelection()==wx.NOT_FOUND:return
+        try:self.report_service.run_activities(self.organization.GetClientData(self.organization.GetSelection()),_date(self.start),_date(self.end))
+        except Exception as error:wx.MessageBox(str(error),"Activities Report",wx.OK|wx.ICON_ERROR,self)
+    def customize_layout(self,event=None):
+        if self.organization.GetSelection()==wx.NOT_FOUND:return
+        try:self.report_service.design_activities(self.organization.GetClientData(self.organization.GetSelection()),_date(self.start),_date(self.end))
+        except Exception as error:wx.MessageBox(str(error),"Activities Report Designer",wx.OK|wx.ICON_ERROR,self)
 
 def show_activities(parent,connection,session,authorization):
-    authorization.require("accounting.reports.run","run accounting reports");dialog=ActivitiesDialog(parent,ActivitiesService(connection))
+    authorization.require("accounting.reports.run","run accounting reports")
+    from .reporting import AccountingVisualReportService
+    dialog=ActivitiesDialog(parent,ActivitiesService(connection),AccountingVisualReportService(connection,authorization,session))
     try:dialog.ShowModal()
     finally:dialog.Destroy()

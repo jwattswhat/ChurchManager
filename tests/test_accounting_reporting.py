@@ -8,8 +8,10 @@ import JSForm
 
 from authorization import AuthorizationDenied
 from accounting.reporting import (
-    AccountingVisualReportService, TRIAL_BALANCE_CONTRACT,
-    TRIAL_BALANCE_MANIFEST, TrialBalanceDatasetProvider,
+    AccountingVisualReportService, ACTIVITIES_CONTRACT, ACTIVITIES_MANIFEST,
+    ActivitiesDatasetProvider, FUND_CONTRACT, FUND_MANIFEST, FundDatasetProvider,
+    POSITION_CONTRACT, POSITION_MANIFEST, FinancialPositionDatasetProvider,
+    TRIAL_BALANCE_CONTRACT, TRIAL_BALANCE_MANIFEST, TrialBalanceDatasetProvider,
 )
 
 
@@ -64,6 +66,34 @@ class TrialService:
             ("4000", "Offerings", "REVENUE", "CREDIT", Decimal("0"), Decimal("100"),
              Decimal("0"), Decimal("100")),
         ]
+
+
+class PositionService:
+    @staticmethod
+    def rows(organization_id, as_of_date):
+        return (
+            [("1000","Cash",Decimal("100"))],
+            [("2000","Payable",Decimal("20"))],
+            [("3000","Net assets","WITHOUT_DONOR_RESTRICTIONS",Decimal("50"))],
+            {"WITHOUT_DONOR_RESTRICTIONS":Decimal("30"),
+             "WITH_DONOR_RESTRICTIONS":Decimal("0")},
+        )
+
+
+class ActivitiesServiceStub:
+    @staticmethod
+    def rows(organization_id, date_from, date_to):
+        return [
+            ("4000","Offerings","REVENUE",Decimal("1000"),Decimal("500")),
+            ("5000","Ministry","EXPENSE",Decimal("250"),Decimal("100")),
+        ]
+
+
+class FundService:
+    @staticmethod
+    def report(organization_id, date_from, date_to):
+        return [("GEN","General","WITHOUT_DONOR_RESTRICTIONS",Decimal("100"),
+                 Decimal("50"),Decimal("25"),Decimal("0"),Decimal("5"),Decimal("130"))]
 
 
 class Session:
@@ -141,6 +171,63 @@ class TestAccountingVisualReports(unittest.TestCase):
         self.assertIn("'accounting.reports.design'", sql)
         self.assertIn("IsSensitive,Active", sql)
         self.assertIn("r.Name='Master Administrator'", sql)
+
+    def test_core_statement_starters_validate_against_contracts_and_manifests(self):
+        root = Path(__file__).parents[1] / "accounting" / "report_definitions"
+        loader = JSForm.ReportDefinitionLoader()
+        for code, contract, manifest in (
+            ("ACCT-FP",POSITION_CONTRACT,POSITION_MANIFEST),
+            ("ACCT-ACT",ACTIVITIES_CONTRACT,ACTIVITIES_MANIFEST),
+            ("ACCT-FUND",FUND_CONTRACT,FUND_MANIFEST),
+        ):
+            definition=loader.load(root / f"{code}.json")
+            self.assertEqual(definition.dataset_name,contract.name)
+            manifest.validate(definition)
+
+    def test_financial_position_dataset_preserves_accounting_equation(self):
+        dataset=FinancialPositionDatasetProvider(
+            Connection(),Authorization(),PositionService(),
+        ).build(1,date(2027,8,12))
+        totals=dataset.collections["totals"][0]
+        self.assertEqual(totals["TotalAssets"],Decimal("100"))
+        self.assertEqual(totals["LiabilitiesAndNetAssets"],Decimal("100"))
+        self.assertEqual(totals["Difference"],Decimal("0"))
+
+    def test_activities_dataset_calculates_change_by_restriction_class(self):
+        dataset=ActivitiesDatasetProvider(
+            Connection(),Authorization(),ActivitiesServiceStub(),
+        ).build(1,date(2027,1,1),date(2027,8,12))
+        totals=dataset.collections["totals"][0]
+        self.assertEqual(totals["WithoutRestrictions"],Decimal("750"))
+        self.assertEqual(totals["WithRestrictions"],Decimal("400"))
+        self.assertEqual(totals["Total"],Decimal("1150"))
+
+    def test_fund_dataset_reconciles_beginning_and_ending_totals(self):
+        dataset=FundDatasetProvider(
+            Connection(),Authorization(),FundService(),
+        ).build(1,date(2027,1,1),date(2027,8,12))
+        totals=dataset.collections["totals"][0]
+        self.assertEqual(totals["Beginning"],Decimal("100"))
+        self.assertEqual(totals["Ending"],Decimal("130"))
+
+    def test_core_statement_starters_render_to_pdf(self):
+        root=Path(__file__).parents[1]/"accounting"/"report_definitions"
+        providers=(
+            ("ACCT-FP",FinancialPositionDatasetProvider(Connection(),Authorization(),PositionService()),
+             (1,date(2027,8,12))),
+            ("ACCT-ACT",ActivitiesDatasetProvider(Connection(),Authorization(),ActivitiesServiceStub()),
+             (1,date(2027,1,1),date(2027,8,12))),
+            ("ACCT-FUND",FundDatasetProvider(Connection(),Authorization(),FundService()),
+             (1,date(2027,1,1),date(2027,8,12))),
+        )
+        with tempfile.TemporaryDirectory() as folder:
+            for code,provider,arguments in providers:
+                definition=JSForm.ReportDefinitionLoader().load(root/f"{code}.json")
+                output=JSForm.PDFReportRenderer().render(
+                    definition,provider.build(*arguments),Path(folder)/f"{code}.pdf",
+                    context={"run_user":"Jonathan Watt"},
+                )
+                self.assertGreater(output.stat().st_size,500)
 
     def test_designer_requires_run_and_accounting_design_permissions(self):
         authorization = Authorization(False)
