@@ -83,4 +83,5 @@ def open_directory_designer(local_app_data=None):
         ensure_user_definition("CMMD01", local_app_data),
         dataset_contract=DIRECTORY_CONTRACT,
         preview_handler=build_directory_preview,
+        starter_definition_path=STARTERS / "CMMD01.json",
     )
