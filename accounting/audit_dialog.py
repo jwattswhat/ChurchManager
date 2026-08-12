@@ -16,9 +16,9 @@ def _date_value(control):
 
 
 class AccountingAuditDialog(wx.Dialog):
-    def __init__(self, parent, service):
+    def __init__(self, parent, service, report_service=None):
         super().__init__(parent, title="Accounting Audit History", size=(1100, 680))
-        self.service, self.rows, self.organization_ids = service, [], []
+        self.service, self.report_service, self.rows, self.organization_ids = service, report_service, [], []
         self.organization = wx.Choice(self)
         self.organization.Append("All organizations")
         self.organization_ids.append(None)
@@ -59,13 +59,15 @@ class AccountingAuditDialog(wx.Dialog):
         self.list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select)
         self.details = wx.TextCtrl(self, style=wx.TE_MULTILINE | wx.TE_READONLY)
         close = wx.Button(self, wx.ID_CLOSE, "Close")
+        pdf=wx.Button(self,label="Preview Confidential PDF");pdf.Bind(wx.EVT_BUTTON,self.on_pdf);pdf.Enable(report_service is not None)
         close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(filter_area, 0, wx.ALL | wx.EXPAND, 10)
         root.Add(self.list, 2, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
         root.Add(wx.StaticText(self, label="Selected event details (read only)"), 0, wx.ALL, 10)
         root.Add(self.details, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
-        root.Add(close, 0, wx.ALL | wx.ALIGN_RIGHT, 10)
+        actions=wx.BoxSizer(wx.HORIZONTAL);actions.AddStretchSpacer();actions.Add(pdf,0,wx.RIGHT,8);actions.Add(close)
+        root.Add(actions, 0, wx.ALL | wx.EXPAND, 10)
         self.SetSizer(root)
         self.refresh()
 
@@ -95,10 +97,16 @@ class AccountingAuditDialog(wx.Dialog):
             )
         )
 
+    def on_pdf(self,event=None):
+        selection=self.organization.GetSelection();organization_id=self.organization_ids[selection] if selection!=wx.NOT_FOUND else None
+        try:self.report_service.run_audit(organization_id,self.user.GetValue(),self.action.GetValue(),self.entity.GetValue(),_date_value(self.date_from),_date_value(self.date_to))
+        except Exception as error:wx.MessageBox(str(error),"Accounting Audit Report",wx.OK|wx.ICON_ERROR,self)
+
 
 def show_accounting_audit(parent, connection, session, authorization):
     authorization.require("accounting.audit.view", "view accounting audit history")
-    dialog = AccountingAuditDialog(parent, AccountingAuditService(connection))
+    from .reporting import AccountingVisualReportService
+    dialog = AccountingAuditDialog(parent, AccountingAuditService(connection),AccountingVisualReportService(connection,authorization,session))
     try:
         dialog.ShowModal()
     finally:

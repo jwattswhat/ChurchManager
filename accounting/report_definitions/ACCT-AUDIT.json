@@ -1,0 +1,427 @@
+{
+  "ACCT-AUDITREPORT": {
+    "REPORT": {
+      "schema_version": 1,
+      "name": "ACCT-AUDIT",
+      "title": "Accounting Audit History",
+      "dataset": "accounting.audithistory",
+      "datasetversion": 1,
+      "pagesize": "legal",
+      "orientation": "landscape",
+      "margins": {
+        "top": 30,
+        "right": 36,
+        "bottom": 30,
+        "left": 36
+      },
+      "theme": "churchmanager.accounting",
+      "classification": "confidential",
+      "emptytext": "No posted activity matches the selected reporting period.",
+      "bands": {
+        "ReportHeader": {
+          "type": "reportheader",
+          "height": 108
+        },
+        "PageHeader": {
+          "type": "pageheader",
+          "height": 8,
+          "repeat": true
+        },
+        "Detail": {
+          "type": "detail",
+          "height": 72
+        },
+        "ReportFooter": {
+          "type": "reportfooter",
+          "height": 54
+        },
+        "PageFooter": {
+          "type": "pagefooter",
+          "height": 24,
+          "repeat": true
+        }
+      }
+    },
+    "CONTROLS": {
+      "ChurchLogo": {
+        "type": "image",
+        "band": "ReportHeader",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          68,
+          68
+        ],
+        "collection": "church",
+        "field": "Logo"
+      },
+      "ChurchName": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          0
+        ],
+        "size": [
+          776,
+          22
+        ],
+        "collection": "church",
+        "field": "Church",
+        "fontsize": 15,
+        "bold": true,
+        "align": "center"
+      },
+      "OrganizationName": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          25
+        ],
+        "size": [
+          776,
+          17
+        ],
+        "collection": "organization",
+        "field": "LegalName",
+        "fontsize": 9,
+        "align": "center"
+      },
+      "ReportTitle": {
+        "type": "systemtext",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          45
+        ],
+        "size": [
+          776,
+          20
+        ],
+        "systemvalue": "report_title",
+        "fontsize": 13,
+        "bold": true,
+        "align": "center"
+      },
+      "Period": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          71
+        ],
+        "size": [
+          776,
+          16
+        ],
+        "collection": "parameters",
+        "field": "Display",
+        "fontsize": 8,
+        "align": "center"
+      },
+      "RunUser": {
+        "type": "systemtext",
+        "band": "ReportHeader",
+        "position": [
+          726,
+          89
+        ],
+        "size": [
+          210,
+          14
+        ],
+        "systemvalue": "run_user",
+        "prefix": "Run by: ",
+        "fontsize": 8,
+        "align": "right",
+        "color": "#555555"
+      },
+      "HeaderRule": {
+        "type": "line",
+        "band": "PageHeader",
+        "position": [
+          0,
+          4
+        ],
+        "size": [
+          936,
+          1
+        ],
+        "bordercolor": "#6D7780",
+        "borderwidth": 0.7
+      },
+      "Records": {
+        "type": "repeater",
+        "band": "Detail",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          936,
+          100
+        ],
+        "repeatcollection": "records",
+        "itemheight": 72,
+        "items": [
+          {
+            "name": "OccurredAt",
+            "field": "OccurredAt",
+            "position": [
+              0,
+              2
+            ],
+            "size": [
+              110,
+              14
+            ],
+            "format": "datetime",
+            "fontsize": 8,
+            "bold": true
+          },
+          {
+            "name": "Organization",
+            "field": "Organization",
+            "position": [
+              120,
+              2
+            ],
+            "size": [
+              180,
+              14
+            ],
+            "fontsize": 8,
+            "bold": true
+          },
+          {
+            "name": "User",
+            "field": "User",
+            "position": [
+              310,
+              2
+            ],
+            "size": [
+              145,
+              14
+            ],
+            "fontsize": 8
+          },
+          {
+            "name": "Action",
+            "field": "Action",
+            "position": [
+              465,
+              2
+            ],
+            "size": [
+              180,
+              14
+            ],
+            "fontsize": 8,
+            "bold": true
+          },
+          {
+            "name": "Entity",
+            "field": "Entity",
+            "position": [
+              655,
+              2
+            ],
+            "size": [
+              160,
+              14
+            ],
+            "fontsize": 8
+          },
+          {
+            "name": "EntityID",
+            "field": "EntityID",
+            "position": [
+              825,
+              2
+            ],
+            "size": [
+              105,
+              14
+            ],
+            "fontsize": 8,
+            "align": "right"
+          },
+          {
+            "name": "Reason",
+            "field": "Reason",
+            "position": [
+              15,
+              22
+            ],
+            "size": [
+              915,
+              16
+            ],
+            "fontsize": 8
+          },
+          {
+            "name": "Before",
+            "field": "Before",
+            "position": [
+              15,
+              42
+            ],
+            "size": [
+              915,
+              18
+            ],
+            "fontsize": 8,
+            "color": "#333333"
+          },
+          {
+            "name": "After",
+            "field": "After",
+            "position": [
+              15,
+              64
+            ],
+            "size": [
+              915,
+              18
+            ],
+            "fontsize": 8,
+            "color": "#333333"
+          }
+        ]
+      },
+      "TotalsRule": {
+        "type": "line",
+        "band": "ReportFooter",
+        "position": [
+          0,
+          3
+        ],
+        "size": [
+          936,
+          1
+        ],
+        "bordercolor": "#202020",
+        "borderwidth": 0.8
+      },
+      "FooterLine": {
+        "type": "line",
+        "band": "PageFooter",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          936,
+          1
+        ],
+        "bordercolor": "#808080",
+        "borderwidth": 0.5
+      },
+      "ReportCode": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          0,
+          6
+        ],
+        "size": [
+          180,
+          14
+        ],
+        "systemvalue": "report_code",
+        "prefix": "ChurchManager report ",
+        "fontsize": 8,
+        "color": "#555555"
+      },
+      "Classification": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          378.0,
+          6
+        ],
+        "size": [
+          180,
+          14
+        ],
+        "systemvalue": "classification",
+        "fontsize": 8,
+        "bold": true,
+        "align": "center",
+        "color": "#555555"
+      },
+      "PageNumber": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          846,
+          6
+        ],
+        "size": [
+          90,
+          14
+        ],
+        "systemvalue": "page_number",
+        "prefix": "Page ",
+        "fontsize": 8,
+        "align": "right",
+        "color": "#555555"
+      },
+      "EventCountLabel": {
+        "type": "label",
+        "band": "ReportFooter",
+        "position": [
+          0.0,
+          10
+        ],
+        "size": [
+          936.0,
+          14
+        ],
+        "label": "Audit events",
+        "fontsize": 8,
+        "bold": true,
+        "align": "right"
+      },
+      "EventCount": {
+        "type": "text",
+        "band": "ReportFooter",
+        "position": [
+          0.0,
+          28
+        ],
+        "size": [
+          936.0,
+          17
+        ],
+        "collection": "totals",
+        "field": "Count",
+        "format": "integer",
+        "fontsize": 9,
+        "bold": true,
+        "align": "right"
+      },
+      "ConfidentialLabel": {
+        "type": "label",
+        "band": "ReportHeader",
+        "position": [
+          240,
+          89
+        ],
+        "size": [
+          500,
+          14
+        ],
+        "label": "CONFIDENTIAL ACCOUNTING AUDIT RECORD",
+        "fontsize": 9,
+        "bold": true,
+        "align": "center",
+        "color": "#9A1B1B"
+      }
+    }
+  }
+}

@@ -161,6 +161,52 @@ def close_definition():
     return item
 
 
+def year_end_definition():
+    item=definition("ACCT-YE","Year-End Close Preview / Proof","accounting.yearend",(
+        column("Fund","Fund",210),column("Revenue","Revenue",100,"currency","right"),
+        column("Expense","Expense",100,"currency","right"),column("Transfers","Transfers",100,"currency","right"),
+        column("Change","Change",100,"currency","right"),column("NetAssetAccount","Net-asset account",210),
+    ),(("RevenueTotal","Revenue","Revenue"),("ExpenseTotal","Expenses","Expense"),
+       ("TransfersTotal","Transfers","Transfers"),("ChangeTotal","Change","Change"),
+       ("Conclusion","Conclusion","Conclusion","text")),page_size="legal",content_width=820)
+    controls=item["ACCT-YEREPORT"]["CONTROLS"]
+    controls["Status"]={"type":"text","band":"ReportHeader","position":[80,89],"size":[180,14],"collection":"parameters","field":"Status","prefix":"Year status: ","fontsize":8}
+    controls["ClosingTransaction"]={"type":"text","band":"ReportHeader","position":[500,89],"size":[240,14],"collection":"parameters","field":"ClosingTransaction","prefix":"Closing transaction: ","fontsize":8,"align":"right"}
+    controls["Blockers"]={"type":"table","band":"Detail","position":[0,40],"size":[820,34],"repeatcollection":"blockers",
+        "visiblewhen":{"collection":"parameters","field":"HasBlockers","operator":"equals","value":True},
+        "columns":[{"name":"Blocker","label":"Close blockers","collection":"blockers","field":"Blocker","width":820}]}
+    item["ACCT-YEREPORT"]["REPORT"]["bands"]["Detail"]["height"]=76
+    return item
+
+
+def audit_definition():
+    item=definition("ACCT-AUDIT","Accounting Audit History","accounting.audithistory",(
+        column("OccurredAt","Date and time",110,"datetime"),column("Organization","Organization",130),
+        column("User","User",100),column("Action","Action",120),column("Entity","Entity",75),
+        column("EntityID","ID",55),column("Reason","Reason",170),
+        column("Before","Before",88),column("After","After",88),
+    ),(("EventCount","Audit events","Count","integer"),),page_size="legal",content_width=936)
+    root=item["ACCT-AUDITREPORT"];root["REPORT"]["classification"]="confidential"
+    root["REPORT"]["bands"]["Detail"]["height"]=72
+    root["CONTROLS"]["Records"]={
+        "type":"repeater","band":"Detail","position":[0,0],"size":[936,100],
+        "repeatcollection":"records","itemheight":72,
+        "items":[
+            {"name":"OccurredAt","field":"OccurredAt","position":[0,2],"size":[110,14],"format":"datetime","fontsize":8,"bold":True},
+            {"name":"Organization","field":"Organization","position":[120,2],"size":[180,14],"fontsize":8,"bold":True},
+            {"name":"User","field":"User","position":[310,2],"size":[145,14],"fontsize":8},
+            {"name":"Action","field":"Action","position":[465,2],"size":[180,14],"fontsize":8,"bold":True},
+            {"name":"Entity","field":"Entity","position":[655,2],"size":[160,14],"fontsize":8},
+            {"name":"EntityID","field":"EntityID","position":[825,2],"size":[105,14],"fontsize":8,"align":"right"},
+            {"name":"Reason","field":"Reason","position":[15,22],"size":[915,16],"fontsize":8},
+            {"name":"Before","field":"Before","position":[15,42],"size":[915,18],"fontsize":8,"color":"#333333"},
+            {"name":"After","field":"After","position":[15,64],"size":[915,18],"fontsize":8,"color":"#333333"}
+        ]}
+    root["CONTROLS"]["ConfidentialLabel"]={"type":"label","band":"ReportHeader","position":[240,89],"size":[500,14],
+        "label":"CONFIDENTIAL ACCOUNTING AUDIT RECORD","fontsize":9,"bold":True,"align":"center","color":"#9A1B1B"}
+    return item
+
+
 REPORTS = (
     definition("ACCT-FP", "Statement of Financial Position", "accounting.position", (
         column("Section","Section",170), column("Code","Code",70),
@@ -202,6 +248,8 @@ REPORTS = (
     journal_definition(),
     reconciliation_definition(),
     close_definition(),
+    year_end_definition(),
+    audit_definition(),
 )
 
 

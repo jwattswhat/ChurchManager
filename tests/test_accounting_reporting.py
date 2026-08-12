@@ -303,6 +303,18 @@ class TestAccountingVisualReports(unittest.TestCase):
             columns=definition.controls["Records"]["columns"]
             self.assertEqual(sum(column["width"] for column in columns),720)
 
+    def test_audit_report_uses_readable_event_cards_within_legal_width(self):
+        definition=JSForm.ReportDefinitionLoader().load(
+            Path(__file__).parents[1]/"accounting"/"report_definitions"/"ACCT-AUDIT.json")
+        control=definition.controls["Records"]
+        self.assertEqual(control["type"],"repeater")
+        self.assertEqual(control["size"][0],936)
+        self.assertEqual({item["field"] for item in control["items"]},
+                         {"OccurredAt","Organization","User","Action","Entity","EntityID","Reason","Before","After"})
+        state_items={item["field"]:item for item in control["items"] if item["field"] in {"Before","After"}}
+        self.assertEqual(state_items["Before"]["size"][0],915)
+        self.assertEqual(state_items["After"]["size"][0],915)
+
     def test_general_ledger_dataset_preserves_opening_and_running_balances(self):
         dataset=GeneralLedgerDatasetProvider(
             Connection(),Authorization(),GeneralLedgerServiceStub(),

@@ -6,10 +6,11 @@ from .year_end_service import YearEndService
 
 
 class YearEndDialog(wx.Dialog):
-    def __init__(self, parent, service, can_override=False):
+    def __init__(self, parent, service, can_override=False, report_service=None):
         super().__init__(parent, title="Year-End Close Preview", size=(1050, 650))
         self.service = service
         self.can_override = can_override
+        self.report_service = report_service
         self.organization = wx.Choice(self)
         self.year = wx.Choice(self)
         for key, name in service.organizations():
@@ -43,6 +44,8 @@ class YearEndDialog(wx.Dialog):
         footer = wx.BoxSizer(wx.HORIZONTAL)
         footer.Add(self.status, 0, wx.ALIGN_CENTER_VERTICAL)
         footer.AddStretchSpacer()
+        pdf=wx.Button(self,label="Preview PDF");pdf.Bind(wx.EVT_BUTTON,self.on_pdf);pdf.Enable(report_service is not None)
+        footer.Add(pdf,0,wx.RIGHT,8)
         footer.Add(close)
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(header, 0, wx.ALL | wx.EXPAND, 10)
@@ -115,10 +118,16 @@ class YearEndDialog(wx.Dialog):
         finally:
             reason_dialog.Destroy()
 
+    def on_pdf(self,event=None):
+        if self.organization.GetSelection()==wx.NOT_FOUND or self.year.GetSelection()==wx.NOT_FOUND:return
+        try:self.report_service.run_year_end(self.organization.GetClientData(self.organization.GetSelection()),self.year.GetClientData(self.year.GetSelection()))
+        except Exception as error:wx.MessageBox(str(error),"Year-End Report",wx.OK|wx.ICON_ERROR,self)
+
 
 def show_year_end(parent, connection, session, authorization):
     authorization.require("accounting.periods.override", "preview and manage year-end close")
-    dialog = YearEndDialog(parent, YearEndService(connection, session.user_id), authorization.has_permission("accounting.approval.override"))
+    from .reporting import AccountingVisualReportService
+    dialog = YearEndDialog(parent, YearEndService(connection, session.user_id), authorization.has_permission("accounting.approval.override"),AccountingVisualReportService(connection,authorization,session))
     try:
         dialog.ShowModal()
     finally:

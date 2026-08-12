@@ -3,6 +3,7 @@
 from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
+import json
 import tempfile
 
 import JSForm
@@ -21,6 +22,8 @@ from .register_service import AccountingRegisterService
 from .journal_entry_service import JournalEntryService
 from .reconciliation_report_service import ReconciliationReportService
 from .close_checklist_service import CloseChecklistService
+from .year_end_service import YearEndService
+from .audit_service import AccountingAuditService
 
 
 ACCOUNTING_DEFINITIONS = Path(__file__).resolve().parent / "report_definitions"
@@ -366,6 +369,45 @@ CLOSE_MANIFEST=_manifest("ACCT-CLOSE","accounting.closechecklist",{
     "Conclusion":{"collection":"totals","field":"Conclusion"},
 })
 
+YEAR_END_CONTRACT=JSForm.ReportDatasetContract(
+    "accounting.yearend",1,"accounting.periods.override",(
+        JSForm.ReportCollection("church","Church",(field("ID","Church ID","integer"),field("Church","Church Name"),field("Logo","Church Logo","image"))),
+        JSForm.ReportCollection("organization","Accounting Organization",(field("ID","Organization ID","integer"),field("LegalName","Legal Name"),field("ReportingBasis","Reporting Basis"),field("BaseCurrency","Base Currency"))),
+        JSForm.ReportCollection("parameters","Fiscal Year",(field("Display","Fiscal Year"),field("Status","Status"),field("Conclusion","Conclusion"),field("ClosingTransaction","Closing Transaction"),field("HasBlockers","Has Blockers","boolean"))),
+        JSForm.ReportCollection("records","Fund Close Summary",(
+            field("Fund","Fund"),field("Revenue","Revenue","currency"),field("Expense","Expense","currency"),
+            field("Transfers","Transfers","currency"),field("Change","Change","currency"),field("NetAssetAccount","Net Asset Account"))),
+        JSForm.ReportCollection("blockers","Close Blockers",(field("Blocker","Blocker"),)),
+        JSForm.ReportCollection("totals","Protected Conclusion",(
+            field("Revenue","Total Revenue","currency"),field("Expense","Total Expense","currency"),
+            field("Transfers","Total Transfers","currency"),field("Change","Total Change","currency"),field("Conclusion","Conclusion"))),
+    ))
+YEAR_END_MANIFEST=_manifest("ACCT-YE","accounting.yearend",{
+    "Status":{"collection":"parameters","field":"Status"},"ClosingTransaction":{"collection":"parameters","field":"ClosingTransaction"},
+    "ChangeTotal":{"collection":"totals","field":"Change"},"Conclusion":{"collection":"totals","field":"Conclusion"},
+})
+
+AUDIT_CONTRACT=JSForm.ReportDatasetContract(
+    "accounting.audithistory",1,"accounting.audit.view",(
+        JSForm.ReportCollection("church","Church",(field("ID","Church ID","integer"),field("Church","Church Name"),field("Logo","Church Logo","image"))),
+        JSForm.ReportCollection("organization","Accounting Organization",(field("ID","Organization ID","integer"),field("LegalName","Legal Name"),field("ReportingBasis","Reporting Basis"),field("BaseCurrency","Base Currency"))),
+        JSForm.ReportCollection("parameters","Filters",(field("Display","Applied Filters"),)),
+        JSForm.ReportCollection("records","Audit Events",(
+            field("OccurredAt","Date and Time","datetime"),field("Organization","Organization"),field("User","User"),
+            field("Action","Action"),field("Entity","Entity"),field("EntityID","Entity ID"),field("Reason","Reason"),
+            field("Before","Before JSON"),field("After","After JSON"))),
+        JSForm.ReportCollection("totals","Protected Audit Count",(field("Count","Event Count","integer"),)),
+    ))
+AUDIT_MANIFEST=_manifest("ACCT-AUDIT","accounting.audithistory",{
+    "ConfidentialLabel":{"label":"CONFIDENTIAL ACCOUNTING AUDIT RECORD"},
+    "EventCount":{"collection":"totals","field":"Count"},
+})
+AUDIT_MANIFEST=JSForm.ReportProtectionManifest(
+    required_settings={**AUDIT_MANIFEST.required_settings,"classification":"confidential"},
+    required_bands=AUDIT_MANIFEST.required_bands,
+    required_controls=AUDIT_MANIFEST.required_controls,
+)
+
 
 class _AccountingDatasetProvider:
     def __init__(self, connection, authorization):
@@ -684,6 +726,55 @@ class CloseChecklistDatasetProvider(_AccountingDatasetProvider):
         return JSForm.ReportDataset.create(CLOSE_CONTRACT,collections)
 
 
+class YearEndDatasetProvider(_AccountingDatasetProvider):
+    def __init__(self,connection,authorization,service=None):
+        super().__init__(connection,authorization);self.service=service or YearEndService(connection)
+    def build(self,organization_id,year_id):
+        self.authorization.require("accounting.periods.override","Create Year-End Close report dataset")
+        collections=self._identity(organization_id);result=self.service.preview(organization_id,year_id);year=result["year"]
+        conclusion=("YEAR CLOSED" if year[3]=="CLOSED" else "READY TO CLOSE" if result["ready"] else "NOT READY TO CLOSE")
+        records=[{"Fund":f"{r[1]} - {r[2]}","Revenue":r[3],"Expense":r[4],"Transfers":r[5],
+                  "Change":r[6],"NetAssetAccount":r[7]} for r in result["rows"]]
+        def total(name):return sum((r[name] for r in records),Decimal("0"))
+        collections.update({"parameters":[{"Display":f"{year[0]} ({year[1]} through {year[2]})",
+            "Status":year[3],"Conclusion":conclusion,"ClosingTransaction":str(year[4] or "(none)"),
+            "HasBlockers":bool(result["blockers"])}],"records":records,
+            "blockers":[{"Blocker":b} for b in result["blockers"]],
+            "totals":[{"Revenue":total("Revenue"),"Expense":total("Expense"),"Transfers":total("Transfers"),
+                       "Change":total("Change"),"Conclusion":conclusion}]})
+        return JSForm.ReportDataset.create(YEAR_END_CONTRACT,collections)
+
+
+class AuditDatasetProvider(_AccountingDatasetProvider):
+    def __init__(self,connection,authorization,service=None):
+        super().__init__(connection,authorization);self.service=service or AccountingAuditService(connection)
+    def build(self,organization_id=None,user_text="",action_text="",entity_text="",date_from=None,date_to=None):
+        self.authorization.require("accounting.audit.view","Create Accounting Audit History dataset")
+        rows=self.service.events(organization_id,user_text,action_text,entity_text,date_from,date_to)
+        selected=organization_id
+        if selected is None:
+            cursor=self.connection.cursor()
+            try:cursor.execute("SELECT ID FROM tblAccountingOrganization ORDER BY ID LIMIT 1");row=cursor.fetchone()
+            finally:cursor.close()
+            if row is None:raise ValueError("No accounting organization is available.")
+            selected=row[0]
+        collections=self._identity(selected)
+        if organization_id is None:collections["organization"][0]["LegalName"]="All accounting organizations"
+        display="; ".join(x for x in (f"User: {user_text}" if user_text else "",f"Action: {action_text}" if action_text else "",
+            f"Entity: {entity_text}" if entity_text else "",f"From: {date_from}" if date_from else "",f"Through: {date_to}" if date_to else "") if x) or "All audit events"
+        def readable_json(value):
+            if not value:return "(none)"
+            try:return json.dumps(json.loads(value),ensure_ascii=False,separators=(", ",": "))
+            except (TypeError,ValueError):return str(value)
+        records=[{"OccurredAt":r[1],"Organization":r[2],"User":r[3],
+                  "Action":str(r[4]).replace("_"," ").title(),
+                  "Entity":str(r[5]).replace("_"," ").title(),
+                  "EntityID":r[6],"Reason":"Reason: "+(r[7] or "(none)"),
+                  "Before":"Before:\n"+readable_json(r[8]),"After":"After:\n"+readable_json(r[9])} for r in rows]
+        collections.update({"parameters":[{"Display":display}],"records":records,"totals":[{"Count":len(records)}]})
+        return JSForm.ReportDataset.create(AUDIT_CONTRACT,collections)
+
+
 class TrialBalanceDatasetProvider:
     def __init__(self, connection, authorization, service=None):
         self.connection = connection
@@ -928,6 +1019,14 @@ class AccountingVisualReportService:
     def design_close_checklist(self,organization_id,period_id):
         return self._design("ACCT-CLOSE",CLOSE_CONTRACT,CLOSE_MANIFEST,
                             CloseChecklistDatasetProvider(self.connection,self.authorization),organization_id,period_id)
+
+    def run_year_end(self,organization_id,year_id):
+        return self._run("ACCT-YE",YEAR_END_CONTRACT,YEAR_END_MANIFEST,
+                         YearEndDatasetProvider(self.connection,self.authorization),organization_id,year_id)
+
+    def run_audit(self,organization_id=None,user_text="",action_text="",entity_text="",date_from=None,date_to=None):
+        return self._run("ACCT-AUDIT",AUDIT_CONTRACT,AUDIT_MANIFEST,
+                         AuditDatasetProvider(self.connection,self.authorization),organization_id,user_text,action_text,entity_text,date_from,date_to)
 
     def design_trial_balance(self, organization_id, as_of_date):
         self.authorization.require("accounting.reports.run", "view Trial Balance data")
