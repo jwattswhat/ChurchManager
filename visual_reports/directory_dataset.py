@@ -24,6 +24,7 @@ DIRECTORY_CONTRACT = ReportDatasetContract(
             field("Pastor", "Pastor"), field("Phone", "Phone", "phone", "contact"),
             field("eMail", "Email", "text", "contact"),
             field("Logo", "Church Logo", "image"),
+            field("AddressLines", "Church Address", "address", "contact"),
         )),
         ReportCollection("families", "Families", (
             field("ID", "Family ID", "integer"), field("ChurchID", "Church ID", "integer"),
@@ -46,7 +47,10 @@ DIRECTORY_CONTRACT = ReportDatasetContract(
             field("ID", "Person ID", "integer"), field("FamilyID", "Family ID", "integer"),
             field("Title", "Title"), field("FirstName", "First Name"),
             field("MiddleName", "Middle Name"), field("LastName", "Last Name"),
-            field("Picture", "Picture", "image"),
+            field("Picture", "Picture", "image"), field("DisplayName", "Display Name"),
+            field("Member", "Member", "boolean"),
+            field("AssociateMember", "Associate Member", "boolean"),
+            field("Status", "Status"), field("MaritalStatus", "Marital Status"),
         ), "families", "FamilyID"),
         ReportCollection("person_addresses", "Personal Addresses", (
             field("ID", "Address ID", "integer"), field("PersonID", "Person ID", "integer"),
@@ -65,6 +69,11 @@ DIRECTORY_CONTRACT = ReportDatasetContract(
             field("MemberNames", "Household Members"),
             field("AddressLines", "Listed Address", "address", "contact"),
             field("ContactLines", "Listed Contacts", "text", "contact"),
+            field("FamilyImage", "Family Photograph", "image"),
+            field("MarriageStatus", "Marriage Status"),
+            field("MemberDetails", "Member Details", "text", "contact"),
+            field("FamilyAddressLines", "Family Addresses", "address", "contact"),
+            field("FamilyContactLines", "Family Contacts", "text", "contact"),
         )),
     ),
 )
@@ -101,7 +110,8 @@ class DirectoryDatasetProvider:
                 f"WHERE f.ChurchID={self.marker} ORDER BY c.FamilyID,c.ID", (church_id,)
             ),
             "people": (
-                "SELECT p.ID,p.FamilyID,p.Title,p.FirstName,p.MiddleName,p.LastName,p.Picture "
+                "SELECT p.ID,p.FamilyID,p.Title,p.FirstName,p.MiddleName,p.LastName,p.Picture,"
+                "p.Member,p.AssociateMember,p.Status,p.MaritalStatus "
                 "FROM rpt_membership_person p JOIN rpt_directory_family f ON f.ID=p.FamilyID "
                 f"WHERE f.ChurchID={self.marker} ORDER BY p.FamilyID,p.FirstName,p.LastName", (church_id,)
             ),
@@ -127,10 +137,22 @@ class DirectoryDatasetProvider:
                 collections[name] = [dict(zip(columns, row)) for row in cursor.fetchall()]
         finally:
             cursor.close()
+        church = collections["church"][0] if collections["church"] else None
+        if church is not None:
+            city_line = ", ".join(part for part in (church.get("City"), church.get("State")) if part)
+            if church.get("Zip"):
+                city_line = (city_line + " " + str(church["Zip"])).strip()
+            church["AddressLines"] = "\n".join(
+                str(line) for line in (church.get("Address"), church.get("Address2"), city_line)
+                if line
+            )
         people = {}
+        people_by_id = {}
         for person in collections["people"]:
             parts = [person.get("Title"), person.get("FirstName"), person.get("MiddleName"), person.get("LastName")]
-            people.setdefault(person["FamilyID"], []).append(" ".join(str(part) for part in parts if part))
+            person["DisplayName"] = " ".join(str(part) for part in parts if part)
+            people.setdefault(person["FamilyID"], []).append(person)
+            people_by_id[person["ID"]] = person
         addresses = {}
         for address in collections["family_addresses"]:
             city_line = ", ".join(part for part in (address.get("City"), address.get("State")) if part)
@@ -142,10 +164,49 @@ class DirectoryDatasetProvider:
         for contact in collections["family_contacts"]:
             label = contact.get("ContactLabel") or contact.get("Type") or "Contact"
             contacts.setdefault(contact["FamilyID"], []).append(f"{label}: {contact.get('Contact') or ''}")
+        person_addresses = {}
+        for address in collections["person_addresses"]:
+            city_line = ", ".join(part for part in (address.get("City"), address.get("State")) if part)
+            if address.get("Zip"):
+                city_line = (city_line + " " + str(address["Zip"])).strip()
+            lines = [address.get("Address"), address.get("Address2"), city_line]
+            value = ", ".join(str(line) for line in lines if line)
+            if value:
+                label = address.get("AddressLabel") or "Address"
+                person_addresses.setdefault(address["PersonID"], []).append(f"{label}: {value}")
+        person_contacts = {}
+        for contact in collections["person_contacts"]:
+            label = contact.get("ContactLabel") or contact.get("Type") or "Contact"
+            if contact.get("Contact"):
+                person_contacts.setdefault(contact["PersonID"], []).append(
+                    f"{label}: {contact['Contact']}"
+                )
+
+        def member_detail(person):
+            if person.get("Member"):
+                relationship = "Member"
+            elif person.get("AssociateMember"):
+                relationship = "Associate Member"
+            else:
+                relationship = "Non-Member"
+            lines = [f"{person['DisplayName']} - {relationship}"]
+            lines.extend(f"  {value}" for value in person_addresses.get(person["ID"], []))
+            lines.extend(f"  {value}" for value in person_contacts.get(person["ID"], []))
+            return "\n".join(lines)
+
         collections["directory_entries"] = [{
             "FamilyID": family["ID"], "FamilyName": family.get("FamilyName") or "",
-            "MemberNames": ", ".join(people.get(family["ID"], [])),
+            "MemberNames": ", ".join(
+                person["DisplayName"] for person in people.get(family["ID"], [])
+            ),
             "AddressLines": "\n".join(addresses.get(family["ID"], [])),
             "ContactLines": "\n".join(contacts.get(family["ID"], [])),
+            "FamilyImage": family.get("Image"),
+            "MarriageStatus": family.get("MarriageStatus") or "",
+            "MemberDetails": "\n".join(
+                member_detail(person) for person in people.get(family["ID"], [])
+            ),
+            "FamilyAddressLines": "\n".join(addresses.get(family["ID"], [])),
+            "FamilyContactLines": "\n".join(contacts.get(family["ID"], [])),
         } for family in collections["families"]]
         return ReportDataset.create(DIRECTORY_CONTRACT, collections)

@@ -3,44 +3,66 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMMD01",
-      "title": "Member Directory",
+      "title": "Member Directory Master",
       "dataset": "membership.directory",
       "datasetversion": 1,
       "pagesize": "letter",
       "orientation": "portrait",
-      "margins": {"top": 36, "right": 36, "bottom": 36, "left": 36},
+      "margins": {"top": 30, "right": 36, "bottom": 30, "left": 36},
       "theme": "churchmanager.standard",
       "bands": {
-        "ReportHeader": {"type": "reportheader", "height": 90},
-        "PageHeader": {"type": "pageheader", "height": 24, "repeat": true},
-        "DirectoryDetail": {"type": "detail", "height": 58},
+        "ReportHeader": {"type": "reportheader", "height": 112},
+        "PageHeader": {"type": "pageheader", "height": 22, "repeat": true},
+        "DirectoryDetail": {"type": "detail", "height": 104},
         "PageFooter": {"type": "pagefooter", "height": 24, "repeat": true}
       },
       "sort": [
-        {"collection": "families", "field": "FamilyName", "direction": "ascending"}
+        {"collection": "directory_entries", "field": "FamilyName", "direction": "ascending"}
       ]
     },
     "CONTROLS": {
       "ChurchLogo": {
-        "type": "image", "band": "ReportHeader", "position": [0, 0], "size": [64, 64],
+        "type": "image", "band": "ReportHeader", "position": [0, 0], "size": [76, 76],
         "collection": "church", "field": "Logo"
       },
       "ChurchName": {
-        "type": "text", "band": "ReportHeader", "position": [76, 4], "size": [428, 24],
+        "type": "text", "band": "ReportHeader", "position": [88, 2], "size": [452, 24],
         "collection": "church", "field": "Church", "fontsize": 16, "bold": true, "align": "center"
       },
       "ReportTitle": {
-        "type": "label", "band": "ReportHeader", "position": [76, 34], "size": [428, 22],
+        "type": "label", "band": "ReportHeader", "position": [88, 29], "size": [452, 21],
         "label": "Member Directory", "fontsize": 14, "bold": true, "align": "center"
       },
+      "ChurchAddress": {
+        "type": "text", "band": "ReportHeader", "position": [88, 54], "size": [250, 42],
+        "collection": "church", "field": "AddressLines", "format": "address", "fontsize": 8
+      },
+      "ChurchPhone": {
+        "type": "text", "band": "ReportHeader", "position": [350, 55], "size": [190, 16],
+        "collection": "church", "field": "Phone", "format": "phone", "fontsize": 8, "align": "right"
+      },
+      "ChurchEmail": {
+        "type": "text", "band": "ReportHeader", "position": [350, 76], "size": [190, 16],
+        "collection": "church", "field": "eMail", "fontsize": 8, "align": "right"
+      },
+      "HeaderRule": {
+        "type": "line", "band": "PageHeader", "position": [0, 18], "size": [540, 1],
+        "bordercolor": "#6D7780", "borderwidth": 0.7
+      },
+      "HeaderLabel": {
+        "type": "label", "band": "PageHeader", "position": [0, 1], "size": [540, 15],
+        "label": "Household Directory", "fontsize": 9, "bold": true, "color": "#46525C"
+      },
       "FamilyDirectoryEntry": {
-        "type": "repeater", "band": "DirectoryDetail", "position": [0, 0], "size": [540, 54],
-        "repeatcollection": "directory_entries", "itemheight": 58,
+        "type": "repeater", "band": "DirectoryDetail", "position": [0, 0], "size": [540, 100],
+        "repeatcollection": "directory_entries", "itemheight": 100,
         "items": [
-          {"name": "FamilyName", "field": "FamilyName", "position": [4, 4], "size": [220, 16], "fontsize": 10, "bold": true},
-          {"name": "MemberNames", "field": "MemberNames", "position": [4, 23], "size": [220, 14], "fontsize": 8, "italic": true},
-          {"name": "AddressLines", "field": "AddressLines", "position": [236, 4], "size": [145, 14], "fontsize": 8},
-          {"name": "ContactLines", "field": "ContactLines", "position": [392, 4], "size": [144, 14], "fontsize": 8}
+          {"name": "FamilyImage", "type": "image", "field": "FamilyImage", "position": [4, 6], "size": [80, 72]},
+          {"name": "FamilyName", "field": "FamilyName", "position": [94, 4], "size": [250, 18], "fontsize": 11, "bold": true, "color": "#1F4058"},
+          {"name": "MarriageStatus", "field": "MarriageStatus", "position": [350, 5], "size": [186, 15], "fontsize": 8, "italic": true, "align": "right", "color": "#555555"},
+          {"name": "MemberDetails", "field": "MemberDetails", "position": [94, 27], "size": [252, 14], "fontsize": 8},
+          {"name": "FamilyAddressLines", "field": "FamilyAddressLines", "position": [358, 27], "size": [178, 14], "fontsize": 8, "format": "address"},
+          {"name": "FamilyContactLines", "field": "FamilyContactLines", "position": [358, 72], "size": [178, 14], "fontsize": 8}
         ]
       },
       "FooterLine": {
@@ -49,7 +71,7 @@
       },
       "FooterText": {
         "type": "label", "band": "PageFooter", "position": [0, 6], "size": [540, 14],
-        "label": "ChurchManager Member Directory", "fontsize": 8, "color": "#555555", "align": "center"
+        "label": "CMMD01 - ChurchManager Member Directory", "fontsize": 8, "color": "#555555", "align": "center"
       }
     }
   }
