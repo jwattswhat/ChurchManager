@@ -18,13 +18,15 @@ STARTERS = ROOT / "definitions"
 
 
 class DirectoryDesignerAuthorization:
+    """Explicit test-only authorization for the standalone proof launcher."""
+
     @staticmethod
     def require(permission, operation=None):
-        if permission != DIRECTORY_CONTRACT.required_permission:
+        if permission not in {"reports.design", DIRECTORY_CONTRACT.required_permission}:
             raise PermissionError(operation or permission)
 
 
-def build_directory_preview(definition):
+def build_directory_preview(definition, authorization):
     config = load_config()
     database = config["database_settings"]
     settings = resolve_database({
@@ -51,7 +53,7 @@ def build_directory_preview(definition):
                 "Preview requires exactly one Reformation Lutheran Church test record."
             )
         dataset = DirectoryDatasetProvider(
-            connection, DirectoryDesignerAuthorization(),
+            connection, authorization,
         ).build(rows[0][0])
     finally:
         connection.close()
@@ -78,10 +80,17 @@ def ensure_user_definition(report_code, local_app_data=None):
     return target
 
 
-def open_directory_designer(local_app_data=None):
+def open_directory_designer(local_app_data=None, authorization=None):
+    authorization = authorization or DirectoryDesignerAuthorization()
+    authorization.require("reports.design", operation="Open Report Designer")
+
+    def preview(definition):
+        return build_directory_preview(definition, authorization)
+
     return JSForm.open_report_designer(
         ensure_user_definition("CMMD01", local_app_data),
         dataset_contract=DIRECTORY_CONTRACT,
-        preview_handler=build_directory_preview,
+        preview_handler=preview,
         starter_definition_path=STARTERS / "CMMD01.json",
+        export_directory=ROOT.parent / "Reports",
     )

@@ -2,7 +2,9 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from visual_reports.designer import ensure_user_definition, user_definition_path
+from visual_reports.designer import (
+    ensure_user_definition, open_directory_designer, user_definition_path,
+)
 
 
 class TestVisualReportDesignerStorage(unittest.TestCase):
@@ -15,6 +17,20 @@ class TestVisualReportDesignerStorage(unittest.TestCase):
             self.assertEqual(first, second)
             self.assertIn("Custom Directory", second.read_text(encoding="utf-8"))
             self.assertEqual(first, user_definition_path("CMMD01", folder))
+
+    def test_designer_requires_design_permission_before_opening(self):
+        class DeniedAuthorization:
+            def __init__(self):
+                self.checked = []
+
+            def require(self, permission, operation=None):
+                self.checked.append(permission)
+                raise PermissionError(permission)
+
+        authorization = DeniedAuthorization()
+        with self.assertRaises(PermissionError):
+            open_directory_designer(authorization=authorization)
+        self.assertEqual(authorization.checked, ["reports.design"])
 
 
 if __name__ == "__main__":
