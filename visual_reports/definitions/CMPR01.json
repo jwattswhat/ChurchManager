@@ -1,0 +1,244 @@
+{
+  "CMPR01REPORT": {
+    "REPORT": {
+      "schema_version": 1,
+      "name": "CMPR01",
+      "title": "Prayer Requests",
+      "dataset": "churchmanager.cmpr01",
+      "datasetversion": 1,
+      "pagesize": "letter",
+      "orientation": "landscape",
+      "margins": {
+        "top": 30,
+        "right": 36,
+        "bottom": 30,
+        "left": 36
+      },
+      "theme": "churchmanager.standard",
+      "emptytext": "No records match the selected criteria.",
+      "bands": {
+        "ReportHeader": {
+          "type": "reportheader",
+          "height": 92
+        },
+        "PageHeader": {
+          "type": "pageheader",
+          "height": 8,
+          "repeat": true
+        },
+        "Detail": {
+          "type": "detail",
+          "height": 42
+        },
+        "PageFooter": {
+          "type": "pagefooter",
+          "height": 24,
+          "repeat": true
+        }
+      },
+      "sort": [
+        {
+          "collection": "records",
+          "field": "Complete",
+          "direction": "ascending"
+        }
+      ]
+    },
+    "CONTROLS": {
+      "ChurchLogo": {
+        "type": "image",
+        "band": "ReportHeader",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          62,
+          62
+        ],
+        "collection": "church",
+        "field": "Logo"
+      },
+      "ChurchName": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          72,
+          2
+        ],
+        "size": [
+          648,
+          22
+        ],
+        "collection": "church",
+        "field": "Church",
+        "fontsize": 15,
+        "bold": true,
+        "align": "center"
+      },
+      "ReportTitle": {
+        "type": "systemtext",
+        "band": "ReportHeader",
+        "position": [
+          72,
+          29
+        ],
+        "size": [
+          648,
+          20
+        ],
+        "systemvalue": "report_title",
+        "fontsize": 13,
+        "bold": true,
+        "align": "center"
+      },
+      "Parameters": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          72,
+          54
+        ],
+        "size": [
+          540,
+          16
+        ],
+        "collection": "parameters",
+        "field": "Display",
+        "fontsize": 8,
+        "color": "#555555"
+      },
+      "RunDate": {
+        "type": "systemtext",
+        "band": "ReportHeader",
+        "position": [
+          620,
+          54
+        ],
+        "size": [
+          100,
+          16
+        ],
+        "systemvalue": "run_date",
+        "prefix": "Run: ",
+        "fontsize": 8,
+        "align": "right",
+        "color": "#555555"
+      },
+      "HeaderRule": {
+        "type": "line",
+        "band": "PageHeader",
+        "position": [
+          0,
+          4
+        ],
+        "size": [
+          720,
+          1
+        ],
+        "bordercolor": "#6D7780",
+        "borderwidth": 0.7
+      },
+      "Records": {
+        "type": "table",
+        "band": "Detail",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          720,
+          40
+        ],
+        "repeatcollection": "records",
+        "columns": [
+          {
+            "name": "StartDate",
+            "label": "Date",
+            "collection": "records",
+            "field": "StartDate",
+            "width": 90.0,
+            "format": "date"
+          },
+          {
+            "name": "Event",
+            "label": "Request",
+            "collection": "records",
+            "field": "Event",
+            "width": 213.75
+          },
+          {
+            "name": "Complete",
+            "label": "Complete",
+            "collection": "records",
+            "field": "Complete",
+            "width": 73.12,
+            "format": "boolean"
+          },
+          {
+            "name": "EndDate",
+            "label": "Ended",
+            "collection": "records",
+            "field": "EndDate",
+            "width": 90.0,
+            "format": "date"
+          },
+          {
+            "name": "Note",
+            "label": "Pastoral Notes",
+            "collection": "records",
+            "field": "Note",
+            "width": 253.12
+          }
+        ]
+      },
+      "FooterLine": {
+        "type": "line",
+        "band": "PageFooter",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          720,
+          1
+        ],
+        "bordercolor": "#808080",
+        "borderwidth": 0.5
+      },
+      "FooterCode": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          0,
+          6
+        ],
+        "size": [
+          360.0,
+          14
+        ],
+        "systemvalue": "report_code",
+        "prefix": "ChurchManager report ",
+        "fontsize": 8,
+        "color": "#555555"
+      },
+      "PageNumber": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          630,
+          6
+        ],
+        "size": [
+          90,
+          14
+        ],
+        "systemvalue": "page_number",
+        "prefix": "Page ",
+        "fontsize": 8,
+        "align": "right",
+        "color": "#555555"
+      }
+    }
+  }
+}

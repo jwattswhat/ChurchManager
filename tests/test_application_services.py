@@ -57,6 +57,19 @@ class TestReportService(unittest.TestCase):
         )
         self.assertEqual(checked, [7])
 
+    def test_official_visual_report_uses_visual_pipeline(self):
+        class AccessStub:
+            authorization = object()
+            @staticmethod
+            def require_report(report_id):
+                return ("CMAS01", "reports.general.run")
+        service = ChurchManagerReportService(object(), object(), AccessStub())
+        service._run_visual_report = lambda code, form, connection: (code, form, connection)
+        self.assertEqual(
+            service.run_catalog_report(26, "form", "connection"),
+            ("CMAS01", "form", "connection"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
