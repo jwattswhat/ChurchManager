@@ -5,6 +5,8 @@ import wx.adv
 from datetime import date
 
 from .register_service import AccountingRegisterService
+from .journal_entry_service import JournalEntryService
+from .journal_entry_dialog import JournalEntryDialog
 from .formatting import money
 
 
@@ -40,14 +42,17 @@ class AccountingRegisterDialog(wx.Dialog):
             ("Payee",100), ("Description",160), ("Debit",80), ("Credit",80),
         )): self.lines.InsertColumn(index, label, width=width)
         self.transactions.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select)
+        self.transactions.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_journal_entry)
         refresh = wx.Button(self, label="Refresh")
         reverse = wx.Button(self, label="Create Reversal")
+        journal = wx.Button(self, label="Journal Entry Report")
         reverse.Enable(reversal_service is not None)
         close = wx.Button(self, wx.ID_CLOSE, "Close")
         refresh.Bind(wx.EVT_BUTTON, self.refresh)
         reverse.Bind(wx.EVT_BUTTON, self.on_reverse)
+        journal.Bind(wx.EVT_BUTTON, self.on_journal_entry)
         close.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_CLOSE))
-        buttons = wx.BoxSizer(wx.HORIZONTAL); buttons.Add(refresh); buttons.AddStretchSpacer(); buttons.Add(reverse, 0, wx.RIGHT, 6); buttons.Add(close)
+        buttons = wx.BoxSizer(wx.HORIZONTAL); buttons.Add(refresh); buttons.AddStretchSpacer(); buttons.Add(journal, 0, wx.RIGHT, 6); buttons.Add(reverse, 0, wx.RIGHT, 6); buttons.Add(close)
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(wx.StaticText(self, label="Posted transactions"), 0, wx.ALL, 10)
         root.Add(self.transactions, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
@@ -85,6 +90,18 @@ class AccountingRegisterDialog(wx.Dialog):
             wx.MessageBox(str(error), "Reversal not created", wx.OK | wx.ICON_WARNING); return
         wx.MessageBox("Reversal {} is ready for independent review.".format(reversal_id),
                       "Reversal Created", wx.OK | wx.ICON_INFORMATION)
+
+    def on_journal_entry(self, event):
+        index = event.GetIndex() if hasattr(event, "GetIndex") and event.GetIndex() >= 0 else self.transactions.GetFirstSelected()
+        if index < 0:
+            wx.MessageBox("Select a posted transaction.", "Journal Entry Report"); return
+        try:
+            report = JournalEntryService(self.service.connection).report(self.rows[index][0])
+        except ValueError as error:
+            wx.MessageBox(str(error), "Journal Entry Report", wx.OK | wx.ICON_WARNING); return
+        dialog = JournalEntryDialog(self, report)
+        try: dialog.ShowModal()
+        finally: dialog.Destroy()
 
 
 def show_accounting_register(parent, connection, session, authorization):
