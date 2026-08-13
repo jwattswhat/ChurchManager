@@ -204,6 +204,13 @@ class TestChurchManagerPython(unittest.TestCase):
         source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
         self.assertIn("self.connection = portable_connection(connection)", source)
 
+    def test_unified_worship_editor_supports_line_editing_and_movement(self):
+        source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
+        self.assertIn("self.on_edit_line", source)
+        self.assertIn("self.on_move_line(-1)", source)
+        self.assertIn("self.on_move_line(1)", source)
+        self.assertIn("normalize_line_sequences(self.working_lines)", source)
+
     def test_cm_has_guarded_main_entrypoint(self):
         tree = ast.parse((ROOT / "cm.py").read_text(encoding="utf-8-sig"))
         main_functions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "main"]

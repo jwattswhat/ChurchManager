@@ -101,6 +101,14 @@ class UnifiedWorshipServiceRepository:
             (service_id,),
         ))
 
+    def hymns(self, service_id):
+        return self.all(
+            "SELECT h.ID,TRIM(CONCAT_WS(' ',h.Hymn,h.Title)) FROM tblHymn h "
+            "JOIN tblService s ON s.ID=? JOIN tblChurch c ON c.ID=s.ChurchID "
+            "WHERE c.PrimaryHymnalID IS NULL OR h.HymnalID=c.PrimaryHymnalID "
+            "ORDER BY h.Hymn,h.Title", (service_id,),
+        )
+
 
 class UnifiedWorshipServiceEditor(wx.Dialog):
     """First-stage unified editor: one window, independently scrolling panels."""
@@ -153,7 +161,21 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
                              ("Reference", 150), ("Status", 100)):
             self.grid.AppendColumn(label, width=width)
         left_box.Add(self.grid, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
-        left_box.Add(wx.StaticText(left, label="Red lines require attention."), 0, wx.ALL, 8)
+        line_actions = wx.BoxSizer(wx.HORIZONTAL)
+        for label, handler in (
+            ("Edit Line...", self.on_edit_line),
+            ("Select Hymn...", self.on_select_hymn),
+            ("Move Up", lambda event: self.on_move_line(-1)),
+            ("Move Down", lambda event: self.on_move_line(1)),
+        ):
+            button = wx.Button(left, label=label)
+            button.Bind(wx.EVT_BUTTON, handler)
+            line_actions.Add(button, 0, wx.RIGHT, 8)
+        line_actions.AddStretchSpacer()
+        line_actions.Add(wx.StaticText(left, label="Red lines require attention."), 0,
+                         wx.ALIGN_CENTER_VERTICAL)
+        left_box.Add(line_actions, 0, wx.EXPAND | wx.ALL, 8)
+        self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_line)
         left.SetSizer(left_box)
 
         self.detail_box = wx.BoxSizer(wx.VERTICAL)
@@ -299,6 +321,70 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
                 self.grid.SetItemTextColour(item, wx.Colour(130, 130, 130))
             elif status:
                 self.grid.SetItemTextColour(item, wx.RED)
+
+    def selected_line_index(self):
+        selected = self.grid.GetFirstSelected()
+        return None if selected < 0 else selected
+
+    def on_edit_line(self, _event):
+        index = self.selected_line_index()
+        if index is None:
+            return
+        line = self.working_lines[index]
+        if line["source"] == "SERVICE_HYMN":
+            self.on_select_hymn(None)
+            return
+        dialog = wx.TextEntryDialog(
+            self,
+            "Enter the weekly value for this service line. Leave it blank to clear it.",
+            f"Edit {line['label']}",
+            value=str(line["value"] or ""),
+        )
+        try:
+            if dialog.ShowModal() == wx.ID_OK:
+                line["value"] = dialog.GetValue().strip()
+                # A typed value is not a catalog-backed hymn selection. The hymn
+                # chooser added in the next stage will set this ID explicitly.
+                if line["source"] == "SERVICE_HYMN":
+                    line["hymn_id"] = None
+                self.refresh_grid()
+                self.grid.Select(index)
+        finally:
+            dialog.Destroy()
+
+    def on_select_hymn(self, _event):
+        index = self.selected_line_index()
+        if index is None:
+            return
+        line = self.working_lines[index]
+        if line["source"] != "SERVICE_HYMN":
+            wx.MessageBox("Select a hymn line first.", "Select Hymn",
+                          wx.OK | wx.ICON_INFORMATION, self)
+            return
+        hymns = self.repository.hymns(self.service_id)
+        choices = [str(row[1]) for row in hymns]
+        dialog = wx.SingleChoiceDialog(self, f"Select the {line['label']}", "Select Hymn", choices)
+        try:
+            if dialog.ShowModal() == wx.ID_OK:
+                selected = hymns[dialog.GetSelection()]
+                line["hymn_id"], line["value"] = selected[0], selected[1]
+                self.refresh_grid()
+                self.grid.Select(index)
+        finally:
+            dialog.Destroy()
+
+    def on_move_line(self, direction):
+        index = self.selected_line_index()
+        target = None if index is None else index + direction
+        if index is None or target < 0 or target >= len(self.working_lines):
+            return
+        self.working_lines[index], self.working_lines[target] = (
+            self.working_lines[target], self.working_lines[index]
+        )
+        normalize_line_sequences(self.working_lines)
+        self.refresh_grid()
+        self.grid.Select(target)
+        self.grid.EnsureVisible(target)
 
     def on_template(self, _event):
         if self.loading or self.template.GetSelection() == wx.NOT_FOUND:
