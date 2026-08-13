@@ -84,12 +84,24 @@ def load_function_without_importing(module_path: Path, function_name: str, globa
 
 
 class TestWorshipPlanningStructure(unittest.TestCase):
-    def test_deleting_custom_template_preserves_weekly_order_snapshot(self):
+    def test_deleting_custom_template_removes_its_weekly_orders(self):
         migration = (
-            ROOT / "migrations" / "035_preserve_weekly_orders_when_template_deleted.sql"
+            ROOT / "migrations" / "036_replace_weekly_order_with_template.sql"
         ).read_text(encoding="utf-8")
-        self.assertIn("MODIFY COLUMN TemplateID int NULL", migration)
-        self.assertIn("ON DELETE SET NULL", migration)
+        self.assertIn("WHERE o.TemplateID IS NULL", migration)
+        self.assertIn("MODIFY COLUMN TemplateID int NOT NULL", migration)
+        self.assertIn("ON DELETE RESTRICT", migration)
+        repository = (ROOT / "bulletin_orders.py").read_text(encoding="utf-8")
+        self.assertIn("DELETE l FROM tblServiceBulletinOrderLine", repository)
+        self.assertIn("DELETE FROM tblServiceBulletinOrder WHERE TemplateID=?", repository)
+        self.assertIn("SET u.ServiceBulletinOrderLineID=NULL", repository)
+
+    def test_replacement_template_reuses_exact_service_hymn_selections(self):
+        repository = (ROOT / "bulletin_orders.py").read_text(encoding="utf-8")
+        self.assertIn("selected_hymns = cursor.fetchall()", repository)
+        self.assertIn('if hymn[1] == line[5]', repository)
+        self.assertIn("selected_hymns.pop(match_index)", repository)
+        self.assertIn("DELETE FROM tblHymnUsage WHERE ServiceID=?", repository)
 
     def test_suggested_hymn_roles_use_full_liturgical_names(self):
         migration = (ROOT / "migrations" / "033_rename_suggested_hymn_roles.sql").read_text(

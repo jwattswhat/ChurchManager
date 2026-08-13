@@ -336,20 +336,37 @@ class BulletinOrderRepository:
         cursor = self.connection.cursor()
         try:
             cursor.execute(
+                "SELECT COUNT(*) FROM tblServiceBulletinOrder WHERE TemplateID=?",
+                (template_id,),
+            )
+            weekly_orders = cursor.fetchone()[0]
+            cursor.execute(
+                "UPDATE tblHymnUsage u "
+                "JOIN tblServiceBulletinOrderLine l ON l.ID=u.ServiceBulletinOrderLineID "
+                "JOIN tblServiceBulletinOrder o ON o.ServiceID=l.ServiceID "
+                "SET u.ServiceBulletinOrderLineID=NULL WHERE o.TemplateID=?",
+                (template_id,),
+            )
+            cursor.execute(
+                "DELETE l FROM tblServiceBulletinOrderLine l "
+                "JOIN tblServiceBulletinOrder o ON o.ServiceID=l.ServiceID "
+                "WHERE o.TemplateID=?",
+                (template_id,),
+            )
+            cursor.execute(
+                "DELETE FROM tblServiceBulletinOrder WHERE TemplateID=?",
+                (template_id,),
+            )
+            cursor.execute(
                 "DELETE FROM tblBulletinOrderTemplate WHERE ID=? AND IsStarter=0",
                 (template_id,),
             )
             if cursor.rowcount != 1:
                 raise ValueError("Starter bulletin orders cannot be deleted.")
             self.connection.commit()
-        except Exception as error:
+            return weekly_orders
+        except Exception:
             self.connection.rollback()
-            if getattr(error, "errno", None) == 1451:
-                raise ValueError(
-                    "This custom template is used by a weekly bulletin order. "
-                    "Apply the pending ChurchManager database update, then delete it again; "
-                    "the weekly order will be preserved."
-                ) from error
             raise
         finally:
             cursor.close()
@@ -464,12 +481,22 @@ class WeeklyBulletinOrderRepository:
         cursor = self.connection.cursor()
         try:
             cursor.execute(
-                "SELECT s.HolyCommunion,COALESCE(p.Season,'') FROM tblService s "
+                "SELECT s.HolyCommunion,COALESCE(p.Season,''),s.ChurchID FROM tblService s "
                 "LEFT JOIN tblPropers p ON p.ID=s.PropersID WHERE s.ID=?", (service_id,),
             )
             service = cursor.fetchone()
             if not service:
                 raise ValueError("The selected service is unavailable.")
+            cursor.execute(
+                "SELECT u.HymnID,u.UsedAs,TRIM(CONCAT_WS(' ',h.Hymn,h.Title)) "
+                "FROM tblHymnUsage u JOIN tblHymn h ON h.ID=u.HymnID "
+                "LEFT JOIN tblServiceBulletinOrderLine l "
+                "ON l.ID=u.ServiceBulletinOrderLineID "
+                "WHERE u.ServiceID=? ORDER BY COALESCE(l.Sequence,2147483647),u.ID",
+                (service_id,),
+            )
+            selected_hymns = cursor.fetchall()
+            cursor.execute("DELETE FROM tblHymnUsage WHERE ServiceID=?", (service_id,))
             template_lines = self.templates.lines(template_id)
             cursor.execute("DELETE FROM tblServiceBulletinOrderLine WHERE ServiceID=?", (service_id,))
             cursor.execute(
@@ -495,6 +522,25 @@ class WeeklyBulletinOrderRepository:
                      line[5], line[6], line[7], line[8], line[9], line[10], line[11],
                      line[12], line[13], line[14], line[17]),
                 )
+                weekly_line_id = cursor.lastrowid
+                if line[4] == "SERVICE_HYMN":
+                    match_index = next(
+                        (index for index, hymn in enumerate(selected_hymns)
+                         if hymn[1] == line[5]),
+                        None,
+                    )
+                    if match_index is not None:
+                        hymn_id, used_as, display = selected_hymns.pop(match_index)
+                        cursor.execute(
+                            "INSERT INTO tblHymnUsage "
+                            "(ChurchID,ServiceID,ServiceBulletinOrderLineID,HymnID,UsedAs) "
+                            "VALUES (?,?,?,?,?)",
+                            (service[2], service_id, weekly_line_id, hymn_id, used_as),
+                        )
+                        cursor.execute(
+                            "UPDATE tblServiceBulletinOrderLine SET WeeklyValue=? WHERE ID=?",
+                            (display, weekly_line_id),
+                        )
             self.connection.commit()
             return len(template_lines)
         except Exception:

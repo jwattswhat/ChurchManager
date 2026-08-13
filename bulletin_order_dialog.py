@@ -326,12 +326,22 @@ class BulletinOrderDialog(wx.Dialog):
     def on_delete_template(self, _event):
         try:
             template = self._require_custom()
-            if wx.MessageBox(f"Delete the customized template '{template[1]}'?", "Delete Custom Template",
+            if wx.MessageBox(
+                             f"Delete the customized template '{template[1]}'?\n\n"
+                             "Any weekly Orders of Service made from this template will also be deleted. "
+                             "Their hymn, reading, and line selections must be entered again after another "
+                             "template is applied.",
+                             "Delete Custom Template",
                              wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) == wx.YES:
-                self.repository.delete_custom_template(template[0])
+                weekly_orders = self.repository.delete_custom_template(template[0])
                 self.refresh_templates()
+                if weekly_orders:
+                    wx.MessageBox(
+                        f"Deleted the custom template and {weekly_orders} weekly Order(s) of Service.",
+                        "Custom Template Deleted", wx.OK | wx.ICON_INFORMATION, self,
+                    )
         except Exception as error:
-            wx.MessageBox(str(error), "Protected template", wx.OK | wx.ICON_INFORMATION, self)
+            wx.MessageBox(str(error), "Unable to delete template", wx.OK | wx.ICON_ERROR, self)
 
     def on_add(self, _event):
         try:
