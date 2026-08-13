@@ -83,7 +83,22 @@ class BulletinOrderLineDialog(wx.Dialog):
         condition_form.Add(wx.StaticText(panel, label="Internal note"), 0, wx.ALIGN_TOP)
         condition_form.Add(self.note, 1, wx.EXPAND)
 
-        buttons = self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL if editable else wx.CLOSE)
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        buttons.AddStretchSpacer()
+        if editable:
+            ok = wx.Button(panel, wx.ID_OK, "Save")
+            cancel = wx.Button(panel, wx.ID_CANCEL, "Cancel")
+            ok.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_OK))
+            cancel.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CANCEL))
+            buttons.Add(ok, 0, wx.RIGHT, 8)
+            buttons.Add(cancel, 0)
+            self.SetAffirmativeId(wx.ID_OK)
+            self.SetEscapeId(wx.ID_CANCEL)
+        else:
+            close = wx.Button(panel, wx.ID_CLOSE, "Close")
+            close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE))
+            buttons.Add(close, 0)
+            self.SetEscapeId(wx.ID_CLOSE)
         outer.Add(form, 0, wx.EXPAND | wx.ALL, 12)
         outer.Add(format_box, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
         outer.Add(condition_form, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
@@ -101,9 +116,6 @@ class BulletinOrderLineDialog(wx.Dialog):
                 self.italic, self.condition, self.condition_value, self.note,
             ):
                 control.Disable()
-            close = self.FindWindow(wx.ID_CLOSE)
-            if close:
-                close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE))
 
     def _load(self, row):
         self.sequence.SetValue(row[1])
