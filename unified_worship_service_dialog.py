@@ -119,17 +119,19 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         title.SetFont(title.GetFont().Bold())
         self.detail_box.Add(title, 0, wx.ALL, 8)
         self.fields = {}
-        for key, label, multiline in (
-            ("church", "Church", False), ("when", "Date and time", False),
-            ("location", "Location", False), ("proper", "Proper", False),
-            ("liturgical", "Printed liturgical title", False),
-            ("communion", "Holy Communion", False),
-            ("psalm", "Psalm or Introit", False), ("sermon", "Sermon", False),
-            ("bulletin", "Bulletin", False), ("check_complete", "Checklist complete", False),
-            ("checklist", "Checklist", True), ("os_note", "Order of Service notes", True),
-            ("note", "Notes for this service", True),
+        for key, label, multiline, inline in (
+            ("church", "Church", False, True), ("when", "Date and time", False, True),
+            ("location", "Location", False, True), ("proper", "Proper", False, False),
+            ("liturgical", "Printed liturgical title", False, False),
+            ("communion", "Holy Communion", False, True),
+            ("psalm", "Psalm or Introit", False, True), ("sermon", "Sermon", False, False),
+            ("bulletin", "Bulletin", False, False),
+            ("check_complete", "Checklist complete", False, True),
+            ("checklist", "Checklist", True, False),
+            ("os_note", "Order of Service notes", True, False),
+            ("note", "Notes for this service", True, False),
         ):
-            self._add_field(right, key, label, multiline)
+            self._add_field(right, key, label, multiline, inline)
         right.SetSizer(self.detail_box)
 
         outer.Add(splitter, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
@@ -144,12 +146,20 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         outer.Add(actions, 0, wx.EXPAND | wx.ALL, 10)
         panel.SetSizer(outer)
 
-    def _add_field(self, parent, key, label, multiline):
-        self.detail_box.Add(wx.StaticText(parent, label=label), 0, wx.LEFT | wx.RIGHT | wx.TOP, 8)
+    def _add_field(self, parent, key, label, multiline, inline):
         style = wx.TE_MULTILINE | wx.TE_READONLY if multiline else wx.TE_READONLY
         size = (-1, 85) if multiline else (-1, -1)
         control = wx.TextCtrl(parent, style=style, size=size)
-        self.detail_box.Add(control, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+        if inline:
+            row = wx.BoxSizer(wx.HORIZONTAL)
+            row.Add(wx.StaticText(parent, label=label + ":", size=(125, -1)), 0,
+                    wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 6)
+            row.Add(control, 1, wx.EXPAND)
+            self.detail_box.Add(row, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 8)
+        else:
+            self.detail_box.Add(wx.StaticText(parent, label=label), 0,
+                                wx.LEFT | wx.RIGHT | wx.TOP, 8)
+            self.detail_box.Add(control, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
         self.fields[key] = control
 
     def _load(self):
