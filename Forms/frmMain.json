@@ -111,8 +111,8 @@
                     2,
                     8
                 ],
-                "label": "   OS",
-                "tooltip": "Open the os form.",
+                "label": "   Bulletin Order Templates",
+                "tooltip": "Create and edit reusable bulletin-order templates.",
                 "security": {
                     "invoke": "worship.manage"
                 }
@@ -165,19 +165,6 @@
                 ],
                 "label": "   Schedule Participants",
                 "tooltip": "Open the schedule participants form.",
-                "security": {
-                    "invoke": "worship.manage"
-                }
-            },
-            "lblOSList": {
-                "name": "lblOSList",
-                "type": "StaticText",
-                "posch": [
-                    2,
-                    13
-                ],
-                "label": "   OS List",
-                "tooltip": "Open the os list form.",
                 "security": {
                     "invoke": "worship.manage"
                 }
@@ -430,8 +417,8 @@
                     19,
                     5
                 ],
-                "label": "Generate OS",
-                "tooltip": "Generate the order-of-service output.",
+                "label": "Prepare Bulletin Order",
+                "tooltip": "Preview and export the selected service's bulletin order.",
                 "security": {
                     "invoke": "worship.manage"
                 }

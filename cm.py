@@ -24,6 +24,8 @@ from report_access import ReportAccessService
 from visual_reports.designer import open_directory_designer
 from churchmanager_screen_designer import open_churchmanager_screen_designer
 from user_admin import show_user_administration
+from bulletin_order_dialog import show_bulletin_orders
+from bulletin_order_generator_dialog import show_prepare_bulletin_order
 from accounting.setup_dialog import show_accounting_setup
 from accounting.draft_dialog import show_accounting_draft_entry
 from accounting.review_dialog import show_accounting_review
@@ -446,10 +448,11 @@ def _buttonclick(event):
         context.form_factory.open(FORM_ROUTES[select])
         return
     match select:
+        case "lblOS":
+            show_bulletin_orders(cmfrm.FRAME, context.connection)
+            return
         case "lblGenerateOS":
-            frm = context.form_factory.create("frmGenerateOS", ["Close"])
-            frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runOSrpt)
-            frm.show()
+            show_prepare_bulletin_order(cmfrm.FRAME, context.connection)
             return
         case "lblNotifyParticipants":
             frm = context.form_factory.create("frmNotifyviaeMail", ["Close"])

@@ -7,8 +7,6 @@ FORM_ROUTES = {
     "lblSermon": "frmSermon",
     "lblPropers": "frmPropers",
     "lblPrayers": "frmPrayer",
-    "lblOSList": "frmOSList",
-    "lblOS": "frmOS",
     "lblCheckList": "frmCheckList",
     "lblEnhancements": "frmEnhancement",
     "lblFamily": "frmFamily",
@@ -35,7 +33,7 @@ FORM_ROUTES = {
 }
 
 SPECIAL_CONTROLS = {
-    "lblGenerateOS", "lblNotifyParticipants", "lblSundayPrayers",
+    "lblOS", "lblGenerateOS", "lblNotifyParticipants", "lblSundayPrayers",
     "lblAnnouncements", "lblServiceSchedule", "lblReports", "lblReportDesigner", "lblScreenDesigner", "lblBackupDB",
     "lblUsers",
     "lblAccountingSetup",

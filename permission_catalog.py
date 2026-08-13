@@ -11,7 +11,6 @@ MAIN_MENU_PERMISSIONS = {
     "lblParticipant": "worship.manage",
     "lblSchedule": "worship.manage",
     "lblServiceSchedule": "worship.manage",
-    "lblOSList": "worship.manage",
     "lblAttendanceEvent": "attendance.events.manage",
     "lblPerson": "membership.manage",
     "lblFamily": "membership.manage",

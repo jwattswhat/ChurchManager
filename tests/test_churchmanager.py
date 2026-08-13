@@ -45,6 +45,8 @@ OPERATIONAL_MODULES = (
     "process_service.py",
     "backup_service.py",
     "bulletin_orders.py",
+    "bulletin_order_dialog.py",
+    "bulletin_order_generator_dialog.py",
     "report_service.py",
     "report_support.py",
     "fnSchedule.py",
