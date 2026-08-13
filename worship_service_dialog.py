@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import wx
 
+from unified_worship_service_dialog import show_unified_worship_service
+
 
 SERVICE_FIELDS = [
     "ID", "ChurchID", "DateTime", "Location", "PropersID", "LiturgicalDate",
@@ -88,6 +90,10 @@ class WorshipServiceDialog(wx.Dialog):
                 self.grid.SetItemTextColour(item, wx.RED)
 
     def _open_editor(self, service_id=None, new=False):
+        if service_id is not None and not new:
+            show_unified_worship_service(self, self.connection, service_id)
+            self.refresh()
+            return
         condition = f"ID = {int(service_id)}" if service_id is not None else "ID = -1"
         form = self.form_factory.create(
             "frmService",

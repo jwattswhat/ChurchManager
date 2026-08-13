@@ -48,6 +48,7 @@ OPERATIONAL_MODULES = (
     "bulletin_order_dialog.py",
     "bulletin_order_generator_dialog.py",
     "weekly_bulletin_order_dialog.py",
+    "unified_worship_service_dialog.py",
     "single_instance.py",
     "report_service.py",
     "report_support.py",
