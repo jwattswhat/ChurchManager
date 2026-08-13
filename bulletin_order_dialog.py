@@ -168,7 +168,10 @@ class BulletinOrderDialog(wx.Dialog):
         outer = wx.BoxSizer(wx.VERTICAL)
         help_text = wx.StaticText(
             panel,
-            label="Choose a bulletin-order template. Blue entries are customized; starter templates are protected.",
+            label=(
+                "Choose a starter, then select Create Custom from Starter to make an editable copy. "
+                "Customized entries appear in blue."
+            ),
         )
         help_text.SetForegroundColour(BLUE)
         outer.Add(help_text, 0, wx.ALL, 10)
@@ -186,7 +189,7 @@ class BulletinOrderDialog(wx.Dialog):
 
         buttons = wx.BoxSizer(wx.HORIZONTAL)
         specs = (
-            ("Duplicate Template", self.on_duplicate), ("Delete Custom", self.on_delete_template),
+            ("Create Custom from Starter", self.on_duplicate), ("Delete Custom", self.on_delete_template),
             ("Add Line", self.on_add), ("Edit Line", self.on_edit), ("Delete Line", self.on_delete_line),
             ("Move Up", lambda event: self.on_move(-1)), ("Move Down", lambda event: self.on_move(1)),
             ("Preview Plain Text", self.on_preview),
@@ -249,7 +252,10 @@ class BulletinOrderDialog(wx.Dialog):
         template = self.selected_template()
         if not template:
             return
-        dialog = wx.TextEntryDialog(self, "Name for the customized copy:", "Duplicate Bulletin Order",
+        dialog = wx.TextEntryDialog(
+            self,
+            "Enter a name for the new editable bulletin order. The starter will remain unchanged:",
+            "Create Custom Bulletin Order",
                                     value=template[1] + " - Custom")
         try:
             if dialog.ShowModal() == wx.ID_OK and dialog.GetValue().strip():
