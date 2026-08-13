@@ -44,7 +44,7 @@ class TestVisualReportDesignerStorage(unittest.TestCase):
             upgraded = ensure_user_definition("CMWP01", folder, starters)
             self.assertEqual(json.loads(upgraded.read_text(encoding="utf-8"))[
                 "CMWP01REPORT"
-            ]["REPORT"]["datasetversion"], 2)
+            ]["REPORT"]["datasetversion"], 3)
             self.assertTrue(upgraded.with_suffix(".v1.json.bak").is_file())
 
     def test_designer_requires_design_permission_before_opening(self):

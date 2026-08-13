@@ -29,6 +29,9 @@ from bulletin_order_dialog import show_bulletin_orders
 from bulletin_order_generator_dialog import show_prepare_bulletin_order
 from weekly_bulletin_order_dialog import show_weekly_bulletin_order
 from worship_service_dialog import show_worship_services
+from worship_scheduling import (
+    show_participants, show_schedule_patterns, show_service_participants,
+)
 from accounting.setup_dialog import show_accounting_setup
 from accounting.draft_dialog import show_accounting_draft_entry
 from accounting.review_dialog import show_accounting_review
@@ -586,6 +589,12 @@ def _buttonclick(event):
         case "lblWeeklyBulletinOrder":
             show_weekly_bulletin_order(cmfrm.FRAME, context.connection)
             return
+        case "lblParticipant":
+            show_participants(cmfrm.FRAME, context.connection)
+            return
+        case "lblSchedule":
+            show_schedule_patterns(cmfrm.FRAME, context.connection)
+            return
         case "lblGenerateOS":
             show_prepare_bulletin_order(cmfrm.FRAME, context.connection)
             return
@@ -599,11 +608,7 @@ def _buttonclick(event):
         case "lblAnnouncements":
             _runSundayAnnouncements()
         case "lblServiceSchedule":
-            frm = context.form_factory.create(
-                "frmServiceSchedule", ["Navigation", "Close"]
-            )
-            frm.CONTROLID["btnRunSchedule"].Bind(wx.EVT_LEFT_DOWN, _runSchedule)
-            frm.show()
+            show_service_participants(cmfrm.FRAME, context.connection)
             return
         case "lblReports":
             frm = context.form_factory.create("frmReports", ["Close"])

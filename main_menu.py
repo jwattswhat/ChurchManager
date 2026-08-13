@@ -15,8 +15,6 @@ FORM_ROUTES = {
     "lblPerson": "frmPerson",
     "lblAttendanceEvent": "frmAttendanceEvent",
     "lblRecordAttendance": "frmRecordAttendance",
-    "lblParticipant": "frmParticipant",
-    "lblSchedule": "frmSchedule",
     "lblConfig": "frmConfig",
     "lblOptions": "frmOptions",
     "lblChoices": "frmChoices",
@@ -36,6 +34,7 @@ FORM_ROUTES = {
 
 SPECIAL_CONTROLS = {
     "lblOS", "lblWeeklyBulletinOrder", "lblGenerateOS", "lblNotifyParticipants", "lblSundayPrayers",
+    "lblParticipant", "lblSchedule",
     "lblAnnouncements", "lblServiceSchedule", "lblReports", "lblReportDesigner", "lblScreenDesigner", "lblBackupDB",
     "lblUsers",
     "lblAccountingSetup",

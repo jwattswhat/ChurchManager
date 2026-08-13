@@ -324,6 +324,13 @@ class BulletinOrderRepository:
                 "FROM tblBulletinOrderLine WHERE TemplateID=?",
                 (new_id, source_id),
             )
+            cursor.execute(
+                "INSERT INTO tblWorshipRoleRequirement "
+                "(BulletinOrderTemplateID,WorshipRoleID,RequiredCount,Active) "
+                "SELECT ?,WorshipRoleID,RequiredCount,Active "
+                "FROM tblWorshipRoleRequirement WHERE BulletinOrderTemplateID=?",
+                (new_id, source_id),
+            )
             self.connection.commit()
             return new_id
         except Exception:

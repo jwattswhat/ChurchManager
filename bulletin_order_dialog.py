@@ -5,6 +5,7 @@ from __future__ import annotations
 import wx
 
 from bulletin_orders import BulletinOrderRepository, render_plain_line
+from worship_scheduling import RequirementDialog, WorshipSchedulingRepository
 
 
 BLUE = wx.Colour(0, 90, 190)
@@ -169,6 +170,7 @@ class BulletinOrderDialog(wx.Dialog):
         super().__init__(parent, title="Bulletin Order Templates", size=(1120, 700),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.repository = BulletinOrderRepository(connection)
+        self.scheduling = WorshipSchedulingRepository(connection)
         self.church_id = church_id
         self.hymnal_rows = self.repository.hymnals()
         self.template_rows = []
@@ -225,6 +227,7 @@ class BulletinOrderDialog(wx.Dialog):
             ("Create Custom from Starter", self.on_duplicate), ("Delete Custom", self.on_delete_template),
             ("Add Line", self.on_add), ("Edit Line", self.on_edit), ("Delete Line", self.on_delete_line),
             ("Move Up", lambda event: self.on_move(-1)), ("Move Down", lambda event: self.on_move(1)),
+            ("Positions...", self.on_required_positions),
             ("Preview Plain Text", self.on_preview),
         )
         for label, handler in specs:
@@ -453,6 +456,22 @@ class BulletinOrderDialog(wx.Dialog):
         panel.SetSizer(sizer)
         dialog.ShowModal()
         dialog.Destroy()
+
+    def on_required_positions(self, _event):
+        try:
+            template = self._require_custom()
+            dialog = RequirementDialog(
+                self, self.scheduling, template_id=template[0],
+            )
+            try:
+                if dialog.ShowModal() == wx.ID_OK:
+                    self.scheduling.save_template_requirements(template[0], dialog.values())
+            finally:
+                dialog.Destroy()
+        except Exception as error:
+            wx.MessageBox(
+                str(error), "Unable to Set Required Positions", wx.OK | wx.ICON_ERROR, self,
+            )
 
 
 def show_bulletin_orders(parent, connection, church_id=None, select_template_id=None,

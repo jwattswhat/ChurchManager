@@ -6,7 +6,7 @@ from JSForm.report_dataset import (
 
 
 WORSHIP_PLANNING_CONTRACT = ReportDatasetContract(
-    "churchmanager.cmwp01", 2, "reports.worship.run",
+    "churchmanager.cmwp01", 3, "reports.worship.run",
     (
         ReportCollection("church", "Church", (
             ReportField("ID", "Church ID", "integer"),
@@ -45,6 +45,7 @@ WORSHIP_PLANNING_CONTRACT = ReportDatasetContract(
         )),
         ReportCollection("participants", "Participants", (
             ReportField("Role", "Role"), ReportField("Name", "Participant"),
+            ReportField("Status", "Status"),
         )),
     ),
 )
@@ -70,6 +71,37 @@ class WorshipPlanningDatasetProvider:
     @staticmethod
     def _placeholder(rows, **values):
         return rows or [values]
+
+    @staticmethod
+    def _participant_plan(requirements, assignments):
+        """Show every required slot plus any additional or declined assignment."""
+        remaining = list(assignments)
+        result = []
+        for requirement in requirements:
+            role_id = requirement["WorshipRoleID"]
+            role = requirement["Role"]
+            required = int(requirement["RequiredCount"])
+            available = [
+                row for row in remaining
+                if row["WorshipRoleID"] == role_id and row["Status"] != "DECLINED"
+            ]
+            for slot in range(1, required + 1):
+                position = f"{role} {slot}" if required > 1 else role
+                assignment = available.pop(0) if available else None
+                if assignment:
+                    remaining.remove(assignment)
+                    result.append({
+                        "Role": position, "Name": assignment["Name"],
+                        "Status": str(assignment["Status"]).title(),
+                    })
+                else:
+                    result.append({"Role": position, "Name": "Unfilled", "Status": "Open"})
+        for assignment in remaining:
+            result.append({
+                "Role": assignment["Role"], "Name": assignment["Name"],
+                "Status": str(assignment["Status"]).title(),
+            })
+        return result
 
     def build(self, church_id, service_id):
         self.authorization.require(
@@ -104,10 +136,16 @@ class WorshipPlanningDatasetProvider:
             "SELECT UsedAs,Hymn FROM rpt_worship_planner_hymn "
             "WHERE ServiceID=? ORDER BY Sequence,ID", (service_id,),
         )
-        participants = self._rows(
-            "SELECT Role,Name FROM rpt_worship_planner_participant "
+        requirements = self._rows(
+            "SELECT WorshipRoleID,Role,RequiredCount "
+            "FROM rpt_worship_planner_required_position WHERE ServiceID=? ORDER BY Role",
+            (service_id,),
+        )
+        assignments = self._rows(
+            "SELECT WorshipRoleID,Role,Name,Status FROM rpt_worship_planner_participant "
             "WHERE ServiceID=? ORDER BY Role,Name", (service_id,),
         )
+        participants = self._participant_plan(requirements, assignments)
         label = service[0]["LiturgicalDate"] or str(service[0]["DateTime"])
         return ReportDataset.create(WORSHIP_PLANNING_CONTRACT, {
             "church": church,
@@ -119,6 +157,6 @@ class WorshipPlanningDatasetProvider:
             "readings": self._placeholder(readings, Reading="Readings", Reference="Not selected"),
             "hymns": self._placeholder(hymns, UsedAs="Hymns", Hymn="Not selected"),
             "participants": self._placeholder(
-                participants, Role="Participants", Name="Not assigned",
+                participants, Role="Participants", Name="Not assigned", Status="Open",
             ),
         })

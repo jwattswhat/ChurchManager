@@ -61,9 +61,25 @@ class TestVisualReportInventory(unittest.TestCase):
         for view in (
             "rpt_worship_planner_service", "rpt_worship_planner_order",
             "rpt_worship_planner_reading", "rpt_worship_planner_hymn",
-            "rpt_worship_planner_participant",
+            "rpt_worship_planner_participant", "rpt_worship_planner_required_position",
         ):
             self.assertIn(view, source)
+
+    def test_worship_planner_lists_required_open_and_declined_positions(self):
+        from visual_reports.worship_planning_dataset import WorshipPlanningDatasetProvider
+
+        rows = WorshipPlanningDatasetProvider._participant_plan(
+            [{"WorshipRoleID": 6, "Role": "Acolyte", "RequiredCount": 2}],
+            [{
+                "WorshipRoleID": 6, "Role": "Acolyte", "Name": "Sam",
+                "Status": "DECLINED",
+            }],
+        )
+        self.assertEqual(rows, [
+            {"Role": "Acolyte 1", "Name": "Unfilled", "Status": "Open"},
+            {"Role": "Acolyte 2", "Name": "Unfilled", "Status": "Open"},
+            {"Role": "Acolyte", "Name": "Sam", "Status": "Declined"},
+        ])
 
     def test_sensitive_contact_sources_are_safe_views(self):
         source = (ROOT / "visual_reports" / "report_inventory.py").read_text(encoding="utf-8")

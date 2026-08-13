@@ -10,6 +10,7 @@ import wx.adv
 
 from ui_dimensions import DATE_PICKER_SIZE, TIME_PICKER_SIZE
 from hymn_validation import duplicate_selection_status, normalize_tune
+from worship_scheduling import show_service_participants
 
 from bulletin_orders import (
     BulletinOrderGenerator,
@@ -390,6 +391,15 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         title = wx.StaticText(right, label="Service Details")
         title.SetFont(title.GetFont().Bold())
         self.detail_box.Add(title, 0, wx.ALL, 8)
+        participants = wx.Button(right, label="Participants...")
+        participants.SetToolTip("Assign, edit, and preview suggested participants for this service.")
+        participants.Bind(
+            wx.EVT_BUTTON,
+            lambda _event: show_service_participants(
+                self, self.repository.connection, self.service_id,
+            ),
+        )
+        self.detail_box.Add(participants, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
         self.fields = {}
         for key, label, multiline, inline in (
             ("church", "Church", False, True),

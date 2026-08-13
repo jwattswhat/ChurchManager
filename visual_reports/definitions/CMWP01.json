@@ -5,7 +5,7 @@
       "name": "CMWP01",
       "title": "Worship Service Planner",
       "dataset": "churchmanager.cmwp01",
-      "datasetversion": 2,
+      "datasetversion": 3,
       "pagesize": "letter",
       "orientation": "portrait",
       "margins": {"top": 24, "right": 36, "bottom": 28, "left": 36},
@@ -64,7 +64,8 @@
       ]},
       "Participants": {"type": "table", "band": "ParticipantDetail", "position": [0, 0], "size": [540, 34], "repeatcollection": "participants", "columns": [
         {"name": "Role", "label": "PARTICIPANTS", "collection": "participants", "field": "Role", "width": 150},
-        {"name": "Name", "label": "Name", "collection": "participants", "field": "Name", "width": 390}
+        {"name": "Name", "label": "Name", "collection": "participants", "field": "Name", "width": 270},
+        {"name": "Status", "label": "Status", "collection": "participants", "field": "Status", "width": 120}
       ]},
       "SermonLabel": {"type": "label", "band": "ReportFooter", "position": [0, 4], "size": [58, 14], "label": "Sermon:", "fontsize": 8, "bold": true},
       "Sermon": {"type": "text", "band": "ReportFooter", "position": [62, 4], "size": [478, 14], "collection": "service", "field": "Sermon", "fontsize": 8},
