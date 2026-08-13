@@ -128,10 +128,16 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             ("bulletin", "Bulletin", False, False),
             ("check_complete", "Checklist complete", False, True),
             ("checklist", "Checklist", True, False),
-            ("os_note", "Order of Service notes", True, False),
+            ("os_note", "Order of Service notes (from template - read only)", True, False),
             ("note", "Notes for this service", True, False),
         ):
             self._add_field(right, key, label, multiline, inline)
+        self.fields["os_note"].SetToolTip(
+            "This note comes from the selected Order of Service template and cannot be changed here."
+        )
+        self.fields["os_note"].SetBackgroundColour(
+            wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
+        )
         right.SetSizer(self.detail_box)
 
         outer.Add(splitter, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
