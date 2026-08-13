@@ -142,8 +142,8 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         template_row.Add(self.template, 1, wx.EXPAND)
         left_box.Add(template_row, 0, wx.EXPAND | wx.ALL, 8)
         self.grid = wx.ListCtrl(left, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-        for label, width in (("Order", 65), ("Service line", 245), ("Weekly value", 270),
-                             ("Reference", 140), ("Status", 90)):
+        for label, width in (("Service line", 270), ("Weekly value", 300),
+                             ("Reference", 150), ("Status", 100)):
             self.grid.AppendColumn(label, width=width)
         left_box.Add(self.grid, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
         left_box.Add(wx.StaticText(left, label="Red lines require attention."), 0, wx.ALL, 8)
@@ -282,13 +282,11 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
                 hymn_counts[line["hymn_id"]] = hymn_counts.get(line["hymn_id"], 0) + 1
         self.grid.DeleteAllItems()
         for index, line in enumerate(self.working_lines):
-            item = self.grid.InsertItem(index, str(line["sequence"]))
+            item = self.grid.InsertItem(index, str(line["label"]))
             duplicate = line["hymn_id"] is not None and hymn_counts[line["hymn_id"]] > 1
             required = bool(line["included"] and line["source"] and not line["value"])
             status = "DUPLICATE" if duplicate else ("Required" if required else "")
-            for column, value in enumerate(
-                (line["label"], line["value"], line["reference"], status), 1
-            ):
+            for column, value in enumerate((line["value"], line["reference"], status), 1):
                 self.grid.SetItem(item, column, str(value))
             if not line["included"]:
                 self.grid.SetItemTextColour(item, wx.Colour(130, 130, 130))

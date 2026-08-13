@@ -13,6 +13,9 @@ and apply-selection steps.
 - Right panel (approximately one third): independently scrollable service data.
 - A fixed action bar applies to the complete service.
 
+The internal sequence used to order database rows is not displayed. Users see
+the service lines directly in their resulting order.
+
 ## Service data
 
 The service panel retains Church, date and time, location, Proper, printable
