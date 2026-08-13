@@ -96,8 +96,22 @@ class TestWorshipPlanningStructure(unittest.TestCase):
         choices = form["CONTROLS"]["SuggestedAs"]["choices"]
         self.assertIn("Hymn of Invocation", choices)
         self.assertIn("Hymn of the Day", choices)
+        self.assertIn("Distribution Hymn", choices)
         self.assertNotIn("Entrance", choices)
         self.assertNotIn("Of the Day", choices)
+        self.assertNotIn("Communion", choices)
+
+    def test_ds1_starter_has_three_distribution_hymn_slots(self):
+        migration = (ROOT / "migrations" / "034_add_ds1_distribution_hymns.sql").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("l.Label = 'Distribution Hymn'", migration)
+        self.assertIn("241,'HYMN','Distribution Hymn','SERVICE_HYMN','Distribution Hymn'", migration)
+        self.assertIn("242,'HYMN','Distribution Hymn','SERVICE_HYMN','Distribution Hymn'", migration)
+        self.assertNotIn("Distribution Hymn 1", migration)
+        self.assertNotIn("Distribution Hymn 2", migration)
+        self.assertNotIn("Distribution Hymn 3", migration)
+        self.assertIn("'Distribution Hymn'", migration)
 
     def test_lsb_reading_roles_are_normalized_by_migration(self):
         migration = (ROOT / "migrations" / "032_normalize_lsb_reading_roles.sql").read_text(

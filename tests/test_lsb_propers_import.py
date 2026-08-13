@@ -13,6 +13,7 @@ class LSBPropersImportTests(unittest.TestCase):
     def test_suggestion_conversion_uses_full_hymn_role_names(self):
         self.assertEqual(ROLE_NAMES["entrance"], "Hymn of Invocation")
         self.assertEqual(ROLE_NAMES["day"], "Hymn of the Day")
+        self.assertEqual(ROLE_NAMES["communion"], "Distribution Hymn")
 
     def test_legacy_cycles_map_to_one_normalized_three_year_system(self):
         names = {SYSTEM_MAP[code][0] for code in ("LCMS-A", "LCMS-B", "LCMS-C")}

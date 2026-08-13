@@ -24,7 +24,7 @@ class LegacyHymnSuggestionConversionTests(unittest.TestCase):
             suggestion_tokens(text),
             [
                 ("343", "Hymn of Invocation"), ("340", "Hymn of Invocation"),
-                ("332", "Hymn of the Day"), ("516", "Communion"),
+                ("332", "Hymn of the Day"), ("516", "Distribution Hymn"),
                 ("331", "Closing"),
             ],
         )

@@ -10,6 +10,8 @@ from bulletin_orders import portable_connection
 def suggestion_role_key(value):
     """Match full suggestion labels to the shorter template slot keys."""
     role = str(value or "").strip().casefold()
+    if role == "communion" or role.startswith("distribution"):
+        return "distribution hymn"
     return {
         "entrance": "hymn of invocation",
         "hymn of invocation": "hymn of invocation",
@@ -40,12 +42,12 @@ class WeeklyWorshipPlanRepository:
         cursor = self.connection.cursor()
         try:
             cursor.execute(
-                "SELECT l.ValueKey,COALESCE(h.Hymn,''),COALESCE(h.Title,'') "
+                "SELECT l.ID,l.ValueKey,COALESCE(h.Hymn,''),COALESCE(h.Title,'') "
                 "FROM tblServiceBulletinOrderLine l "
-                "LEFT JOIN tblHymnUsage u ON u.ServiceID=l.ServiceID AND u.UsedAs=l.ValueKey "
+                "LEFT JOIN tblHymnUsage u ON u.ServiceBulletinOrderLineID=l.ID "
                 "LEFT JOIN tblHymn h ON h.ID=u.HymnID "
                 "WHERE l.ServiceID=? AND l.Included=1 AND l.ValueSource='SERVICE_HYMN' "
-                "GROUP BY l.ValueKey,h.Hymn,h.Title ORDER BY MIN(l.Sequence)", (service_id,),
+                "ORDER BY l.Sequence,l.ID", (service_id,),
             )
             return cursor.fetchall()
         finally:
@@ -92,16 +94,28 @@ class WeeklyWorshipPlanRepository:
         finally:
             cursor.close()
 
-    def set_hymn(self, service_id, used_as, hymn_id):
+    def set_hymn(self, service_id, line_id, used_as, hymn_id):
         church_id = self.service(service_id)[0]
         cursor = self.connection.cursor()
         try:
-            cursor.execute("DELETE FROM tblHymnUsage WHERE ServiceID=? AND UsedAs=?", (service_id, used_as))
+            cursor.execute(
+                "DELETE FROM tblHymnUsage WHERE ServiceID=? AND ServiceBulletinOrderLineID=?",
+                (service_id, line_id),
+            )
+            weekly_value = None
             if hymn_id is not None:
+                cursor.execute("SELECT COALESCE(Hymn,''),COALESCE(Title,'') FROM tblHymn WHERE ID=?", (hymn_id,))
+                hymn = cursor.fetchone()
+                weekly_value = " ".join(str(value) for value in hymn if value).strip()
                 cursor.execute(
-                    "INSERT INTO tblHymnUsage (ChurchID,ServiceID,HymnID,UsedAs) VALUES (?,?,?,?)",
-                    (church_id, service_id, hymn_id, used_as),
+                    "INSERT INTO tblHymnUsage "
+                    "(ChurchID,ServiceID,ServiceBulletinOrderLineID,HymnID,UsedAs) VALUES (?,?,?,?,?)",
+                    (church_id, service_id, line_id, hymn_id, used_as),
                 )
+            cursor.execute(
+                "UPDATE tblServiceBulletinOrderLine SET WeeklyValue=? WHERE ID=? AND ServiceID=?",
+                (weekly_value, line_id, service_id),
+            )
             self.connection.commit()
         except Exception:
             self.connection.rollback()
@@ -196,13 +210,13 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
         self.hymn_rows = self.repository.hymn_slots(self.service_id)
         self.hymn_grid.DeleteAllItems()
         for index, row in enumerate(self.hymn_rows):
-            item = self.hymn_grid.InsertItem(index, str(row[0] or "Hymn"))
-            self.hymn_grid.SetItem(item, 1, str(row[1]))
-            self.hymn_grid.SetItem(item, 2, str(row[2]))
-            matched = suggested_by_role.get(suggestion_role_key(row[0]), [])
+            item = self.hymn_grid.InsertItem(index, str(row[1] or "Hymn"))
+            self.hymn_grid.SetItem(item, 1, str(row[2]))
+            self.hymn_grid.SetItem(item, 2, str(row[3]))
+            matched = suggested_by_role.get(suggestion_role_key(row[1]), [])
             general = suggested_by_role.get("", [])
             self.hymn_grid.SetItem(item, 3, "; ".join(matched or general))
-            if not row[1] and not row[2]:
+            if not row[2] and not row[3]:
                 self.hymn_grid.SetItemTextColour(item, wx.RED)
         self.reading_rows = self.repository.readings(self.service_id)
         self.reading_grid.DeleteAllItems()
@@ -220,10 +234,12 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
             return
         choices = [" ".join(value for value in (str(item[1]), item[2]) if value).strip()
                    for item in self.catalog]
-        dialog = wx.SingleChoiceDialog(self, f"Select the {row[0]}", "Select Hymn", choices)
+        dialog = wx.SingleChoiceDialog(self, f"Select the {row[1]}", "Select Hymn", choices)
         try:
             if dialog.ShowModal() == wx.ID_OK:
-                self.repository.set_hymn(self.service_id, row[0], self.catalog[dialog.GetSelection()][0])
+                self.repository.set_hymn(
+                    self.service_id, row[0], row[1], self.catalog[dialog.GetSelection()][0]
+                )
                 self.refresh()
         finally:
             dialog.Destroy()
@@ -231,7 +247,7 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
     def on_clear_hymn(self, _event):
         row = self._selected(self.hymn_grid, self.hymn_rows)
         if row:
-            self.repository.set_hymn(self.service_id, row[0], None); self.refresh()
+            self.repository.set_hymn(self.service_id, row[0], row[1], None); self.refresh()
 
 def show_weekly_worship_plan(parent, connection, service_id):
     dialog = WeeklyWorshipPlanDialog(parent, connection, service_id)

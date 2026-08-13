@@ -252,6 +252,37 @@ class TestChurchManagerDatabase(unittest.TestCase):
         }
         self.assertTrue({"Hymn of Invocation", "Hymn of the Day"}.issubset(roles))
 
+    def test_ds1_starter_and_suggestions_use_distribution_hymns(self):
+        migration = self.query(
+            "SELECT version FROM schema_migrations "
+            "WHERE version='034_add_ds1_distribution_hymns.sql'"
+        )
+        self.assertEqual(migration, [("034_add_ds1_distribution_hymns.sql",)])
+        old_role_count = self.query(
+            "SELECT COUNT(*) FROM tblProperHymnSuggestion WHERE SuggestedAs='Communion'"
+        )[0][0]
+        self.assertEqual(old_role_count, 0)
+        new_role_count = self.query(
+            "SELECT COUNT(*) FROM tblProperHymnSuggestion "
+            "WHERE SuggestedAs='Distribution Hymn'"
+        )[0][0]
+        self.assertGreater(new_role_count, 0)
+        slots = self.query(
+            "SELECT l.Sequence,l.Label,l.ValueKey FROM tblBulletinOrderLine l "
+            "JOIN tblBulletinOrderTemplate t ON t.ID=l.TemplateID "
+            "WHERE t.SourceLegacyName='STARTER:LCMS-DS1' "
+            "AND l.ValueSource='SERVICE_HYMN' AND l.ValueKey='Distribution Hymn' "
+            "ORDER BY l.Sequence"
+        )
+        self.assertEqual(
+            slots,
+            [
+                (240, "Distribution Hymn", "Distribution Hymn"),
+                (241, "Distribution Hymn", "Distribution Hymn"),
+                (242, "Distribution Hymn", "Distribution Hymn"),
+            ],
+        )
+
     def test_bulletin_order_hymnal_link_is_optional_and_seeded(self):
         migration = self.query(
             "SELECT version FROM schema_migrations "

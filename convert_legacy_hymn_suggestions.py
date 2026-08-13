@@ -25,7 +25,7 @@ ROLE_PATTERN = re.compile(
 ROLE_NAMES = {
     "entrance": "Hymn of Invocation",
     "day": "Hymn of the Day",
-    "communion": "Communion",
+    "communion": "Distribution Hymn",
     "closing": "Closing",
 }
 HYMN_GUESSES = {
