@@ -83,6 +83,17 @@ def load_function_without_importing(module_path: Path, function_name: str, globa
     return namespace[function_name]
 
 
+class TestWorshipPlanningStructure(unittest.TestCase):
+    def test_proper_hymn_suggestions_are_normalized(self):
+        migration = (ROOT / "migrations" / "026_add_proper_hymn_suggestions.sql").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("CREATE TABLE IF NOT EXISTS tblProperHymnSuggestion", migration)
+        self.assertIn("FOREIGN KEY (PropersID)", migration)
+        self.assertIn("FOREIGN KEY (HymnID)", migration)
+        self.assertIn("UNIQUE KEY uq_proper_hymn_suggestion", migration)
+
+
 class TestChurchManagerPython(unittest.TestCase):
     def test_cm_has_guarded_main_entrypoint(self):
         tree = ast.parse((ROOT / "cm.py").read_text(encoding="utf-8-sig"))
