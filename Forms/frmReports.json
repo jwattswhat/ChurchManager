@@ -71,37 +71,37 @@
                     1,
                     4
                 ],
-                "label": "Report:",
+                "label": "Blue reports have a saved customization. Starter layouts remain available for recovery.",
                 "layout": {
                     "row": 1,
-                    "column": 0
+                    "column": 0,
+                    "column_span": 2
                 }
             },
             "ReportID": {
                 "name": "ReportID",
-                "type": "ComboBox",
+                "type": "ListCtrlID",
                 "posch": [
                     7,
                     4
                 ],
                 "sizech": [
-                    25,
-                    2
+                    40,
+                    10
+                ],
+                "label": "Report",
+                "singleselect": true,
+                "column": [
+                    {"label": "Report", "widthch": 10},
+                    {"label": "Title", "widthch": 24},
+                    {"label": "Status", "widthch": 10}
                 ],
                 "layout": {
-                    "row": 1,
-                    "column": 1,
-                    "expand": true
-                },
-                "lookupchoices": {
-                    "name": "tblReports",
-                    "fields": [
-                        "ID",
-                        "Title",
-                        "CONCAT('(',Report,')')"
-                    ],
-                    "condition": "Report NOT IN ('CFCA01','CFCR01','CFGR01','CMDN01','CMDN02')",
-                    "orderby": "Title"
+                    "row": 2,
+                    "column": 0,
+                    "column_span": 2,
+                    "expand": true,
+                    "proportion": 1
                 },
                 "action": [
                     "onchange",
@@ -122,7 +122,7 @@
                 ],
                 "label": "Parameters",
                 "layout": {
-                    "row": 2,
+                    "row": 3,
                     "column": 0,
                     "column_span": 2,
                     "expand": true

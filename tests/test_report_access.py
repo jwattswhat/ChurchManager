@@ -67,6 +67,11 @@ class FakeControl:
         self.value = value
 
 
+class FakeCatalogControl:
+    def SetCatalogRows(self, rows):
+        self.rows = rows
+
+
 class TestReportAccessService(unittest.TestCase):
     ROWS = (
         (1, "CMWP01", "Worship Planning", "reports.worship.run"),
@@ -83,6 +88,17 @@ class TestReportAccessService(unittest.TestCase):
         self.assertEqual(control.choices.id, [1])
         self.assertEqual(control.items, ["Worship Planning (CMWP01)"])
         self.assertEqual(control.value, "")
+
+    def test_catalog_grid_marks_customized_reports_blue(self):
+        control = FakeCatalogControl()
+        count = self.service({"reports.worship.run", "reports.membership.contact"}).configure_picker(
+            control, {"CMMD01"},
+        )
+        self.assertEqual(count, 2)
+        by_code = {row["values"][0]: row for row in control.rows}
+        self.assertEqual(by_code["CMMD01"]["values"], ["CMMD01", "Member Directory", "Customized"])
+        self.assertEqual(by_code["CMMD01"]["foreground"], "#0066CC")
+        self.assertEqual(by_code["CMWP01"]["values"], ["CMWP01", "Worship Planning", "Starter"])
 
     def test_direct_report_invocation_rechecks_permission(self):
         service = self.service({"reports.worship.run"})

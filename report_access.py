@@ -20,7 +20,9 @@ class ReportAccessService:
                 "SELECT r.ID,r.Report,r.Title,p.Name "
                 "FROM tblReports r "
                 "JOIN tblPermission p ON p.ID=r.RequiredPermissionID AND p.Active=1 "
-                "WHERE r.Available=1 ORDER BY r.Title"
+                "WHERE r.Available=1 "
+                "AND r.Report NOT IN ('CFCA01','CFCR01','CFGR01','CMDN01','CMDN02') "
+                "ORDER BY r.Title"
             )
             return cursor.fetchall()
         finally:
@@ -48,8 +50,22 @@ class ReportAccessService:
         self.authorization.require(row[1], "run report {}".format(row[0]))
         return row
 
-    def configure_picker(self, control):
+    def configure_picker(self, control, customized_codes=()):
         rows = self.allowed_reports()
+        if hasattr(control, "SetCatalogRows"):
+            customized_codes = set(customized_codes)
+            control.SetCatalogRows([
+                {
+                    "id": row[0],
+                    "values": [
+                        row[1], row[2],
+                        "Customized" if row[1] in customized_codes else "Starter",
+                    ],
+                    "foreground": "#0066CC" if row[1] in customized_codes else None,
+                }
+                for row in rows
+            ])
+            return len(rows)
         control.choices.id = [row[0] for row in rows]
         control.choices.display = ["{} ({})".format(row[2], row[1]) for row in rows]
         control.choices.fielddata = [[row[2], "({})".format(row[1])] for row in rows]

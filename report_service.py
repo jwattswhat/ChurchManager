@@ -2,7 +2,9 @@
 
 from pathlib import Path
 
-from visual_reports.designer import ensure_user_definition, resolve_report_definition
+from visual_reports.designer import (
+    STARTERS, resolve_report_definition, user_definition_directory,
+)
 from visual_reports.report_inventory import OFFICIAL_CODES
 from visual_reports.tabular_dataset import TabularDatasetProvider
 
@@ -56,7 +58,19 @@ class ChurchManagerReportService:
     def configure_catalog_picker(self, control):
         if self.access is None:
             raise RuntimeError("Report authorization is not configured.")
-        return self.access.configure_picker(control)
+        customized = set()
+        loader = self.jsform.ReportDefinitionLoader()
+        for custom in user_definition_directory().glob("*.json"):
+            starter = STARTERS / custom.name
+            if not starter.is_file():
+                customized.add(custom.stem)
+                continue
+            try:
+                if loader.load(custom).to_dict() != loader.load(starter).to_dict():
+                    customized.add(custom.stem)
+            except Exception:
+                customized.add(custom.stem)
+        return self.access.configure_picker(control, customized)
 
     def start_python_report(self, script, settings, extra_arguments=()):
         from churchmanager_mode import connection_arguments

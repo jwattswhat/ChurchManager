@@ -722,8 +722,7 @@ class TestChurchManagerForms(unittest.TestCase):
         from main_menu import FORM_ROUTES
 
         main = next(iter(load_json(FORMS / "frmMain.json").values()))
-        reports = next(iter(load_json(FORMS / "frmReports.json").values()))
-        report_filter = reports["CONTROLS"]["ReportID"]["lookupchoices"]["condition"]
+        report_filter = (ROOT / "report_access.py").read_text(encoding="utf-8")
 
         self.assertTrue(removed_forms.isdisjoint({path.stem for path in FORMS.glob("*.json")}))
         self.assertTrue(removed_controls.isdisjoint(main["CONTROLS"]))
