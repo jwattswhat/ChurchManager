@@ -107,29 +107,6 @@
                         "LiturgicalDate"
                     ]
                 },
-                "frmAltReading": {
-                    "name": "frmAltReading",
-                    "title": "frmAltReading - Add/Edit/Delete Alternate Readings",
-                    "type": "Panel",
-                    "table": {
-                        "name": "tblAltReading",
-                        "fields": [
-                            "*"
-                        ],
-                        "condition": "ServiceID = {ID}"
-                    },
-                    "controls": [
-                        "Navigation",
-                        "Close"
-                    ],
-                    "readonlyfields": [
-                        "ServiceID"
-                    ],
-                    "fillonblank": [
-                        "ServiceID",
-                        "ID"
-                    ]
-                },
                 "frmEditCheckList": {
                     "name": "frmEditCheckList",
                     "title": "frmEditCheckList - Add/Edit/Delete items in CheckList",
@@ -317,20 +294,6 @@
                     11
                 ],
                 "tooltip": "Select this if holy communion applies."
-            },
-            "btnServiceAltReading": {
-                "name": "btnServiceAltReading",
-                "type": "Button",
-                "label": "Alt Readings",
-                "action": [
-                    "openlinkedform",
-                    "frmAltReading"
-                ],
-                "posch": [
-                    38,
-                    9
-                ],
-                "tooltip": "Open the alt readings form."
             },
             "lblOrderofService": {
                 "name": "lblOrderofService",

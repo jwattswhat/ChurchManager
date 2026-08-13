@@ -242,7 +242,7 @@ class WeeklyBulletinOrderDialog(wx.Dialog):
         try:
             rendered = self.generator.render(assignment[1], service_id, prefer_weekly=False)
             resolved = [
-                (item["id"], item["value"])
+                (item["id"], item["value"], item["value_source"])
                 for item in rendered["lines"]
                 if item["value_source"] in ("SERVICE_HYMN", "SERVICE_READING")
                 and item["value"] not in (None, "")

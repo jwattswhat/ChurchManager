@@ -486,14 +486,24 @@ class WeeklyBulletinOrderRepository:
         cursor = self.connection.cursor()
         try:
             updated = 0
-            for line_id, value in resolved_values:
+            for resolved in resolved_values:
+                line_id, value = resolved[:2]
+                value_source = resolved[2] if len(resolved) > 2 else None
                 if value in (None, ""):
                     continue
-                cursor.execute(
-                    "UPDATE tblServiceBulletinOrderLine SET WeeklyValue=? "
-                    "WHERE ID=? AND ServiceID=? AND ValueSource IS NOT NULL",
-                    (str(value), line_id, service_id),
-                )
+                if value_source == "SERVICE_READING":
+                    cursor.execute(
+                        "UPDATE tblServiceBulletinOrderLine SET WeeklyValue=? "
+                        "WHERE ID=? AND ServiceID=? AND ValueSource='SERVICE_READING' "
+                        "AND (WeeklyValue IS NULL OR WeeklyValue='')",
+                        (str(value), line_id, service_id),
+                    )
+                else:
+                    cursor.execute(
+                        "UPDATE tblServiceBulletinOrderLine SET WeeklyValue=? "
+                        "WHERE ID=? AND ServiceID=? AND ValueSource IS NOT NULL",
+                        (str(value), line_id, service_id),
+                    )
                 updated += cursor.rowcount
             self.connection.commit()
             return updated
@@ -581,11 +591,8 @@ class BulletinOrderGenerator:
                 "JOIN tblHymn h ON h.ID=hu.HymnID WHERE hu.ServiceID=?", (service_id,),
             )
             hymns = {str(row[0]).casefold(): (row[1] or row[2] or "") for row in cursor.fetchall()}
-            cursor.execute("SELECT Reading,Reference FROM tblAltReading WHERE ServiceID=?", (service_id,))
+            cursor.execute("SELECT Reading,Reference FROM tblReading WHERE PropersID=?", (service[4],))
             reading_rows = cursor.fetchall()
-            if not reading_rows:
-                cursor.execute("SELECT Reading,Reference FROM tblReading WHERE PropersID=?", (service[4],))
-                reading_rows = cursor.fetchall()
             readings = {str(row[0]).casefold(): row[1] for row in reading_rows}
             return service, hymns, readings
         finally:

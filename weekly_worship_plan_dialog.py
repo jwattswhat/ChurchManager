@@ -90,33 +90,7 @@ class WeeklyWorshipPlanRepository:
                     (propers_id,),
                 )
                 defaults = cursor.fetchall()
-            cursor.execute(
-                "SELECT Reading,Reference FROM tblAltReading WHERE ServiceID=? ORDER BY ID",
-                (service_id,),
-            )
-            alternatives = {str(row[0]).casefold(): row[1] for row in cursor.fetchall()}
-            rows = [(role, reference, alternatives.get(str(role).casefold(), ""))
-                    for role, reference in defaults]
-            known = {str(row[0]).casefold() for row in defaults}
-            for role, reference in [(key, value) for key, value in alternatives.items() if key not in known]:
-                rows.append((role.title(), "", reference))
-            return rows
-        finally:
-            cursor.close()
-
-    def set_alternate_reading(self, service_id, role, reference):
-        cursor = self.connection.cursor()
-        try:
-            cursor.execute("DELETE FROM tblAltReading WHERE ServiceID=? AND Reading=?", (service_id, role))
-            if reference:
-                cursor.execute(
-                    "INSERT INTO tblAltReading (ServiceID,Reading,Reference) VALUES (?,?,?)",
-                    (service_id, role, reference),
-                )
-            self.connection.commit()
-        except Exception:
-            self.connection.rollback()
-            raise
+            return defaults
         finally:
             cursor.close()
 
@@ -139,8 +113,8 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
         panel = wx.Panel(self)
         outer = wx.BoxSizer(wx.VERTICAL)
         note = wx.StaticText(panel, label=(
-            "These selections belong to this Worship Service. Hymns remain in usage history; "
-            "alternate readings do not change the lectionary."
+            "Hymn selections belong to this Worship Service and remain in usage history. "
+            "Lectionary readings are defaults; edit the corresponding weekly-order line to override one."
         ))
         note.SetForegroundColour(wx.Colour(0, 90, 190))
         outer.Add(note, 0, wx.ALL, 10)
@@ -164,16 +138,15 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
 
         readings = wx.BoxSizer(wx.VERTICAL)
         self.reading_grid = wx.ListCtrl(reading_page, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-        for label, width in (("Reading", 170), ("Lectionary", 260), ("Alternate for this service", 340)):
+        for label, width in (("Reading", 190), ("Lectionary default", 520)):
             self.reading_grid.AppendColumn(label, width=width)
         readings.Add(self.reading_grid, 1, wx.EXPAND | wx.ALL, 8)
-        reading_buttons = wx.BoxSizer(wx.HORIZONTAL)
-        for label, handler in (("Set Alternate...", self.on_set_alternate), ("Use Lectionary Reading", self.on_clear_alternate)):
-            button = wx.Button(reading_page, label=label); button.Bind(wx.EVT_BUTTON, handler)
-            reading_buttons.Add(button, 0, wx.RIGHT, 8)
-        readings.Add(reading_buttons, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+        reading_help = wx.StaticText(
+            reading_page,
+            label="To use a different reading, return to Weekly Order and double-click that reading line.",
+        )
+        readings.Add(reading_help, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
         reading_page.SetSizer(readings)
-        self.reading_grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_set_alternate)
 
         outer.Add(book, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
         buttons = wx.BoxSizer(wx.HORIZONTAL); buttons.AddStretchSpacer()
@@ -206,7 +179,6 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
         for index, row in enumerate(self.reading_rows):
             item = self.reading_grid.InsertItem(index, str(row[0]))
             self.reading_grid.SetItem(item, 1, str(row[1] or ""))
-            self.reading_grid.SetItem(item, 2, str(row[2] or ""))
 
     def _selected(self, grid, rows):
         index = grid.GetFirstSelected()
@@ -230,25 +202,6 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
         row = self._selected(self.hymn_grid, self.hymn_rows)
         if row:
             self.repository.set_hymn(self.service_id, row[0], None); self.refresh()
-
-    def on_set_alternate(self, _event):
-        row = self._selected(self.reading_grid, self.reading_rows)
-        if not row:
-            return
-        dialog = wx.TextEntryDialog(self, f"Enter the alternate {row[0]} reference:",
-                                    "Alternate Reading", value=str(row[2] or row[1] or ""))
-        try:
-            if dialog.ShowModal() == wx.ID_OK:
-                self.repository.set_alternate_reading(self.service_id, row[0], dialog.GetValue().strip())
-                self.refresh()
-        finally:
-            dialog.Destroy()
-
-    def on_clear_alternate(self, _event):
-        row = self._selected(self.reading_grid, self.reading_rows)
-        if row:
-            self.repository.set_alternate_reading(self.service_id, row[0], ""); self.refresh()
-
 
 def show_weekly_worship_plan(parent, connection, service_id):
     dialog = WeeklyWorshipPlanDialog(parent, connection, service_id)
