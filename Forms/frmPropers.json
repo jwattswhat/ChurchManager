@@ -140,6 +140,7 @@
                     23,
                     8
                 ],
+                "layout": {"row_span": 4, "expand": true},
                 "tooltip": "Enter the theme. Multiple lines are allowed."
             },
             "lblSort": {
@@ -232,6 +233,7 @@
                     23,
                     8
                 ],
+                "layout": {"row_span": 4, "expand": true},
                 "tooltip": "Enter the hymn sug. Multiple lines are allowed."
             },
             "lblColor": {
@@ -316,6 +318,7 @@
                     33,
                     10
                 ],
+                "layout": {"row_span": 5, "expand": true},
                 "tooltip": "View the readings records and select a row when needed."
             },
             "lblNote": {
@@ -341,6 +344,7 @@
                     24,
                     10
                 ],
+                "layout": {"row_span": 5, "expand": true},
                 "tooltip": "Enter the note. Multiple lines are allowed."
             },
             "lblIntroit": {
@@ -366,6 +370,7 @@
                     23,
                     18
                 ],
+                "layout": {"row_span": 9, "expand": true},
                 "tooltip": "Enter the introit. Multiple lines are allowed."
             }
         }
