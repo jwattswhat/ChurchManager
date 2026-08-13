@@ -12,6 +12,13 @@ from bulletin_orders import (
 )
 
 
+def normalize_line_sequences(lines):
+    """Make displayed list order the complete persisted order."""
+    for sequence, line in enumerate(lines, 1):
+        line["sequence"] = sequence
+    return lines
+
+
 class UnifiedWorshipServiceRepository:
     def __init__(self, connection):
         self.connection = portable_connection(connection)

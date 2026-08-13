@@ -1,9 +1,17 @@
 import unittest
 
 from weekly_worship_plan_dialog import duplicate_hymn_line_ids, match_suggestions_to_slots
+from unified_worship_service_dialog import normalize_line_sequences
 
 
 class WeeklyWorshipPlanMatchingTests(unittest.TestCase):
+    def test_displayed_order_is_resequenced_with_simple_increments(self):
+        lines = [{"sequence": 30, "label": "Third"}, {"sequence": 10, "label": "First"}]
+        self.assertEqual(
+            normalize_line_sequences(lines),
+            [{"sequence": 1, "label": "Third"}, {"sequence": 2, "label": "First"}],
+        )
+
     def test_distribution_suggestions_fill_repeated_slots_in_order(self):
         slots = [
             (30, "Distribution Hymn", "", ""),

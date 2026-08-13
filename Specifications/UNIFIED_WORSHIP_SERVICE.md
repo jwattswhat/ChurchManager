@@ -16,6 +16,10 @@ and apply-selection steps.
 The internal sequence used to order database rows is not displayed. Users see
 the service lines directly in their resulting order.
 
+Moving a line changes only its position in the working list. On Save, every
+weekly line is resequenced from 1 through the number of lines in displayed
+order. Historic gaps of ten are not retained.
+
 ## Service data
 
 The service panel retains Church, date and time, location, Proper, printable
