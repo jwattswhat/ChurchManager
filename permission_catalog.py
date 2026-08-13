@@ -6,6 +6,8 @@ MAIN_MENU_PERMISSIONS = {
     "lblService": "worship.manage",
     "lblSermon": "worship.manage",
     "lblPropers": "worship.manage",
+    "lblHymnal": "worship.manage",
+    "lblHymn": "worship.manage",
     "lblOS": "worship.manage",
     "lblWeeklyBulletinOrder": "worship.manage",
     "lblPrayers": "worship.manage",

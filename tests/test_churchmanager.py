@@ -840,13 +840,17 @@ class TestChurchManagerForms(unittest.TestCase):
         database_items = [
             "lblSermon", "lblPropers", "lblPrayers", "lblParticipant",
             "lblSchedule", "lblServiceSchedule", "lblAttendanceEvent",
+            "lblHymnal", "lblHymn",
         ]
         self.assertEqual(
             [controls[name]["posch"] for name in database_items],
-            [[2, row] for row in range(5, 12)],
+            [[2, row] for row in range(5, 14)],
         )
         self.assertTrue(all(controls[name]["label"] == controls[name]["label"].strip()
                             for name in database_items))
+        from main_menu import FORM_ROUTES
+        self.assertEqual(FORM_ROUTES["lblHymnal"], "frmHymnal")
+        self.assertEqual(FORM_ROUTES["lblHymn"], "frmHymn")
 
     def test_removed_financial_features_are_not_exposed(self):
         removed_forms = {

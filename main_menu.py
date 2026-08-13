@@ -6,6 +6,8 @@ FORM_ROUTES = {
     "lblService": "frmService",
     "lblSermon": "frmSermon",
     "lblPropers": "frmPropers",
+    "lblHymnal": "frmHymnal",
+    "lblHymn": "frmHymn",
     "lblPrayers": "frmPrayer",
     "lblCheckList": "frmCheckList",
     "lblEnhancements": "frmEnhancement",

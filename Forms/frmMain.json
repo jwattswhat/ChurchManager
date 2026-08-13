@@ -57,7 +57,7 @@
                 ],
                 "sizech": [
                     15,
-                    9
+                    11
                 ],
                 "label": "Database",
                 "layout": {
@@ -195,13 +195,39 @@
                     "invoke": "attendance.events.manage"
                 }
             },
+            "lblHymnal": {
+                "name": "lblHymnal",
+                "type": "StaticText",
+                "posch": [
+                    2,
+                    12
+                ],
+                "label": "Hymnals",
+                "tooltip": "Open the hymnal catalog.",
+                "security": {
+                    "invoke": "worship.manage"
+                }
+            },
+            "lblHymn": {
+                "name": "lblHymn",
+                "type": "StaticText",
+                "posch": [
+                    2,
+                    13
+                ],
+                "label": "Hymns",
+                "tooltip": "Open the hymn catalog.",
+                "security": {
+                    "invoke": "worship.manage"
+                }
+            },
             "MemberBox": {
                 "name": "MemberBox",
                 "label": "Membership",
                 "type": "StaticBox",
                 "posch": [
                     1,
-                    13
+                    15
                 ],
                 "layout": {
                     "row": 2,
@@ -217,7 +243,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    14
+                    16
                 ],
                 "label": "Person",
                 "tooltip": "Open the person form.",
@@ -230,7 +256,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    15
+                    17
                 ],
                 "label": "Families",
                 "tooltip": "Open the families form.",
@@ -248,7 +274,7 @@
                 "type": "StaticBox",
                 "posch": [
                     1,
-                    17
+                    19
                 ],
                 "sizech": [
                     15,
@@ -260,7 +286,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    18
+                    20
                 ],
                 "label": "Record Attendance",
                 "tooltip": "Open the record attendance form.",
@@ -273,7 +299,7 @@
                 "name": "ProjectBox",
                 "posch": [
                     1,
-                    20
+                    22
                 ],
                 "sizech": [
                     15,
@@ -290,7 +316,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    21
+                    23
                 ],
                 "label": "Project",
                 "tooltip": "Open the project form.",
@@ -303,7 +329,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    22
+                    24
                 ],
                 "label": "Task",
                 "tooltip": "Open the task form.",
@@ -317,7 +343,7 @@
                 "label": "Administration",
                 "posch": [
                     1,
-                    24
+                    26
                 ],
                 "sizech": [
                     15,
@@ -334,7 +360,7 @@
                 "label": "Documents",
                 "posch": [
                     2,
-                    25
+                    27
                 ],
                 "tooltip": "Open the documents form.",
                 "security": {
@@ -347,7 +373,7 @@
                 "label": "Announcement",
                 "posch": [
                     2,
-                    26
+                    28
                 ],
                 "tooltip": "Open the announcement form.",
                 "security": {
@@ -359,7 +385,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    27
+                    29
                 ],
                 "label": "Journal",
                 "tooltip": "Open the journal form.",
