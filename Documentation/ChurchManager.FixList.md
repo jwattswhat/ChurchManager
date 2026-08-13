@@ -9,3 +9,7 @@
 ## Deferred installation and starter-data work
 
 - During a new ChurchManager installation, ask which hymnals and lectionary systems the congregation wants installed. Permit multiple selections and an explicit "none" choice for each catalog. Install only the selected starter datasets, then let setup choose the church's primary hymnal and default lectionary independently. The installer must remain denomination-neutral: LSB and its lectionaries are optional packages, not hard-coded requirements.
+
+## Worship-planning integration
+
+- The selected Order of Service template determines the required hymn positions and counts. In particular, the number of Communion or Distribution hymns must come from the template's hymn lines rather than a fixed Worship-screen assumption. Weekly planning should request exactly those slots, retain each selection in `tblHymnUsage` for usage history, and apply the selected values to the corresponding weekly bulletin-order lines.
