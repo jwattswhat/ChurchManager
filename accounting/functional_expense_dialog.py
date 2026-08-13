@@ -3,6 +3,8 @@ from datetime import date
 import wx
 import wx.adv
 
+from ui_dimensions import DATE_PICKER_SIZE
+
 from .formatting import money
 from .functional_expense_service import FunctionalExpenseService
 
@@ -22,8 +24,8 @@ class FunctionalExpenseDialog(wx.Dialog):
             self.organization.Append(name, key)
         if self.organization.GetCount():
             self.organization.SetSelection(0)
-        self.start = wx.adv.DatePickerCtrl(self)
-        self.end = wx.adv.DatePickerCtrl(self)
+        self.start = wx.adv.DatePickerCtrl(self, size=DATE_PICKER_SIZE)
+        self.end = wx.adv.DatePickerCtrl(self, size=DATE_PICKER_SIZE)
         run = wx.Button(self, label="Run Report")
         run.Bind(wx.EVT_BUTTON, self.refresh)
         header = wx.BoxSizer(wx.HORIZONTAL)

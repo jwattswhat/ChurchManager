@@ -5,6 +5,8 @@ from datetime import date
 import wx
 import wx.adv
 
+from ui_dimensions import DATE_PICKER_SIZE
+
 from .audit_service import AccountingAuditService
 
 
@@ -30,10 +32,10 @@ class AccountingAuditDialog(wx.Dialog):
         self.action = wx.TextCtrl(self, size=(130, -1))
         self.entity = wx.TextCtrl(self, size=(130, -1))
         self.date_from = wx.adv.DatePickerCtrl(
-            self, size=(125, -1), style=wx.adv.DP_ALLOWNONE
+            self, size=DATE_PICKER_SIZE, style=wx.adv.DP_ALLOWNONE
         )
         self.date_to = wx.adv.DatePickerCtrl(
-            self, size=(125, -1), style=wx.adv.DP_ALLOWNONE
+            self, size=DATE_PICKER_SIZE, style=wx.adv.DP_ALLOWNONE
         )
         self.date_from.SetValue(wx.DateTime())
         self.date_to.SetValue(wx.DateTime())

@@ -6,6 +6,8 @@ from decimal import Decimal
 import wx
 import wx.adv
 
+from ui_dimensions import DATE_PICKER_SIZE
+
 from .formatting import money
 from .fund_balance_service import FundBalanceService
 
@@ -25,8 +27,8 @@ class FundBalanceDialog(wx.Dialog):
             self.organization.Append(str(label), item_id)
         if self.organization.GetCount(): self.organization.SetSelection(0)
         today = date.today()
-        self.date_from = wx.adv.DatePickerCtrl(self, size=(125, -1))
-        self.date_to = wx.adv.DatePickerCtrl(self, size=(125, -1))
+        self.date_from = wx.adv.DatePickerCtrl(self, size=DATE_PICKER_SIZE)
+        self.date_to = wx.adv.DatePickerCtrl(self, size=DATE_PICKER_SIZE)
         self.date_from.SetValue(wx.DateTime.FromDMY(1, 0, today.year))
         filters = wx.BoxSizer(wx.HORIZONTAL)
         for label, control in (("Organization", self.organization),

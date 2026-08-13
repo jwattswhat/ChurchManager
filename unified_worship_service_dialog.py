@@ -7,6 +7,8 @@ from datetime import datetime
 import wx
 import wx.adv
 
+from ui_dimensions import DATE_PICKER_SIZE, TIME_PICKER_SIZE
+
 from bulletin_orders import (
     BulletinOrderRepository,
     WeeklyBulletinOrderRepository,
@@ -346,12 +348,12 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             row.Add(wx.StaticText(parent, label="Service date:", size=(92, -1)), 0,
                     wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
             service_date = wx.adv.DatePickerCtrl(
-                parent, size=(130, -1), style=wx.adv.DP_DROPDOWN
+                parent, size=DATE_PICKER_SIZE, style=wx.adv.DP_DROPDOWN
             )
             row.Add(service_date, 0, wx.RIGHT, 12)
             row.Add(wx.StaticText(parent, label="Time:"), 0,
                     wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
-            service_time = wx.adv.TimePickerCtrl(parent, size=(115, -1))
+            service_time = wx.adv.TimePickerCtrl(parent, size=TIME_PICKER_SIZE)
             row.Add(service_time, 0)
             self.detail_box.Add(row, 0, wx.LEFT | wx.RIGHT | wx.TOP, 8)
             self.fields["service_date"] = service_date

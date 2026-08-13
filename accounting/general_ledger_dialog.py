@@ -5,6 +5,8 @@ from datetime import date
 import wx
 import wx.adv
 
+from ui_dimensions import DATE_PICKER_SIZE
+
 from .formatting import money
 from .general_ledger_service import GeneralLedgerService
 
@@ -27,8 +29,8 @@ class GeneralLedgerDialog(wx.Dialog):
         if self.organization.GetCount():
             self.organization.SetSelection(0)
         today = date.today()
-        self.date_from = wx.adv.DatePickerCtrl(self)
-        self.date_to = wx.adv.DatePickerCtrl(self)
+        self.date_from = wx.adv.DatePickerCtrl(self, size=DATE_PICKER_SIZE)
+        self.date_to = wx.adv.DatePickerCtrl(self, size=DATE_PICKER_SIZE)
         self.date_from.SetValue(wx.DateTime.FromDMY(1, 0, today.year))
         self.organization.Bind(wx.EVT_CHOICE, self.on_organization)
         filters = wx.FlexGridSizer(cols=4, hgap=8, vgap=8)

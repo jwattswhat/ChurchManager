@@ -4,6 +4,8 @@ import wx
 import wx.adv
 from datetime import date
 
+from ui_dimensions import DATE_PICKER_SIZE
+
 from .register_service import AccountingRegisterService
 from .journal_entry_service import JournalEntryService
 from .journal_entry_dialog import JournalEntryDialog
@@ -13,7 +15,7 @@ from .formatting import money
 class ReversalDialog(wx.Dialog):
     def __init__(self, parent, transaction_number):
         super().__init__(parent, title="Create Reversal")
-        self.reversal_date = wx.adv.DatePickerCtrl(self)
+        self.reversal_date = wx.adv.DatePickerCtrl(self, size=DATE_PICKER_SIZE)
         self.reason = wx.TextCtrl(self, size=(420, 80), style=wx.TE_MULTILINE)
         grid = wx.FlexGridSizer(cols=2, hgap=8, vgap=8); grid.AddGrowableCol(1, 1)
         grid.Add(wx.StaticText(self, label="Transaction")); grid.Add(wx.StaticText(self, label=str(transaction_number)))

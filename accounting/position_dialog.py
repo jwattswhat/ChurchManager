@@ -3,6 +3,7 @@ from datetime import date
 from decimal import Decimal
 import wx
 import wx.adv
+from ui_dimensions import DATE_PICKER_SIZE
 from .position_service import FinancialPositionService
 from .formatting import money
 
@@ -12,7 +13,7 @@ class FinancialPositionDialog(wx.Dialog):
         self.service=service; self.organization=wx.Choice(self)
         for key,name in service.organizations(): self.organization.Append(name,key)
         if self.organization.GetCount(): self.organization.SetSelection(0)
-        self.as_of=wx.adv.DatePickerCtrl(self); run=wx.Button(self,label="Run Statement")
+        self.as_of=wx.adv.DatePickerCtrl(self,size=DATE_PICKER_SIZE); run=wx.Button(self,label="Run Statement")
         run.Bind(wx.EVT_BUTTON,self.refresh)
         header=wx.BoxSizer(wx.HORIZONTAL)
         for label,control in (("Organization",self.organization),("As of",self.as_of)):

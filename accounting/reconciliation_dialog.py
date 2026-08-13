@@ -6,6 +6,8 @@ from decimal import Decimal, InvalidOperation
 import wx
 import wx.adv
 
+from ui_dimensions import DATE_PICKER_SIZE
+
 from .formatting import money
 
 
@@ -19,7 +21,7 @@ class BankReconciliationDialog(wx.Dialog):
         self.account.SetItems([str(row[1]) for row in self.accounts])
         if self.accounts:
             self.account.SetSelection(0)
-        self.statement_date = wx.adv.DatePickerCtrl(self)
+        self.statement_date = wx.adv.DatePickerCtrl(self, size=DATE_PICKER_SIZE)
         self.beginning = wx.TextCtrl(self, value="0.00")
         self.ending = wx.TextCtrl(self, value="0.00")
         create = wx.Button(self, label="Create Draft")

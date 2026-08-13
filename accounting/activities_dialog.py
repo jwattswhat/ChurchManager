@@ -3,6 +3,7 @@ from datetime import date
 from decimal import Decimal
 import wx
 import wx.adv
+from ui_dimensions import DATE_PICKER_SIZE
 from .activities_service import ActivitiesService
 from .formatting import money
 
@@ -14,7 +15,7 @@ class ActivitiesDialog(wx.Dialog):
         self.organization=wx.Choice(self)
         for key,name in service.organizations():self.organization.Append(name,key)
         if self.organization.GetCount():self.organization.SetSelection(0)
-        self.start=wx.adv.DatePickerCtrl(self);self.end=wx.adv.DatePickerCtrl(self)
+        self.start=wx.adv.DatePickerCtrl(self,size=DATE_PICKER_SIZE);self.end=wx.adv.DatePickerCtrl(self,size=DATE_PICKER_SIZE)
         run=wx.Button(self,label="Run Statement");run.Bind(wx.EVT_BUTTON,self.refresh)
         header=wx.BoxSizer(wx.HORIZONTAL)
         for label,control in (("Organization",self.organization),("From",self.start),("Through",self.end)):

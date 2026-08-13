@@ -3,6 +3,7 @@ from datetime import date
 from decimal import Decimal
 import wx
 import wx.adv
+from ui_dimensions import DATE_PICKER_SIZE
 from .trial_balance_service import TrialBalanceService
 from .formatting import money
 
@@ -13,7 +14,7 @@ class TrialBalanceDialog(wx.Dialog):
         self.organization = wx.Choice(self)
         for organization_id, name in service.organizations(): self.organization.Append(name, organization_id)
         if self.organization.GetCount(): self.organization.SetSelection(0)
-        self.as_of = wx.adv.DatePickerCtrl(self)
+        self.as_of = wx.adv.DatePickerCtrl(self, size=DATE_PICKER_SIZE)
         run = wx.Button(self, label="Run Trial Balance")
         run.Bind(wx.EVT_BUTTON, self.refresh)
         preview = wx.Button(self, label="Preview PDF")

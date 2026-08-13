@@ -8,6 +8,8 @@ from decimal import Decimal, InvalidOperation
 import wx
 import wx.adv
 
+from ui_dimensions import DATE_PICKER_SIZE
+
 from .draft_service import AccountingDraftService
 from .models import JournalLine, JournalTransaction, ZERO
 from .formatting import money
@@ -659,7 +661,7 @@ class AccountingDraftDialog(wx.Dialog):
         if self.organization.GetCount():
             self.organization.SetSelection(0)
         self.organization.Bind(wx.EVT_CHOICE, self.on_organization)
-        self.transaction_date = wx.adv.DatePickerCtrl(self)
+        self.transaction_date = wx.adv.DatePickerCtrl(self, size=DATE_PICKER_SIZE)
         self.transaction_type = wx.Choice(
             self, choices=["Cash disbursement", "Cash receipt", "General journal",
                            "Restriction release", "Opening balances"]
