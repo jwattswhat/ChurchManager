@@ -472,10 +472,12 @@ def _buttonclick(event):
             context.services.reports.configure_catalog_picker(frm.CONTROLID["ReportID"])
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runReports)
             frm.disable_all_buttons()
+            frm.enable_button("ChurchID")
             frm.enable_button("ReportID")
             frm.enable_button("btnRun")
             frm.enable_button("btnClose")
             frm.show()
+            frm.CONTROLID["ReportID"].SetFocus()
             return
         case "lblReportDesigner":
             open_directory_designer(authorization=context.authorization)

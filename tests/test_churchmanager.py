@@ -733,6 +733,14 @@ class TestChurchManagerForms(unittest.TestCase):
 
 
 class TestChurchManagerReportAssets(unittest.TestCase):
+    def test_report_menu_keeps_church_readable_and_focuses_report_grid(self):
+        source = (ROOT / "cm.py").read_text(encoding="utf-8")
+        report_case = source.split('case "lblReports":', 1)[1].split(
+            'case "lblReportDesigner":', 1,
+        )[0]
+        self.assertIn('enable_button("ChurchID")', report_case)
+        self.assertIn('CONTROLID["ReportID"].SetFocus()', report_case)
+
     def test_lime_report_test_template_changes_database_without_changing_source(self):
         function = load_function_without_importing(
             Path(r"C:\Users\Pastor\Documents\JSForm\fnReport.py"),
