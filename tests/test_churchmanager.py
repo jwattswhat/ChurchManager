@@ -231,6 +231,12 @@ class TestChurchManagerPython(unittest.TestCase):
         self.assertIn("self.connection.rollback()", source)
         self.assertIn('key in ("church", "os_note")', source)
 
+    def test_unified_worship_location_uses_tblchoices(self):
+        source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
+        self.assertIn('SELECT Choices FROM tblChoices WHERE Field=?', source)
+        self.assertIn('choice_values("Location")', source)
+        self.assertIn('key in ("proper", "sermon", "location")', source)
+
     def test_cm_has_guarded_main_entrypoint(self):
         tree = ast.parse((ROOT / "cm.py").read_text(encoding="utf-8-sig"))
         main_functions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "main"]

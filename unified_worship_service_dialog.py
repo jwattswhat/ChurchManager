@@ -104,6 +104,18 @@ class UnifiedWorshipServiceRepository:
             "WHERE p.ID=?", (proper_id,),
         )
 
+    def choice_values(self, field):
+        values = []
+        for row in self.all(
+            "SELECT Choices FROM tblChoices WHERE Field=? ORDER BY ID", (field,),
+        ):
+            text = str(row[0] or "").replace("[", "").replace("]", "")
+            for value in text.replace(",", "\n").splitlines():
+                value = value.strip().strip("'\"")
+                if value and value not in values:
+                    values.append(value)
+        return values
+
     def weekly_hymns(self, service_id):
         return dict(self.all(
             "SELECT ServiceBulletinOrderLineID,HymnID FROM tblHymnUsage "
@@ -321,7 +333,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         panel.SetSizer(outer)
 
     def _add_field(self, parent, key, label, multiline, inline):
-        if key in ("proper", "sermon"):
+        if key in ("proper", "sermon", "location"):
             control = wx.Choice(parent)
             if key == "proper":
                 control.Bind(wx.EVT_CHOICE, self.on_proper)
@@ -366,11 +378,17 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         )
         self.fields["sermon"].Set([str(row[1]) for row in self.sermon_rows])
         self._select(self.fields["sermon"], self.sermon_rows, r[10])
+        self.location_values = self.repository.choice_values("Location")
+        if r[3] and r[3] not in self.location_values:
+            self.location_values.append(r[3])
+        self.fields["location"].Set(self.location_values)
+        self.fields["location"].SetSelection(
+            self.location_values.index(r[3]) if r[3] in self.location_values else wx.NOT_FOUND
+        )
         church = self.repository.one("SELECT Church FROM tblChurch WHERE ID=?", (r[1],))
         values = {
             "church": church[0] if church else "",
             "when": r[2].strftime("%m/%d/%Y %I:%M %p") if hasattr(r[2], "strftime") else str(r[2]),
-            "location": r[3],
             "liturgical": r[5], "communion": bool(r[6]),
             "psalm": r[9], "bulletin": r[11], "check_complete": bool(r[12]),
             "os_note": r[8], "note": r[14],
@@ -638,7 +656,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
                           "Invalid Date and Time", wx.OK | wx.ICON_WARNING, self)
             return
         service_values = (
-            when, self.fields["location"].GetValue().strip() or None,
+            when, self.fields["location"].GetStringSelection() or None,
             self._choice_value(self.fields["proper"], self.proper_rows),
             self.fields["liturgical"].GetValue().strip() or None,
             int(self.fields["communion"].GetValue()), template_id,
