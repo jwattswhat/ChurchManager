@@ -9,6 +9,7 @@ class LSBPropersImportTests(unittest.TestCase):
         cycles = {SYSTEM_MAP[code][2] for code in ("LCMS-A", "LCMS-B", "LCMS-C")}
         self.assertEqual(len(names), 1)
         self.assertEqual(cycles, {"A", "B", "C"})
+        self.assertEqual(next(iter(names)), "LSB Three-Year Lectionary")
 
     def test_one_year_festivals_and_occasions_remain_distinct(self):
         names = {SYSTEM_MAP[code][0] for code in ("LCMS-1", "LCMS-F", "LCMS-O")}

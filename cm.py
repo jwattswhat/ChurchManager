@@ -60,6 +60,53 @@ single_instance = None
 
 
 class clsForm(JSForm.clsForm):
+    def fill_form(self, record):
+        result = super().fill_form(record)
+        if self.FORMNAME == "frmService" and record is not None:
+            self._filter_service_propers(record.get("ChurchID"), record.get("PropersID"))
+            self._save_control_value_baseline(record)
+        return result
+
+    def _filter_service_propers(self, church_id, selected_proper_id=None):
+        if "PropersID" not in self.CONTROLID:
+            return
+        marker = "%s" if "mysql.connector" in type(self.DBConnection).__module__ else "?"
+        cursor = self.DBConnection.cursor()
+        try:
+            cursor.execute(
+                "SELECT p.ID,CONCAT(ls.Name,"
+                "CASE WHEN p.Cycle IS NULL OR TRIM(p.Cycle)='' THEN '' "
+                "ELSE CONCAT(' - Year ',p.Cycle) END,' - ',p.LiturgicalDate) "
+                "FROM tblPropers p JOIN tblLectionarySystem ls ON ls.ID=p.LectionarySystemID "
+                "WHERE (SELECT PrimaryLectionarySystemID FROM tblChurch WHERE ID="
+                + marker
+                + ") IS NULL OR p.LectionarySystemID=(SELECT PrimaryLectionarySystemID "
+                "FROM tblChurch WHERE ID=" + marker + ") "
+                "ORDER BY ls.Name,p.Cycle,p.Sort,p.ID",
+                (church_id, church_id),
+            )
+            rows = cursor.fetchall()
+        finally:
+            cursor.close()
+        control = self.CONTROLID["PropersID"]
+        choices = control.choices
+        choices.id = []
+        choices.display = []
+        choices.fielddata = []
+        choices.subfields = []
+        for proper_id, display in rows:
+            choices._addchoiceanddata(proper_id, display, [display])
+        control.Set(choices.display)
+        display = choices.getchoicedisplay(selected_proper_id)
+        control.ChangeValue(str(display) if selected_proper_id in choices.id else "")
+
+    def _on_service_church_changed(self, event):
+        self._filter_service_propers(
+            self.CONTROLID["ChurchID"].GetValue(),
+            self.CONTROLID["PropersID"].GetValue(),
+        )
+        event.Skip()
+
     def _refresh_parent_grid(self, control_name):
         parent = self.PARENT
         if not parent or control_name not in getattr(parent, "CONTROLID", {}):
@@ -141,6 +188,8 @@ class clsForm(JSForm.clsForm):
                 wx.EVT_BUTTON, self._open_service_weekly_order,
                 self.CONTROLID["btnWeeklyOrder"],
             )
+        if self.FORMNAME == "frmService" and "ChurchID" in self.CONTROLID:
+            self.CONTROLID["ChurchID"].Bind(wx.EVT_COMBOBOX, self._on_service_church_changed)
         super().bind_form_controls()
 
     def _current_service_id(self):

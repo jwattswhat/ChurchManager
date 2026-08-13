@@ -467,6 +467,17 @@ class TestChurchManagerForms(unittest.TestCase):
         self.assertIn("SELECT Season FROM tblPropers", source)
         self.assertNotIn("SELECT * FROM tblPropers WHERE ID=%s", source)
 
+    def test_worship_service_filters_propers_by_church_default_lectionary(self):
+        source = (ROOT / "cm.py").read_text(encoding="utf-8-sig")
+        migration = (
+            ROOT / "migrations" / "030_abbreviate_lsb_lectionary_names.sql"
+        ).read_text(encoding="utf-8")
+        self.assertIn("PrimaryLectionarySystemID FROM tblChurch", source)
+        self.assertIn('self.FORMNAME == "frmService"', source)
+        self.assertIn("wx.EVT_COMBOBOX", source)
+        self.assertIn("LSB Three-Year Lectionary", migration)
+        self.assertNotIn("SET Name = 'Lutheran Service Book", migration)
+
     def test_user_administration_is_a_protected_main_menu_action(self):
         definition = next(iter(load_json(FORMS / "frmMain.json").values()))
         control = definition["CONTROLS"]["lblUsers"]

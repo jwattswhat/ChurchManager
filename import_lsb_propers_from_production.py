@@ -13,12 +13,12 @@ from import_lsb_from_production import connect, rows_as_dicts
 ROOT = Path(__file__).resolve().parent
 LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
 SYSTEM_MAP = {
-    "LCMS-A": ("Lutheran Service Book Three-Year Lectionary", "ABC", "A"),
-    "LCMS-B": ("Lutheran Service Book Three-Year Lectionary", "ABC", "B"),
-    "LCMS-C": ("Lutheran Service Book Three-Year Lectionary", "ABC", "C"),
-    "LCMS-1": ("Lutheran Service Book One-Year Lectionary", "None", None),
-    "LCMS-F": ("Lutheran Service Book Feasts and Festivals", "None", None),
-    "LCMS-O": ("Lutheran Service Book Occasions", "Custom", None),
+    "LCMS-A": ("LSB Three-Year Lectionary", "ABC", "A"),
+    "LCMS-B": ("LSB Three-Year Lectionary", "ABC", "B"),
+    "LCMS-C": ("LSB Three-Year Lectionary", "ABC", "C"),
+    "LCMS-1": ("LSB One-Year Lectionary", "None", None),
+    "LCMS-F": ("LSB Feasts and Festivals", "None", None),
+    "LCMS-O": ("LSB Occasions", "Custom", None),
 }
 SYSTEM_DEFINITIONS = {
     name: cycle_type for name, cycle_type, _cycle in SYSTEM_MAP.values()
