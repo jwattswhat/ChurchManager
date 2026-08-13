@@ -13,3 +13,4 @@
 ## Worship-planning integration
 
 - The selected Order of Service template determines the required hymn positions and counts. In particular, the number of Communion or Distribution hymns must come from the template's hymn lines rather than a fixed Worship-screen assumption. Weekly planning should request exactly those slots, retain each selection in `tblHymnUsage` for usage history, and apply the selected values to the corresponding weekly bulletin-order lines.
+- Add a liturgical-color swatch to both the unified Worship Service screen and the Worship Service Planner report. The swatch must use the service's selected Propers color, while retaining a readable text label for clarity and accessibility. If the color is null or blank, the swatch must be transparent or omitted rather than displaying a default color.
