@@ -23,8 +23,8 @@ class LegacyHymnSuggestionConversionTests(unittest.TestCase):
         self.assertEqual(
             suggestion_tokens(text),
             [
-                ("343", "Entrance"), ("340", "Entrance"),
-                ("332", "Of the Day"), ("516", "Communion"),
+                ("343", "Hymn of Invocation"), ("340", "Hymn of Invocation"),
+                ("332", "Hymn of the Day"), ("516", "Communion"),
                 ("331", "Closing"),
             ],
         )

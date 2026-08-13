@@ -7,6 +7,17 @@ import wx
 from bulletin_orders import portable_connection
 
 
+def suggestion_role_key(value):
+    """Match full suggestion labels to the shorter template slot keys."""
+    role = str(value or "").strip().casefold()
+    return {
+        "entrance": "hymn of invocation",
+        "hymn of invocation": "hymn of invocation",
+        "of the day": "hymn of the day",
+        "hymn of the day": "hymn of the day",
+    }.get(role, role)
+
+
 class WeeklyWorshipPlanRepository:
     def __init__(self, connection):
         self.connection = portable_connection(connection)
@@ -179,7 +190,7 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
         suggestions = self.repository.suggestions(self.propers_id)
         suggested_by_role = {}
         for _hymn_id, number, title, role in suggestions:
-            suggested_by_role.setdefault(str(role or "").casefold(), []).append(
+            suggested_by_role.setdefault(suggestion_role_key(role), []).append(
                 " ".join(value for value in (str(number), title) if value).strip()
             )
         self.hymn_rows = self.repository.hymn_slots(self.service_id)
@@ -188,7 +199,7 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
             item = self.hymn_grid.InsertItem(index, str(row[0] or "Hymn"))
             self.hymn_grid.SetItem(item, 1, str(row[1]))
             self.hymn_grid.SetItem(item, 2, str(row[2]))
-            matched = suggested_by_role.get(str(row[0] or "").casefold(), [])
+            matched = suggested_by_role.get(suggestion_role_key(row[0]), [])
             general = suggested_by_role.get("", [])
             self.hymn_grid.SetItem(item, 3, "; ".join(matched or general))
             if not row[1] and not row[2]:

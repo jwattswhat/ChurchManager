@@ -23,8 +23,8 @@ ROLE_PATTERN = re.compile(
     re.IGNORECASE,
 )
 ROLE_NAMES = {
-    "entrance": "Entrance",
-    "day": "Of the Day",
+    "entrance": "Hymn of Invocation",
+    "day": "Hymn of the Day",
     "communion": "Communion",
     "closing": "Closing",
 }

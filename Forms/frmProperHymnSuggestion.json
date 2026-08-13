@@ -47,7 +47,7 @@
         "type": "ComboBox",
         "posch": [12, 3],
         "sizech": [20, 2],
-        "choices": ["", "Entrance", "Of the Day", "Communion", "Closing"],
+        "choices": ["", "Hymn of Invocation", "Hymn of the Day", "Communion", "Closing"],
         "tooltip": "Optionally identify the service position."
       },
       "lblNote": {"name": "lblNote", "type": "StaticText", "label": "Note:", "posch": [1, 5]},

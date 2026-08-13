@@ -84,6 +84,21 @@ def load_function_without_importing(module_path: Path, function_name: str, globa
 
 
 class TestWorshipPlanningStructure(unittest.TestCase):
+    def test_suggested_hymn_roles_use_full_liturgical_names(self):
+        migration = (ROOT / "migrations" / "033_rename_suggested_hymn_roles.sql").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("'Hymn of Invocation'", migration)
+        self.assertIn("'Hymn of the Day'", migration)
+        form = json.loads(
+            (ROOT / "Forms" / "frmProperHymnSuggestion.json").read_text(encoding="utf-8")
+        )["frmProperHymnSuggestionFORM"]
+        choices = form["CONTROLS"]["SuggestedAs"]["choices"]
+        self.assertIn("Hymn of Invocation", choices)
+        self.assertIn("Hymn of the Day", choices)
+        self.assertNotIn("Entrance", choices)
+        self.assertNotIn("Of the Day", choices)
+
     def test_lsb_reading_roles_are_normalized_by_migration(self):
         migration = (ROOT / "migrations" / "032_normalize_lsb_reading_roles.sql").read_text(
             encoding="utf-8"

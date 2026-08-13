@@ -1,5 +1,6 @@
 import unittest
 
+from convert_legacy_hymn_suggestions import ROLE_NAMES
 from import_lsb_propers_from_production import (
     SYSTEM_DEFINITIONS,
     SYSTEM_MAP,
@@ -9,6 +10,10 @@ from import_lsb_propers_from_production import (
 
 
 class LSBPropersImportTests(unittest.TestCase):
+    def test_suggestion_conversion_uses_full_hymn_role_names(self):
+        self.assertEqual(ROLE_NAMES["entrance"], "Hymn of Invocation")
+        self.assertEqual(ROLE_NAMES["day"], "Hymn of the Day")
+
     def test_legacy_cycles_map_to_one_normalized_three_year_system(self):
         names = {SYSTEM_MAP[code][0] for code in ("LCMS-A", "LCMS-B", "LCMS-C")}
         cycles = {SYSTEM_MAP[code][2] for code in ("LCMS-A", "LCMS-B", "LCMS-C")}

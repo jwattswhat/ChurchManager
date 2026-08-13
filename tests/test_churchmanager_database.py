@@ -234,6 +234,24 @@ class TestChurchManagerDatabase(unittest.TestCase):
         }
         self.assertTrue({"Old Testament", "Epistle", "Gospel"}.issubset(roles))
 
+    def test_suggested_hymns_use_full_liturgical_role_names(self):
+        migration = self.query(
+            "SELECT version FROM schema_migrations "
+            "WHERE version='033_rename_suggested_hymn_roles.sql'"
+        )
+        self.assertEqual(migration, [("033_rename_suggested_hymn_roles.sql",)])
+        old_names = self.query(
+            "SELECT COUNT(*) FROM tblProperHymnSuggestion "
+            "WHERE SuggestedAs IN ('Entrance','Of the Day')"
+        )[0][0]
+        self.assertEqual(old_names, 0)
+        roles = {
+            row[0] for row in self.query(
+                "SELECT DISTINCT SuggestedAs FROM tblProperHymnSuggestion"
+            )
+        }
+        self.assertTrue({"Hymn of Invocation", "Hymn of the Day"}.issubset(roles))
+
     def test_bulletin_order_hymnal_link_is_optional_and_seeded(self):
         migration = self.query(
             "SELECT version FROM schema_migrations "
