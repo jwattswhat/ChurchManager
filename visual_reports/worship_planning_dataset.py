@@ -3,6 +3,7 @@
 from JSForm.report_dataset import (
     ReportCollection, ReportDataset, ReportDatasetContract, ReportField,
 )
+from worship_scheduling_rules import report_participant_rows
 
 
 WORSHIP_PLANNING_CONTRACT = ReportDatasetContract(
@@ -72,37 +73,6 @@ class WorshipPlanningDatasetProvider:
     def _placeholder(rows, **values):
         return rows or [values]
 
-    @staticmethod
-    def _participant_plan(requirements, assignments):
-        """Show every required slot plus any additional or declined assignment."""
-        remaining = list(assignments)
-        result = []
-        for requirement in requirements:
-            role_id = requirement["WorshipRoleID"]
-            role = requirement["Role"]
-            required = int(requirement["RequiredCount"])
-            available = [
-                row for row in remaining
-                if row["WorshipRoleID"] == role_id and row["Status"] != "DECLINED"
-            ]
-            for slot in range(1, required + 1):
-                position = f"{role} {slot}" if required > 1 else role
-                assignment = available.pop(0) if available else None
-                if assignment:
-                    remaining.remove(assignment)
-                    result.append({
-                        "Role": position, "Name": assignment["Name"],
-                        "Status": str(assignment["Status"]).title(),
-                    })
-                else:
-                    result.append({"Role": position, "Name": "Unfilled", "Status": "Open"})
-        for assignment in remaining:
-            result.append({
-                "Role": assignment["Role"], "Name": assignment["Name"],
-                "Status": str(assignment["Status"]).title(),
-            })
-        return result
-
     def build(self, church_id, service_id):
         self.authorization.require(
             WORSHIP_PLANNING_CONTRACT.required_permission,
@@ -145,7 +115,7 @@ class WorshipPlanningDatasetProvider:
             "SELECT WorshipRoleID,Role,Name,Status FROM rpt_worship_planner_participant "
             "WHERE ServiceID=? ORDER BY Role,Name", (service_id,),
         )
-        participants = self._participant_plan(requirements, assignments)
+        participants = report_participant_rows(requirements, assignments)
         label = service[0]["LiturgicalDate"] or str(service[0]["DateTime"])
         return ReportDataset.create(WORSHIP_PLANNING_CONTRACT, {
             "church": church,

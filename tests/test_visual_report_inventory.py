@@ -68,7 +68,9 @@ class TestVisualReportInventory(unittest.TestCase):
     def test_worship_planner_lists_required_open_and_declined_positions(self):
         from visual_reports.worship_planning_dataset import WorshipPlanningDatasetProvider
 
-        rows = WorshipPlanningDatasetProvider._participant_plan(
+        from worship_scheduling_rules import report_participant_rows
+
+        rows = report_participant_rows(
             [{"WorshipRoleID": 6, "Role": "Acolyte", "RequiredCount": 2}],
             [{
                 "WorshipRoleID": 6, "Role": "Acolyte", "Name": "Sam",

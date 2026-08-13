@@ -442,8 +442,10 @@ Key tables include:
 - `tblServiceRole`
 - `tblPropers`
 - `tblReading`
-- `tblAltReading`
-- `tblOrderOfService`
+- `tblBulletinOrderTemplate`
+- `tblBulletinOrderLine`
+- `tblServiceBulletinOrder`
+- `tblServiceBulletinOrderLine`
 - `tblHymnUsage`
 - `tblSermon`
 
@@ -451,11 +453,11 @@ A typical service-planning workflow is:
 
 1. Confirm the Church record.
 2. Create or select the appropriate Propers record.
-3. Confirm readings and any alternate readings.
-4. Create the Service record with its date, time, propers, and order-of-service selection.
-5. Add hymns and identify how each is used.
+3. Create the Service record and select its Order of Service template.
+4. Apply the propers to fill readings and suggested hymns into the weekly order.
+5. Review and complete the weekly Order of Service.
 6. Link or create the sermon and outline files.
-7. Generate participant assignments.
+7. Fill the template's required participant positions and add any service-specific assignments.
 8. Review the Worship Planning report.
 9. Notify participants.
 10. Generate the order of service.
@@ -465,7 +467,7 @@ A typical service-planning workflow is:
 
 Propers represent the appointed liturgical information for a Sunday, feast, festival, or other service. They can supply readings and seasonal data used by scheduling and worship output.
 
-Reading screens maintain biblical references and reading text. Alternate readings permit service-specific substitutions or additions.
+Reading screens maintain biblical references used to fill the weekly Order of Service. A weekly reading may be overridden directly when a service needs a different selection.
 
 Because report and order-of-service scripts rely on positional fields in some queries, changes to table column order or `SELECT *` behavior require careful regression testing.
 
@@ -497,7 +499,7 @@ This creates a durable connection between the database record and filesystem art
 
 ### 8.7 Orders of service
 
-Order-of-service components are maintained through the OS and OS List forms. `rptOrderofService.py` generates a service document based on the selected service ID.
+Reusable Order of Service templates are maintained through Bulletin Order Templates. Each template owns its ordered lines, optional hymnal, and normal required participant positions. Customized copies may be edited; starter templates remain protected.
 
 The generator combines data such as:
 
@@ -508,7 +510,7 @@ The generator combines data such as:
 - propers; and
 - service-specific selections.
 
-The Generate OS menu opens a service selector and launches the script with the selected service ID. Generated material should be reviewed before publication because the script depends on database content and external files being complete and correctly named.
+The Worship Service screen combines the selected template with that week's readings, hymns, and service-specific values. It saves a weekly outline that can be previewed or exported as plain text. The output is an outline for insertion into a bulletin, not the complete copyrighted liturgical text.
 
 ### 8.8 Prayers
 
@@ -529,7 +531,7 @@ The application includes both the normal Announcement screen and an Announcement
 
 ### 8.10 Participant scheduling
 
-Participants have names, roles, scheduling selections, phone numbers, email addresses, and notes. Schedule rules can restrict assignments by:
+Participants may link to congregation members or remain independent outside participants. They have contact information, eligible roles, availability patterns, and notes. Availability can be restricted by:
 
 - service time;
 - day of week;
@@ -537,16 +539,9 @@ Participants have names, roles, scheduling selections, phone numbers, email addr
 - liturgical season; and
 - participant role.
 
-When Schedule Participants runs for a service, `fnSchedule.ScheduleParticipants()`:
+The selected Order of Service template defines the normal number of people required for each position. The Service Participants screen displays every required slot, including open positions, and allows additional service-specific assignments. Manual assignments are authoritative. Preview Suggestions fills only open required slots using eligible, available participants and never replaces existing assignments. All accepted suggestions are saved together as one database transaction.
 
-1. checks whether service-role rows already exist;
-2. reads the service and its propers;
-3. determines time, weekday, month, week number, and season;
-4. compares each participant's schedule rules;
-5. inserts matching roles into `tblServiceRole`; and
-6. avoids rescheduling if role rows already exist.
-
-Review assignments after generation. The current operation does not provide a full optimization or conflict-resolution engine; it matches configured eligibility rules.
+Declined assignments remain visible for planning and reporting but do not fill a required slot. The Worship Planning report includes required, open, assigned, suggested, confirmed, declined, and additional positions.
 
 ### 8.11 Participant notification
 
@@ -995,7 +990,9 @@ Recommended modernization order:
 | --- | --- |
 | `cm.py` | Main program, extended form behavior, menu handlers, attendance, reporting, and backup launch. |
 | `fnCMargParse.py` | Command-line database and report-date arguments. |
-| `fnSchedule.py` | Worship participant scheduling and email notification. |
+| `worship_scheduling.py` | Participant, role, availability, and service-assignment screens plus database access. |
+| `worship_scheduling_rules.py` | UI-free availability, required-slot, report-row, and suggestion rules. |
+| `fnSchedule.py` | Legacy participant-email notification support; scheduling has moved to the normalized workflow. |
 | `fnDatabase.py` | Database maintenance utility, including auto-increment reset behavior. It runs its function at import/execution and should be used cautiously. |
 | `rptOrderofService.py` | Order-of-service document generation. |
 | `rptAnnouncement.py` | Date- and week-filtered Sunday announcement generation. |

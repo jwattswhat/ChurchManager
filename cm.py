@@ -478,12 +478,6 @@ def _buttonclick(event):
         )
         frm.FORM.Close()
 
-    def _runSchedule(event):
-        ID = int(frm.CONTROLID["ServiceID"].GetValue())
-        if ID == None:
-            return
-        fnSchedule.ScheduleParticipants(ID, ChurchDB.DBConnection)
-
     def _runNotify(event):
         ID = int(frm.CONTROLID["ServiceID"].GetValue())
         if ID == None:

@@ -6,6 +6,7 @@ from worship_scheduling import (
     AssignmentSuggestion, SchedulingSuggestionService, pattern_matches,
     required_position_rows, serialized_values, time_text,
 )
+from worship_scheduling_rules import report_participant_rows
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,6 +33,10 @@ class SuggestionRepository:
 
     def save_assignment(self, *values):
         self.saved.append(values)
+
+    def save_suggestions(self, service_id, suggestions):
+        self.saved.append((service_id, tuple(suggestions)))
+        return len(suggestions)
 
 
 class WorshipSchedulingTests(unittest.TestCase):
@@ -78,6 +83,19 @@ class WorshipSchedulingTests(unittest.TestCase):
         self.assertEqual(len(rows), 2)
         self.assertEqual(rows[0][4][4], "Alex")
         self.assertIsNone(rows[1][4])
+
+    def test_report_and_screen_share_required_slot_rules(self):
+        rows = report_participant_rows(
+            [{"WorshipRoleID": 6, "Role": "Acolyte", "RequiredCount": 2}],
+            [{
+                "WorshipRoleID": 6, "Role": "Acolyte", "Name": "Alex",
+                "Status": "ASSIGNED",
+            }],
+        )
+        self.assertEqual(rows, [
+            {"Role": "Acolyte 1", "Name": "Alex", "Status": "Assigned"},
+            {"Role": "Acolyte 2", "Name": "Unfilled", "Status": "Open"},
+        ])
 
     def test_normalization_migration_preserves_optional_member_link_and_legacy_roles(self):
         sql = (ROOT / "migrations" / "041_normalize_worship_participants.sql").read_text(
