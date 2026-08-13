@@ -269,6 +269,13 @@ class TestChurchManagerPython(unittest.TestCase):
         self.assertIn('self.fields["liturgical"].SetValue(str(detail[3] or ""))', source)
         self.assertIn('self.fields["liturgical"].GetValue().strip() or None', source)
 
+    def test_new_and_existing_services_both_use_unified_editor(self):
+        source = (ROOT / "worship_service_dialog.py").read_text(encoding="utf-8")
+        self.assertNotIn('form_factory.create(\n            "frmService"', source)
+        self.assertIn("repository.create_service(church_id)", source)
+        self.assertIn("show_unified_worship_service(", source)
+        self.assertIn("repository.discard_unsaved_service(new_id)", source)
+
     def test_unified_worship_save_persists_service_order_and_hymns_together(self):
         source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
         self.assertIn("def save(self, service_id, service_values, template_id, lines)", source)

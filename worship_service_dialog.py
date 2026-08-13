@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import wx
 
-from unified_worship_service_dialog import show_unified_worship_service
+from unified_worship_service_dialog import (
+    UnifiedWorshipServiceRepository,
+    show_unified_worship_service,
+)
 
 
 SERVICE_FIELDS = [
@@ -94,21 +97,34 @@ class WorshipServiceDialog(wx.Dialog):
             show_unified_worship_service(self, self.connection, service_id)
             self.refresh()
             return
-        condition = f"ID = {int(service_id)}" if service_id is not None else "ID = -1"
-        form = self.form_factory.create(
-            "frmService",
-            parent=self,
-            form_description={
-                "table": {
-                    "name": "tblService", "fields": SERVICE_FIELDS,
-                    "condition": condition, "orderby": "DateTime DESC",
-                }
-            },
-        )
-        if new:
-            form.new_record()
-        form.FRAME.Bind(wx.EVT_CLOSE, self._on_editor_close)
-        form.show()
+        repository = UnifiedWorshipServiceRepository(self.connection)
+        churches = repository.churches()
+        if not churches:
+            wx.MessageBox("Create a Church record before adding a Worship Service.",
+                          "Church Required", wx.OK | wx.ICON_WARNING, self)
+            return
+        church_id = churches[0][0]
+        if len(churches) > 1:
+            chooser = wx.SingleChoiceDialog(
+                self, "Select the church for this service.", "New Worship Service",
+                [str(row[1]) for row in churches],
+            )
+            try:
+                if chooser.ShowModal() != wx.ID_OK:
+                    return
+                church_id = churches[chooser.GetSelection()][0]
+            finally:
+                chooser.Destroy()
+        new_id = repository.create_service(church_id)
+        saved = False
+        try:
+            saved = show_unified_worship_service(
+                self, self.connection, new_id, new_service=True,
+            )
+        finally:
+            if not saved:
+                repository.discard_unsaved_service(new_id)
+        self.refresh()
 
     def _on_editor_close(self, event):
         event.Skip()

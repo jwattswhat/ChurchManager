@@ -58,6 +58,39 @@ class UnifiedWorshipServiceRepository:
             "ON t.ID=s.BulletinOrderTemplateID WHERE s.ID=?", (service_id,),
         )
 
+    def churches(self):
+        return self.all("SELECT ID,Church FROM tblChurch ORDER BY Church,ID")
+
+    def create_service(self, church_id):
+        """Create the temporary database identity needed by the unified editor."""
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "INSERT INTO tblService "
+                "(ChurchID,DateTime,HolyCommunion,CheckListComplete,CheckList) "
+                "VALUES (?,?,0,0,'{}')",
+                (church_id, datetime.now().replace(microsecond=0)),
+            )
+            service_id = cursor.lastrowid
+            self.connection.commit()
+            return service_id
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
+    def discard_unsaved_service(self, service_id):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute("DELETE FROM tblService WHERE ID=?", (service_id,))
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
     def proper_name(self, proper_id):
         if not proper_id:
             return "Not selected"
@@ -227,11 +260,13 @@ class UnifiedWorshipServiceRepository:
 class UnifiedWorshipServiceEditor(wx.Dialog):
     """First-stage unified editor: one window, independently scrolling panels."""
 
-    def __init__(self, parent, connection, service_id):
+    def __init__(self, parent, connection, service_id, new_service=False):
         super().__init__(parent, title="Worship Service and Order of Service", size=(1400, 780),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.repository = UnifiedWorshipServiceRepository(connection)
         self.service_id = service_id
+        self.new_service = new_service
+        self.saved = False
         self.record = self.repository.service(service_id)
         if not self.record:
             raise ValueError("The selected Worship Service is unavailable.")
@@ -705,6 +740,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             self.repository.save(
                 self.service_id, service_values, template_id, self.working_lines,
             )
+            self.saved = True
             self.save_status.SetLabel("Worship Service and weekly Order of Service saved.")
             self.save_status.SetForegroundColour(wx.Colour(0, 120, 0))
             wx.MessageBox("The complete Worship Service was saved.", "Worship Service",
@@ -896,9 +932,10 @@ class ProperReadOnlyDialog(wx.Dialog):
         panel.SetSizer(outer)
 
 
-def show_unified_worship_service(parent, connection, service_id):
-    dialog = UnifiedWorshipServiceEditor(parent, connection, service_id)
+def show_unified_worship_service(parent, connection, service_id, new_service=False):
+    dialog = UnifiedWorshipServiceEditor(parent, connection, service_id, new_service)
     try:
-        return dialog.ShowModal()
+        dialog.ShowModal()
+        return dialog.saved
     finally:
         dialog.Destroy()
