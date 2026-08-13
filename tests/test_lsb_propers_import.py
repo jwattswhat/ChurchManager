@@ -4,6 +4,7 @@ from convert_legacy_hymn_suggestions import ROLE_NAMES
 from import_lsb_propers_from_production import (
     SYSTEM_DEFINITIONS,
     SYSTEM_MAP,
+    normalized_liturgical_date,
     normalized_reading_role,
     proper_key,
 )
@@ -48,6 +49,24 @@ class LSBPropersImportTests(unittest.TestCase):
         self.assertEqual(normalized_reading_role("Second Reading"), "Epistle")
         self.assertEqual(normalized_reading_role(" third "), "Gospel")
         self.assertEqual(normalized_reading_role("Psalm"), "Psalm")
+
+    def test_printable_liturgical_dates_are_spelled_out(self):
+        self.assertEqual(
+            normalized_liturgical_date("First S. in Advent"),
+            "First Sunday in Advent",
+        )
+        self.assertEqual(
+            normalized_liturgical_date("Second S. a. the Epiphany"),
+            "Second Sunday after the Epiphany",
+        )
+        self.assertEqual(
+            normalized_liturgical_date("First Sunday a. Christmas"),
+            "First Sunday after Christmas",
+        )
+        self.assertEqual(
+            normalized_liturgical_date("The Resurrecition of Our Lord (Easter Tusday)"),
+            "The Resurrection of Our Lord (Easter Tuesday)",
+        )
 
 
 if __name__ == "__main__":

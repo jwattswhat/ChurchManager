@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -46,6 +47,20 @@ def normalized_reading_role(value):
     return LSB_READING_ROLES.get(label.casefold(), label)
 
 
+def normalized_liturgical_date(value):
+    """Return bulletin-ready Proper wording without legacy abbreviations."""
+    title = str(value or "").strip()
+    title = re.sub(r"\bS\.\s+a\.?\s+the\b", "Sunday after the", title)
+    title = re.sub(r"\bS\.\s+a\.?\s+", "Sunday after ", title)
+    title = re.sub(r"\bSunday\s+a\.\s+", "Sunday after ", title)
+    title = re.sub(r"\bS\.\s+(after|in|of)\b", r"Sunday \1", title, flags=re.IGNORECASE)
+    title = re.sub(r"\bSunday\s+After\b", "Sunday after", title)
+    title = title.replace("Eight Sunday", "Eighth Sunday")
+    title = title.replace("Resurrecition", "Resurrection")
+    title = title.replace("Tusday", "Tuesday")
+    return re.sub(r"\s{2,}", " ", title)
+
+
 def fetch_all(connection, sql, values=()):
     cursor = connection.cursor()
     try:
@@ -60,7 +75,7 @@ def proper_key(system_name, cycle, liturgical_date):
     return (
         system_name.casefold(),
         (cycle or "").casefold(),
-        str(liturgical_date or "").strip().casefold(),
+        normalized_liturgical_date(liturgical_date).casefold(),
     )
 
 
@@ -171,7 +186,11 @@ def main():
         for row in source_propers:
             system_name, _cycle_type, cycle = SYSTEM_MAP[row["Lectionary"]]
             key = proper_key(system_name, cycle, row["LiturgicalDate"])
-            values = [row.get(field) for field in PROPER_FIELDS]
+            values = [
+                normalized_liturgical_date(row.get(field))
+                if field == "LiturgicalDate" else row.get(field)
+                for field in PROPER_FIELDS
+            ]
             if key in existing_by_key:
                 proper_id = existing_by_key[key]["ID"]
                 assignments = ",".join(f"{field}=?" for field in PROPER_FIELDS)

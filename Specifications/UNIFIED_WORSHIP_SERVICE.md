@@ -29,9 +29,9 @@ Order of Service notes, and service notes.
 Order of Service notes are supplied by the selected template and are read-only
 on the Worship Service screen. Service notes remain independently editable.
 
-The final name/behavior of printable liturgical date remains
-open design questions. Existing data is preserved until those decisions are
-made.
+The printed liturgical title is initialized from the selected Proper's fully
+spelled-out `LiturgicalDate`. It remains editable on the individual service so
+the bulletin may use a special title without changing the reusable Proper.
 
 ## Working Order of Service
 
