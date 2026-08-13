@@ -44,6 +44,7 @@ OPERATIONAL_MODULES = (
     "user_admin.py",
     "process_service.py",
     "backup_service.py",
+    "bulletin_orders.py",
     "report_service.py",
     "report_support.py",
     "fnSchedule.py",
@@ -180,6 +181,34 @@ class TestChurchManagerPython(unittest.TestCase):
         records = [(1, "Entrance", 14), (2, "Closing", 22)]
         self.assertEqual(search_records("Closing", records), records[1])
         self.assertIsNone(search_records("Communion", records))
+
+    def test_legacy_bulletin_order_line_becomes_structured_data(self):
+        from bulletin_orders import parse_legacy_line
+
+        line = parse_legacy_line("Opening Hymn&#x0009;<b>{Entrance}</b><br>")
+        self.assertEqual(line.line_type, "HYMN")
+        self.assertEqual(line.label, "Opening Hymn")
+        self.assertEqual(line.value_source, "SERVICE_HYMN")
+        self.assertEqual(line.value_key, "Entrance")
+        self.assertTrue(line.value_bold)
+        self.assertTrue(line.has_tab)
+        self.assertFalse(line.needs_review)
+
+    def test_legacy_season_rule_is_preserved(self):
+        from bulletin_orders import parse_legacy_line
+
+        line = parse_legacy_line("<i>Gloria omitted during Advent</i><br>")
+        self.assertEqual(line.condition_type, "EXCLUDE_SEASON")
+        self.assertEqual(line.condition_value, "Advent")
+        self.assertTrue(line.italic)
+
+    def test_plain_bulletin_output_uses_real_tabs(self):
+        from bulletin_orders import render_plain_line
+
+        self.assertEqual(
+            render_plain_line("Opening Hymn", value="LSB 507", has_tab=True),
+            "Opening Hymn\tLSB 507",
+        )
 
     def test_sermon_docx_conversion_uses_expected_html_markers(self):
         function = load_function_without_importing(
