@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime
 import wx
 
 from bulletin_orders import (
@@ -110,6 +111,58 @@ class UnifiedWorshipServiceRepository:
             (service_id,),
         ))
 
+    def save(self, service_id, service_values, template_id, lines):
+        """Persist the service and its complete displayed weekly order atomically."""
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "UPDATE tblService SET DateTime=?,Location=?,PropersID=?,LiturgicalDate=?,"
+                "HolyCommunion=?,BulletinOrderTemplateID=?,OSNote=?,PsalmorIntroit=?,SermonID=?,"
+                "Bulletin=?,CheckListComplete=?,CheckList=?,Note=? WHERE ID=?",
+                service_values + (service_id,),
+            )
+            cursor.execute("SELECT ChurchID FROM tblService WHERE ID=?", (service_id,))
+            church_id = cursor.fetchone()[0]
+            cursor.execute("DELETE FROM tblHymnUsage WHERE ServiceID=?", (service_id,))
+            cursor.execute("DELETE FROM tblServiceBulletinOrderLine WHERE ServiceID=?", (service_id,))
+            cursor.execute(
+                "INSERT INTO tblServiceBulletinOrder (ServiceID,TemplateID) VALUES (?,?) "
+                "ON DUPLICATE KEY UPDATE TemplateID=VALUES(TemplateID),GeneratedPlainText=NULL,"
+                "GeneratedHtml=NULL,GeneratedAt=NULL", (service_id, template_id),
+            )
+            for line in normalize_line_sequences(lines):
+                cursor.execute(
+                    "INSERT INTO tblServiceBulletinOrderLine "
+                    "(ServiceID,TemplateLineID,Sequence,Included,LineType,Label,ValueSource,"
+                    "ValueKey,WeeklyValue,ReferenceText,StyleName,LabelBold,ValueBold,Italic,"
+                    "IndentLevel,TabPosition,TabAlignment,TabLeader,Note) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (
+                        service_id, line.get("template_line_id"), line["sequence"],
+                        int(line["included"]), line["type"], line["label"], line["source"],
+                        line["key"], line["value"] or None, line["reference"] or None,
+                        line.get("style") or "Normal", int(bool(line.get("label_bold"))),
+                        int(bool(line.get("value_bold"))), int(bool(line.get("italic"))),
+                        int(line.get("indent") or 0), line.get("tab_position"),
+                        line.get("tab_alignment") or "LEFT", line.get("tab_leader") or "NONE",
+                        line.get("note") or None,
+                    ),
+                )
+                weekly_line_id = cursor.lastrowid
+                if line.get("hymn_id") is not None:
+                    cursor.execute(
+                        "INSERT INTO tblHymnUsage "
+                        "(ChurchID,ServiceID,ServiceBulletinOrderLineID,HymnID,UsedAs) "
+                        "VALUES (?,?,?,?,?)",
+                        (church_id, service_id, weekly_line_id, line["hymn_id"], line["key"]),
+                    )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
     def hymns(self, service_id):
         return self.search_hymns(service_id, "", "All fields")
 
@@ -166,6 +219,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         self.loading = True
         self.template_rows = []
         self.proper_rows = []
+        self.sermon_rows = []
         self.working_lines = []
         self._build()
         self._load()
@@ -252,9 +306,12 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
 
         outer.Add(splitter, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
         actions = wx.BoxSizer(wx.HORIZONTAL)
-        stage = wx.StaticText(panel, label="Unified editing and Save are the next implementation stage.")
-        stage.SetForegroundColour(wx.Colour(110, 80, 0))
-        actions.Add(stage, 0, wx.ALIGN_CENTER_VERTICAL)
+        save = wx.Button(panel, label="Save Service")
+        save.Bind(wx.EVT_BUTTON, self.on_save)
+        actions.Add(save, 0, wx.RIGHT, 8)
+        self.save_status = wx.StaticText(panel, label="Changes are not saved until Save Service is selected.")
+        self.save_status.SetForegroundColour(wx.Colour(110, 80, 0))
+        actions.Add(self.save_status, 0, wx.ALIGN_CENTER_VERTICAL)
         actions.AddStretchSpacer()
         close = wx.Button(panel, wx.ID_CLOSE, "Close")
         close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE))
@@ -263,11 +320,19 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         panel.SetSizer(outer)
 
     def _add_field(self, parent, key, label, multiline, inline):
-        if key == "proper":
+        if key in ("proper", "sermon"):
             control = wx.Choice(parent)
-            control.Bind(wx.EVT_CHOICE, self.on_proper)
+            if key == "proper":
+                control.Bind(wx.EVT_CHOICE, self.on_proper)
+        elif key in ("communion", "check_complete"):
+            control = wx.CheckBox(parent)
+        elif key == "bulletin":
+            control = wx.FilePickerCtrl(parent, message="Select the bulletin file")
         else:
-            style = wx.TE_MULTILINE | wx.TE_READONLY if multiline else wx.TE_READONLY
+            readonly = key in ("church", "os_note")
+            style = wx.TE_MULTILINE if multiline else 0
+            if readonly:
+                style |= wx.TE_READONLY
             size = (-1, 85) if multiline else (-1, -1)
             control = wx.TextCtrl(parent, style=style, size=size)
         if inline:
@@ -294,14 +359,19 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         self.proper_rows = self.repository.propers(r[1])
         self.fields["proper"].Set([str(row[1]) for row in self.proper_rows])
         self._select(self.fields["proper"], self.proper_rows, r[4])
+        self.sermon_rows = self.repository.all(
+            "SELECT ID,CONCAT(ID,' - ',COALESCE(Reference,''),' - ',COALESCE(Title,'')) "
+            "FROM tblSermon ORDER BY ID DESC"
+        )
+        self.fields["sermon"].Set([str(row[1]) for row in self.sermon_rows])
+        self._select(self.fields["sermon"], self.sermon_rows, r[10])
         church = self.repository.one("SELECT Church FROM tblChurch WHERE ID=?", (r[1],))
         values = {
             "church": church[0] if church else "",
             "when": r[2].strftime("%m/%d/%Y %I:%M %p") if hasattr(r[2], "strftime") else str(r[2]),
             "location": r[3],
-            "liturgical": r[5], "communion": "Yes" if r[6] else "No",
-            "psalm": r[9], "sermon": self.repository.sermon_name(r[10]),
-            "bulletin": r[11], "check_complete": "Yes" if r[12] else "No",
+            "liturgical": r[5], "communion": bool(r[6]),
+            "psalm": r[9], "bulletin": r[11], "check_complete": bool(r[12]),
             "os_note": r[8], "note": r[14],
         }
         try:
@@ -313,7 +383,13 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         except (TypeError, ValueError):
             values["checklist"] = str(r[13])
         for key, value in values.items():
-            self.fields[key].SetValue(str(value or ""))
+            control = self.fields[key]
+            if isinstance(control, wx.CheckBox):
+                control.SetValue(bool(value))
+            elif isinstance(control, wx.FilePickerCtrl):
+                control.SetPath(str(value or ""))
+            else:
+                control.SetValue(str(value or ""))
         hymn_ids = self.repository.weekly_hymns(self.service_id)
         self.working_lines = [
             self._weekly_line(row, hymn_ids.get(row[0]))
@@ -333,6 +409,10 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             "sequence": row[1], "included": bool(row[2]), "type": row[3],
             "label": row[4], "source": row[5], "key": row[6],
             "value": row[7] or "", "reference": row[8] or "", "hymn_id": hymn_id,
+            "style": row[9], "label_bold": row[10], "value_bold": row[11],
+            "italic": row[12], "indent": row[13], "tab_position": row[14],
+            "tab_alignment": row[15], "tab_leader": row[16], "note": row[17],
+            "template_line_id": row[18],
         }
 
     @staticmethod
@@ -348,6 +428,10 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             "sequence": row[1], "included": included, "type": row[2], "label": row[3],
             "source": row[4], "key": row[5], "value": "", "reference": row[6] or "",
             "hymn_id": None,
+            "style": row[7], "label_bold": row[8], "value_bold": row[9],
+            "italic": row[10], "indent": row[11], "tab_position": row[12],
+            "tab_alignment": row[13], "tab_leader": row[14], "note": row[17],
+            "template_line_id": row[0],
         }
 
     def refresh_grid(self):
@@ -450,12 +534,15 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         ) != wx.YES:
             return
         template_id = self.template_rows[self.template.GetSelection()][0]
+        self.fields["os_note"].SetValue(str(
+            self.template_rows[self.template.GetSelection()][2] or ""
+        ))
         season_row = self.repository.one(
             "SELECT COALESCE(p.Season,'') FROM tblService s LEFT JOIN tblPropers p "
             "ON p.ID=s.PropersID WHERE s.ID=?", (self.service_id,),
         )
         season = str(season_row[0] if season_row else "").casefold()
-        communion = self.fields["communion"].GetValue() == "Yes"
+        communion = self.fields["communion"].GetValue()
         self.working_lines = [
             self._template_line(row, communion, season)
             for row in self.repository.templates.lines(template_id)
@@ -483,6 +570,9 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         selection = self.fields["proper"].GetSelection()
         proper_id = None if selection == wx.NOT_FOUND else self.proper_rows[selection][0]
         readings, suggestions = self.repository.proper_values(proper_id)
+        if proper_id:
+            detail = self.repository.proper_detail(proper_id)
+            self.fields["liturgical"].SetValue(str(detail[3] or ""))
         readings_by_use = {row[0]: row[1] for row in readings}
         unused = list(suggestions)
         for line in self.working_lines:
@@ -496,6 +586,79 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
                     hymn = unused.pop(match)
                     line["hymn_id"], line["value"] = hymn[0], hymn[1]
         self.refresh_grid()
+
+    @staticmethod
+    def _choice_value(choice, rows):
+        selection = choice.GetSelection()
+        return None if selection == wx.NOT_FOUND else rows[selection][0]
+
+    def checklist_json(self):
+        result = {}
+        for raw in self.fields["checklist"].GetValue().splitlines():
+            text = raw.strip()
+            if not text:
+                continue
+            checked = text.startswith("[x]") or text.startswith("[X]")
+            label = text[3:].strip() if text.startswith("[") and len(text) >= 3 else text
+            result[label] = "True" if checked else "False"
+        return json.dumps(result)
+
+    def validation_counts(self):
+        hymn_ids = [line["hymn_id"] for line in self.working_lines if line["hymn_id"] is not None]
+        duplicates = len(hymn_ids) - len(set(hymn_ids))
+        missing = sum(
+            1 for line in self.working_lines
+            if line["included"] and line["source"] and not line["value"]
+        )
+        return duplicates, missing
+
+    def on_save(self, _event):
+        template_id = self._choice_value(self.template, self.template_rows)
+        if template_id is None:
+            wx.MessageBox("Select an Order of Service template before saving.",
+                          "Template Required", wx.OK | wx.ICON_WARNING, self)
+            return
+        duplicates, missing = self.validation_counts()
+        if duplicates or missing:
+            message = (
+                f"The service has {duplicates} duplicate hymn occurrence(s) and "
+                f"{missing} unfinished required line(s).\n\n"
+                "These items are shown in red. Save the service anyway?"
+            )
+            if wx.MessageBox(message, "Worship Service Validation",
+                             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES:
+                return
+        try:
+            when = datetime.strptime(
+                self.fields["when"].GetValue().strip(), "%m/%d/%Y %I:%M %p"
+            )
+        except ValueError:
+            wx.MessageBox("Enter the date and time as MM/DD/YYYY HH:MM AM or PM.",
+                          "Invalid Date and Time", wx.OK | wx.ICON_WARNING, self)
+            return
+        service_values = (
+            when, self.fields["location"].GetValue().strip() or None,
+            self._choice_value(self.fields["proper"], self.proper_rows),
+            self.fields["liturgical"].GetValue().strip() or None,
+            int(self.fields["communion"].GetValue()), template_id,
+            self.fields["os_note"].GetValue() or None,
+            self.fields["psalm"].GetValue().strip() or None,
+            self._choice_value(self.fields["sermon"], self.sermon_rows),
+            self.fields["bulletin"].GetPath() or None,
+            int(self.fields["check_complete"].GetValue()), self.checklist_json(),
+            self.fields["note"].GetValue() or None,
+        )
+        try:
+            self.repository.save(
+                self.service_id, service_values, template_id, self.working_lines,
+            )
+            self.save_status.SetLabel("Worship Service and weekly Order of Service saved.")
+            self.save_status.SetForegroundColour(wx.Colour(0, 120, 0))
+            wx.MessageBox("The complete Worship Service was saved.", "Worship Service",
+                          wx.OK | wx.ICON_INFORMATION, self)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Save Worship Service",
+                          wx.OK | wx.ICON_ERROR, self)
 
 
 class HymnPickerDialog(wx.Dialog):

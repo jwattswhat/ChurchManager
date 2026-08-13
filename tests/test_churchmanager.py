@@ -220,6 +220,17 @@ class TestChurchManagerPython(unittest.TestCase):
         self.assertIn('Clear This Position', source)
         self.assertIn('wx.EVT_LIST_ITEM_ACTIVATED', source)
 
+    def test_unified_worship_save_persists_service_order_and_hymns_together(self):
+        source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
+        self.assertIn("def save(self, service_id, service_values, template_id, lines)", source)
+        self.assertIn("UPDATE tblService SET DateTime=?", source)
+        self.assertIn("DELETE FROM tblServiceBulletinOrderLine WHERE ServiceID=?", source)
+        self.assertIn("INSERT INTO tblServiceBulletinOrderLine", source)
+        self.assertIn("INSERT INTO tblHymnUsage", source)
+        self.assertIn("self.connection.commit()", source)
+        self.assertIn("self.connection.rollback()", source)
+        self.assertIn('key in ("church", "os_note")', source)
+
     def test_cm_has_guarded_main_entrypoint(self):
         tree = ast.parse((ROOT / "cm.py").read_text(encoding="utf-8-sig"))
         main_functions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "main"]
