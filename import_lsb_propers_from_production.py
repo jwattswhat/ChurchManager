@@ -30,6 +30,22 @@ PROPER_FIELDS = (
 READING_FIELDS = ("Reading", "Reference", "Note", "OldID")
 
 
+LSB_READING_ROLES = {
+    "first": "Old Testament",
+    "first reading": "Old Testament",
+    "second": "Epistle",
+    "second reading": "Epistle",
+    "third": "Gospel",
+    "third reading": "Gospel",
+}
+
+
+def normalized_reading_role(value):
+    """Translate legacy ordinal reading labels into liturgical roles."""
+    label = str(value or "").strip()
+    return LSB_READING_ROLES.get(label.casefold(), label)
+
+
 def fetch_all(connection, sql, values=()):
     cursor = connection.cursor()
     try:
@@ -91,7 +107,7 @@ def main():
             readings_by_proper[reading["PropersID"]].append(reading)
         duplicate_readings = []
         for proper_id, readings in readings_by_proper.items():
-            labels = [str(row.get("Reading") or "").strip().casefold() for row in readings]
+            labels = [normalized_reading_role(row.get("Reading")).casefold() for row in readings]
             if "" in labels or len(labels) != len(set(labels)):
                 duplicate_readings.append(proper_id)
         if duplicate_readings:
@@ -184,8 +200,9 @@ def main():
                 for row in existing_readings
             }
             for row in readings:
-                label = str(row.get("Reading") or "").strip().casefold()
-                values = [row.get(field) for field in READING_FIELDS]
+                normalized_role = normalized_reading_role(row.get("Reading"))
+                label = normalized_role.casefold()
+                values = [normalized_role] + [row.get(field) for field in READING_FIELDS[1:]]
                 if label in existing_by_label:
                     assignments = ",".join(f"{field}=?" for field in READING_FIELDS)
                     cursor.execute(

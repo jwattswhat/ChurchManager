@@ -209,6 +209,31 @@ class TestChurchManagerDatabase(unittest.TestCase):
         )[0][0]
         self.assertEqual(obsolete_option, 0)
 
+    def test_lsb_readings_use_liturgical_roles(self):
+        migration = self.query(
+            "SELECT version FROM schema_migrations "
+            "WHERE version='032_normalize_lsb_reading_roles.sql'"
+        )
+        self.assertEqual(migration, [("032_normalize_lsb_reading_roles.sql",)])
+        ordinal_count = self.query(
+            "SELECT COUNT(*) FROM tblReading r "
+            "JOIN tblPropers p ON p.ID=r.PropersID "
+            "JOIN tblLectionarySystem ls ON ls.ID=p.LectionarySystemID "
+            "WHERE ls.Name LIKE 'LSB %' "
+            "AND LOWER(TRIM(r.Reading)) IN "
+            "('first','first reading','second','second reading','third','third reading')"
+        )[0][0]
+        self.assertEqual(ordinal_count, 0)
+        roles = {
+            row[0] for row in self.query(
+                "SELECT DISTINCT r.Reading FROM tblReading r "
+                "JOIN tblPropers p ON p.ID=r.PropersID "
+                "JOIN tblLectionarySystem ls ON ls.ID=p.LectionarySystemID "
+                "WHERE ls.Name LIKE 'LSB %'"
+            )
+        }
+        self.assertTrue({"Old Testament", "Epistle", "Gospel"}.issubset(roles))
+
     def test_bulletin_order_hymnal_link_is_optional_and_seeded(self):
         migration = self.query(
             "SELECT version FROM schema_migrations "

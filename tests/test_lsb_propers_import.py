@@ -1,6 +1,11 @@
 import unittest
 
-from import_lsb_propers_from_production import SYSTEM_DEFINITIONS, SYSTEM_MAP, proper_key
+from import_lsb_propers_from_production import (
+    SYSTEM_DEFINITIONS,
+    SYSTEM_MAP,
+    normalized_reading_role,
+    proper_key,
+)
 
 
 class LSBPropersImportTests(unittest.TestCase):
@@ -31,6 +36,12 @@ class LSBPropersImportTests(unittest.TestCase):
             proper_key("Festivals", None, "St. Mary Magdalene"),
             proper_key("Festivals", None, "St. James the Elder"),
         )
+
+    def test_lsb_ordinal_readings_become_liturgical_roles(self):
+        self.assertEqual(normalized_reading_role("First"), "Old Testament")
+        self.assertEqual(normalized_reading_role("Second Reading"), "Epistle")
+        self.assertEqual(normalized_reading_role(" third "), "Gospel")
+        self.assertEqual(normalized_reading_role("Psalm"), "Psalm")
 
 
 if __name__ == "__main__":

@@ -84,6 +84,15 @@ def load_function_without_importing(module_path: Path, function_name: str, globa
 
 
 class TestWorshipPlanningStructure(unittest.TestCase):
+    def test_lsb_reading_roles_are_normalized_by_migration(self):
+        migration = (ROOT / "migrations" / "032_normalize_lsb_reading_roles.sql").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("LIKE 'LSB %'", migration)
+        self.assertIn("'Old Testament'", migration)
+        self.assertIn("'Epistle'", migration)
+        self.assertIn("'Gospel'", migration)
+
     def test_proper_hymn_suggestions_are_normalized(self):
         migration = (ROOT / "migrations" / "026_add_proper_hymn_suggestions.sql").read_text(
             encoding="utf-8"
