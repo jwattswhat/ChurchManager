@@ -9,6 +9,7 @@ neighboring JSForm package.
 from __future__ import annotations
 
 import ast
+import csv
 import contextlib
 import io
 import json
@@ -46,6 +47,22 @@ class TestCopyrightSensitiveWorshipFields(unittest.TestCase):
         combined = "\n".join(path.read_text(encoding="utf-8-sig") for path in current_sources)
         self.assertNotIn("PsalmorIntroit", combined)
         self.assertNotIn('p.Introit', combined)
+
+
+class TestPrintedLsbTuneMetadata(unittest.TestCase):
+    def test_tune_source_is_exactly_the_printed_lsb_range(self):
+        rows = list(csv.DictReader(
+            (ROOT / "data" / "lsb_printed_hymn_tunes.csv").open(encoding="utf-8")
+        ))
+        numbers = [int(row["HymnNumber"]) for row in rows]
+        self.assertEqual(len(rows), 636)
+        self.assertEqual(numbers, list(range(331, 967)))
+        self.assertTrue(all(row["Tune"].strip() for row in rows))
+        migration = (ROOT / "migrations" / "038_add_printed_lsb_hymn_tunes.sql").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("ADD COLUMN IF NOT EXISTS Tune", migration)
+        self.assertIn("t.HymnNumber BETWEEN 331 AND 966", migration)
 
 # ChurchManager-owned operational modules. Archived code, saved copies,
 # conversion utilities, and JSForm are intentionally absent.

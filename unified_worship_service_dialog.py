@@ -8,6 +8,7 @@ import wx
 import wx.adv
 
 from ui_dimensions import DATE_PICKER_SIZE, TIME_PICKER_SIZE
+from hymn_validation import duplicate_selection_status, normalize_tune
 
 from bulletin_orders import (
     BulletinOrderRepository,
@@ -92,7 +93,8 @@ class UnifiedWorshipServiceRepository:
             (proper_id,),
         ) if proper_id else []
         hymns = self.all(
-            "SELECT s.HymnID,TRIM(CONCAT_WS(' ',h.Hymn,h.Title)),s.SuggestedAs "
+            "SELECT s.HymnID,TRIM(CONCAT_WS(' ',h.Hymn,h.Title)),s.SuggestedAs,"
+            "COALESCE(h.Tune,'') "
             "FROM tblProperHymnSuggestion s JOIN tblHymn h ON h.ID=s.HymnID "
             "WHERE s.PropersID=? ORDER BY s.ID", (proper_id,),
         ) if proper_id else []
@@ -120,11 +122,12 @@ class UnifiedWorshipServiceRepository:
         return values
 
     def weekly_hymns(self, service_id):
-        return dict(self.all(
-            "SELECT ServiceBulletinOrderLineID,HymnID FROM tblHymnUsage "
-            "WHERE ServiceID=? AND ServiceBulletinOrderLineID IS NOT NULL",
+        return {row[0]: (row[1], row[2] or "") for row in self.all(
+            "SELECT u.ServiceBulletinOrderLineID,u.HymnID,COALESCE(h.Tune,'') "
+            "FROM tblHymnUsage u JOIN tblHymn h ON h.ID=u.HymnID "
+            "WHERE u.ServiceID=? AND u.ServiceBulletinOrderLineID IS NOT NULL",
             (service_id,),
-        ))
+        )}
 
     def save(self, service_id, service_values, template_id, lines):
         """Persist the service and its complete displayed weekly order atomically."""
@@ -194,10 +197,10 @@ class UnifiedWorshipServiceRepository:
     def search_hymns(self, service_id, search, search_in):
         columns = {
             "Hymn number": "h.Hymn", "Title": "h.Title", "Bible reference": "h.BibleText",
-            "Category": "h.Category", "Notes": "h.Note",
+            "Tune": "h.Tune", "Category": "h.Category", "Notes": "h.Note",
         }
         sql = (
-            "SELECT h.ID,COALESCE(h.Hymn,''),COALESCE(h.Title,''),"
+            "SELECT h.ID,COALESCE(h.Hymn,''),COALESCE(h.Title,''),COALESCE(h.Tune,''),"
             "COALESCE(h.BibleText,''),COALESCE(h.Category,''),COALESCE(h.Note,'') "
             "FROM tblHymn h JOIN tblService s ON s.ID=? "
             "JOIN tblChurch c ON c.ID=s.ChurchID WHERE "
@@ -212,10 +215,10 @@ class UnifiedWorshipServiceRepository:
                 values.append(pattern)
             else:
                 sql += (
-                    " AND (h.Hymn LIKE ? OR h.Title LIKE ? OR h.BibleText LIKE ? "
+                    " AND (h.Hymn LIKE ? OR h.Title LIKE ? OR h.Tune LIKE ? OR h.BibleText LIKE ? "
                     "OR h.Category LIKE ? OR h.Note LIKE ?)"
                 )
-                values.extend([pattern] * 5)
+                values.extend([pattern] * 6)
         sql += " ORDER BY h.Hymn,h.Title"
         return self.all(sql, tuple(values))
 
@@ -444,9 +447,9 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             time_value.SetMinute(when.minute)
             time_value.SetSecond(when.second)
             self.fields["service_time"].SetValue(time_value)
-        hymn_ids = self.repository.weekly_hymns(self.service_id)
+        hymn_assignments = self.repository.weekly_hymns(self.service_id)
         self.working_lines = [
-            self._weekly_line(row, hymn_ids.get(row[0]))
+            self._weekly_line(row, *(hymn_assignments.get(row[0]) or (None, "")))
             for row in self.repository.weekly.lines(self.service_id)
         ]
         self.refresh_grid()
@@ -458,11 +461,12 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         ))
 
     @staticmethod
-    def _weekly_line(row, hymn_id=None):
+    def _weekly_line(row, hymn_id=None, tune=""):
         return {
             "sequence": row[1], "included": bool(row[2]), "type": row[3],
             "label": row[4], "source": row[5], "key": row[6],
             "value": row[7] or "", "reference": row[8] or "", "hymn_id": hymn_id,
+            "tune": tune or "",
             "style": row[9], "label_bold": row[10], "value_bold": row[11],
             "italic": row[12], "indent": row[13], "tab_position": row[14],
             "tab_alignment": row[15], "tab_leader": row[16], "note": row[17],
@@ -481,7 +485,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         return {
             "sequence": row[1], "included": included, "type": row[2], "label": row[3],
             "source": row[4], "key": row[5], "value": "", "reference": row[6] or "",
-            "hymn_id": None,
+            "hymn_id": None, "tune": "",
             "style": row[7], "label_bold": row[8], "value_bold": row[9],
             "italic": row[10], "indent": row[11], "tab_position": row[12],
             "tab_alignment": row[13], "tab_leader": row[14], "note": row[17],
@@ -489,16 +493,14 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         }
 
     def refresh_grid(self):
-        hymn_counts = {}
-        for line in self.working_lines:
-            if line["hymn_id"] is not None:
-                hymn_counts[line["hymn_id"]] = hymn_counts.get(line["hymn_id"], 0) + 1
+        duplicate_statuses, _hymn_duplicates, _tune_duplicates = duplicate_selection_status(
+            self.working_lines
+        )
         self.grid.DeleteAllItems()
         for index, line in enumerate(self.working_lines):
             item = self.grid.InsertItem(index, str(line["label"]))
-            duplicate = line["hymn_id"] is not None and hymn_counts[line["hymn_id"]] > 1
             required = bool(line["included"] and line["source"] and not line["value"])
-            status = "DUPLICATE" if duplicate else ("Required" if required else "")
+            status = duplicate_statuses[index] or ("Required" if required else "")
             for column, value in enumerate((line["value"], line["reference"], status), 1):
                 self.grid.SetItem(item, column, str(value))
             if not line["included"]:
@@ -545,22 +547,21 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             wx.MessageBox("Select a hymn line first.", "Select Hymn",
                           wx.OK | wx.ICON_INFORMATION, self)
             return
-        used_ids = [
-            item["hymn_id"] for item in self.working_lines
-            if item is not line and item["hymn_id"] is not None
-        ]
+        used = [item for item in self.working_lines if item is not line and item["hymn_id"] is not None]
         dialog = HymnPickerDialog(
-            self, self.repository, self.service_id, line["label"], used_ids,
+            self, self.repository, self.service_id, line["label"],
+            [item["hymn_id"] for item in used], [item.get("tune") for item in used],
         )
         try:
             if dialog.ShowModal() == wx.ID_OK:
                 selected = dialog.selected_hymn
                 line["hymn_id"] = selected[0]
                 line["value"] = " ".join(value for value in (selected[1], selected[2]) if value)
+                line["tune"] = selected[3] or ""
                 self.refresh_grid()
                 self.grid.Select(index)
             elif dialog.clear_requested:
-                line["hymn_id"], line["value"] = None, ""
+                line["hymn_id"], line["value"], line["tune"] = None, "", ""
                 self.refresh_grid()
                 self.grid.Select(index)
         finally:
@@ -635,10 +636,10 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             elif line["source"] == "SERVICE_HYMN":
                 match = next((i for i, hymn in enumerate(unused) if hymn[2] == line["key"]), None)
                 if match is None:
-                    line["value"], line["hymn_id"] = "", None
+                    line["value"], line["hymn_id"], line["tune"] = "", None, ""
                 else:
                     hymn = unused.pop(match)
-                    line["hymn_id"], line["value"] = hymn[0], hymn[1]
+                    line["hymn_id"], line["value"], line["tune"] = hymn[0], hymn[1], hymn[3]
         self.refresh_grid()
 
     @staticmethod
@@ -658,13 +659,12 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         return json.dumps(result)
 
     def validation_counts(self):
-        hymn_ids = [line["hymn_id"] for line in self.working_lines if line["hymn_id"] is not None]
-        duplicates = len(hymn_ids) - len(set(hymn_ids))
+        _statuses, hymn_duplicates, tune_duplicates = duplicate_selection_status(self.working_lines)
         missing = sum(
             1 for line in self.working_lines
             if line["included"] and line["source"] and not line["value"]
         )
-        return duplicates, missing
+        return hymn_duplicates, tune_duplicates, missing
 
     def on_save(self, _event):
         template_id = self._choice_value(self.template, self.template_rows)
@@ -672,10 +672,11 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             wx.MessageBox("Select an Order of Service template before saving.",
                           "Template Required", wx.OK | wx.ICON_WARNING, self)
             return
-        duplicates, missing = self.validation_counts()
-        if duplicates or missing:
+        hymn_duplicates, tune_duplicates, missing = self.validation_counts()
+        if hymn_duplicates or tune_duplicates or missing:
             message = (
-                f"The service has {duplicates} duplicate hymn occurrence(s) and "
+                f"The service has {hymn_duplicates} duplicate hymn occurrence(s), "
+                f"{tune_duplicates} different hymn(s) sharing a tune, and "
                 f"{missing} unfinished required line(s).\n\n"
                 "These items are shown in red. Save the service anyway?"
             )
@@ -714,15 +715,16 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
 
 class HymnPickerDialog(wx.Dialog):
     SEARCH_FIELDS = (
-        "All fields", "Hymn number", "Title", "Bible reference", "Category", "Notes",
+        "All fields", "Hymn number", "Title", "Tune", "Bible reference", "Category", "Notes",
     )
 
-    def __init__(self, parent, repository, service_id, used_as, used_hymn_ids):
+    def __init__(self, parent, repository, service_id, used_as, used_hymn_ids, used_tunes=()):
         super().__init__(parent, title="Select Hymn", size=(980, 650),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.repository = repository
         self.service_id = service_id
         self.used_ids = set(used_hymn_ids)
+        self.used_tunes = {normalize_tune(tune) for tune in used_tunes if normalize_tune(tune)}
         self.rows = []
         self.selected_hymn = None
         self.clear_requested = False
@@ -752,8 +754,8 @@ class HymnPickerDialog(wx.Dialog):
 
         self.grid = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         for label, width in (
-            ("Hymn", 95), ("Title", 275), ("Bible reference", 145),
-            ("Category", 120), ("Notes", 230), ("Status", 90),
+            ("Hymn", 90), ("Title", 235), ("Tune", 180), ("Bible reference", 125),
+            ("Category", 105), ("Notes", 145), ("Status", 105),
         ):
             self.grid.AppendColumn(label, width=width)
         self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_select)
@@ -780,8 +782,13 @@ class HymnPickerDialog(wx.Dialog):
         self.grid.DeleteAllItems()
         for index, row in enumerate(self.rows):
             item = self.grid.InsertItem(index, str(row[1]))
-            status = "Already used" if row[0] in self.used_ids else ""
-            for column, value in enumerate((row[2], row[3], row[4], row[5], status), 1):
+            if row[0] in self.used_ids:
+                status = "Already used"
+            elif normalize_tune(row[3]) in self.used_tunes:
+                status = "Tune already used"
+            else:
+                status = ""
+            for column, value in enumerate((row[2], row[3], row[4], row[5], row[6], status), 1):
                 self.grid.SetItem(item, column, str(value))
             if status:
                 self.grid.SetItemTextColour(item, wx.Colour(190, 90, 0))

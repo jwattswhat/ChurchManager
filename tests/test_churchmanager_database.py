@@ -56,6 +56,17 @@ def database_tests_enabled() -> bool:
 
 @unittest.skipUnless(database_tests_enabled(), "Set CHURCHMANAGER_RUN_DB_TESTS=1 for read-only test-database checks")
 class TestChurchManagerDatabase(unittest.TestCase):
+    def test_printed_lsb_tunes_are_loaded_without_service_builder_guesses(self):
+        rows = self.query(
+            "SELECT "
+            "SUM(CASE WHEN CAST(SUBSTRING_INDEX(TRIM(h.Hymn),' ',-1) AS UNSIGNED) "
+            "BETWEEN 331 AND 966 AND h.Tune IS NOT NULL THEN 1 ELSE 0 END), "
+            "SUM(CASE WHEN CAST(SUBSTRING_INDEX(TRIM(h.Hymn),' ',-1) AS UNSIGNED) "
+            "NOT BETWEEN 331 AND 966 AND h.Tune IS NOT NULL THEN 1 ELSE 0 END) "
+            "FROM tblHymn h JOIN tblHymnal y ON y.ID=h.HymnalID WHERE y.Hymnal='LSB'"
+        )
+        self.assertEqual(rows, [(634, 0)])
+
     def test_copyrighted_introit_storage_is_removed(self):
         columns = {
             (row[0], row[1])

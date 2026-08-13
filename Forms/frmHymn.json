@@ -100,13 +100,35 @@
                 ],
                 "tooltip": "Enter the title."
             },
+            "lblTune": {
+                "name": "lblTune",
+                "type": "StaticText",
+                "label": "Tune:",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "Tune": {
+                "name": "Tune",
+                "type": "TextCtrl",
+                "posch": [
+                    6,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the hymn tune name."
+            },
             "lblBibleText": {
                 "name": "lblBibleText",
                 "type": "StaticText",
                 "label": "Bible Refs:",
                 "posch": [
                     1,
-                    7
+                    9
                 ]
             },
             "BibleText": {
@@ -114,7 +136,7 @@
                 "type": "TextCtrl",
                 "posch": [
                     6,
-                    7
+                    9
                 ],
                 "sizech": [
                     24,
@@ -128,7 +150,7 @@
                 "label": "Category:",
                 "posch": [
                     1,
-                    9
+                    11
                 ]
             },
             "Category": {
@@ -136,7 +158,7 @@
                 "type": "ComboBox",
                 "posch": [
                     6,
-                    9
+                    11
                 ],
                 "sizech": [
                     24,
@@ -150,7 +172,7 @@
                 "label": "Note:",
                 "posch": [
                     1,
-                    11
+                    13
                 ]
             },
             "Note": {
@@ -161,7 +183,7 @@
                 ],
                 "posch": [
                     6,
-                    11
+                    13
                 ],
                 "sizech": [
                     24,

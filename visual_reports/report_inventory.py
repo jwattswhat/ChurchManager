@@ -56,8 +56,8 @@ SPECS = (
         c("ServiceID", "Service", 75, "integer"), c("UsedAs", "Used As", 110),
         c("HymnID", "Hymn ID", 75, "integer"), c("Note", "Notes", 275)), "ServiceID DESC, UsedAs", 2),
     ReportSpec("CMHU02", "Hymn Usage by Hymn", "reports.worship.run", "rpt_hymn", (
-        c("Hymn", "Hymn", 65), c("Title", "Title", 210), c("Category", "Category", 130),
-        c("BibleText", "Bible Text", 125)), "Hymn", 2),
+        c("Hymn", "Hymn", 60), c("Title", "Title", 175), c("Tune", "Tune", 145),
+        c("Category", "Category", 95), c("BibleText", "Bible Text", 85)), "Hymn", 2),
     ReportSpec("CMHU03", "Selected Hymn Usage", "reports.worship.run", "rpt_hymn_usage", (
         c("HymnID", "Hymn ID", 70, "integer"), c("ServiceID", "Service", 75, "integer"),
         c("UsedAs", "Used As", 120), c("Note", "Notes", 275)), "ServiceID DESC", 2),

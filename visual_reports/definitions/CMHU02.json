@@ -157,28 +157,35 @@
             "label": "Hymn",
             "collection": "records",
             "field": "Hymn",
-            "width": 66.23
+            "width": 57.86
           },
           {
             "name": "Title",
             "label": "Title",
             "collection": "records",
             "field": "Title",
-            "width": 213.96
+            "width": 168.75
+          },
+          {
+            "name": "Tune",
+            "label": "Tune",
+            "collection": "records",
+            "field": "Tune",
+            "width": 139.82
           },
           {
             "name": "Category",
             "label": "Category",
             "collection": "records",
             "field": "Category",
-            "width": 132.45
+            "width": 91.61
           },
           {
             "name": "BibleText",
             "label": "Bible Text",
             "collection": "records",
             "field": "BibleText",
-            "width": 127.36
+            "width": 81.96
           }
         ]
       },
