@@ -118,6 +118,10 @@ class TestChurchManagerScreenDesigner(unittest.TestCase):
         os_list = json.loads(Path("Forms/frmOSList.json").read_text(encoding="utf-8"))["frmOSListFORM"]
         self.assertEqual(os_list["FORM"]["name"], "frmOSList")
         self.assertEqual(os_list["FORM"]["table"]["fields"], ["OrderofService"])
+        self.assertEqual(os_list["FORM"]["layout"]["type"], "legacy")
+        self.assertLessEqual(os_list["FORM"]["sizech"][0], 62)
+        self.assertLessEqual(os_list["FORM"]["sizech"][1], 28)
+        self.assertLessEqual(os_list["CONTROLS"]["dvlOS"]["sizech"][1], 19)
 
     def test_propers_uses_compact_fixed_two_column_layout(self):
         import json

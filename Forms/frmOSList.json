@@ -3,7 +3,7 @@
         "FORM": {
             "name": "frmOSList",
             "type": "Panel",
-            "title": "frmOrderofService: AltOrderofService Edit Form",
+            "title": "Order of Service List",
             "table": {
                 "name": "tblOrderOfService",
                 "fields": [
@@ -23,16 +23,17 @@
                 0
             ],
             "sizech": [
-                73,
-                62
+                62,
+                28
             ],
+            "layout": {"type": "legacy"},
             "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblOrderofService": {
                 "name": "lblOrderofServiceID",
                 "type": "StaticText",
-                "label": "OrderofService:",
+                "label": "Order of Service:",
                 "posch": [
                     0,
                     2
@@ -93,8 +94,8 @@
                     4
                 ],
                 "sizech": [
-                    70,
-                    49
+                    58,
+                    19
                 ],
                 "tooltip": "View the order-of-service records and select a row when needed."
             }
