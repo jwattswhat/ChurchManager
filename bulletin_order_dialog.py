@@ -292,10 +292,46 @@ class BulletinOrderDialog(wx.Dialog):
             line = self.selected_line()
             if not line:
                 return
-            editable = not bool(template[4])
-            dialog = BulletinOrderLineDialog(self, existing=line, editable=editable)
+            if template[4]:
+                answer = wx.MessageBox(
+                    "Starter templates are protected. Create a customized copy and edit this line?",
+                    "Create Customized Bulletin Order",
+                    wx.YES_NO | wx.YES_DEFAULT | wx.ICON_INFORMATION,
+                    self,
+                )
+                if answer != wx.YES:
+                    dialog = BulletinOrderLineDialog(self, existing=line, editable=False)
+                    try:
+                        dialog.ShowModal()
+                    finally:
+                        dialog.Destroy()
+                    return
+                name_dialog = wx.TextEntryDialog(
+                    self, "Name for the customized copy:", "Customize Bulletin Order",
+                    value=template[1] + " - Custom",
+                )
+                try:
+                    if name_dialog.ShowModal() != wx.ID_OK or not name_dialog.GetValue().strip():
+                        return
+                    sequence = line[1]
+                    new_id = self.repository.duplicate_template(
+                        template[0], name_dialog.GetValue(), self.church_id,
+                    )
+                    self.refresh_templates(new_id)
+                    line_index = next(
+                        (index for index, row in enumerate(self.line_rows) if row[1] == sequence), None
+                    )
+                    if line_index is None:
+                        raise ValueError("The copied bulletin line could not be located.")
+                    self.lines.Select(line_index)
+                    self.lines.Focus(line_index)
+                    template = self.selected_template()
+                    line = self.line_rows[line_index]
+                finally:
+                    name_dialog.Destroy()
+            dialog = BulletinOrderLineDialog(self, existing=line, editable=True)
             try:
-                if dialog.ShowModal() == wx.ID_OK and editable:
+                if dialog.ShowModal() == wx.ID_OK:
                     self.repository.save_line(template[0], dialog.values(), line[0])
                     self.on_template_selected()
             finally:
