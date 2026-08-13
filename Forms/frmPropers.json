@@ -38,9 +38,9 @@
             ],
             "sizech": [
                 64,
-                42
+                35
             ],
-            "layout": {"type": "responsive", "border": 3, "gap": 2},
+            "layout": {"type": "legacy"},
             "theme": "churchmanager"
         },
         "CONTROLS": {
@@ -84,7 +84,7 @@
                     "frmLectionarySystem"
                 ],
                 "posch": [
-                    22,
+                    25,
                     3
                 ],
                 "tooltip": "Edit the selected lectionary system."
@@ -138,9 +138,8 @@
                 ],
                 "sizech": [
                     23,
-                    8
+                    6
                 ],
-                "layout": {"row_span": 4, "expand": true},
                 "tooltip": "Enter the theme. Multiple lines are allowed."
             },
             "lblSort": {
@@ -215,7 +214,7 @@
                 "name": "lblHymnSug",
                 "posch": [
                     34,
-                    10
+                    8
                 ]
             },
             "HymnSug": {
@@ -227,13 +226,12 @@
                 "name": "HymnSug",
                 "posch": [
                     39,
-                    10
+                    8
                 ],
                 "sizech": [
                     23,
-                    8
+                    6
                 ],
-                "layout": {"row_span": 4, "expand": true},
                 "tooltip": "Enter the hymn sug. Multiple lines are allowed."
             },
             "lblColor": {
@@ -316,9 +314,8 @@
                 ],
                 "sizech": [
                     33,
-                    10
+                    8
                 ],
-                "layout": {"row_span": 2, "expand": true},
                 "tooltip": "View the readings records and select a row when needed."
             },
             "lblNote": {
@@ -327,7 +324,7 @@
                 "name": "lblNote",
                 "posch": [
                     1,
-                    26
+                    24
                 ]
             },
             "Note": {
@@ -338,13 +335,12 @@
                 ],
                 "posch": [
                     10,
-                    26
+                    24
                 ],
                 "sizech": [
                     24,
-                    10
+                    8
                 ],
-                "layout": {"row_span": 5, "expand": true},
                 "tooltip": "Enter the note. Multiple lines are allowed."
             },
             "lblIntroit": {
@@ -353,7 +349,7 @@
                 "name": "lblIntroit",
                 "posch": [
                     34,
-                    19
+                    15
                 ]
             },
             "Introit": {
@@ -364,13 +360,12 @@
                 "name": "Introit",
                 "posch": [
                     39,
-                    19
+                    15
                 ],
                 "sizech": [
                     23,
-                    18
+                    17
                 ],
-                "layout": {"row_span": 9, "expand": true},
                 "tooltip": "Enter the introit. Multiple lines are allowed."
             }
         }
