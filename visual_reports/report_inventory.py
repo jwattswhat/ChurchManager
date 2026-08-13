@@ -112,8 +112,8 @@ SPECS = (
         c("Type", "Type", 90), c("Contact", "Contact", 275)), "PersonID, Type, ContactLabel", 4),
     ReportSpec("CMWP01", "Worship Planning Worksheet", "reports.worship.run", "rpt_service", (
         c("DateTime", "Date and Time", 100, "datetime"), c("LiturgicalDate", "Liturgical Day", 160),
-        c("Location", "Location", 95), c("OrderofService", "Order of Service", 120),
-        c("PsalmorIntroit", "Psalm / Introit", 90)), "DateTime DESC", 4),
+        c("Location", "Location", 120), c("OrderofService", "Order of Service", 185)),
+        "DateTime DESC", 4),
 
     ReportSpec("CMJR01", "Journal", "reports.pastoral.confidential", "rpt_journal", (
         c("StartDate", "Start", 75, "date"), c("EndDate", "End", 75, "date"), c("Event", "Event", 180),

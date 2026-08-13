@@ -27,6 +27,26 @@ ROOT = Path(__file__).resolve().parents[1]
 FORMS = ROOT / "Forms"
 REPORTS = ROOT / "LimeReportPattern"
 
+
+class TestCopyrightSensitiveWorshipFields(unittest.TestCase):
+    def test_introit_and_service_psalm_fields_are_permanently_removed(self):
+        migration = (ROOT / "migrations" / "037_remove_copyrighted_introit_fields.sql").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("DROP COLUMN IF EXISTS PsalmorIntroit", migration)
+        self.assertIn("DROP COLUMN IF EXISTS Introit", migration)
+        current_sources = (
+            ROOT / "unified_worship_service_dialog.py",
+            ROOT / "worship_service_dialog.py",
+            FORMS / "frmService.json",
+            FORMS / "frmPropers.json",
+            ROOT / "visual_reports" / "report_inventory.py",
+            ROOT / "visual_reports" / "definitions" / "CMWP01.json",
+        )
+        combined = "\n".join(path.read_text(encoding="utf-8-sig") for path in current_sources)
+        self.assertNotIn("PsalmorIntroit", combined)
+        self.assertNotIn('p.Introit', combined)
+
 # ChurchManager-owned operational modules. Archived code, saved copies,
 # conversion utilities, and JSForm are intentionally absent.
 OPERATIONAL_MODULES = (

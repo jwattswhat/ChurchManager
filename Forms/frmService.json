@@ -25,7 +25,6 @@
                     "HolyCommunion",
                     "BulletinOrderTemplateID",
                     "OSNote",
-                    "PsalmorIntroit",
                     "SermonID",
                     "Bulletin",
                     "CheckListComplete",
@@ -358,28 +357,6 @@
                 ],
                 "layout": {"row_span": 3, "expand": true},
                 "tooltip": "Enter the order-of-service note. Multiple lines are allowed."
-            },
-            "lblPsalmorIntroit": {
-                "name": "lblPsalmorIntroit",
-                "type": "StaticText",
-                "label": "Psalm or Introit:",
-                "posch": [
-                    1,
-                    15
-                ]
-            },
-            "PsalmorIntroit": {
-                "name": "PsalmorIntroit",
-                "type": "ComboBox",
-                "posch": [
-                    12,
-                    15
-                ],
-                "sizech": [
-                    24,
-                    2
-                ],
-                "tooltip": "Select the psalm or introit."
             },
             "lblSermonID": {
                 "name": "lblSermonID",

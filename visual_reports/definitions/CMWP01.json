@@ -180,13 +180,6 @@
             "collection": "records",
             "field": "OrderofService",
             "width": 114.69
-          },
-          {
-            "name": "PsalmorIntroit",
-            "label": "Psalm / Introit",
-            "collection": "records",
-            "field": "PsalmorIntroit",
-            "width": 86.02
           }
         ]
       },

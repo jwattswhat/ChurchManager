@@ -49,7 +49,7 @@ class UnifiedWorshipServiceRepository:
         return self.one(
             "SELECT s.ID,s.ChurchID,s.DateTime,COALESCE(s.Location,''),s.PropersID,"
             "COALESCE(s.LiturgicalDate,''),s.HolyCommunion,s.BulletinOrderTemplateID,"
-            "COALESCE(s.OSNote,''),COALESCE(s.PsalmorIntroit,''),s.SermonID,"
+            "COALESCE(s.OSNote,''),s.SermonID,"
             "COALESCE(s.Bulletin,''),COALESCE(s.CheckListComplete,0),"
             "COALESCE(s.CheckList,'{}'),COALESCE(s.Note,''),COALESCE(t.Name,'Not selected') "
             "FROM tblService s LEFT JOIN tblBulletinOrderTemplate t "
@@ -102,7 +102,7 @@ class UnifiedWorshipServiceRepository:
         return self.one(
             "SELECT ls.Name,COALESCE(p.Cycle,''),COALESCE(p.Season,''),"
             "COALESCE(p.LiturgicalDate,''),COALESCE(p.Theme,''),COALESCE(p.Color,''),"
-            "COALESCE(p.AltColor,''),COALESCE(p.Introit,''),COALESCE(p.Note,'') "
+            "COALESCE(p.AltColor,''),COALESCE(p.Note,'') "
             "FROM tblPropers p JOIN tblLectionarySystem ls ON ls.ID=p.LectionarySystemID "
             "WHERE p.ID=?", (proper_id,),
         )
@@ -132,7 +132,7 @@ class UnifiedWorshipServiceRepository:
         try:
             cursor.execute(
                 "UPDATE tblService SET DateTime=?,Location=?,PropersID=?,LiturgicalDate=?,"
-                "HolyCommunion=?,BulletinOrderTemplateID=?,OSNote=?,PsalmorIntroit=?,SermonID=?,"
+                "HolyCommunion=?,BulletinOrderTemplateID=?,OSNote=?,SermonID=?,"
                 "Bulletin=?,CheckListComplete=?,CheckList=?,Note=? WHERE ID=?",
                 service_values + (service_id,),
             )
@@ -301,7 +301,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             ("location", "Location", False, True), ("proper", "Proper", False, False),
             ("liturgical", "Printed liturgical title", False, False),
             ("communion", "Holy Communion", False, True),
-            ("psalm", "Psalm or Introit", False, True), ("sermon", "Sermon", False, False),
+            ("sermon", "Sermon", False, False),
             ("bulletin", "Bulletin", False, False),
             ("check_complete", "Checklist complete", False, True),
             ("checklist", "Checklist", True, False),
@@ -403,7 +403,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             "FROM tblSermon ORDER BY ID DESC"
         )
         self.fields["sermon"].Set([str(row[1]) for row in self.sermon_rows])
-        self._select(self.fields["sermon"], self.sermon_rows, r[10])
+        self._select(self.fields["sermon"], self.sermon_rows, r[9])
         self.location_values = self.repository.choice_values("Location")
         if r[3] and r[3] not in self.location_values:
             self.location_values.append(r[3])
@@ -415,11 +415,11 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         values = {
             "church": church[0] if church else "",
             "liturgical": r[5], "communion": bool(r[6]),
-            "psalm": r[9], "bulletin": r[11], "check_complete": bool(r[12]),
-            "os_note": r[8], "note": r[14],
+            "bulletin": r[10], "check_complete": bool(r[11]),
+            "os_note": r[8], "note": r[13],
         }
         try:
-            checklist = json.loads(r[13]) if r[13] else {}
+            checklist = json.loads(r[12]) if r[12] else {}
             values["checklist"] = "\n".join(
                 ("[x] " if str(done).casefold() == "true" else "[ ] ") + str(item)
                 for item, done in checklist.items()
@@ -694,7 +694,6 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             self.fields["liturgical"].GetValue().strip() or None,
             int(self.fields["communion"].GetValue()), template_id,
             self.fields["os_note"].GetValue() or None,
-            self.fields["psalm"].GetValue().strip() or None,
             self._choice_value(self.fields["sermon"], self.sermon_rows),
             self.fields["bulletin"].GetPath() or None,
             int(self.fields["check_complete"].GetValue()), self.checklist_json(),
@@ -824,7 +823,7 @@ class ProperReadOnlyDialog(wx.Dialog):
             ("Lectionary", detail[0]), ("Cycle", detail[1]), ("Season", detail[2]),
             ("Liturgical date", detail[3]), ("Theme", detail[4]),
             ("Color", detail[5]), ("Alternate color", detail[6]),
-            ("Introit", detail[7]), ("Note", detail[8]),
+            ("Note", detail[7]),
         )
         info = wx.FlexGridSizer(cols=2, vgap=5, hgap=10)
         info.AddGrowableCol(1, 1)

@@ -56,6 +56,25 @@ def database_tests_enabled() -> bool:
 
 @unittest.skipUnless(database_tests_enabled(), "Set CHURCHMANAGER_RUN_DB_TESTS=1 for read-only test-database checks")
 class TestChurchManagerDatabase(unittest.TestCase):
+    def test_copyrighted_introit_storage_is_removed(self):
+        columns = {
+            (row[0], row[1])
+            for row in self.query(
+                "SELECT TABLE_NAME,COLUMN_NAME FROM information_schema.COLUMNS "
+                "WHERE TABLE_SCHEMA=DATABASE() AND "
+                "((TABLE_NAME='tblService' AND COLUMN_NAME='PsalmorIntroit') OR "
+                "(TABLE_NAME='tblPropers' AND COLUMN_NAME='Introit'))"
+            )
+        }
+        self.assertEqual(columns, set())
+        self.assertEqual(
+            self.query(
+                "SELECT version FROM schema_migrations "
+                "WHERE version='037_remove_copyrighted_introit_fields.sql'"
+            ),
+            [("037_remove_copyrighted_introit_fields.sql",)],
+        )
+
     def test_used_fiscal_period_boundary_trigger_exists(self):
         cursor = self.connection.cursor()
         try:

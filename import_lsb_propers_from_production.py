@@ -25,7 +25,7 @@ SYSTEM_DEFINITIONS = {
 }
 PROPER_FIELDS = (
     "Sort", "Season", "LiturgicalDate", "Color", "AltColor", "Theme",
-    "HymnSug", "Introit", "Note",
+    "HymnSug", "Note",
 )
 READING_FIELDS = ("Reading", "Reference", "Note", "OldID")
 

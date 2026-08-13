@@ -9,7 +9,7 @@ from unified_worship_service_dialog import show_unified_worship_service
 
 SERVICE_FIELDS = [
     "ID", "ChurchID", "DateTime", "Location", "PropersID", "LiturgicalDate",
-    "HolyCommunion", "BulletinOrderTemplateID", "OSNote", "PsalmorIntroit",
+    "HolyCommunion", "BulletinOrderTemplateID", "OSNote",
     "SermonID", "Bulletin", "CheckListComplete", "CheckList", "Note",
 ]
 

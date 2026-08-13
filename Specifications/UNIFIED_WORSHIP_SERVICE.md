@@ -23,13 +23,13 @@ order. Historic gaps of ten are not retained.
 ## Service data
 
 The service panel retains Church, date and time, location, Proper, printable
-liturgical date, Holy Communion, Psalm or Introit, sermon, bulletin, checklist,
+liturgical date, Holy Communion, sermon, bulletin, checklist,
 Order of Service notes, and service notes.
 
 Order of Service notes are supplied by the selected template and are read-only
 on the Worship Service screen. Service notes remain independently editable.
 
-Psalm or Introit and the final name/behavior of printable liturgical date remain
+The final name/behavior of printable liturgical date remains
 open design questions. Existing data is preserved until those decisions are
 made.
 

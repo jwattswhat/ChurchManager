@@ -369,31 +369,6 @@
                     8
                 ],
                 "tooltip": "Enter the note. Multiple lines are allowed."
-            },
-            "lblIntroit": {
-                "type": "StaticText",
-                "label": "Introit:",
-                "name": "lblIntroit",
-                "posch": [
-                    34,
-                    15
-                ]
-            },
-            "Introit": {
-                "type": "MultiLine",
-                "stylelist": [
-                    "MULTILINE"
-                ],
-                "name": "Introit",
-                "posch": [
-                    39,
-                    15
-                ],
-                "sizech": [
-                    23,
-                    17
-                ],
-                "tooltip": "Enter the introit. Multiple lines are allowed."
             }
         }
     }
