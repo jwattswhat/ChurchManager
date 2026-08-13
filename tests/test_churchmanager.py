@@ -200,6 +200,10 @@ class TestWorshipPlanningStructure(unittest.TestCase):
 
 
 class TestChurchManagerPython(unittest.TestCase):
+    def test_unified_worship_repository_uses_portable_connection(self):
+        source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
+        self.assertIn("self.connection = portable_connection(connection)", source)
+
     def test_cm_has_guarded_main_entrypoint(self):
         tree = ast.parse((ROOT / "cm.py").read_text(encoding="utf-8-sig"))
         main_functions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "main"]

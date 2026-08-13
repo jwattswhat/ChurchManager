@@ -5,14 +5,18 @@ from __future__ import annotations
 import json
 import wx
 
-from bulletin_orders import BulletinOrderRepository, WeeklyBulletinOrderRepository
+from bulletin_orders import (
+    BulletinOrderRepository,
+    WeeklyBulletinOrderRepository,
+    portable_connection,
+)
 
 
 class UnifiedWorshipServiceRepository:
     def __init__(self, connection):
-        self.connection = connection
-        self.templates = BulletinOrderRepository(connection)
-        self.weekly = WeeklyBulletinOrderRepository(connection)
+        self.connection = portable_connection(connection)
+        self.templates = BulletinOrderRepository(self.connection)
+        self.weekly = WeeklyBulletinOrderRepository(self.connection)
 
     def one(self, sql, values):
         cursor = self.connection.cursor()
