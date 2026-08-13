@@ -13,6 +13,9 @@ from visual_reports.directory_dataset import DIRECTORY_CONTRACT
 from visual_reports.directory_dataset import DirectoryDatasetProvider
 from visual_reports.report_inventory import REPORTS_BY_CODE
 from visual_reports.tabular_dataset import TabularDatasetProvider, contract_for
+from visual_reports.worship_planning_dataset import (
+    WORSHIP_PLANNING_CONTRACT, WorshipPlanningDatasetProvider,
+)
 
 
 ROOT = Path(__file__).resolve().parent
@@ -85,7 +88,21 @@ def build_tabular_preview(definition, authorization):
         cursor.close()
         if len(rows) != 1:
             raise RuntimeError("Preview requires exactly one Reformation Lutheran Church test record.")
-        dataset = TabularDatasetProvider(connection, authorization).build(code, rows[0][0])
+        if code == "CMWP01":
+            cursor = connection.cursor()
+            cursor.execute(
+                "SELECT ID FROM rpt_worship_planner_service WHERE ChurchID=? "
+                "ORDER BY DateTime DESC,ID DESC LIMIT 1", (rows[0][0],),
+            )
+            service = cursor.fetchone()
+            cursor.close()
+            if not service:
+                raise RuntimeError("Preview requires a saved test Worship Service.")
+            dataset = WorshipPlanningDatasetProvider(
+                connection, authorization,
+            ).build(rows[0][0], service[0])
+        else:
+            dataset = TabularDatasetProvider(connection, authorization).build(code, rows[0][0])
     finally:
         connection.close()
     output = Path(tempfile.gettempdir()) / f"ChurchManager-{code}-preview.pdf"
@@ -106,7 +123,19 @@ def ensure_user_definition(report_code, local_app_data=None, starter_directory=N
     if not starter.is_file():
         raise FileNotFoundError(f"Starter report definition not found: {report_code}")
     target = user_definition_path(report_code, local_app_data)
-    if not target.exists():
+    replace_incompatible = False
+    if target.exists():
+        loader = JSForm.ReportDefinitionLoader()
+        current = loader.load(target)
+        baseline = loader.load(starter)
+        replace_incompatible = (
+            current.dataset_name != baseline.dataset_name
+            or current.dataset_version != baseline.dataset_version
+        )
+        if replace_incompatible:
+            backup = target.with_suffix(f".v{current.dataset_version}.json.bak")
+            shutil.copyfile(target, backup)
+    if not target.exists() or replace_incompatible:
         target.parent.mkdir(parents=True, exist_ok=True)
         temporary = target.with_suffix(".json.tmp")
         shutil.copyfile(starter, temporary)
@@ -120,6 +149,15 @@ def resolve_report_definition(report_code, local_app_data=None, starter_director
     starter = Path(starter_directory or STARTERS) / f"{report_code}.json"
     custom = user_definition_path(report_code, local_app_data)
     selected = custom if custom.is_file() else starter
+    if custom.is_file() and starter.is_file():
+        loader = JSForm.ReportDefinitionLoader()
+        custom_definition = loader.load(custom)
+        starter_definition = loader.load(starter)
+        if (
+            custom_definition.dataset_name != starter_definition.dataset_name
+            or custom_definition.dataset_version != starter_definition.dataset_version
+        ):
+            selected = starter
     if not selected.is_file():
         raise FileNotFoundError(f"Report definition not found: {report_code}")
     JSForm.ReportDefinitionLoader().load(selected)
@@ -142,6 +180,9 @@ def open_directory_designer(local_app_data=None, authorization=None):
         if definition.report_id == "CMMD01":
             contract = DIRECTORY_CONTRACT
             preview_handler = preview
+        elif definition.report_id == "CMWP01":
+            contract = WORSHIP_PLANNING_CONTRACT
+            preview_handler = lambda value: build_tabular_preview(value, authorization)
         else:
             contract = contract_for(definition.report_id)
             preview_handler = lambda value: build_tabular_preview(value, authorization)

@@ -110,7 +110,7 @@ SPECS = (
     ReportSpec("CMPH02", "Member Contact Listing", "reports.membership.contact", "rpt_person_contact", (
         c("PersonID", "Person ID", 75, "integer"), c("ContactLabel", "Label", 100),
         c("Type", "Type", 90), c("Contact", "Contact", 275)), "PersonID, Type, ContactLabel", 4),
-    ReportSpec("CMWP01", "Worship Planning Worksheet", "reports.worship.run", "rpt_service", (
+    ReportSpec("CMWP01", "Worship Service Planner", "reports.worship.run", "rpt_service", (
         c("DateTime", "Date and Time", 100, "datetime"), c("LiturgicalDate", "Liturgical Day", 160),
         c("Location", "Location", 120), c("OrderofService", "Order of Service", 185)),
         "DateTime DESC", 4),

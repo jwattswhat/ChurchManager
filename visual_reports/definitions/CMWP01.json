@@ -3,233 +3,81 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMWP01",
-      "title": "Worship Planning Worksheet",
+      "title": "Worship Service Planner",
       "dataset": "churchmanager.cmwp01",
-      "datasetversion": 1,
+      "datasetversion": 2,
       "pagesize": "letter",
       "orientation": "portrait",
-      "margins": {
-        "top": 30,
-        "right": 36,
-        "bottom": 30,
-        "left": 36
-      },
+      "margins": {"top": 24, "right": 36, "bottom": 28, "left": 36},
       "theme": "churchmanager.standard",
-      "emptytext": "No records match the selected criteria.",
+      "classification": "official",
+      "emptytext": "No Worship Service planning information is available.",
       "bands": {
-        "ReportHeader": {
-          "type": "reportheader",
-          "height": 92
-        },
-        "PageHeader": {
-          "type": "pageheader",
-          "height": 8,
-          "repeat": true
-        },
-        "Detail": {
-          "type": "detail",
-          "height": 42
-        },
-        "PageFooter": {
-          "type": "pagefooter",
-          "height": 24,
-          "repeat": true
-        }
+        "ReportHeader": {"type": "reportheader", "height": 236},
+        "PageHeader": {"type": "pageheader", "height": 8, "repeat": true},
+        "OrderDetail": {"type": "detail", "height": 36},
+        "ReadingDetail": {"type": "detail", "height": 36},
+        "HymnDetail": {"type": "detail", "height": 36},
+        "ParticipantDetail": {"type": "detail", "height": 36},
+        "ReportFooter": {"type": "reportfooter", "height": 126},
+        "PageFooter": {"type": "pagefooter", "height": 24, "repeat": true}
       },
       "sort": [
-        {
-          "collection": "records",
-          "field": "DateTime",
-          "direction": "descending"
-        }
+        {"collection": "order_lines", "field": "Sequence", "direction": "ascending"},
+        {"collection": "participants", "field": "Role", "direction": "ascending"}
       ]
     },
     "CONTROLS": {
-      "ChurchLogo": {
-        "type": "image",
-        "band": "ReportHeader",
-        "position": [
-          0,
-          0
-        ],
-        "size": [
-          62,
-          62
-        ],
-        "collection": "church",
-        "field": "Logo"
-      },
-      "ChurchName": {
-        "type": "text",
-        "band": "ReportHeader",
-        "position": [
-          72,
-          2
-        ],
-        "size": [
-          468,
-          22
-        ],
-        "collection": "church",
-        "field": "Church",
-        "fontsize": 15,
-        "bold": true,
-        "align": "center"
-      },
-      "ReportTitle": {
-        "type": "systemtext",
-        "band": "ReportHeader",
-        "position": [
-          72,
-          29
-        ],
-        "size": [
-          468,
-          20
-        ],
-        "systemvalue": "report_title",
-        "fontsize": 13,
-        "bold": true,
-        "align": "center"
-      },
-      "Parameters": {
-        "type": "text",
-        "band": "ReportHeader",
-        "position": [
-          72,
-          54
-        ],
-        "size": [
-          360,
-          16
-        ],
-        "collection": "parameters",
-        "field": "Display",
-        "fontsize": 8,
-        "color": "#555555"
-      },
-      "RunDate": {
-        "type": "systemtext",
-        "band": "ReportHeader",
-        "position": [
-          440,
-          54
-        ],
-        "size": [
-          100,
-          16
-        ],
-        "systemvalue": "run_date",
-        "prefix": "Run: ",
-        "fontsize": 8,
-        "align": "right",
-        "color": "#555555"
-      },
-      "HeaderRule": {
-        "type": "line",
-        "band": "PageHeader",
-        "position": [
-          0,
-          4
-        ],
-        "size": [
-          540,
-          1
-        ],
-        "bordercolor": "#6D7780",
-        "borderwidth": 0.7
-      },
-      "Records": {
-        "type": "table",
-        "band": "Detail",
-        "position": [
-          0,
-          0
-        ],
-        "size": [
-          540,
-          40
-        ],
-        "repeatcollection": "records",
-        "columns": [
-          {
-            "name": "DateTime",
-            "label": "Date and Time",
-            "collection": "records",
-            "field": "DateTime",
-            "width": 95.58,
-            "format": "datetime"
-          },
-          {
-            "name": "LiturgicalDate",
-            "label": "Liturgical Day",
-            "collection": "records",
-            "field": "LiturgicalDate",
-            "width": 152.92
-          },
-          {
-            "name": "Location",
-            "label": "Location",
-            "collection": "records",
-            "field": "Location",
-            "width": 90.8
-          },
-          {
-            "name": "OrderofService",
-            "label": "Order of Service",
-            "collection": "records",
-            "field": "OrderofService",
-            "width": 114.69
-          }
-        ]
-      },
-      "FooterLine": {
-        "type": "line",
-        "band": "PageFooter",
-        "position": [
-          0,
-          0
-        ],
-        "size": [
-          540,
-          1
-        ],
-        "bordercolor": "#808080",
-        "borderwidth": 0.5
-      },
-      "FooterCode": {
-        "type": "systemtext",
-        "band": "PageFooter",
-        "position": [
-          0,
-          6
-        ],
-        "size": [
-          270.0,
-          14
-        ],
-        "systemvalue": "report_code",
-        "prefix": "ChurchManager report ",
-        "fontsize": 8,
-        "color": "#555555"
-      },
-      "PageNumber": {
-        "type": "systemtext",
-        "band": "PageFooter",
-        "position": [
-          450,
-          6
-        ],
-        "size": [
-          90,
-          14
-        ],
-        "systemvalue": "page_number",
-        "prefix": "Page ",
-        "fontsize": 8,
-        "align": "right",
-        "color": "#555555"
-      }
+      "ChurchLogo": {"type": "image", "band": "ReportHeader", "position": [0, 0], "size": [58, 58], "collection": "church", "field": "Logo"},
+      "ChurchName": {"type": "text", "band": "ReportHeader", "position": [68, 0], "size": [472, 20], "collection": "church", "field": "Church", "fontsize": 14, "bold": true, "align": "center"},
+      "ReportTitle": {"type": "systemtext", "band": "ReportHeader", "position": [68, 24], "size": [472, 19], "systemvalue": "report_title", "fontsize": 12, "bold": true, "align": "center"},
+      "LiturgicalDate": {"type": "text", "band": "ReportHeader", "position": [68, 48], "size": [472, 18], "collection": "service", "field": "LiturgicalDate", "fontsize": 10, "bold": true, "align": "center"},
+      "DateTimeLabel": {"type": "label", "band": "ReportHeader", "position": [0, 76], "size": [72, 14], "label": "Date / time:", "fontsize": 8, "bold": true},
+      "DateTime": {"type": "text", "band": "ReportHeader", "position": [76, 76], "size": [180, 14], "collection": "service", "field": "DateTime", "format": "datetime", "fontsize": 8},
+      "LocationLabel": {"type": "label", "band": "ReportHeader", "position": [282, 76], "size": [54, 14], "label": "Location:", "fontsize": 8, "bold": true},
+      "Location": {"type": "text", "band": "ReportHeader", "position": [340, 76], "size": [200, 14], "collection": "service", "field": "Location", "fontsize": 8},
+      "OSLabel": {"type": "label", "band": "ReportHeader", "position": [0, 96], "size": [92, 14], "label": "Order of Service:", "fontsize": 8, "bold": true},
+      "OrderOfService": {"type": "text", "band": "ReportHeader", "position": [96, 96], "size": [188, 14], "collection": "service", "field": "OrderOfService", "fontsize": 8},
+      "CommunionLabel": {"type": "label", "band": "ReportHeader", "position": [304, 96], "size": [104, 14], "label": "Holy Communion:", "fontsize": 8, "bold": true},
+      "HolyCommunion": {"type": "text", "band": "ReportHeader", "position": [412, 96], "size": [52, 14], "collection": "service", "field": "HolyCommunion", "format": "boolean", "fontsize": 8},
+      "SeasonLabel": {"type": "label", "band": "ReportHeader", "position": [468, 96], "size": [42, 14], "label": "Color:", "fontsize": 8, "bold": true},
+      "Color": {"type": "text", "band": "ReportHeader", "position": [512, 96], "size": [28, 14], "collection": "service", "field": "Color", "fontsize": 8},
+      "LectionaryLabel": {"type": "label", "band": "ReportHeader", "position": [0, 116], "size": [66, 14], "label": "Lectionary:", "fontsize": 8, "bold": true},
+      "Lectionary": {"type": "text", "band": "ReportHeader", "position": [70, 116], "size": [186, 14], "collection": "service", "field": "Lectionary", "fontsize": 8},
+      "SeasonTextLabel": {"type": "label", "band": "ReportHeader", "position": [282, 116], "size": [48, 14], "label": "Season:", "fontsize": 8, "bold": true},
+      "Season": {"type": "text", "band": "ReportHeader", "position": [334, 116], "size": [206, 14], "collection": "service", "field": "Season", "fontsize": 8},
+      "ThemeLabel": {"type": "label", "band": "ReportHeader", "position": [0, 140], "size": [48, 14], "label": "Theme:", "fontsize": 8, "bold": true, "color": "#1F4058"},
+      "Theme": {"type": "text", "band": "ReportHeader", "position": [52, 138], "size": [488, 70], "collection": "service", "field": "Theme", "fontsize": 8},
+      "OrderSection": {"type": "label", "band": "ReportHeader", "position": [0, 216], "size": [540, 16], "label": "ORDER OF SERVICE", "fontsize": 9, "bold": true, "color": "#1F4058"},
+      "HeaderRule": {"type": "line", "band": "PageHeader", "position": [0, 4], "size": [540, 1], "bordercolor": "#6D7780", "borderwidth": 0.7},
+      "OrderLines": {"type": "table", "band": "OrderDetail", "position": [0, 0], "size": [540, 34], "repeatcollection": "order_lines", "columns": [
+        {"name": "OrderLabel", "label": "Order of Service", "collection": "order_lines", "field": "Label", "width": 220},
+        {"name": "OrderDetail", "label": "Selection / reference", "collection": "order_lines", "field": "Detail", "width": 320}
+      ]},
+      "Readings": {"type": "table", "band": "ReadingDetail", "position": [0, 0], "size": [540, 34], "repeatcollection": "readings", "columns": [
+        {"name": "Reading", "label": "READINGS", "collection": "readings", "field": "Reading", "width": 150},
+        {"name": "Reference", "label": "Scripture reference", "collection": "readings", "field": "Reference", "width": 390}
+      ]},
+      "Hymns": {"type": "table", "band": "HymnDetail", "position": [0, 0], "size": [540, 34], "repeatcollection": "hymns", "columns": [
+        {"name": "UsedAs", "label": "HYMNS", "collection": "hymns", "field": "UsedAs", "width": 150},
+        {"name": "Hymn", "label": "Hymn number and title", "collection": "hymns", "field": "Hymn", "width": 390}
+      ]},
+      "Participants": {"type": "table", "band": "ParticipantDetail", "position": [0, 0], "size": [540, 34], "repeatcollection": "participants", "columns": [
+        {"name": "Role", "label": "PARTICIPANTS", "collection": "participants", "field": "Role", "width": 150},
+        {"name": "Name", "label": "Name", "collection": "participants", "field": "Name", "width": 390}
+      ]},
+      "SermonLabel": {"type": "label", "band": "ReportFooter", "position": [0, 4], "size": [58, 14], "label": "Sermon:", "fontsize": 8, "bold": true},
+      "Sermon": {"type": "text", "band": "ReportFooter", "position": [62, 4], "size": [478, 14], "collection": "service", "field": "Sermon", "fontsize": 8},
+      "BulletinLabel": {"type": "label", "band": "ReportFooter", "position": [0, 24], "size": [58, 14], "label": "Bulletin:", "fontsize": 8, "bold": true},
+      "Bulletin": {"type": "text", "band": "ReportFooter", "position": [62, 24], "size": [478, 14], "collection": "service", "field": "Bulletin", "fontsize": 8},
+      "OSNoteLabel": {"type": "label", "band": "ReportFooter", "position": [0, 44], "size": [76, 14], "label": "OS note:", "fontsize": 8, "bold": true},
+      "OSNote": {"type": "text", "band": "ReportFooter", "position": [80, 44], "size": [460, 30], "collection": "service", "field": "OSNote", "fontsize": 8},
+      "ServiceNoteLabel": {"type": "label", "band": "ReportFooter", "position": [0, 80], "size": [76, 14], "label": "Service note:", "fontsize": 8, "bold": true},
+      "ServiceNote": {"type": "text", "band": "ReportFooter", "position": [80, 80], "size": [460, 38], "collection": "service", "field": "Note", "fontsize": 8},
+      "FooterLine": {"type": "line", "band": "PageFooter", "position": [0, 0], "size": [540, 1], "bordercolor": "#808080", "borderwidth": 0.5},
+      "FooterCode": {"type": "systemtext", "band": "PageFooter", "position": [0, 6], "size": [200, 14], "systemvalue": "report_code", "prefix": "ChurchManager report ", "fontsize": 8, "color": "#555555"},
+      "RunUser": {"type": "systemtext", "band": "PageFooter", "position": [200, 6], "size": [250, 14], "systemvalue": "run_user", "prefix": "Prepared by: ", "fontsize": 8, "align": "center", "color": "#555555"},
+      "PageNumber": {"type": "systemtext", "band": "PageFooter", "position": [450, 6], "size": [90, 14], "systemvalue": "page_number", "prefix": "Page ", "fontsize": 8, "align": "right", "color": "#555555"}
     }
   }
 }

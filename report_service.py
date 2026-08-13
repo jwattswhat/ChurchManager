@@ -7,6 +7,7 @@ from visual_reports.designer import (
 )
 from visual_reports.report_inventory import OFFICIAL_CODES
 from visual_reports.tabular_dataset import TabularDatasetProvider
+from visual_reports.worship_planning_dataset import WorshipPlanningDatasetProvider
 
 
 class ChurchManagerReportService:
@@ -46,6 +47,10 @@ class ChurchManagerReportService:
         if code == "CMMD01":
             from visual_reports.directory_dataset import DirectoryDatasetProvider
             dataset = DirectoryDatasetProvider(connection, self.access.authorization).build(church_id)
+        elif code == "CMWP01":
+            dataset = WorshipPlanningDatasetProvider(
+                connection, self.access.authorization,
+            ).build(church_id, parameters.get("ServiceID"))
         else:
             dataset = TabularDatasetProvider(connection, self.access.authorization).build(
                 code, church_id, parameters,

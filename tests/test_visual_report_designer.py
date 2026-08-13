@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import tempfile
 import unittest
 
@@ -27,6 +28,24 @@ class TestVisualReportDesignerStorage(unittest.TestCase):
             self.assertIn("Custom Directory", second.read_text(encoding="utf-8"))
             self.assertEqual(first, user_definition_path("CMMD01", folder))
             self.assertEqual(first.parent, user_definition_directory(folder))
+
+    def test_incompatible_custom_dataset_is_backed_up_and_upgraded(self):
+        with tempfile.TemporaryDirectory() as folder, tempfile.TemporaryDirectory() as starters:
+            source = Path(__file__).resolve().parents[1] / "visual_reports" / "definitions" / "CMWP01.json"
+            starter = Path(starters) / "CMWP01.json"
+            starter.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+            custom = ensure_user_definition("CMWP01", folder, starters)
+            data = json.loads(custom.read_text(encoding="utf-8"))
+            data["CMWP01REPORT"]["REPORT"]["datasetversion"] = 1
+            data["CMWP01REPORT"]["REPORT"]["title"] = "Older Custom Planner"
+            custom.write_text(json.dumps(data), encoding="utf-8")
+
+            self.assertEqual(resolve_report_definition("CMWP01", folder, starters), starter)
+            upgraded = ensure_user_definition("CMWP01", folder, starters)
+            self.assertEqual(json.loads(upgraded.read_text(encoding="utf-8"))[
+                "CMWP01REPORT"
+            ]["REPORT"]["datasetversion"], 2)
+            self.assertTrue(upgraded.with_suffix(".v1.json.bak").is_file())
 
     def test_designer_requires_design_permission_before_opening(self):
         class DeniedAuthorization:
