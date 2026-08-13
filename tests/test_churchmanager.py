@@ -212,6 +212,20 @@ class TestChurchManagerPython(unittest.TestCase):
             "Opening Hymn\tLSB 507",
         )
 
+    def test_bulletin_order_sql_uses_mysql_connector_markers(self):
+        from bulletin_orders import _PortableCursor
+
+        calls = []
+        Cursor = type(
+            "Cursor", (),
+            {
+                "__module__": "mysql.connector.cursor",
+                "execute": lambda self, sql, values=(): calls.append((sql, values)),
+            },
+        )
+        _PortableCursor(Cursor()).execute("SELECT ID FROM Sample WHERE ID=?", (7,))
+        self.assertEqual(calls, [("SELECT ID FROM Sample WHERE ID=%s", (7,))])
+
     def test_sermon_docx_conversion_uses_expected_html_markers(self):
         function = load_function_without_importing(
             ROOT / "sermon2blogger.py", "convert_docx_to_text", {"Document": Document}

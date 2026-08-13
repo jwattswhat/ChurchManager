@@ -11,6 +11,33 @@ PLACEHOLDER_RE = re.compile(r"\{([^{}]+)\}")
 TAG_RE = re.compile(r"<[^>]+>")
 BREAK_RE = re.compile(r"<br\s*/?>", re.IGNORECASE)
 
+
+class _PortableCursor:
+    def __init__(self, cursor):
+        self._cursor = cursor
+        self._marker = "%s" if cursor.__class__.__module__.startswith("mysql.connector") else "?"
+
+    def execute(self, sql, values=()):
+        return self._cursor.execute(sql.replace("?", self._marker), values)
+
+    def __getattr__(self, name):
+        return getattr(self._cursor, name)
+
+
+class _PortableConnection:
+    def __init__(self, connection):
+        self._connection = connection
+
+    def cursor(self, *args, **kwargs):
+        return _PortableCursor(self._connection.cursor(*args, **kwargs))
+
+    def __getattr__(self, name):
+        return getattr(self._connection, name)
+
+
+def portable_connection(connection):
+    return connection if isinstance(connection, _PortableConnection) else _PortableConnection(connection)
+
 HYMN_KEYS = {
     "entrance", "processional", "office hymn", "of the day", "communion",
     "hymn", "closing", "gloria in excelsis", "sanctus", "agnus dei",
@@ -193,7 +220,7 @@ class BulletinOrderRepository:
     """Small persistence boundary used by the bulletin-order editor."""
 
     def __init__(self, connection):
-        self.connection = connection
+        self.connection = portable_connection(connection)
 
     def templates(self):
         cursor = self.connection.cursor()
@@ -347,8 +374,8 @@ class BulletinOrderRepository:
 
 class BulletinOrderGenerator:
     def __init__(self, connection):
-        self.connection = connection
-        self.repository = BulletinOrderRepository(connection)
+        self.connection = portable_connection(connection)
+        self.repository = BulletinOrderRepository(self.connection)
 
     def services(self):
         cursor = self.connection.cursor()
