@@ -6,6 +6,7 @@
     
 """
 import os
+from pathlib import Path
 from datetime import datetime, timezone
 import wx
 
@@ -46,6 +47,7 @@ from accounting.budget_actual_dialog import show_budget_actual
 from accounting.functional_expense_dialog import show_functional_expenses
 from accounting.year_end_dialog import show_year_end
 from types import SimpleNamespace
+from single_instance import ChurchManagerSingleInstance
 
 
 arguments = None
@@ -53,6 +55,7 @@ app = None
 ChurchDB = None
 cmfrm = None
 context = None
+single_instance = None
 
 
 class clsForm(JSForm.clsForm):
@@ -580,8 +583,20 @@ def _buttonclick(event):
 
 
 def main(argv=None):
-    global arguments, app, ChurchDB, cmfrm, context
+    global arguments, app, ChurchDB, cmfrm, context, single_instance
     from startup import build_runtime
+
+    single_instance = ChurchManagerSingleInstance(Path(__file__).resolve().parent)
+    if not single_instance.acquire():
+        notice_app = wx.App(False)
+        wx.MessageBox(
+            "ChurchManager is already running. Close the existing ChurchManager window "
+            "before starting another copy.",
+            "ChurchManager Already Running",
+            wx.OK | wx.ICON_INFORMATION,
+        )
+        notice_app.Destroy()
+        return 1
 
     runtime = build_runtime(clsForm, argv)
     arguments = runtime.arguments
