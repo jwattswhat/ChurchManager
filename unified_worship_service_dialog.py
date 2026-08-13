@@ -209,7 +209,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
     """First-stage unified editor: one window, independently scrolling panels."""
 
     def __init__(self, parent, connection, service_id):
-        super().__init__(parent, title="Worship Service and Order of Service", size=(1280, 760),
+        super().__init__(parent, title="Worship Service and Order of Service", size=(1400, 780),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.repository = UnifiedWorshipServiceRepository(connection)
         self.service_id = service_id
@@ -239,10 +239,11 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         splitter = wx.SplitterWindow(panel, style=wx.SP_LIVE_UPDATE | wx.SP_3D)
         left = wx.Panel(splitter)
         right = wx.ScrolledWindow(splitter, style=wx.VSCROLL)
+        right.SetMinSize((430, -1))
         right.SetScrollRate(0, 12)
-        splitter.SplitVertically(left, right, 810)
+        splitter.SplitVertically(left, right, 890)
         splitter.SetMinimumPaneSize(330)
-        splitter.SetSashGravity(0.67)
+        splitter.SetSashGravity(0.66)
 
         left_box = wx.BoxSizer(wx.VERTICAL)
         template_row = wx.BoxSizer(wx.HORIZONTAL)
