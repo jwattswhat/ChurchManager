@@ -91,6 +91,48 @@ class SundayContentRuleTests(unittest.TestCase):
         self.assertIn('field = "PrayerCategory" if kind == "prayer" else "AnnouncementCategory"', source)
         self.assertNotIn("Electronic display only", source)
 
+    def test_choice_cleanup_removes_legacy_rows_and_adds_active_lists(self):
+        from pathlib import Path
+        root = Path(__file__).resolve().parents[1]
+        migration = (root / "migrations" / "048_clean_and_complete_choices.sql").read_text(
+            encoding="utf-8"
+        )
+        for obsolete in (
+            "AccountType", "OrderofService", "PsalmorIntroit", "Roles", "EnteredBy", "GroupType",
+        ):
+            self.assertIn(obsolete, migration)
+        for active in ("UsedAs", "AnnouncementCategory", "AddressLabel", "Reading", "Season", "Category"):
+            self.assertIn(active, migration)
+        self.assertIn("Hymn of Invocation", migration)
+        self.assertIn("Hymn of the Day", migration)
+        self.assertIn("Distribution Hymn", migration)
+
+    def test_legacy_choice_screens_are_retired_and_person_lookups_are_relational(self):
+        from pathlib import Path
+        import json
+        root = Path(__file__).resolve().parents[1]
+        for retired in ("frmOS.json", "frmOSList.json", "frmParticipant.json"):
+            self.assertFalse((root / "Forms" / retired).exists())
+        for filename in ("frmPersonAddress.json", "frmPersonDateGrid.json"):
+            document = json.loads((root / "Forms" / filename).read_text(encoding="utf-8"))
+            form = next(iter(document.values()))
+            lookup = form["CONTROLS"]["PersonID"]["lookupchoices"]
+            self.assertEqual(lookup["name"], "tblPerson")
+            self.assertEqual(lookup["fields"], ["ID", "LastName", "FirstName"])
+
+    def test_choice_manager_is_safe_and_choice_fields_are_unique(self):
+        from pathlib import Path
+        root = Path(__file__).resolve().parents[1]
+        migration = (root / "migrations" / "049_enforce_unique_choice_fields.sql").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("UNIQUE (Field)", migration)
+        menu = (root / "main_menu.py").read_text(encoding="utf-8")
+        application = (root / "cm.py").read_text(encoding="utf-8")
+        self.assertIn('"lblChoices"', menu)
+        self.assertIn("show_choice_manager", application)
+        self.assertIn('"AnnouncementCategory"', application)
+
 
 if __name__ == "__main__":
     unittest.main()

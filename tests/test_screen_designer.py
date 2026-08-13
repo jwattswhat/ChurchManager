@@ -22,7 +22,7 @@ class TestChurchManagerScreenDesigner(unittest.TestCase):
 
         loader = JSForm.ScreenDefinitionLoader()
         paths = sorted(Path("Forms").glob("*.json"))
-        self.assertGreaterEqual(len(paths), 59)
+        self.assertGreaterEqual(len(paths), 56)
         for path in paths:
             with self.subTest(form=path.name):
                 model = JSForm.ScreenDesignerModel(loader.load(path))
@@ -110,7 +110,7 @@ class TestChurchManagerScreenDesigner(unittest.TestCase):
         self.assertIn("Image", family["FORM"]["table"]["fields"])
         self.assertEqual(family["CONTROLS"]["Image"]["type"], "ImagePickerCtrl")
 
-    def test_utility_dialogs_and_list_forms_have_correct_identity(self):
+    def test_utility_dialogs_have_correct_identity(self):
         import json
 
         for name in ("frmGenerateOS", "frmNotifyviaeMail"):
@@ -118,13 +118,6 @@ class TestChurchManagerScreenDesigner(unittest.TestCase):
             self.assertEqual(form["name"], name)
             self.assertIn("Close", form["controls"])
             self.assertIn("CLOSEBOX", form["stylelist"])
-        os_list = json.loads(Path("Forms/frmOSList.json").read_text(encoding="utf-8"))["frmOSListFORM"]
-        self.assertEqual(os_list["FORM"]["name"], "frmOSList")
-        self.assertEqual(os_list["FORM"]["table"]["fields"], ["OrderofService"])
-        self.assertEqual(os_list["FORM"]["layout"]["type"], "legacy")
-        self.assertLessEqual(os_list["FORM"]["sizech"][0], 62)
-        self.assertLessEqual(os_list["FORM"]["sizech"][1], 28)
-        self.assertLessEqual(os_list["CONTROLS"]["dvlOS"]["sizech"][1], 19)
 
     def test_propers_uses_compact_fixed_two_column_layout(self):
         import json

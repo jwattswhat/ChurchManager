@@ -34,6 +34,7 @@ from worship_scheduling import (
 )
 from sunday_content_dialog import show_announcements, show_prayers, show_sunday_preview
 from report_support import get_today, load_report_config
+from JSForm.choice_manager import show_choice_manager
 from accounting.setup_dialog import show_accounting_setup
 from accounting.draft_dialog import show_accounting_draft_entry
 from accounting.review_dialog import show_accounting_review
@@ -599,6 +600,15 @@ def _buttonclick(event):
             return
         case "lblAnnouncement":
             show_announcements(cmfrm.FRAME, context.connection)
+            return
+        case "lblChoices":
+            show_choice_manager(cmfrm.FRAME, context.connection, {
+                "Priority", "Color", "AltColor", "ProjectCategory", "Status",
+                "MarriageStatus", "UsedAs", "State", "Preacher", "Author",
+                "DocumentType", "AttendanceType", "DateType", "ContactLabel",
+                "Type", "Location", "PrayerCategory", "AnnouncementCategory",
+                "AddressLabel", "Reading", "Season", "Category",
+            })
             return
         case "lblSchedule":
             show_schedule_patterns(cmfrm.FRAME, context.connection)

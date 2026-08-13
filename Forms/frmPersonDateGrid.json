@@ -37,12 +37,14 @@
             "PersonID": {
                 "type": "ComboBox",
                 "name": "PersonID",
-                "table": {
+                "lookupchoices": {
                     "name": "tblPerson",
                     "fields": [
                         "ID",
-                        "CONCAT(LastName,', ',FirstName) as PersonID"
-                    ]
+                        "LastName",
+                        "FirstName"
+                    ],
+                    "orderby": "LastName, FirstName"
                 },
                 "posch": [
                     10,
