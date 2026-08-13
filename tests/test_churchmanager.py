@@ -822,6 +822,32 @@ class TestChurchManagerForms(unittest.TestCase):
         }
         self.assertEqual(actual, expected)
 
+    def test_main_menu_separates_database_bulletin_and_weekly_output(self):
+        controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
+        self.assertEqual(controls["ServiceBox"]["label"], "Database")
+        self.assertEqual(controls["BulletinBox"]["label"], "Bulletin")
+
+        self.assertEqual(controls["lblService"]["posch"], [19, 3])
+        bulletin_items = [
+            "lblOS", "lblWeeklyBulletinOrder", "lblGenerateOS",
+            "lblNotifyParticipants", "lblSundayPrayers", "lblAnnouncements",
+        ]
+        self.assertEqual(
+            [controls[name]["posch"] for name in bulletin_items],
+            [[19, row] for row in range(6, 12)],
+        )
+
+        database_items = [
+            "lblSermon", "lblPropers", "lblPrayers", "lblParticipant",
+            "lblSchedule", "lblServiceSchedule", "lblAttendanceEvent",
+        ]
+        self.assertEqual(
+            [controls[name]["posch"] for name in database_items],
+            [[2, row] for row in range(5, 12)],
+        )
+        self.assertTrue(all(controls[name]["label"] == controls[name]["label"].strip()
+                            for name in database_items))
+
     def test_removed_financial_features_are_not_exposed(self):
         removed_forms = {
             "frmBudget", "frmFund", "frmLedger", "frmCheckRegister",
