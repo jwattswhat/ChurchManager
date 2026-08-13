@@ -461,6 +461,28 @@ class WeeklyBulletinOrderRepository:
         finally:
             cursor.close()
 
+    def apply_resolved_values(self, service_id, resolved_values):
+        """Copy current worship-planning selections into this service's weekly snapshot."""
+        cursor = self.connection.cursor()
+        try:
+            updated = 0
+            for line_id, value in resolved_values:
+                if value in (None, ""):
+                    continue
+                cursor.execute(
+                    "UPDATE tblServiceBulletinOrderLine SET WeeklyValue=? "
+                    "WHERE ID=? AND ServiceID=? AND ValueSource IS NOT NULL",
+                    (str(value), line_id, service_id),
+                )
+                updated += cursor.rowcount
+            self.connection.commit()
+            return updated
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
     def move_line(self, service_id, line_id, direction):
         rows = self.lines(service_id)
         index = next((i for i, row in enumerate(rows) if row[0] == line_id), None)
@@ -560,7 +582,7 @@ class BulletinOrderGenerator:
     def _included(cls, line, service):
         return cls.condition_included(line[15], line[16], bool(service[3]), service[5])
 
-    def render(self, template_id, service_id):
+    def render(self, template_id, service_id, prefer_weekly=True):
         service, hymns, readings = self._service_context(service_id)
         rendered = []
         weekly_lines = WeeklyBulletinOrderRepository(self.connection).lines(service_id)
@@ -589,7 +611,7 @@ class BulletinOrderGenerator:
         for source_line in source_lines:
             source, key = source_line["source"], source_line["key"]
             value = None
-            if source_line["weekly_value"]:
+            if prefer_weekly and source_line["weekly_value"]:
                 value = source_line["weekly_value"]
             elif source == "SERVICE_HYMN":
                 value = hymns.get(str(key or "").casefold())
@@ -608,6 +630,7 @@ class BulletinOrderGenerator:
                 "tab_alignment": source_line["tab_alignment"],
                 "tab_leader": source_line["tab_leader"],
                 "missing": bool(source and not value), "value_key": key,
+                "value_source": source,
             }
             rendered.append(item)
         plain = "\r\n".join(

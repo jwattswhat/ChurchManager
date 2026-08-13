@@ -102,6 +102,7 @@ class WeeklyBulletinOrderDialog(wx.Dialog):
         outer.Add(self.status, 0, wx.ALL, 10)
         buttons = wx.BoxSizer(wx.HORIZONTAL)
         for label, handler in (("Apply Selected Template", self.on_apply),
+                               ("Apply Selected Hymns and Readings", self.on_apply_selections),
                                ("Edit Weekly Line", self.on_edit),
                                ("Move Up", lambda _event: self.on_move(-1)),
                                ("Move Down", lambda _event: self.on_move(1))):
@@ -195,6 +196,38 @@ class WeeklyBulletinOrderDialog(wx.Dialog):
     def selected_line(self):
         index = self.grid.GetFirstSelected()
         return None if index < 0 else self.line_rows[index]
+
+    def on_apply_selections(self, _event):
+        service_id = self.selected_service_id()
+        assignment = self.repository.assignment(service_id) if service_id is not None else None
+        if not assignment or not self.line_rows:
+            wx.MessageBox(
+                "Apply a bulletin-order template to this service first.",
+                "Weekly order needed", wx.OK | wx.ICON_INFORMATION, self,
+            )
+            return
+        try:
+            rendered = self.generator.render(assignment[1], service_id, prefer_weekly=False)
+            resolved = [
+                (item["id"], item["value"])
+                for item in rendered["lines"]
+                if item["value_source"] in ("SERVICE_HYMN", "SERVICE_READING")
+                and item["value"] not in (None, "")
+            ]
+            updated = self.repository.apply_resolved_values(service_id, resolved)
+            self.refresh_lines()
+            unresolved = sum(
+                1 for item in self.generator.render(assignment[1], service_id)["lines"]
+                if item["missing"]
+            )
+            self.status.SetLabel(
+                f"Applied {updated} selected hymn/reading value(s). "
+                + (f"{unresolved} unfinished line(s) remain in red."
+                   if unresolved else "All selected hymn and reading values are complete.")
+            )
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to apply worship selections",
+                          wx.OK | wx.ICON_ERROR, self)
 
     def on_edit(self, _event):
         row = self.selected_line()
