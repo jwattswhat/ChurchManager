@@ -421,6 +421,10 @@ class WeeklyBulletinOrderRepository:
                 "ON DUPLICATE KEY UPDATE TemplateID=VALUES(TemplateID),GeneratedPlainText=NULL,"
                 "GeneratedHtml=NULL,GeneratedAt=NULL", (service_id, template_id),
             )
+            cursor.execute(
+                "UPDATE tblService SET BulletinOrderTemplateID=? WHERE ID=?",
+                (template_id, service_id),
+            )
             for line in template_lines:
                 included = BulletinOrderGenerator.condition_included(
                     line[15], line[16], bool(service[0]), service[1],

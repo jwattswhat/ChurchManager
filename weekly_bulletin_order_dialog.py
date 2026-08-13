@@ -59,13 +59,14 @@ class WeeklyLineDialog(wx.Dialog):
 
 
 class WeeklyBulletinOrderDialog(wx.Dialog):
-    def __init__(self, parent, connection):
+    def __init__(self, parent, connection, service_id=None):
         super().__init__(parent, title="Weekly Bulletin Order", size=(1060, 700),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.generator = BulletinOrderGenerator(connection)
         self.repository = WeeklyBulletinOrderRepository(connection)
         self.service_rows = self.generator.services()
         self.template_rows = [row for row in self.generator.repository.templates() if row[3]]
+        self.initial_service_id = service_id
         self.line_rows = []
         self._build()
         self._load_choices()
@@ -126,7 +127,12 @@ class WeeklyBulletinOrderDialog(wx.Dialog):
         for row in self.template_rows:
             self.template.Append(row[1] + (" (Starter)" if row[4] else " (Customized)"))
         if self.service_rows:
-            self.service.SetSelection(0)
+            selected = next(
+                (index for index, row in enumerate(self.service_rows)
+                 if row[0] == self.initial_service_id),
+                0,
+            )
+            self.service.SetSelection(selected)
             self.on_service()
 
     def selected_service_id(self):
@@ -277,8 +283,8 @@ class WeeklyBulletinOrderDialog(wx.Dialog):
             self.refresh_lines()
 
 
-def show_weekly_bulletin_order(parent, connection):
-    dialog = WeeklyBulletinOrderDialog(parent, connection)
+def show_weekly_bulletin_order(parent, connection, service_id=None):
+    dialog = WeeklyBulletinOrderDialog(parent, connection, service_id=service_id)
     try:
         return dialog.ShowModal()
     finally:

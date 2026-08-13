@@ -363,6 +363,13 @@
                 ],
                 "tooltip": "Select the reusable bulletin-order outline template for this service."
             },
+            "btnWeeklyOrder": {
+                "name": "btnWeeklyOrder",
+                "type": "Button",
+                "label": "Weekly Order...",
+                "posch": [38, 13],
+                "tooltip": "Create or edit the weekly order that drives preparation for this Worship Service."
+            },
             "lblOSNote": {
                 "name": "lblOSNote",
                 "type": "StaticText",

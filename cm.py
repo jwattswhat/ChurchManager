@@ -115,7 +115,60 @@ class clsForm(JSForm.clsForm):
             self.FORM.Bind(
                 wx.EVT_BUTTON, self._addIDtofilename, self.CONTROLID["btnAddOutlineID"]
             )
+        if "btnWeeklyOrder" in self.CONTROLID:
+            self.FORM.Bind(
+                wx.EVT_BUTTON, self._open_service_weekly_order,
+                self.CONTROLID["btnWeeklyOrder"],
+            )
         super().bind_form_controls()
+
+    def _current_service_id(self):
+        if self.FORMNAME != "frmService" or not self.RECORDS:
+            return None
+        current = self.RECORDS.current()
+        return current.get("ID") if current else None
+
+    def _open_service_weekly_order(self, _event=None):
+        service_id = self._current_service_id()
+        if not service_id:
+            wx.MessageBox(
+                "Save the Worship Service first. ChurchManager will then help you create "
+                "its weekly order of service.",
+                "Save Worship Service",
+                wx.OK | wx.ICON_INFORMATION,
+                self.FORM,
+            )
+            return
+        show_weekly_bulletin_order(self.FRAME, self.DBConnection, service_id=service_id)
+
+    def _service_has_weekly_order(self, service_id):
+        cursor = self.DBConnection.cursor()
+        try:
+            marker = "%s" if "mysql.connector" in type(self.DBConnection).__module__ else "?"
+            cursor.execute(
+                "SELECT 1 FROM tblServiceBulletinOrder WHERE ServiceID=" + marker,
+                (service_id,),
+            )
+            return cursor.fetchone() is not None
+        finally:
+            cursor.close()
+
+    def _on_update_record_click(self, event):
+        previous_service_id = self._current_service_id()
+        super()._on_update_record_click(event)
+        service_id = self._current_service_id()
+        if self.FORMNAME != "frmService" or previous_service_id or not service_id:
+            return
+        if self._service_has_weekly_order(service_id):
+            return
+        if wx.MessageBox(
+            "This Worship Service does not yet have a weekly order of service. "
+            "Would you like to select one now?",
+            "Weekly Order Needed",
+            wx.YES_NO | wx.YES_DEFAULT | wx.ICON_INFORMATION,
+            self.FORM,
+        ) == wx.YES:
+            self._open_service_weekly_order()
 
     def _checkboxallchecked(self, event):
         JSForm.LG.log()
