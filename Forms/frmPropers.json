@@ -318,7 +318,7 @@
                     33,
                     10
                 ],
-                "layout": {"row_span": 5, "expand": true},
+                "layout": {"row_span": 2, "expand": true},
                 "tooltip": "View the readings records and select a row when needed."
             },
             "lblNote": {
