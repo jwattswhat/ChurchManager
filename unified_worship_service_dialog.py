@@ -94,6 +94,15 @@ class UnifiedWorshipServiceRepository:
         ) if proper_id else []
         return readings, hymns
 
+    def proper_detail(self, proper_id):
+        return self.one(
+            "SELECT ls.Name,COALESCE(p.Cycle,''),COALESCE(p.Season,''),"
+            "COALESCE(p.LiturgicalDate,''),COALESCE(p.Theme,''),COALESCE(p.Color,''),"
+            "COALESCE(p.AltColor,''),COALESCE(p.Introit,''),COALESCE(p.Note,'') "
+            "FROM tblPropers p JOIN tblLectionarySystem ls ON ls.ID=p.LectionarySystemID "
+            "WHERE p.ID=?", (proper_id,),
+        )
+
     def weekly_hymns(self, service_id):
         return dict(self.all(
             "SELECT ServiceBulletinOrderLineID,HymnID FROM tblHymnUsage "
@@ -196,6 +205,10 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             ("note", "Notes for this service", True, False),
         ):
             self._add_field(right, key, label, multiline, inline)
+            if key == "proper":
+                view_proper = wx.Button(right, label="View Proper...")
+                view_proper.Bind(wx.EVT_BUTTON, self.on_view_proper)
+                self.detail_box.Add(view_proper, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
         self.fields["os_note"].SetToolTip(
             "This note comes from the selected Order of Service template and cannot be changed here."
         )
@@ -411,6 +424,19 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         if not self.loading:
             self.apply_proper()
 
+    def on_view_proper(self, _event):
+        selection = self.fields["proper"].GetSelection()
+        if selection == wx.NOT_FOUND:
+            wx.MessageBox("Select a Proper first.", "View Proper",
+                          wx.OK | wx.ICON_INFORMATION, self)
+            return
+        proper_id = self.proper_rows[selection][0]
+        dialog = ProperReadOnlyDialog(self, self.repository, proper_id)
+        try:
+            dialog.ShowModal()
+        finally:
+            dialog.Destroy()
+
     def apply_proper(self):
         selection = self.fields["proper"].GetSelection()
         proper_id = None if selection == wx.NOT_FOUND else self.proper_rows[selection][0]
@@ -428,6 +454,58 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
                     hymn = unused.pop(match)
                     line["hymn_id"], line["value"] = hymn[0], hymn[1]
         self.refresh_grid()
+
+
+class ProperReadOnlyDialog(wx.Dialog):
+    def __init__(self, parent, repository, proper_id):
+        super().__init__(parent, title="Proper (Read Only)", size=(780, 620),
+                         style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        detail = repository.proper_detail(proper_id)
+        readings, hymns = repository.proper_values(proper_id)
+        panel = wx.Panel(self)
+        outer = wx.BoxSizer(wx.VERTICAL)
+        banner = wx.StaticText(panel, label="This Proper is displayed for reference only.")
+        banner.SetForegroundColour(wx.Colour(0, 90, 190))
+        outer.Add(banner, 0, wx.ALL, 10)
+        labels = (
+            ("Lectionary", detail[0]), ("Cycle", detail[1]), ("Season", detail[2]),
+            ("Liturgical date", detail[3]), ("Theme", detail[4]),
+            ("Color", detail[5]), ("Alternate color", detail[6]),
+            ("Introit", detail[7]), ("Note", detail[8]),
+        )
+        info = wx.FlexGridSizer(cols=2, vgap=5, hgap=10)
+        info.AddGrowableCol(1, 1)
+        for label, value in labels:
+            info.Add(wx.StaticText(panel, label=label + ":"), 0, wx.ALIGN_TOP)
+            info.Add(wx.StaticText(panel, label=str(value or "")), 1, wx.EXPAND)
+        outer.Add(info, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+
+        book = wx.Notebook(panel)
+        reading_page, hymn_page = wx.Panel(book), wx.Panel(book)
+        book.AddPage(reading_page, "Readings")
+        book.AddPage(hymn_page, "Suggested Hymns")
+        reading_grid = wx.ListCtrl(reading_page, style=wx.LC_REPORT)
+        reading_grid.AppendColumn("Reading", width=180)
+        reading_grid.AppendColumn("Reference", width=500)
+        for index, row in enumerate(readings):
+            item = reading_grid.InsertItem(index, str(row[0]))
+            reading_grid.SetItem(item, 1, str(row[1] or ""))
+        reading_box = wx.BoxSizer(wx.VERTICAL); reading_box.Add(reading_grid, 1, wx.EXPAND | wx.ALL, 6)
+        reading_page.SetSizer(reading_box)
+        hymn_grid = wx.ListCtrl(hymn_page, style=wx.LC_REPORT)
+        hymn_grid.AppendColumn("Suggested Use", width=190)
+        hymn_grid.AppendColumn("Hymn", width=490)
+        for index, row in enumerate(hymns):
+            item = hymn_grid.InsertItem(index, str(row[2]))
+            hymn_grid.SetItem(item, 1, str(row[1]))
+        hymn_box = wx.BoxSizer(wx.VERTICAL); hymn_box.Add(hymn_grid, 1, wx.EXPAND | wx.ALL, 6)
+        hymn_page.SetSizer(hymn_box)
+        outer.Add(book, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
+        close = wx.Button(panel, wx.ID_CLOSE, "Close")
+        close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE))
+        buttons = wx.BoxSizer(wx.HORIZONTAL); buttons.AddStretchSpacer(); buttons.Add(close)
+        outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 10)
+        panel.SetSizer(outer)
 
 
 def show_unified_worship_service(parent, connection, service_id):
