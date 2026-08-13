@@ -364,12 +364,20 @@
                 "tooltip": "Customize approved ChurchManager report layouts.",
                 "security": { "invoke": "reports.design" }
             },
+            "lblScreenDesigner": {
+                "name": "lblScreenDesigner",
+                "type": "StaticText",
+                "posch": [19, 4],
+                "label": "Screen Designer",
+                "tooltip": "Customize approved ChurchManager screen layouts.",
+                "security": { "invoke": "screens.design" }
+            },
             "lblGenerateOS": {
                 "name": "lblGenerateOS",
                 "type": "StaticText",
                 "posch": [
                     19,
-                    4
+                    5
                 ],
                 "label": "Generate OS",
                 "tooltip": "Generate the order-of-service output.",
@@ -380,7 +388,7 @@
                 "type": "StaticText",
                 "posch": [
                     19,
-                    5
+                    6
                 ],
                 "label": "Notify Participants",
                 "tooltip": "Notify scheduled service participants by email.",
@@ -391,7 +399,7 @@
                 "label": "Sunday Prayers",
                 "posch": [
                     19,
-                    6
+                    7
                 ],
                 "type": "StaticText",
                 "tooltip": "Generate the Sunday prayer list.",
@@ -403,7 +411,7 @@
                 "label": "Sunday Announcements",
                 "posch": [
                     19,
-                    7
+                    8
                 ],
                 "tooltip": "Generate the Sunday announcements.",
                 "security": { "invoke": "worship.manage" }

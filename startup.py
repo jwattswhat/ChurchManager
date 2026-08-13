@@ -1,6 +1,7 @@
 """ChurchManager application composition root."""
 
 from dataclasses import dataclass
+import os
 
 import wx
 import JSForm
@@ -36,6 +37,10 @@ def build_runtime(form_class, argv=None, login_provider=authenticate_user):
         argv=argv,
     )
     arguments = resolve_database(arguments)
+    overlay_name = "TestScreenDefinitions" if arguments.get("test_mode") else "ScreenDefinitions"
+    overlay = os.path.join(os.environ.get("LOCALAPPDATA", os.getcwd()), "ChurchManager", overlay_name)
+    os.makedirs(overlay, exist_ok=True)
+    os.environ["JSFORM_SCREEN_OVERLAY"] = overlay
     wx_app = wx.App(0)
     JSForm.check_internetconnection(1)
     database = JSForm.clsDB(

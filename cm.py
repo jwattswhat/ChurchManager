@@ -22,6 +22,7 @@ from process_service import ProcessService
 from report_service import ChurchManagerReportService
 from report_access import ReportAccessService
 from visual_reports.designer import open_directory_designer
+from churchmanager_screen_designer import open_churchmanager_screen_designer
 from user_admin import show_user_administration
 from accounting.setup_dialog import show_accounting_setup
 from accounting.draft_dialog import show_accounting_draft_entry
@@ -478,6 +479,12 @@ def _buttonclick(event):
             return
         case "lblReportDesigner":
             open_directory_designer(authorization=context.authorization)
+            return
+        case "lblScreenDesigner":
+            open_churchmanager_screen_designer(
+                context.connection, context.session, context.authorization,
+                test_mode=context.test_mode,
+            )
             return
         case "lblBackupDB":
             _runBackupDB()
