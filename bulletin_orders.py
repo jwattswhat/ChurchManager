@@ -547,6 +547,12 @@ class BulletinOrderGenerator:
             if row:
                 return row[0]
             cursor.execute(
+                "SELECT BulletinOrderTemplateID FROM tblService WHERE ID=?", (service_id,)
+            )
+            row = cursor.fetchone()
+            if row and row[0]:
+                return row[0]
+            cursor.execute(
                 "SELECT t.ID FROM tblService s JOIN tblBulletinOrderTemplate t "
                 "ON t.SourceLegacyName=s.OrderofService WHERE s.ID=?", (service_id,),
             )

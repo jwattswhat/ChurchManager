@@ -23,7 +23,7 @@
                     "PropersID",
                     "LiturgicalDate",
                     "HolyCommunion",
-                    "OrderofService",
+                    "BulletinOrderTemplateID",
                     "OSNote",
                     "PsalmorIntroit",
                     "SermonID",
@@ -335,15 +335,24 @@
             "lblOrderofService": {
                 "name": "lblOrderofService",
                 "type": "StaticText",
-                "label": "Order of Service:",
+                "label": "Order Template:",
                 "posch": [
                     1,
                     13
                 ]
             },
-            "OrderofService": {
-                "name": "OrderofService",
+            "BulletinOrderTemplateID": {
+                "name": "BulletinOrderTemplateID",
                 "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblBulletinOrderTemplate",
+                    "fields": [
+                        "ID",
+                        "Name"
+                    ],
+                    "condition": "Active = 1",
+                    "orderby": "IsStarter DESC, Name"
+                },
                 "posch": [
                     12,
                     13
@@ -352,7 +361,7 @@
                     24,
                     2
                 ],
-                "tooltip": "Select the order of service."
+                "tooltip": "Select the reusable bulletin-order outline template for this service."
             },
             "lblOSNote": {
                 "name": "lblOSNote",
