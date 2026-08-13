@@ -182,7 +182,7 @@
                     "frmHymnUsage"
                 ],
                 "posch": [
-                    41,
+                    38,
                     1
                 ],
                 "tooltip": "Open the hymns form."
@@ -273,7 +273,7 @@
                     "frmPropers"
                 ],
                 "posch": [
-                    41,
+                    38,
                     7
                 ],
                 "tooltip": "Open the propers form."
@@ -327,15 +327,15 @@
                     "frmAltReading"
                 ],
                 "posch": [
-                    41,
-                    11
+                    38,
+                    9
                 ],
                 "tooltip": "Open the alt readings form."
             },
             "lblOrderofService": {
                 "name": "lblOrderofService",
                 "type": "StaticText",
-                "label": "OrderofService:",
+                "label": "Order of Service:",
                 "posch": [
                     1,
                     13
@@ -357,7 +357,7 @@
             "lblOSNote": {
                 "name": "lblOSNote",
                 "type": "StaticText",
-                "label": "OSNote:",
+                "label": "OS Note:",
                 "posch": [
                     38,
                     3
@@ -495,7 +495,7 @@
             "lblCheckListComplete": {
                 "name": "lblCheckListComplete",
                 "type": "StaticText",
-                "label": "Check List Complete:",
+                "label": "Checklist Complete:",
                 "posch": [
                     1,
                     21
@@ -513,10 +513,10 @@
             "lblCheckList": {
                 "name": "lblCheckList",
                 "type": "StaticText",
-                "label": "CheckList:",
+                "label": "Checklist:",
                 "posch": [
-                    38,
-                    21
+                    1,
+                    23
                 ]
             },
             "CheckList": {
@@ -536,13 +536,13 @@
             "btnEditCheckList": {
                 "type": "Button",
                 "name": "btnEditCheckList",
-                "label": "Edit CheckList",
+                "label": "Edit Checklist",
                 "action": [
                     "openlinkedform",
                     "frmEditCheckList"
                 ],
                 "posch": [
-                    1,
+                    38,
                     23
                 ],
                 "tooltip": "Open the edit checklist form."
