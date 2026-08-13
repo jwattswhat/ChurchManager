@@ -260,6 +260,10 @@
                     16,
                     14
                 ],
+                "layout": {
+                    "row_span": 7,
+                    "expand": true
+                },
                 "maxbytes": 5242880,
                 "tooltip": "Choose the church logo printed on reports. PNG or JPEG is recommended."
             }

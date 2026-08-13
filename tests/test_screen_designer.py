@@ -94,6 +94,8 @@ class TestChurchManagerScreenDesigner(unittest.TestCase):
         self.assertGreaterEqual(label["posch"][0], 30)
         self.assertGreaterEqual(logo["posch"][0], 30)
         self.assertLess(logo["posch"][1], form["CONTROLS"]["Note"]["posch"][1])
+        self.assertGreaterEqual(logo["layout"]["row_span"], 6)
+        self.assertTrue(logo["layout"]["expand"])
 
 
 if __name__ == "__main__": unittest.main()
