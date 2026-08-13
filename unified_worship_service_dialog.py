@@ -295,8 +295,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         self.fields = {}
         for key, label, multiline, inline in (
             ("church", "Church", False, True),
-            ("service_date", "Service date", False, True),
-            ("service_time", "Service time", False, True),
+            ("date_time", "Date and time", False, True),
             ("location", "Location", False, True), ("proper", "Proper", False, False),
             ("liturgical", "Printed liturgical title", False, False),
             ("communion", "Holy Communion", False, True),
@@ -304,8 +303,8 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             ("bulletin", "Bulletin", False, False),
             ("check_complete", "Checklist complete", False, True),
             ("checklist", "Checklist", True, False),
-            ("os_note", "Order of Service notes (from template - read only)", True, False),
             ("note", "Notes for this service", True, False),
+            ("os_note", "Order of Service notes (from template - read only)", True, False),
         ):
             self._add_field(right, key, label, multiline, inline)
             if key == "proper":
@@ -342,11 +341,23 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         panel.SetSizer(outer)
 
     def _add_field(self, parent, key, label, multiline, inline):
-        if key == "service_date":
-            control = wx.adv.DatePickerCtrl(parent, style=wx.adv.DP_DROPDOWN)
-        elif key == "service_time":
-            control = wx.adv.TimePickerCtrl(parent)
-        elif key in ("proper", "sermon", "location"):
+        if key == "date_time":
+            row = wx.BoxSizer(wx.HORIZONTAL)
+            row.Add(wx.StaticText(parent, label="Service date:", size=(92, -1)), 0,
+                    wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
+            service_date = wx.adv.DatePickerCtrl(
+                parent, size=(130, -1), style=wx.adv.DP_DROPDOWN
+            )
+            row.Add(service_date, 0, wx.RIGHT, 12)
+            row.Add(wx.StaticText(parent, label="Time:"), 0,
+                    wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
+            service_time = wx.adv.TimePickerCtrl(parent, size=(115, -1))
+            row.Add(service_time, 0)
+            self.detail_box.Add(row, 0, wx.LEFT | wx.RIGHT | wx.TOP, 8)
+            self.fields["service_date"] = service_date
+            self.fields["service_time"] = service_time
+            return
+        if key in ("proper", "sermon", "location"):
             control = wx.Choice(parent)
             if key == "proper":
                 control.Bind(wx.EVT_CHOICE, self.on_proper)

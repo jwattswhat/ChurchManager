@@ -241,8 +241,9 @@ class TestChurchManagerPython(unittest.TestCase):
         source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
         self.assertIn('wx.adv.DatePickerCtrl', source)
         self.assertIn('wx.adv.TimePickerCtrl', source)
-        self.assertIn('("service_date", "Service date"', source)
-        self.assertIn('("service_time", "Service time"', source)
+        self.assertIn('("date_time", "Date and time"', source)
+        self.assertIn('label="Service date:"', source)
+        self.assertIn('label="Time:"', source)
         self.assertIn('selected_date.GetYear()', source)
         self.assertIn('selected_time.GetHour()', source)
 
