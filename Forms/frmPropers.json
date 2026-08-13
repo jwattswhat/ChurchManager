@@ -27,6 +27,20 @@
                         "Update",
                         "Close"
                     ]
+                },
+                "frmProperHymnSuggestion": {
+                    "name": "frmProperHymnSuggestion",
+                    "type": "Panel",
+                    "title": "Suggested Hymns",
+                    "table": {
+                        "name": "tblProperHymnSuggestion",
+                        "fields": ["ID", "PropersID", "HymnID", "SuggestedAs", "Priority", "Note"],
+                        "condition": "PropersID = {ID}",
+                        "orderby": "Priority, ID"
+                    },
+                    "controls": ["Navigation", "Update", "Delete", "Close"],
+                    "readonlyfields": ["PropersID"],
+                    "fillonblank": ["PropersID", "ID"]
                 }
             },
             "stylelist": [
@@ -208,22 +222,28 @@
                 ],
                 "tooltip": "Enter the liturgical date."
             },
-            "lblHymnSug": {
+            "lblHymnSuggestions": {
                 "type": "StaticText",
-                "label": "Hymns:",
-                "name": "lblHymnSug",
+                "label": "Suggested hymns:",
+                "name": "lblHymnSuggestions",
                 "posch": [
                     34,
                     8
                 ]
             },
-            "HymnSug": {
-                "type": "MultiLine",
-                "stylelist": [
-                    "MULTILINE",
-                    "WORDWRAP"
+            "dvlHymnSuggestions": {
+                "type": "DataViewListCtrl",
+                "name": "dvlHymnSuggestions",
+                "table": {
+                    "name": "tblProperHymnSuggestion",
+                    "fields": ["ID", "HymnID", "SuggestedAs", "Priority"],
+                    "condition": "PropersID = {ID}"
+                },
+                "column": [
+                    {"name": "HymnID", "label": "Hymn", "widthch": 16, "lookupchoices": {"name": "tblHymn", "fields": ["Hymn", "Title"], "condition": "ID = {HymnID}"}},
+                    {"name": "SuggestedAs", "label": "Use", "widthch": 10},
+                    {"name": "Priority", "label": "Priority", "widthch": 6}
                 ],
-                "name": "HymnSug",
                 "posch": [
                     39,
                     8
@@ -232,7 +252,15 @@
                     23,
                     6
                 ],
-                "tooltip": "Enter the hymn sug. Multiple lines are allowed."
+                "tooltip": "View normalized hymn suggestions for this Proper."
+            },
+            "btnHymnSuggestions": {
+                "name": "btnHymnSuggestions",
+                "type": "Button",
+                "label": "Edit",
+                "action": ["openlinkedform", "frmProperHymnSuggestion"],
+                "posch": [34, 13],
+                "tooltip": "Add, edit, or delete suggested hymns for this Proper."
             },
             "lblColor": {
                 "type": "StaticText",

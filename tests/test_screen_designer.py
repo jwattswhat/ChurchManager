@@ -133,7 +133,8 @@ class TestChurchManagerScreenDesigner(unittest.TestCase):
         self.assertEqual(propers["FORM"]["layout"]["type"], "legacy")
         self.assertLessEqual(propers["FORM"]["sizech"][1], 35)
         self.assertLessEqual(propers["CONTROLS"]["Theme"]["sizech"][1], 6)
-        self.assertLessEqual(propers["CONTROLS"]["HymnSug"]["sizech"][1], 6)
+        self.assertLessEqual(propers["CONTROLS"]["dvlHymnSuggestions"]["sizech"][1], 6)
+        self.assertNotIn("HymnSug", propers["CONTROLS"])
         self.assertLessEqual(propers["CONTROLS"]["Note"]["sizech"][1], 8)
 
 
