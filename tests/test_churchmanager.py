@@ -891,7 +891,10 @@ class TestNonAccountingTestDataset(unittest.TestCase):
         self.assertLessEqual(controls["ChurchID"]["sizech"][1], 2)
         self.assertGreaterEqual(controls["ParameterBox"]["sizech"][1], 24)
         self.assertEqual(controls["ParameterBox"]["layout"]["column_span"], 2)
-        self.assertEqual(controls["btnRun"]["layout"]["row"], 3)
+        self.assertGreater(
+            controls["btnRun"]["layout"]["row"],
+            controls["ProjectID"]["posch"][1],
+        )
 
 
 if __name__ == "__main__":

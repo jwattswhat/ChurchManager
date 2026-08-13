@@ -325,11 +325,11 @@
                 "type": "Button",
                 "label": "Run Report",
                 "posch": [
-                    35,
+                    9,
                     33
                 ],
                 "layout": {
-                    "row": 3,
+                    "row": 40,
                     "column": 1
                 },
                 "tooltip": "Run the selected report using the entered parameters."

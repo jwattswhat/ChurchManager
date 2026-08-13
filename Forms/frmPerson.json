@@ -116,7 +116,7 @@
                 ],
                 "posch": [
                     37,
-                    2
+                    1
                 ],
                 "tooltip": "Open the person's addresses form."
             },
@@ -130,7 +130,7 @@
                 ],
                 "posch": [
                     37,
-                    4
+                    3
                 ],
                 "tooltip": "Open the person's contacts form."
             },
@@ -144,7 +144,7 @@
                 ],
                 "posch": [
                     37,
-                    6
+                    5
                 ],
                 "tooltip": "Open the person's significant dates form."
             },
