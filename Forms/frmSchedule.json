@@ -31,7 +31,7 @@
         },
         "CONTROLS": {
             "lblDescription": {
-                "name": "lblDescriptionID",
+                "name": "lblDescription",
                 "type": "StaticText",
                 "label": "Description:",
                 "posch": [
@@ -125,9 +125,9 @@
                 "tooltip": "Select one or more months."
             },
             "lblSeasons": {
-                "name": "lblSeaons",
+                "name": "lblSeasons",
                 "type": "StaticText",
-                "label": "Seasons",
+                "label": "Seasons:",
                 "posch": [
                     1,
                     17
@@ -172,7 +172,7 @@
             },
             "lblNote": {
                 "type": "StaticText",
-                "label": "Note",
+                "label": "Note:",
                 "name": "lblNote",
                 "posch": [
                     1,

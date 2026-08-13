@@ -3,7 +3,7 @@
         "FORM": {
             "name": "frmChecklist",
             "type": "Panel",
-            "title": "CheckList",
+            "title": "Checklist",
             "table": {
                 "name": "tblCheckList",
                 "fields": [
@@ -61,7 +61,7 @@
             },
             "lblCheckList": {
                 "type": "StaticText",
-                "label": "CheckList:",
+                "label": "Checklist:",
                 "posch": [
                     1,
                     3

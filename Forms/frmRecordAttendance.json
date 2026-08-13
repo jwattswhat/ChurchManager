@@ -83,7 +83,7 @@
                 "tooltip": "Check each member who attended this event."
             },
             "lblVisitors": {
-                "name": "lblMembers",
+                "name": "lblVisitors",
                 "posch": [
                     18,
                     3

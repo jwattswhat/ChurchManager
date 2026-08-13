@@ -50,9 +50,9 @@
                 "tooltip": "Select the service."
             },
             "btnNotify": {
-                "name": "btnRun",
+                "name": "btnNotify",
                 "type": "Button",
-                "label": "Notify via eMail",
+                "label": "Notify via Email",
                 "posch": [
                     2,
                     6

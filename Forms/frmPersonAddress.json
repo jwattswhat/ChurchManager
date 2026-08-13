@@ -180,7 +180,7 @@
             },
             "lblZip": {
                 "type": "StaticText",
-                "label": "Zip:",
+                "label": "ZIP:",
                 "name": "lblZip",
                 "posch": [
                     0,
@@ -210,14 +210,14 @@
                 ]
             },
             "StartDate": {
-                "type": "TextCtrl",
+                "type": "DatePickerCtrl",
                 "name": "StartDate",
                 "posch": [
                     10,
                     19
                 ],
                 "sizech": [
-                    24,
+                    20,
                     2
                 ],
                 "tooltip": "Enter the start date."
@@ -232,14 +232,14 @@
                 ]
             },
             "EndDate": {
-                "type": "TextCtrl",
+                "type": "DatePickerCtrl",
                 "name": "EndDate",
                 "posch": [
                     10,
                     22
                 ],
                 "sizech": [
-                    24,
+                    20,
                     2
                 ],
                 "tooltip": "Enter the end date."

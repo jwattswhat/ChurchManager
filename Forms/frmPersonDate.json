@@ -95,7 +95,7 @@
                     4
                 ],
                 "sizech": [
-                    24,
+                    20,
                     2
                 ],
                 "tooltip": "Select the date."
@@ -103,7 +103,7 @@
             "lblNote": {
                 "type": "StaticText",
                 "label": "Note:",
-                "name": "lblNote:",
+                "name": "lblNote",
                 "posch": [
                     0,
                     7

@@ -129,8 +129,8 @@
             },
             "lblDocumentType": {
                 "type": "StaticText",
-                "label": "DocumentType:",
-                "name": "DocumentType",
+                "label": "Document Type:",
+                "name": "lblDocumentType",
                 "posch": [
                     1,
                     7

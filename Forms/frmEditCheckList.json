@@ -3,7 +3,7 @@
         "FORM": {
             "name": "frmEditChecklist",
             "type": "Panel",
-            "title": "Edit CheckList",
+            "title": "Edit Checklist",
             "table": {
                 "name": "tblService",
                 "fields": [
@@ -32,7 +32,7 @@
         "CONTROLS": {
             "lblCheckList": {
                 "type": "StaticText",
-                "label": "CheckList:",
+                "label": "Checklist:",
                 "posch": [
                     1,
                     3

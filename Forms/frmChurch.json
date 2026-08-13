@@ -146,7 +146,7 @@
             "lblZip": {
                 "name": "lblZip",
                 "type": "StaticText",
-                "label": "Zip:",
+                "label": "ZIP:",
                 "posch": [
                     1,
                     11
@@ -212,7 +212,7 @@
             "lbleMail": {
                 "name": "lbleMail",
                 "type": "StaticText",
-                "label": "eMail:",
+                "label": "Email:",
                 "posch": [
                     1,
                     17

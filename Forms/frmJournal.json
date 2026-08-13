@@ -139,7 +139,7 @@
             },
             "lblNote": {
                 "type": "StaticText",
-                "label": "Note",
+                "label": "Note:",
                 "name": "lblNote",
                 "posch": [
                     1,

@@ -265,7 +265,7 @@
                 }
             },
             "AttendanceBox": {
-                "name": "MemberBox",
+                "name": "AttendanceBox",
                 "label": "Attendance",
                 "layout": {
                     "row": 1,
@@ -590,7 +590,7 @@
                     19,
                     23
                 ],
-                "label": "CheckLists",
+                "label": "Checklists",
                 "tooltip": "Open the checklists form.",
                 "security": {
                     "invoke": "application.config.manage"

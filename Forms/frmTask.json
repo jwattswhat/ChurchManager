@@ -179,7 +179,7 @@
                     9
                 ],
                 "sizech": [
-                    24,
+                    20,
                     2
                 ],
                 "tooltip": "Select the completion date."
@@ -187,7 +187,7 @@
             "lblProjectID": {
                 "type": "StaticText",
                 "label": "Project:",
-                "name": "Project",
+                "name": "lblProjectID",
                 "posch": [
                     1,
                     11
@@ -257,7 +257,7 @@
                     15
                 ],
                 "sizech": [
-                    24,
+                    20,
                     2
                 ],
                 "tooltip": "Select the start date."
@@ -283,7 +283,7 @@
                     17
                 ],
                 "sizech": [
-                    24,
+                    20,
                     2
                 ],
                 "tooltip": "Select the end date."

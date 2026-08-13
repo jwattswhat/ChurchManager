@@ -30,7 +30,7 @@
             "lblDescription": {
                 "name": "lblDescription",
                 "type": "StaticText",
-                "label": "Description",
+                "label": "Description:",
                 "posch": [
                     0,
                     2

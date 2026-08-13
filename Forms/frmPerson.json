@@ -275,7 +275,7 @@
                 "tooltip": "Enter the last name."
             },
             "lblStatus": {
-                "label": "Status",
+                "label": "Status:",
                 "type": "StaticText",
                 "name": "lblStatus",
                 "posch": [

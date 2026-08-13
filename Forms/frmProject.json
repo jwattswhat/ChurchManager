@@ -57,7 +57,7 @@
         },
         "CONTROLS": {
             "lblChurch": {
-                "name": "lblChurchID",
+                "name": "lblChurch",
                 "type": "StaticText",
                 "label": "Church:",
                 "posch": [
@@ -122,7 +122,7 @@
                     5
                 ],
                 "sizech": [
-                    24,
+                    20,
                     2
                 ],
                 "tooltip": "Select the completion date."
@@ -188,7 +188,7 @@
             "lblProjectCategory": {
                 "type": "StaticText",
                 "label": "Category:",
-                "name": "lblprojectCategory",
+                "name": "lblProjectCategory",
                 "posch": [
                     1,
                     11
@@ -250,7 +250,7 @@
                     15
                 ],
                 "sizech": [
-                    24,
+                    20,
                     2
                 ],
                 "tooltip": "Select the start date."
@@ -276,7 +276,7 @@
                     17
                 ],
                 "sizech": [
-                    24,
+                    20,
                     2
                 ],
                 "tooltip": "Select the end date."

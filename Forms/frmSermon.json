@@ -121,7 +121,7 @@
             "lblSeries": {
                 "type": "StaticText",
                 "label": "Series:",
-                "name": "lblPreacher",
+                "name": "lblSeries",
                 "posch": [
                     1,
                     9
@@ -157,7 +157,7 @@
                     11
                 ],
                 "sizech": [
-                    24,
+                    20,
                     2
                 ],
                 "stylelist": [

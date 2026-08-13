@@ -86,14 +86,14 @@
                 ]
             },
             "Date": {
-                "type": "TextCtrl",
+                "type": "DatePickerCtrl",
                 "name": "Date",
                 "posch": [
                     10,
                     5
                 ],
                 "sizech": [
-                    24,
+                    20,
                     2
                 ],
                 "tooltip": "Enter the date."
@@ -101,7 +101,7 @@
             "lblNote": {
                 "type": "StaticText",
                 "label": "Note:",
-                "name": "lblNote:",
+                "name": "lblNote",
                 "posch": [
                     1,
                     7

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -56,6 +57,48 @@ def database_tests_enabled() -> bool:
 
 @unittest.skipUnless(database_tests_enabled(), "Set CHURCHMANAGER_RUN_DB_TESTS=1 for read-only test-database checks")
 class TestChurchManagerDatabase(unittest.TestCase):
+    def test_json_form_fields_exist_and_temporal_types_match(self):
+        schema_rows = self.query(
+            "SELECT TABLE_NAME,COLUMN_NAME,DATA_TYPE FROM information_schema.COLUMNS "
+            "WHERE TABLE_SCHEMA=DATABASE()"
+        )
+        schema = {
+            (table.casefold(), column.casefold()): data_type.casefold()
+            for table, column, data_type in schema_rows
+        }
+        missing = []
+        incompatible = []
+        temporal_controls = {
+            "date": {"DatePickerCtrl"},
+            "datetime": {"DateTime"},
+            "timestamp": {"DateTime"},
+            "time": {"TimePickerCtrl"},
+        }
+        for path in sorted((ROOT / "Forms").glob("*.json")):
+            document = json.loads(path.read_text(encoding="utf-8-sig"))
+            form = document[next(iter(document))]
+            table = form.get("FORM", {}).get("table", {})
+            table_name = table.get("name")
+            if not table_name:
+                continue
+            controls = form.get("CONTROLS", {})
+            for field in table.get("fields", []):
+                if not isinstance(field, str) or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", field):
+                    continue
+                key = (table_name.casefold(), field.casefold())
+                data_type = schema.get(key)
+                if data_type is None:
+                    missing.append(f"{path.name}: {table_name}.{field}")
+                    continue
+                control = controls.get(field)
+                allowed = temporal_controls.get(data_type)
+                if control and allowed and control.get("type") not in allowed:
+                    incompatible.append(
+                        f"{path.name}: {field} is {data_type}, control is {control.get('type')}"
+                    )
+        self.assertEqual(missing, [])
+        self.assertEqual(incompatible, [])
+
     def test_printed_lsb_tunes_are_loaded_without_service_builder_guesses(self):
         rows = self.query(
             "SELECT "

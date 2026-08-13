@@ -70,7 +70,7 @@
             "lblDateTime": {
                 "name": "lblDateTime",
                 "type": "StaticText",
-                "label": "Service Date:",
+                "label": "Service Date/Time:",
                 "posch": [
                     1,
                     5
@@ -78,17 +78,17 @@
             },
             "DateTime": {
                 "name": "DateTime",
-                "type": "TextCtrl",
+                "type": "DateTime",
                 "readonly": true,
                 "posch": [
                     10,
                     5
                 ],
                 "sizech": [
-                    24,
+                    20,
                     2
                 ],
-                "tooltip": "Enter the date and time."
+                "tooltip": "View the service date and time."
             },
             "btnRunSchedule": {
                 "name": "btnRunSchedule",
