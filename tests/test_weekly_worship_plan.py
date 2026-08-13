@@ -1,6 +1,6 @@
 import unittest
 
-from weekly_worship_plan_dialog import match_suggestions_to_slots
+from weekly_worship_plan_dialog import duplicate_hymn_line_ids, match_suggestions_to_slots
 
 
 class WeeklyWorshipPlanMatchingTests(unittest.TestCase):
@@ -64,6 +64,21 @@ class WeeklyWorshipPlanMatchingTests(unittest.TestCase):
             (502, "502", "Distribution", "distribution hymn"),
         ]
         self.assertEqual(match_suggestions_to_slots(slots, suggestions), [])
+
+    def test_every_occurrence_of_a_duplicate_hymn_is_flagged(self):
+        slots = [
+            (10, "Hymn of Invocation", "100", "A Hymn", 501),
+            (20, "Hymn of the Day", "200", "Another Hymn", 502),
+            (30, "Closing", "100", "A Hymn", 501),
+        ]
+        self.assertEqual(duplicate_hymn_line_ids(slots), {10, 30})
+
+    def test_unselected_hymn_lines_are_not_duplicates(self):
+        slots = [
+            (10, "Distribution Hymn", "", "", None),
+            (20, "Distribution Hymn", "", "", None),
+        ]
+        self.assertEqual(duplicate_hymn_line_ids(slots), set())
 
 
 if __name__ == "__main__":

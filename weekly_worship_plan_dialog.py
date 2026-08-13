@@ -23,6 +23,20 @@ def match_suggestions_to_slots(slots, suggestions):
     return assignments
 
 
+def duplicate_hymn_line_ids(slots):
+    """Return every service-line ID whose selected hymn occurs more than once."""
+    lines_by_hymn = {}
+    for slot in slots:
+        hymn_id = slot[4] if len(slot) > 4 else None
+        if hymn_id is not None:
+            lines_by_hymn.setdefault(hymn_id, []).append(slot[0])
+    return {
+        line_id
+        for line_ids in lines_by_hymn.values() if len(line_ids) > 1
+        for line_id in line_ids
+    }
+
+
 class WeeklyWorshipPlanRepository:
     def __init__(self, connection):
         self.connection = portable_connection(connection)
@@ -45,7 +59,7 @@ class WeeklyWorshipPlanRepository:
         cursor = self.connection.cursor()
         try:
             cursor.execute(
-                "SELECT l.ID,l.ValueKey,COALESCE(h.Hymn,''),COALESCE(h.Title,'') "
+                "SELECT l.ID,l.ValueKey,COALESCE(h.Hymn,''),COALESCE(h.Title,''),u.HymnID "
                 "FROM tblServiceBulletinOrderLine l "
                 "LEFT JOIN tblHymnUsage u ON u.ServiceBulletinOrderLineID=l.ID "
                 "LEFT JOIN tblHymn h ON h.ID=u.HymnID "
@@ -130,7 +144,7 @@ class WeeklyWorshipPlanRepository:
         slots = self.hymn_slots(service_id)
         assignments = match_suggestions_to_slots(slots, self.suggestions(propers_id))
         hymns_by_line = {line_id: hymn_id for line_id, _used_as, hymn_id in assignments}
-        for line_id, used_as, _hymn, _title in slots:
+        for line_id, used_as, _hymn, _title, _hymn_id in slots:
             self.set_hymn(service_id, line_id, used_as, hymns_by_line.get(line_id))
         return len(assignments)
 
@@ -180,7 +194,10 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
 
         hymns = wx.BoxSizer(wx.VERTICAL)
         self.hymn_grid = wx.ListCtrl(hymn_page, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-        for label, width in (("Position", 180), ("Hymn", 110), ("Title", 360), ("Suggested", 150)):
+        for label, width in (
+            ("Position", 170), ("Hymn", 90), ("Title", 270),
+            ("Suggested", 150), ("Status", 100),
+        ):
             self.hymn_grid.AppendColumn(label, width=width)
         hymns.Add(self.hymn_grid, 1, wx.EXPAND | wx.ALL, 8)
         hymn_buttons = wx.BoxSizer(wx.HORIZONTAL)
@@ -223,6 +240,7 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
                 " ".join(value for value in (str(number), title) if value).strip()
             )
         self.hymn_rows = self.repository.hymn_slots(self.service_id)
+        duplicate_lines = duplicate_hymn_line_ids(self.hymn_rows)
         self.hymn_grid.DeleteAllItems()
         for index, row in enumerate(self.hymn_rows):
             item = self.hymn_grid.InsertItem(index, str(row[1] or "Hymn"))
@@ -230,7 +248,11 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
             self.hymn_grid.SetItem(item, 2, str(row[3]))
             matched = suggested_by_role.get(row[1], [])
             self.hymn_grid.SetItem(item, 3, "; ".join(matched))
-            if not row[2] and not row[3]:
+            if row[0] in duplicate_lines:
+                self.hymn_grid.SetItem(item, 4, "DUPLICATE")
+                self.hymn_grid.SetItemTextColour(item, wx.RED)
+            elif not row[2] and not row[3]:
+                self.hymn_grid.SetItem(item, 4, "Unfinished")
                 self.hymn_grid.SetItemTextColour(item, wx.RED)
         self.reading_rows = self.repository.readings(self.service_id)
         self.reading_grid.DeleteAllItems()
