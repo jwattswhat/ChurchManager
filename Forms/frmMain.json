@@ -389,7 +389,7 @@
                 "type": "StaticText",
                 "posch": [
                     19,
-                    3
+                    11
                 ],
                 "label": "Report Designer",
                 "tooltip": "Customize approved ChurchManager report layouts.",
@@ -402,13 +402,26 @@
                 "type": "StaticText",
                 "posch": [
                     19,
-                    4
+                    12
                 ],
                 "label": "Screen Designer",
                 "tooltip": "Customize approved ChurchManager screen layouts.",
                 "security": {
                     "invoke": "screens.design"
                 }
+            },
+            "DesignersBox": {
+                "name": "DesignersBox",
+                "type": "StaticBox",
+                "label": "Designers",
+                "posch": [
+                    18,
+                    10
+                ],
+                "sizech": [
+                    15,
+                    4
+                ]
             },
             "lblGenerateOS": {
                 "name": "lblGenerateOS",
