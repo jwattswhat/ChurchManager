@@ -443,6 +443,22 @@ class WeeklyBulletinOrderRepository:
         finally:
             cursor.close()
 
+    def delete_order(self, service_id):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute("DELETE FROM tblServiceBulletinOrderLine WHERE ServiceID=?", (service_id,))
+            deleted_lines = cursor.rowcount
+            cursor.execute("DELETE FROM tblServiceBulletinOrder WHERE ServiceID=?", (service_id,))
+            if cursor.rowcount != 1:
+                raise ValueError("No weekly bulletin order exists for the selected service.")
+            self.connection.commit()
+            return deleted_lines
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
     def save_line(self, service_id, line_id, included, label, weekly_value, reference, note):
         cursor = self.connection.cursor()
         try:

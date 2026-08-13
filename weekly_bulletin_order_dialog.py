@@ -105,7 +105,8 @@ class WeeklyBulletinOrderDialog(wx.Dialog):
                                ("Apply Selected Hymns and Readings", self.on_apply_selections),
                                ("Edit Weekly Line", self.on_edit),
                                ("Move Up", lambda _event: self.on_move(-1)),
-                               ("Move Down", lambda _event: self.on_move(1))):
+                               ("Move Down", lambda _event: self.on_move(1)),
+                               ("Delete Weekly Order", self.on_delete_order)):
             button = wx.Button(panel, label=label)
             button.Bind(wx.EVT_BUTTON, handler)
             buttons.Add(button, 0, wx.RIGHT, 8)
@@ -196,6 +197,30 @@ class WeeklyBulletinOrderDialog(wx.Dialog):
     def selected_line(self):
         index = self.grid.GetFirstSelected()
         return None if index < 0 else self.line_rows[index]
+
+    def on_delete_order(self, _event):
+        service_index = self.service.GetSelection()
+        service_id = self.selected_service_id()
+        if service_id is None or not self.repository.assignment(service_id):
+            wx.MessageBox("No weekly bulletin order exists for the selected service.",
+                          "Nothing to delete", wx.OK | wx.ICON_INFORMATION, self)
+            return
+        service_name = self.service.GetString(service_index)
+        if wx.MessageBox(
+            f"Delete the weekly bulletin order for:\n\n{service_name}\n\n"
+            "The reusable template and Worship Service information will not be changed.",
+            "Delete Weekly Bulletin Order",
+            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING,
+            self,
+        ) != wx.YES:
+            return
+        try:
+            deleted_lines = self.repository.delete_order(service_id)
+            self.refresh_lines()
+            self.status.SetLabel(f"Weekly bulletin order deleted ({deleted_lines} line(s)).")
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to delete weekly order",
+                          wx.OK | wx.ICON_ERROR, self)
 
     def on_apply_selections(self, _event):
         service_id = self.selected_service_id()
