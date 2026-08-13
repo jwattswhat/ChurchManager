@@ -32,13 +32,18 @@ def ensure_user_screen(form_name, test_mode=False, local_app_data=None):
 
 
 def security_audit_hook(connection, session):
+    marker = "%s" if connection.__class__.__module__.startswith("mysql.connector") else "?"
+
     def audit(action, filename, detail=None):
         cursor = connection.cursor()
         try:
-            cursor.execute(
+            sql = (
                 "INSERT INTO tblSecurityAuditEvent "
                 "(UserID,SessionID,Action,EntityType,EntityID,FormName,AfterJSON,Workstation) "
-                "VALUES (?,? ,?,'SCREEN_DEFINITION',?,?,?,?)",
+                "VALUES (?,? ,?,'SCREEN_DEFINITION',?,?,?,?)"
+            ).replace("?", marker)
+            cursor.execute(
+                sql,
                 (
                     session.user_id, None, action,
                     filename, Path(filename).stem,

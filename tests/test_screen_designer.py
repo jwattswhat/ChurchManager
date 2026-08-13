@@ -3,7 +3,10 @@ import tempfile
 import unittest
 
 from authorization import AuthorizationDenied, UserSession
-from churchmanager_screen_designer import ensure_user_screen, open_churchmanager_screen_designer, user_screen_directory
+from churchmanager_screen_designer import (
+    ensure_user_screen, open_churchmanager_screen_designer,
+    security_audit_hook, user_screen_directory,
+)
 
 
 class Authorization:
@@ -14,6 +17,30 @@ class Authorization:
 
 
 class TestChurchManagerScreenDesigner(unittest.TestCase):
+    def test_security_audit_uses_mysql_connector_parameter_markers(self):
+        class Cursor:
+            def __init__(self): self.call = None
+            def execute(self, sql, values): self.call = (sql, values)
+            def close(self): pass
+
+        class MySQLConnection:
+            __module__ = "mysql.connector.connection_cext"
+            def __init__(self): self.cursor_value = Cursor(); self.committed = False
+            def cursor(self): return self.cursor_value
+            def commit(self): self.committed = True
+
+        class Session:
+            user_id = 1
+            workstation = "TEST"
+
+        connection = MySQLConnection()
+        security_audit_hook(connection, Session())("SCREEN_DESIGN_OPENED", "frmMain.json")
+        sql, values = connection.cursor_value.call
+        self.assertEqual(sql.count("%s"), 7)
+        self.assertNotIn("?", sql)
+        self.assertEqual(len(values), 7)
+        self.assertTrue(connection.committed)
+
     def test_test_and_production_customizations_are_separate(self):
         with tempfile.TemporaryDirectory() as folder:
             self.assertNotEqual(user_screen_directory(True, folder), user_screen_directory(False, folder))
