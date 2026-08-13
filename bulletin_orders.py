@@ -342,8 +342,14 @@ class BulletinOrderRepository:
             if cursor.rowcount != 1:
                 raise ValueError("Starter bulletin orders cannot be deleted.")
             self.connection.commit()
-        except Exception:
+        except Exception as error:
             self.connection.rollback()
+            if getattr(error, "errno", None) == 1451:
+                raise ValueError(
+                    "This custom template is used by a weekly bulletin order. "
+                    "Apply the pending ChurchManager database update, then delete it again; "
+                    "the weekly order will be preserved."
+                ) from error
             raise
         finally:
             cursor.close()

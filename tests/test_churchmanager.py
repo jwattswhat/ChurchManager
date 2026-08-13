@@ -84,6 +84,13 @@ def load_function_without_importing(module_path: Path, function_name: str, globa
 
 
 class TestWorshipPlanningStructure(unittest.TestCase):
+    def test_deleting_custom_template_preserves_weekly_order_snapshot(self):
+        migration = (
+            ROOT / "migrations" / "035_preserve_weekly_orders_when_template_deleted.sql"
+        ).read_text(encoding="utf-8")
+        self.assertIn("MODIFY COLUMN TemplateID int NULL", migration)
+        self.assertIn("ON DELETE SET NULL", migration)
+
     def test_suggested_hymn_roles_use_full_liturgical_names(self):
         migration = (ROOT / "migrations" / "033_rename_suggested_hymn_roles.sql").read_text(
             encoding="utf-8"
