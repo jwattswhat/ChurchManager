@@ -24,7 +24,8 @@
             "sizech": [
                 41,
                 20
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblTaskID": {

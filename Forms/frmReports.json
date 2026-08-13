@@ -20,7 +20,8 @@
                 "gap": 3,
                 "border": 8,
                 "item_padding": 2
-            }
+            },
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblChurchID": {

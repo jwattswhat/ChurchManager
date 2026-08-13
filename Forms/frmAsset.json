@@ -21,7 +21,8 @@
             "sizech": [
                 51,
                 33
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblChurchID": {

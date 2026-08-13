@@ -102,7 +102,8 @@
             "sizech": [
                 55,
                 35
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "btnPersonAddress": {

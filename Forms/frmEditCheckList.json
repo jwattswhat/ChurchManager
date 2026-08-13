@@ -26,7 +26,8 @@
             "controls": [
                 "Navigation",
                 "Close"
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblCheckList": {

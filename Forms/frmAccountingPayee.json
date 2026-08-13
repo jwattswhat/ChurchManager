@@ -1,29 +1,145 @@
 {
-  "frmAccountingPayeeFORM": {
-    "FORM": {
-      "name": "frmAccountingPayee", "type": "Panel",
-      "title": "Accounting Payees", "posch": [-1, -1],
-      "sizech": [54, 25], "stylelist": ["CAPTION"],
-      "layout": { "type": "legacy" },
-      "table": { "name": "tblAccountingPayee", "fields": ["*"], "orderby": "OrganizationID, Name" },
-      "security": {
-        "open": "accounting.master_data.manage", "create": "accounting.master_data.manage",
-        "update": "accounting.master_data.manage", "delete": "accounting.master_data.manage"
-      }
-    },
-    "CONTROLS": {
-      "lblOrganizationID": { "name": "lblOrganizationID", "type": "StaticText", "label": "Organization:", "posch": [1, 1] },
-      "OrganizationID": {
-        "name": "OrganizationID", "type": "ComboBox", "posch": [12, 1], "sizech": [38, 2],
-        "lookupchoices": { "name": "tblAccountingOrganization", "fields": ["ID", "LegalName"], "condition": "Active = 1", "orderby": "LegalName" }
-      },
-      "lblName": { "name": "lblName", "type": "StaticText", "label": "Payee name:", "posch": [1, 3] },
-      "Name": { "name": "Name", "type": "TextCtrl", "posch": [12, 3], "sizech": [38, 2], "tooltip": "Enter the person, business, or organization name." },
-      "lblReference": { "name": "lblReference", "type": "StaticText", "label": "Reference:", "posch": [1, 5] },
-      "Reference": { "name": "Reference", "type": "TextCtrl", "posch": [12, 5], "sizech": [38, 2], "tooltip": "Optional account number, vendor code, or other non-sensitive reference." },
-      "Active": { "name": "Active", "type": "CheckBox", "label": "Active", "posch": [12, 7], "tooltip": "Make this payee available for transaction entry." },
-      "lblContactData": { "name": "lblContactData", "type": "StaticText", "label": "Contact notes:", "posch": [1, 9] },
-      "ContactData": { "name": "ContactData", "type": "MultiLine", "posch": [12, 9], "sizech": [38, 8], "tooltip": "Optional contact or payment notes. Do not store banking credentials." }
+    "frmAccountingPayeeFORM": {
+        "FORM": {
+            "name": "frmAccountingPayee",
+            "type": "Panel",
+            "title": "Accounting Payees",
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                54,
+                25
+            ],
+            "stylelist": [
+                "CAPTION"
+            ],
+            "layout": {
+                "type": "legacy"
+            },
+            "table": {
+                "name": "tblAccountingPayee",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "OrganizationID, Name"
+            },
+            "security": {
+                "open": "accounting.master_data.manage",
+                "create": "accounting.master_data.manage",
+                "update": "accounting.master_data.manage",
+                "delete": "accounting.master_data.manage"
+            },
+            "theme": "churchmanager"
+        },
+        "CONTROLS": {
+            "lblOrganizationID": {
+                "name": "lblOrganizationID",
+                "type": "StaticText",
+                "label": "Organization:",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "OrganizationID": {
+                "name": "OrganizationID",
+                "type": "ComboBox",
+                "posch": [
+                    12,
+                    1
+                ],
+                "sizech": [
+                    38,
+                    2
+                ],
+                "lookupchoices": {
+                    "name": "tblAccountingOrganization",
+                    "fields": [
+                        "ID",
+                        "LegalName"
+                    ],
+                    "condition": "Active = 1",
+                    "orderby": "LegalName"
+                }
+            },
+            "lblName": {
+                "name": "lblName",
+                "type": "StaticText",
+                "label": "Payee name:",
+                "posch": [
+                    1,
+                    3
+                ]
+            },
+            "Name": {
+                "name": "Name",
+                "type": "TextCtrl",
+                "posch": [
+                    12,
+                    3
+                ],
+                "sizech": [
+                    38,
+                    2
+                ],
+                "tooltip": "Enter the person, business, or organization name."
+            },
+            "lblReference": {
+                "name": "lblReference",
+                "type": "StaticText",
+                "label": "Reference:",
+                "posch": [
+                    1,
+                    5
+                ]
+            },
+            "Reference": {
+                "name": "Reference",
+                "type": "TextCtrl",
+                "posch": [
+                    12,
+                    5
+                ],
+                "sizech": [
+                    38,
+                    2
+                ],
+                "tooltip": "Optional account number, vendor code, or other non-sensitive reference."
+            },
+            "Active": {
+                "name": "Active",
+                "type": "CheckBox",
+                "label": "Active",
+                "posch": [
+                    12,
+                    7
+                ],
+                "tooltip": "Make this payee available for transaction entry."
+            },
+            "lblContactData": {
+                "name": "lblContactData",
+                "type": "StaticText",
+                "label": "Contact notes:",
+                "posch": [
+                    1,
+                    9
+                ]
+            },
+            "ContactData": {
+                "name": "ContactData",
+                "type": "MultiLine",
+                "posch": [
+                    12,
+                    9
+                ],
+                "sizech": [
+                    38,
+                    8
+                ],
+                "tooltip": "Optional contact or payment notes. Do not store banking credentials."
+            }
+        }
     }
-  }
 }

@@ -20,7 +20,8 @@
             },
             "stylelist": [
                 "CAPTION"
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblPersonID": {

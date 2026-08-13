@@ -1,12 +1,28 @@
 {
     "frmAccountingFiscalYearFORM": {
         "FORM": {
-            "name": "frmAccountingFiscalYear", "type": "Panel",
-            "title": "Accounting Fiscal Years", "posch": [-1, -1],
-            "sizech": [48, 22], "stylelist": ["CAPTION"],
-            "layout": { "type": "legacy" },
+            "name": "frmAccountingFiscalYear",
+            "type": "Panel",
+            "title": "Accounting Fiscal Years",
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                48,
+                22
+            ],
+            "stylelist": [
+                "CAPTION"
+            ],
+            "layout": {
+                "type": "legacy"
+            },
             "table": {
-                "name": "tblAccountingFiscalYear", "fields": ["*"],
+                "name": "tblAccountingFiscalYear",
+                "fields": [
+                    "*"
+                ],
                 "orderby": "OrganizationID, StartDate DESC"
             },
             "security": {
@@ -14,55 +30,131 @@
                 "create": "accounting.master_data.manage",
                 "update": "accounting.master_data.manage",
                 "delete": "accounting.master_data.manage"
-            }
+            },
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblOrganizationID": {
-                "name": "lblOrganizationID", "type": "StaticText",
-                "label": "Organization:", "posch": [1, 1]
+                "name": "lblOrganizationID",
+                "type": "StaticText",
+                "label": "Organization:",
+                "posch": [
+                    1,
+                    1
+                ]
             },
             "OrganizationID": {
-                "name": "OrganizationID", "type": "ComboBox",
-                "posch": [12, 1], "sizech": [32, 2],
+                "name": "OrganizationID",
+                "type": "ComboBox",
+                "posch": [
+                    12,
+                    1
+                ],
+                "sizech": [
+                    32,
+                    2
+                ],
                 "lookupchoices": {
                     "name": "tblAccountingOrganization",
-                    "fields": ["ID", "LegalName"],
-                    "condition": "Active = 1", "orderby": "LegalName"
+                    "fields": [
+                        "ID",
+                        "LegalName"
+                    ],
+                    "condition": "Active = 1",
+                    "orderby": "LegalName"
                 }
             },
             "lblName": {
-                "name": "lblName", "type": "StaticText",
-                "label": "Year name:", "posch": [1, 3]
+                "name": "lblName",
+                "type": "StaticText",
+                "label": "Year name:",
+                "posch": [
+                    1,
+                    3
+                ]
             },
             "Name": {
-                "name": "Name", "type": "TextCtrl",
-                "posch": [12, 3], "sizech": [14, 2]
+                "name": "Name",
+                "type": "TextCtrl",
+                "posch": [
+                    12,
+                    3
+                ],
+                "sizech": [
+                    14,
+                    2
+                ]
             },
             "lblStartDate": {
-                "name": "lblStartDate", "type": "StaticText",
-                "label": "Start date:", "posch": [1, 5]
+                "name": "lblStartDate",
+                "type": "StaticText",
+                "label": "Start date:",
+                "posch": [
+                    1,
+                    5
+                ]
             },
             "StartDate": {
-                "name": "StartDate", "type": "DatePickerCtrl",
-                "posch": [12, 5], "sizech": [20, 2]
+                "name": "StartDate",
+                "type": "DatePickerCtrl",
+                "posch": [
+                    12,
+                    5
+                ],
+                "sizech": [
+                    20,
+                    2
+                ]
             },
             "lblEndDate": {
-                "name": "lblEndDate", "type": "StaticText",
-                "label": "End date:", "posch": [1, 7]
+                "name": "lblEndDate",
+                "type": "StaticText",
+                "label": "End date:",
+                "posch": [
+                    1,
+                    7
+                ]
             },
             "EndDate": {
-                "name": "EndDate", "type": "DatePickerCtrl",
-                "posch": [12, 7], "sizech": [20, 2]
+                "name": "EndDate",
+                "type": "DatePickerCtrl",
+                "posch": [
+                    12,
+                    7
+                ],
+                "sizech": [
+                    20,
+                    2
+                ]
             },
             "lblStatus": {
-                "name": "lblStatus", "type": "StaticText",
-                "label": "Status:", "posch": [1, 9]
+                "name": "lblStatus",
+                "type": "StaticText",
+                "label": "Status:",
+                "posch": [
+                    1,
+                    9
+                ]
             },
             "Status": {
-                "name": "Status", "type": "ComboBox",
-                "posch": [12, 9], "sizech": [14, 2],
-                "choices": ["OPEN", "CLOSING", "CLOSED"],
-                "security": { "edit": "accounting.periods.override" },
+                "name": "Status",
+                "type": "ComboBox",
+                "posch": [
+                    12,
+                    9
+                ],
+                "sizech": [
+                    14,
+                    2
+                ],
+                "choices": [
+                    "OPEN",
+                    "CLOSING",
+                    "CLOSED"
+                ],
+                "security": {
+                    "edit": "accounting.periods.override"
+                },
                 "tooltip": "Closing or reopening a fiscal year requires override authority."
             }
         }

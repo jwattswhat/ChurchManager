@@ -20,7 +20,8 @@
             "sizech": [
                 40,
                 35
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblFamilyID": {

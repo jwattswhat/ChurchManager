@@ -20,7 +20,8 @@
             "sizech": [
                 51,
                 41
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblPerson": {

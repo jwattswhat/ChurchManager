@@ -17,7 +17,8 @@
             ],
             "controls": [
                 "Close"
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblService": {

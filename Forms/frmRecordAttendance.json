@@ -26,7 +26,8 @@
                     "AttendanceType"
                 ],
                 "orderby": "Description LIMIT 1"
-            }
+            },
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "AttendanceEventID": {

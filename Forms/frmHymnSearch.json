@@ -16,7 +16,8 @@
             "sizech": [
                 80,
                 60
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblSearch": {

@@ -22,7 +22,8 @@
             "stylelist": [
                 "CAPTION"
             ],
-            "readonly": 1
+            "readonly": 1,
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "Announcement": {

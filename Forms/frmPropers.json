@@ -18,10 +18,15 @@
                     "title": "Lectionary Systems",
                     "table": {
                         "name": "tblLectionarySystem",
-                        "fields": ["*"],
+                        "fields": [
+                            "*"
+                        ],
                         "condition": "ID = {LectionarySystemID}"
                     },
-                    "controls": ["Update", "Close"]
+                    "controls": [
+                        "Update",
+                        "Close"
+                    ]
                 }
             },
             "stylelist": [
@@ -34,7 +39,8 @@
             "sizech": [
                 73,
                 52
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblLectionarySystemID": {
@@ -51,7 +57,10 @@
                 "name": "LectionarySystemID",
                 "lookupchoices": {
                     "name": "tblLectionarySystem",
-                    "fields": ["ID", "Name"],
+                    "fields": [
+                        "ID",
+                        "Name"
+                    ],
                     "condition": "Active = 1",
                     "orderby": "Name"
                 },
@@ -69,22 +78,41 @@
                 "name": "btnLectionarySystem",
                 "type": "Button",
                 "label": "Systems",
-                "action": ["openlinkedform", "frmLectionarySystem"],
-                "posch": [22, 3],
+                "action": [
+                    "openlinkedform",
+                    "frmLectionarySystem"
+                ],
+                "posch": [
+                    22,
+                    3
+                ],
                 "tooltip": "Edit the selected lectionary system."
             },
             "lblCycle": {
                 "name": "lblCycle",
                 "type": "StaticText",
                 "label": "Cycle:",
-                "posch": [1, 3]
+                "posch": [
+                    1,
+                    3
+                ]
             },
             "Cycle": {
                 "name": "Cycle",
                 "type": "ComboBox",
-                "choices": ["A", "B", "C"],
-                "posch": [10, 3],
-                "sizech": [10, 2],
+                "choices": [
+                    "A",
+                    "B",
+                    "C"
+                ],
+                "posch": [
+                    10,
+                    3
+                ],
+                "sizech": [
+                    10,
+                    2
+                ],
                 "tooltip": "Enter A, B, C, another cycle label, or leave blank."
             },
             "lblTheme": {

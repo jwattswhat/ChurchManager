@@ -29,7 +29,8 @@
             "sizech": [
                 62,
                 45
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblName": {

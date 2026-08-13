@@ -21,7 +21,8 @@
             },
             "stylelist": [
                 "CAPTION"
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblField": {

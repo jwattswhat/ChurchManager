@@ -17,7 +17,8 @@
             "sizech": [
                 66,
                 29
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "dvlReadings": {

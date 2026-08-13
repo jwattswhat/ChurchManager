@@ -14,7 +14,8 @@
             ],
             "stylelist": [
                 "CAPTION"
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblService": {

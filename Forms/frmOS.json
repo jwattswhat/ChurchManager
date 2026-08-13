@@ -25,7 +25,8 @@
             "sizech": [
                 51,
                 37
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblOrderofService": {

@@ -17,6 +17,18 @@ class Authorization:
 
 
 class TestChurchManagerScreenDesigner(unittest.TestCase):
+    def test_every_churchmanager_form_loads_and_round_trips_in_designer_model(self):
+        import JSForm
+
+        loader = JSForm.ScreenDefinitionLoader()
+        paths = sorted(Path("Forms").glob("*.json"))
+        self.assertGreaterEqual(len(paths), 60)
+        for path in paths:
+            with self.subTest(form=path.name):
+                model = JSForm.ScreenDesignerModel(loader.load(path))
+                model.validated_definition()
+                self.assertEqual(model.form.get("theme"), "churchmanager")
+
     def test_security_audit_uses_mysql_connector_parameter_markers(self):
         class Cursor:
             def __init__(self): self.call = None

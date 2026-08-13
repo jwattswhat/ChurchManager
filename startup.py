@@ -41,6 +41,7 @@ def build_runtime(form_class, argv=None, login_provider=authenticate_user):
     overlay = os.path.join(os.environ.get("LOCALAPPDATA", os.getcwd()), "ChurchManager", overlay_name)
     os.makedirs(overlay, exist_ok=True)
     os.environ["JSFORM_SCREEN_OVERLAY"] = overlay
+    os.environ["JSFORM_DEFAULT_THEME"] = "churchmanager"
     wx_app = wx.App(0)
     JSForm.check_internetconnection(1)
     database = JSForm.clsDB(

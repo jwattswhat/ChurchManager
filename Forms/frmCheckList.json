@@ -25,7 +25,8 @@
             "controls": [
                 "Navigation",
                 "Close"
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "lblName": {

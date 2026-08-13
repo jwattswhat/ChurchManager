@@ -136,7 +136,8 @@
             "sizech": [
                 55,
                 20
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "btnFamilyAddress": {

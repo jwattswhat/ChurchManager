@@ -40,7 +40,8 @@
             "sizech": [
                 49,
                 41
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "btnEditChurch": {

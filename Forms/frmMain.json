@@ -14,7 +14,8 @@
             ],
             "stylelist": [
                 "CAPTION"
-            ]
+            ],
+            "theme": "churchmanager"
         },
         "CONTROLS": {
             "ChurchBox": {
@@ -43,7 +44,9 @@
                 ],
                 "label": "Churches",
                 "tooltip": "Open the churches form.",
-                "security": { "invoke": "church.manage" }
+                "security": {
+                    "invoke": "church.manage"
+                }
             },
             "ServiceBox": {
                 "type": "StaticBox",
@@ -71,7 +74,9 @@
                 ],
                 "label": "Worship Service",
                 "tooltip": "Open the worship service form.",
-                "security": { "invoke": "worship.manage" }
+                "security": {
+                    "invoke": "worship.manage"
+                }
             },
             "lblSermon": {
                 "name": "lblSermon",
@@ -82,7 +87,9 @@
                 ],
                 "label": "   Sermons",
                 "tooltip": "Open the sermons form.",
-                "security": { "invoke": "worship.manage" }
+                "security": {
+                    "invoke": "worship.manage"
+                }
             },
             "lblPropers": {
                 "name": "lblPropers",
@@ -93,7 +100,9 @@
                 ],
                 "label": "   Propers",
                 "tooltip": "Open the propers form.",
-                "security": { "invoke": "worship.manage" }
+                "security": {
+                    "invoke": "worship.manage"
+                }
             },
             "lblOS": {
                 "name": "lblOS",
@@ -104,7 +113,9 @@
                 ],
                 "label": "   OS",
                 "tooltip": "Open the os form.",
-                "security": { "invoke": "worship.manage" }
+                "security": {
+                    "invoke": "worship.manage"
+                }
             },
             "lblPrayers": {
                 "name": "lblPrayers",
@@ -115,7 +126,9 @@
                 ],
                 "type": "StaticText",
                 "tooltip": "Open the prayers form.",
-                "security": { "invoke": "worship.manage" }
+                "security": {
+                    "invoke": "worship.manage"
+                }
             },
             "lblParticipant": {
                 "name": "lblParticipant",
@@ -126,7 +139,9 @@
                 ],
                 "type": "StaticText",
                 "tooltip": "Open the participant form.",
-                "security": { "invoke": "worship.manage" }
+                "security": {
+                    "invoke": "worship.manage"
+                }
             },
             "lblSchedule": {
                 "name": "lblSchedule",
@@ -137,7 +152,9 @@
                 ],
                 "label": "   Schedule",
                 "tooltip": "Open the schedule form.",
-                "security": { "invoke": "worship.manage" }
+                "security": {
+                    "invoke": "worship.manage"
+                }
             },
             "lblServiceSchedule": {
                 "name": "lblServiceSchedule",
@@ -148,7 +165,9 @@
                 ],
                 "label": "   Schedule Participants",
                 "tooltip": "Open the schedule participants form.",
-                "security": { "invoke": "worship.manage" }
+                "security": {
+                    "invoke": "worship.manage"
+                }
             },
             "lblOSList": {
                 "name": "lblOSList",
@@ -159,7 +178,9 @@
                 ],
                 "label": "   OS List",
                 "tooltip": "Open the os list form.",
-                "security": { "invoke": "worship.manage" }
+                "security": {
+                    "invoke": "worship.manage"
+                }
             },
             "lblAttendanceEvent": {
                 "type": "StaticText",
@@ -170,7 +191,9 @@
                 ],
                 "label": "   Attendance Event",
                 "tooltip": "Open the attendance event form.",
-                "security": { "invoke": "attendance.events.manage" }
+                "security": {
+                    "invoke": "attendance.events.manage"
+                }
             },
             "MemberBox": {
                 "name": "MemberBox",
@@ -198,7 +221,9 @@
                 ],
                 "label": "Person",
                 "tooltip": "Open the person form.",
-                "security": { "invoke": "membership.manage" }
+                "security": {
+                    "invoke": "membership.manage"
+                }
             },
             "lblFamily": {
                 "name": "lblFamily",
@@ -209,7 +234,9 @@
                 ],
                 "label": "Families",
                 "tooltip": "Open the families form.",
-                "security": { "invoke": "membership.manage" }
+                "security": {
+                    "invoke": "membership.manage"
+                }
             },
             "AttendanceBox": {
                 "name": "MemberBox",
@@ -237,7 +264,9 @@
                 ],
                 "label": "Record Attendance",
                 "tooltip": "Open the record attendance form.",
-                "security": { "invoke": "attendance.record" }
+                "security": {
+                    "invoke": "attendance.record"
+                }
             },
             "ProjectBox": {
                 "type": "StaticBox",
@@ -265,7 +294,9 @@
                 ],
                 "label": "Project",
                 "tooltip": "Open the project form.",
-                "security": { "invoke": "ministry.manage" }
+                "security": {
+                    "invoke": "ministry.manage"
+                }
             },
             "lblTask": {
                 "name": "lblTask",
@@ -276,7 +307,9 @@
                 ],
                 "label": "   Task",
                 "tooltip": "Open the task form.",
-                "security": { "invoke": "ministry.manage" }
+                "security": {
+                    "invoke": "ministry.manage"
+                }
             },
             "AdministrationBox": {
                 "type": "StaticBox",
@@ -304,7 +337,9 @@
                     28
                 ],
                 "tooltip": "Open the documents form.",
-                "security": { "invoke": "ministry.manage" }
+                "security": {
+                    "invoke": "ministry.manage"
+                }
             },
             "lblAnnouncement": {
                 "name": "lblAnnouncement",
@@ -315,7 +350,9 @@
                     29
                 ],
                 "tooltip": "Open the announcement form.",
-                "security": { "invoke": "ministry.manage" }
+                "security": {
+                    "invoke": "ministry.manage"
+                }
             },
             "lblJournal": {
                 "name": "lblJournal",
@@ -326,7 +363,9 @@
                 ],
                 "label": "Journal",
                 "tooltip": "Open the journal form.",
-                "security": { "invoke": "ministry.manage" }
+                "security": {
+                    "invoke": "ministry.manage"
+                }
             },
             "ReportBox": {
                 "type": "StaticBox",
@@ -354,23 +393,35 @@
                 ],
                 "label": "Reports",
                 "tooltip": "Open the reports form.",
-                "security": { "invoke": "reports.run" }
+                "security": {
+                    "invoke": "reports.run"
+                }
             },
             "lblReportDesigner": {
                 "name": "lblReportDesigner",
                 "type": "StaticText",
-                "posch": [19, 3],
+                "posch": [
+                    19,
+                    3
+                ],
                 "label": "Report Designer",
                 "tooltip": "Customize approved ChurchManager report layouts.",
-                "security": { "invoke": "reports.design" }
+                "security": {
+                    "invoke": "reports.design"
+                }
             },
             "lblScreenDesigner": {
                 "name": "lblScreenDesigner",
                 "type": "StaticText",
-                "posch": [19, 4],
+                "posch": [
+                    19,
+                    4
+                ],
                 "label": "Screen Designer",
                 "tooltip": "Customize approved ChurchManager screen layouts.",
-                "security": { "invoke": "screens.design" }
+                "security": {
+                    "invoke": "screens.design"
+                }
             },
             "lblGenerateOS": {
                 "name": "lblGenerateOS",
@@ -381,7 +432,9 @@
                 ],
                 "label": "Generate OS",
                 "tooltip": "Generate the order-of-service output.",
-                "security": { "invoke": "worship.manage" }
+                "security": {
+                    "invoke": "worship.manage"
+                }
             },
             "lblNotifyParticipants": {
                 "name": "lblNotifyParticipants",
@@ -392,7 +445,9 @@
                 ],
                 "label": "Notify Participants",
                 "tooltip": "Notify scheduled service participants by email.",
-                "security": { "invoke": "worship.manage" }
+                "security": {
+                    "invoke": "worship.manage"
+                }
             },
             "lblSundayPrayers": {
                 "name": "lblSundayPrayers",
@@ -403,7 +458,9 @@
                 ],
                 "type": "StaticText",
                 "tooltip": "Generate the Sunday prayer list.",
-                "security": { "invoke": "worship.manage" }
+                "security": {
+                    "invoke": "worship.manage"
+                }
             },
             "lblAnnouncements": {
                 "name": "lblAnnouncements",
@@ -414,7 +471,9 @@
                     8
                 ],
                 "tooltip": "Generate the Sunday announcements.",
-                "security": { "invoke": "worship.manage" }
+                "security": {
+                    "invoke": "worship.manage"
+                }
             },
             "UtilitiesBox": {
                 "name": "UtilitiesBox",
@@ -442,7 +501,9 @@
                     20
                 ],
                 "tooltip": "Open the config form.",
-                "security": { "invoke": "application.config.manage" }
+                "security": {
+                    "invoke": "application.config.manage"
+                }
             },
             "lblOptions": {
                 "name": "lblOptions",
@@ -453,7 +514,9 @@
                     21
                 ],
                 "tooltip": "Open the options form.",
-                "security": { "invoke": "application.config.manage" }
+                "security": {
+                    "invoke": "application.config.manage"
+                }
             },
             "lblChoices": {
                 "name": "lblChoices",
@@ -464,7 +527,9 @@
                     22
                 ],
                 "tooltip": "Open the choices form.",
-                "security": { "invoke": "application.config.manage" }
+                "security": {
+                    "invoke": "application.config.manage"
+                }
             },
             "lblCheckList": {
                 "name": "lblCheckList",
@@ -475,7 +540,9 @@
                 ],
                 "label": "CheckLists",
                 "tooltip": "Open the checklists form.",
-                "security": { "invoke": "application.config.manage" }
+                "security": {
+                    "invoke": "application.config.manage"
+                }
             },
             "lblUsers": {
                 "name": "lblUsers",
@@ -516,7 +583,9 @@
                     27
                 ],
                 "tooltip": "Back up the ChurchManager databases.",
-                "security": { "invoke": "application.backup.run" }
+                "security": {
+                    "invoke": "application.backup.run"
+                }
             },
             "EnhancementsBox": {
                 "name": "EnhancementsBox",
@@ -544,199 +613,389 @@
                     32
                 ],
                 "tooltip": "Open the enhancements and bug-tracking form.",
-                "security": { "invoke": "application.enhancements.manage" }
+                "security": {
+                    "invoke": "application.enhancements.manage"
+                }
             },
             "SessionBox": {
                 "name": "SessionBox",
                 "type": "StaticBox",
                 "label": "Current User",
-                "posch": [34, 1],
-                "sizech": [15, 15]
+                "posch": [
+                    34,
+                    1
+                ],
+                "sizech": [
+                    15,
+                    15
+                ]
             },
             "lblCurrentUser": {
                 "name": "lblCurrentUser",
                 "type": "StaticText",
                 "label": "Signed in",
-                "posch": [35, 2]
+                "posch": [
+                    35,
+                    2
+                ]
             },
             "lblChangePassword": {
                 "name": "lblChangePassword",
                 "type": "StaticText",
                 "label": "Change Password",
-                "posch": [35, 4],
+                "posch": [
+                    35,
+                    4
+                ],
                 "tooltip": "Change your ChurchManager password."
             },
             "lblLogout": {
                 "name": "lblLogout",
                 "type": "StaticText",
                 "label": "Log Out",
-                "posch": [35, 5],
+                "posch": [
+                    35,
+                    5
+                ],
                 "tooltip": "End the current ChurchManager session."
             },
             "FundAccountingBox": {
                 "name": "FundAccountingBox",
                 "type": "StaticBox",
                 "label": "Accounting",
-                "posch": [34, 8],
-                "sizech": [15, 27]
+                "posch": [
+                    34,
+                    8
+                ],
+                "sizech": [
+                    15,
+                    27
+                ]
             },
             "lblAccountingSetup": {
                 "name": "lblAccountingSetup",
                 "type": "StaticText",
                 "label": "Accounting Setup",
-                "posch": [35, 9],
+                "posch": [
+                    35,
+                    9
+                ],
                 "tooltip": "Review or create an accounting configuration.",
-                "security": { "invoke": "accounting.master_data.manage" }
+                "security": {
+                    "invoke": "accounting.master_data.manage"
+                }
             },
             "lblAccountingAccounts": {
                 "name": "lblAccountingAccounts",
                 "type": "StaticText",
                 "label": "Chart of Accounts",
-                "posch": [35, 10],
+                "posch": [
+                    35,
+                    10
+                ],
                 "tooltip": "Review and maintain the chart of accounts.",
-                "security": { "invoke": "accounting.master_data.manage" }
+                "security": {
+                    "invoke": "accounting.master_data.manage"
+                }
             },
             "lblAccountingFunds": {
                 "name": "lblAccountingFunds",
                 "type": "StaticText",
                 "label": "Funds and Restrictions",
-                "posch": [35, 11],
+                "posch": [
+                    35,
+                    11
+                ],
                 "tooltip": "Review and maintain accounting funds and restrictions.",
-                "security": { "invoke": "accounting.master_data.manage" }
+                "security": {
+                    "invoke": "accounting.master_data.manage"
+                }
             },
             "lblAccountingFunctions": {
                 "name": "lblAccountingFunctions",
                 "type": "StaticText",
                 "label": "Functional Classifications",
-                "posch": [35, 12],
+                "posch": [
+                    35,
+                    12
+                ],
                 "tooltip": "Review and maintain accounting functional classifications.",
-                "security": { "invoke": "accounting.master_data.manage" }
+                "security": {
+                    "invoke": "accounting.master_data.manage"
+                }
             },
             "lblAccountingYears": {
-                "name": "lblAccountingYears", "type": "StaticText",
-                "label": "Fiscal Years", "posch": [35, 13],
+                "name": "lblAccountingYears",
+                "type": "StaticText",
+                "label": "Fiscal Years",
+                "posch": [
+                    35,
+                    13
+                ],
                 "tooltip": "Review and maintain accounting fiscal years.",
-                "security": { "invoke": "accounting.master_data.manage" }
+                "security": {
+                    "invoke": "accounting.master_data.manage"
+                }
             },
             "lblAccountingPeriods": {
-                "name": "lblAccountingPeriods", "type": "StaticText",
-                "label": "Fiscal Periods", "posch": [35, 14],
+                "name": "lblAccountingPeriods",
+                "type": "StaticText",
+                "label": "Fiscal Periods",
+                "posch": [
+                    35,
+                    14
+                ],
                 "tooltip": "Review and maintain accounting fiscal periods.",
-                "security": { "invoke": "accounting.master_data.manage" }
+                "security": {
+                    "invoke": "accounting.master_data.manage"
+                }
             },
             "lblAccountingBankAccounts": {
-                "name": "lblAccountingBankAccounts", "type": "StaticText",
-                "label": "Bank Accounts", "posch": [35, 15],
+                "name": "lblAccountingBankAccounts",
+                "type": "StaticText",
+                "label": "Bank Accounts",
+                "posch": [
+                    35,
+                    15
+                ],
                 "tooltip": "Configure cash accounts for bank imports and reconciliation.",
-                "security": { "invoke": "accounting.master_data.manage" }
+                "security": {
+                    "invoke": "accounting.master_data.manage"
+                }
             },
             "lblAccountingPayees": {
-                "name": "lblAccountingPayees", "type": "StaticText",
-                "label": "Payees", "posch": [35, 16],
+                "name": "lblAccountingPayees",
+                "type": "StaticText",
+                "label": "Payees",
+                "posch": [
+                    35,
+                    16
+                ],
                 "tooltip": "Maintain transaction payees and vendors.",
-                "security": { "invoke": "accounting.master_data.manage" }
+                "security": {
+                    "invoke": "accounting.master_data.manage"
+                }
             },
             "lblAccountingTransactions": {
-                "name": "lblAccountingTransactions", "type": "StaticText",
-                "label": "Transaction Entry", "posch": [35, 17],
+                "name": "lblAccountingTransactions",
+                "type": "StaticText",
+                "label": "Transaction Entry",
+                "posch": [
+                    35,
+                    17
+                ],
                 "tooltip": "Create a balanced accounting draft.",
-                "security": { "invoke": "accounting.transactions.create" }
+                "security": {
+                    "invoke": "accounting.transactions.create"
+                }
             },
             "lblAccountingReview": {
-                "name": "lblAccountingReview", "type": "StaticText",
-                "label": "Transaction Review", "posch": [35, 18],
+                "name": "lblAccountingReview",
+                "type": "StaticText",
+                "label": "Transaction Review",
+                "posch": [
+                    35,
+                    18
+                ],
                 "tooltip": "Review and approve accounting transactions awaiting approval.",
-                "security": { "invoke": "accounting.transactions.approve" }
+                "security": {
+                    "invoke": "accounting.transactions.approve"
+                }
             },
             "lblAccountingPosting": {
-                "name": "lblAccountingPosting", "type": "StaticText",
-                "label": "Transaction Posting", "posch": [35, 19],
+                "name": "lblAccountingPosting",
+                "type": "StaticText",
+                "label": "Transaction Posting",
+                "posch": [
+                    35,
+                    19
+                ],
                 "tooltip": "Post reviewed accounting transactions permanently.",
-                "security": { "invoke": "accounting.transactions.post" }
+                "security": {
+                    "invoke": "accounting.transactions.post"
+                }
             },
             "lblAccountingRegister": {
-                "name": "lblAccountingRegister", "type": "StaticText",
-                "label": "Posted Register", "posch": [35, 20],
+                "name": "lblAccountingRegister",
+                "type": "StaticText",
+                "label": "Posted Register",
+                "posch": [
+                    35,
+                    20
+                ],
                 "tooltip": "View posted accounting transactions and their lines.",
-                "security": { "invoke": "accounting.transactions.view" }
+                "security": {
+                    "invoke": "accounting.transactions.view"
+                }
             },
             "lblAccountingTrialBalance": {
-                "name": "lblAccountingTrialBalance", "type": "StaticText",
-                "label": "Trial Balance", "posch": [35, 21],
+                "name": "lblAccountingTrialBalance",
+                "type": "StaticText",
+                "label": "Trial Balance",
+                "posch": [
+                    35,
+                    21
+                ],
                 "tooltip": "Run an as-of-date trial balance from posted transactions.",
-                "security": { "invoke": "accounting.reports.run" }
+                "security": {
+                    "invoke": "accounting.reports.run"
+                }
             },
             "lblAccountingPosition": {
-                "name": "lblAccountingPosition", "type": "StaticText",
-                "label": "Financial Position", "posch": [35, 22],
+                "name": "lblAccountingPosition",
+                "type": "StaticText",
+                "label": "Financial Position",
+                "posch": [
+                    35,
+                    22
+                ],
                 "tooltip": "Run a statement of financial position as of a selected date.",
-                "security": { "invoke": "accounting.reports.run" }
+                "security": {
+                    "invoke": "accounting.reports.run"
+                }
             },
             "lblAccountingActivities": {
-                "name": "lblAccountingActivities", "type": "StaticText",
-                "label": "Statement of Activities", "posch": [35, 23],
+                "name": "lblAccountingActivities",
+                "type": "StaticText",
+                "label": "Statement of Activities",
+                "posch": [
+                    35,
+                    23
+                ],
                 "tooltip": "Run revenue, expense, transfer, and net-asset activity by restriction class.",
-                "security": { "invoke": "accounting.reports.run" }
+                "security": {
+                    "invoke": "accounting.reports.run"
+                }
             },
             "lblAccountingBankImport": {
-                "name": "lblAccountingBankImport", "type": "StaticText",
-                "label": "Bank File Import", "posch": [35, 24],
+                "name": "lblAccountingBankImport",
+                "type": "StaticText",
+                "label": "Bank File Import",
+                "posch": [
+                    35,
+                    24
+                ],
                 "tooltip": "Preview and stage a CSV bank file without posting transactions.",
-                "security": { "invoke": "accounting.reconciliation.manage" }
+                "security": {
+                    "invoke": "accounting.reconciliation.manage"
+                }
             },
             "lblAccountingAudit": {
-                "name": "lblAccountingAudit", "type": "StaticText",
-                "label": "Audit History", "posch": [35, 25],
+                "name": "lblAccountingAudit",
+                "type": "StaticText",
+                "label": "Audit History",
+                "posch": [
+                    35,
+                    25
+                ],
                 "tooltip": "Review the read-only accounting audit trail.",
-                "security": { "invoke": "accounting.audit.view" }
+                "security": {
+                    "invoke": "accounting.audit.view"
+                }
             },
             "lblAccountingGeneralLedger": {
-                "name": "lblAccountingGeneralLedger", "type": "StaticText",
-                "label": "General Ledger", "posch": [35, 26],
+                "name": "lblAccountingGeneralLedger",
+                "type": "StaticText",
+                "label": "General Ledger",
+                "posch": [
+                    35,
+                    26
+                ],
                 "tooltip": "Run account detail with opening and running balances.",
-                "security": { "invoke": "accounting.reports.run" }
+                "security": {
+                    "invoke": "accounting.reports.run"
+                }
             },
             "lblAccountingFundBalances": {
-                "name": "lblAccountingFundBalances", "type": "StaticText",
-                "label": "Fund Balances", "posch": [35, 27],
+                "name": "lblAccountingFundBalances",
+                "type": "StaticText",
+                "label": "Fund Balances",
+                "posch": [
+                    35,
+                    27
+                ],
                 "tooltip": "Run beginning, activity, and ending balances by fund.",
-                "security": { "invoke": "accounting.reports.run" }
+                "security": {
+                    "invoke": "accounting.reports.run"
+                }
             },
             "lblAccountingReconciliationReport": {
-                "name": "lblAccountingReconciliationReport", "type": "StaticText",
-                "label": "Reconciliation Report", "posch": [35, 28],
+                "name": "lblAccountingReconciliationReport",
+                "type": "StaticText",
+                "label": "Reconciliation Report",
+                "posch": [
+                    35,
+                    28
+                ],
                 "tooltip": "Review completed reconciliation proof and outstanding items.",
-                "security": { "invoke": "accounting.reports.run" }
+                "security": {
+                    "invoke": "accounting.reports.run"
+                }
             },
             "lblAccountingCloseChecklist": {
-                "name": "lblAccountingCloseChecklist", "type": "StaticText",
-                "label": "Close Checklist", "posch": [35, 29],
+                "name": "lblAccountingCloseChecklist",
+                "type": "StaticText",
+                "label": "Close Checklist",
+                "posch": [
+                    35,
+                    29
+                ],
                 "tooltip": "Identify unresolved items before closing a fiscal period.",
-                "security": { "invoke": "accounting.reports.run" }
+                "security": {
+                    "invoke": "accounting.reports.run"
+                }
             },
             "lblAccountingBudgets": {
-                "name": "lblAccountingBudgets", "type": "StaticText",
-                "label": "Budgets", "posch": [35, 30],
+                "name": "lblAccountingBudgets",
+                "type": "StaticText",
+                "label": "Budgets",
+                "posch": [
+                    35,
+                    30
+                ],
                 "tooltip": "Create account-only or detailed draft budgets.",
-                "security": { "invoke": "accounting.budgets.manage" }
+                "security": {
+                    "invoke": "accounting.budgets.manage"
+                }
             },
             "lblAccountingBudgetActual": {
-                "name": "lblAccountingBudgetActual", "type": "StaticText",
-                "label": "Budget to Actual", "posch": [35, 31],
+                "name": "lblAccountingBudgetActual",
+                "type": "StaticText",
+                "label": "Budget to Actual",
+                "posch": [
+                    35,
+                    31
+                ],
                 "tooltip": "Compare adopted budget totals with posted actual activity.",
-                "security": { "invoke": "accounting.reports.run" }
+                "security": {
+                    "invoke": "accounting.reports.run"
+                }
             },
             "lblAccountingFunctionalExpenses": {
-                "name": "lblAccountingFunctionalExpenses", "type": "StaticText",
-                "label": "Functional Expenses", "posch": [35, 32],
+                "name": "lblAccountingFunctionalExpenses",
+                "type": "StaticText",
+                "label": "Functional Expenses",
+                "posch": [
+                    35,
+                    32
+                ],
                 "tooltip": "Report expenses by natural account and ministry function.",
-                "security": { "invoke": "accounting.reports.run" }
+                "security": {
+                    "invoke": "accounting.reports.run"
+                }
             },
             "lblAccountingYearEnd": {
-                "name": "lblAccountingYearEnd", "type": "StaticText",
-                "label": "Year-End Close", "posch": [35, 33],
+                "name": "lblAccountingYearEnd",
+                "type": "StaticText",
+                "label": "Year-End Close",
+                "posch": [
+                    35,
+                    33
+                ],
                 "tooltip": "Preview the controlled fiscal-year closing process.",
-                "security": { "invoke": "accounting.periods.override" }
+                "security": {
+                    "invoke": "accounting.periods.override"
+                }
             }
         }
     }
