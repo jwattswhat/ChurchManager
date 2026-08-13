@@ -18,13 +18,14 @@ SERVICE_FIELDS = [
 
 
 class WorshipServiceDialog(wx.Dialog):
-    def __init__(self, parent, connection, form_factory):
+    def __init__(self, parent, connection, form_factory, session=None):
         super().__init__(
             parent, title="Worship Services", size=(900, 570),
             style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
         )
         self.connection = connection
         self.form_factory = form_factory
+        self.session = session
         # JSForm child windows detach themselves from both registries when they
         # close. This picker is deliberately lightweight, but still honors that
         # parent contract.
@@ -55,7 +56,11 @@ class WorshipServiceDialog(wx.Dialog):
             self.grid.AppendColumn(label, width=width)
         outer.Add(self.grid, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
         buttons = wx.BoxSizer(wx.HORIZONTAL)
-        for label, handler in (("New Service", self.on_new), ("Open Service", self.on_open)):
+        for label, handler in (
+            ("New Service", self.on_new),
+            ("Open Service", self.on_open),
+            ("Delete Service", self.on_delete),
+        ):
             button = wx.Button(panel, label=label)
             button.Bind(wx.EVT_BUTTON, handler)
             buttons.Add(button, 0, wx.RIGHT, 8)
@@ -138,9 +143,35 @@ class WorshipServiceDialog(wx.Dialog):
         if selected >= 0:
             self._open_editor(self.rows[selected][0])
 
+    def on_delete(self, _event):
+        selected = self.grid.GetFirstSelected()
+        if selected < 0:
+            wx.MessageBox("Select a service to delete.", "Delete Worship Service",
+                          wx.OK | wx.ICON_INFORMATION, self)
+            return
+        row = self.rows[selected]
+        when = row[1].strftime("%m/%d/%Y %I:%M %p") if hasattr(row[1], "strftime") else str(row[1])
+        title = str(row[2] or "Untitled service")
+        message = (
+            f"Delete this Worship Service?\n\n{when}\n{title}\n\n"
+            "Its weekly Order of Service and hymn selections will also be deleted. "
+            "Services with attendance or participant assignments are protected."
+        )
+        if wx.MessageBox(message, "Delete Worship Service",
+                         wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES:
+            return
+        try:
+            UnifiedWorshipServiceRepository(self.connection).delete_service(
+                row[0], self.session,
+            )
+            self.refresh()
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Delete Worship Service",
+                          wx.OK | wx.ICON_WARNING, self)
 
-def show_worship_services(parent, connection, form_factory):
-    dialog = WorshipServiceDialog(parent, connection, form_factory)
+
+def show_worship_services(parent, connection, form_factory, session=None):
+    dialog = WorshipServiceDialog(parent, connection, form_factory, session)
     try:
         return dialog.ShowModal()
     finally:

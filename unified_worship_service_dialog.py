@@ -91,6 +91,62 @@ class UnifiedWorshipServiceRepository:
         finally:
             cursor.close()
 
+    def delete_service(self, service_id, session):
+        """Delete an unused service, preserving attendance and schedule history."""
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT s.DateTime,COALESCE(s.LiturgicalDate,''),COALESCE(s.Location,'') "
+                "FROM tblService s WHERE s.ID=? FOR UPDATE", (service_id,),
+            )
+            service = cursor.fetchone()
+            if not service:
+                raise ValueError("The selected Worship Service no longer exists.")
+            dependencies = []
+            for table, description in (
+                ("tblAttendanceEvent", "attendance event(s)"),
+                ("tblServiceRole", "participant assignment(s)"),
+            ):
+                cursor.execute(f"SELECT COUNT(*) FROM {table} WHERE ServiceID=?", (service_id,))
+                count = cursor.fetchone()[0]
+                if count:
+                    dependencies.append(f"{count} {description}")
+            if dependencies:
+                raise ValueError(
+                    "This service cannot be deleted because it has "
+                    + " and ".join(dependencies)
+                    + ". Remove or reassign those records first."
+                )
+            before = json.dumps(
+                {
+                    "date_time": service[0].isoformat(sep=" ")
+                    if hasattr(service[0], "isoformat") else str(service[0]),
+                    "liturgical_date": service[1],
+                    "location": service[2],
+                },
+                separators=(",", ":"),
+            )
+            cursor.execute("DELETE FROM tblHymnUsage WHERE ServiceID=?", (service_id,))
+            cursor.execute("DELETE FROM tblServiceBulletinOrderLine WHERE ServiceID=?", (service_id,))
+            cursor.execute("DELETE FROM tblServiceBulletinOrder WHERE ServiceID=?", (service_id,))
+            cursor.execute("DELETE FROM tblAltReading WHERE ServiceID=?", (service_id,))
+            cursor.execute("DELETE FROM tblService WHERE ID=?", (service_id,))
+            cursor.execute(
+                "INSERT INTO tblSecurityAuditEvent "
+                "(UserID,Action,EntityType,EntityID,BeforeJSON,Workstation) "
+                "VALUES (?,'WORSHIP_SERVICE_DELETED','WORSHIP_SERVICE',?,?,?)",
+                (
+                    getattr(session, "user_id", None), str(service_id), before,
+                    getattr(session, "workstation", None),
+                ),
+            )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
     def proper_name(self, proper_id):
         if not proper_id:
             return "Not selected"

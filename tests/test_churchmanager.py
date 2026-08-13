@@ -276,6 +276,16 @@ class TestChurchManagerPython(unittest.TestCase):
         self.assertIn("show_unified_worship_service(", source)
         self.assertIn("repository.discard_unsaved_service(new_id)", source)
 
+    def test_service_deletion_protects_history_and_is_audited(self):
+        picker = (ROOT / "worship_service_dialog.py").read_text(encoding="utf-8")
+        repository = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
+        self.assertIn('(\"Delete Service\", self.on_delete)', picker)
+        self.assertIn("def delete_service", repository)
+        self.assertIn('("tblAttendanceEvent", "attendance event(s)")', repository)
+        self.assertIn('("tblServiceRole", "participant assignment(s)")', repository)
+        self.assertIn("WORSHIP_SERVICE_DELETED", repository)
+        self.assertIn("DELETE FROM tblHymnUsage WHERE ServiceID=?", repository)
+
     def test_unified_worship_save_persists_service_order_and_hymns_together(self):
         source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
         self.assertIn("def save(self, service_id, service_values, template_id, lines)", source)

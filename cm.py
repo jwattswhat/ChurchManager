@@ -572,7 +572,9 @@ def _buttonclick(event):
         MAIN_MENU_PERMISSIONS[select], "use {}".format(select)
     )
     if select == "lblService":
-        show_worship_services(cmfrm.FRAME, context.connection, context.form_factory)
+        show_worship_services(
+            cmfrm.FRAME, context.connection, context.form_factory, context.session,
+        )
         return
     if select in FORM_ROUTES:
         context.form_factory.open(FORM_ROUTES[select])
