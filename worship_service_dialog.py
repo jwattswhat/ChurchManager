@@ -20,6 +20,11 @@ class WorshipServiceDialog(wx.Dialog):
         )
         self.connection = connection
         self.form_factory = form_factory
+        # JSForm child windows detach themselves from both registries when they
+        # close. This picker is deliberately lightweight, but still honors that
+        # parent contract.
+        self.LINKEDFORM = {}
+        self.SUBFORM = {}
         self.rows = []
         self._build()
         self.refresh()
