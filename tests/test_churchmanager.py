@@ -257,6 +257,13 @@ class TestChurchManagerPython(unittest.TestCase):
         self.assertIn('Clear This Position', source)
         self.assertIn('wx.EVT_LIST_ITEM_ACTIVATED', source)
 
+    def test_unified_hymn_picker_sorts_on_header_double_click(self):
+        source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
+        self.assertIn("wx.EVT_LIST_COL_CLICK", source)
+        self.assertIn("def on_column_click", source)
+        self.assertIn("now - previous_time > 0.65", source)
+        self.assertIn("self.rows.sort", source)
+
     def test_unified_worship_save_persists_service_order_and_hymns_together(self):
         source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
         self.assertIn("def save(self, service_id, service_values, template_id, lines)", source)

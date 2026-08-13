@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 from datetime import datetime
 import wx
 import wx.adv
@@ -726,6 +727,9 @@ class HymnPickerDialog(wx.Dialog):
         self.used_ids = set(used_hymn_ids)
         self.used_tunes = {normalize_tune(tune) for tune in used_tunes if normalize_tune(tune)}
         self.rows = []
+        self._last_header_click = (None, 0.0)
+        self._sort_column = None
+        self._sort_reverse = False
         self.selected_hymn = None
         self.clear_requested = False
         panel = wx.Panel(self)
@@ -759,6 +763,7 @@ class HymnPickerDialog(wx.Dialog):
         ):
             self.grid.AppendColumn(label, width=width)
         self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_select)
+        self.grid.Bind(wx.EVT_LIST_COL_CLICK, self.on_column_click)
         outer.Add(self.grid, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
         buttons = wx.BoxSizer(wx.HORIZONTAL)
         choose = wx.Button(panel, wx.ID_OK, "Select Hymn")
@@ -779,19 +784,43 @@ class HymnPickerDialog(wx.Dialog):
         self.rows = self.repository.search_hymns(
             self.service_id, self.search.GetValue(), self.search_in.GetStringSelection(),
         )
+        self._populate_grid()
+
+    def _status(self, row):
+        if row[0] in self.used_ids:
+            return "Already used"
+        if normalize_tune(row[3]) in self.used_tunes:
+            return "Tune already used"
+        return ""
+
+    def _populate_grid(self):
         self.grid.DeleteAllItems()
         for index, row in enumerate(self.rows):
             item = self.grid.InsertItem(index, str(row[1]))
-            if row[0] in self.used_ids:
-                status = "Already used"
-            elif normalize_tune(row[3]) in self.used_tunes:
-                status = "Tune already used"
-            else:
-                status = ""
+            status = self._status(row)
             for column, value in enumerate((row[2], row[3], row[4], row[5], row[6], status), 1):
                 self.grid.SetItem(item, column, str(value))
             if status:
                 self.grid.SetItemTextColour(item, wx.Colour(190, 90, 0))
+
+    def on_column_click(self, event):
+        """Sort only after two clicks on the same header in quick succession."""
+        column = event.GetColumn()
+        now = time.monotonic()
+        previous_column, previous_time = self._last_header_click
+        self._last_header_click = (column, now)
+        if column != previous_column or now - previous_time > 0.65:
+            return
+        self._last_header_click = (None, 0.0)
+        self._sort_reverse = not self._sort_reverse if self._sort_column == column else False
+        self._sort_column = column
+        value_indexes = (1, 2, 3, 4, 5, 6)
+        if column < len(value_indexes):
+            key = lambda row: str(row[value_indexes[column]] or "").casefold()
+        else:
+            key = lambda row: self._status(row).casefold()
+        self.rows.sort(key=key, reverse=self._sort_reverse)
+        self._populate_grid()
 
     def on_search(self, _event):
         self.load_results()
