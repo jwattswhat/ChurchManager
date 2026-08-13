@@ -245,20 +245,20 @@
                 "type": "StaticText",
                 "label": "Report logo:",
                 "posch": [
-                    1,
-                    28
+                    33,
+                    1
                 ]
             },
             "Logo": {
                 "name": "Logo",
                 "type": "ImagePickerCtrl",
                 "posch": [
-                    8,
-                    28
+                    33,
+                    3
                 ],
                 "sizech": [
-                    22,
-                    10
+                    16,
+                    14
                 ],
                 "maxbytes": 5242880,
                 "tooltip": "Choose the church logo printed on reports. PNG or JPEG is recommended."

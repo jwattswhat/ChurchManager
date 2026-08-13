@@ -85,5 +85,15 @@ class TestChurchManagerScreenDesigner(unittest.TestCase):
         self.assertIn("IsSensitive,Active", sql)
         self.assertIn("Master Administrator", sql)
 
+    def test_church_logo_uses_the_open_upper_right_area(self):
+        import json
+
+        form = json.loads(Path("Forms/frmChurch.json").read_text(encoding="utf-8"))["frmChurchFORM"]
+        label = form["CONTROLS"]["lblLogo"]
+        logo = form["CONTROLS"]["Logo"]
+        self.assertGreaterEqual(label["posch"][0], 30)
+        self.assertGreaterEqual(logo["posch"][0], 30)
+        self.assertLess(logo["posch"][1], form["CONTROLS"]["Note"]["posch"][1])
+
 
 if __name__ == "__main__": unittest.main()
