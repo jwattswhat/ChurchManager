@@ -28,6 +28,7 @@ from user_admin import show_user_administration
 from bulletin_order_dialog import show_bulletin_orders
 from bulletin_order_generator_dialog import show_prepare_bulletin_order
 from weekly_bulletin_order_dialog import show_weekly_bulletin_order
+from worship_service_dialog import show_worship_services
 from accounting.setup_dialog import show_accounting_setup
 from accounting.draft_dialog import show_accounting_draft_entry
 from accounting.review_dialog import show_accounting_review
@@ -501,6 +502,9 @@ def _buttonclick(event):
     context.authorization.require(
         MAIN_MENU_PERMISSIONS[select], "use {}".format(select)
     )
+    if select == "lblService":
+        show_worship_services(cmfrm.FRAME, context.connection, context.form_factory)
+        return
     if select in FORM_ROUTES:
         context.form_factory.open(FORM_ROUTES[select])
         return

@@ -1,0 +1,120 @@
+"""Fast Worship Service picker that opens one service record at a time."""
+
+from __future__ import annotations
+
+import wx
+
+
+SERVICE_FIELDS = [
+    "ID", "ChurchID", "DateTime", "Location", "PropersID", "LiturgicalDate",
+    "HolyCommunion", "BulletinOrderTemplateID", "OSNote", "PsalmorIntroit",
+    "SermonID", "Bulletin", "CheckListComplete", "CheckList", "Note",
+]
+
+
+class WorshipServiceDialog(wx.Dialog):
+    def __init__(self, parent, connection, form_factory):
+        super().__init__(
+            parent, title="Worship Services", size=(900, 570),
+            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
+        )
+        self.connection = connection
+        self.form_factory = form_factory
+        self.rows = []
+        self._build()
+        self.refresh()
+        self.CentreOnParent()
+
+    def _build(self):
+        panel = wx.Panel(self)
+        outer = wx.BoxSizer(wx.VERTICAL)
+        help_text = wx.StaticText(
+            panel,
+            label=(
+                "Double-click a service to continue its preparation. The Weekly Order column "
+                "shows whether its service-specific outline has been created."
+            ),
+        )
+        help_text.SetForegroundColour(wx.Colour(0, 90, 190))
+        outer.Add(help_text, 0, wx.ALL, 10)
+        self.grid = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        for label, width in (
+            ("Date and time", 165), ("Liturgical date", 230), ("Location", 150),
+            ("Communion", 90), ("Weekly order", 210),
+        ):
+            self.grid.AppendColumn(label, width=width)
+        outer.Add(self.grid, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        for label, handler in (("New Service", self.on_new), ("Open Service", self.on_open)):
+            button = wx.Button(panel, label=label)
+            button.Bind(wx.EVT_BUTTON, handler)
+            buttons.Add(button, 0, wx.RIGHT, 8)
+        buttons.AddStretchSpacer()
+        close = wx.Button(panel, wx.ID_CLOSE, "Close")
+        close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE))
+        buttons.Add(close)
+        outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 10)
+        panel.SetSizer(outer)
+        self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_open)
+
+    def refresh(self):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT s.ID,s.DateTime,COALESCE(s.LiturgicalDate,''),"
+                "COALESCE(s.Location,''),s.HolyCommunion,"
+                "COALESCE(t.Name,'Not created') "
+                "FROM tblService s "
+                "LEFT JOIN tblServiceBulletinOrder w ON w.ServiceID=s.ID "
+                "LEFT JOIN tblBulletinOrderTemplate t ON t.ID=w.TemplateID "
+                "ORDER BY s.DateTime DESC,s.ID DESC"
+            )
+            self.rows = cursor.fetchall()
+        finally:
+            cursor.close()
+        self.grid.DeleteAllItems()
+        for index, row in enumerate(self.rows):
+            when = row[1].strftime("%m/%d/%Y %I:%M %p") if hasattr(row[1], "strftime") else str(row[1])
+            item = self.grid.InsertItem(index, when)
+            values = (row[2], row[3], "Yes" if row[4] else "No", row[5])
+            for column, value in enumerate(values, 1):
+                self.grid.SetItem(item, column, str(value))
+            if row[5] == "Not created":
+                self.grid.SetItemTextColour(item, wx.RED)
+
+    def _open_editor(self, service_id=None, new=False):
+        condition = f"ID = {int(service_id)}" if service_id is not None else "ID = -1"
+        form = self.form_factory.create(
+            "frmService",
+            parent=self,
+            form_description={
+                "table": {
+                    "name": "tblService", "fields": SERVICE_FIELDS,
+                    "condition": condition, "orderby": "DateTime DESC",
+                }
+            },
+        )
+        if new:
+            form.new_record()
+        form.FRAME.Bind(wx.EVT_CLOSE, self._on_editor_close)
+        form.show()
+
+    def _on_editor_close(self, event):
+        event.Skip()
+        wx.CallAfter(self.refresh)
+
+    def on_new(self, _event):
+        self._open_editor(new=True)
+
+    def on_open(self, _event):
+        selected = self.grid.GetFirstSelected()
+        if selected >= 0:
+            self._open_editor(self.rows[selected][0])
+
+
+def show_worship_services(parent, connection, form_factory):
+    dialog = WorshipServiceDialog(parent, connection, form_factory)
+    try:
+        return dialog.ShowModal()
+    finally:
+        dialog.Destroy()
