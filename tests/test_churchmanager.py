@@ -211,6 +211,15 @@ class TestChurchManagerPython(unittest.TestCase):
         self.assertIn("self.on_move_line(1)", source)
         self.assertIn("normalize_line_sequences(self.working_lines)", source)
 
+    def test_unified_hymn_picker_uses_safe_search_and_service_context(self):
+        source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
+        self.assertIn("class HymnPickerDialog", source)
+        self.assertIn('columns = {', source)
+        self.assertIn('LIKE ?', source)
+        self.assertIn('Already used', source)
+        self.assertIn('Clear This Position', source)
+        self.assertIn('wx.EVT_LIST_ITEM_ACTIVATED', source)
+
     def test_cm_has_guarded_main_entrypoint(self):
         tree = ast.parse((ROOT / "cm.py").read_text(encoding="utf-8-sig"))
         main_functions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "main"]

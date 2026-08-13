@@ -111,12 +111,45 @@ class UnifiedWorshipServiceRepository:
         ))
 
     def hymns(self, service_id):
-        return self.all(
-            "SELECT h.ID,TRIM(CONCAT_WS(' ',h.Hymn,h.Title)) FROM tblHymn h "
-            "JOIN tblService s ON s.ID=? JOIN tblChurch c ON c.ID=s.ChurchID "
-            "WHERE c.PrimaryHymnalID IS NULL OR h.HymnalID=c.PrimaryHymnalID "
-            "ORDER BY h.Hymn,h.Title", (service_id,),
+        return self.search_hymns(service_id, "", "All fields")
+
+    def hymnal_name(self, service_id):
+        row = self.one(
+            "SELECT CASE WHEN h.ID IS NULL THEN 'All hymnals' "
+            "ELSE CONCAT(h.Hymnal,' - ',h.Title) END FROM tblService s "
+            "JOIN tblChurch c ON c.ID=s.ChurchID "
+            "LEFT JOIN tblHymnal h ON h.ID=c.PrimaryHymnalID WHERE s.ID=?",
+            (service_id,),
         )
+        return row[0] if row else "All hymnals"
+
+    def search_hymns(self, service_id, search, search_in):
+        columns = {
+            "Hymn number": "h.Hymn", "Title": "h.Title", "Bible reference": "h.BibleText",
+            "Category": "h.Category", "Notes": "h.Note",
+        }
+        sql = (
+            "SELECT h.ID,COALESCE(h.Hymn,''),COALESCE(h.Title,''),"
+            "COALESCE(h.BibleText,''),COALESCE(h.Category,''),COALESCE(h.Note,'') "
+            "FROM tblHymn h JOIN tblService s ON s.ID=? "
+            "JOIN tblChurch c ON c.ID=s.ChurchID WHERE "
+            "(c.PrimaryHymnalID IS NULL OR h.HymnalID=c.PrimaryHymnalID)"
+        )
+        values = [service_id]
+        text = str(search or "").strip()
+        if text:
+            pattern = "%" + text + "%"
+            if search_in in columns:
+                sql += " AND " + columns[search_in] + " LIKE ?"
+                values.append(pattern)
+            else:
+                sql += (
+                    " AND (h.Hymn LIKE ? OR h.Title LIKE ? OR h.BibleText LIKE ? "
+                    "OR h.Category LIKE ? OR h.Note LIKE ?)"
+                )
+                values.extend([pattern] * 5)
+        sql += " ORDER BY h.Hymn,h.Title"
+        return self.all(sql, tuple(values))
 
 
 class UnifiedWorshipServiceEditor(wx.Dialog):
@@ -374,13 +407,22 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             wx.MessageBox("Select a hymn line first.", "Select Hymn",
                           wx.OK | wx.ICON_INFORMATION, self)
             return
-        hymns = self.repository.hymns(self.service_id)
-        choices = [str(row[1]) for row in hymns]
-        dialog = wx.SingleChoiceDialog(self, f"Select the {line['label']}", "Select Hymn", choices)
+        used_ids = [
+            item["hymn_id"] for item in self.working_lines
+            if item is not line and item["hymn_id"] is not None
+        ]
+        dialog = HymnPickerDialog(
+            self, self.repository, self.service_id, line["label"], used_ids,
+        )
         try:
             if dialog.ShowModal() == wx.ID_OK:
-                selected = hymns[dialog.GetSelection()]
-                line["hymn_id"], line["value"] = selected[0], selected[1]
+                selected = dialog.selected_hymn
+                line["hymn_id"] = selected[0]
+                line["value"] = " ".join(value for value in (selected[1], selected[2]) if value)
+                self.refresh_grid()
+                self.grid.Select(index)
+            elif dialog.clear_requested:
+                line["hymn_id"], line["value"] = None, ""
                 self.refresh_grid()
                 self.grid.Select(index)
         finally:
@@ -454,6 +496,102 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
                     hymn = unused.pop(match)
                     line["hymn_id"], line["value"] = hymn[0], hymn[1]
         self.refresh_grid()
+
+
+class HymnPickerDialog(wx.Dialog):
+    SEARCH_FIELDS = (
+        "All fields", "Hymn number", "Title", "Bible reference", "Category", "Notes",
+    )
+
+    def __init__(self, parent, repository, service_id, used_as, used_hymn_ids):
+        super().__init__(parent, title="Select Hymn", size=(980, 650),
+                         style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        self.repository = repository
+        self.service_id = service_id
+        self.used_ids = set(used_hymn_ids)
+        self.rows = []
+        self.selected_hymn = None
+        self.clear_requested = False
+        panel = wx.Panel(self)
+        outer = wx.BoxSizer(wx.VERTICAL)
+        context = wx.StaticText(
+            panel,
+            label=f"Selecting hymn for: {used_as}    |    Hymnal: {repository.hymnal_name(service_id)}",
+        )
+        context.SetForegroundColour(wx.Colour(0, 90, 190))
+        outer.Add(context, 0, wx.ALL, 10)
+        search_row = wx.BoxSizer(wx.HORIZONTAL)
+        search_row.Add(wx.StaticText(panel, label="Search:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 6)
+        self.search = wx.TextCtrl(panel, style=wx.TE_PROCESS_ENTER)
+        search_row.Add(self.search, 1, wx.RIGHT, 8)
+        self.search_in = wx.Choice(panel, choices=list(self.SEARCH_FIELDS))
+        self.search_in.SetSelection(0)
+        search_row.Add(self.search_in, 0, wx.RIGHT, 8)
+        find = wx.Button(panel, label="Search")
+        find.Bind(wx.EVT_BUTTON, self.on_search)
+        search_row.Add(find, 0, wx.RIGHT, 8)
+        clear_search = wx.Button(panel, label="Clear Search")
+        clear_search.Bind(wx.EVT_BUTTON, self.on_clear_search)
+        search_row.Add(clear_search)
+        outer.Add(search_row, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        self.search.Bind(wx.EVT_TEXT_ENTER, self.on_search)
+
+        self.grid = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        for label, width in (
+            ("Hymn", 95), ("Title", 275), ("Bible reference", 145),
+            ("Category", 120), ("Notes", 230), ("Status", 90),
+        ):
+            self.grid.AppendColumn(label, width=width)
+        self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_select)
+        outer.Add(self.grid, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        choose = wx.Button(panel, wx.ID_OK, "Select Hymn")
+        choose.Bind(wx.EVT_BUTTON, self.on_select)
+        buttons.Add(choose, 0, wx.RIGHT, 8)
+        clear_position = wx.Button(panel, label="Clear This Position")
+        clear_position.Bind(wx.EVT_BUTTON, self.on_clear_position)
+        buttons.Add(clear_position)
+        buttons.AddStretchSpacer()
+        cancel = wx.Button(panel, wx.ID_CANCEL, "Cancel")
+        buttons.Add(cancel)
+        outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 10)
+        panel.SetSizer(outer)
+        self.load_results()
+        self.search.SetFocus()
+
+    def load_results(self):
+        self.rows = self.repository.search_hymns(
+            self.service_id, self.search.GetValue(), self.search_in.GetStringSelection(),
+        )
+        self.grid.DeleteAllItems()
+        for index, row in enumerate(self.rows):
+            item = self.grid.InsertItem(index, str(row[1]))
+            status = "Already used" if row[0] in self.used_ids else ""
+            for column, value in enumerate((row[2], row[3], row[4], row[5], status), 1):
+                self.grid.SetItem(item, column, str(value))
+            if status:
+                self.grid.SetItemTextColour(item, wx.Colour(190, 90, 0))
+
+    def on_search(self, _event):
+        self.load_results()
+
+    def on_clear_search(self, _event):
+        self.search.SetValue("")
+        self.search_in.SetSelection(0)
+        self.load_results()
+
+    def on_select(self, _event):
+        index = self.grid.GetFirstSelected()
+        if index < 0:
+            wx.MessageBox("Select a hymn first.", "Select Hymn",
+                          wx.OK | wx.ICON_INFORMATION, self)
+            return
+        self.selected_hymn = self.rows[index]
+        self.EndModal(wx.ID_OK)
+
+    def on_clear_position(self, _event):
+        self.clear_requested = True
+        self.EndModal(wx.ID_CANCEL)
 
 
 class ProperReadOnlyDialog(wx.Dialog):
