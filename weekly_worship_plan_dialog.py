@@ -21,18 +21,18 @@ def suggestion_role_key(value):
 
 
 def match_suggestions_to_slots(slots, suggestions):
-    """Assign saved suggestions to matching service slots in line order."""
-    queues = {}
-    for suggestion in suggestions:
-        queues.setdefault(suggestion_role_key(suggestion[3]), []).append(suggestion)
+    """Match each service slot to the first unused suggestion with its title."""
+    used_suggestions = set()
     assignments = []
     for slot in slots:
         role = suggestion_role_key(slot[1])
-        candidates = queues.get(role, [])
-        if not candidates:
-            candidates = queues.get("", [])
-        if candidates:
-            assignments.append((slot[0], slot[1], candidates.pop(0)[0]))
+        for index, suggestion in enumerate(suggestions):
+            if index in used_suggestions:
+                continue
+            if suggestion_role_key(suggestion[3]) == role:
+                assignments.append((slot[0], slot[1], suggestion[0]))
+                used_suggestions.add(index)
+                break
     return assignments
 
 
@@ -142,8 +142,9 @@ class WeeklyWorshipPlanRepository:
     def apply_suggestions(self, service_id, propers_id):
         slots = self.hymn_slots(service_id)
         assignments = match_suggestions_to_slots(slots, self.suggestions(propers_id))
-        for line_id, used_as, hymn_id in assignments:
-            self.set_hymn(service_id, line_id, used_as, hymn_id)
+        hymns_by_line = {line_id: hymn_id for line_id, _used_as, hymn_id in assignments}
+        for line_id, used_as, _hymn, _title in slots:
+            self.set_hymn(service_id, line_id, used_as, hymns_by_line.get(line_id))
         return len(assignments)
 
     def readings(self, service_id):
