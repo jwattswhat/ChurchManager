@@ -234,6 +234,25 @@ class TestChurchManagerDatabase(unittest.TestCase):
             0,
         )
 
+    def test_church_default_lectionary_link_is_optional(self):
+        migration = self.query(
+            "SELECT version FROM schema_migrations "
+            "WHERE version='029_add_church_primary_lectionary.sql'"
+        )
+        self.assertEqual(migration, [("029_add_church_primary_lectionary.sql",)])
+        column = self.query(
+            "SELECT IS_NULLABLE FROM information_schema.COLUMNS "
+            "WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tblChurch' "
+            "AND COLUMN_NAME='PrimaryLectionarySystemID'"
+        )
+        self.assertEqual(column, [("YES",)])
+        orphan_count = self.query(
+            "SELECT COUNT(*) FROM tblChurch c "
+            "LEFT JOIN tblLectionarySystem ls ON ls.ID=c.PrimaryLectionarySystemID "
+            "WHERE c.PrimaryLectionarySystemID IS NOT NULL AND ls.ID IS NULL"
+        )[0][0]
+        self.assertEqual(orphan_count, 0)
+
     def test_accounting_foundation_and_role_defaults_are_installed(self):
         rows = self.query(
             "SELECT version FROM schema_migrations "

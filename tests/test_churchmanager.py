@@ -115,6 +115,18 @@ class TestWorshipPlanningStructure(unittest.TestCase):
         )
         self.assertIn("WHERE HymnalID=?", weekly_plan)
 
+    def test_church_can_select_an_optional_default_lectionary(self):
+        migration = (ROOT / "migrations" / "029_add_church_primary_lectionary.sql").read_text(
+            encoding="utf-8"
+        )
+        church = load_json(FORMS / "frmChurch.json")["frmChurchFORM"]
+        control = church["CONTROLS"]["PrimaryLectionarySystemID"]
+        self.assertIn("PrimaryLectionarySystemID int NULL", migration)
+        self.assertIn("REFERENCES tblLectionarySystem(ID)", migration)
+        self.assertEqual(control["lookupchoices"]["name"], "tblLectionarySystem")
+        self.assertTrue(control["lookupchoices"]["allowblank"])
+        self.assertEqual(control["lookupchoices"]["blanklabel"], "No default lectionary")
+
 
 class TestChurchManagerPython(unittest.TestCase):
     def test_cm_has_guarded_main_entrypoint(self):

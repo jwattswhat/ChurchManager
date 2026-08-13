@@ -18,6 +18,13 @@
                     "title": "Hymnal Catalog",
                     "table": {"name": "tblHymnal", "fields": ["*"], "orderby": "Title"},
                     "controls": ["Navigation", "Update", "Delete", "Close"]
+                },
+                "frmLectionarySystem": {
+                    "name": "frmLectionarySystem",
+                    "type": "Panel",
+                    "title": "Lectionary Systems",
+                    "table": {"name": "tblLectionarySystem", "fields": ["*"], "orderby": "Name"},
+                    "controls": ["Navigation", "Update", "Delete", "Close"]
                 }
             },
             "stylelist": [
@@ -233,7 +240,7 @@
             "PrimaryHymnalID": {
                 "name": "PrimaryHymnalID",
                 "type": "ComboBox",
-                "lookupchoices": {"name": "tblHymnal", "fields": ["ID", "Hymnal", "Title"], "orderby": "Title"},
+                "lookupchoices": {"name": "tblHymnal", "fields": ["ID", "Hymnal", "Title"], "orderby": "Title", "allowblank": true, "blanklabel": "No primary hymnal"},
                 "posch": [8, 19],
                 "sizech": [22, 2],
                 "tooltip": "Select the hymnal normally used by this church."
@@ -246,13 +253,35 @@
                 "posch": [33, 19],
                 "tooltip": "Review, add, or edit hymnals."
             },
+            "lblPrimaryLectionarySystemID": {
+                "name": "lblPrimaryLectionarySystemID",
+                "type": "StaticText",
+                "label": "Default lectionary:",
+                "posch": [1, 21]
+            },
+            "PrimaryLectionarySystemID": {
+                "name": "PrimaryLectionarySystemID",
+                "type": "ComboBox",
+                "lookupchoices": {"name": "tblLectionarySystem", "fields": ["ID", "Name"], "orderby": "Name", "allowblank": true, "blanklabel": "No default lectionary"},
+                "posch": [10, 21],
+                "sizech": [20, 2],
+                "tooltip": "Select the lectionary system normally used by this church, or choose no default."
+            },
+            "btnLectionaryCatalog": {
+                "name": "btnLectionaryCatalog",
+                "type": "Button",
+                "label": "Lectionaries...",
+                "action": ["openlinkedform", "frmLectionarySystem"],
+                "posch": [33, 21],
+                "tooltip": "Review, add, or edit lectionary systems."
+            },
             "lblNote": {
                 "name": "lblNote",
                 "type": "StaticText",
                 "label": "Note:",
                 "posch": [
                     1,
-                    21
+                    23
                 ]
             },
             "Note": {
@@ -263,7 +292,7 @@
                 ],
                 "posch": [
                     6,
-                    21
+                    23
                 ],
                 "sizech": [
                     24,
