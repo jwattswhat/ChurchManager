@@ -452,7 +452,7 @@ def _buttonclick(event):
             frm.show()
             return
         case "lblNotifyParticipants":
-            frm = context.form_factory.create("frmNotifyviaeMail")
+            frm = context.form_factory.create("frmNotifyviaeMail", ["Close"])
             frm.CONTROLID["btnNotify"].Bind(wx.EVT_LEFT_DOWN, _runNotify)
             frm.show()
             return

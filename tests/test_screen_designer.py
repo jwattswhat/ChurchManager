@@ -97,5 +97,27 @@ class TestChurchManagerScreenDesigner(unittest.TestCase):
         self.assertGreaterEqual(logo["layout"]["row_span"], 6)
         self.assertTrue(logo["layout"]["expand"])
 
+    def test_member_forms_expose_database_backed_images(self):
+        import json
+
+        person = json.loads(Path("Forms/frmPerson.json").read_text(encoding="utf-8"))["frmPersonFORM"]
+        family = json.loads(Path("Forms/frmFamily.json").read_text(encoding="utf-8"))["frmFamilyFORM"]
+        self.assertIn("Picture", person["FORM"]["table"]["fields"])
+        self.assertEqual(person["CONTROLS"]["Picture"]["type"], "ImagePickerCtrl")
+        self.assertIn("Image", family["FORM"]["table"]["fields"])
+        self.assertEqual(family["CONTROLS"]["Image"]["type"], "ImagePickerCtrl")
+
+    def test_utility_dialogs_and_list_forms_have_correct_identity(self):
+        import json
+
+        for name in ("frmGenerateOS", "frmNotifyviaeMail"):
+            form = json.loads(Path("Forms", name + ".json").read_text(encoding="utf-8"))[name + "FORM"]["FORM"]
+            self.assertEqual(form["name"], name)
+            self.assertIn("Close", form["controls"])
+            self.assertIn("CLOSEBOX", form["stylelist"])
+        os_list = json.loads(Path("Forms/frmOSList.json").read_text(encoding="utf-8"))["frmOSListFORM"]
+        self.assertEqual(os_list["FORM"]["name"], "frmOSList")
+        self.assertEqual(os_list["FORM"]["table"]["fields"], ["OrderofService"])
+
 
 if __name__ == "__main__": unittest.main()

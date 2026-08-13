@@ -9,9 +9,10 @@
                 -1
             ],
             "sizech": [
-                50,
-                50
+                64,
+                38
             ],
+            "layout": {"type": "responsive", "border": 3, "gap": 2},
             "table": {
                 "name": "tblService",
                 "fields": [
@@ -358,8 +359,8 @@
                 "type": "StaticText",
                 "label": "OSNote:",
                 "posch": [
-                    1,
-                    15
+                    38,
+                    3
                 ]
             },
             "OSNote": {
@@ -369,13 +370,14 @@
                     "MULTILINE"
                 ],
                 "posch": [
-                    12,
-                    15
+                    43,
+                    3
                 ],
                 "sizech": [
-                    24,
-                    5
+                    19,
+                    6
                 ],
+                "layout": {"row_span": 3, "expand": true},
                 "tooltip": "Enter the order-of-service note. Multiple lines are allowed."
             },
             "lblPsalmorIntroit": {
@@ -384,7 +386,7 @@
                 "label": "Psalm or Introit:",
                 "posch": [
                     1,
-                    21
+                    15
                 ]
             },
             "PsalmorIntroit": {
@@ -392,7 +394,7 @@
                 "type": "ComboBox",
                 "posch": [
                     12,
-                    21
+                    15
                 ],
                 "sizech": [
                     24,
@@ -406,7 +408,7 @@
                 "label": "Sermon:",
                 "posch": [
                     1,
-                    23
+                    17
                 ]
             },
             "SermonID": {
@@ -424,7 +426,7 @@
                 },
                 "posch": [
                     12,
-                    23
+                    17
                 ],
                 "sizech": [
                     24,
@@ -441,8 +443,8 @@
                     "frmSermon"
                 ],
                 "posch": [
-                    41,
-                    23
+                    38,
+                    17
                 ],
                 "tooltip": "Open the selected sermon record."
             },
@@ -452,7 +454,7 @@
                 "label": "Bulletin:",
                 "posch": [
                     1,
-                    25
+                    19
                 ]
             },
             "Bulletin": {
@@ -468,7 +470,7 @@
                 ],
                 "posch": [
                     12,
-                    25
+                    19
                 ],
                 "sizech": [
                     24,
@@ -485,8 +487,8 @@
                     "Bulletin"
                 ],
                 "posch": [
-                    41,
-                    25
+                    38,
+                    19
                 ],
                 "tooltip": "Open the selected bulletin file."
             },
@@ -496,7 +498,7 @@
                 "label": "Check List Complete:",
                 "posch": [
                     1,
-                    27
+                    21
                 ]
             },
             "CheckListComplete": {
@@ -504,7 +506,7 @@
                 "type": "CheckBox",
                 "posch": [
                     12,
-                    27
+                    21
                 ],
                 "tooltip": "Mark the entire service checklist complete."
             },
@@ -513,8 +515,8 @@
                 "type": "StaticText",
                 "label": "CheckList:",
                 "posch": [
-                    41,
-                    29
+                    38,
+                    21
                 ]
             },
             "CheckList": {
@@ -522,12 +524,13 @@
                 "type": "CheckListBox",
                 "posch": [
                     12,
-                    29
+                    23
                 ],
                 "sizech": [
                     24,
-                    10
+                    8
                 ],
+                "layout": {"row_span": 4, "expand": true},
                 "tooltip": "Check completed service-preparation items."
             },
             "btnEditCheckList": {
@@ -540,7 +543,7 @@
                 ],
                 "posch": [
                     1,
-                    29
+                    23
                 ],
                 "tooltip": "Open the edit checklist form."
             },
@@ -549,8 +552,8 @@
                 "type": "StaticText",
                 "label": "Note:",
                 "posch": [
-                    1,
-                    39
+                    38,
+                    11
                 ]
             },
             "Note": {
@@ -561,13 +564,14 @@
                     "WORDWRAP"
                 ],
                 "posch": [
-                    12,
-                    39
+                    43,
+                    11
                 ],
                 "sizech": [
-                    24,
+                    19,
                     8
                 ],
+                "layout": {"row_span": 4, "expand": true},
                 "tooltip": "Enter the note. Multiple lines are allowed."
             }
         }

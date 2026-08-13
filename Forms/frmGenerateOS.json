@@ -1,7 +1,7 @@
 {
     "frmGenerateOSFORM": {
         "FORM": {
-            "name": "frmMain",
+            "name": "frmGenerateOS",
             "type": "Dialog",
             "title": "frmGenerateOS: Worship Planning",
             "posch": [
@@ -13,8 +13,10 @@
                 10
             ],
             "stylelist": [
-                "CAPTION"
+                "CAPTION",
+                "CLOSEBOX"
             ],
+            "controls": ["Close"],
             "theme": "churchmanager"
         },
         "CONTROLS": {

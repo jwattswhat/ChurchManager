@@ -1,7 +1,7 @@
 {
     "frmNotifyviaeMailFORM": {
         "FORM": {
-            "name": "frmMain",
+            "name": "frmNotifyviaeMail",
             "type": "Dialog",
             "title": "frmNotifyviaeMail: Notify Participants",
             "posch": [
@@ -13,7 +13,8 @@
                 10
             ],
             "stylelist": [
-                "CAPTION"
+                "CAPTION",
+                "CLOSEBOX"
             ],
             "controls": [
                 "Close"

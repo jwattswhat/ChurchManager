@@ -20,8 +20,9 @@
             ],
             "sizech": [
                 38,
-                38
+                34
             ],
+            "layout": {"type": "responsive", "border": 3, "gap": 2},
             "theme": "churchmanager"
         },
         "CONTROLS": {
@@ -310,7 +311,7 @@
                 "name": "lblNote",
                 "posch": [
                     1,
-                    28
+                    27
                 ]
             },
             "Note": {
@@ -321,11 +322,11 @@
                 "name": "Note",
                 "posch": [
                     9,
-                    28
+                    27
                 ],
                 "sizech": [
                     24,
-                    8
+                    6
                 ],
                 "tooltip": "Enter the note. Multiple lines are allowed."
             }

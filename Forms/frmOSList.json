@@ -1,13 +1,13 @@
 {
     "frmOSListFORM": {
         "FORM": {
-            "name": "frmOrderofService",
+            "name": "frmOSList",
             "type": "Panel",
             "title": "frmOrderofService: AltOrderofService Edit Form",
             "table": {
                 "name": "tblOrderOfService",
                 "fields": [
-                    "UNIQUE OrderofService"
+                    "OrderofService"
                 ],
                 "orderby": "OrderofService"
             },

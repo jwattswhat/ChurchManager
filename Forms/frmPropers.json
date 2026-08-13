@@ -37,9 +37,10 @@
                 -1
             ],
             "sizech": [
-                73,
-                52
+                64,
+                42
             ],
+            "layout": {"type": "responsive", "border": 3, "gap": 2},
             "theme": "churchmanager"
         },
         "CONTROLS": {
@@ -120,7 +121,7 @@
                 "label": "Theme:",
                 "name": "lblTheme",
                 "posch": [
-                    37,
+                    34,
                     1
                 ]
             },
@@ -132,12 +133,12 @@
                 ],
                 "name": "Theme",
                 "posch": [
-                    41,
+                    39,
                     1
                 ],
                 "sizech": [
-                    30,
-                    10
+                    23,
+                    8
                 ],
                 "tooltip": "Enter the theme. Multiple lines are allowed."
             },
@@ -212,8 +213,8 @@
                 "label": "Hymns:",
                 "name": "lblHymnSug",
                 "posch": [
-                    37,
-                    12
+                    34,
+                    10
                 ]
             },
             "HymnSug": {
@@ -224,12 +225,12 @@
                 ],
                 "name": "HymnSug",
                 "posch": [
-                    41,
-                    12
+                    39,
+                    10
                 ],
                 "sizech": [
-                    30,
-                    10
+                    23,
+                    8
                 ],
                 "tooltip": "Enter the hymn sug. Multiple lines are allowed."
             },
@@ -347,8 +348,8 @@
                 "label": "Introit:",
                 "name": "lblIntroit",
                 "posch": [
-                    37,
-                    26
+                    34,
+                    19
                 ]
             },
             "Introit": {
@@ -358,12 +359,12 @@
                 ],
                 "name": "Introit",
                 "posch": [
-                    41,
-                    26
+                    39,
+                    19
                 ],
                 "sizech": [
-                    30,
-                    26
+                    23,
+                    18
                 ],
                 "tooltip": "Enter the introit. Multiple lines are allowed."
             }

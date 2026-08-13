@@ -12,6 +12,7 @@
                     "FamilyName",
                     "MarriageStatus",
                     "Directory",
+                    "Image",
                     "Note"
                 ],
                 "orderby": "FamilyName"
@@ -297,6 +298,21 @@
                     1,
                     9
                 ]
+            },
+            "lblImage": {
+                "type": "StaticText",
+                "label": "Family picture:",
+                "name": "lblImage",
+                "posch": [37, 9]
+            },
+            "Image": {
+                "type": "ImagePickerCtrl",
+                "name": "Image",
+                "posch": [37, 11],
+                "sizech": [16, 12],
+                "layout": {"row_span": 5, "expand": true},
+                "maxbytes": 5242880,
+                "tooltip": "Choose the family picture stored in the database."
             },
             "Note": {
                 "type": "MultiLine",

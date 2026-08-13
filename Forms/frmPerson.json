@@ -18,6 +18,7 @@
                     "Confirmed",
                     "Member",
                     "AssociateMember",
+                    "Picture",
                     "Note"
                 ],
                 "orderby": "LastName,FirstName"
@@ -377,6 +378,21 @@
                     1,
                     21
                 ]
+            },
+            "lblPicture": {
+                "type": "StaticText",
+                "label": "Individual picture:",
+                "name": "lblPicture",
+                "posch": [37, 8]
+            },
+            "Picture": {
+                "type": "ImagePickerCtrl",
+                "name": "Picture",
+                "posch": [37, 10],
+                "sizech": [16, 14],
+                "layout": {"row_span": 7, "expand": true},
+                "maxbytes": 5242880,
+                "tooltip": "Choose the individual's picture stored in the database."
             },
             "Note": {
                 "type": "MultiLine",
