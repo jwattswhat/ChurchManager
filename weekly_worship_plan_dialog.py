@@ -20,6 +20,22 @@ def suggestion_role_key(value):
     }.get(role, role)
 
 
+def match_suggestions_to_slots(slots, suggestions):
+    """Assign saved suggestions to matching service slots in line order."""
+    queues = {}
+    for suggestion in suggestions:
+        queues.setdefault(suggestion_role_key(suggestion[3]), []).append(suggestion)
+    assignments = []
+    for slot in slots:
+        role = suggestion_role_key(slot[1])
+        candidates = queues.get(role, [])
+        if not candidates:
+            candidates = queues.get("", [])
+        if candidates:
+            assignments.append((slot[0], slot[1], candidates.pop(0)[0]))
+    return assignments
+
+
 class WeeklyWorshipPlanRepository:
     def __init__(self, connection):
         self.connection = portable_connection(connection)
@@ -61,7 +77,7 @@ class WeeklyWorshipPlanRepository:
             cursor.execute(
                 "SELECT s.HymnID,COALESCE(h.Hymn,''),COALESCE(h.Title,''),s.SuggestedAs "
                 "FROM tblProperHymnSuggestion s JOIN tblHymn h ON h.ID=s.HymnID "
-                "WHERE s.PropersID=? ORDER BY h.Hymn,h.Title,s.ID", (propers_id,),
+                "WHERE s.PropersID=? ORDER BY s.ID", (propers_id,),
             )
             return cursor.fetchall()
         finally:
@@ -123,6 +139,13 @@ class WeeklyWorshipPlanRepository:
         finally:
             cursor.close()
 
+    def apply_suggestions(self, service_id, propers_id):
+        slots = self.hymn_slots(service_id)
+        assignments = match_suggestions_to_slots(slots, self.suggestions(propers_id))
+        for line_id, used_as, hymn_id in assignments:
+            self.set_hymn(service_id, line_id, used_as, hymn_id)
+        return len(assignments)
+
     def readings(self, service_id):
         propers_id = self.service(service_id)[1]
         cursor = self.connection.cursor()
@@ -173,7 +196,11 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
             self.hymn_grid.AppendColumn(label, width=width)
         hymns.Add(self.hymn_grid, 1, wx.EXPAND | wx.ALL, 8)
         hymn_buttons = wx.BoxSizer(wx.HORIZONTAL)
-        for label, handler in (("Select Hymn...", self.on_select_hymn), ("Clear Selection", self.on_clear_hymn)):
+        for label, handler in (
+            ("Apply Suggested Hymns", self.on_apply_suggestions),
+            ("Select Hymn...", self.on_select_hymn),
+            ("Clear Selection", self.on_clear_hymn),
+        ):
             button = wx.Button(hymn_page, label=label); button.Bind(wx.EVT_BUTTON, handler)
             hymn_buttons.Add(button, 0, wx.RIGHT, 8)
         hymns.Add(hymn_buttons, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
@@ -243,6 +270,17 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
                 self.refresh()
         finally:
             dialog.Destroy()
+
+    def on_apply_suggestions(self, _event):
+        applied = self.repository.apply_suggestions(self.service_id, self.propers_id)
+        self.refresh()
+        wx.MessageBox(
+            f"Applied {applied} suggested hymn selection(s) in Order of Service order. "
+            "Suggestions without an available matching slot were ignored.",
+            "Suggested Hymns",
+            wx.OK | wx.ICON_INFORMATION,
+            self,
+        )
 
     def on_clear_hymn(self, _event):
         row = self._selected(self.hymn_grid, self.hymn_rows)
