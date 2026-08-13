@@ -226,10 +226,59 @@ class BulletinOrderRepository:
         cursor = self.connection.cursor()
         try:
             cursor.execute(
-                "SELECT ID,Name,Description,Active,IsStarter FROM tblBulletinOrderTemplate "
-                "ORDER BY IsStarter DESC,Name"
+                "SELECT t.ID,t.Name,t.Description,t.Active,t.IsStarter,t.HymnalID,"
+                "CASE WHEN h.ID IS NULL THEN 'No hymnal' "
+                "ELSE CONCAT(h.Hymnal,' - ',h.Title) END "
+                "FROM tblBulletinOrderTemplate t "
+                "LEFT JOIN tblHymnal h ON h.ID=t.HymnalID "
+                "ORDER BY t.IsStarter DESC,t.Name"
             )
             return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def hymnals(self):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute("SELECT ID,Hymnal,Title FROM tblHymnal ORDER BY Title,Hymnal")
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def templates_for_service(self, service_id):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT c.PrimaryHymnalID,w.TemplateID FROM tblService s "
+                "LEFT JOIN tblChurch c ON c.ID=s.ChurchID "
+                "LEFT JOIN tblServiceBulletinOrder w ON w.ServiceID=s.ID "
+                "WHERE s.ID=?", (service_id,),
+            )
+            row = cursor.fetchone()
+            primary_hymnal_id = row[0] if row else None
+            assigned_template_id = row[1] if row else None
+        finally:
+            cursor.close()
+        return [
+            template for template in self.templates()
+            if template[5] is None
+            or template[5] == primary_hymnal_id
+            or template[0] == assigned_template_id
+        ]
+
+    def set_template_hymnal(self, template_id, hymnal_id):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "UPDATE tblBulletinOrderTemplate SET HymnalID=?,Version=Version+1 "
+                "WHERE ID=? AND IsStarter=0", (hymnal_id, template_id),
+            )
+            if cursor.rowcount != 1:
+                raise ValueError("Starter bulletin orders cannot be changed.")
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
         finally:
             cursor.close()
 
@@ -252,15 +301,16 @@ class BulletinOrderRepository:
         cursor = self.connection.cursor()
         try:
             cursor.execute(
-                "SELECT Description FROM tblBulletinOrderTemplate WHERE ID=?", (source_id,)
+                "SELECT Description,HymnalID FROM tblBulletinOrderTemplate WHERE ID=?", (source_id,)
             )
             source = cursor.fetchone()
             if not source:
                 raise ValueError("The selected bulletin order no longer exists.")
             cursor.execute(
                 "INSERT INTO tblBulletinOrderTemplate "
-                "(ChurchID,Name,Description,Active,IsStarter,Version) VALUES (?,?,?,1,0,1)",
-                (church_id, name.strip(), source[0]),
+                "(ChurchID,HymnalID,Name,Description,Active,IsStarter,Version) "
+                "VALUES (?,?,?,?,1,0,1)",
+                (church_id, source[1], name.strip(), source[0]),
             )
             new_id = cursor.lastrowid
             cursor.execute(

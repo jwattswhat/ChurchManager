@@ -66,7 +66,7 @@ class WeeklyBulletinOrderDialog(wx.Dialog):
         self.generator = BulletinOrderGenerator(connection)
         self.repository = WeeklyBulletinOrderRepository(connection)
         self.service_rows = self.generator.services()
-        self.template_rows = [row for row in self.generator.repository.templates() if row[3]]
+        self.template_rows = []
         self.initial_service_id = service_id
         self.line_rows = []
         self._build()
@@ -126,8 +126,6 @@ class WeeklyBulletinOrderDialog(wx.Dialog):
         for row in self.service_rows:
             when = row[1].strftime("%m/%d/%Y %I:%M %p") if hasattr(row[1], "strftime") else str(row[1])
             self.service.Append(f"{when} — {row[2] or 'Service'}")
-        for row in self.template_rows:
-            self.template.Append(row[1] + (" (Starter)" if row[4] else " (Customized)"))
         if self.service_rows:
             selected = next(
                 (index for index, row in enumerate(self.service_rows)
@@ -144,6 +142,13 @@ class WeeklyBulletinOrderDialog(wx.Dialog):
     def on_service(self, _event=None):
         service_id = self.selected_service_id()
         assignment = self.repository.assignment(service_id) if service_id is not None else None
+        self.template_rows = [
+            row for row in self.generator.repository.templates_for_service(service_id) if row[3]
+        ] if service_id is not None else []
+        self.template.Clear()
+        for row in self.template_rows:
+            label = row[1] + (" (Starter)" if row[4] else " (Customized)")
+            self.template.Append(f"{label} — {row[6]}")
         if assignment:
             template_index = next(
                 (index for index, row in enumerate(self.template_rows) if row[0] == assignment[1]), 0

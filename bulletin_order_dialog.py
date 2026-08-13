@@ -170,6 +170,7 @@ class BulletinOrderDialog(wx.Dialog):
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.repository = BulletinOrderRepository(connection)
         self.church_id = church_id
+        self.hymnal_rows = self.repository.hymnals()
         self.template_rows = []
         self.line_rows = []
         self.initial_template_id = select_template_id
@@ -198,10 +199,19 @@ class BulletinOrderDialog(wx.Dialog):
         )
         help_text.SetForegroundColour(BLUE)
         outer.Add(help_text, 0, wx.ALL, 10)
+        hymnal_row = wx.BoxSizer(wx.HORIZONTAL)
+        hymnal_row.Add(wx.StaticText(panel, label="Hymnal"), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 8)
+        self.hymnal = wx.Choice(panel)
+        self.hymnal.Append("No hymnal")
+        for row in self.hymnal_rows:
+            self.hymnal.Append(f"{row[1]} - {row[2]}")
+        hymnal_row.Add(self.hymnal, 1)
+        outer.Add(hymnal_row, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
         body = wx.BoxSizer(wx.HORIZONTAL)
         self.templates = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-        self.templates.AppendColumn("Template", width=245)
+        self.templates.AppendColumn("Template", width=225)
         self.templates.AppendColumn("Status", width=90)
+        self.templates.AppendColumn("Hymnal", width=210)
         self.lines = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         for label, width in (("Order", 65), ("Bulletin text", 300), ("Reference / value", 190),
                              ("Type", 100), ("Condition", 135), ("Review", 70)):
@@ -229,6 +239,7 @@ class BulletinOrderDialog(wx.Dialog):
         panel.SetSizer(outer)
         self.templates.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_template_selected)
         self.lines.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit)
+        self.hymnal.Bind(wx.EVT_CHOICE, self.on_hymnal_changed)
 
     def refresh_templates(self, select_id=None):
         self.template_rows = self.repository.templates()
@@ -237,6 +248,7 @@ class BulletinOrderDialog(wx.Dialog):
         for index, row in enumerate(self.template_rows):
             item = self.templates.InsertItem(index, row[1])
             self.templates.SetItem(item, 1, "Starter" if row[4] else "Customized")
+            self.templates.SetItem(item, 2, row[6])
             if not row[4]:
                 self.templates.SetItemTextColour(item, BLUE)
             if row[0] == select_id:
@@ -255,6 +267,16 @@ class BulletinOrderDialog(wx.Dialog):
 
     def on_template_selected(self, _event=None):
         template = self.selected_template()
+        if template:
+            hymnal_index = next(
+                (index + 1 for index, row in enumerate(self.hymnal_rows) if row[0] == template[5]),
+                0,
+            )
+            self.hymnal.SetSelection(hymnal_index)
+            self.hymnal.Enable(not bool(template[4]))
+        else:
+            self.hymnal.SetSelection(0)
+            self.hymnal.Disable()
         self.line_rows = self.repository.lines(template[0]) if template else []
         self.lines.DeleteAllItems()
         for index, row in enumerate(self.line_rows):
@@ -262,6 +284,18 @@ class BulletinOrderDialog(wx.Dialog):
             value = row[5] or row[6] or ""
             for column, text in enumerate((row[3], value, row[2], row[15], "Yes" if row[18] else ""), 1):
                 self.lines.SetItem(item, column, str(text or ""))
+
+    def on_hymnal_changed(self, _event=None):
+        template = self.selected_template()
+        if not template or template[4]:
+            return
+        selection = self.hymnal.GetSelection()
+        hymnal_id = None if selection <= 0 else self.hymnal_rows[selection - 1][0]
+        try:
+            self.repository.set_template_hymnal(template[0], hymnal_id)
+            self.refresh_templates(template[0])
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to change hymnal", wx.OK | wx.ICON_ERROR, self)
 
     def _require_custom(self):
         template = self.selected_template()

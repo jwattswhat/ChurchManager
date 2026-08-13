@@ -209,6 +209,31 @@ class TestChurchManagerDatabase(unittest.TestCase):
         )[0][0]
         self.assertEqual(obsolete_option, 0)
 
+    def test_bulletin_order_hymnal_link_is_optional_and_seeded(self):
+        migration = self.query(
+            "SELECT version FROM schema_migrations "
+            "WHERE version='028_link_bulletin_orders_to_hymnals.sql'"
+        )
+        self.assertEqual(migration, [("028_link_bulletin_orders_to_hymnals.sql",)])
+        column = self.query(
+            "SELECT IS_NULLABLE FROM information_schema.COLUMNS "
+            "WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tblBulletinOrderTemplate' "
+            "AND COLUMN_NAME='HymnalID'"
+        )
+        self.assertEqual(column, [("YES",)])
+        starter = self.query(
+            "SELECT h.Hymnal FROM tblBulletinOrderTemplate t "
+            "JOIN tblHymnal h ON h.ID=t.HymnalID "
+            "WHERE t.Name='LCMS Divine Service One'"
+        )
+        self.assertEqual(starter, [("LSB",)])
+        self.assertGreater(
+            self.query(
+                "SELECT COUNT(*) FROM tblBulletinOrderTemplate WHERE HymnalID IS NULL"
+            )[0][0],
+            0,
+        )
+
     def test_accounting_foundation_and_role_defaults_are_installed(self):
         rows = self.query(
             "SELECT version FROM schema_migrations "
