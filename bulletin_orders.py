@@ -372,6 +372,117 @@ class BulletinOrderRepository:
             cursor.close()
 
 
+class WeeklyBulletinOrderRepository:
+    """Service-specific snapshot and overrides; template records are never changed."""
+
+    def __init__(self, connection):
+        self.connection = portable_connection(connection)
+        self.templates = BulletinOrderRepository(self.connection)
+
+    def assignment(self, service_id):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT ServiceID,TemplateID FROM tblServiceBulletinOrder WHERE ServiceID=?",
+                (service_id,),
+            )
+            return cursor.fetchone()
+        finally:
+            cursor.close()
+
+    def lines(self, service_id):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT ID,Sequence,Included,LineType,Label,ValueSource,ValueKey,WeeklyValue,"
+                "ReferenceText,StyleName,LabelBold,ValueBold,Italic,IndentLevel,TabPosition,"
+                "TabAlignment,TabLeader,Note,TemplateLineID "
+                "FROM tblServiceBulletinOrderLine WHERE ServiceID=? ORDER BY Sequence,ID",
+                (service_id,),
+            )
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def apply_template(self, service_id, template_id):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT s.HolyCommunion,COALESCE(p.Season,'') FROM tblService s "
+                "LEFT JOIN tblPropers p ON p.ID=s.PropersID WHERE s.ID=?", (service_id,),
+            )
+            service = cursor.fetchone()
+            if not service:
+                raise ValueError("The selected service is unavailable.")
+            template_lines = self.templates.lines(template_id)
+            cursor.execute("DELETE FROM tblServiceBulletinOrderLine WHERE ServiceID=?", (service_id,))
+            cursor.execute(
+                "INSERT INTO tblServiceBulletinOrder (ServiceID,TemplateID) VALUES (?,?) "
+                "ON DUPLICATE KEY UPDATE TemplateID=VALUES(TemplateID),GeneratedPlainText=NULL,"
+                "GeneratedHtml=NULL,GeneratedAt=NULL", (service_id, template_id),
+            )
+            for line in template_lines:
+                included = BulletinOrderGenerator.condition_included(
+                    line[15], line[16], bool(service[0]), service[1],
+                )
+                cursor.execute(
+                    "INSERT INTO tblServiceBulletinOrderLine "
+                    "(ServiceID,TemplateLineID,Sequence,Included,LineType,Label,ValueSource,"
+                    "ValueKey,ReferenceText,StyleName,LabelBold,ValueBold,Italic,IndentLevel,"
+                    "TabPosition,TabAlignment,TabLeader,Note) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (service_id, line[0], line[1], included, line[2], line[3], line[4],
+                     line[5], line[6], line[7], line[8], line[9], line[10], line[11],
+                     line[12], line[13], line[14], line[17]),
+                )
+            self.connection.commit()
+            return len(template_lines)
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
+    def save_line(self, service_id, line_id, included, label, weekly_value, reference, note):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "UPDATE tblServiceBulletinOrderLine SET Included=?,Label=?,WeeklyValue=?,"
+                "ReferenceText=?,Note=? WHERE ID=? AND ServiceID=?",
+                (included, label.strip(), weekly_value or None, reference or None, note or None,
+                 line_id, service_id),
+            )
+            if cursor.rowcount != 1:
+                raise ValueError("The selected weekly bulletin line is unavailable.")
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
+    def move_line(self, service_id, line_id, direction):
+        rows = self.lines(service_id)
+        index = next((i for i, row in enumerate(rows) if row[0] == line_id), None)
+        target = None if index is None else index + direction
+        if index is None or target < 0 or target >= len(rows):
+            return
+        cursor = self.connection.cursor()
+        try:
+            current_sequence, target_sequence = rows[index][1], rows[target][1]
+            cursor.execute("UPDATE tblServiceBulletinOrderLine SET Sequence=-1 WHERE ID=?", (line_id,))
+            cursor.execute("UPDATE tblServiceBulletinOrderLine SET Sequence=? WHERE ID=?",
+                           (current_sequence, rows[target][0]))
+            cursor.execute("UPDATE tblServiceBulletinOrderLine SET Sequence=? WHERE ID=?",
+                           (target_sequence, line_id))
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
+
 class BulletinOrderGenerator:
     def __init__(self, connection):
         self.connection = portable_connection(connection)
@@ -433,9 +544,8 @@ class BulletinOrderGenerator:
             cursor.close()
 
     @staticmethod
-    def _included(line, service):
-        condition, value = line[15], line[16]
-        communion, season = bool(service[3]), str(service[5] or "").casefold()
+    def condition_included(condition, value, communion, season):
+        season = str(season or "").casefold()
         if condition == "COMMUNION":
             return communion
         if condition == "NO_COMMUNION":
@@ -446,26 +556,57 @@ class BulletinOrderGenerator:
             return str(value or "").casefold() != season
         return True
 
+    @classmethod
+    def _included(cls, line, service):
+        return cls.condition_included(line[15], line[16], bool(service[3]), service[5])
+
     def render(self, template_id, service_id):
         service, hymns, readings = self._service_context(service_id)
         rendered = []
-        for line in self.repository.lines(template_id):
-            if not self._included(line, service):
-                continue
-            source, key = line[4], line[5]
+        weekly_lines = WeeklyBulletinOrderRepository(self.connection).lines(service_id)
+        if weekly_lines:
+            source_lines = [
+                {
+                    "id": line[0], "sequence": line[1], "included": bool(line[2]),
+                    "type": line[3], "label": line[4], "source": line[5], "key": line[6],
+                    "weekly_value": line[7], "reference": line[8], "style": line[9],
+                    "label_bold": line[10], "value_bold": line[11], "italic": line[12],
+                    "indent": line[13], "tab_position": line[14],
+                    "tab_alignment": line[15], "tab_leader": line[16],
+                } for line in weekly_lines if line[2]
+            ]
+        else:
+            source_lines = [
+                {
+                    "id": line[0], "sequence": line[1], "included": True,
+                    "type": line[2], "label": line[3], "source": line[4], "key": line[5],
+                    "weekly_value": None, "reference": line[6], "style": line[7],
+                    "label_bold": line[8], "value_bold": line[9], "italic": line[10],
+                    "indent": line[11], "tab_position": line[12],
+                    "tab_alignment": line[13], "tab_leader": line[14],
+                } for line in self.repository.lines(template_id) if self._included(line, service)
+            ]
+        for source_line in source_lines:
+            source, key = source_line["source"], source_line["key"]
             value = None
-            if source == "SERVICE_HYMN":
+            if source_line["weekly_value"]:
+                value = source_line["weekly_value"]
+            elif source == "SERVICE_HYMN":
                 value = hymns.get(str(key or "").casefold())
             elif source == "SERVICE_READING":
                 value = readings.get(str(key or "").casefold())
                 if value is None and str(key or "").casefold() == "first reading":
                     value = readings.get("old testament") or readings.get("first")
             item = {
-                "id": line[0], "sequence": line[1], "type": line[2], "label": line[3],
-                "value": value, "reference": line[6], "style": line[7],
-                "label_bold": bool(line[8]), "value_bold": bool(line[9]),
-                "italic": bool(line[10]), "indent": line[11], "tab_position": line[12],
-                "tab_alignment": line[13], "tab_leader": line[14],
+                "id": source_line["id"], "sequence": source_line["sequence"],
+                "type": source_line["type"], "label": source_line["label"],
+                "value": value, "reference": source_line["reference"],
+                "style": source_line["style"], "label_bold": bool(source_line["label_bold"]),
+                "value_bold": bool(source_line["value_bold"]),
+                "italic": bool(source_line["italic"]), "indent": source_line["indent"],
+                "tab_position": source_line["tab_position"],
+                "tab_alignment": source_line["tab_alignment"],
+                "tab_leader": source_line["tab_leader"],
                 "missing": bool(source and not value), "value_key": key,
             }
             rendered.append(item)

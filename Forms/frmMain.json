@@ -169,6 +169,19 @@
                     "invoke": "worship.manage"
                 }
             },
+            "lblWeeklyBulletinOrder": {
+                "name": "lblWeeklyBulletinOrder",
+                "type": "StaticText",
+                "posch": [
+                    2,
+                    13
+                ],
+                "label": "   Weekly Bulletin Order",
+                "tooltip": "Enter this week's bulletin-outline choices and values.",
+                "security": {
+                    "invoke": "worship.manage"
+                }
+            },
             "lblAttendanceEvent": {
                 "type": "StaticText",
                 "name": "lblAttendanceEvent",
