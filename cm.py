@@ -60,6 +60,23 @@ single_instance = None
 
 
 class clsForm(JSForm.clsForm):
+    def _refresh_parent_grid(self, control_name):
+        parent = self.PARENT
+        if not parent or control_name not in getattr(parent, "CONTROLID", {}):
+            return
+        if not getattr(parent, "RECORDS", None):
+            return
+        description = parent.CONTROLDESCRIPTION[control_name]
+        parent.CONTROLID[control_name].SetValueTable(
+            parent.RECORDS.current(), description["table"]
+        )
+
+    def _on_close(self, event):
+        refresh_suggestions = self.FORMNAME == "frmProperHymnSuggestion"
+        super()._on_close(event)
+        if refresh_suggestions:
+            wx.CallAfter(self._refresh_parent_grid, "dvlHymnSuggestions")
+
     def bind_form_controls(self):
         JSForm.LG.log()
         if "btnHymnSearchByHymn" in self.CONTROLID:
