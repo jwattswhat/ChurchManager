@@ -8,7 +8,6 @@ FORM_ROUTES = {
     "lblPropers": "frmPropers",
     "lblHymnal": "frmHymnal",
     "lblHymn": "frmHymn",
-    "lblPrayers": "frmPrayer",
     "lblCheckList": "frmCheckList",
     "lblEnhancements": "frmEnhancement",
     "lblFamily": "frmFamily",
@@ -22,7 +21,6 @@ FORM_ROUTES = {
     "lblProject": "frmProject",
     "lblTask": "frmTask",
     "lblDocument": "frmDocument",
-    "lblAnnouncement": "frmAnnouncement",
     "lblAccountingAccounts": "frmAccountingAccount",
     "lblAccountingFunds": "frmAccountingFund",
     "lblAccountingFunctions": "frmAccountingFunction",
@@ -34,7 +32,7 @@ FORM_ROUTES = {
 
 SPECIAL_CONTROLS = {
     "lblOS", "lblWeeklyBulletinOrder", "lblGenerateOS", "lblNotifyParticipants", "lblSundayPrayers",
-    "lblParticipant", "lblSchedule",
+    "lblParticipant", "lblSchedule", "lblPrayers", "lblAnnouncement",
     "lblAnnouncements", "lblServiceSchedule", "lblReports", "lblReportDesigner", "lblScreenDesigner", "lblBackupDB",
     "lblUsers",
     "lblAccountingSetup",

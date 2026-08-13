@@ -27,6 +27,8 @@ def CMargs(prog,description,arguments, argv=None):
         cmparser.add_argument("-p", "--password", type=str)
     if "reportdate" in arguments:
         cmparser.add_argument("-r","--reportdate",type=str)
+    if "churchid" in arguments:
+        cmparser.add_argument("--church-id",type=int)
     if "test_mode" in arguments:
         cmparser.add_argument(
             "--test",
@@ -52,6 +54,8 @@ def CMargs(prog,description,arguments, argv=None):
         returnarguments["password"] = args.password
     if "reportdate" in arguments:
         returnarguments["reportdate"] = args.reportdate
+    if "churchid" in arguments:
+        returnarguments["churchid"] = args.church_id
     if "test_mode" in arguments:
         returnarguments["test_mode"] = args.test_mode
     if "jsform_database" in arguments:

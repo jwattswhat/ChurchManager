@@ -503,7 +503,7 @@
             },
             "lblSundayPrayers": {
                 "name": "lblSundayPrayers",
-                "label": "Sunday Prayers",
+                "label": "Weekly Prayers",
                 "posch": [
                     19,
                     10
@@ -517,7 +517,7 @@
             "lblAnnouncements": {
                 "name": "lblAnnouncements",
                 "type": "StaticText",
-                "label": "Sunday Announcements",
+                "label": "Weekly Announcements",
                 "posch": [
                     19,
                     11

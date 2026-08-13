@@ -32,6 +32,8 @@ from worship_service_dialog import show_worship_services
 from worship_scheduling import (
     show_participants, show_schedule_patterns, show_service_participants,
 )
+from sunday_content_dialog import show_announcements, show_prayers, show_sunday_preview
+from report_support import get_today, load_report_config
 from accounting.setup_dialog import show_accounting_setup
 from accounting.draft_dialog import show_accounting_draft_entry
 from accounting.review_dialog import show_accounting_review
@@ -499,13 +501,19 @@ def _buttonclick(event):
         )
 
     def _runSundayPrayers():
-        context.services.reports.start_python_report(
-            "rptPrayers.py", arguments, ["--reportdate", "now"]
+        show_sunday_preview(
+            cmfrm.FRAME, context.connection, "prayer", get_today(load_report_config()),
+            lambda value, church_id: context.services.reports.start_python_report(
+                "rptPrayers.py", arguments, ["--reportdate", value.isoformat(), "--church-id", str(church_id)]
+            ),
         )
 
     def _runSundayAnnouncements():
-        context.services.reports.start_python_report(
-            "rptAnnouncement.py", arguments, ["--reportdate", "now"]
+        show_sunday_preview(
+            cmfrm.FRAME, context.connection, "announcement", get_today(load_report_config()),
+            lambda value, church_id: context.services.reports.start_python_report(
+                "rptAnnouncement.py", arguments, ["--reportdate", value.isoformat(), "--church-id", str(church_id)]
+            ),
         )
 
     def _runReports(event):
@@ -585,6 +593,12 @@ def _buttonclick(event):
             return
         case "lblParticipant":
             show_participants(cmfrm.FRAME, context.connection)
+            return
+        case "lblPrayers":
+            show_prayers(cmfrm.FRAME, context.connection)
+            return
+        case "lblAnnouncement":
+            show_announcements(cmfrm.FRAME, context.connection)
             return
         case "lblSchedule":
             show_schedule_patterns(cmfrm.FRAME, context.connection)

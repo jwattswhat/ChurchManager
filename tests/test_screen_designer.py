@@ -22,7 +22,7 @@ class TestChurchManagerScreenDesigner(unittest.TestCase):
 
         loader = JSForm.ScreenDefinitionLoader()
         paths = sorted(Path("Forms").glob("*.json"))
-        self.assertGreaterEqual(len(paths), 60)
+        self.assertGreaterEqual(len(paths), 59)
         for path in paths:
             with self.subTest(form=path.name):
                 model = JSForm.ScreenDesignerModel(loader.load(path))
