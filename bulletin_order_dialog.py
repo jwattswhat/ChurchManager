@@ -152,15 +152,26 @@ class BulletinOrderLineDialog(wx.Dialog):
 
 
 class BulletinOrderDialog(wx.Dialog):
-    def __init__(self, parent, connection, church_id=None):
+    def __init__(self, parent, connection, church_id=None, select_template_id=None,
+                 select_line_id=None):
         super().__init__(parent, title="Bulletin Order Templates", size=(1120, 700),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.repository = BulletinOrderRepository(connection)
         self.church_id = church_id
         self.template_rows = []
         self.line_rows = []
+        self.initial_template_id = select_template_id
+        self.initial_line_id = select_line_id
         self._build()
-        self.refresh_templates()
+        self.refresh_templates(select_template_id)
+        if select_line_id is not None:
+            line_index = next(
+                (index for index, row in enumerate(self.line_rows) if row[0] == select_line_id), None
+            )
+            if line_index is not None:
+                self.lines.Select(line_index)
+                self.lines.Focus(line_index)
+                wx.CallAfter(self.on_edit, None)
         self.CentreOnParent()
 
     def _build(self):
@@ -388,8 +399,11 @@ class BulletinOrderDialog(wx.Dialog):
         dialog.Destroy()
 
 
-def show_bulletin_orders(parent, connection, church_id=None):
-    dialog = BulletinOrderDialog(parent, connection, church_id)
+def show_bulletin_orders(parent, connection, church_id=None, select_template_id=None,
+                         select_line_id=None):
+    dialog = BulletinOrderDialog(
+        parent, connection, church_id, select_template_id, select_line_id,
+    )
     try:
         return dialog.ShowModal()
     finally:

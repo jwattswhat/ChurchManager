@@ -10,6 +10,7 @@ from docx.shared import Inches
 import wx
 
 from bulletin_orders import BulletinOrderGenerator
+from bulletin_order_dialog import show_bulletin_orders
 
 
 OUTPUTS = ("Plain Text", "HTML", "Word Document")
@@ -80,7 +81,9 @@ class PrepareBulletinOrderDialog(wx.Dialog):
         outer.Add(self.status, 0, wx.EXPAND | wx.ALL, 12)
 
         buttons = wx.BoxSizer(wx.HORIZONTAL)
-        for label, handler in (("Preview", self.on_preview), ("Copy Output", self.on_copy),
+        for label, handler in (("Preview", self.on_preview),
+                               ("Edit / Customize Template", self.on_customize),
+                               ("Copy Output", self.on_copy),
                                ("Save Output", self.on_save)):
             button = wx.Button(panel, label=label)
             button.Bind(wx.EVT_BUTTON, handler)
@@ -92,8 +95,11 @@ class PrepareBulletinOrderDialog(wx.Dialog):
         outer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
         panel.SetSizer(outer)
         self.service.Bind(wx.EVT_CHOICE, self.on_service)
+        self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_customize)
 
     def _load_choices(self):
+        self.service.Clear()
+        self.template.Clear()
         for row in self.service_rows:
             when = row[1].strftime("%m/%d/%Y %I:%M %p") if hasattr(row[1], "strftime") else str(row[1])
             title = row[2] or "Service"
@@ -103,6 +109,34 @@ class PrepareBulletinOrderDialog(wx.Dialog):
         if self.service_rows:
             self.service.SetSelection(0)
             self.on_service()
+
+    def on_customize(self, _event=None):
+        template_index = self.template.GetSelection()
+        if template_index < 0:
+            wx.MessageBox("Choose a bulletin-order template first.", "Selection needed",
+                          wx.OK | wx.ICON_INFORMATION, self)
+            return
+        template_id = self.template_rows[template_index][0]
+        selected_preview = self.grid.GetFirstSelected()
+        line_id = None
+        if self.rendered is not None and selected_preview >= 0:
+            line_id = self.rendered["lines"][selected_preview]["id"]
+        show_bulletin_orders(
+            self, self.generator.connection,
+            select_template_id=template_id, select_line_id=line_id,
+        )
+        selected_id = template_id
+        self.template_rows = [row for row in self.generator.repository.templates() if row[3]]
+        self.template.Clear()
+        for row in self.template_rows:
+            self.template.Append(row[1] + (" (Starter)" if row[4] else " (Customized)"))
+        refreshed_index = next(
+            (index for index, row in enumerate(self.template_rows) if row[0] == selected_id), 0
+        )
+        if self.template_rows:
+            self.template.SetSelection(refreshed_index)
+        self.rendered = None
+        self.on_preview()
 
     def on_service(self, _event=None):
         index = self.service.GetSelection()
