@@ -318,7 +318,13 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         self.fields["os_note"].SetBackgroundColour(
             wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE)
         )
-        right.SetSizer(self.detail_box)
+        # Keep controls clear of the native vertical scrollbar. On Windows the
+        # scrollbar can consume part of the scrolled window's reported client
+        # width after the sizer has calculated its expanding children.
+        right_layout = wx.BoxSizer(wx.HORIZONTAL)
+        right_layout.Add(self.detail_box, 1, wx.EXPAND)
+        right_layout.AddSpacer(32)
+        right.SetSizer(right_layout)
 
         outer.Add(splitter, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
         actions = wx.BoxSizer(wx.HORIZONTAL)

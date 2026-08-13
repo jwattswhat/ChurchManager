@@ -246,6 +246,10 @@ class TestChurchManagerPython(unittest.TestCase):
         self.assertIn('selected_date.GetYear()', source)
         self.assertIn('selected_time.GetHour()', source)
 
+    def test_unified_worship_reserves_space_for_right_scrollbar(self):
+        source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
+        self.assertIn("right_layout.AddSpacer(32)", source)
+
     def test_cm_has_guarded_main_entrypoint(self):
         tree = ast.parse((ROOT / "cm.py").read_text(encoding="utf-8-sig"))
         main_functions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "main"]
