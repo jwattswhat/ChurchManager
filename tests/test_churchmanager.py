@@ -237,6 +237,15 @@ class TestChurchManagerPython(unittest.TestCase):
         self.assertIn('choice_values("Location")', source)
         self.assertIn('key in ("proper", "sermon", "location")', source)
 
+    def test_unified_worship_uses_separate_native_date_and_time_pickers(self):
+        source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
+        self.assertIn('wx.adv.DatePickerCtrl', source)
+        self.assertIn('wx.adv.TimePickerCtrl', source)
+        self.assertIn('("service_date", "Service date"', source)
+        self.assertIn('("service_time", "Service time"', source)
+        self.assertIn('selected_date.GetYear()', source)
+        self.assertIn('selected_time.GetHour()', source)
+
     def test_cm_has_guarded_main_entrypoint(self):
         tree = ast.parse((ROOT / "cm.py").read_text(encoding="utf-8-sig"))
         main_functions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "main"]

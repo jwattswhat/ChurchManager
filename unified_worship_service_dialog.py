@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from datetime import datetime
 import wx
+import wx.adv
 
 from bulletin_orders import (
     BulletinOrderRepository,
@@ -293,7 +294,9 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         self.detail_box.Add(title, 0, wx.ALL, 8)
         self.fields = {}
         for key, label, multiline, inline in (
-            ("church", "Church", False, True), ("when", "Date and time", False, True),
+            ("church", "Church", False, True),
+            ("service_date", "Service date", False, True),
+            ("service_time", "Service time", False, True),
             ("location", "Location", False, True), ("proper", "Proper", False, False),
             ("liturgical", "Printed liturgical title", False, False),
             ("communion", "Holy Communion", False, True),
@@ -333,7 +336,11 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         panel.SetSizer(outer)
 
     def _add_field(self, parent, key, label, multiline, inline):
-        if key in ("proper", "sermon", "location"):
+        if key == "service_date":
+            control = wx.adv.DatePickerCtrl(parent, style=wx.adv.DP_DROPDOWN)
+        elif key == "service_time":
+            control = wx.adv.TimePickerCtrl(parent)
+        elif key in ("proper", "sermon", "location"):
             control = wx.Choice(parent)
             if key == "proper":
                 control.Bind(wx.EVT_CHOICE, self.on_proper)
@@ -388,7 +395,6 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         church = self.repository.one("SELECT Church FROM tblChurch WHERE ID=?", (r[1],))
         values = {
             "church": church[0] if church else "",
-            "when": r[2].strftime("%m/%d/%Y %I:%M %p") if hasattr(r[2], "strftime") else str(r[2]),
             "liturgical": r[5], "communion": bool(r[6]),
             "psalm": r[9], "bulletin": r[11], "check_complete": bool(r[12]),
             "os_note": r[8], "note": r[14],
@@ -409,6 +415,16 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
                 control.SetPath(str(value or ""))
             else:
                 control.SetValue(str(value or ""))
+        when = r[2]
+        if hasattr(when, "year"):
+            self.fields["service_date"].SetValue(
+                wx.DateTime.FromDMY(when.day, when.month - 1, when.year)
+            )
+            time_value = wx.DateTime.Now()
+            time_value.SetHour(when.hour)
+            time_value.SetMinute(when.minute)
+            time_value.SetSecond(when.second)
+            self.fields["service_time"].SetValue(time_value)
         hymn_ids = self.repository.weekly_hymns(self.service_id)
         self.working_lines = [
             self._weekly_line(row, hymn_ids.get(row[0]))
@@ -647,14 +663,12 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             if wx.MessageBox(message, "Worship Service Validation",
                              wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES:
                 return
-        try:
-            when = datetime.strptime(
-                self.fields["when"].GetValue().strip(), "%m/%d/%Y %I:%M %p"
-            )
-        except ValueError:
-            wx.MessageBox("Enter the date and time as MM/DD/YYYY HH:MM AM or PM.",
-                          "Invalid Date and Time", wx.OK | wx.ICON_WARNING, self)
-            return
+        selected_date = self.fields["service_date"].GetValue()
+        selected_time = self.fields["service_time"].GetValue()
+        when = datetime(
+            selected_date.GetYear(), selected_date.GetMonth() + 1, selected_date.GetDay(),
+            selected_time.GetHour(), selected_time.GetMinute(), selected_time.GetSecond(),
+        )
         service_values = (
             when, self.fields["location"].GetStringSelection() or None,
             self._choice_value(self.fields["proper"], self.proper_rows),
