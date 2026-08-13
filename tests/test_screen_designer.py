@@ -104,6 +104,9 @@ class TestChurchManagerScreenDesigner(unittest.TestCase):
         family = json.loads(Path("Forms/frmFamily.json").read_text(encoding="utf-8"))["frmFamilyFORM"]
         self.assertIn("Picture", person["FORM"]["table"]["fields"])
         self.assertEqual(person["CONTROLS"]["Picture"]["type"], "ImagePickerCtrl")
+        self.assertEqual(person["FORM"]["layout"]["type"], "legacy")
+        linked_person_fields = family["FORM"]["linkedform"]["frmPerson"]["table"]["fields"]
+        self.assertIn("Picture", linked_person_fields)
         self.assertIn("Image", family["FORM"]["table"]["fields"])
         self.assertEqual(family["CONTROLS"]["Image"]["type"], "ImagePickerCtrl")
 

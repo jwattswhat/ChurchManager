@@ -116,6 +116,7 @@
                             "Confirmed",
                             "Member",
                             "AssociateMember",
+                            "Picture",
                             "Note"
                         ],
                         "condition": "FamilyID = {ID}",

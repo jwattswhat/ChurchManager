@@ -27,9 +27,7 @@
                 "CAPTION"
             ],
             "layout": {
-                "type": "responsive",
-                "border": 2,
-                "gap": 2
+                "type": "legacy"
             },
             "linkedform": {
                 "frmPersonAddress": {
@@ -389,8 +387,7 @@
                 "type": "ImagePickerCtrl",
                 "name": "Picture",
                 "posch": [37, 10],
-                "sizech": [16, 14],
-                "layout": {"row_span": 7, "expand": true},
+                "sizech": [16, 15],
                 "maxbytes": 5242880,
                 "tooltip": "Choose the individual's picture stored in the database."
             },
