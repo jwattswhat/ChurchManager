@@ -12,6 +12,7 @@ from ui_dimensions import DATE_PICKER_SIZE, TIME_PICKER_SIZE
 from hymn_validation import duplicate_selection_status, normalize_tune
 
 from bulletin_orders import (
+    BulletinOrderGenerator,
     BulletinOrderRepository,
     WeeklyBulletinOrderRepository,
     portable_connection,
@@ -460,6 +461,8 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
                 control.Bind(wx.EVT_CHOICE, self.on_proper)
         elif key in ("communion", "check_complete"):
             control = wx.CheckBox(parent)
+            if key == "communion":
+                control.Bind(wx.EVT_CHECKBOX, self.on_communion)
         elif key == "bulletin":
             control = wx.FilePickerCtrl(parent, message="Select the bulletin file")
         else:
@@ -700,6 +703,30 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         if not self.loading:
             self.apply_proper()
 
+    def on_communion(self, _event):
+        if not self.loading:
+            self._refresh_conditional_lines()
+            self.refresh_grid()
+
+    def _refresh_conditional_lines(self):
+        template_id = self._choice_value(self.template, self.template_rows)
+        if template_id is None:
+            return
+        conditions = {
+            row[0]: (row[15], row[16])
+            for row in self.repository.templates.lines(template_id)
+        }
+        proper_id = self._choice_value(self.fields["proper"], self.proper_rows)
+        detail = self.repository.proper_detail(proper_id) if proper_id else None
+        season = detail[2] if detail else ""
+        communion = self.fields["communion"].GetValue()
+        for line in self.working_lines:
+            condition = conditions.get(line.get("template_line_id"))
+            if condition:
+                line["included"] = BulletinOrderGenerator.condition_included(
+                    condition[0], condition[1], communion, season,
+                )
+
     def on_view_proper(self, _event):
         selection = self.fields["proper"].GetSelection()
         if selection == wx.NOT_FOUND:
@@ -720,6 +747,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         if proper_id:
             detail = self.repository.proper_detail(proper_id)
             self.fields["liturgical"].SetValue(str(detail[3] or ""))
+        self._refresh_conditional_lines()
         readings_by_use = {row[0]: row[1] for row in readings}
         unused = list(suggestions)
         for line in self.working_lines:

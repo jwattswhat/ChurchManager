@@ -286,6 +286,13 @@ class TestChurchManagerPython(unittest.TestCase):
         self.assertIn("WORSHIP_SERVICE_DELETED", repository)
         self.assertIn("DELETE FROM tblHymnUsage WHERE ServiceID=?", repository)
 
+    def test_communion_checkbox_reactivates_required_template_lines(self):
+        source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
+        self.assertIn("control.Bind(wx.EVT_CHECKBOX, self.on_communion)", source)
+        self.assertIn("def _refresh_conditional_lines", source)
+        self.assertIn("BulletinOrderGenerator.condition_included", source)
+        self.assertIn('line["included"] =', source)
+
     def test_unified_worship_save_persists_service_order_and_hymns_together(self):
         source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
         self.assertIn("def save(self, service_id, service_values, template_id, lines)", source)
