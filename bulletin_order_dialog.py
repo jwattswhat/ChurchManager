@@ -14,9 +14,11 @@ CONDITIONS = ("ALWAYS", "COMMUNION", "NO_COMMUNION", "INCLUDE_SEASON", "EXCLUDE_
 
 
 class BulletinOrderLineDialog(wx.Dialog):
-    def __init__(self, parent, existing=None, default_sequence=10):
-        super().__init__(parent, title="Edit Bulletin Order Line", size=(600, 610))
+    def __init__(self, parent, existing=None, default_sequence=10, editable=True):
+        super().__init__(parent, title="Edit Bulletin Order Line" if editable else "Bulletin Order Line Details",
+                         size=(600, 610))
         self.existing = existing
+        self.editable = editable
         panel = wx.Panel(self)
         outer = wx.BoxSizer(wx.VERTICAL)
         form = wx.FlexGridSizer(cols=2, vgap=8, hgap=12)
@@ -81,7 +83,7 @@ class BulletinOrderLineDialog(wx.Dialog):
         condition_form.Add(wx.StaticText(panel, label="Internal note"), 0, wx.ALIGN_TOP)
         condition_form.Add(self.note, 1, wx.EXPAND)
 
-        buttons = self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL)
+        buttons = self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL if editable else wx.CLOSE)
         outer.Add(form, 0, wx.EXPAND | wx.ALL, 12)
         outer.Add(format_box, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
         outer.Add(condition_form, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
@@ -91,6 +93,17 @@ class BulletinOrderLineDialog(wx.Dialog):
         if existing:
             self._load(existing)
         self._tab_state()
+        if not editable:
+            for control in (
+                self.sequence, self.line_type, self.label, self.value_source, self.value_key,
+                self.reference, self.style, self.indent, self.use_tab, self.tab_position,
+                self.tab_alignment, self.tab_leader, self.label_bold, self.value_bold,
+                self.italic, self.condition, self.condition_value, self.note,
+            ):
+                control.Disable()
+            close = self.FindWindow(wx.ID_CLOSE)
+            if close:
+                close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE))
 
     def _load(self, row):
         self.sequence.SetValue(row[1])
@@ -273,13 +286,16 @@ class BulletinOrderDialog(wx.Dialog):
 
     def on_edit(self, _event):
         try:
-            template = self._require_custom()
+            template = self.selected_template()
+            if not template:
+                return
             line = self.selected_line()
             if not line:
                 return
-            dialog = BulletinOrderLineDialog(self, existing=line)
+            editable = not bool(template[4])
+            dialog = BulletinOrderLineDialog(self, existing=line, editable=editable)
             try:
-                if dialog.ShowModal() == wx.ID_OK:
+                if dialog.ShowModal() == wx.ID_OK and editable:
                     self.repository.save_line(template[0], dialog.values(), line[0])
                     self.on_template_selected()
             finally:
