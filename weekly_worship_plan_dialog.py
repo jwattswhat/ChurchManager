@@ -48,7 +48,7 @@ class WeeklyWorshipPlanRepository:
             cursor.execute(
                 "SELECT s.HymnID,COALESCE(h.Hymn,''),COALESCE(h.Title,''),s.SuggestedAs "
                 "FROM tblProperHymnSuggestion s JOIN tblHymn h ON h.ID=s.HymnID "
-                "WHERE s.PropersID=? ORDER BY s.Priority,h.Hymn,h.Title", (propers_id,),
+                "WHERE s.PropersID=? ORDER BY h.Hymn,h.Title,s.ID", (propers_id,),
             )
             return cursor.fetchall()
         finally:

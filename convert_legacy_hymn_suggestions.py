@@ -190,7 +190,6 @@ def main():
                         "proper": proper["LiturgicalDate"],
                         "number": number,
                         "title": hymn["Title"],
-                        "priority": found_for_proper * 10,
                     }
                 )
             if not found_for_proper:
@@ -281,12 +280,11 @@ def main():
                     continue
                 cursor.execute(
                     "INSERT INTO tblProperHymnSuggestion "
-                    "(PropersID,HymnID,SuggestedAs,Priority,Note) VALUES (?,?,?,?,?)",
+                    "(PropersID,HymnID,SuggestedAs,Note) VALUES (?,?,?,?)",
                     (
                         proper_id,
                         hymn_id,
                         role,
-                        item["priority"],
                         "Converted from the legacy HymnSug text; the original text remains on the Proper.",
                     ),
                 )

@@ -34,9 +34,9 @@
                     "title": "Suggested Hymns",
                     "table": {
                         "name": "tblProperHymnSuggestion",
-                        "fields": ["ID", "PropersID", "HymnID", "SuggestedAs", "Priority", "Note"],
+                        "fields": ["ID", "PropersID", "HymnID", "SuggestedAs", "Note"],
                         "condition": "PropersID = {ID}",
-                        "orderby": "Priority, ID"
+                        "orderby": "ID"
                     },
                     "controls": ["Navigation", "Update", "Delete", "Close"],
                     "readonlyfields": ["PropersID"],
@@ -236,13 +236,12 @@
                 "name": "dvlHymnSuggestions",
                 "table": {
                     "name": "tblProperHymnSuggestion",
-                    "fields": ["ID", "HymnID", "SuggestedAs", "Priority"],
+                    "fields": ["ID", "HymnID", "SuggestedAs"],
                     "condition": "PropersID = {ID}"
                 },
                 "column": [
-                    {"name": "HymnID", "label": "Hymn", "widthch": 16, "lookupchoices": {"name": "tblHymn", "fields": ["Hymn", "Title"], "condition": "ID = {HymnID}"}},
-                    {"name": "SuggestedAs", "label": "Use", "widthch": 10},
-                    {"name": "Priority", "label": "Priority", "widthch": 6}
+                    {"name": "HymnID", "label": "Hymn No.", "widthch": 12, "lookup": {"table": "tblHymn", "display": "Hymn", "key": "ID"}},
+                    {"name": "SuggestedAs", "label": "Use", "widthch": 14}
                 ],
                 "posch": [
                     39,

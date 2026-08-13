@@ -93,6 +93,19 @@ class TestWorshipPlanningStructure(unittest.TestCase):
         self.assertIn("FOREIGN KEY (HymnID)", migration)
         self.assertIn("UNIQUE KEY uq_proper_hymn_suggestion", migration)
 
+    def test_proper_hymn_suggestion_priority_is_removed(self):
+        migration = (ROOT / "migrations" / "031_remove_proper_hymn_suggestion_priority.sql").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("ALTER TABLE tblProperHymnSuggestion", migration)
+        self.assertIn("DROP COLUMN Priority", migration)
+
+        form = json.loads((ROOT / "Forms" / "frmPropers.json").read_text(encoding="utf-8"))
+        controls = form["frmPropersFORM"]["CONTROLS"]
+        suggestion_grid = controls["dvlHymnSuggestions"]
+        self.assertNotIn("Priority", suggestion_grid["table"]["fields"])
+        self.assertEqual(suggestion_grid["column"][0]["lookup"]["display"], "Hymn")
+
     def test_church_selects_primary_hymnal(self):
         migration = (ROOT / "migrations" / "027_add_church_primary_hymnal.sql").read_text(
             encoding="utf-8"
