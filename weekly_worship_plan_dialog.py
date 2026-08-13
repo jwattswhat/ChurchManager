@@ -7,29 +7,16 @@ import wx
 from bulletin_orders import portable_connection
 
 
-def suggestion_role_key(value):
-    """Match full suggestion labels to the shorter template slot keys."""
-    role = str(value or "").strip().casefold()
-    if role == "communion" or role.startswith("distribution"):
-        return "distribution hymn"
-    return {
-        "entrance": "hymn of invocation",
-        "hymn of invocation": "hymn of invocation",
-        "of the day": "hymn of the day",
-        "hymn of the day": "hymn of the day",
-    }.get(role, role)
-
-
 def match_suggestions_to_slots(slots, suggestions):
     """Match each service slot to the first unused suggestion with its title."""
     used_suggestions = set()
     assignments = []
     for slot in slots:
-        role = suggestion_role_key(slot[1])
+        role = slot[1]
         for index, suggestion in enumerate(suggestions):
             if index in used_suggestions:
                 continue
-            if suggestion_role_key(suggestion[3]) == role:
+            if suggestion[3] == role:
                 assignments.append((slot[0], slot[1], suggestion[0]))
                 used_suggestions.add(index)
                 break
@@ -232,7 +219,7 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
         suggestions = self.repository.suggestions(self.propers_id)
         suggested_by_role = {}
         for _hymn_id, number, title, role in suggestions:
-            suggested_by_role.setdefault(suggestion_role_key(role), []).append(
+            suggested_by_role.setdefault(role, []).append(
                 " ".join(value for value in (str(number), title) if value).strip()
             )
         self.hymn_rows = self.repository.hymn_slots(self.service_id)
@@ -241,9 +228,8 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
             item = self.hymn_grid.InsertItem(index, str(row[1] or "Hymn"))
             self.hymn_grid.SetItem(item, 1, str(row[2]))
             self.hymn_grid.SetItem(item, 2, str(row[3]))
-            matched = suggested_by_role.get(suggestion_role_key(row[1]), [])
-            general = suggested_by_role.get("", [])
-            self.hymn_grid.SetItem(item, 3, "; ".join(matched or general))
+            matched = suggested_by_role.get(row[1], [])
+            self.hymn_grid.SetItem(item, 3, "; ".join(matched))
             if not row[2] and not row[3]:
                 self.hymn_grid.SetItemTextColour(item, wx.RED)
         self.reading_rows = self.repository.readings(self.service_id)

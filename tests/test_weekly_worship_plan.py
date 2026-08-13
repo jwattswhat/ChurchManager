@@ -1,6 +1,6 @@
 import unittest
 
-from weekly_worship_plan_dialog import match_suggestions_to_slots, suggestion_role_key
+from weekly_worship_plan_dialog import match_suggestions_to_slots
 
 
 class WeeklyWorshipPlanMatchingTests(unittest.TestCase):
@@ -57,10 +57,13 @@ class WeeklyWorshipPlanMatchingTests(unittest.TestCase):
             [(10, "Hymn of Invocation", 501)],
         )
 
-    def test_legacy_slot_aliases_match_full_suggestion_names(self):
-        self.assertEqual(suggestion_role_key("Entrance"), "hymn of invocation")
-        self.assertEqual(suggestion_role_key("Of the Day"), "hymn of the day")
-        self.assertEqual(suggestion_role_key("Communion"), "distribution hymn")
+    def test_nonexact_suggested_use_is_skipped(self):
+        slots = [(10, "Hymn of Invocation", "", ""), (20, "Distribution Hymn", "", "")]
+        suggestions = [
+            (501, "501", "Opening", "Entrance"),
+            (502, "502", "Distribution", "distribution hymn"),
+        ]
+        self.assertEqual(match_suggestions_to_slots(slots, suggestions), [])
 
 
 if __name__ == "__main__":
