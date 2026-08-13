@@ -5,6 +5,7 @@ from __future__ import annotations
 import wx
 
 from bulletin_orders import BulletinOrderGenerator, WeeklyBulletinOrderRepository
+from weekly_worship_plan_dialog import show_weekly_worship_plan
 
 
 class WeeklyLineDialog(wx.Dialog):
@@ -103,6 +104,7 @@ class WeeklyBulletinOrderDialog(wx.Dialog):
         outer.Add(self.status, 0, wx.ALL, 10)
         buttons = wx.BoxSizer(wx.HORIZONTAL)
         for label, handler in (("Apply Selected Template", self.on_apply),
+                               ("Plan Hymns and Readings...", self.on_plan),
                                ("Apply Selected Hymns and Readings", self.on_apply_selections),
                                ("Edit Weekly Line", self.on_edit),
                                ("Move Up", lambda _event: self.on_move(-1)),
@@ -259,6 +261,17 @@ class WeeklyBulletinOrderDialog(wx.Dialog):
         except Exception as error:
             wx.MessageBox(str(error), "Unable to apply worship selections",
                           wx.OK | wx.ICON_ERROR, self)
+
+    def on_plan(self, _event):
+        service_id = self.selected_service_id()
+        if service_id is None or not self.repository.assignment(service_id):
+            wx.MessageBox(
+                "Apply a bulletin-order template to this service first.",
+                "Weekly order needed", wx.OK | wx.ICON_INFORMATION, self,
+            )
+            return
+        if show_weekly_worship_plan(self, self.repository.connection, service_id) == wx.ID_OK:
+            self.on_apply_selections(None)
 
     def on_edit(self, _event):
         row = self.selected_line()
