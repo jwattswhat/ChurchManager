@@ -73,9 +73,12 @@ class clsForm(JSForm.clsForm):
 
     def _on_close(self, event):
         refresh_suggestions = self.FORMNAME == "frmProperHymnSuggestion"
+        refresh_hymn_choices = self.FORMNAME == "frmHymn"
         super()._on_close(event)
         if refresh_suggestions:
             wx.CallAfter(self._refresh_parent_grid, "dvlHymnSuggestions")
+        if refresh_hymn_choices and getattr(self, "PARENT", None):
+            wx.CallAfter(self.PARENT.update_choices)
 
     def bind_form_controls(self):
         JSForm.LG.log()

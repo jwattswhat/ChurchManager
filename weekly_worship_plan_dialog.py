@@ -62,6 +62,25 @@ class WeeklyWorshipPlanRepository:
         finally:
             cursor.close()
 
+    def hymn_catalog_for_service(self, service_id):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT c.PrimaryHymnalID FROM tblService s "
+                "LEFT JOIN tblChurch c ON c.ID=s.ChurchID WHERE s.ID=?", (service_id,),
+            )
+            row = cursor.fetchone()
+            hymnal_id = row[0] if row else None
+            if not hymnal_id:
+                return self.hymn_catalog()
+            cursor.execute(
+                "SELECT ID,COALESCE(Hymn,''),COALESCE(Title,'') FROM tblHymn "
+                "WHERE HymnalID=? ORDER BY Hymn,Title", (hymnal_id,),
+            )
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
     def set_hymn(self, service_id, used_as, hymn_id):
         church_id = self.service(service_id)[0]
         cursor = self.connection.cursor()
@@ -103,7 +122,7 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
         self.service_id = service_id
         self.hymn_rows = []
         self.reading_rows = []
-        self.catalog = self.repository.hymn_catalog()
+        self.catalog = self.repository.hymn_catalog_for_service(service_id)
         self.propers_id = self.repository.service(service_id)[1]
         self._build()
         self.refresh()

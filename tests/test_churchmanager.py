@@ -93,6 +93,28 @@ class TestWorshipPlanningStructure(unittest.TestCase):
         self.assertIn("FOREIGN KEY (HymnID)", migration)
         self.assertIn("UNIQUE KEY uq_proper_hymn_suggestion", migration)
 
+    def test_church_selects_primary_hymnal(self):
+        migration = (ROOT / "migrations" / "027_add_church_primary_hymnal.sql").read_text(
+            encoding="utf-8"
+        )
+        church = load_json(FORMS / "frmChurch.json")["frmChurchFORM"]
+        suggestions = load_json(FORMS / "frmProperHymnSuggestion.json")[
+            "frmProperHymnSuggestionFORM"
+        ]
+        weekly_plan = (ROOT / "weekly_worship_plan_dialog.py").read_text(encoding="utf-8")
+        self.assertIn("PrimaryHymnalID", migration)
+        self.assertEqual(
+            church["CONTROLS"]["PrimaryHymnalID"]["lookupchoices"]["name"], "tblHymnal"
+        )
+        self.assertEqual(
+            suggestions["FORM"]["linkedform"]["frmHymn"]["table"]["name"], "tblHymn"
+        )
+        self.assertEqual(
+            suggestions["CONTROLS"]["btnHymnCatalog"]["action"],
+            ["openlinkedform", "frmHymn"],
+        )
+        self.assertIn("WHERE HymnalID=?", weekly_plan)
+
 
 class TestChurchManagerPython(unittest.TestCase):
     def test_cm_has_guarded_main_entrypoint(self):

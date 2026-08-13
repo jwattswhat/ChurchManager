@@ -11,6 +11,15 @@
                 ],
                 "orderby": "Church"
             },
+            "linkedform": {
+                "frmHymnal": {
+                    "name": "frmHymnal",
+                    "type": "Panel",
+                    "title": "Hymnal Catalog",
+                    "table": {"name": "tblHymnal", "fields": ["*"], "orderby": "Title"},
+                    "controls": ["Navigation", "Update", "Delete", "Close"]
+                }
+            },
             "stylelist": [
                 "CAPTION"
             ],
@@ -215,13 +224,35 @@
                 ],
                 "tooltip": "Enter the email address."
             },
+            "lblPrimaryHymnalID": {
+                "name": "lblPrimaryHymnalID",
+                "type": "StaticText",
+                "label": "Primary hymnal:",
+                "posch": [1, 19]
+            },
+            "PrimaryHymnalID": {
+                "name": "PrimaryHymnalID",
+                "type": "ComboBox",
+                "lookupchoices": {"name": "tblHymnal", "fields": ["ID", "Hymnal", "Title"], "orderby": "Title"},
+                "posch": [8, 19],
+                "sizech": [22, 2],
+                "tooltip": "Select the hymnal normally used by this church."
+            },
+            "btnHymnalCatalog": {
+                "name": "btnHymnalCatalog",
+                "type": "Button",
+                "label": "Hymnals...",
+                "action": ["openlinkedform", "frmHymnal"],
+                "posch": [33, 19],
+                "tooltip": "Review, add, or edit hymnals."
+            },
             "lblNote": {
                 "name": "lblNote",
                 "type": "StaticText",
                 "label": "Note:",
                 "posch": [
                     1,
-                    19
+                    21
                 ]
             },
             "Note": {
@@ -232,7 +263,7 @@
                 ],
                 "posch": [
                     6,
-                    19
+                    21
                 ],
                 "sizech": [
                     24,
