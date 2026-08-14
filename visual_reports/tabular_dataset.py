@@ -74,7 +74,7 @@ class TabularDatasetProvider:
         marker = self.marker
         direct = {
             "rpt_asset", "rpt_document", "rpt_attendance_event", "rpt_attendance_weekly",
-            "rpt_individual_attendance", "rpt_service",
+            "rpt_individual_attendance", "rpt_pastors_attendance_comparison", "rpt_service",
             "rpt_membership_person", "rpt_directory_family", "rpt_project",
             "rpt_journal", "rpt_pastor_report",
         }

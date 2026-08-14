@@ -102,6 +102,17 @@ class AttendanceTests(unittest.TestCase):
         self.assertIn("rpt_individual_attendance", migration)
         self.assertIn("PersonID", migration)
 
+    def test_pastors_attendance_comparison_uses_same_date_in_three_years(self):
+        inventory = (ROOT / "visual_reports" / "report_inventory.py").read_text(encoding="utf-8")
+        migration = (
+            ROOT / "migrations" / "059_add_pastors_attendance_comparison.sql"
+        ).read_text(encoding="utf-8")
+        self.assertIn('"CMAT04", "Pastor\'s Attendance Comparison"', inventory)
+        self.assertIn("YEAR(CURDATE())-1", migration)
+        self.assertIn("YEAR(CURDATE())-2", migration)
+        self.assertIn("FullYearAttendance", migration)
+        self.assertIn("ThroughDateAttendance", migration)
+
 
 if __name__ == "__main__":
     unittest.main()

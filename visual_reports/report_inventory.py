@@ -62,6 +62,14 @@ SPECS = (
         c("FirstName", "First Name", 90), c("Description", "Event", 145),
         c("AttendanceType", "Type", 90), c("Communion", "Communion", 70, "boolean"),
         c("Note", "Note", 130)), "LastName, FirstName, DateTime DESC", 2, "landscape"),
+    ReportSpec("CMAT04", "Pastor's Attendance Comparison", "reports.attendance.run", "rpt_pastors_attendance_comparison", (
+        c("ReportYear", "Year", 65, "integer"),
+        c("FullYearAttendance", "Full-year total", 100, "integer", "right"),
+        c("ThroughDateAttendance", "Total through today", 115, "integer", "right"),
+        c("EventsThroughDate", "Events", 70, "integer", "right"),
+        c("AverageThroughDate", "Average", 80, "decimal", "right"),
+        c("CommunionThroughDate", "Communion", 90, "integer", "right")),
+        "ReportYear DESC", 2),
     ReportSpec("CMHU01", "Hymn Usage by Service", "reports.worship.run", "rpt_hymn_usage", (
         c("ServiceID", "Service", 75, "integer"), c("UsedAs", "Used As", 110),
         c("HymnID", "Hymn ID", 75, "integer"), c("Note", "Notes", 275)), "ServiceID DESC, UsedAs", 2),

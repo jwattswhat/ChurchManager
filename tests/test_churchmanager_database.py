@@ -271,6 +271,12 @@ class TestChurchManagerDatabase(unittest.TestCase):
             "SELECT ID, ChurchID, PersonID, LastName, FirstName, DateTime, Description, "
             "AttendanceType, Communion, Note FROM rpt_individual_attendance LIMIT 1"
         )
+        rows = self.query(
+            "SELECT ChurchID, ReportYear, FullYearAttendance, ThroughDateAttendance, "
+            "EventsThroughDate, AverageThroughDate, CommunionThroughDate "
+            "FROM rpt_pastors_attendance_comparison ORDER BY ReportYear DESC LIMIT 3"
+        )
+        self.assertLessEqual(len(rows), 3)
 
     def test_propers_use_lectionary_systems_and_lookup_labels(self):
         migration = self.query(
