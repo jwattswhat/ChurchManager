@@ -230,8 +230,8 @@
                     1
                 ],
                 "layout": {
-                    "row": 2,
-                    "column": 0
+                    "row": 0,
+                    "column": 1
                 },
                 "sizech": [
                     12,
@@ -355,7 +355,7 @@
                 ],
                 "label": "Reports and Design",
                 "layout": {
-                    "row": 0,
+                    "row": 1,
                     "column": 1
                 }
             },
@@ -409,7 +409,11 @@
                 "sizech": [
                     12,
                     7
-                ]
+                ],
+                "layout": {
+                    "row": 1,
+                    "column": 2
+                }
             },
             "DesignersBox": {
                 "name": "DesignersBox",
@@ -422,7 +426,11 @@
                 "sizech": [
                     13,
                     12
-                ]
+                ],
+                "layout": {
+                    "row": 0,
+                    "column": 3
+                }
             },
             "lblGenerateOS": {
                 "name": "lblGenerateOS",
@@ -595,7 +603,11 @@
                 "sizech": [
                     12,
                     6
-                ]
+                ],
+                "layout": {
+                    "row": 2,
+                    "column": 1
+                }
             },
             "lblCurrentUser": {
                 "name": "lblCurrentUser",
@@ -637,7 +649,11 @@
                 "sizech": [
                     13,
                     13
-                ]
+                ],
+                "layout": {
+                    "row": 1,
+                    "column": 3
+                }
             },
             "lblAccountingSetup": {
                 "name": "lblAccountingSetup",
