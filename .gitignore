@@ -11,6 +11,7 @@ BackupDB/
 Backups/
 tmp/
 Log.txt
+root-reset.*.log
 .local-mariadb.ini
 mariadb-service-localhost.ini
 token.json

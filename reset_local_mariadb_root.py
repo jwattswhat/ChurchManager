@@ -4,6 +4,8 @@ from __future__ import annotations
 import subprocess
 import time
 import traceback
+import winreg
+import re
 from pathlib import Path
 
 import mariadb
@@ -16,11 +18,15 @@ SERVER = Path(r"C:\Program Files\MariaDB 12.1\bin\mysqld.exe")
 CONFIG = Path(r"C:\Program Files\MariaDB 12.1\data\my.ini")
 TARGET = "ChurchManager/LocalRestoreAdmin"
 RECOVERY_LOG = Path(__file__).with_name("root-reset.mariadb.log")
+SERVICE_REGISTRY = r"SYSTEM\CurrentControlSet\Services\MariaDB"
 
 
 def service_state():
     result = subprocess.run(["sc.exe", "query", SERVICE], capture_output=True, text=True, check=True)
-    return "RUNNING" if "STATE" in result.stdout and "RUNNING" in result.stdout else "STOPPED"
+    match = re.search(r"STATE\s+:\s+\d+\s+(\w+)", result.stdout)
+    if not match:
+        raise RuntimeError("Unable to determine the MariaDB service state.")
+    return match.group(1)
 
 
 def wait_for(state, seconds=30):
@@ -44,6 +50,22 @@ def recovery_connection(seconds=30):
     raise RuntimeError("MariaDB recovery server did not accept a local connection.") from last_error
 
 
+def service_image_path(value=None):
+    access = winreg.KEY_QUERY_VALUE | (winreg.KEY_SET_VALUE if value is not None else 0)
+    with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, SERVICE_REGISTRY, 0, access) as key:
+        if value is None:
+            return winreg.QueryValueEx(key, "ImagePath")[0]
+        winreg.SetValueEx(key, "ImagePath", 0, winreg.REG_EXPAND_SZ, value)
+
+
+def recovery_image_path(original):
+    service_name = '"MariaDB"'
+    options = "--skip-grant-tables --skip-networking=0 --bind-address=127.0.0.1"
+    if original.rstrip().endswith(service_name):
+        return original.rstrip()[:-len(service_name)] + options + " " + service_name
+    raise RuntimeError("The MariaDB service command has an unexpected format.")
+
+
 def main():
     username, password = read_credential(TARGET)
     if username != "root" or not password:
@@ -52,18 +74,16 @@ def main():
         raise RuntimeError("The expected local MariaDB 12.1 installation was not found.")
     if service_state() != "RUNNING":
         raise RuntimeError("Safety stop: the normal MariaDB service was not running before reset.")
-    recovery = None
+    original_image_path = None
+    configuration_changed = False
     connection = None
     try:
         subprocess.run(["sc.exe", "stop", SERVICE], check=True, capture_output=True, text=True)
         wait_for("STOPPED")
-        recovery = subprocess.Popen(
-            [str(SERVER), "--defaults-file=" + str(CONFIG), "--skip-grant-tables",
-             "--skip-networking=0", "--bind-address=127.0.0.1", "--port=3306",
-             "--log-error=" + str(RECOVERY_LOG), "--console"],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-        )
+        original_image_path = service_image_path()
+        service_image_path(recovery_image_path(original_image_path))
+        configuration_changed = True
+        subprocess.run(["sc.exe", "start", SERVICE], check=True, capture_output=True, text=True)
         connection = recovery_connection()
         cursor = connection.cursor()
         cursor.execute("FLUSH PRIVILEGES")
@@ -78,12 +98,15 @@ def main():
     finally:
         if connection is not None:
             connection.close()
-        if recovery is not None and recovery.poll() is None:
-            recovery.terminate()
-            try:
-                recovery.wait(timeout=15)
-            except subprocess.TimeoutExpired:
-                recovery.kill(); recovery.wait(timeout=5)
+        if configuration_changed:
+            state = service_state()
+            if state not in ("RUNNING", "STOPPED"):
+                wait_for("RUNNING", 45)
+                state = "RUNNING"
+            if state == "RUNNING":
+                subprocess.run(["sc.exe", "stop", SERVICE], check=True, capture_output=True, text=True)
+                wait_for("STOPPED")
+            service_image_path(original_image_path)
         if service_state() != "RUNNING":
             subprocess.run(["sc.exe", "start", SERVICE], check=True, capture_output=True, text=True)
             wait_for("RUNNING", 45)
