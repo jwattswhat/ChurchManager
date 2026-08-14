@@ -246,15 +246,6 @@ def _buttonclick(event):
     def _runSPrpt(event):
         context.services.reports.run_catalog_report(2, frm, context.connection)
 
-    def _runOSrpt(event):
-        ID = frm.CONTROLID["ServiceID"].GetValue()
-        if ID == None:
-            return
-        context.services.reports.start_python_report(
-            "rptOrderofService.py", arguments, ["--ID", str(ID)]
-        )
-        frm.FORM.Close()
-
     def _runNotify(event):
         ID = int(frm.CONTROLID["ServiceID"].GetValue())
         if ID == None:

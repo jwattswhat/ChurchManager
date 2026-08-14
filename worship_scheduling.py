@@ -104,29 +104,21 @@ class WorshipSchedulingRepository:
         person_id, display_name, email, phone, active, external, note = values
         cursor = self.connection.cursor()
         try:
-            legacy_roles = ";".join(str(row[1]) for row in self.all(
-                "SELECT ID,COALESCE(LegacyRoleID,ID) FROM tblWorshipRole WHERE ID IN ("
-                + ",".join("?" for _ in role_ids) + ")", tuple(role_ids),
-            )) if role_ids else ""
-            legacy_schedules = ";".join(str(row[1]) for row in self.all(
-                "SELECT ID,COALESCE(SourceLegacyScheduleID,ID) FROM tblWorshipSchedulePattern WHERE ID IN ("
-                + ",".join("?" for _ in pattern_ids) + ")", tuple(pattern_ids),
-            )) if pattern_ids else ""
             if participant_id is None:
                 cursor.execute(
                     "INSERT INTO tblParticipant "
-                    "(PersonID,Name,DisplayName,Roles,Schedule,Phone,eMail,Active,ExternalParticipant,Note) "
-                    "VALUES (?,?,?,?,?,?,?,?,?,?)",
-                    (person_id,display_name,display_name,legacy_roles,legacy_schedules,phone or None,
-                     email or None,int(active),int(external),note or None),
+                    "(PersonID,Name,DisplayName,Phone,eMail,Active,ExternalParticipant,Note) "
+                    "VALUES (?,?,?,?,?,?,?,?)",
+                    (person_id,display_name,display_name,phone or None,email or None,
+                     int(active),int(external),note or None),
                 )
                 participant_id = cursor.lastrowid
             else:
                 cursor.execute(
-                    "UPDATE tblParticipant SET PersonID=?,Name=?,DisplayName=?,Roles=?,Schedule=?,"
-                    "Phone=?,eMail=?,Active=?,ExternalParticipant=?,Note=? WHERE ID=?",
-                    (person_id,display_name,display_name,legacy_roles,legacy_schedules,phone or None,
-                     email or None,int(active),int(external),note or None,participant_id),
+                    "UPDATE tblParticipant SET PersonID=?,Name=?,DisplayName=?,Phone=?,eMail=?,"
+                    "Active=?,ExternalParticipant=?,Note=? WHERE ID=?",
+                    (person_id,display_name,display_name,phone or None,email or None,
+                     int(active),int(external),note or None,participant_id),
                 )
                 cursor.execute("DELETE FROM tblParticipantRole WHERE ParticipantID=?", (participant_id,))
                 cursor.execute("DELETE FROM tblParticipantAvailability WHERE ParticipantID=?", (participant_id,))
@@ -163,7 +155,6 @@ class WorshipSchedulingRepository:
                     "UPDATE tblWorshipRole SET Name=?,Description=?,DisplayOrder=?,Active=? WHERE ID=?",
                     (name, description or None, order, int(active), role_id),
                 )
-                cursor.execute("UPDATE tblServiceRole SET Role=? WHERE WorshipRoleID=?", (name, role_id))
             self.connection.commit()
         except Exception:
             self.connection.rollback()
@@ -228,31 +219,30 @@ class WorshipSchedulingRepository:
 
     def assignments(self, service_id):
         return self.all(
-            "SELECT sr.ID,sr.WorshipRoleID,COALESCE(wr.Name,sr.Role),sr.ParticipantID,"
+            "SELECT sr.ID,sr.WorshipRoleID,wr.Name,sr.ParticipantID,"
             "COALESCE(NULLIF(p.DisplayName,''),p.Name),sr.AssignmentStatus,COALESCE(sr.Note,'') "
             "FROM tblServiceRole sr JOIN tblParticipant p ON p.ID=sr.ParticipantID "
-            "LEFT JOIN tblWorshipRole wr ON wr.ID=sr.WorshipRoleID "
-            "WHERE sr.ServiceID=? ORDER BY COALESCE(wr.DisplayOrder,500),5,sr.ID", (service_id,),
+            "JOIN tblWorshipRole wr ON wr.ID=sr.WorshipRoleID "
+            "WHERE sr.ServiceID=? ORDER BY wr.DisplayOrder,5,sr.ID", (service_id,),
         )
 
     def save_assignment(self, assignment_id, service_id, role_id, participant_id, status, note):
-        role = self.one("SELECT Name FROM tblWorshipRole WHERE ID=?", (role_id,))
-        if not role:
+        if not self.one("SELECT ID FROM tblWorshipRole WHERE ID=?", (role_id,)):
             raise ValueError("Select a valid worship role.")
         cursor = self.connection.cursor()
         try:
             if assignment_id is None:
                 cursor.execute(
                     "INSERT INTO tblServiceRole "
-                    "(ServiceID,ParticipantID,WorshipRoleID,Role,AssignmentStatus,Note) "
-                    "VALUES (?,?,?,?,?,?)",
-                    (service_id,participant_id,role_id,role[0],status,note or None),
+                    "(ServiceID,ParticipantID,WorshipRoleID,AssignmentStatus,Note) "
+                    "VALUES (?,?,?,?,?)",
+                    (service_id,participant_id,role_id,status,note or None),
                 )
             else:
                 cursor.execute(
-                    "UPDATE tblServiceRole SET ParticipantID=?,WorshipRoleID=?,Role=?,"
+                    "UPDATE tblServiceRole SET ParticipantID=?,WorshipRoleID=?,"
                     "AssignmentStatus=?,Note=? WHERE ID=? AND ServiceID=?",
-                    (participant_id,role_id,role[0],status,note or None,assignment_id,service_id),
+                    (participant_id,role_id,status,note or None,assignment_id,service_id),
                 )
             self.connection.commit()
         except Exception:
@@ -266,16 +256,15 @@ class WorshipSchedulingRepository:
         cursor = self.connection.cursor()
         try:
             for item in suggestions:
-                cursor.execute("SELECT Name FROM tblWorshipRole WHERE ID=?", (item.role_id,))
-                role = cursor.fetchone()
-                if not role:
+                cursor.execute("SELECT ID FROM tblWorshipRole WHERE ID=?", (item.role_id,))
+                if not cursor.fetchone():
                     raise ValueError("A suggested worship position is no longer available.")
                 cursor.execute(
                     "INSERT INTO tblServiceRole "
-                    "(ServiceID,ParticipantID,WorshipRoleID,Role,AssignmentStatus,Note) "
-                    "VALUES (?,?,?,?,?,?)",
+                    "(ServiceID,ParticipantID,WorshipRoleID,AssignmentStatus,Note) "
+                    "VALUES (?,?,?,?,?)",
                     (
-                        service_id, item.participant_id, item.role_id, role[0],
+                        service_id, item.participant_id, item.role_id,
                         "SUGGESTED", "Suggested by ChurchManager",
                     ),
                 )

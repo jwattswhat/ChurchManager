@@ -20,7 +20,6 @@ TABLES = (
     "tblAttendanceEvent",
     "tblServiceRole",
     "tblHymnUsage",
-    "tblAltReading",
     "tblServiceBulletinOrderLine",
     "tblServiceBulletinOrder",
     "tblService",
@@ -114,7 +113,6 @@ def main():
         cursor.execute("DELETE FROM tblAttendanceEvent WHERE ServiceID IS NOT NULL")
         cursor.execute("DELETE FROM tblServiceRole")
         cursor.execute("DELETE FROM tblHymnUsage")
-        cursor.execute("DELETE FROM tblAltReading")
         cursor.execute("DELETE FROM tblServiceBulletinOrderLine")
         cursor.execute("DELETE FROM tblServiceBulletinOrder")
         cursor.execute(

@@ -56,7 +56,7 @@ class UnifiedWorshipServiceRepository:
             "COALESCE(s.LiturgicalDate,''),s.HolyCommunion,s.BulletinOrderTemplateID,"
             "COALESCE(s.OSNote,''),s.SermonID,"
             "COALESCE(s.Bulletin,''),COALESCE(s.CheckListComplete,0),"
-            "COALESCE(s.CheckList,'{}'),COALESCE(s.Note,''),COALESCE(t.Name,'Not selected') "
+            "COALESCE(s.Note,''),COALESCE(t.Name,'Not selected') "
             "FROM tblService s LEFT JOIN tblBulletinOrderTemplate t "
             "ON t.ID=s.BulletinOrderTemplateID WHERE s.ID=?", (service_id,),
         )
@@ -70,8 +70,8 @@ class UnifiedWorshipServiceRepository:
         try:
             cursor.execute(
                 "INSERT INTO tblService "
-                "(ChurchID,DateTime,HolyCommunion,CheckListComplete,CheckList) "
-                "VALUES (?,?,0,0,'{}')",
+                "(ChurchID,DateTime,HolyCommunion,CheckListComplete) "
+                "VALUES (?,?,0,0)",
                 (church_id, datetime.now().replace(microsecond=0)),
             )
             service_id = cursor.lastrowid
@@ -132,7 +132,6 @@ class UnifiedWorshipServiceRepository:
             cursor.execute("DELETE FROM tblHymnUsage WHERE ServiceID=?", (service_id,))
             cursor.execute("DELETE FROM tblServiceBulletinOrderLine WHERE ServiceID=?", (service_id,))
             cursor.execute("DELETE FROM tblServiceBulletinOrder WHERE ServiceID=?", (service_id,))
-            cursor.execute("DELETE FROM tblAltReading WHERE ServiceID=?", (service_id,))
             cursor.execute("DELETE FROM tblService WHERE ID=?", (service_id,))
             cursor.execute(
                 "INSERT INTO tblSecurityAuditEvent "
@@ -529,7 +528,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             "church": church[0] if church else "",
             "liturgical": r[5], "communion": bool(r[6]),
             "bulletin": r[10],
-            "os_note": r[8], "note": r[13],
+            "os_note": r[8], "note": r[12],
         }
         for key, value in values.items():
             control = self.fields[key]

@@ -343,7 +343,7 @@ class TestChurchManagerDatabase(unittest.TestCase):
         slots = self.query(
             "SELECT l.Sequence,l.Label,l.ValueKey FROM tblBulletinOrderLine l "
             "JOIN tblBulletinOrderTemplate t ON t.ID=l.TemplateID "
-            "WHERE t.SourceLegacyName='STARTER:LCMS-DS1' "
+            "WHERE t.Name='LCMS Divine Service One' AND t.IsStarter=1 "
             "AND l.ValueSource='SERVICE_HYMN' AND l.ValueKey='Distribution Hymn' "
             "ORDER BY l.Sequence"
         )

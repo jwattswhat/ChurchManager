@@ -22,7 +22,6 @@ SOURCE_MAP = {
     "tblHymnUsage": "rpt_hymn_usage",
     "tblPropers": "rpt_propers",
     "tblReading": "rpt_reading",
-    "tblAltReading": "rpt_alt_reading",
     "tblParticipant": "rpt_participant",
     "tblServiceRole": "rpt_service_role",
     "tblProject": "rpt_project",

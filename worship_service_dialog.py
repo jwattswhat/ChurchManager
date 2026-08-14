@@ -13,7 +13,7 @@ from unified_worship_service_dialog import (
 SERVICE_FIELDS = [
     "ID", "ChurchID", "DateTime", "Location", "PropersID", "LiturgicalDate",
     "HolyCommunion", "BulletinOrderTemplateID", "OSNote",
-    "SermonID", "Bulletin", "CheckListComplete", "CheckList", "Note",
+    "SermonID", "Bulletin", "CheckListComplete", "Note",
 ]
 
 

@@ -93,7 +93,6 @@ OPERATIONAL_MODULES = (
     "network.py",
     "liccalendar.py",
     "rptAnnouncement.py",
-    "rptOrderofService.py",
     "rptPrayers.py",
     "rptMemberDirectory.py",
     "sermon2blogger.py",
@@ -408,43 +407,6 @@ class TestChurchManagerPython(unittest.TestCase):
             with self.subTest(module=module_name):
                 self.assertIn('if __name__ == "__main__":', source)
 
-    def test_schedule_serialized_list_conversion(self):
-        function = load_function_without_importing(ROOT / "fnSchedule.py", "strtolist", {})
-        self.assertIsNone(function(None))
-        self.assertEqual(function("Reader"), "Reader")
-        self.assertEqual(function("[Reader\rUsher\rAcolyte]"), ["Reader", "Usher", "Acolyte"])
-        self.assertEqual(function("[Reader\rUsher\n]"), ["Reader", "Usher"])
-
-    def test_order_of_service_placeholder_helpers(self):
-        get_name = load_function_without_importing(ROOT / "rptOrderofService.py", "getimbedname", {})
-        search_records = load_function_without_importing(ROOT / "rptOrderofService.py", "searchrecrods", {})
-        self.assertEqual(get_name("Hymn: {Entrance}"), "Entrance")
-        self.assertEqual(get_name("{Gospel}"), "Gospel")
-        self.assertIsNone(get_name("No placeholder"))
-        records = [(1, "Entrance", 14), (2, "Closing", 22)]
-        self.assertEqual(search_records("Closing", records), records[1])
-        self.assertIsNone(search_records("Communion", records))
-
-    def test_legacy_bulletin_order_line_becomes_structured_data(self):
-        from bulletin_orders import parse_legacy_line
-
-        line = parse_legacy_line("Opening Hymn&#x0009;<b>{Entrance}</b><br>")
-        self.assertEqual(line.line_type, "HYMN")
-        self.assertEqual(line.label, "Opening Hymn")
-        self.assertEqual(line.value_source, "SERVICE_HYMN")
-        self.assertEqual(line.value_key, "Entrance")
-        self.assertTrue(line.value_bold)
-        self.assertTrue(line.has_tab)
-        self.assertFalse(line.needs_review)
-
-    def test_legacy_season_rule_is_preserved(self):
-        from bulletin_orders import parse_legacy_line
-
-        line = parse_legacy_line("<i>Gloria omitted during Advent</i><br>")
-        self.assertEqual(line.condition_type, "EXCLUDE_SEASON")
-        self.assertEqual(line.condition_value, "Advent")
-        self.assertTrue(line.italic)
-
     def test_plain_bulletin_output_uses_real_tabs(self):
         from bulletin_orders import render_plain_line
 
@@ -645,10 +607,25 @@ class TestChurchManagerForms(unittest.TestCase):
         )
         self.assertIn("frmLectionarySystem", definition["FORM"]["linkedform"])
 
-    def test_schedule_reads_season_by_name_not_propers_column_position(self):
+    def test_participant_notifications_use_normalized_active_assignments(self):
         source = (ROOT / "fnSchedule.py").read_text(encoding="utf-8-sig")
-        self.assertIn("SELECT Season FROM tblPropers", source)
-        self.assertNotIn("SELECT * FROM tblPropers WHERE ID=%s", source)
+        self.assertIn("tblServiceRole", source)
+        self.assertIn("AssignmentStatus<>'DECLINED'", source)
+        self.assertIn("p.Active=1", source)
+        self.assertNotIn("tblSchedule", source)
+        self.assertNotIn("p.Roles", source)
+        self.assertNotIn("p.Schedule", source)
+
+    def test_obsolete_jsform_database_structures_have_a_guarded_retirement(self):
+        migration = (
+            ROOT / "migrations" / "053_remove_obsolete_jsform_database_structures.sql"
+        ).read_text(encoding="utf-8")
+        runner = (ROOT / "run_churchdb_migrations.py").read_text(encoding="utf-8-sig")
+        for table in ("tblOrderofService", "tblSchedule", "tblCheckList"):
+            self.assertIn(f"DROP TABLE IF EXISTS {table}", migration)
+        for column in ("OrderofService", "CheckListID", "Roles", "Schedule"):
+            self.assertIn(f"DROP COLUMN IF EXISTS {column}", migration)
+        self.assertIn("verify_obsolete_structure_conversion", runner)
 
     def test_worship_service_filters_propers_by_church_default_lectionary(self):
         source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8-sig")

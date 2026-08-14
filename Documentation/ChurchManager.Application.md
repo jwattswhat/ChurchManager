@@ -148,8 +148,8 @@ Application-specific orchestration is separated into small modules:
 - `report_service.py` routes catalog reports through JSForm and launches
   specialized generators;
 - `report_support.py` contains import-safe shared report setup; and
-- `fnSchedule.py` contains named scheduling records, parameterized data access,
-  and transactional scheduling and notification services.
+- `fnSchedule.py` sends notifications to active participants from normalized
+  worship assignments.
 
 `cm.py` defines an application-specific `clsForm` subclass. This subclass extends JSForm behavior for operations such as:
 
@@ -677,7 +677,7 @@ Some menu actions bypass the general Reports screen:
 
 - Sunday Prayers runs `rptPrayers.py`.
 - Sunday Announcements runs `rptAnnouncement.py`.
-- Generate OS runs `rptOrderofService.py` with a service ID.
+- Prepare Bulletin Order uses the structured weekly Order of Service.
 - Member Directory uses `rptMemberDirectory.py` where the menu item is enabled.
 - Prayer Requests can invoke LimeReport directly.
 
@@ -703,9 +703,9 @@ The following table groups the principal ChurchManager tables by purpose. The li
 | Congregation | `tblChurch`, `tblChurchInfo` |
 | Framework configuration | `tblConfig`, `tblOptions`, `tblChoices`, `tblReports` |
 | Membership | `tblFamily`, `tblFamilyAddress`, `tblFamilyContact`, `tblFamilyDate`, `tblFamilyVisit`, `tblPerson`, `tblPersonAddress`, `tblPersonContact`, `tblPersonDate` |
-| Worship | `tblService`, `tblServiceRole`, `tblPropers`, `tblReading`, `tblAltReading`, `tblOrderOfService`, `tblSermon` |
+| Worship | `tblService`, `tblServiceRole`, `tblPropers`, `tblReading`, `tblBulletinOrderTemplate`, `tblBulletinOrderLine`, `tblServiceBulletinOrder`, `tblServiceBulletinOrderLine`, `tblSermon` |
 | Hymns | `tblHymn`, `tblHymnal`, `tblHymnUsage` |
-| Scheduling | `tblParticipant`, `tblSchedule`, `tblServiceRole` |
+| Scheduling | `tblParticipant`, `tblParticipantRole`, `tblParticipantAvailability`, `tblWorshipRole`, `tblWorshipSchedulePattern`, `tblServiceRole` |
 | Attendance | `tblAttendanceEvent`, `tblAttendance` |
 | Communications | `tblPrayer`, `tblAnnouncement` |
 | Preserved historical data not used by ChurchManager | Financial and donor tables retained pending a separately approved database migration |
@@ -992,9 +992,8 @@ Recommended modernization order:
 | `fnCMargParse.py` | Command-line database and report-date arguments. |
 | `worship_scheduling.py` | Participant, role, availability, and service-assignment screens plus database access. |
 | `worship_scheduling_rules.py` | UI-free availability, required-slot, report-row, and suggestion rules. |
-| `fnSchedule.py` | Legacy participant-email notification support; scheduling has moved to the normalized workflow. |
+| `fnSchedule.py` | Participant email notification using normalized worship assignments. |
 | `fnDatabase.py` | Database maintenance utility, including auto-increment reset behavior. It runs its function at import/execution and should be used cautiously. |
-| `rptOrderofService.py` | Order-of-service document generation. |
 | `rptAnnouncement.py` | Date- and week-filtered Sunday announcement generation. |
 | `rptPrayers.py` | Date- and week-filtered Sunday prayer generation. |
 | `rptMemberDirectory.py` | Custom FPDF membership directory. |
