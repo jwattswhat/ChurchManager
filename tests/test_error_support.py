@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import unittest
 from unittest.mock import patch
+from pathlib import Path
 
 import churchmanager_error_support as support
 from main_menu import MENU_CONTROLS
@@ -43,6 +44,14 @@ class ChurchManagerErrorSupportTests(unittest.TestCase):
 
     def test_support_diagnostics_is_on_main_menu(self):
         self.assertIn("lblSupportDiagnostics", MENU_CONTROLS)
+
+    def test_support_permission_grants_only_active_roles(self):
+        migration = (
+            Path(__file__).resolve().parents[1]
+            / "migrations" / "062_add_support_diagnostics_permission.sql"
+        ).read_text(encoding="utf-8")
+        self.assertIn("WHERE r.Active=1", migration)
+        self.assertNotIn("r.IsActive", migration)
 
 
 if __name__ == "__main__":

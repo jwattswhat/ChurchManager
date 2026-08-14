@@ -11,4 +11,4 @@ SELECT r.ID, p.ID
 FROM tblRole r
 JOIN tblPermission p ON p.Name='application.support.create'
 LEFT JOIN tblRolePermission rp ON rp.RoleID=r.ID AND rp.PermissionID=p.ID
-WHERE r.IsActive=1 AND rp.RoleID IS NULL;
+WHERE r.Active=1 AND rp.RoleID IS NULL;
