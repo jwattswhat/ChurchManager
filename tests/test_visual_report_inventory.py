@@ -6,7 +6,7 @@ import JSForm
 from visual_reports.report_inventory import (
     CONSOLIDATED_CODES, DISABLED_CODES, LAUNCHER_CODES, OFFICIAL_CODES, SPECS,
 )
-from visual_reports.tabular_dataset import contract_for
+from visual_reports.tabular_dataset import TabularDatasetProvider, contract_for
 from visual_reports.worship_planning_dataset import WORSHIP_PLANNING_CONTRACT
 
 
@@ -98,6 +98,15 @@ class TestVisualReportInventory(unittest.TestCase):
         self.assertNotIn('"tblFamilyContact"', source)
         self.assertNotIn('"tblPersonAddress"', source)
         self.assertNotIn('"tblFamilyAddress"', source)
+
+    def test_every_tabular_report_view_is_approved_by_the_provider(self):
+        provider = TabularDatasetProvider(object(), None)
+        for spec in SPECS:
+            if spec.code == "CMWP01":
+                continue
+            with self.subTest(code=spec.code, view=spec.view):
+                source, _where, _values = provider._scope(spec.view, 1)
+                self.assertIn(spec.view, source)
 
 
 if __name__ == "__main__":
