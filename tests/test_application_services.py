@@ -2,6 +2,7 @@ from datetime import datetime
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 from backup_service import BackupError, BackupPreferences, BackupService
 from process_service import ProcessService
@@ -54,6 +55,17 @@ class TestBackupService(unittest.TestCase):
                           last_automatic_date="2026-08-14")
             store.save(values)
             self.assertEqual(store.load(), values)
+
+    def test_backup_preferences_fall_back_when_windows_blocks_replace(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "preferences.json"
+            path.write_text('{"folder": "old"}', encoding="utf-8")
+            store = BackupPreferences(path)
+            values = store.load()
+            values["folder"] = "new"
+            with mock.patch.object(Path, "replace", side_effect=PermissionError("locked")):
+                store.save(values)
+            self.assertEqual(store.load()["folder"], "new")
 
     def test_only_automatic_backups_are_pruned(self):
         with tempfile.TemporaryDirectory() as folder:

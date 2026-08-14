@@ -4,6 +4,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import time
 import json
 from dataclasses import dataclass
 from datetime import datetime
@@ -163,6 +164,30 @@ class BackupPreferences:
 
     def save(self, values):
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        temporary = self.path.with_suffix(".tmp")
-        temporary.write_text(json.dumps(values, indent=2), encoding="utf-8")
-        temporary.replace(self.path)
+        content = json.dumps(values, indent=2)
+        temporary = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", suffix=".tmp",
+                dir=self.path.parent, delete=False,
+            ) as stream:
+                stream.write(content)
+                temporary = Path(stream.name)
+            for attempt in range(4):
+                try:
+                    temporary.replace(self.path)
+                    return
+                except PermissionError:
+                    if attempt == 3:
+                        break
+                    time.sleep(0.05 * (attempt + 1))
+            # Some Windows processes briefly prevent replacement while still
+            # allowing the existing user-owned file to be updated in place.
+            self.path.write_text(content, encoding="utf-8")
+        except OSError as error:
+            raise BackupError(
+                "Backup preferences could not be saved: {}".format(error)
+            ) from error
+        finally:
+            if temporary:
+                temporary.unlink(missing_ok=True)
