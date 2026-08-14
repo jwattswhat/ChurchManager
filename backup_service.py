@@ -1,6 +1,7 @@
 """Secure, testable MariaDB backup service."""
 
 import os
+import shutil
 import subprocess
 import tempfile
 import json
@@ -25,11 +26,12 @@ class BackupService:
         self.clock = clock
 
     def create(self, settings, mysqldump_directory, backup_prefix):
-        stamp = self.clock().strftime("%Y-%m-%d.%H%M")
+        stamp = self.clock().strftime("%Y-%m-%d.%H%M%S")
         output = Path(
             "{}.{}.Backup.{}.SQL".format(backup_prefix, settings["database"], stamp)
         )
         option_path = None
+        dump_path = None
         try:
             with tempfile.NamedTemporaryFile(
                 mode="w", encoding="utf-8", suffix=".cnf", delete=False
@@ -42,30 +44,42 @@ class BackupService:
             command = [
                 str(Path(mysqldump_directory) / "mysqldump"),
                 "--defaults-extra-file={}".format(option_path),
-                "--host", settings["server"], settings["database"],
+                "--host", settings["server"],
             ]
+            if settings.get("port"):
+                command.extend(["--port", str(settings["port"])])
+            command.append(settings["database"])
             output.parent.mkdir(parents=True, exist_ok=True)
-            with output.open("wb") as destination:
+            with tempfile.NamedTemporaryFile(
+                mode="w+b", suffix=".sql", dir=output.parent, delete=False
+            ) as dump_file:
+                dump_path = Path(dump_file.name)
+                self.runner(command, stdout=dump_file, check=True)
+            with output.open("wb") as destination, dump_path.open("rb") as dump_source:
                 destination.write(b"-- ChurchManager database backup\n")
                 destination.write("-- Database: {}\n".format(settings["database"]).encode("utf-8"))
-                self.runner(command, stdout=destination, check=True)
+                shutil.copyfileobj(dump_source, destination)
         except (OSError, subprocess.SubprocessError) as error:
             raise BackupError("The database backup could not be created.") from error
         finally:
             if option_path:
                 option_path.unlink(missing_ok=True)
+            if dump_path:
+                dump_path.unlink(missing_ok=True)
         return BackupResult(output, stamp)
 
     def create_in_folder(self, settings, mysqldump_directory, folder, automatic=False):
         folder = Path(folder).expanduser().resolve()
         label = "Automatic" if automatic else "Manual"
-        prefix = folder / "{}.{}".format(settings["database"], label)
+        prefix = folder / label
         return self.create(settings, mysqldump_directory, prefix)
 
     @staticmethod
     def prune_automatic(folder, database, keep=30):
+        root = Path(folder)
         files = sorted(
-            Path(folder).glob("Automatic.{}.Backup.*.SQL".format(database)),
+            set(root.glob("Automatic.{}.Backup.*.SQL".format(database)))
+            | set(root.glob("{}.Automatic.{}.Backup.*.SQL".format(database, database))),
             key=lambda path: path.stat().st_mtime,
             reverse=True,
         )
@@ -107,7 +121,10 @@ class BackupService:
             if not executable.with_suffix(".exe").exists() and not executable.exists():
                 executable = Path(mariadb_directory) / "mysql"
             command = [str(executable), "--defaults-extra-file={}".format(option_path),
-                       "--host", settings["server"], settings["database"]]
+                       "--host", settings["server"]]
+            if settings.get("port"):
+                command.extend(["--port", str(settings["port"])])
+            command.append(settings["database"])
             with Path(dump_path).open("rb") as source:
                 self.runner(command, stdin=source, check=True)
         except (OSError, subprocess.SubprocessError) as error:

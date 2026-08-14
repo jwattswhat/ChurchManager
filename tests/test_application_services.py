@@ -33,6 +33,7 @@ class TestBackupService(unittest.TestCase):
                 folder, prefix,
             )
             self.assertTrue(result.path.exists())
+            self.assertTrue(result.path.read_bytes().endswith(b"backup"))
             self.assertNotIn("secret", " ".join(calls[0]))
             self.assertEqual(BackupService.inspect_dump(result.path), "ChurchDBTest")
 
@@ -63,6 +64,44 @@ class TestBackupService(unittest.TestCase):
             BackupService.prune_automatic(root, "ChurchDBTest", keep=2)
             self.assertEqual(len(list(root.glob("Automatic.*.SQL"))), 2)
             self.assertTrue(manual.exists())
+
+    def test_folder_backup_uses_readable_nonduplicated_name(self):
+        calls = []
+        class FixedClock:
+            @staticmethod
+            def strftime(_format):
+                return "2026-08-14.1200"
+        def runner(command, stdout, check):
+            calls.append(command)
+            stdout.write(b"backup")
+        with tempfile.TemporaryDirectory() as folder:
+            result = BackupService(runner=runner, clock=lambda: FixedClock()).create_in_folder(
+                {"server": "db", "database": "ChurchDBTest", "user": "church", "password": "secret"},
+                folder, folder, automatic=True,
+            )
+            self.assertEqual(result.path.name, "Automatic.ChurchDBTest.Backup.2026-08-14.1200.SQL")
+
+    def test_configured_port_is_used_by_backup(self):
+        calls = []
+        def runner(command, stdout, check):
+            calls.append(command)
+            stdout.write(b"backup")
+        with tempfile.TemporaryDirectory() as folder:
+            BackupService(runner=runner).create(
+                {"server": "db", "port": 3307, "database": "ChurchDBTest",
+                 "user": "church", "password": "secret"},
+                folder, str(Path(folder) / "backup"),
+            )
+            self.assertIn("--port", calls[0])
+            self.assertIn("3307", calls[0])
+
+    def test_prune_recognizes_older_duplicated_automatic_names(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for number in range(3):
+                (root / f"ChurchDBTest.Automatic.ChurchDBTest.Backup.{number}.SQL").write_text("backup")
+            BackupService.prune_automatic(root, "ChurchDBTest", keep=1)
+            self.assertEqual(len(list(root.glob("ChurchDBTest.Automatic.*.SQL"))), 1)
 
 
 class TestReportService(unittest.TestCase):

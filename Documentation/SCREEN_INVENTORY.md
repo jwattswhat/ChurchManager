@@ -129,7 +129,7 @@ Frozen ChurchManager application.
 | User Administration and New User | None | Active | Coordinates users, roles, status, password reset, and contact information securely. |
 | Role Permissions | None | Supporting | Edits security grants with authorization and audit enforcement. |
 | Security Audit | None | Supporting | Read-only protected security history. |
-| Backup and Restore | None | Active; manual verification pending | Runs external database tools, validates database identity, creates pre-restore backups, and requires protected confirmations. |
+| Backup and Restore | None | Active; backup and temporary-clone restore verified 2026-08-14 | Runs external database tools, validates database identity, creates pre-restore backups, and requires protected confirmations. |
 | Accounting Setup | None | Active | Launches and coordinates the seven JSForm accounting master-data forms. |
 | Transaction Entry and Draft List | None | Active | Owns balanced transaction editing, concurrency, guided workflows, attachments, and state transitions. |
 | Transaction Line editor | None | Supporting | Enforces debit/credit semantics and accounting dimensions in transaction context. |

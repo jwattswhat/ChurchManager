@@ -8,6 +8,7 @@ Sermons/
 *.pyc
 LocalTestMigrationBackups/
 BackupDB/
+Backups/
 tmp/
 Log.txt
 .local-mariadb.ini
