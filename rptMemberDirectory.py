@@ -1,3 +1,5 @@
+"""Generate the historical PDF member directory outside the visual report path."""
+
 from fpdf import FPDF
 from datetime import datetime
 import mysql

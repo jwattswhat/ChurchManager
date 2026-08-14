@@ -12,16 +12,22 @@ from pathlib import Path
 
 
 class BackupError(RuntimeError):
+    """Raised when backup, restore, inspection, or preference work is unsafe."""
+
     pass
 
 
 @dataclass(frozen=True)
 class BackupResult:
+    """Describe a completed backup without exposing connection credentials."""
+
     path: Path
     timestamp: str
 
 
 class BackupService:
+    """Create and restore labeled MariaDB dumps with safety backups."""
+
     def __init__(self, runner=subprocess.run, clock=datetime.now):
         self.runner = runner
         self.clock = clock
@@ -147,6 +153,8 @@ class BackupService:
 
 
 class BackupPreferences:
+    """Persist non-secret backup UI preferences in the user's local profile."""
+
     def __init__(self, path=None):
         base = Path(os.environ.get("LOCALAPPDATA", Path.cwd())) / "ChurchManager"
         self.path = Path(path) if path else base / "backup-preferences.json"

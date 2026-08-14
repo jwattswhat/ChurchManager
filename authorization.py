@@ -12,6 +12,8 @@ class AuthorizationDenied(PermissionError):
 
 @dataclass(frozen=True)
 class UserSession:
+    """Immutable identity and permission snapshot for one signed-in user."""
+
     user_id: int
     username: str
     display_name: str

@@ -1,3 +1,5 @@
+"""Provide the startup internet-availability probe used by ChurchManager."""
+
 import requests
 
 def check_internetconnection(timeout):

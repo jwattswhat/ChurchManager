@@ -1,3 +1,5 @@
+"""Convert sermon DOCX content into Blogger-friendly plain text."""
+
 import sys
 import os
 from docx import Document

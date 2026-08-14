@@ -1,3 +1,5 @@
+"""Legacy database helper retained for inventory; active startup uses fnCMargParse."""
+
 import mysql
 import JSForm
 

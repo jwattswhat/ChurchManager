@@ -5,6 +5,8 @@ from dataclasses import dataclass
 
 @dataclass
 class ApplicationContext:
+    """Own the authenticated services and runtime state for one app instance."""
+
     settings: dict
     database: object
     main_form: object | None = None

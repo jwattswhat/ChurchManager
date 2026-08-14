@@ -1,3 +1,5 @@
+"""Integrate selected ChurchManager scheduling workflows with Google Calendar."""
+
 from __future__ import print_function
 import datetime
 import os.path

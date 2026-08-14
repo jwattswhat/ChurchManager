@@ -54,6 +54,8 @@ class PasswordService:
 
 @dataclass(frozen=True)
 class UserAccount:
+    """Authentication fields loaded for one ChurchManager identity."""
+
     id: int
     username: str
     display_name: str

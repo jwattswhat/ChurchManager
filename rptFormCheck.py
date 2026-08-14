@@ -1,3 +1,5 @@
+"""Generate the historical form-definition inspection report."""
+
 import os
 import json
 from turtle import position
