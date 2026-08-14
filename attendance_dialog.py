@@ -56,7 +56,8 @@ class AttendanceRepository:
             "CASE WHEN a.ID IS NULL THEN 0 ELSE 1 END,COALESCE(a.Communion,0),"
             "COALESCE(a.Note,'') FROM tblPerson p LEFT JOIN tblAttendance a "
             "ON a.PersonID=p.ID AND a.AttendanceEventID=? "
-            "WHERE p.ChurchID=? ORDER BY p.LastName,p.FirstName,p.ID",
+            "WHERE p.ChurchID=? "
+            "ORDER BY COALESCE(p.Member,0) DESC,p.LastName,p.FirstName,p.ID",
             (event_id, church_id),
         )
 
@@ -203,6 +204,7 @@ class AttendanceEditorDialog(wx.Dialog):
         ):
             self.grid.SetColLabelValue(column, label); self.grid.SetColSize(column, width)
         self.grid.SetColFormatBool(0); self.grid.SetColFormatBool(3)
+        self.grid.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.on_cell_click)
         self.grid.Bind(wx.grid.EVT_GRID_CELL_CHANGED, self.on_cell_changed)
         outer.Add(self.grid, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
         actions = wx.BoxSizer(wx.HORIZONTAL)
@@ -268,6 +270,18 @@ class AttendanceEditorDialog(wx.Dialog):
 
     def on_search(self, _event):
         self._capture_grid(); self._populate_grid()
+
+    def on_cell_click(self, event):
+        row, column = event.GetRow(), event.GetCol()
+        if column not in (0, 3) or row < 0:
+            event.Skip()
+            return
+        checked = self.grid.GetCellValue(row, column) == "1"
+        self.grid.SetCellValue(row, column, "" if checked else "1")
+        if column == 3 and not checked:
+            self.grid.SetCellValue(row, 0, "1")
+        self._capture_grid()
+        self._refresh_summary()
 
     def on_cell_changed(self, event):
         if event.GetCol() == 3 and self.grid.GetCellValue(event.GetRow(), 3) == "1":

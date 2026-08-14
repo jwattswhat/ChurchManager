@@ -77,6 +77,15 @@ class AttendanceTests(unittest.TestCase):
             source,
         )
 
+    def test_people_are_sorted_members_first_and_checkboxes_are_single_click(self):
+        connection = FakeConnection([])
+        AttendanceRepository(connection).people(12, 3)
+        sql = connection.cursor_value.executed[0][0]
+        self.assertIn("ORDER BY COALESCE(p.Member,0) DESC,p.LastName,p.FirstName", sql)
+        source = (ROOT / "attendance_dialog.py").read_text(encoding="utf-8")
+        self.assertIn("EVT_GRID_CELL_LEFT_CLICK", source)
+        self.assertIn("def on_cell_click", source)
+
 
 if __name__ == "__main__":
     unittest.main()
