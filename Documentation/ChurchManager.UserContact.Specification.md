@@ -1,8 +1,10 @@
 # ChurchManager user contact information specification
 
-**Status:** Proposed for approval
+**Status:** Approved
 
 **Date:** August 14, 2026
+
+**Approved by:** Rev. Jonathan C. Watt
 
 **Target application:** Development ChurchManager
 
@@ -177,4 +179,3 @@ The feature is complete when:
 5. Add focused security, validation, audit, and privacy tests.
 6. Apply migration to ChurchDBTest.
 7. Complete user acceptance before beginning the email-system review.
-

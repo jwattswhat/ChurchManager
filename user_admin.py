@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 
 import wx
@@ -15,6 +16,8 @@ class UserSummary:
     id: int
     username: str
     display_name: str
+    email: str
+    phone: str
     active: bool
     is_master: bool
     failed_login_count: int
@@ -52,12 +55,13 @@ class UserAdministrationService:
         try:
             self.repository._execute(
                 cursor,
-                "SELECT u.ID, u.Username, u.DisplayName, u.Active, "
+                "SELECT u.ID, u.Username, u.DisplayName, COALESCE(u.Email, ''), "
+                "COALESCE(u.Phone, ''), u.Active, "
                 "u.MasterAdministrator, u.FailedLoginCount, u.LockedUntil, "
                 "GROUP_CONCAT(r.Name ORDER BY r.Name SEPARATOR ', ') "
                 "FROM tblUser u LEFT JOIN tblUserRole ur ON ur.UserID=u.ID "
                 "LEFT JOIN tblRole r ON r.ID=ur.RoleID "
-                "GROUP BY u.ID, u.Username, u.DisplayName, u.Active, "
+                "GROUP BY u.ID, u.Username, u.DisplayName, u.Email, u.Phone, u.Active, "
                 "u.MasterAdministrator, u.FailedLoginCount, u.LockedUntil "
                 "ORDER BY u.DisplayName, u.Username",
             )
@@ -66,8 +70,8 @@ class UserAdministrationService:
             cursor.close()
         return [
             UserSummary(
-                row[0], row[1], row[2], bool(row[3]), bool(row[4]), row[5], row[6],
-                tuple(filter(None, (row[7] or "").split(", "))),
+                row[0], row[1], row[2], row[3], row[4], bool(row[5]), bool(row[6]),
+                row[7], row[8], tuple(filter(None, (row[9] or "").split(", "))),
             )
             for row in rows
         ]
@@ -189,11 +193,33 @@ class UserAdministrationService:
         finally:
             cursor.close()
 
-    def create_user(self, username, display_name, temporary_password, role_ids=()):
+    @staticmethod
+    def normalize_contact(display_name, email=None, phone=None):
+        display_name = " ".join(str(display_name or "").split())
+        email = str(email or "").strip() or None
+        phone = " ".join(str(phone or "").split()) or None
+        if not display_name:
+            raise ValueError("Display name is required.")
+        if len(display_name) > 255:
+            raise ValueError("Display name cannot exceed 255 characters.")
+        if email:
+            if len(email) > 254:
+                raise ValueError("Email address cannot exceed 254 characters.")
+            local, separator, domain = email.partition("@")
+            if not separator or not local or not domain or "@" in domain or any(c.isspace() for c in email):
+                raise ValueError("Enter a valid email address, such as name@example.org.")
+        if phone:
+            if len(phone) > 50:
+                raise ValueError("Phone number cannot exceed 50 characters.")
+            if not re.fullmatch(r"[0-9A-Za-z+().\- ]+", phone) or sum(c.isdigit() for c in phone) < 4:
+                raise ValueError("Enter a valid phone number with at least four digits.")
+        return display_name, email, phone
+
+    def create_user(self, username, display_name, temporary_password, role_ids=(), email=None, phone=None):
         username = username.strip()
-        display_name = display_name.strip()
-        if not username or not display_name:
-            raise ValueError("Username and display name are required.")
+        display_name, email, phone = self.normalize_contact(display_name, email, phone)
+        if not username:
+            raise ValueError("Username is required.")
         password_hash = self.passwords.hash(temporary_password)
         cursor = self._cursor()
         try:
@@ -205,15 +231,52 @@ class UserAdministrationService:
             self.repository._execute(
                 cursor,
                 "INSERT INTO tblUser "
-                "(Username, DisplayName, PasswordHash, Active, MustChangePassword) "
-                "VALUES (?, ?, ?, 1, 1)",
-                (username, display_name, password_hash),
+                "(Username, DisplayName, Email, Phone, PasswordHash, Active, MustChangePassword) "
+                "VALUES (?, ?, ?, ?, ?, 1, 1)",
+                (username, display_name, email, phone, password_hash),
             )
             user_id = cursor.lastrowid
             self._replace_roles(cursor, user_id, role_ids)
             self._audit(cursor, "USER_CREATED", user_id, "Created {}".format(username))
             self.connection.commit()
             return user_id
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
+    def update_contact(self, user_id, display_name, email=None, phone=None):
+        display_name, email, phone = self.normalize_contact(display_name, email, phone)
+        cursor = self._cursor()
+        try:
+            self.repository._execute(
+                cursor, "SELECT DisplayName, Email, Phone FROM tblUser WHERE ID=? FOR UPDATE",
+                (user_id,),
+            )
+            existing = cursor.fetchone()
+            if not existing:
+                raise ValueError("The selected user no longer exists.")
+            before = (existing[0] or "", existing[1] or None, existing[2] or None)
+            after = (display_name, email, phone)
+            field_names = ("DisplayName", "Email", "Phone")
+            changed = [name for name, old, new in zip(field_names, before, after) if old != new]
+            if not changed:
+                self.connection.rollback()
+                return False
+            self.repository._execute(
+                cursor, "UPDATE tblUser SET DisplayName=?, Email=?, Phone=? WHERE ID=?",
+                (display_name, email, phone, user_id),
+            )
+            self.repository._execute(
+                cursor,
+                "INSERT INTO tblSecurityAuditEvent "
+                "(UserID, Action, EntityType, EntityID, AfterJSON) "
+                "VALUES (?, 'USER_CONTACT_UPDATED', 'User', ?, ?)",
+                (self.acting_user_id, str(user_id), json.dumps({"changed_fields": changed})),
+            )
+            self.connection.commit()
+            return True
         except Exception:
             self.connection.rollback()
             raise
@@ -352,7 +415,7 @@ class PasswordEntryDialog(wx.Dialog):
 class NewUserDialog(PasswordEntryDialog):
     def __init__(self, parent):
         wx.Dialog.__init__(self, parent, title="Create ChurchManager User")
-        grid = wx.FlexGridSizer(4, 2, 8, 8)
+        grid = wx.FlexGridSizer(6, 2, 8, 8)
         grid.AddGrowableCol(1, 1)
         grid.Add(wx.StaticText(self, label="Username"))
         self.username = wx.TextCtrl(self, size=(280, -1))
@@ -360,12 +423,41 @@ class NewUserDialog(PasswordEntryDialog):
         grid.Add(wx.StaticText(self, label="Display name"))
         self.display_name = wx.TextCtrl(self)
         grid.Add(self.display_name, 1, wx.EXPAND)
+        grid.Add(wx.StaticText(self, label="Email"))
+        self.email = wx.TextCtrl(self)
+        grid.Add(self.email, 1, wx.EXPAND)
+        grid.Add(wx.StaticText(self, label="Phone"))
+        self.phone = wx.TextCtrl(self)
+        grid.Add(self.phone, 1, wx.EXPAND)
         grid.Add(wx.StaticText(self, label="Temporary password"))
         self.password = wx.TextCtrl(self, style=wx.TE_PASSWORD)
         grid.Add(self.password, 1, wx.EXPAND)
         grid.Add(wx.StaticText(self, label="Confirm password"))
         self.confirmation = wx.TextCtrl(self, style=wx.TE_PASSWORD)
         grid.Add(self.confirmation, 1, wx.EXPAND)
+        root = wx.BoxSizer(wx.VERTICAL)
+        root.Add(grid, 1, wx.ALL | wx.EXPAND, 12)
+        root.Add(self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL), 0, wx.ALL | wx.EXPAND, 10)
+        self.SetSizerAndFit(root)
+
+
+class UserContactDialog(wx.Dialog):
+    def __init__(self, parent, user):
+        super().__init__(parent, title="Edit User Contact")
+        grid = wx.FlexGridSizer(4, 2, 8, 8)
+        grid.AddGrowableCol(1, 1)
+        grid.Add(wx.StaticText(self, label="Username"))
+        username = wx.TextCtrl(self, value=user.username, style=wx.TE_READONLY, size=(320, -1))
+        grid.Add(username, 1, wx.EXPAND)
+        grid.Add(wx.StaticText(self, label="Display name"))
+        self.display_name = wx.TextCtrl(self, value=user.display_name)
+        grid.Add(self.display_name, 1, wx.EXPAND)
+        grid.Add(wx.StaticText(self, label="Email"))
+        self.email = wx.TextCtrl(self, value=user.email)
+        grid.Add(self.email, 1, wx.EXPAND)
+        grid.Add(wx.StaticText(self, label="Phone"))
+        self.phone = wx.TextCtrl(self, value=user.phone)
+        grid.Add(self.phone, 1, wx.EXPAND)
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(grid, 1, wx.ALL | wx.EXPAND, 12)
         root.Add(self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL), 0, wx.ALL | wx.EXPAND, 10)
@@ -449,20 +541,21 @@ class SecurityAuditDialog(wx.Dialog):
 
 class UserAdministrationDialog(wx.Dialog):
     def __init__(self, parent, service, authorization):
-        super().__init__(parent, title="ChurchManager User Administration", size=(1080, 430))
+        super().__init__(parent, title="ChurchManager User Administration", size=(1280, 460))
         self.service = service
         self.authorization = authorization
         self.users = []
         self.list = wx.ListCtrl(self, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         for index, (label, width) in enumerate((
-            ("Username", 130), ("Display name", 210), ("Active", 70),
-            ("Master", 70), ("Roles", 280),
+            ("Username", 125), ("Display name", 190), ("Email", 220),
+            ("Phone", 145), ("Active", 65), ("Master", 65), ("Roles", 260),
         )):
             self.list.InsertColumn(index, label, width=width)
         self.list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_roles)
         buttons = wx.BoxSizer(wx.HORIZONTAL)
         actions = (
-            ("New User", self.on_new), ("Roles", self.on_roles),
+            ("New User", self.on_new), ("Edit Contact", self.on_contact),
+            ("Roles", self.on_roles),
             ("Enable/Disable", self.on_active), ("Unlock", self.on_unlock),
             ("Reset Password", self.on_reset),
             ("Role Permissions", self.on_role_permissions),
@@ -488,9 +581,11 @@ class UserAdministrationDialog(wx.Dialog):
         for user in self.users:
             row = self.list.InsertItem(self.list.GetItemCount(), user.username)
             self.list.SetItem(row, 1, user.display_name)
-            self.list.SetItem(row, 2, "Yes" if user.active else "No")
-            self.list.SetItem(row, 3, "Yes" if user.is_master else "No")
-            self.list.SetItem(row, 4, ", ".join(user.roles))
+            self.list.SetItem(row, 2, user.email)
+            self.list.SetItem(row, 3, user.phone)
+            self.list.SetItem(row, 4, "Yes" if user.active else "No")
+            self.list.SetItem(row, 5, "Yes" if user.is_master else "No")
+            self.list.SetItem(row, 6, ", ".join(user.roles))
 
     def selected(self):
         index = self.list.GetFirstSelected()
@@ -512,6 +607,25 @@ class UserAdministrationDialog(wx.Dialog):
             self.service.create_user(
                 dialog.username.GetValue(), dialog.display_name.GetValue(),
                 dialog.password.GetValue(),
+                email=dialog.email.GetValue(), phone=dialog.phone.GetValue(),
+            )
+        except (ValueError, RuntimeError) as error:
+            self.show_error(error)
+        finally:
+            dialog.Destroy()
+        self.refresh()
+
+    def on_contact(self, _event):
+        user = self.selected()
+        if not user:
+            return
+        dialog = UserContactDialog(self, user)
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            self.service.update_contact(
+                user.id, dialog.display_name.GetValue(),
+                dialog.email.GetValue(), dialog.phone.GetValue(),
             )
         except (ValueError, RuntimeError) as error:
             self.show_error(error)

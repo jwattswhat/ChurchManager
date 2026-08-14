@@ -19,6 +19,7 @@ _SAFE_CONTEXT = {
     "authenticated": False,
 }
 _EMAIL = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.I)
+_PHONE = re.compile(r"(?<!\w)(?:\+?\d[\d(). -]{5,}\d)(?!\w)")
 
 
 def _churchmanager_redactor(text: str) -> str:
@@ -27,7 +28,8 @@ def _churchmanager_redactor(text: str) -> str:
     if profile:
         result = result.replace(profile, "[USERPROFILE]")
         result = result.replace(profile.replace("\\", "/"), "[USERPROFILE]")
-    return _EMAIL.sub("[EMAIL]", result)
+    result = _EMAIL.sub("[EMAIL]", result)
+    return _PHONE.sub("[PHONE]", result)
 
 
 def configure_churchmanager_error_reporting():

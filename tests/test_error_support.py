@@ -32,15 +32,17 @@ class ChurchManagerErrorSupportTests(unittest.TestCase):
             "authenticated": True,
         })
 
-    def test_redactor_removes_user_profile_and_email(self):
+    def test_redactor_removes_user_profile_email_and_phone(self):
         with patch.dict(os.environ, {"USERPROFILE": r"C:\Users\PrivateUser"}):
             result = support._churchmanager_redactor(
-                r"C:\Users\PrivateUser\Documents\file.txt person@example.com"
+                r"C:\Users\PrivateUser\Documents\file.txt person@example.com (555) 010-1234"
             )
         self.assertNotIn("PrivateUser", result)
         self.assertNotIn("person@example.com", result)
+        self.assertNotIn("555", result)
         self.assertIn("[USERPROFILE]", result)
         self.assertIn("[EMAIL]", result)
+        self.assertIn("[PHONE]", result)
 
     def test_support_diagnostics_is_on_main_menu(self):
         self.assertIn("lblSupportDiagnostics", MENU_CONTROLS)
