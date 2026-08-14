@@ -104,6 +104,11 @@ class BackupRestoreDialog(wx.Dialog):
         finally: prompt.Destroy()
         if wx.MessageBox("Final warning: restore the selected backup now?","Confirm Restore",wx.YES_NO|wx.NO_DEFAULT|wx.ICON_WARNING,self)!=wx.YES: return
         self.save_preferences()
+        busy = wx.BusyInfo(
+            "Restoring the ChurchManager database...\n\nPlease wait. Do not close the program.",
+            parent=self,
+        )
+        wx.YieldIfNeeded()
         try:
             safety=self.context.services.backups.restore(
                 self.context.settings,mariadb_tools_directory(self.jsform),path,self.folder.GetPath(),
@@ -113,10 +118,17 @@ class BackupRestoreDialog(wx.Dialog):
             with log.open("a",encoding="utf-8") as destination:
                 destination.write(f"{datetime.now().isoformat()} user={self.context.session.username} database={self.context.settings['database']} source={path} safety={safety.path}\n")
             self.context.skip_auto_backup=True; self.context.restart_requested=True
+            del busy
+            busy = None
             wx.MessageBox("Restore completed successfully. ChurchManager will restart.","Restore Complete",wx.OK|wx.ICON_INFORMATION,self)
             self.EndModal(wx.ID_OK); wx.CallAfter(self.GetParent().Close)
         except Exception as error:
+            del busy
+            busy = None
             wx.MessageBox(str(error),"Restore Failed",wx.OK|wx.ICON_ERROR,self)
+        finally:
+            if busy is not None:
+                del busy
 
     def on_close(self,_event):
         self.save_preferences(); self.EndModal(wx.ID_CLOSE)

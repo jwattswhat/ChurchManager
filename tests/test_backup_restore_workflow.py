@@ -35,6 +35,12 @@ class BackupRestoreWorkflowTests(unittest.TestCase):
         self.assertIn('glob("MariaDB */bin")', source)
         self.assertIn('"mariadb-dump"', source)
 
+    def test_restore_displays_a_working_message(self):
+        source = (ROOT / "backup_restore_dialog.py").read_text()
+        self.assertIn("Restoring the ChurchManager database", source)
+        self.assertIn("Do not close the program", source)
+        self.assertIn("wx.BusyInfo", source)
+
 
 if __name__ == "__main__":
     unittest.main()
