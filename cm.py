@@ -13,7 +13,6 @@ from datetime import datetime, timezone
 import wx
 
 import JSForm
-import fnSchedule
 from application_context import ApplicationContext
 from form_factory import ChurchManagerFormFactory
 from main_menu import FORM_ROUTES, MENU_CONTROLS, SESSION_CONTROLS
@@ -64,6 +63,7 @@ from churchmanager_error_support import (
     configure_churchmanager_error_reporting, show_support_diagnostics,
     update_runtime_context,
 )
+from participant_notification_dialog import show_participant_notifications
 
 
 arguments = None
@@ -251,14 +251,6 @@ def _buttonclick(event):
     def _runSPrpt(event):
         context.services.reports.run_catalog_report(2, frm, context.connection)
 
-    def _runNotify(event):
-        ID = int(frm.CONTROLID["ServiceID"].GetValue())
-        if ID == None:
-            return
-        #JSForm.RunReport(2, frm, ChurchDB.DBConnection)
-        fnSchedule.notifyviaeMail(ID, ChurchDB.DBConnection)
-        frm.FORM.Close()
-
     def _runPrayerRequests():
         reportdescription = JSForm.CONFIG.get_Config_Value(
             "Location", "ReportDescription"
@@ -393,9 +385,10 @@ def _buttonclick(event):
             show_prepare_bulletin_order(cmfrm.FRAME, context.connection)
             return
         case "lblNotifyParticipants":
-            frm = context.form_factory.create("frmNotifyviaeMail", ["Close"])
-            frm.CONTROLID["btnNotify"].Bind(wx.EVT_LEFT_DOWN, _runNotify)
-            frm.show()
+            show_participant_notifications(
+                cmfrm.FRAME, context.connection, context.authorization,
+                context.services.reports, context.services.processes,
+            )
             return
         case "lblSundayPrayers":
             _runSundayPrayers()

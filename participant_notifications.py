@@ -74,6 +74,12 @@ class ParticipantNotificationRepository:
             raise ValueError("The selected worship service is unavailable.")
         return NotificationServiceContext(*row)
 
+    def services(self):
+        return self.all(
+            "SELECT ID,CONCAT(DATE_FORMAT(DateTime,'%m/%d/%Y %h:%i %p'),' - ',"
+            "COALESCE(LiturgicalDate,'')) FROM tblService ORDER BY DateTime DESC,ID DESC"
+        )
+
     def assigned_participants(self, service_id):
         return self.all(
             "SELECT p.ID,COALESCE(NULLIF(p.DisplayName,''),p.Name),COALESCE(p.eMail,''),"
@@ -154,3 +160,21 @@ class ParticipantNotificationService:
             addresses,
             JSForm.MailMessage(subject or plan.subject, body or plan.body, (plan.attachment,)),
         )
+
+
+def configured_mail_service(config=JSForm.CONFIG):
+    """Adapt compatible historical SMTP settings to the new JSForm service."""
+    values = {str(name): value for name, value, *_rest in config.get_Config_Family("SMTP")}
+    username = str(values.get("UserName") or "").strip() or None
+    password = str(values.get("Password") or "") or None
+    settings = JSForm.MailSettings(
+        host=str(values.get("Server") or "smtp.gmail.com").strip(),
+        port=int(values.get("Port") or 587),
+        username=username,
+        password=password,
+        sender_address=str(values.get("SenderAddress") or username or "").strip(),
+        sender_name=str(values.get("SenderName") or "ChurchManager").strip(),
+        security=str(values.get("Security") or "starttls").strip().casefold(),
+        reply_to=str(values.get("ReplyTo") or "").strip() or None,
+    )
+    return JSForm.MailService(JSForm.SMTPTransport(settings))
