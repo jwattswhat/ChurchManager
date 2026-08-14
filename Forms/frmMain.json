@@ -27,9 +27,9 @@
                 ],
                 "sizech": [
                     15,
-                    3
+                    9
                 ],
-                "label": "Church",
+                "label": "Service Planning",
                 "layout": {
                     "row": 0,
                     "column": 0
@@ -40,9 +40,9 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    2
+                    12
                 ],
-                "label": "Churches",
+                "label": "Church Information",
                 "tooltip": "Open the churches form.",
                 "security": {
                     "invoke": "church.manage"
@@ -53,13 +53,13 @@
                 "name": "ServiceBox",
                 "posch": [
                     1,
-                    4
+                    22
                 ],
                 "sizech": [
                     15,
-                    11
+                    13
                 ],
-                "label": "Database",
+                "label": "Worship Resources",
                 "layout": {
                     "row": 1,
                     "column": 0
@@ -69,10 +69,10 @@
                 "name": "lblService",
                 "type": "StaticText",
                 "posch": [
-                    19,
-                    3
+                    2,
+                    2
                 ],
-                "label": "Worship Service",
+                "label": "Worship Services",
                 "tooltip": "Open the worship service form.",
                 "security": {
                     "invoke": "worship.manage"
@@ -83,7 +83,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    5
+                    27
                 ],
                 "label": "Sermons",
                 "tooltip": "Open the sermons form.",
@@ -96,7 +96,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    6
+                    26
                 ],
                 "label": "Propers",
                 "tooltip": "Open the propers form.",
@@ -108,8 +108,8 @@
                 "name": "lblOS",
                 "type": "StaticText",
                 "posch": [
-                    19,
-                    6
+                    2,
+                    24
                 ],
                 "label": "Bulletin Order Templates",
                 "tooltip": "Create and edit reusable bulletin-order templates.",
@@ -122,7 +122,7 @@
                 "label": "Prayers",
                 "posch": [
                     2,
-                    7
+                    32
                 ],
                 "type": "StaticText",
                 "tooltip": "Open the prayers form.",
@@ -132,10 +132,10 @@
             },
             "lblParticipant": {
                 "name": "lblParticipant",
-                "label": "Participant",
+                "label": "Participants",
                 "posch": [
                     2,
-                    8
+                    30
                 ],
                 "type": "StaticText",
                 "tooltip": "Open the participant form.",
@@ -148,9 +148,9 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    9
+                    31
                 ],
-                "label": "Schedule",
+                "label": "Scheduling Patterns",
                 "tooltip": "Open the schedule form.",
                 "security": {
                     "invoke": "worship.manage"
@@ -161,7 +161,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    10
+                    4
                 ],
                 "label": "Service Participants",
                 "tooltip": "Assign participants to a worship service and fill required positions.",
@@ -173,8 +173,8 @@
                 "name": "lblWeeklyBulletinOrder",
                 "type": "StaticText",
                 "posch": [
-                    19,
-                    7
+                    2,
+                    3
                 ],
                 "label": "Weekly Bulletin Order",
                 "tooltip": "Enter this week's bulletin-outline choices and values.",
@@ -187,9 +187,9 @@
                 "name": "lblAttendanceEvent",
                 "posch": [
                     2,
-                    11
+                    34
                 ],
-                "label": "Attendance Event",
+                "label": "Attendance Events",
                 "tooltip": "Open the attendance event form.",
                 "security": {
                     "invoke": "attendance.events.manage"
@@ -200,7 +200,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    12
+                    28
                 ],
                 "label": "Hymnals",
                 "tooltip": "Open the hymnal catalog.",
@@ -213,7 +213,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    13
+                    29
                 ],
                 "label": "Hymns",
                 "tooltip": "Open the hymn catalog.",
@@ -223,11 +223,11 @@
             },
             "MemberBox": {
                 "name": "MemberBox",
-                "label": "Membership",
+                "label": "People and Congregation",
                 "type": "StaticBox",
                 "posch": [
                     1,
-                    15
+                    11
                 ],
                 "layout": {
                     "row": 2,
@@ -235,7 +235,7 @@
                 },
                 "sizech": [
                     15,
-                    4
+                    10
                 ]
             },
             "lblPerson": {
@@ -243,9 +243,9 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    16
+                    13
                 ],
-                "label": "Person",
+                "label": "People",
                 "tooltip": "Open the person form.",
                 "security": {
                     "invoke": "membership.manage"
@@ -256,7 +256,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    17
+                    14
                 ],
                 "label": "Families",
                 "tooltip": "Open the families form.",
@@ -264,29 +264,12 @@
                     "invoke": "membership.manage"
                 }
             },
-            "AttendanceBox": {
-                "name": "AttendanceBox",
-                "label": "Attendance",
-                "layout": {
-                    "row": 1,
-                    "column": 1
-                },
-                "type": "StaticBox",
-                "posch": [
-                    1,
-                    19
-                ],
-                "sizech": [
-                    15,
-                    3
-                ]
-            },
             "lblRecordAttendance": {
                 "name": "lblRecordAttendance",
                 "type": "StaticText",
                 "posch": [
                     2,
-                    20
+                    15
                 ],
                 "label": "Record Attendance",
                 "tooltip": "Open the record attendance form.",
@@ -294,31 +277,14 @@
                     "invoke": "attendance.record"
                 }
             },
-            "ProjectBox": {
-                "type": "StaticBox",
-                "name": "ProjectBox",
-                "posch": [
-                    1,
-                    22
-                ],
-                "sizech": [
-                    15,
-                    4
-                ],
-                "label": "Projects and Tasks",
-                "layout": {
-                    "row": 2,
-                    "column": 1
-                }
-            },
             "lblProject": {
                 "name": "lblProject",
                 "type": "StaticText",
                 "posch": [
                     2,
-                    23
+                    18
                 ],
-                "label": "Project",
+                "label": "Projects",
                 "tooltip": "Open the project form.",
                 "security": {
                     "invoke": "ministry.manage"
@@ -329,29 +295,12 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    24
+                    19
                 ],
-                "label": "Task",
+                "label": "Tasks",
                 "tooltip": "Open the task form.",
                 "security": {
                     "invoke": "ministry.manage"
-                }
-            },
-            "AdministrationBox": {
-                "type": "StaticBox",
-                "name": "AdministrationBox",
-                "label": "Administration",
-                "posch": [
-                    1,
-                    26
-                ],
-                "sizech": [
-                    15,
-                    5
-                ],
-                "layout": {
-                    "row": 3,
-                    "column": 1
                 }
             },
             "lblDocument": {
@@ -360,7 +309,7 @@
                 "label": "Documents",
                 "posch": [
                     2,
-                    27
+                    16
                 ],
                 "tooltip": "Open the documents form.",
                 "security": {
@@ -370,10 +319,10 @@
             "lblAnnouncement": {
                 "name": "lblAnnouncement",
                 "type": "StaticText",
-                "label": "Announcement",
+                "label": "Announcements",
                 "posch": [
                     2,
-                    28
+                    33
                 ],
                 "tooltip": "Open the announcement form.",
                 "security": {
@@ -385,7 +334,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    29
+                    17
                 ],
                 "label": "Journal",
                 "tooltip": "Open the journal form.",
@@ -402,9 +351,9 @@
                 ],
                 "sizech": [
                     15,
-                    4
+                    6
                 ],
-                "label": "Reports and Weekly Output",
+                "label": "Reports and Design",
                 "layout": {
                     "row": 0,
                     "column": 1
@@ -428,7 +377,7 @@
                 "type": "StaticText",
                 "posch": [
                     19,
-                    15
+                    3
                 ],
                 "label": "Report Designer",
                 "tooltip": "Customize approved ChurchManager report layouts.",
@@ -441,7 +390,7 @@
                 "type": "StaticText",
                 "posch": [
                     19,
-                    16
+                    4
                 ],
                 "label": "Screen Designer",
                 "tooltip": "Customize approved ChurchManager screen layouts.",
@@ -452,34 +401,34 @@
             "BulletinBox": {
                 "name": "BulletinBox",
                 "type": "StaticBox",
-                "label": "Bulletin",
+                "label": "Accounting - Daily Work",
                 "posch": [
-                    18,
-                    5
+                    34,
+                    1
                 ],
                 "sizech": [
                     15,
-                    8
+                    7
                 ]
             },
             "DesignersBox": {
                 "name": "DesignersBox",
                 "type": "StaticBox",
-                "label": "Designers",
+                "label": "Accounting - Reports",
                 "posch": [
-                    18,
-                    14
+                    34,
+                    9
                 ],
                 "sizech": [
                     15,
-                    4
+                    12
                 ]
             },
             "lblGenerateOS": {
                 "name": "lblGenerateOS",
                 "type": "StaticText",
                 "posch": [
-                    19,
+                    2,
                     8
                 ],
                 "label": "Prepare Bulletin Order",
@@ -492,8 +441,8 @@
                 "name": "lblNotifyParticipants",
                 "type": "StaticText",
                 "posch": [
-                    19,
-                    9
+                    2,
+                    5
                 ],
                 "label": "Notify Participants",
                 "tooltip": "Notify scheduled service participants by email.",
@@ -505,8 +454,8 @@
                 "name": "lblSundayPrayers",
                 "label": "Weekly Prayers",
                 "posch": [
-                    19,
-                    10
+                    2,
+                    6
                 ],
                 "type": "StaticText",
                 "tooltip": "Generate the Sunday prayer list.",
@@ -519,8 +468,8 @@
                 "type": "StaticText",
                 "label": "Weekly Announcements",
                 "posch": [
-                    19,
-                    11
+                    2,
+                    7
                 ],
                 "tooltip": "Generate the Sunday announcements.",
                 "security": {
@@ -537,20 +486,20 @@
                 },
                 "posch": [
                     18,
-                    19
+                    8
                 ],
                 "sizech": [
                     15,
-                    7
+                    10
                 ]
             },
             "lblConfig": {
                 "name": "lblConfig",
                 "type": "StaticText",
-                "label": "Config",
+                "label": "Configuration",
                 "posch": [
                     19,
-                    20
+                    11
                 ],
                 "tooltip": "Open the config form.",
                 "security": {
@@ -563,7 +512,7 @@
                 "label": "Options",
                 "posch": [
                     19,
-                    21
+                    12
                 ],
                 "tooltip": "Open the options form.",
                 "security": {
@@ -576,7 +525,7 @@
                 "label": "Choices",
                 "posch": [
                     19,
-                    22
+                    10
                 ],
                 "tooltip": "Open the choices form.",
                 "security": {
@@ -587,10 +536,10 @@
                 "name": "lblCheckList",
                 "type": "StaticText",
                 "posch": [
-                    19,
-                    23
+                    2,
+                    25
                 ],
-                "label": "Checklists",
+                "label": "Preparation Checklists",
                 "tooltip": "Open the checklists form.",
                 "security": {
                     "invoke": "application.config.manage"
@@ -602,59 +551,25 @@
                 "label": "Users and Roles",
                 "posch": [
                     19,
-                    24
+                    9
                 ],
                 "tooltip": "Manage ChurchManager users and role assignments.",
                 "security": {
                     "invoke": "security.users.manage"
                 }
             },
-            "JSFormUtilitiesBox": {
-                "name": "JSFormUtilitiesBox",
-                "type": "StaticBox",
-                "label": "Database Utilities",
-                "layout": {
-                    "row": 1,
-                    "column": 2
-                },
-                "posch": [
-                    18,
-                    26
-                ],
-                "sizech": [
-                    15,
-                    5
-                ]
-            },
             "lblBackupDB": {
                 "name": "lblBackupDB",
                 "type": "StaticText",
-                "label": "Backup DBs {OPTION:Backup:LastDate}",
+                "label": "Database Backup {OPTION:Backup:LastDate}",
                 "posch": [
                     19,
-                    27
+                    13
                 ],
                 "tooltip": "Back up the ChurchManager databases.",
                 "security": {
                     "invoke": "application.backup.run"
                 }
-            },
-            "EnhancementsBox": {
-                "name": "EnhancementsBox",
-                "type": "StaticBox",
-                "label": "Enhancements and Bugs",
-                "layout": {
-                    "row": 2,
-                    "column": 2
-                },
-                "posch": [
-                    18,
-                    31
-                ],
-                "sizech": [
-                    15,
-                    3
-                ]
             },
             "lblEnhancements": {
                 "name": "lblEnhancements",
@@ -662,7 +577,7 @@
                 "label": "Enhancements / Bugs",
                 "posch": [
                     19,
-                    32
+                    14
                 ],
                 "tooltip": "Open the enhancements and bug-tracking form.",
                 "security": {
@@ -674,12 +589,12 @@
                 "type": "StaticBox",
                 "label": "Current User",
                 "posch": [
-                    34,
-                    1
+                    18,
+                    20
                 ],
                 "sizech": [
                     15,
-                    15
+                    6
                 ]
             },
             "lblCurrentUser": {
@@ -687,8 +602,8 @@
                 "type": "StaticText",
                 "label": "Signed in",
                 "posch": [
-                    35,
-                    2
+                    19,
+                    21
                 ]
             },
             "lblChangePassword": {
@@ -696,8 +611,8 @@
                 "type": "StaticText",
                 "label": "Change Password",
                 "posch": [
-                    35,
-                    4
+                    19,
+                    23
                 ],
                 "tooltip": "Change your ChurchManager password."
             },
@@ -706,22 +621,22 @@
                 "type": "StaticText",
                 "label": "Log Out",
                 "posch": [
-                    35,
-                    5
+                    19,
+                    24
                 ],
                 "tooltip": "End the current ChurchManager session."
             },
             "FundAccountingBox": {
                 "name": "FundAccountingBox",
                 "type": "StaticBox",
-                "label": "Accounting",
+                "label": "Accounting - Setup and Period End",
                 "posch": [
                     34,
-                    8
+                    22
                 ],
                 "sizech": [
                     15,
-                    27
+                    13
                 ]
             },
             "lblAccountingSetup": {
@@ -730,7 +645,7 @@
                 "label": "Accounting Setup",
                 "posch": [
                     35,
-                    9
+                    23
                 ],
                 "tooltip": "Review or create an accounting configuration.",
                 "security": {
@@ -743,7 +658,7 @@
                 "label": "Chart of Accounts",
                 "posch": [
                     35,
-                    10
+                    24
                 ],
                 "tooltip": "Review and maintain the chart of accounts.",
                 "security": {
@@ -756,7 +671,7 @@
                 "label": "Funds and Restrictions",
                 "posch": [
                     35,
-                    11
+                    25
                 ],
                 "tooltip": "Review and maintain accounting funds and restrictions.",
                 "security": {
@@ -769,7 +684,7 @@
                 "label": "Functional Classifications",
                 "posch": [
                     35,
-                    12
+                    26
                 ],
                 "tooltip": "Review and maintain accounting functional classifications.",
                 "security": {
@@ -782,7 +697,7 @@
                 "label": "Fiscal Years",
                 "posch": [
                     35,
-                    13
+                    27
                 ],
                 "tooltip": "Review and maintain accounting fiscal years.",
                 "security": {
@@ -795,7 +710,7 @@
                 "label": "Fiscal Periods",
                 "posch": [
                     35,
-                    14
+                    28
                 ],
                 "tooltip": "Review and maintain accounting fiscal periods.",
                 "security": {
@@ -808,7 +723,7 @@
                 "label": "Bank Accounts",
                 "posch": [
                     35,
-                    15
+                    29
                 ],
                 "tooltip": "Configure cash accounts for bank imports and reconciliation.",
                 "security": {
@@ -821,7 +736,7 @@
                 "label": "Payees",
                 "posch": [
                     35,
-                    16
+                    30
                 ],
                 "tooltip": "Maintain transaction payees and vendors.",
                 "security": {
@@ -834,7 +749,7 @@
                 "label": "Transaction Entry",
                 "posch": [
                     35,
-                    17
+                    2
                 ],
                 "tooltip": "Create a balanced accounting draft.",
                 "security": {
@@ -847,7 +762,7 @@
                 "label": "Transaction Review",
                 "posch": [
                     35,
-                    18
+                    3
                 ],
                 "tooltip": "Review and approve accounting transactions awaiting approval.",
                 "security": {
@@ -860,7 +775,7 @@
                 "label": "Transaction Posting",
                 "posch": [
                     35,
-                    19
+                    4
                 ],
                 "tooltip": "Post reviewed accounting transactions permanently.",
                 "security": {
@@ -873,7 +788,7 @@
                 "label": "Posted Register",
                 "posch": [
                     35,
-                    20
+                    5
                 ],
                 "tooltip": "View posted accounting transactions and their lines.",
                 "security": {
@@ -886,7 +801,7 @@
                 "label": "Trial Balance",
                 "posch": [
                     35,
-                    21
+                    10
                 ],
                 "tooltip": "Run an as-of-date trial balance from posted transactions.",
                 "security": {
@@ -899,7 +814,7 @@
                 "label": "Financial Position",
                 "posch": [
                     35,
-                    22
+                    12
                 ],
                 "tooltip": "Run a statement of financial position as of a selected date.",
                 "security": {
@@ -912,7 +827,7 @@
                 "label": "Statement of Activities",
                 "posch": [
                     35,
-                    23
+                    13
                 ],
                 "tooltip": "Run revenue, expense, transfer, and net-asset activity by restriction class.",
                 "security": {
@@ -925,7 +840,7 @@
                 "label": "Bank File Import",
                 "posch": [
                     35,
-                    24
+                    6
                 ],
                 "tooltip": "Preview and stage a CSV bank file without posting transactions.",
                 "security": {
@@ -938,7 +853,7 @@
                 "label": "Audit History",
                 "posch": [
                     35,
-                    25
+                    18
                 ],
                 "tooltip": "Review the read-only accounting audit trail.",
                 "security": {
@@ -951,7 +866,7 @@
                 "label": "General Ledger",
                 "posch": [
                     35,
-                    26
+                    11
                 ],
                 "tooltip": "Run account detail with opening and running balances.",
                 "security": {
@@ -964,7 +879,7 @@
                 "label": "Fund Balances",
                 "posch": [
                     35,
-                    27
+                    14
                 ],
                 "tooltip": "Run beginning, activity, and ending balances by fund.",
                 "security": {
@@ -977,7 +892,7 @@
                 "label": "Reconciliation Report",
                 "posch": [
                     35,
-                    28
+                    15
                 ],
                 "tooltip": "Review completed reconciliation proof and outstanding items.",
                 "security": {
@@ -990,7 +905,7 @@
                 "label": "Close Checklist",
                 "posch": [
                     35,
-                    29
+                    32
                 ],
                 "tooltip": "Identify unresolved items before closing a fiscal period.",
                 "security": {
@@ -1003,7 +918,7 @@
                 "label": "Budgets",
                 "posch": [
                     35,
-                    30
+                    31
                 ],
                 "tooltip": "Create account-only or detailed draft budgets.",
                 "security": {
@@ -1016,7 +931,7 @@
                 "label": "Budget to Actual",
                 "posch": [
                     35,
-                    31
+                    16
                 ],
                 "tooltip": "Compare adopted budget totals with posted actual activity.",
                 "security": {
@@ -1029,7 +944,7 @@
                 "label": "Functional Expenses",
                 "posch": [
                     35,
-                    32
+                    17
                 ],
                 "tooltip": "Report expenses by natural account and ministry function.",
                 "security": {

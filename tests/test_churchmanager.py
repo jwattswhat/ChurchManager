@@ -885,7 +885,7 @@ class TestChurchManagerForms(unittest.TestCase):
         self.assertIn("AccountType = 'ASSET'",lookup["condition"])
         self.assertIn("last four digits",form["CONTROLS"]["AccountLastFour"]["tooltip"])
         controls=load_json(FORMS/"frmMain.json")["frmMainFORM"]["CONTROLS"]
-        box=controls["FundAccountingBox"]; top=box["posch"][1]; bottom=top+box["sizech"][1]
+        box=controls["DesignersBox"]; top=box["posch"][1]; bottom=top+box["sizech"][1]
         self.assertTrue(top < controls["lblAccountingActivities"]["posch"][1] < bottom)
 
     def test_payees_are_protected_jsform_master_data(self):
@@ -993,43 +993,45 @@ class TestChurchManagerForms(unittest.TestCase):
         main = next(iter(load_json(FORMS / "frmMain.json").values()))
         controls = main["CONTROLS"]
         expected = {
-            "ChurchBox": (0, 0), "ServiceBox": (1, 0), "MemberBox": (2, 0),
-            "ReportBox": (0, 1), "AttendanceBox": (1, 1), "ProjectBox": (2, 1),
-            "AdministrationBox": (3, 1), "UtilitiesBox": (0, 2),
-            "JSFormUtilitiesBox": (1, 2), "EnhancementsBox": (2, 2),
+            "ChurchBox": "Service Planning",
+            "MemberBox": "People and Congregation",
+            "ServiceBox": "Worship Resources",
+            "ReportBox": "Reports and Design",
+            "UtilitiesBox": "ChurchManager Settings",
+            "SessionBox": "Current User",
+            "BulletinBox": "Accounting - Daily Work",
+            "DesignersBox": "Accounting - Reports",
+            "FundAccountingBox": "Accounting - Setup and Period End",
         }
-        actual = {
-            name: (controls[name]["layout"]["row"], controls[name]["layout"]["column"])
-            for name in expected
-        }
-        self.assertEqual(actual, expected)
-
-    def test_main_menu_separates_database_bulletin_and_weekly_output(self):
-        controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
-        self.assertEqual(controls["ServiceBox"]["label"], "Database")
-        self.assertEqual(controls["BulletinBox"]["label"], "Bulletin")
-
-        self.assertEqual(controls["lblService"]["posch"], [19, 3])
-        bulletin_items = [
-            "lblOS", "lblWeeklyBulletinOrder", "lblGenerateOS",
-            "lblNotifyParticipants", "lblSundayPrayers", "lblAnnouncements",
-        ]
         self.assertEqual(
-            [controls[name]["posch"] for name in bulletin_items],
-            [[19, row] for row in range(6, 12)],
+            {name: controls[name]["label"] for name in expected}, expected,
         )
+        self.assertEqual({controls[name]["posch"][0] for name in expected}, {1, 18, 34})
 
-        database_items = [
-            "lblSermon", "lblPropers", "lblPrayers", "lblParticipant",
-            "lblSchedule", "lblServiceSchedule", "lblAttendanceEvent",
-            "lblHymnal", "lblHymn",
+    def test_main_menu_groups_work_by_usage(self):
+        controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
+        self.assertEqual(controls["ServiceBox"]["label"], "Worship Resources")
+        self.assertEqual(controls["ChurchBox"]["label"], "Service Planning")
+        planning_items = [
+            "lblService", "lblWeeklyBulletinOrder", "lblServiceSchedule",
+            "lblNotifyParticipants", "lblSundayPrayers", "lblAnnouncements",
+            "lblGenerateOS",
         ]
         self.assertEqual(
-            [controls[name]["posch"] for name in database_items],
-            [[2, row] for row in range(5, 14)],
+            sorted(controls[name]["posch"][1] for name in planning_items),
+            list(range(2, 9)),
+        )
+        resource_items = [
+            "lblOS", "lblCheckList", "lblPropers", "lblSermon", "lblHymnal",
+            "lblHymn", "lblParticipant", "lblSchedule", "lblPrayers",
+            "lblAnnouncement", "lblAttendanceEvent",
+        ]
+        self.assertEqual(
+            sorted(controls[name]["posch"][1] for name in resource_items),
+            list(range(24, 35)),
         )
         self.assertTrue(all(controls[name]["label"] == controls[name]["label"].strip()
-                            for name in database_items))
+                            for name in resource_items))
         from main_menu import FORM_ROUTES
         self.assertEqual(FORM_ROUTES["lblHymnal"], "frmHymnal")
         self.assertEqual(FORM_ROUTES["lblHymn"], "frmHymn")
