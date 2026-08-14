@@ -48,6 +48,12 @@ class WorshipChecklistTests(unittest.TestCase):
             "Manually confirmed complete",
         )
 
+    def test_this_time_task_is_service_only_and_manual(self):
+        source = (ROOT / "worship_checklist.py").read_text()
+        self.assertIn("def add_service_task", source)
+        self.assertIn("VALUES (?,NULL,?,?,'MANUAL',?,'NOT_DONE')", source)
+        self.assertIn('label="Add This-Time Task..."', source)
+
 
 if __name__ == "__main__":
     unittest.main()

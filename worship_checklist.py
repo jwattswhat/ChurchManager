@@ -139,6 +139,30 @@ class WorshipChecklistRepository:
         finally:
             cursor.close()
 
+    def add_service_task(self, service_id, task, required=True):
+        task = str(task or "").strip()
+        if not task:
+            raise ValueError("Enter a description for the preparation task.")
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT COALESCE(MAX(Sequence),0)+1 FROM tblServiceChecklistItem "
+                "WHERE ServiceID=?", (service_id,),
+            )
+            sequence = cursor.fetchone()[0]
+            cursor.execute(
+                "INSERT INTO tblServiceChecklistItem "
+                "(ServiceID,TemplateItemID,Sequence,Task,CompletionSource,Required,Status) "
+                "VALUES (?,NULL,?,?,'MANUAL',?,'NOT_DONE')",
+                (service_id, sequence, task, int(bool(required))),
+            )
+            self.connection.commit()
+            return cursor.lastrowid
+        except Exception:
+            self.connection.rollback(); raise
+        finally:
+            cursor.close()
+
     def set_override(self, service_id, complete):
         cursor = self.connection.cursor()
         try:
@@ -175,6 +199,9 @@ class PreparationChecklistDialog(wx.Dialog):
         buttons=wx.BoxSizer(wx.HORIZONTAL)
         for label,status in (("Done","DONE"),("Not Done","NOT_DONE"),("Not Needed","NOT_NEEDED")):
             button=wx.Button(panel,label=label); button.Bind(wx.EVT_BUTTON,lambda _e,s=status:self.change(s)); buttons.Add(button,0,wx.RIGHT,6)
+        add_task = wx.Button(panel, label="Add This-Time Task...")
+        add_task.Bind(wx.EVT_BUTTON, self.add_task)
+        buttons.Add(add_task, 0, wx.LEFT, 8)
         self.override=wx.Button(panel); self.override.Bind(wx.EVT_BUTTON,self.toggle_override)
         buttons.AddStretchSpacer(); buttons.Add(self.override,0,wx.RIGHT,8)
         close = wx.Button(panel, wx.ID_CLOSE, "Close")
@@ -223,6 +250,30 @@ class PreparationChecklistDialog(wx.Dialog):
     def toggle_override(self,_event):
         service=self.repository.service(self.service_id)
         self.repository.set_override(self.service_id,not bool(service[4])); self.refresh()
+
+    def add_task(self, _event):
+        dialog = wx.TextEntryDialog(
+            self,
+            "Enter a preparation task needed only for this Worship Service.",
+            "Add This-Time Task",
+        )
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            task = dialog.GetValue().strip()
+            if not task:
+                wx.MessageBox("Enter a task description.", "Preparation Checklist",
+                              wx.OK | wx.ICON_INFORMATION, self)
+                return
+            self.repository.add_service_task(self.service_id, task)
+            self.refresh()
+            index = self.grid.GetItemCount() - 1
+            if index >= 0:
+                self.grid.Select(index); self.grid.EnsureVisible(index)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Add Task", wx.OK | wx.ICON_ERROR, self)
+        finally:
+            dialog.Destroy()
 
 
 def show_preparation_checklist(parent, connection, service_id):
