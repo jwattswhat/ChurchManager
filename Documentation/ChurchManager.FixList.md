@@ -29,6 +29,7 @@ should not delay a stable ChurchManager release.
 
 ### 1. User contact information
 
+- Proposed design: [ChurchManager user contact information specification](ChurchManager.UserContact.Specification.md)
 - Add email address and phone number to ChurchManager user accounts.
 - Update User Administration, database migrations, validation, auditing, and
   tests.
