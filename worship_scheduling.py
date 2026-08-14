@@ -467,12 +467,24 @@ class RoleManagerDialog(wx.Dialog):
         for i,row in enumerate(self.rows):
             item=self.grid.InsertItem(i,row[1]); self.grid.SetItem(item,1,row[2]); self.grid.SetItem(item,2,"Yes" if row[4] else "No")
     def _edit(self,row):
-        dialog=wx.Dialog(self,title="Worship Role"); panel=wx.Panel(dialog); s=wx.BoxSizer(wx.VERTICAL)
-        name=wx.TextCtrl(panel,value=row[1] if row else ""); desc=wx.TextCtrl(panel,value=row[2] if row else "")
-        order=wx.SpinCtrl(panel,min=1,max=999,initial=int(row[3]) if row else 100); active=wx.CheckBox(panel,label="Active"); active.SetValue(bool(row[4]) if row else True)
-        for label,control in (("Role",name),("Description",desc),("Display order",order)):
-            s.Add(wx.StaticText(panel,label=label+":"),0,wx.LEFT|wx.RIGHT|wx.TOP,8); s.Add(control,0,wx.EXPAND|wx.LEFT|wx.RIGHT,8)
-        s.Add(active,0,wx.ALL,8); s.Add(dialog_button_sizer(dialog,panel),0,wx.EXPAND|wx.ALL,8); panel.SetSizer(s); dialog.Fit()
+        title="Edit Worship Position" if row else "Add Worship Position"
+        dialog=wx.Dialog(self,title=title,size=(560,330),style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+        panel=wx.Panel(dialog); outer=wx.BoxSizer(wx.VERTICAL)
+        note=wx.StaticText(panel,label="A position describes a role someone may fill during a worship service.")
+        note.SetForegroundColour(wx.Colour(0,90,190)); outer.Add(note,0,wx.ALL,12)
+        form=wx.FlexGridSizer(cols=2,vgap=10,hgap=12); form.AddGrowableCol(1,1); form.AddGrowableRow(1,1)
+        name=wx.TextCtrl(panel,value=row[1] if row else "")
+        desc=wx.TextCtrl(panel,value=row[2] if row else "",style=wx.TE_MULTILINE)
+        desc.SetMinSize((-1,100))
+        order=wx.SpinCtrl(panel,min=1,max=999,initial=int(row[3]) if row else 100)
+        active=wx.CheckBox(panel,label="This position is active"); active.SetValue(bool(row[4]) if row else True)
+        for label,control in (("Position name",name),("Description",desc),("Display order",order)):
+            form.Add(wx.StaticText(panel,label=label+":"),0,wx.ALIGN_TOP|wx.TOP,4)
+            form.Add(control,1 if control is desc else 0,wx.EXPAND)
+        form.AddSpacer(1); form.Add(active,0,wx.TOP,2)
+        outer.Add(form,1,wx.EXPAND|wx.LEFT|wx.RIGHT,12)
+        outer.Add(dialog_button_sizer(dialog,panel),0,wx.EXPAND|wx.ALL,12)
+        panel.SetSizer(outer); dialog.SetMinSize((500,300)); dialog.CentreOnParent()
         try:
             if dialog.ShowModal()==wx.ID_OK:
                 if not name.GetValue().strip(): raise ValueError("Enter a role name.")
@@ -660,9 +672,9 @@ class ServiceParticipantsDialog(wx.Dialog):
         self.grid.Bind(wx.EVT_LIST_ITEM_DESELECTED,self.on_selection)
         outer.Add(self.grid,1,wx.EXPAND|wx.LEFT|wx.RIGHT,10)
         actions=wx.BoxSizer(wx.HORIZONTAL)
-        for label,handler in (("Add...",self.on_add),("Edit...",self.on_edit),("Remove",self.on_remove),("Preview Suggestions...",self.on_suggest)):
+        for label,handler in (("Add...",self.on_add),("Edit...",self.on_edit),("Remove Assignment",self.on_remove),("Preview Suggestions...",self.on_suggest)):
             b=wx.Button(panel,label=label); b.Bind(wx.EVT_BUTTON,handler); actions.Add(b,0,wx.RIGHT,7)
-            if label == "Remove": self.remove_button=b; b.Enable(False)
+            if label == "Remove Assignment": self.remove_button=b; b.Enable(False)
         self.status=wx.StaticText(panel,label="Required positions remain visible as Open after an assignment is removed.")
         outer.Add(self.status,0,wx.LEFT|wx.RIGHT|wx.TOP,10)
         actions.AddStretchSpacer(); actions.Add(wx.Button(panel,wx.ID_CANCEL,"Close")); outer.Add(actions,0,wx.EXPAND|wx.ALL,10); panel.SetSizer(outer); self.refresh()

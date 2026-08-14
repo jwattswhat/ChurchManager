@@ -139,6 +139,13 @@ class TestWorshipPlanningStructure(unittest.TestCase):
         self.assertIn("line.WeeklyValue", migration)
         self.assertIn("line.ReferenceText", migration)
 
+    def test_worship_position_editor_has_a_usable_dialog_size(self):
+        source = (ROOT / "worship_scheduling.py").read_text(encoding="utf-8")
+        self.assertIn('title="Edit Worship Position" if row else "Add Worship Position"', source)
+        self.assertIn("size=(560,330)", source)
+        self.assertIn("desc.SetMinSize((-1,100))", source)
+        self.assertIn('(\"Remove Assignment\",self.on_remove)', source)
+
     def test_deleting_custom_template_preserves_its_weekly_orders(self):
         migration = (
             ROOT / "migrations" / "054_preserve_weekly_order_snapshots.sql"
