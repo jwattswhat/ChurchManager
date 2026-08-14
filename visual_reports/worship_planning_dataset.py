@@ -7,7 +7,7 @@ from worship_scheduling_rules import report_participant_rows
 
 
 WORSHIP_PLANNING_CONTRACT = ReportDatasetContract(
-    "churchmanager.cmwp01", 3, "reports.worship.run",
+    "churchmanager.cmwp01", 4, "reports.worship.run",
     (
         ReportCollection("church", "Church", (
             ReportField("ID", "Church ID", "integer"),
@@ -47,6 +47,15 @@ WORSHIP_PLANNING_CONTRACT = ReportDatasetContract(
         ReportCollection("participants", "Participants", (
             ReportField("Role", "Role"), ReportField("Name", "Participant"),
             ReportField("Status", "Status"),
+        )),
+        ReportCollection("checklist", "Preparation Checklist (Optional)", (
+            ReportField("Sequence", "Sequence", "integer"),
+            ReportField("Task", "Preparation Item"), ReportField("Status", "Status"),
+            ReportField("Note", "Note"),
+        )),
+        ReportCollection("checklist_summary", "Checklist Summary (Optional)", (
+            ReportField("Display", "Checklist Summary"),
+            ReportField("ManuallyConfirmed", "Manually Confirmed", "boolean"),
         )),
     ),
 )
@@ -116,6 +125,18 @@ class WorshipPlanningDatasetProvider:
             "WHERE ServiceID=? ORDER BY Role,Name", (service_id,),
         )
         participants = report_participant_rows(requirements, assignments)
+        checklist = self._rows(
+            "SELECT Sequence,Task,Status,Note,CompletionSource FROM rpt_worship_planner_checklist "
+            "WHERE ServiceID=? ORDER BY Sequence", (service_id,),
+        )
+        completion = self._rows(
+            "SELECT ManuallyConfirmed AS Complete FROM rpt_worship_planner_checklist_summary "
+            "WHERE ServiceID=?",
+            (service_id,),
+        )[0]["Complete"]
+        counts = {"DONE": 0, "NOT_DONE": 0, "NOT_NEEDED": 0}
+        for row in checklist:
+            counts[row["Status"]] = counts.get(row["Status"], 0) + 1
         label = service[0]["LiturgicalDate"] or str(service[0]["DateTime"])
         return ReportDataset.create(WORSHIP_PLANNING_CONTRACT, {
             "church": church,
@@ -129,4 +150,12 @@ class WorshipPlanningDatasetProvider:
             "participants": self._placeholder(
                 participants, Role="Participants", Name="Not assigned", Status="Open",
             ),
+            "checklist": self._placeholder(
+                checklist, Sequence=0, Task="No preparation checklist has been created.",
+                Status="NOT_DONE", Note="",
+            ),
+            "checklist_summary": [{
+                "Display": f"{counts['DONE']} done · {counts['NOT_DONE']} not done · {counts['NOT_NEEDED']} not needed",
+                "ManuallyConfirmed": bool(completion),
+            }],
         })

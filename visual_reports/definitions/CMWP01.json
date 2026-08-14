@@ -5,7 +5,7 @@
       "name": "CMWP01",
       "title": "Worship Service Planner",
       "dataset": "churchmanager.cmwp01",
-      "datasetversion": 3,
+      "datasetversion": 4,
       "pagesize": "letter",
       "orientation": "portrait",
       "margins": {"top": 24, "right": 36, "bottom": 28, "left": 36},

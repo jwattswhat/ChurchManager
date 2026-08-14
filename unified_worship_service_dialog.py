@@ -11,6 +11,7 @@ import wx.adv
 from ui_dimensions import DATE_PICKER_SIZE, TIME_PICKER_SIZE
 from hymn_validation import duplicate_selection_status, normalize_tune
 from worship_scheduling import show_service_participants
+from worship_checklist import show_preparation_checklist
 
 from bulletin_orders import (
     BulletinOrderGenerator,
@@ -228,7 +229,7 @@ class UnifiedWorshipServiceRepository:
             cursor.execute(
                 "UPDATE tblService SET DateTime=?,Location=?,PropersID=?,LiturgicalDate=?,"
                 "HolyCommunion=?,BulletinOrderTemplateID=?,OSNote=?,SermonID=?,"
-                "Bulletin=?,CheckListComplete=?,CheckList=?,Note=? WHERE ID=?",
+                "Bulletin=?,Note=? WHERE ID=?",
                 service_values + (service_id,),
             )
             cursor.execute("SELECT ChurchID FROM tblService WHERE ID=?", (service_id,))
@@ -400,6 +401,12 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             ),
         )
         self.detail_box.Add(participants, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+        checklist = wx.Button(right, label="Preparation Checklist...")
+        checklist.SetToolTip("Review preparation reminders and completion summaries.")
+        checklist.Bind(wx.EVT_BUTTON, lambda _event: show_preparation_checklist(
+            self, self.repository.connection, self.service_id,
+        ))
+        self.detail_box.Add(checklist, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
         self.fields = {}
         for key, label, multiline, inline in (
             ("church", "Church", False, True),
@@ -409,8 +416,6 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             ("communion", "Holy Communion", False, True),
             ("sermon", "Sermon", False, False),
             ("bulletin", "Bulletin", False, False),
-            ("check_complete", "Checklist complete", False, True),
-            ("checklist", "Checklist", True, False),
             ("note", "Notes for this service", True, False),
             ("os_note", "Order of Service notes (from template - read only)", True, False),
         ):
@@ -469,7 +474,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             control = wx.Choice(parent)
             if key == "proper":
                 control.Bind(wx.EVT_CHOICE, self.on_proper)
-        elif key in ("communion", "check_complete"):
+        elif key == "communion":
             control = wx.CheckBox(parent)
             if key == "communion":
                 control.Bind(wx.EVT_CHECKBOX, self.on_communion)
@@ -523,17 +528,9 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         values = {
             "church": church[0] if church else "",
             "liturgical": r[5], "communion": bool(r[6]),
-            "bulletin": r[10], "check_complete": bool(r[11]),
+            "bulletin": r[10],
             "os_note": r[8], "note": r[13],
         }
-        try:
-            checklist = json.loads(r[12]) if r[12] else {}
-            values["checklist"] = "\n".join(
-                ("[x] " if str(done).casefold() == "true" else "[ ] ") + str(item)
-                for item, done in checklist.items()
-            )
-        except (TypeError, ValueError):
-            values["checklist"] = str(r[13])
         for key, value in values.items():
             control = self.fields[key]
             if isinstance(control, wx.CheckBox):
@@ -777,17 +774,6 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         selection = choice.GetSelection()
         return None if selection == wx.NOT_FOUND else rows[selection][0]
 
-    def checklist_json(self):
-        result = {}
-        for raw in self.fields["checklist"].GetValue().splitlines():
-            text = raw.strip()
-            if not text:
-                continue
-            checked = text.startswith("[x]") or text.startswith("[X]")
-            label = text[3:].strip() if text.startswith("[") and len(text) >= 3 else text
-            result[label] = "True" if checked else "False"
-        return json.dumps(result)
-
     def validation_counts(self):
         _statuses, hymn_duplicates, tune_duplicates = duplicate_selection_status(self.working_lines)
         missing = sum(
@@ -827,7 +813,6 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             self.fields["os_note"].GetValue() or None,
             self._choice_value(self.fields["sermon"], self.sermon_rows),
             self.fields["bulletin"].GetPath() or None,
-            int(self.fields["check_complete"].GetValue()), self.checklist_json(),
             self.fields["note"].GetValue() or None,
         )
         try:
