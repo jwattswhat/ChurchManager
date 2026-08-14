@@ -49,15 +49,21 @@ class ChurchManagerFormFactory:
         )
         swatch.SetToolTip("Preview of the selected liturgical color.")
 
-        def refresh(_event=None):
+        def refresh():
             color = liturgical_color_hex(color_field.GetValue())
             swatch.Show(bool(color))
             if color:
                 swatch.SetBackgroundColour(wx.Colour(color))
                 swatch.Refresh()
 
-        color_field.Bind(wx.EVT_TEXT, refresh)
-        color_field.Bind(wx.EVT_COMBOBOX, refresh)
+        def on_color_change(event):
+            # ComboBox values are committed after the native selection event
+            # on some Windows wxPython builds.
+            wx.CallAfter(refresh)
+            event.Skip()
+
+        color_field.Bind(wx.EVT_TEXT, on_color_change)
+        color_field.Bind(wx.EVT_COMBOBOX, on_color_change)
         refresh()
         form.LITURGICAL_COLOR_SWATCH = swatch
 

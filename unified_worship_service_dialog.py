@@ -820,9 +820,12 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         if not self.loading:
             self.apply_proper()
 
-    def on_color_override(self, _event):
+    def on_color_override(self, event):
         if not self.loading:
-            self._show_liturgical_color_for_selected_proper()
+            # On Windows, let wx finish committing the new Choice selection
+            # before reading it to repaint the swatch.
+            wx.CallAfter(self._show_liturgical_color_for_selected_proper)
+        event.Skip()
 
     def on_communion(self, _event):
         if not self.loading:

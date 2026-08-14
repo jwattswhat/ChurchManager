@@ -336,6 +336,7 @@ class TestChurchManagerPython(unittest.TestCase):
         )
         self.assertIn('choice_values("Color")', source)
         self.assertIn("Use Proper color", source)
+        self.assertIn("wx.CallAfter(self._show_liturgical_color_for_selected_proper)", source)
         self.assertIn("LiturgicalColorOverride=?", source)
         self.assertIn("LiturgicalColorOverride VARCHAR(32)", migration)
         self.assertIn("NULLIF(TRIM(s.LiturgicalColorOverride),'')", migration)
