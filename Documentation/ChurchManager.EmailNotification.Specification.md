@@ -101,7 +101,15 @@ failure stops the workflow before sending.
 
 Default subject:
 
-`Worship Planning - <service date> - <church name>`
+`Worship Planning - <full service date and time> - <church name>`
+
+Example:
+
+`Worship Planning - Sunday, August 16, 2026 at 9:00 AM - Reformation Lutheran Church`
+
+The full service date and time are required so each service notification begins
+a distinct Gmail conversation instead of being attached to an older weekly
+planning thread.
 
 Default message:
 
@@ -109,6 +117,20 @@ Default message:
 
 The user may edit the subject and message for this send. Initial implementation
 uses plain text. Rich HTML and reusable message templates are later enhancements.
+
+### New-conversation requirement
+
+Every notification send is a newly composed message, not a reply or continuation.
+The mail transport must:
+
+- create a fresh RFC message ID;
+- omit `In-Reply-To` and `References` headers;
+- omit any provider-specific prior thread or conversation ID;
+- retain the service-specific full date and time in the subject.
+
+A deliberate resend for the same service may retain the same subject and can be
+grouped with the prior attempt. Notifications for different services must have
+different subjects.
 
 ## 8. Configuration
 
@@ -176,6 +198,7 @@ Automated tests must use fakes and perform no real email delivery. Tests cover:
 - starter/custom report resolution;
 - explicit confirmation and cancel behavior;
 - BCC or individual-recipient privacy;
+- distinct service subjects and absence of reply/thread headers;
 - complete and partial delivery summaries;
 - authorization at the service boundary;
 - audit content and diagnostic redaction;
