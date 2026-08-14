@@ -70,6 +70,13 @@ class AttendanceTests(unittest.TestCase):
         self.assertIn("KnownAttendance", migration)
         self.assertIn("UnnamedAttendance", migration)
 
+    def test_attendance_editor_uses_its_saved_repository(self):
+        source = (ROOT / "attendance_dialog.py").read_text(encoding="utf-8")
+        self.assertIn(
+            'choices=self.repository.choices("AttendanceType")',
+            source,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

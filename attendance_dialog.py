@@ -160,7 +160,9 @@ class AttendanceEditorDialog(wx.Dialog):
         self.church = wx.StaticText(panel)
         self.service = wx.StaticText(panel)
         self.description = wx.TextCtrl(panel)
-        self.attendance_type = wx.Choice(panel, choices=repository.choices("AttendanceType"))
+        self.attendance_type = wx.Choice(
+            panel, choices=self.repository.choices("AttendanceType")
+        )
         self.service_date = wx.adv.DatePickerCtrl(panel, size=DATE_PICKER_SIZE, style=wx.adv.DP_DROPDOWN)
         self.service_time = wx.adv.TimePickerCtrl(panel, size=TIME_PICKER_SIZE)
         self.communion_offered = wx.CheckBox(panel)
