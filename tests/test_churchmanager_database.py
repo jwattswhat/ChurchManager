@@ -473,6 +473,23 @@ class TestChurchManagerDatabase(unittest.TestCase):
         )
         self.assertEqual(delete_rule, [("SET NULL",)])
 
+    def test_weekly_hymn_value_is_title_and_reference_is_number(self):
+        migration = self.query(
+            "SELECT version FROM schema_migrations "
+            "WHERE version='055_separate_weekly_hymn_title_and_number.sql'"
+        )
+        self.assertEqual(migration, [("055_separate_weekly_hymn_title_and_number.sql",)])
+        mismatches = self.query(
+            "SELECT COUNT(*) FROM tblServiceBulletinOrderLine weekly_line "
+            "JOIN tblHymnUsage hymn_usage "
+            "ON hymn_usage.ServiceBulletinOrderLineID=weekly_line.ID "
+            "JOIN tblHymn hymn_record ON hymn_record.ID=hymn_usage.HymnID "
+            "WHERE weekly_line.ValueSource='SERVICE_HYMN' AND "
+            "(COALESCE(weekly_line.WeeklyValue,'')<>COALESCE(hymn_record.Title,'') OR "
+            "COALESCE(weekly_line.ReferenceText,'')<>COALESCE(hymn_record.Hymn,''))"
+        )[0][0]
+        self.assertEqual(mismatches, 0)
+
     def test_sample_accounting_setup_is_complete(self):
         rows = self.query(
             "SELECT o.ID, "

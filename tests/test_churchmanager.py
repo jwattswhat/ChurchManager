@@ -127,6 +127,18 @@ class TestWorshipPlanningStructure(unittest.TestCase):
         self.assertIn("The reusable template will not be changed.", source)
         self.assertIn("normalize_line_sequences(self.working_lines)", source)
 
+    def test_weekly_hymns_store_title_as_value_and_number_as_reference(self):
+        editor = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
+        repository = (ROOT / "bulletin_orders.py").read_text(encoding="utf-8")
+        migration = (
+            ROOT / "migrations" / "055_separate_weekly_hymn_title_and_number.sql"
+        ).read_text(encoding="utf-8")
+        self.assertIn('line["value"] = selected[2] or ""', editor)
+        self.assertIn('line["reference"] = selected[1] or ""', editor)
+        self.assertIn("SET WeeklyValue=?,ReferenceText=?", repository)
+        self.assertIn("line.WeeklyValue", migration)
+        self.assertIn("line.ReferenceText", migration)
+
     def test_deleting_custom_template_preserves_its_weekly_orders(self):
         migration = (
             ROOT / "migrations" / "054_preserve_weekly_order_snapshots.sql"

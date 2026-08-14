@@ -186,7 +186,7 @@ class UnifiedWorshipServiceRepository:
             (proper_id,),
         ) if proper_id else []
         hymns = self.all(
-            "SELECT s.HymnID,TRIM(CONCAT_WS(' ',h.Hymn,h.Title)),s.SuggestedAs,"
+            "SELECT s.HymnID,COALESCE(h.Hymn,''),COALESCE(h.Title,''),s.SuggestedAs,"
             "COALESCE(h.Tune,'') "
             "FROM tblProperHymnSuggestion s JOIN tblHymn h ON h.ID=s.HymnID "
             "WHERE s.PropersID=? ORDER BY s.ID", (proper_id,),
@@ -698,12 +698,15 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             if dialog.ShowModal() == wx.ID_OK:
                 selected = dialog.selected_hymn
                 line["hymn_id"] = selected[0]
-                line["value"] = " ".join(value for value in (selected[1], selected[2]) if value)
+                line["value"] = selected[2] or ""
+                line["reference"] = selected[1] or ""
                 line["tune"] = selected[3] or ""
                 self.refresh_grid()
                 self.grid.Select(index)
             elif dialog.clear_requested:
-                line["hymn_id"], line["value"], line["tune"] = None, "", ""
+                line["hymn_id"], line["value"], line["reference"], line["tune"] = (
+                    None, "", "", ""
+                )
                 self.refresh_grid()
                 self.grid.Select(index)
         finally:
@@ -814,12 +817,14 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             if line["source"] == "SERVICE_READING":
                 line["value"] = readings_by_use.get(line["key"], "")
             elif line["source"] == "SERVICE_HYMN":
-                match = next((i for i, hymn in enumerate(unused) if hymn[2] == line["key"]), None)
+                match = next((i for i, hymn in enumerate(unused) if hymn[3] == line["key"]), None)
                 if match is None:
-                    line["value"], line["hymn_id"], line["tune"] = "", None, ""
+                    line["value"], line["reference"] = "", ""
+                    line["hymn_id"], line["tune"] = None, ""
                 else:
                     hymn = unused.pop(match)
-                    line["hymn_id"], line["value"], line["tune"] = hymn[0], hymn[1], hymn[3]
+                    line["hymn_id"], line["reference"] = hymn[0], hymn[1]
+                    line["value"], line["tune"] = hymn[2], hymn[4]
         self.refresh_grid()
 
     @staticmethod
@@ -1052,8 +1057,8 @@ class ProperReadOnlyDialog(wx.Dialog):
         hymn_grid.AppendColumn("Suggested Use", width=190)
         hymn_grid.AppendColumn("Hymn", width=490)
         for index, row in enumerate(hymns):
-            item = hymn_grid.InsertItem(index, str(row[2]))
-            hymn_grid.SetItem(item, 1, str(row[1]))
+            item = hymn_grid.InsertItem(index, str(row[3]))
+            hymn_grid.SetItem(item, 1, " ".join(value for value in (row[1], row[2]) if value))
         hymn_box = wx.BoxSizer(wx.VERTICAL); hymn_box.Add(hymn_grid, 1, wx.EXPAND | wx.ALL, 6)
         hymn_page.SetSizer(hymn_box)
         outer.Add(book, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)

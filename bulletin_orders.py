@@ -302,7 +302,7 @@ class WeeklyBulletinOrderRepository:
             if not service:
                 raise ValueError("The selected service is unavailable.")
             cursor.execute(
-                "SELECT u.HymnID,u.UsedAs,TRIM(CONCAT_WS(' ',h.Hymn,h.Title)) "
+                "SELECT u.HymnID,u.UsedAs,COALESCE(h.Hymn,''),COALESCE(h.Title,'') "
                 "FROM tblHymnUsage u JOIN tblHymn h ON h.ID=u.HymnID "
                 "LEFT JOIN tblServiceBulletinOrderLine l "
                 "ON l.ID=u.ServiceBulletinOrderLineID "
@@ -346,7 +346,7 @@ class WeeklyBulletinOrderRepository:
                         None,
                     )
                     if match_index is not None:
-                        hymn_id, used_as, display = selected_hymns.pop(match_index)
+                        hymn_id, used_as, hymn_number, hymn_title = selected_hymns.pop(match_index)
                         cursor.execute(
                             "INSERT INTO tblHymnUsage "
                             "(ChurchID,ServiceID,ServiceBulletinOrderLineID,HymnID,UsedAs) "
@@ -354,8 +354,9 @@ class WeeklyBulletinOrderRepository:
                             (service[2], service_id, weekly_line_id, hymn_id, used_as),
                         )
                         cursor.execute(
-                            "UPDATE tblServiceBulletinOrderLine SET WeeklyValue=? WHERE ID=?",
-                            (display, weekly_line_id),
+                            "UPDATE tblServiceBulletinOrderLine SET WeeklyValue=?,ReferenceText=? "
+                            "WHERE ID=?",
+                            (hymn_title or None, hymn_number or None, weekly_line_id),
                         )
             self.connection.commit()
             return len(template_lines)
@@ -505,7 +506,10 @@ class BulletinOrderGenerator:
                 "SELECT hu.UsedAs,h.Hymn,h.Title FROM tblHymnUsage hu "
                 "JOIN tblHymn h ON h.ID=hu.HymnID WHERE hu.ServiceID=?", (service_id,),
             )
-            hymns = {str(row[0]).casefold(): (row[1] or row[2] or "") for row in cursor.fetchall()}
+            hymns = {
+                str(row[0]).casefold(): {"number": row[1] or "", "title": row[2] or ""}
+                for row in cursor.fetchall()
+            }
             cursor.execute("SELECT Reading,Reference FROM tblReading WHERE PropersID=?", (service[4],))
             reading_rows = cursor.fetchall()
             readings = {str(row[0]).casefold(): row[1] for row in reading_rows}
@@ -562,7 +566,10 @@ class BulletinOrderGenerator:
             if prefer_weekly and source_line["weekly_value"]:
                 value = source_line["weekly_value"]
             elif source == "SERVICE_HYMN":
-                value = hymns.get(str(key or "").casefold())
+                hymn = hymns.get(str(key or "").casefold())
+                value = hymn["title"] if hymn else None
+                if hymn:
+                    source_line["reference"] = hymn["number"]
             elif source == "SERVICE_READING":
                 value = readings.get(str(key or "").casefold())
                 if value is None and str(key or "").casefold() == "first reading":
