@@ -1071,7 +1071,19 @@ class ProperReadOnlyDialog(wx.Dialog):
         info.AddGrowableCol(1, 1)
         for label, value in labels:
             info.Add(wx.StaticText(panel, label=label + ":"), 0, wx.ALIGN_TOP)
-            info.Add(wx.StaticText(panel, label=str(value or "")), 1, wx.EXPAND)
+            if label == "Color" and str(value or "").strip():
+                color_row = wx.BoxSizer(wx.HORIZONTAL)
+                color = liturgical_color_hex(value)
+                if color:
+                    swatch = wx.Panel(panel, size=(24, 18), style=wx.BORDER_SIMPLE)
+                    swatch.SetBackgroundColour(wx.Colour(color))
+                    color_row.Add(swatch, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 6)
+                color_row.Add(
+                    wx.StaticText(panel, label=str(value)), 0, wx.ALIGN_CENTER_VERTICAL,
+                )
+                info.Add(color_row, 1, wx.EXPAND)
+            else:
+                info.Add(wx.StaticText(panel, label=str(value or "")), 1, wx.EXPAND)
         outer.Add(info, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
 
         book = wx.Notebook(panel)

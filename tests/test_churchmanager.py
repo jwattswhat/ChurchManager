@@ -506,6 +506,13 @@ class TestChurchManagerConfiguration(unittest.TestCase):
         form = factory.open("frmExample", ["Close"])
         self.assertEqual(created, [("parent", "connection", "frmExample", ["Close"])])
         self.assertTrue(form.shown)
+
+    def test_form_factory_decorates_only_the_propers_editor(self):
+        source = (ROOT / "form_factory.py").read_text(encoding="utf-8")
+        self.assertIn('form_name == "frmPropers"', source)
+        self.assertIn("LITURGICAL_COLOR_SWATCH", source)
+        self.assertIn("liturgical_color_hex(color_field.GetValue())", source)
+
     def test_configuration_has_required_sections(self):
         config = load_json(ROOT / "churchmanager.json")
         self.assertIn("database_settings", config)
