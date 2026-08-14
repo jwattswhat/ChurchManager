@@ -30,7 +30,8 @@ def starter(spec):
     first_sort = spec.order_by.split(",", 1)[0].strip().split()
     report = {
         "schema_version": 1, "name": spec.code, "title": spec.title,
-        "dataset": f"churchmanager.{spec.code.lower()}", "datasetversion": 1,
+        "dataset": f"churchmanager.{spec.code.lower()}",
+        "datasetversion": spec.dataset_version,
         "pagesize": "letter", "orientation": spec.orientation,
         "margins": {"top": 30, "right": 36, "bottom": 30, "left": 36},
         "theme": "churchmanager.standard",

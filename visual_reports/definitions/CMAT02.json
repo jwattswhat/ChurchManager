@@ -5,7 +5,7 @@
       "name": "CMAT02",
       "title": "Weekly Attendance Summary",
       "dataset": "churchmanager.cmat02",
-      "datasetversion": 1,
+      "datasetversion": 2,
       "pagesize": "letter",
       "orientation": "portrait",
       "margins": {

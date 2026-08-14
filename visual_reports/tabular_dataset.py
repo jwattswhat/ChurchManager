@@ -14,7 +14,7 @@ CHURCH_FIELDS = (
 def contract_for(code):
     spec = REPORTS_BY_CODE[code]
     return ReportDatasetContract(
-        f"churchmanager.{code.lower()}", 1, spec.permission,
+        f"churchmanager.{code.lower()}", spec.dataset_version, spec.permission,
         (
             ReportCollection("church", "Church", CHURCH_FIELDS),
             ReportCollection("parameters", "Parameters", (ReportField("Display", "Selected Parameters"),)),

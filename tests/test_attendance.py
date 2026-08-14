@@ -2,6 +2,7 @@ from pathlib import Path
 import unittest
 
 from attendance_dialog import AttendanceRepository
+from visual_reports.report_inventory import REPORTS_BY_CODE
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -69,6 +70,8 @@ class AttendanceTests(unittest.TestCase):
         self.assertIn("rpt_attendance_weekly", inventory)
         self.assertIn("KnownAttendance", migration)
         self.assertIn("UnnamedAttendance", migration)
+        self.assertEqual(REPORTS_BY_CODE["CMAT01"].dataset_version, 2)
+        self.assertEqual(REPORTS_BY_CODE["CMAT02"].dataset_version, 2)
 
     def test_attendance_editor_uses_its_saved_repository(self):
         source = (ROOT / "attendance_dialog.py").read_text(encoding="utf-8")

@@ -22,6 +22,7 @@ class ReportSpec:
     order_by: str
     wave: int
     orientation: str = "portrait"
+    dataset_version: int = 1
 
 
 def c(field, label, width, data_type="text", align="left"):
@@ -49,14 +50,16 @@ SPECS = (
         c("AttendanceType", "Type", 80), c("HandCount", "Total", 55, "integer", "right"),
         c("KnownAttendance", "Known", 55, "integer", "right"),
         c("UnnamedAttendance", "Unnamed", 60, "integer", "right"),
-        c("HandCountCommunion", "Communion", 65, "integer", "right")), "DateTime DESC", 2, "landscape"),
+        c("HandCountCommunion", "Communion", 65, "integer", "right")),
+        "DateTime DESC", 2, "landscape", 2),
     ReportSpec("CMAT02", "Weekly Attendance Summary", "reports.attendance.run", "rpt_attendance_weekly", (
         c("DateTime", "Week beginning", 105, "date"), c("AttendanceType", "Type", 120),
         c("EventCount", "Events", 60, "integer", "right"),
         c("Attendance", "Total", 70, "integer", "right"),
         c("KnownAttendance", "Known", 70, "integer", "right"),
         c("UnnamedAttendance", "Unnamed", 75, "integer", "right"),
-        c("Communion", "Communion", 75, "integer", "right")), "DateTime DESC, AttendanceType", 2),
+        c("Communion", "Communion", 75, "integer", "right")),
+        "DateTime DESC, AttendanceType", 2, dataset_version=2),
     ReportSpec("CMAT03", "Individual Attendance History", "reports.attendance.run", "rpt_individual_attendance", (
         c("DateTime", "Date and Time", 100, "datetime"), c("LastName", "Last Name", 95),
         c("FirstName", "First Name", 90), c("Description", "Event", 145),
