@@ -37,6 +37,7 @@ MAIN_MENU_PERMISSIONS = {
     "lblCheckList": "application.config.manage",
     "lblUsers": "security.users.manage",
     "lblBackupDB": "application.backup.run",
+    "lblSupportDiagnostics": "application.support.create",
     "lblEnhancements": "application.enhancements.manage",
     "lblAccountingSetup": "accounting.master_data.manage",
     "lblAccountingAccounts": "accounting.master_data.manage",

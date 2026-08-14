@@ -60,6 +60,10 @@ from accounting.functional_expense_dialog import show_functional_expenses
 from accounting.year_end_dialog import show_year_end
 from types import SimpleNamespace
 from single_instance import ChurchManagerSingleInstance
+from churchmanager_error_support import (
+    configure_churchmanager_error_reporting, show_support_diagnostics,
+    update_runtime_context,
+)
 
 
 arguments = None
@@ -426,6 +430,8 @@ def _buttonclick(event):
             return
         case "lblBackupDB":
             show_backup_restore(cmfrm.FRAME, context, JSForm)
+        case "lblSupportDiagnostics":
+            show_support_diagnostics(cmfrm.FRAME)
             return
         case "lblUsers":
             show_user_administration(
@@ -511,6 +517,7 @@ def _buttonclick(event):
 
 def main(argv=None):
     global arguments, app, ChurchDB, cmfrm, context, single_instance
+    configure_churchmanager_error_reporting()
     from startup import build_runtime
 
     single_instance = ChurchManagerSingleInstance(Path(__file__).resolve().parent)
@@ -534,6 +541,7 @@ def main(argv=None):
         arguments, ChurchDB, cmfrm,
         session=runtime.session, authorization=runtime.authorization,
     )
+    update_runtime_context(arguments, runtime.session)
     context.form_factory = ChurchManagerFormFactory(
         clsForm, context.connection, cmfrm,
         authorization_policy=context.authorization,

@@ -511,7 +511,7 @@
                 ],
                 "sizech": [
                     12,
-                    10
+                    11
                 ]
             },
             "lblConfig": {
@@ -603,6 +603,19 @@
                 "tooltip": "Open the enhancements and bug-tracking form.",
                 "security": {
                     "invoke": "application.enhancements.manage"
+                }
+            },
+            "lblSupportDiagnostics": {
+                "name": "lblSupportDiagnostics",
+                "type": "StaticText",
+                "label": "Support and Diagnostics",
+                "posch": [
+                    28,
+                    8
+                ],
+                "tooltip": "Create a privacy-safe diagnostic package for support.",
+                "security": {
+                    "invoke": "application.support.create"
                 }
             },
             "SessionBox": {
