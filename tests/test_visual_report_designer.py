@@ -4,12 +4,24 @@ import tempfile
 import unittest
 
 from visual_reports.designer import (
-    ensure_user_definition, open_directory_designer, resolve_report_definition, user_definition_directory,
+    contract_for_definition, ensure_user_definition, open_directory_designer, resolve_report_definition, source_code_for_definition, user_definition_directory,
     user_definition_path,
 )
+import JSForm
 
 
 class TestVisualReportDesignerStorage(unittest.TestCase):
+    def test_custom_report_code_uses_its_inherited_dataset_contract(self):
+        source = Path(__file__).resolve().parents[1] / "visual_reports" / "definitions" / "CMAT01.json"
+        data = json.loads(source.read_text(encoding="utf-8"))
+        root = data.pop("CMAT01REPORT")
+        root["REPORT"]["name"] = "test"
+        definition = JSForm.ReportDefinitionLoader().from_dict({"testREPORT": root})
+        contract, kind = contract_for_definition(definition)
+        self.assertEqual(contract.name, definition.dataset_name)
+        self.assertEqual(kind, "tabular")
+        self.assertEqual(source_code_for_definition(definition), "CMAT01")
+
     def test_current_starter_is_used_until_a_custom_definition_exists(self):
         with tempfile.TemporaryDirectory() as folder:
             starter=resolve_report_definition("CMMD01",folder)

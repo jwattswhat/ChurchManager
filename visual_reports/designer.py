@@ -22,6 +22,32 @@ ROOT = Path(__file__).resolve().parent
 STARTERS = ROOT / "definitions"
 
 
+def source_code_for_definition(definition):
+    """Return the approved source report code for a custom report definition."""
+    if definition.dataset_name == DIRECTORY_CONTRACT.name:
+        return "CMMD01"
+    if definition.dataset_name == WORSHIP_PLANNING_CONTRACT.name:
+        return "CMWP01"
+    for code in REPORTS_BY_CODE:
+        if definition.dataset_name == contract_for(code).name:
+            return code
+    raise ValueError(
+        "No approved ChurchManager dataset is registered for {}.".format(
+            definition.dataset_name
+        )
+    )
+
+
+def contract_for_definition(definition):
+    """Resolve a designer contract from stable dataset identity, not report code."""
+    code = source_code_for_definition(definition)
+    if code == "CMMD01":
+        return DIRECTORY_CONTRACT, "directory"
+    if code == "CMWP01":
+        return WORSHIP_PLANNING_CONTRACT, "worship"
+    return contract_for(code), "tabular"
+
+
 class DirectoryDesignerAuthorization:
     """Explicit test-only authorization for the standalone proof launcher."""
 
@@ -67,7 +93,7 @@ def build_directory_preview(definition, authorization):
 
 
 def build_tabular_preview(definition, authorization):
-    code = definition.report_id
+    code = source_code_for_definition(definition)
     config = load_config()
     database = config["database_settings"]
     settings = resolve_database({
@@ -171,20 +197,17 @@ def open_directory_designer(local_app_data=None, authorization=None):
     def preview(definition):
         return build_directory_preview(definition, authorization)
 
-    for report_code in ("CMMD01", *REPORTS_BY_CODE):
-        ensure_user_definition(report_code, local_app_data)
-
     def open_definition(path):
         starter = STARTERS / path.name
+        if starter.is_file():
+            path = ensure_user_definition(path.stem, local_app_data)
         definition = JSForm.ReportDefinitionLoader().load(path)
-        if definition.report_id == "CMMD01":
-            contract = DIRECTORY_CONTRACT
+        contract, dataset_kind = contract_for_definition(definition)
+        if dataset_kind == "directory":
             preview_handler = preview
-        elif definition.report_id == "CMWP01":
-            contract = WORSHIP_PLANNING_CONTRACT
+        elif dataset_kind == "worship":
             preview_handler = lambda value: build_tabular_preview(value, authorization)
         else:
-            contract = contract_for(definition.report_id)
             preview_handler = lambda value: build_tabular_preview(value, authorization)
         JSForm.open_report_designer(
             path,

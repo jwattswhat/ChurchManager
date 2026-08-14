@@ -63,6 +63,19 @@ class TestPrintedLsbTuneMetadata(unittest.TestCase):
         self.assertIn("ADD COLUMN IF NOT EXISTS Tune", migration)
         self.assertIn("t.HymnNumber BETWEEN 331 AND 966", migration)
 
+
+class TestLsbStarterReferenceConvention(unittest.TestCase):
+    def test_starter_liturgical_pages_and_psalms_are_normalized(self):
+        migration = (
+            ROOT / "migrations" / "064_normalize_lsb_starter_references.sql"
+        ).read_text(encoding="utf-8")
+        self.assertIn("template.IsStarter=1", migration)
+        self.assertIn("CONCAT('LSB p. ',SUBSTRING(line.ReferenceText,5))", migration)
+        self.assertIn("|330)", migration)
+        self.assertIn("line.Label='Psalm'", migration)
+        self.assertIn("SET line.ReferenceText=NULL", migration)
+        self.assertIn("3[0-2][0-9]|330", migration)
+
 # ChurchManager-owned operational modules. Archived code, saved copies,
 # conversion utilities, and JSForm are intentionally absent.
 OPERATIONAL_MODULES = (
