@@ -606,16 +606,21 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         self.liturgical_color_swatch.Show(bool(color))
         if color:
             self.liturgical_color_swatch.SetBackgroundColour(wx.Colour(color))
+            self.liturgical_color_swatch.Refresh()
+            self.liturgical_color_swatch.Update()
         self.liturgical_color_swatch.GetParent().Layout()
+
+    def _selected_proper_color(self):
+        selection = self.fields["proper"].GetSelection()
+        proper_id = None if selection == wx.NOT_FOUND else self.proper_rows[selection][0]
+        detail = self.repository.proper_detail(proper_id) if proper_id else None
+        return detail[5] if detail else ""
 
     def _show_liturgical_color_for_selected_proper(self):
         override = ""
         if self.fields["color_override"].GetSelection() > 0:
             override = self.fields["color_override"].GetStringSelection()
-        selection = self.fields["proper"].GetSelection()
-        proper_id = None if selection == wx.NOT_FOUND else self.proper_rows[selection][0]
-        detail = self.repository.proper_detail(proper_id) if proper_id else None
-        self._show_liturgical_color(override or (detail[5] if detail else ""))
+        self._show_liturgical_color(override or self._selected_proper_color())
 
     @staticmethod
     def _select(choice, rows, value):
@@ -822,9 +827,10 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
 
     def on_color_override(self, event):
         if not self.loading:
-            # On Windows, let wx finish committing the new Choice selection
-            # before reading it to repaint the swatch.
-            wx.CallAfter(self._show_liturgical_color_for_selected_proper)
+            # Use the event's value directly; on some Windows wxPython builds
+            # GetStringSelection still reports the previous item in this handler.
+            selected = event.GetString() if event.GetSelection() > 0 else ""
+            self._show_liturgical_color(selected or self._selected_proper_color())
         event.Skip()
 
     def on_communion(self, _event):
