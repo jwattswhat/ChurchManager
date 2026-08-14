@@ -329,11 +329,22 @@ class TestChurchManagerPython(unittest.TestCase):
         self.assertIn("self.connection.rollback()", source)
         self.assertIn('key in ("church", "os_note")', source)
 
+    def test_service_color_override_uses_choices_and_updates_report_color(self):
+        source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
+        migration = (ROOT / "migrations" / "056_add_service_liturgical_color_override.sql").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('choice_values("Color")', source)
+        self.assertIn("Use Proper color", source)
+        self.assertIn("LiturgicalColorOverride=?", source)
+        self.assertIn("LiturgicalColorOverride VARCHAR(32)", migration)
+        self.assertIn("NULLIF(TRIM(s.LiturgicalColorOverride),'')", migration)
+
     def test_unified_worship_location_uses_tblchoices(self):
         source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
         self.assertIn('SELECT Choices FROM tblChoices WHERE Field=?', source)
         self.assertIn('choice_values("Location")', source)
-        self.assertIn('key in ("proper", "sermon", "location")', source)
+        self.assertIn('key in ("proper", "sermon", "location", "color_override")', source)
 
     def test_unified_worship_uses_separate_native_date_and_time_pickers(self):
         source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")

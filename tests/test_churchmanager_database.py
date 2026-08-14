@@ -490,6 +490,13 @@ class TestChurchManagerDatabase(unittest.TestCase):
         )[0][0]
         self.assertEqual(mismatches, 0)
 
+    def test_service_has_optional_liturgical_color_override(self):
+        columns = self.query(
+            "SELECT COLUMN_NAME FROM information_schema.COLUMNS "
+            "WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tblService'"
+        )
+        self.assertIn("LiturgicalColorOverride", {row[0] for row in columns})
+
     def test_sample_accounting_setup_is_complete(self):
         rows = self.query(
             "SELECT o.ID, "

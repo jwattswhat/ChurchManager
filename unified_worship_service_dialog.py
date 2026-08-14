@@ -58,7 +58,8 @@ class UnifiedWorshipServiceRepository:
             "COALESCE(s.LiturgicalDate,''),s.HolyCommunion,s.BulletinOrderTemplateID,"
             "COALESCE(s.OSNote,''),s.SermonID,"
             "COALESCE(s.Bulletin,''),COALESCE(s.CheckListComplete,0),"
-            "COALESCE(s.Note,''),COALESCE(t.Name,'Not selected') "
+            "COALESCE(s.Note,''),COALESCE(t.Name,'Not selected'),"
+            "COALESCE(s.LiturgicalColorOverride,'') "
             "FROM tblService s LEFT JOIN tblBulletinOrderTemplate t "
             "ON t.ID=s.BulletinOrderTemplateID WHERE s.ID=?", (service_id,),
         )
@@ -229,7 +230,7 @@ class UnifiedWorshipServiceRepository:
         try:
             cursor.execute(
                 "UPDATE tblService SET DateTime=?,Location=?,PropersID=?,LiturgicalDate=?,"
-                "HolyCommunion=?,BulletinOrderTemplateID=?,OSNote=?,SermonID=?,"
+                "LiturgicalColorOverride=?,HolyCommunion=?,BulletinOrderTemplateID=?,OSNote=?,SermonID=?,"
                 "Bulletin=?,Note=? WHERE ID=?",
                 service_values + (service_id,),
             )
@@ -427,6 +428,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             ("church", "Church", False, True),
             ("date_time", "Date and time", False, True),
             ("location", "Location", False, True), ("proper", "Proper", False, False),
+            ("color_override", "Color override", False, True),
             ("liturgical", "Printed liturgical title", False, False),
             ("communion", "Holy Communion", False, True),
             ("sermon", "Sermon", False, False),
@@ -495,10 +497,12 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             self.fields["service_date"] = service_date
             self.fields["service_time"] = service_time
             return
-        if key in ("proper", "sermon", "location"):
+        if key in ("proper", "sermon", "location", "color_override"):
             control = wx.Choice(parent)
             if key == "proper":
                 control.Bind(wx.EVT_CHOICE, self.on_proper)
+            elif key == "color_override":
+                control.Bind(wx.EVT_CHOICE, self.on_color_override)
         elif key == "communion":
             control = wx.CheckBox(parent)
             if key == "communion":
@@ -536,6 +540,16 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         self.proper_rows = self.repository.propers(r[1])
         self.fields["proper"].Set([str(row[1]) for row in self.proper_rows])
         self._select(self.fields["proper"], self.proper_rows, r[4])
+        # Liturgical colors are maintained centrally in tblChoices (Field=Color).
+        self.color_override_values = ["Use Proper color"] + self.repository.choice_values("Color")
+        self.fields["color_override"].Set(self.color_override_values)
+        override = str(r[14] or "")
+        if override and override not in self.color_override_values:
+            self.color_override_values.append(override)
+            self.fields["color_override"].Append(override)
+        self.fields["color_override"].SetSelection(
+            self.color_override_values.index(override) if override else 0
+        )
         self.sermon_rows = self.repository.all(
             "SELECT ID,CONCAT(ID,' - ',COALESCE(Reference,''),' - ',COALESCE(Title,'')) "
             "FROM tblSermon ORDER BY ID DESC"
@@ -595,10 +609,13 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         self.liturgical_color_swatch.GetParent().Layout()
 
     def _show_liturgical_color_for_selected_proper(self):
+        override = ""
+        if self.fields["color_override"].GetSelection() > 0:
+            override = self.fields["color_override"].GetStringSelection()
         selection = self.fields["proper"].GetSelection()
         proper_id = None if selection == wx.NOT_FOUND else self.proper_rows[selection][0]
         detail = self.repository.proper_detail(proper_id) if proper_id else None
-        self._show_liturgical_color(detail[5] if detail else "")
+        self._show_liturgical_color(override or (detail[5] if detail else ""))
 
     @staticmethod
     def _select(choice, rows, value):
@@ -803,6 +820,10 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         if not self.loading:
             self.apply_proper()
 
+    def on_color_override(self, _event):
+        if not self.loading:
+            self._show_liturgical_color_for_selected_proper()
+
     def on_communion(self, _event):
         if not self.loading:
             self._refresh_conditional_lines()
@@ -839,10 +860,9 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         if proper_id:
             detail = self.repository.proper_detail(proper_id)
             self.fields["liturgical"].SetValue(str(detail[3] or ""))
-            self._show_liturgical_color(detail[5])
         else:
             self.fields["liturgical"].SetValue("")
-            self._show_liturgical_color("")
+        self._show_liturgical_color_for_selected_proper()
         self._refresh_conditional_lines()
         readings_by_use = {row[0]: row[1] for row in readings}
         unused = list(suggestions)
@@ -900,6 +920,8 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             when, self.fields["location"].GetStringSelection() or None,
             self._choice_value(self.fields["proper"], self.proper_rows),
             self.fields["liturgical"].GetValue().strip() or None,
+            (self.fields["color_override"].GetStringSelection()
+             if self.fields["color_override"].GetSelection() > 0 else None),
             int(self.fields["communion"].GetValue()), template_id,
             self.fields["os_note"].GetValue() or None,
             self._choice_value(self.fields["sermon"], self.sermon_rows),
