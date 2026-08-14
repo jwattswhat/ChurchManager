@@ -989,7 +989,7 @@ class TestChurchManagerForms(unittest.TestCase):
         self.assertGreater(bound, set(), "No ChurchManager main-menu bindings found")
         self.assertEqual(bound - controls, set(), "cm.py binds controls missing from frmMain.json")
 
-    def test_main_menu_has_explicit_three_column_dashboard(self):
+    def test_main_menu_has_compact_four_column_dashboard(self):
         main = next(iter(load_json(FORMS / "frmMain.json").values()))
         controls = main["CONTROLS"]
         expected = {
@@ -1001,12 +1001,12 @@ class TestChurchManagerForms(unittest.TestCase):
             "SessionBox": "Current User",
             "BulletinBox": "Accounting - Daily Work",
             "DesignersBox": "Accounting - Reports",
-            "FundAccountingBox": "Accounting - Setup and Period End",
+            "FundAccountingBox": "Accounting - Setup and Close",
         }
         self.assertEqual(
             {name: controls[name]["label"] for name in expected}, expected,
         )
-        self.assertEqual({controls[name]["posch"][0] for name in expected}, {1, 18, 34})
+        self.assertEqual({controls[name]["posch"][0] for name in expected}, {1, 14, 27, 40})
 
     def test_main_menu_groups_work_by_usage(self):
         controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
@@ -1028,7 +1028,7 @@ class TestChurchManagerForms(unittest.TestCase):
         ]
         self.assertEqual(
             sorted(controls[name]["posch"][1] for name in resource_items),
-            list(range(24, 35)),
+            list(range(12, 23)),
         )
         self.assertTrue(all(controls[name]["label"] == controls[name]["label"].strip()
                             for name in resource_items))
