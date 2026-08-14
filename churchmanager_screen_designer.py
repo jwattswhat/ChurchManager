@@ -66,7 +66,11 @@ def open_churchmanager_screen_designer(connection, session, authorization, test_
 
     def open_entry(entry):
         authorization.require("screens.design", "Design {}".format(entry["name"]))
-        path = ensure_user_screen(entry["name"], test_mode, local_app_data)
+        path = (
+            ensure_user_screen(entry["name"], test_mode, local_app_data)
+            if entry["starter"] is not None
+            else Path(entry["path"])
+        )
         audit("SCREEN_DESIGN_OPENED", path.name)
         JSForm.open_screen_designer(
             path,
