@@ -14,6 +14,7 @@ import unittest
 from pathlib import Path
 
 from churchmanager_mode import resolve_database
+from visual_reports.report_inventory import OFFICIAL_CODES
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -221,9 +222,12 @@ class TestChurchManagerDatabase(unittest.TestCase):
             for path in (ROOT / "LimeReportPattern").glob(pattern)
         }
         removed = {code.casefold() for code in REMOVED_REPORT_CODES}
+        visual = {code.casefold() for code in OFFICIAL_CODES}
         missing = sorted(
             code for (code,) in rows
-            if str(code).casefold() not in available and str(code).casefold() not in removed
+            if str(code).casefold() not in available
+            and str(code).casefold() not in removed
+            and str(code).casefold() not in visual
         )
         self.assertEqual(missing, [], "Report catalog codes without local LimeReport patterns")
 
@@ -262,6 +266,10 @@ class TestChurchManagerDatabase(unittest.TestCase):
             "SELECT ID, ChurchID, DateTime, AttendanceType, EventCount, Attendance, "
             "KnownAttendance, UnnamedAttendance, Communion "
             "FROM rpt_attendance_weekly LIMIT 1"
+        )
+        self.query(
+            "SELECT ID, ChurchID, PersonID, LastName, FirstName, DateTime, Description, "
+            "AttendanceType, Communion, Note FROM rpt_individual_attendance LIMIT 1"
         )
 
     def test_propers_use_lectionary_systems_and_lookup_labels(self):

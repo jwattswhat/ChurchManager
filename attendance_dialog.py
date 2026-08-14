@@ -73,6 +73,25 @@ class AttendanceRepository:
     def churches(self):
         return self.all("SELECT ID,Church FROM tblChurch ORDER BY Church,ID")
 
+    def year_to_date(self, church_id, year):
+        start = datetime(year, 1, 1)
+        end = min(datetime(year + 1, 1, 1), datetime.now())
+        if end <= start:
+            return []
+        return self.all(
+            "SELECT e.AttendanceType,COUNT(*),SUM(e.HandCount),"
+            "SUM(e.HandCountCommunion),ROUND(AVG(e.HandCount),1),"
+            "SUM(e.KnownAttendance),"
+            "GREATEST(SUM(e.HandCount)-SUM(e.KnownAttendance),0) FROM ("
+            "SELECT ae.ID,COALESCE(NULLIF(ae.AttendanceType,''),'Unspecified') AttendanceType,"
+            "COALESCE(ae.HandCount,0) HandCount,"
+            "COALESCE(ae.HandCountCommunion,0) HandCountCommunion,COUNT(a.ID) KnownAttendance "
+            "FROM tblAttendanceEvent ae LEFT JOIN tblAttendance a ON a.AttendanceEventID=ae.ID "
+            "WHERE ae.ChurchID=? AND ae.DateTime>=? AND ae.DateTime<? GROUP BY ae.ID) e "
+            "GROUP BY e.AttendanceType ORDER BY e.AttendanceType",
+            (church_id, start, end),
+        )
+
     def create_event(self, church_id):
         attendance_types = self.choices("AttendanceType")
         attendance_type = attendance_types[0] if attendance_types else "Worship Service"
@@ -347,6 +366,7 @@ class AttendanceCatalogDialog(wx.Dialog):
         buttons = wx.BoxSizer(wx.HORIZONTAL)
         new_event = wx.Button(panel, label="New Other Event..."); new_event.Bind(wx.EVT_BUTTON, self.on_new); buttons.Add(new_event, 0, wx.RIGHT, 8)
         open_event = wx.Button(panel, label="Open Attendance"); open_event.Bind(wx.EVT_BUTTON, self.on_open); buttons.Add(open_event)
+        ytd = wx.Button(panel, label="YTD Summary..."); ytd.Bind(wx.EVT_BUTTON, self.on_ytd); buttons.Add(ytd, 0, wx.LEFT, 8)
         buttons.AddStretchSpacer(); close = wx.Button(panel, wx.ID_CLOSE, "Close"); close.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_CLOSE)); buttons.Add(close)
         outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 10); panel.SetSizer(outer)
         self.refresh(); self.CentreOnParent()
@@ -368,6 +388,11 @@ class AttendanceCatalogDialog(wx.Dialog):
         finally: dialog.Destroy()
         self.refresh()
 
+    def on_ytd(self, _event):
+        dialog = AttendanceYTDSummaryDialog(self, self.repository)
+        try: dialog.ShowModal()
+        finally: dialog.Destroy()
+
     def on_new(self, _event):
         if self.authorization is not None:
             try:
@@ -387,6 +412,59 @@ class AttendanceCatalogDialog(wx.Dialog):
         try: dialog.ShowModal()
         finally: dialog.Destroy()
         self.refresh()
+
+
+class AttendanceYTDSummaryDialog(wx.Dialog):
+    def __init__(self, parent, repository):
+        super().__init__(parent, title="Year-to-Date Attendance Summary", size=(860, 460),
+                         style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        self.repository = repository
+        self.churches = repository.churches()
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        filters = wx.BoxSizer(wx.HORIZONTAL)
+        filters.Add(wx.StaticText(panel, label="Church:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 6)
+        self.church = wx.Choice(panel, choices=[str(row[1]) for row in self.churches])
+        if self.churches: self.church.SetSelection(0)
+        self.church.Bind(wx.EVT_CHOICE, self.on_refresh); filters.Add(self.church, 1, wx.RIGHT, 16)
+        filters.Add(wx.StaticText(panel, label="Year:"), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 6)
+        self.year = wx.SpinCtrl(panel, min=1900, max=2200, initial=datetime.now().year, size=(90, -1))
+        self.year.Bind(wx.EVT_SPINCTRL, self.on_refresh); filters.Add(self.year)
+        outer.Add(filters, 0, wx.EXPAND | wx.ALL, 10)
+        self.grid = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        for label, width in (("Attendance type", 175), ("Events", 70), ("Attendance", 90),
+                             ("Known", 75), ("Unnamed", 80), ("Average", 80),
+                             ("Communion", 90)):
+            self.grid.AppendColumn(label, width=width)
+        outer.Add(self.grid, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
+        self.summary = wx.StaticText(panel); outer.Add(self.summary, 0, wx.ALL, 10)
+        close = wx.Button(panel, wx.ID_CLOSE, "Close")
+        close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE))
+        buttons = wx.BoxSizer(wx.HORIZONTAL); buttons.AddStretchSpacer(); buttons.Add(close)
+        outer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        panel.SetSizer(outer); self.refresh(); self.CentreOnParent()
+
+    def on_refresh(self, _event):
+        self.refresh()
+
+    def refresh(self):
+        self.grid.DeleteAllItems()
+        if not self.churches or self.church.GetSelection() < 0:
+            self.summary.SetLabel("No Church record is available.")
+            return
+        rows = self.repository.year_to_date(
+            self.churches[self.church.GetSelection()][0], self.year.GetValue()
+        )
+        event_total = attendance_total = communion_total = 0
+        for index, row in enumerate(rows):
+            item = self.grid.InsertItem(index, str(row[0]))
+            for column, value in enumerate((row[1], row[2], row[5], row[6], row[4], row[3]), 1):
+                self.grid.SetItem(item, column, str(value))
+            event_total += int(row[1]); attendance_total += int(row[2]); communion_total += int(row[3])
+        average = attendance_total / event_total if event_total else 0
+        self.summary.SetLabel(
+            f"{event_total} event(s)  |  Attendance: {attendance_total:,}  |  "
+            f"Average: {average:,.1f}  |  Communion: {communion_total:,}"
+        )
 
 
 def show_attendance(parent, connection, authorization=None):

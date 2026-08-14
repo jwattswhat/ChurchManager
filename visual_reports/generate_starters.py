@@ -1,6 +1,7 @@
 """Generate standardized, editable starter definitions from the official inventory."""
 
 import json
+import sys
 from pathlib import Path
 
 from visual_reports.report_inventory import SPECS
@@ -60,12 +61,14 @@ def starter(spec):
     return {f"{spec.code}REPORT": {"REPORT": report, "CONTROLS": controls}}
 
 
-def generate():
+def generate(codes=()):
     DEFINITIONS.mkdir(parents=True, exist_ok=True)
     for spec in SPECS:
+        if codes and spec.code not in codes:
+            continue
         path = DEFINITIONS / f"{spec.code}.json"
         path.write_text(json.dumps(starter(spec), indent=2) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":
-    generate()
+    generate(set(sys.argv[1:]))

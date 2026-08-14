@@ -57,6 +57,11 @@ SPECS = (
         c("KnownAttendance", "Known", 70, "integer", "right"),
         c("UnnamedAttendance", "Unnamed", 75, "integer", "right"),
         c("Communion", "Communion", 75, "integer", "right")), "DateTime DESC, AttendanceType", 2),
+    ReportSpec("CMAT03", "Individual Attendance History", "reports.attendance.run", "rpt_individual_attendance", (
+        c("DateTime", "Date and Time", 100, "datetime"), c("LastName", "Last Name", 95),
+        c("FirstName", "First Name", 90), c("Description", "Event", 145),
+        c("AttendanceType", "Type", 90), c("Communion", "Communion", 70, "boolean"),
+        c("Note", "Note", 130)), "LastName, FirstName, DateTime DESC", 2, "landscape"),
     ReportSpec("CMHU01", "Hymn Usage by Service", "reports.worship.run", "rpt_hymn_usage", (
         c("ServiceID", "Service", 75, "integer"), c("UsedAs", "Used As", 110),
         c("HymnID", "Hymn ID", 75, "integer"), c("Note", "Notes", 275)), "ServiceID DESC, UsedAs", 2),

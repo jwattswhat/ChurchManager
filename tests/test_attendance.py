@@ -86,6 +86,22 @@ class AttendanceTests(unittest.TestCase):
         self.assertIn("EVT_GRID_CELL_LEFT_CLICK", source)
         self.assertIn("def on_cell_click", source)
 
+    def test_ytd_summary_preserves_known_and_unnamed_counts(self):
+        connection = FakeConnection([])
+        AttendanceRepository(connection).year_to_date(3, 2026)
+        sql = connection.cursor_value.executed[0][0]
+        self.assertIn("KnownAttendance", sql)
+        self.assertIn("GREATEST(SUM(e.HandCount)-SUM(e.KnownAttendance),0)", sql)
+
+    def test_individual_attendance_report_is_registered(self):
+        inventory = (ROOT / "visual_reports" / "report_inventory.py").read_text(encoding="utf-8")
+        migration = (ROOT / "migrations" / "058_add_individual_attendance_report.sql").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('"CMAT03", "Individual Attendance History"', inventory)
+        self.assertIn("rpt_individual_attendance", migration)
+        self.assertIn("PersonID", migration)
+
 
 if __name__ == "__main__":
     unittest.main()
