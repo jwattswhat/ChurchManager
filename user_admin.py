@@ -7,8 +7,15 @@ import re
 from dataclasses import dataclass
 
 import wx
+import JSForm
 
 from authentication import MariaDBUserRepository, PasswordService
+
+
+def _format_phone_control(event):
+    control = event.GetEventObject()
+    control.ChangeValue(JSForm.phone_display(control.GetValue()))
+    event.Skip()
 
 
 @dataclass(frozen=True)
@@ -197,7 +204,7 @@ class UserAdministrationService:
     def normalize_contact(display_name, email=None, phone=None):
         display_name = " ".join(str(display_name or "").split())
         email = str(email or "").strip() or None
-        phone = " ".join(str(phone or "").split()) or None
+        phone = JSForm.phone_storage(phone)
         if not display_name:
             raise ValueError("Display name is required.")
         if len(display_name) > 255:
@@ -428,6 +435,7 @@ class NewUserDialog(PasswordEntryDialog):
         grid.Add(self.email, 1, wx.EXPAND)
         grid.Add(wx.StaticText(self, label="Phone"))
         self.phone = wx.TextCtrl(self)
+        self.phone.Bind(wx.EVT_KILL_FOCUS, _format_phone_control)
         grid.Add(self.phone, 1, wx.EXPAND)
         grid.Add(wx.StaticText(self, label="Temporary password"))
         self.password = wx.TextCtrl(self, style=wx.TE_PASSWORD)
@@ -456,7 +464,8 @@ class UserContactDialog(wx.Dialog):
         self.email = wx.TextCtrl(self, value=user.email)
         grid.Add(self.email, 1, wx.EXPAND)
         grid.Add(wx.StaticText(self, label="Phone"))
-        self.phone = wx.TextCtrl(self, value=user.phone)
+        self.phone = wx.TextCtrl(self, value=JSForm.phone_display(user.phone))
+        self.phone.Bind(wx.EVT_KILL_FOCUS, _format_phone_control)
         grid.Add(self.phone, 1, wx.EXPAND)
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(grid, 1, wx.ALL | wx.EXPAND, 12)

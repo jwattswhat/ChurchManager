@@ -61,6 +61,10 @@ class UserContactTests(unittest.TestCase):
             UserAdministrationService.normalize_contact("Sarah Johnson", "", " "),
             ("Sarah Johnson", None, None),
         )
+        self.assertEqual(
+            UserAdministrationService.normalize_contact("Sarah Johnson", None, "9999999999"),
+            ("Sarah Johnson", None, "9999999999"),
+        )
 
     def test_invalid_contact_is_rejected_before_database_access(self):
         for email, phone in (("not an email", None), (None, "abc"), ("x" * 255, None)):
@@ -98,6 +102,8 @@ class UserContactTests(unittest.TestCase):
         self.assertIn('("Edit Contact", self.on_contact)', source)
         self.assertIn('grid.Add(wx.StaticText(self, label="Email"))', source)
         self.assertIn('grid.Add(wx.StaticText(self, label="Phone"))', source)
+        self.assertIn('JSForm.phone_display(user.phone)', source)
+        self.assertIn('JSForm.phone_storage(phone)', source)
 
 
 if __name__ == "__main__":
