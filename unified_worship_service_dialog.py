@@ -13,6 +13,7 @@ from hymn_validation import duplicate_selection_status, normalize_tune
 from worship_scheduling import show_service_participants
 from worship_checklist import show_preparation_checklist
 from worship_checklist import WorshipChecklistRepository, checklist_counts
+from liturgical_colors import liturgical_color_hex
 
 from bulletin_orders import (
     BulletinOrderGenerator,
@@ -435,9 +436,19 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         ):
             self._add_field(right, key, label, multiline, inline)
             if key == "proper":
+                proper_row = wx.BoxSizer(wx.HORIZONTAL)
                 view_proper = wx.Button(right, label="View Proper...")
                 view_proper.Bind(wx.EVT_BUTTON, self.on_view_proper)
-                self.detail_box.Add(view_proper, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+                proper_row.Add(view_proper, 0, wx.RIGHT, 18)
+                self.liturgical_color_label = wx.StaticText(right, label="Liturgical color:")
+                proper_row.Add(self.liturgical_color_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 6)
+                self.liturgical_color_swatch = wx.Panel(
+                    right, size=(24, 18), style=wx.BORDER_SIMPLE,
+                )
+                proper_row.Add(self.liturgical_color_swatch, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 6)
+                self.liturgical_color_text = wx.StaticText(right, label="")
+                proper_row.Add(self.liturgical_color_text, 0, wx.ALIGN_CENTER_VERTICAL)
+                self.detail_box.Add(proper_row, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
         self.fields["os_note"].SetToolTip(
             "This note comes from the selected Order of Service template and cannot be changed here."
         )
@@ -570,6 +581,24 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         ]
         self.refresh_grid()
         self.refresh_checklist_status()
+        self._show_liturgical_color_for_selected_proper()
+
+    def _show_liturgical_color(self, value):
+        text = str(value or "").strip()
+        color = liturgical_color_hex(text)
+        self.liturgical_color_label.Show(bool(text))
+        self.liturgical_color_text.SetLabel(text)
+        self.liturgical_color_text.Show(bool(text))
+        self.liturgical_color_swatch.Show(bool(color))
+        if color:
+            self.liturgical_color_swatch.SetBackgroundColour(wx.Colour(color))
+        self.liturgical_color_swatch.GetParent().Layout()
+
+    def _show_liturgical_color_for_selected_proper(self):
+        selection = self.fields["proper"].GetSelection()
+        proper_id = None if selection == wx.NOT_FOUND else self.proper_rows[selection][0]
+        detail = self.repository.proper_detail(proper_id) if proper_id else None
+        self._show_liturgical_color(detail[5] if detail else "")
 
     @staticmethod
     def _select(choice, rows, value):
@@ -810,6 +839,10 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         if proper_id:
             detail = self.repository.proper_detail(proper_id)
             self.fields["liturgical"].SetValue(str(detail[3] or ""))
+            self._show_liturgical_color(detail[5])
+        else:
+            self.fields["liturgical"].SetValue("")
+            self._show_liturgical_color("")
         self._refresh_conditional_lines()
         readings_by_use = {row[0]: row[1] for row in readings}
         unused = list(suggestions)

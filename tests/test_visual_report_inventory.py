@@ -51,6 +51,11 @@ class TestVisualReportInventory(unittest.TestCase):
         self.assertEqual(definition.controls["Readings"]["repeatcollection"], "readings")
         self.assertEqual(definition.controls["Hymns"]["repeatcollection"], "hymns")
         self.assertEqual(definition.controls["Participants"]["repeatcollection"], "participants")
+        self.assertEqual(definition.controls["ColorSwatch"]["collection"], "service")
+        self.assertEqual(definition.controls["ColorSwatch"]["field"], "ColorHex")
+        self.assertIn(
+            "ColorHex", {field.name for field in WORSHIP_PLANNING_CONTRACT.collection("service").fields}
+        )
 
     def test_worship_planner_checklist_contract_includes_completion_source(self):
         checklist = WORSHIP_PLANNING_CONTRACT.collection("checklist")

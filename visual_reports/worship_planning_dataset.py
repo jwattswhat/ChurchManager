@@ -4,6 +4,7 @@ from JSForm.report_dataset import (
     ReportCollection, ReportDataset, ReportDatasetContract, ReportField,
 )
 from worship_scheduling_rules import report_participant_rows
+from liturgical_colors import liturgical_color_hex
 
 
 WORSHIP_PLANNING_CONTRACT = ReportDatasetContract(
@@ -26,6 +27,7 @@ WORSHIP_PLANNING_CONTRACT = ReportDatasetContract(
             ReportField("Lectionary", "Lectionary"),
             ReportField("Season", "Season"),
             ReportField("Color", "Color"),
+            ReportField("ColorHex", "Liturgical Color Block"),
             ReportField("Theme", "Theme"),
             ReportField("OrderOfService", "Order of Service"),
             ReportField("Sermon", "Sermon"),
@@ -102,6 +104,7 @@ class WorshipPlanningDatasetProvider:
         )
         if not service:
             raise ValueError("The selected Worship Service is unavailable.")
+        service[0]["ColorHex"] = liturgical_color_hex(service[0]["Color"])
 
         order_lines = self._rows(
             "SELECT Sequence,Label,TRIM(CONCAT_WS('  ',NULLIF(WeeklyValue,''),"
