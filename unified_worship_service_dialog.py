@@ -109,8 +109,16 @@ class UnifiedWorshipServiceRepository:
             if not service:
                 raise ValueError("The selected Worship Service no longer exists.")
             dependencies = []
+            cursor.execute(
+                "SELECT COUNT(a.ID),COALESCE(SUM(ae.HandCount),0),"
+                "COALESCE(SUM(ae.HandCountCommunion),0) "
+                "FROM tblAttendanceEvent ae LEFT JOIN tblAttendance a "
+                "ON a.AttendanceEventID=ae.ID WHERE ae.ServiceID=?", (service_id,),
+            )
+            attendance = cursor.fetchone()
+            if any(attendance):
+                dependencies.append("recorded attendance")
             for table, description in (
-                ("tblAttendanceEvent", "attendance event(s)"),
                 ("tblServiceRole", "participant assignment(s)"),
             ):
                 cursor.execute(f"SELECT COUNT(*) FROM {table} WHERE ServiceID=?", (service_id,))
@@ -135,6 +143,7 @@ class UnifiedWorshipServiceRepository:
             cursor.execute("DELETE FROM tblHymnUsage WHERE ServiceID=?", (service_id,))
             cursor.execute("DELETE FROM tblServiceBulletinOrderLine WHERE ServiceID=?", (service_id,))
             cursor.execute("DELETE FROM tblServiceBulletinOrder WHERE ServiceID=?", (service_id,))
+            cursor.execute("DELETE FROM tblAttendanceEvent WHERE ServiceID=?", (service_id,))
             cursor.execute("DELETE FROM tblService WHERE ID=?", (service_id,))
             cursor.execute(
                 "INSERT INTO tblSecurityAuditEvent "
@@ -236,6 +245,10 @@ class UnifiedWorshipServiceRepository:
             )
             cursor.execute("SELECT ChurchID FROM tblService WHERE ID=?", (service_id,))
             church_id = cursor.fetchone()[0]
+            self._sync_empty_attendance_event(
+                cursor, service_id, church_id, service_values[0], service_values[3],
+                bool(service_values[5]),
+            )
             cursor.execute("DELETE FROM tblHymnUsage WHERE ServiceID=?", (service_id,))
             cursor.execute("DELETE FROM tblServiceBulletinOrderLine WHERE ServiceID=?", (service_id,))
             cursor.execute(
@@ -278,6 +291,51 @@ class UnifiedWorshipServiceRepository:
             raise
         finally:
             cursor.close()
+
+    def _sync_empty_attendance_event(
+        self, cursor, service_id, church_id, date_time, liturgical_date, communion_offered,
+    ):
+        """Create or update the service event until attendance becomes historical."""
+        cursor.execute(
+            "SELECT ae.ID,COALESCE(ae.HandCount,0),COALESCE(ae.HandCountCommunion,0),"
+            "COUNT(a.ID) FROM tblAttendanceEvent ae "
+            "LEFT JOIN tblAttendance a ON a.AttendanceEventID=ae.ID "
+            "WHERE ae.ServiceID=? GROUP BY ae.ID ORDER BY ae.ID", (service_id,),
+        )
+        events = cursor.fetchall()
+        if events and any(row[1] or row[2] or row[3] for row in events):
+            return
+        cursor.execute("SELECT Choices FROM tblChoices WHERE Field='AttendanceType' ORDER BY ID")
+        attendance_types = []
+        for row in cursor.fetchall():
+            for value in str(row[0] or "").replace("[", "").replace("]", "").replace(",", "\n").splitlines():
+                value = value.strip().strip("'\"")
+                if value and value not in attendance_types:
+                    attendance_types.append(value)
+        attendance_type = next(
+            (value for value in attendance_types if value.casefold() == "worship service"),
+            "Worship Service",
+        )
+        description = str(liturgical_date or "").strip() or "Worship Service"
+        if events:
+            cursor.execute(
+                "UPDATE tblAttendanceEvent SET ChurchID=?,DateTime=?,Description=?,"
+                "AttendanceType=?,CommunionOffered=? WHERE ID=?",
+                (
+                    church_id, date_time, description, attendance_type,
+                    int(communion_offered), events[0][0],
+                ),
+            )
+            return
+        cursor.execute(
+            "INSERT INTO tblAttendanceEvent "
+            "(ChurchID,ServiceID,DateTime,Description,AttendanceType,CommunionOffered,"
+            "HandCount,HandCountCommunion) VALUES (?,?,?,?,?,?,0,0)",
+            (
+                church_id, service_id, date_time, description, attendance_type,
+                int(communion_offered),
+            ),
+        )
 
     def hymns(self, service_id):
         return self.search_hymns(service_id, "", "All fields")

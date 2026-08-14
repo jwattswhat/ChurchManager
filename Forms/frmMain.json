@@ -202,8 +202,8 @@
                     2,
                     23
                 ],
-                "label": "Attendance Events",
-                "tooltip": "Open the attendance event form.",
+                "label": "Attendance",
+                "tooltip": "Open the combined attendance event and recording screen.",
                 "security": {
                     "invoke": "attendance.events.manage"
                 }
@@ -284,8 +284,8 @@
                     15,
                     5
                 ],
-                "label": "Record Attendance",
-                "tooltip": "Open the record attendance form.",
+                "label": "Attendance",
+                "tooltip": "Open the combined attendance event and recording screen.",
                 "security": {
                     "invoke": "attendance.record"
                 }

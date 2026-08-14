@@ -32,9 +32,10 @@ changed.
 | `frmPersonAddress` | ChurchManager + JSForm | Frozen counterpart | Supporting | Not CM-only. |
 | `frmPersonContact` | ChurchManager + JSForm | Frozen counterpart | Supporting | Not CM-only. |
 | `frmPersonDate` | ChurchManager + JSForm | Frozen counterpart | Supporting | Not CM-only. |
-| `frmAttendanceEvent` | ChurchManager + JSForm | Frozen counterpart | Active | Not CM-only. |
-| `frmAttendance` | ChurchManager + JSForm | Frozen counterpart | Supporting | Not CM-only. |
-| `frmRecordAttendance` | ChurchManager + JSForm | Frozen counterpart | Active | Not CM-only; JSForm renders the attendance-entry definition. |
+| `frmAttendanceEvent` | ChurchManager + JSForm | Frozen counterpart | Compatibility only | Replaced in ordinary use by the combined Attendance screen. |
+| `frmAttendance` | ChurchManager + JSForm | Frozen counterpart | Compatibility only | Direct row maintenance bypasses attendance synchronization rules. |
+| `frmRecordAttendance` | ChurchManager + JSForm | Frozen counterpart | Retired | Insert-only entry was replaced by the combined Attendance screen. |
+| Attendance | ChurchManager only | None | Active | Transactionally coordinates event metadata, hand counts, known-person attendance, Communion validation, searching, and service-derived locking. |
 | `frmDocument` | ChurchManager + JSForm | Frozen counterpart | Active | Not CM-only. |
 | `frmJournal` | ChurchManager + JSForm | Frozen counterpart | Active | Not CM-only. |
 | `frmProject` | ChurchManager + JSForm | Frozen counterpart | Active | Not CM-only. |

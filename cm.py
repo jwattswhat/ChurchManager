@@ -32,6 +32,7 @@ from bulletin_order_dialog import show_bulletin_orders
 from bulletin_order_generator_dialog import show_prepare_bulletin_order
 from weekly_bulletin_order_dialog import show_weekly_bulletin_order
 from worship_service_dialog import show_worship_services
+from attendance_dialog import show_attendance
 from worship_checklist import show_checklist_maintenance
 from worship_scheduling import (
     show_participants, show_schedule_patterns, show_service_participants, show_worship_roles,
@@ -398,6 +399,9 @@ def _buttonclick(event):
             _runSundayAnnouncements()
         case "lblServiceSchedule":
             show_service_participants(cmfrm.FRAME, context.connection)
+            return
+        case "lblAttendanceEvent" | "lblRecordAttendance":
+            show_attendance(cmfrm.FRAME, context.connection, context.authorization)
             return
         case "lblReports":
             frm = context.form_factory.create("frmReports", ["Close"])

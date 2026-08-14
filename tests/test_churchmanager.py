@@ -85,6 +85,7 @@ OPERATIONAL_MODULES = (
     "bulletin_order_generator_dialog.py",
     "weekly_bulletin_order_dialog.py",
     "unified_worship_service_dialog.py",
+    "attendance_dialog.py",
     "single_instance.py",
     "report_service.py",
     "report_support.py",
@@ -306,10 +307,11 @@ class TestChurchManagerPython(unittest.TestCase):
         repository = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
         self.assertIn('(\"Delete Service\", self.on_delete)', picker)
         self.assertIn("def delete_service", repository)
-        self.assertIn('("tblAttendanceEvent", "attendance event(s)")', repository)
+        self.assertIn('dependencies.append("recorded attendance")', repository)
         self.assertIn('("tblServiceRole", "participant assignment(s)")', repository)
         self.assertIn("WORSHIP_SERVICE_DELETED", repository)
         self.assertIn("DELETE FROM tblHymnUsage WHERE ServiceID=?", repository)
+        self.assertIn("DELETE FROM tblAttendanceEvent WHERE ServiceID=?", repository)
 
     def test_communion_checkbox_reactivates_required_template_lines(self):
         source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
