@@ -48,9 +48,9 @@ class ChurchManagerReportService:
             from visual_reports.directory_dataset import DirectoryDatasetProvider
             dataset = DirectoryDatasetProvider(connection, self.access.authorization).build(church_id)
         elif code == "CMWP01":
-            dataset = WorshipPlanningDatasetProvider(
-                connection, self.access.authorization,
-            ).build(church_id, parameters.get("ServiceID"))
+            return self.render_worship_planning(
+                church_id, parameters.get("ServiceID"), connection, open_output=True,
+            )
         else:
             dataset = TabularDatasetProvider(connection, self.access.authorization).build(
                 code, church_id, parameters,
@@ -58,6 +58,21 @@ class ChurchManagerReportService:
         output = Path(__file__).resolve().parent / "Reports" / f"{code}.pdf"
         rendered = self.jsform.PDFReportRenderer().render(definition, dataset, output)
         self.processes.open_file(rendered)
+        return rendered
+
+    def render_worship_planning(
+        self, church_id, service_id, connection, *, open_output=False, output=None,
+    ):
+        """Render a fresh planner for one service, optionally without opening it."""
+        definition_path = resolve_report_definition("CMWP01")
+        definition = self.jsform.ReportDefinitionLoader().load(definition_path)
+        dataset = WorshipPlanningDatasetProvider(
+            connection, self.access.authorization,
+        ).build(church_id, service_id)
+        output = Path(output or (Path(__file__).resolve().parent / "Reports" / "CMWP01.pdf"))
+        rendered = self.jsform.PDFReportRenderer().render(definition, dataset, output)
+        if open_output:
+            self.processes.open_file(rendered)
         return rendered
 
     def configure_catalog_picker(self, control):

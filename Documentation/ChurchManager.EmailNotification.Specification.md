@@ -1,8 +1,10 @@
 # ChurchManager email and participant-notification specification
 
-**Status:** Proposed for approval
+**Status:** Approved
 
 **Date:** August 14, 2026
+
+**Approved by:** Rev. Jonathan C. Watt
 
 **Target:** Development ChurchManager and JSForm
 
