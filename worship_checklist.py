@@ -162,7 +162,10 @@ class PreparationChecklistDialog(wx.Dialog):
         for label,status in (("Done","DONE"),("Not Done","NOT_DONE"),("Not Needed","NOT_NEEDED")):
             button=wx.Button(panel,label=label); button.Bind(wx.EVT_BUTTON,lambda _e,s=status:self.change(s)); buttons.Add(button,0,wx.RIGHT,6)
         self.override=wx.Button(panel); self.override.Bind(wx.EVT_BUTTON,self.toggle_override)
-        buttons.AddStretchSpacer(); buttons.Add(self.override,0,wx.RIGHT,8); buttons.Add(wx.Button(panel,wx.ID_CLOSE,"Close"))
+        buttons.AddStretchSpacer(); buttons.Add(self.override,0,wx.RIGHT,8)
+        close = wx.Button(panel, wx.ID_CLOSE, "Close")
+        close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE))
+        buttons.Add(close)
         outer.Add(buttons,0,wx.EXPAND|wx.ALL,10); panel.SetSizer(outer); self.refresh()
 
     def refresh(self):

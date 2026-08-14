@@ -33,6 +33,11 @@ class WorshipChecklistTests(unittest.TestCase):
         self.assertIn("AssignmentStatus<>'DECLINED'", source)
         self.assertNotIn("COALESCE(Status", source)
 
+    def test_close_button_ends_the_modal_dialog(self):
+        source = (ROOT / "worship_checklist.py").read_text()
+        self.assertIn("close.Bind(wx.EVT_BUTTON", source)
+        self.assertIn("self.EndModal(wx.ID_CLOSE)", source)
+
 
 if __name__ == "__main__":
     unittest.main()
