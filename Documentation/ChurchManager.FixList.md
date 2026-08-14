@@ -50,6 +50,8 @@ should not delay a stable ChurchManager release.
 
 ### 3. Release, installation, and recovery readiness
 
+- Implement the proposed [ChurchManager error logging and support specification](ChurchManager.ErrorLogging.Specification.md)
+  after the companion JSForm facility is approved and implemented.
 - Complete the formal visual acceptance review of all official reports.
 - Record final acceptance of active ChurchManager screens and workflows.
 - Build a repeatable new-install and upgrade process.
