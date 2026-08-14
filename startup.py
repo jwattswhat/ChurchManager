@@ -11,6 +11,7 @@ from development_boundary import assert_development_isolation
 from authorization import ChurchManagerAuthorizationPolicy
 from churchmanager_mode import load_config, resolve_database
 from login_dialog import authenticate_user
+from churchmanager_version import __version__
 
 
 assert_development_isolation(JSForm)
@@ -33,10 +34,17 @@ def security_enabled(arguments, config=None):
     return bool(security.get(key, False))
 
 
+def main_window_title(arguments):
+    title = "ChurchManager {}".format(__version__)
+    if arguments.get("test_mode"):
+        return "{} - TEST MODE - {}".format(title, arguments["database"])
+    return title
+
+
 def build_runtime(form_class, argv=None, login_provider=authenticate_user):
     arguments = fnCMargParse.CMargs(
         prog="ChurchManager",
-        description="ChurchManager v.01",
+        description="ChurchManager {}".format(__version__),
         arguments=["server", "database", "user", "test_mode", "jsform_database"],
         argv=argv,
     )
@@ -76,8 +84,5 @@ def build_runtime(form_class, argv=None, login_provider=authenticate_user):
         None, database.DBConnection, "frmMain", ["Close"],
         authorization_policy=authorization,
     )
-    if arguments["test_mode"]:
-        main_form.FRAME.SetTitle(
-            "ChurchManager - TEST MODE - {}".format(arguments["database"])
-        )
+    main_form.FRAME.SetTitle(main_window_title(arguments))
     return Runtime(arguments, wx_app, database, main_form, session, authorization)
