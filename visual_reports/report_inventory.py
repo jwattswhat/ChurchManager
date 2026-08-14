@@ -45,13 +45,18 @@ SPECS = (
         c("Note", "Notes", 155)), "Title", 1, "landscape"),
 
     ReportSpec("CMAT01", "Attendance Event Listing", "reports.attendance.run", "rpt_attendance_event", (
-        c("DateTime", "Date and Time", 100, "datetime"), c("Description", "Event", 175),
-        c("AttendanceType", "Type", 90), c("HandCount", "Attendance", 70, "integer", "right"),
-        c("HandCountCommunion", "Communion", 70, "integer", "right")), "DateTime DESC", 2),
-    ReportSpec("CMAT02", "Weekly Attendance Listing", "reports.attendance.run", "rpt_attendance_event", (
-        c("DateTime", "Week / Service", 110, "datetime"), c("Description", "Event", 190),
-        c("AttendanceType", "Type", 100), c("HandCount", "Attendance", 70, "integer", "right"),
-        c("HandCountCommunion", "Communion", 70, "integer", "right")), "DateTime DESC", 2),
+        c("DateTime", "Date and Time", 95, "datetime"), c("Description", "Event", 155),
+        c("AttendanceType", "Type", 80), c("HandCount", "Total", 55, "integer", "right"),
+        c("KnownAttendance", "Known", 55, "integer", "right"),
+        c("UnnamedAttendance", "Unnamed", 60, "integer", "right"),
+        c("HandCountCommunion", "Communion", 65, "integer", "right")), "DateTime DESC", 2, "landscape"),
+    ReportSpec("CMAT02", "Weekly Attendance Summary", "reports.attendance.run", "rpt_attendance_weekly", (
+        c("DateTime", "Week beginning", 105, "date"), c("AttendanceType", "Type", 120),
+        c("EventCount", "Events", 60, "integer", "right"),
+        c("Attendance", "Total", 70, "integer", "right"),
+        c("KnownAttendance", "Known", 70, "integer", "right"),
+        c("UnnamedAttendance", "Unnamed", 75, "integer", "right"),
+        c("Communion", "Communion", 75, "integer", "right")), "DateTime DESC, AttendanceType", 2),
     ReportSpec("CMHU01", "Hymn Usage by Service", "reports.worship.run", "rpt_hymn_usage", (
         c("ServiceID", "Service", 75, "integer"), c("UsedAs", "Used As", 110),
         c("HymnID", "Hymn ID", 75, "integer"), c("Note", "Notes", 275)), "ServiceID DESC, UsedAs", 2),

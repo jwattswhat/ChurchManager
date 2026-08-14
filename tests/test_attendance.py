@@ -59,6 +59,17 @@ class AttendanceTests(unittest.TestCase):
         self.assertIn('case "lblAttendanceEvent" | "lblRecordAttendance"', cm)
         self.assertIn("show_attendance", cm)
 
+    def test_attendance_reports_separate_events_from_weekly_summary(self):
+        inventory = (ROOT / "visual_reports" / "report_inventory.py").read_text(encoding="utf-8")
+        migration = (ROOT / "migrations" / "057_improve_attendance_reports.sql").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('"CMAT01", "Attendance Event Listing"', inventory)
+        self.assertIn('"CMAT02", "Weekly Attendance Summary"', inventory)
+        self.assertIn("rpt_attendance_weekly", inventory)
+        self.assertIn("KnownAttendance", migration)
+        self.assertIn("UnnamedAttendance", migration)
+
 
 if __name__ == "__main__":
     unittest.main()

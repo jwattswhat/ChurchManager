@@ -7,7 +7,7 @@
       "dataset": "churchmanager.cmat01",
       "datasetversion": 1,
       "pagesize": "letter",
-      "orientation": "portrait",
+      "orientation": "landscape",
       "margins": {
         "top": 30,
         "right": 36,
@@ -67,7 +67,7 @@
           2
         ],
         "size": [
-          468,
+          648,
           22
         ],
         "collection": "church",
@@ -84,7 +84,7 @@
           29
         ],
         "size": [
-          468,
+          648,
           20
         ],
         "systemvalue": "report_title",
@@ -100,7 +100,7 @@
           54
         ],
         "size": [
-          360,
+          540,
           16
         ],
         "collection": "parameters",
@@ -112,7 +112,7 @@
         "type": "systemtext",
         "band": "ReportHeader",
         "position": [
-          440,
+          620,
           54
         ],
         "size": [
@@ -133,7 +133,7 @@
           4
         ],
         "size": [
-          540,
+          720,
           1
         ],
         "bordercolor": "#6D7780",
@@ -147,7 +147,7 @@
           0
         ],
         "size": [
-          540,
+          720,
           40
         ],
         "repeatcollection": "records",
@@ -157,7 +157,7 @@
             "label": "Date and Time",
             "collection": "records",
             "field": "DateTime",
-            "width": 106.93,
+            "width": 121.06,
             "format": "datetime"
           },
           {
@@ -165,21 +165,39 @@
             "label": "Event",
             "collection": "records",
             "field": "Description",
-            "width": 187.13
+            "width": 197.52
           },
           {
             "name": "AttendanceType",
             "label": "Type",
             "collection": "records",
             "field": "AttendanceType",
-            "width": 96.24
+            "width": 101.95
           },
           {
             "name": "HandCount",
-            "label": "Attendance",
+            "label": "Total",
             "collection": "records",
             "field": "HandCount",
-            "width": 74.85,
+            "width": 70.09,
+            "format": "integer",
+            "align": "right"
+          },
+          {
+            "name": "KnownAttendance",
+            "label": "Known",
+            "collection": "records",
+            "field": "KnownAttendance",
+            "width": 70.09,
+            "format": "integer",
+            "align": "right"
+          },
+          {
+            "name": "UnnamedAttendance",
+            "label": "Unnamed",
+            "collection": "records",
+            "field": "UnnamedAttendance",
+            "width": 76.46,
             "format": "integer",
             "align": "right"
           },
@@ -188,7 +206,7 @@
             "label": "Communion",
             "collection": "records",
             "field": "HandCountCommunion",
-            "width": 74.85,
+            "width": 82.83,
             "format": "integer",
             "align": "right"
           }
@@ -202,7 +220,7 @@
           0
         ],
         "size": [
-          540,
+          720,
           1
         ],
         "bordercolor": "#808080",
@@ -216,7 +234,7 @@
           6
         ],
         "size": [
-          270.0,
+          360.0,
           14
         ],
         "systemvalue": "report_code",
@@ -228,7 +246,7 @@
         "type": "systemtext",
         "band": "PageFooter",
         "position": [
-          450,
+          630,
           6
         ],
         "size": [

@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMAT02",
-      "title": "Weekly Attendance Listing",
+      "title": "Weekly Attendance Summary",
       "dataset": "churchmanager.cmat02",
       "datasetversion": 1,
       "pagesize": "letter",
@@ -154,41 +154,61 @@
         "columns": [
           {
             "name": "DateTime",
-            "label": "Week / Service",
+            "label": "Week beginning",
             "collection": "records",
             "field": "DateTime",
-            "width": 110.0,
-            "format": "datetime"
-          },
-          {
-            "name": "Description",
-            "label": "Event",
-            "collection": "records",
-            "field": "Description",
-            "width": 190.0
+            "width": 98.61,
+            "format": "date"
           },
           {
             "name": "AttendanceType",
             "label": "Type",
             "collection": "records",
             "field": "AttendanceType",
-            "width": 100.0
+            "width": 112.7
           },
           {
-            "name": "HandCount",
-            "label": "Attendance",
+            "name": "EventCount",
+            "label": "Events",
             "collection": "records",
-            "field": "HandCount",
-            "width": 70.0,
+            "field": "EventCount",
+            "width": 56.35,
             "format": "integer",
             "align": "right"
           },
           {
-            "name": "HandCountCommunion",
+            "name": "Attendance",
+            "label": "Total",
+            "collection": "records",
+            "field": "Attendance",
+            "width": 65.74,
+            "format": "integer",
+            "align": "right"
+          },
+          {
+            "name": "KnownAttendance",
+            "label": "Known",
+            "collection": "records",
+            "field": "KnownAttendance",
+            "width": 65.74,
+            "format": "integer",
+            "align": "right"
+          },
+          {
+            "name": "UnnamedAttendance",
+            "label": "Unnamed",
+            "collection": "records",
+            "field": "UnnamedAttendance",
+            "width": 70.43,
+            "format": "integer",
+            "align": "right"
+          },
+          {
+            "name": "Communion",
             "label": "Communion",
             "collection": "records",
-            "field": "HandCountCommunion",
-            "width": 70.0,
+            "field": "Communion",
+            "width": 70.43,
             "format": "integer",
             "align": "right"
           }

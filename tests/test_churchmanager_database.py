@@ -252,6 +252,18 @@ class TestChurchManagerDatabase(unittest.TestCase):
         self.query("SELECT ID, dt, Description, AttendanceType FROM vwattendance LIMIT 1")
         self.query("SELECT ID, FirstName, LastName, Member FROM vmperson LIMIT 1")
 
+    def test_attendance_report_views_are_readable(self):
+        self.query(
+            "SELECT ID, ChurchID, DateTime, AttendanceType, HandCount, "
+            "KnownAttendance, UnnamedAttendance, HandCountCommunion "
+            "FROM rpt_attendance_event LIMIT 1"
+        )
+        self.query(
+            "SELECT ID, ChurchID, DateTime, AttendanceType, EventCount, Attendance, "
+            "KnownAttendance, UnnamedAttendance, Communion "
+            "FROM rpt_attendance_weekly LIMIT 1"
+        )
+
     def test_propers_use_lectionary_systems_and_lookup_labels(self):
         migration = self.query(
             "SELECT version FROM schema_migrations "
