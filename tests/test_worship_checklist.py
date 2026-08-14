@@ -54,6 +54,11 @@ class WorshipChecklistTests(unittest.TestCase):
         self.assertIn("VALUES (?,NULL,?,?,'MANUAL',?,'NOT_DONE')", source)
         self.assertIn('label="Add This-Time Task..."', source)
 
+    def test_double_click_toggles_done_and_not_done(self):
+        source = (ROOT / "worship_checklist.py").read_text()
+        self.assertIn("wx.EVT_LIST_ITEM_ACTIVATED, self.toggle_selected", source)
+        self.assertIn('self.change("NOT_DONE" if current == "DONE" else "DONE")', source)
+
 
 if __name__ == "__main__":
     unittest.main()

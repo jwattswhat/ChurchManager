@@ -194,7 +194,7 @@ class PreparationChecklistDialog(wx.Dialog):
         self.grid = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         for label, width in (("Status",110),("Preparation item",390),("How completed",150),("Note",120)):
             self.grid.AppendColumn(label,width=width)
-        self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, lambda _event: self.change("DONE"))
+        self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.toggle_selected)
         outer.Add(self.grid,1,wx.EXPAND|wx.LEFT|wx.RIGHT,10)
         buttons=wx.BoxSizer(wx.HORIZONTAL)
         for label,status in (("Done","DONE"),("Not Done","NOT_DONE"),("Not Needed","NOT_NEEDED")):
@@ -246,6 +246,13 @@ class PreparationChecklistDialog(wx.Dialog):
         if row[3] != "MANUAL":
             wx.MessageBox("This item is calculated from the Worship Service.","Automatic Item",wx.OK|wx.ICON_INFORMATION,self); return
         self.repository.set_status(row[0],status); self.refresh(); self.grid.Select(selected)
+
+    def toggle_selected(self, _event):
+        selected = self.grid.GetFirstSelected()
+        if selected < 0:
+            return
+        current = self.rows[selected][6]
+        self.change("NOT_DONE" if current == "DONE" else "DONE")
 
     def toggle_override(self,_event):
         service=self.repository.service(self.service_id)
