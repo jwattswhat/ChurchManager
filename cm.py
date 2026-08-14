@@ -25,7 +25,7 @@ from process_service import ProcessService
 from report_service import ChurchManagerReportService
 from report_access import ReportAccessService
 from visual_reports.designer import open_directory_designer
-from churchmanager_screen_designer import open_churchmanager_screen_designer
+from churchmanager_screen_designer import choice_eligible_fields, open_churchmanager_screen_designer
 from user_admin import show_user_administration
 from bulletin_order_dialog import show_bulletin_orders
 from bulletin_order_generator_dialog import show_prepare_bulletin_order
@@ -376,7 +376,7 @@ def _buttonclick(event):
                 "DocumentType", "AttendanceType", "DateType", "ContactLabel",
                 "Type", "Location", "PrayerCategory", "AnnouncementCategory",
                 "AddressLabel", "Reading", "Season", "Category",
-            })
+            }, choice_eligible_fields())
             return
         case "lblSchedule":
             show_schedule_patterns(cmfrm.FRAME, context.connection)

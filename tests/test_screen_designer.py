@@ -4,7 +4,7 @@ import unittest
 
 from authorization import AuthorizationDenied, UserSession
 from churchmanager_screen_designer import (
-    ensure_user_screen, open_churchmanager_screen_designer,
+    choice_eligible_fields, ensure_user_screen, open_churchmanager_screen_designer,
     security_audit_hook, user_screen_directory,
 )
 
@@ -17,6 +17,12 @@ class Authorization:
 
 
 class TestChurchManagerScreenDesigner(unittest.TestCase):
+    def test_choice_editor_can_list_database_bound_text_fields(self):
+        fields = choice_eligible_fields()
+        self.assertIn("FirstName", fields)
+        self.assertIn("MarriageStatus", fields)
+        self.assertNotIn("ID", fields)
+
     def test_every_churchmanager_form_loads_and_round_trips_in_designer_model(self):
         import JSForm
 

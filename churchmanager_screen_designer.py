@@ -12,6 +12,23 @@ ROOT = Path(__file__).resolve().parent
 STARTERS = ROOT / "Forms"
 
 
+def choice_eligible_fields(forms_directory=STARTERS):
+    """Return database-bound text fields that may be presented as dropdowns."""
+    fields = set()
+    for path in Path(forms_directory).glob("*.json"):
+        try:
+            document = json.loads(path.read_text(encoding="utf-8-sig"))
+            definition = next(iter(document.values()))
+            form = definition.get("FORM", {})
+            table_fields = set(form.get("table", {}).get("fields", ()))
+            for name, control in definition.get("CONTROLS", {}).items():
+                if control.get("type") in {"TextCtrl", "ComboBox"} and name in table_fields:
+                    fields.add(name)
+        except (OSError, UnicodeError, ValueError, StopIteration):
+            continue
+    return sorted(fields, key=str.casefold)
+
+
 def user_screen_directory(test_mode=False, local_app_data=None):
     base = Path(local_app_data or os.environ["LOCALAPPDATA"])
     return base / "ChurchManager" / ("TestScreenDefinitions" if test_mode else "ScreenDefinitions")
