@@ -116,6 +116,8 @@ class BackupRestoreDialog(wx.Dialog):
         finally: prompt.Destroy()
         if wx.MessageBox("Final warning: restore the selected backup now?","Confirm Restore",wx.YES_NO|wx.NO_DEFAULT|wx.ICON_WARNING,self)!=wx.YES: return
         self.save_preferences()
+        tools_directory = mariadb_tools_directory(self.jsform)
+        backup_folder = self.folder.GetPath()
         close_database_connections(self.context)
         self.context.skip_auto_backup = True
         busy = wx.BusyInfo(
@@ -125,7 +127,7 @@ class BackupRestoreDialog(wx.Dialog):
         wx.YieldIfNeeded()
         try:
             safety=self.context.services.backups.restore(
-                self.context.settings,mariadb_tools_directory(self.jsform),path,self.folder.GetPath(),
+                self.context.settings,tools_directory,path,backup_folder,
             )
             log=Path(os.environ.get("LOCALAPPDATA",Path.cwd()))/"ChurchManager"/"restore.log"
             log.parent.mkdir(parents=True,exist_ok=True)

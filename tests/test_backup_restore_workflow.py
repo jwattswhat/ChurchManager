@@ -43,9 +43,12 @@ class BackupRestoreWorkflowTests(unittest.TestCase):
 
     def test_restore_releases_live_connections_before_import(self):
         source = (ROOT / "backup_restore_dialog.py").read_text()
+        tools_position = source.index("tools_directory = mariadb_tools_directory(self.jsform)")
         close_position = source.index("close_database_connections(self.context)")
         restore_position = source.index("self.context.services.backups.restore(")
+        self.assertLess(tools_position, close_position)
         self.assertLess(close_position, restore_position)
+        self.assertIn("self.context.settings,tools_directory,path,backup_folder", source)
         self.assertIn('("DBConnection", "JSConnection")', source)
         self.assertIn("must restart because its database connections were closed", source)
 
