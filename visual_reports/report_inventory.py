@@ -23,6 +23,7 @@ class ReportSpec:
     wave: int
     orientation: str = "portrait"
     dataset_version: int = 1
+    row_color_field: str | None = None
 
 
 def c(field, label, width, data_type="text", align="left"):
@@ -73,6 +74,12 @@ SPECS = (
         c("AverageThroughDate", "Average", 80, "decimal", "right"),
         c("CommunionThroughDate", "Communion", 90, "integer", "right")),
         "ReportYear DESC", 2),
+    ReportSpec("CMAT05", "Member Attendance Follow-up", "reports.attendance.run", "rpt_member_attendance_followup", (
+        c("LastName", "Last Name", 120), c("FirstName", "First Name", 110),
+        c("LastAttended", "Last attended", 100, "date"),
+        c("MissedWeeks", "Consecutive weeks missed", 130, "integer", "right"),
+        c("Status", "Member status", 100)), "MissedWeeks DESC, LastName, FirstName", 2,
+        row_color_field="FlagColor"),
     ReportSpec("CMHU01", "Hymn Usage by Service", "reports.worship.run", "rpt_hymn_usage", (
         c("ServiceID", "Service", 75, "integer"), c("UsedAs", "Used As", 110),
         c("HymnID", "Hymn ID", 75, "integer"), c("Note", "Notes", 275)), "ServiceID DESC, UsedAs", 2),

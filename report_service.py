@@ -36,7 +36,7 @@ class ChurchManagerReportService:
         parameters = {}
         for name in (
             "ServiceID", "PersonID", "HymnID", "ProjectID", "StartDate", "EndDate",
-            "AttendanceType", "Detail",
+            "AttendanceType", "Detail", "MissedWeeks",
         ):
             if name not in controls:
                 continue

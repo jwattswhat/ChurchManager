@@ -59,6 +59,8 @@ def starter(spec):
         "FooterCode": {"type": "systemtext", "band": "PageFooter", "position": [0, 6], "size": [content_width / 2, 14], "systemvalue": "report_code", "prefix": "ChurchManager report ", "fontsize": 8, "color": "#555555"},
         "PageNumber": {"type": "systemtext", "band": "PageFooter", "position": [content_width - 90, 6], "size": [90, 14], "systemvalue": "page_number", "prefix": "Page ", "fontsize": 8, "align": "right", "color": "#555555"},
     }
+    if spec.row_color_field:
+        controls["Records"]["colorfield"] = spec.row_color_field
     return {f"{spec.code}REPORT": {"REPORT": report, "CONTROLS": controls}}
 
 

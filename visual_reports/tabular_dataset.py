@@ -13,15 +13,18 @@ CHURCH_FIELDS = (
 
 def contract_for(code):
     spec = REPORTS_BY_CODE[code]
+    record_fields = [
+        ReportField(column.field, column.label, column.data_type)
+        for column in spec.columns
+    ]
+    if spec.row_color_field:
+        record_fields.append(ReportField(spec.row_color_field, "Row color"))
     return ReportDatasetContract(
         f"churchmanager.{code.lower()}", spec.dataset_version, spec.permission,
         (
             ReportCollection("church", "Church", CHURCH_FIELDS),
             ReportCollection("parameters", "Parameters", (ReportField("Display", "Selected Parameters"),)),
-            ReportCollection("records", spec.title, tuple(
-                ReportField(column.field, column.label, column.data_type)
-                for column in spec.columns
-            )),
+            ReportCollection("records", spec.title, tuple(record_fields)),
         ),
     )
 
@@ -60,6 +63,13 @@ class TabularDatasetProvider:
             sql += f" ORDER BY {order_by}"
             cursor.execute(sql, tuple(values))
             records = self._rows(cursor)
+            if spec.row_color_field:
+                threshold = self._positive_integer(parameters.get("MissedWeeks"), 3)
+                for record in records:
+                    record[spec.row_color_field] = (
+                        "#C00000" if int(record.get("MissedWeeks") or 0) >= threshold
+                        else "#000000"
+                    )
         finally:
             cursor.close()
         display = "; ".join(
@@ -111,6 +121,14 @@ class TabularDatasetProvider:
         if spec.code == "CMPJ02":
             filters.append("Complete=0")
         return filters, values
+
+    @staticmethod
+    def _positive_integer(value, default):
+        try:
+            value = int(value)
+        except (TypeError, ValueError):
+            return default
+        return value if value > 0 else default
 
     @staticmethod
     def _rows(cursor):

@@ -116,6 +116,18 @@ class AttendanceTests(unittest.TestCase):
         self.assertIn("FullYearAttendance", migration)
         self.assertIn("ThroughDateAttendance", migration)
 
+    def test_member_followup_report_supports_a_missed_week_threshold(self):
+        inventory = (ROOT / "visual_reports" / "report_inventory.py").read_text(encoding="utf-8")
+        migration = (
+            ROOT / "migrations" / "060_add_member_attendance_followup.sql"
+        ).read_text(encoding="utf-8")
+        report_form = (ROOT / "Forms" / "frmReports.json").read_text(encoding="utf-8")
+        self.assertIn('"CMAT05", "Member Attendance Follow-up"', inventory)
+        self.assertIn('row_color_field="FlagColor"', inventory)
+        self.assertIn("MissedWeeks", migration)
+        self.assertIn('"MissedWeeks"', report_form)
+        self.assertIn('"value": 3', report_form)
+
 
 if __name__ == "__main__":
     unittest.main()

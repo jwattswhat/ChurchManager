@@ -320,13 +320,27 @@
                 "value": "All",
                 "tooltip": "Select the project."
             },
+            "lblMissedWeeks": {
+                "name": "lblMissedWeeks",
+                "type": "StaticText",
+                "posch": [2, 34],
+                "label": "Flag after missed weeks:"
+            },
+            "MissedWeeks": {
+                "name": "MissedWeeks",
+                "type": "TextNumber",
+                "posch": [18, 34],
+                "sizech": [5, 2],
+                "value": 3,
+                "tooltip": "Enter the number of consecutive recorded worship weeks missed before a member is flagged."
+            },
             "btnRun": {
                 "name": "btnRun",
                 "type": "Button",
                 "label": "Run Report",
                 "posch": [
                     9,
-                    33
+                    37
                 ],
                 "layout": {
                     "row": 40,

@@ -14,8 +14,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class TestVisualReportInventory(unittest.TestCase):
-    def test_inventory_has_29_official_reports_and_declared_exceptions(self):
-        self.assertEqual(len(OFFICIAL_CODES), 29)
+    def test_inventory_has_30_official_reports_and_declared_exceptions(self):
+        self.assertEqual(len(OFFICIAL_CODES), 30)
         self.assertEqual(CONSOLIDATED_CODES, {"CMAD01", "CMPH01"})
         self.assertEqual(DISABLED_CODES, {"CMSM01"})
         self.assertEqual(LAUNCHER_CODES, {"CMBATCH00"})
