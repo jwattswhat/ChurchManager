@@ -55,6 +55,145 @@ class WorshipChecklistRepository:
             "ORDER BY IsStarter DESC,Name", (church_id,),
         )
 
+    def maintenance_templates(self, church_id):
+        return self.all(
+            "SELECT ID,Name,IsStarter,ChurchID,COALESCE(Note,'') "
+            "FROM tblWorshipChecklistTemplate WHERE Active=1 "
+            "AND (ChurchID IS NULL OR ChurchID=?) ORDER BY IsStarter DESC,Name", (church_id,),
+        )
+
+    def template_items(self, template_id):
+        return self.all(
+            "SELECT ID,Sequence,Task,CompletionSource,Required FROM "
+            "tblWorshipChecklistTemplateItem WHERE TemplateID=? AND Active=1 "
+            "ORDER BY Sequence,ID", (template_id,),
+        )
+
+    def create_custom_template(self, church_id, source_id, name):
+        name = str(name or "").strip()
+        if not name:
+            raise ValueError("Enter a name for the custom checklist.")
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "INSERT INTO tblWorshipChecklistTemplate (ChurchID,Name,IsStarter,Active) "
+                "VALUES (?,?,0,1)", (church_id, name),
+            )
+            template_id = cursor.lastrowid
+            cursor.execute(
+                "INSERT INTO tblWorshipChecklistTemplateItem "
+                "(TemplateID,Sequence,Task,CompletionSource,Required,Active) "
+                "SELECT ?,Sequence,Task,CompletionSource,Required,Active FROM "
+                "tblWorshipChecklistTemplateItem WHERE TemplateID=? ORDER BY Sequence,ID",
+                (template_id, source_id),
+            )
+            self.connection.commit(); return template_id
+        except Exception:
+            self.connection.rollback(); raise
+        finally:
+            cursor.close()
+
+    def delete_custom_template(self, template_id, church_id):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT IsStarter,ChurchID FROM tblWorshipChecklistTemplate WHERE ID=?",
+                (template_id,),
+            )
+            row = cursor.fetchone()
+            if not row or row[0] or row[1] != church_id:
+                raise ValueError("Starter checklists cannot be deleted.")
+            cursor.execute(
+                "SELECT COUNT(*) FROM tblService WHERE WorshipChecklistTemplateID=?",
+                (template_id,),
+            )
+            if cursor.fetchone()[0]:
+                raise ValueError("This checklist is already used by a Worship Service and cannot be deleted.")
+            cursor.execute("DELETE FROM tblWorshipChecklistTemplate WHERE ID=?", (template_id,))
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback(); raise
+        finally:
+            cursor.close()
+
+    def save_template_item(self, template_id, item_id, task, source, required):
+        task = str(task or "").strip()
+        if not task:
+            raise ValueError("Enter a preparation task.")
+        if source not in {"MANUAL", "HYMNS", "ORDER", "PARTICIPANTS"}:
+            raise ValueError("Select a valid completion method.")
+        cursor = self.connection.cursor()
+        try:
+            if item_id is None:
+                cursor.execute(
+                    "SELECT COALESCE(MAX(Sequence),0)+1 FROM tblWorshipChecklistTemplateItem "
+                    "WHERE TemplateID=?", (template_id,),
+                )
+                cursor.execute(
+                    "INSERT INTO tblWorshipChecklistTemplateItem "
+                    "(TemplateID,Sequence,Task,CompletionSource,Required,Active) "
+                    "VALUES (?,?,?,?,?,1)",
+                    (template_id, cursor.fetchone()[0], task, source, int(bool(required))),
+                )
+            else:
+                cursor.execute(
+                    "UPDATE tblWorshipChecklistTemplateItem SET Task=?,CompletionSource=?,"
+                    "Required=? WHERE ID=? AND TemplateID=?",
+                    (task, source, int(bool(required)), item_id, template_id),
+                )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback(); raise
+        finally:
+            cursor.close()
+
+    def delete_template_item(self, template_id, item_id):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "DELETE FROM tblWorshipChecklistTemplateItem WHERE ID=? AND TemplateID=?",
+                (item_id, template_id),
+            )
+            self._renumber(cursor, template_id); self.connection.commit()
+        except Exception:
+            self.connection.rollback(); raise
+        finally:
+            cursor.close()
+
+    @staticmethod
+    def _renumber(cursor, template_id):
+        cursor.execute(
+            "SELECT ID FROM tblWorshipChecklistTemplateItem WHERE TemplateID=? "
+            "ORDER BY Sequence,ID", (template_id,),
+        )
+        for sequence, row in enumerate(cursor.fetchall(), 1):
+            cursor.execute(
+                "UPDATE tblWorshipChecklistTemplateItem SET Sequence=? WHERE ID=?",
+                (-sequence, row[0]),
+            )
+        cursor.execute(
+            "UPDATE tblWorshipChecklistTemplateItem SET Sequence=-Sequence "
+            "WHERE TemplateID=?", (template_id,),
+        )
+
+    def move_template_item(self, template_id, item_id, direction):
+        rows = self.template_items(template_id)
+        index = next((i for i, row in enumerate(rows) if row[0] == item_id), None)
+        target = None if index is None else index + direction
+        if index is None or target < 0 or target >= len(rows):
+            return
+        reordered = list(rows); reordered[index], reordered[target] = reordered[target], reordered[index]
+        cursor = self.connection.cursor()
+        try:
+            for sequence, row in enumerate(reordered, 1):
+                cursor.execute("UPDATE tblWorshipChecklistTemplateItem SET Sequence=? WHERE ID=?", (-sequence, row[0]))
+            cursor.execute("UPDATE tblWorshipChecklistTemplateItem SET Sequence=-Sequence WHERE TemplateID=?", (template_id,))
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback(); raise
+        finally:
+            cursor.close()
+
     def ensure_items(self, service_id):
         service = self.service(service_id)
         if not service:
@@ -283,7 +422,135 @@ class PreparationChecklistDialog(wx.Dialog):
             dialog.Destroy()
 
 
+class ChecklistTaskDialog(wx.Dialog):
+    SOURCES = (("Manual", "MANUAL"), ("Selected hymns", "HYMNS"),
+               ("Weekly Order of Service", "ORDER"), ("Required participants", "PARTICIPANTS"))
+
+    def __init__(self, parent, task="", source="MANUAL", required=True):
+        super().__init__(parent, title="Checklist Task", size=(480, 245))
+        panel=wx.Panel(self); outer=wx.BoxSizer(wx.VERTICAL)
+        form=wx.FlexGridSizer(cols=2,vgap=10,hgap=10); form.AddGrowableCol(1,1)
+        form.Add(wx.StaticText(panel,label="Task:"),0,wx.ALIGN_CENTER_VERTICAL)
+        self.task=wx.TextCtrl(panel,value=task); form.Add(self.task,1,wx.EXPAND)
+        form.Add(wx.StaticText(panel,label="Completion:"),0,wx.ALIGN_CENTER_VERTICAL)
+        self.source=wx.Choice(panel,choices=[row[0] for row in self.SOURCES])
+        self.source.SetSelection(next((i for i,row in enumerate(self.SOURCES) if row[1]==source),0)); form.Add(self.source,1,wx.EXPAND)
+        form.Add(wx.StaticText(panel,label="Required:"),0,wx.ALIGN_CENTER_VERTICAL)
+        self.required=wx.CheckBox(panel,label="Include in overall Ready status"); self.required.SetValue(bool(required)); form.Add(self.required)
+        outer.Add(form,1,wx.EXPAND|wx.ALL,15); outer.Add(self.CreateSeparatedButtonSizer(wx.OK|wx.CANCEL),0,wx.EXPAND|wx.ALL,10)
+        panel.SetSizer(outer)
+
+    def values(self):
+        return self.task.GetValue().strip(),self.SOURCES[self.source.GetSelection()][1],self.required.GetValue()
+
+
+class ChecklistMaintenanceDialog(wx.Dialog):
+    def __init__(self, parent, connection):
+        super().__init__(parent,title="Worship Checklist Maintenance",size=(1000,650),style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+        self.repository=WorshipChecklistRepository(connection)
+        church=self.repository.one("SELECT ID,Church FROM tblChurch ORDER BY ID LIMIT 1")
+        if not church: raise ValueError("No church record is available.")
+        self.church_id=church[0]; self.template_rows=[]; self.item_rows=[]
+        panel=wx.Panel(self); outer=wx.BoxSizer(wx.VERTICAL)
+        banner=wx.StaticText(panel,label="Create a custom checklist from a starter, then arrange its preparation tasks. Starter checklists are protected.")
+        banner.SetForegroundColour(wx.Colour(0,90,190)); outer.Add(banner,0,wx.ALL,10)
+        body=wx.BoxSizer(wx.HORIZONTAL)
+        self.templates=wx.ListCtrl(panel,style=wx.LC_REPORT|wx.LC_SINGLE_SEL)
+        self.templates.AppendColumn("Checklist",width=270); self.templates.AppendColumn("Status",width=90)
+        self.templates.Bind(wx.EVT_LIST_ITEM_SELECTED,lambda _e:self.load_items())
+        body.Add(self.templates,0,wx.EXPAND|wx.RIGHT,10)
+        self.items=wx.ListCtrl(panel,style=wx.LC_REPORT|wx.LC_SINGLE_SEL)
+        for label,width in (("Order",60),("Preparation task",330),("Completion",155),("Required",75)): self.items.AppendColumn(label,width=width)
+        self.items.Bind(wx.EVT_LIST_ITEM_ACTIVATED,self.edit_item); body.Add(self.items,1,wx.EXPAND)
+        outer.Add(body,1,wx.EXPAND|wx.LEFT|wx.RIGHT,10)
+        actions=wx.BoxSizer(wx.HORIZONTAL)
+        for label,handler in (("Create Custom from Selected...",self.create_custom),("Delete Custom",self.delete_custom),("Add Task...",self.add_item),("Edit Task...",self.edit_item),("Delete Task",self.delete_item),("Move Up",lambda e:self.move_item(-1)),("Move Down",lambda e:self.move_item(1))):
+            button=wx.Button(panel,label=label); button.Bind(wx.EVT_BUTTON,handler); actions.Add(button,0,wx.RIGHT,6)
+        actions.AddStretchSpacer(); close=wx.Button(panel,wx.ID_CLOSE,"Close"); close.Bind(wx.EVT_BUTTON,lambda _e:self.EndModal(wx.ID_CLOSE)); actions.Add(close)
+        outer.Add(actions,0,wx.EXPAND|wx.ALL,10); panel.SetSizer(outer); self.load_templates()
+
+    def selected_template(self):
+        index=self.templates.GetFirstSelected(); return None if index<0 else self.template_rows[index]
+
+    def selected_item(self):
+        index=self.items.GetFirstSelected(); return None if index<0 else self.item_rows[index]
+
+    def editable_template(self):
+        row=self.selected_template()
+        if not row: return None
+        if row[2] or row[3] != self.church_id:
+            wx.MessageBox("Create a custom copy before changing a starter checklist.","Protected Checklist",wx.OK|wx.ICON_INFORMATION,self); return None
+        return row
+
+    def load_templates(self, select_id=None):
+        self.template_rows=self.repository.maintenance_templates(self.church_id); self.templates.DeleteAllItems()
+        selection=0
+        for i,row in enumerate(self.template_rows):
+            item=self.templates.InsertItem(i,str(row[1])); self.templates.SetItem(item,1,"Starter" if row[2] else "Customized")
+            if not row[2]: self.templates.SetItemTextColour(item,wx.Colour(0,90,190))
+            if row[0]==select_id: selection=i
+        if self.template_rows: self.templates.Select(selection); self.load_items()
+
+    def load_items(self, select_id=None):
+        row=self.selected_template(); self.item_rows=self.repository.template_items(row[0]) if row else []; self.items.DeleteAllItems()
+        labels={"MANUAL":"Manual","HYMNS":"Selected hymns","ORDER":"Weekly order","PARTICIPANTS":"Participants"}
+        selection=0
+        for i,itemrow in enumerate(self.item_rows):
+            line=self.items.InsertItem(i,str(itemrow[1])); self.items.SetItem(line,1,str(itemrow[2])); self.items.SetItem(line,2,labels.get(itemrow[3],itemrow[3])); self.items.SetItem(line,3,"Yes" if itemrow[4] else "No")
+            if itemrow[0]==select_id: selection=i
+        if self.item_rows: self.items.Select(selection)
+
+    def create_custom(self,_event):
+        row=self.selected_template()
+        if not row: return
+        dialog=wx.TextEntryDialog(self,"Name the editable custom checklist.","Create Custom Checklist",value=str(row[1])+" - Custom")
+        try:
+            if dialog.ShowModal()==wx.ID_OK:
+                new_id=self.repository.create_custom_template(self.church_id,row[0],dialog.GetValue()); self.load_templates(new_id)
+        except Exception as error: wx.MessageBox(str(error),"Unable to Create Checklist",wx.OK|wx.ICON_ERROR,self)
+        finally: dialog.Destroy()
+
+    def delete_custom(self,_event):
+        row=self.editable_template()
+        if not row: return
+        if wx.MessageBox(f"Delete custom checklist '{row[1]}'?","Delete Checklist",wx.YES_NO|wx.NO_DEFAULT|wx.ICON_WARNING,self)!=wx.YES: return
+        try: self.repository.delete_custom_template(row[0],self.church_id); self.load_templates()
+        except Exception as error: wx.MessageBox(str(error),"Unable to Delete Checklist",wx.OK|wx.ICON_ERROR,self)
+
+    def add_item(self,_event): self._edit(None)
+    def edit_item(self,_event):
+        item=self.selected_item()
+        if item: self._edit(item)
+
+    def _edit(self,item):
+        template=self.editable_template()
+        if not template: return
+        dialog=ChecklistTaskDialog(self,*(item[2:5] if item else ()))
+        try:
+            if dialog.ShowModal()==wx.ID_OK:
+                self.repository.save_template_item(template[0],item[0] if item else None,*dialog.values()); self.load_items(item[0] if item else None)
+        except Exception as error: wx.MessageBox(str(error),"Unable to Save Task",wx.OK|wx.ICON_ERROR,self)
+        finally: dialog.Destroy()
+
+    def delete_item(self,_event):
+        template=self.editable_template(); item=self.selected_item()
+        if not template or not item: return
+        if wx.MessageBox(f"Delete '{item[2]}'?","Delete Task",wx.YES_NO|wx.NO_DEFAULT|wx.ICON_WARNING,self)==wx.YES:
+            self.repository.delete_template_item(template[0],item[0]); self.load_items()
+
+    def move_item(self,direction):
+        template=self.editable_template(); item=self.selected_item()
+        if not template or not item: return
+        self.repository.move_template_item(template[0],item[0],direction); self.load_items(item[0])
+
+
 def show_preparation_checklist(parent, connection, service_id):
     dialog=PreparationChecklistDialog(parent,connection,service_id)
+    try: dialog.ShowModal()
+    finally: dialog.Destroy()
+
+
+def show_checklist_maintenance(parent, connection):
+    dialog=ChecklistMaintenanceDialog(parent,connection)
     try: dialog.ShowModal()
     finally: dialog.Destroy()

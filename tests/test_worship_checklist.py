@@ -59,6 +59,16 @@ class WorshipChecklistTests(unittest.TestCase):
         self.assertIn("wx.EVT_LIST_ITEM_ACTIVATED, self.toggle_selected", source)
         self.assertIn('self.change("NOT_DONE" if current == "DONE" else "DONE")', source)
 
+    def test_normalized_checklist_maintenance_is_on_main_menu(self):
+        menu = (ROOT / "main_menu.py").read_text()
+        application = (ROOT / "cm.py").read_text()
+        source = (ROOT / "worship_checklist.py").read_text()
+        self.assertNotIn('"lblCheckList": "frmCheckList"', menu)
+        self.assertIn('case "lblCheckList":', application)
+        self.assertIn("show_checklist_maintenance", application)
+        self.assertIn("class ChecklistMaintenanceDialog", source)
+        self.assertIn("Create Custom from Selected...", source)
+
 
 if __name__ == "__main__":
     unittest.main()

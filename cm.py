@@ -29,6 +29,7 @@ from bulletin_order_dialog import show_bulletin_orders
 from bulletin_order_generator_dialog import show_prepare_bulletin_order
 from weekly_bulletin_order_dialog import show_weekly_bulletin_order
 from worship_service_dialog import show_worship_services
+from worship_checklist import show_checklist_maintenance
 from worship_scheduling import (
     show_participants, show_schedule_patterns, show_service_participants,
 )
@@ -586,6 +587,9 @@ def _buttonclick(event):
         context.form_factory.open(FORM_ROUTES[select])
         return
     match select:
+        case "lblCheckList":
+            show_checklist_maintenance(cmfrm.FRAME, context.connection)
+            return
         case "lblOS":
             show_bulletin_orders(cmfrm.FRAME, context.connection)
             return
