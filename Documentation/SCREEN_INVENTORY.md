@@ -10,14 +10,15 @@ Status meanings:
 
 - **Active**: reachable in the current application.
 - **Supporting**: opened from another active screen.
-- **Dormant**: definition remains, but normal current navigation does not use it.
+- **Removed**: obsolete development definition was deleted after dependency review.
 - **Frozen**: retained only in the independent Legacy application.
 - **Verify visually**: structurally tested, but awaiting the user's current visual check.
 
-## JSON screens
+## Current and removed development JSON screens
 
-These screens are ChurchManager definitions rendered by JSForm. They are not
-ChurchManager-only, even when ChurchManager supplies extra behavior.
+Active entries are ChurchManager definitions rendered by JSForm. Removed rows
+are retained here as cleanup history; their frozen Legacy counterparts were not
+changed.
 
 | Screen | Development ownership | Legacy | Status | Why ChurchManager-only? |
 |---|---|---|---|---|
@@ -55,28 +56,28 @@ ChurchManager-only, even when ChurchManager supplies extra behavior.
 | `frmAccountingFunction` | ChurchManager + JSForm | None | Supporting | Not CM-only; opened by Accounting Setup. |
 | `frmAccountingFund` | ChurchManager + JSForm | None | Supporting | Not CM-only; opened by Accounting Setup. |
 | `frmAccountingPayee` | ChurchManager + JSForm | None | Supporting | Not CM-only; opened by Accounting Setup. |
-| `frmAltReading` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only; alternate readings were removed from the current workflow. |
-| `frmAnnouncementKiosk` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only. |
-| `frmAsset` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only. |
-| `frmChecklist` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only; replaced by native checklist maintenance. |
-| `frmchoices` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only; replaced by JSForm Choice Manager. |
-| `frmEditCheckList` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only; replaced by native preparation checklist. |
-| `frmGenerateOS` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only; replaced by unified worship planning. |
-| `frmGenerateWorshipPlanning` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only; replaced by unified worship planning. |
-| `frmHymnHistory` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only. |
-| `frmHymnSearch` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only; replaced by the native hymn picker. |
-| `frmHymnUsage` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only; usage is handled by the unified workflow. |
-| `frmHymnUsageDisplay` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only. |
-| `frmMembershipMain` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only; old container screen. |
-| `frmNote` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only. |
-| `frmOpenMembership` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only; old menu/container screen. |
-| `frmOpenWorship` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only; old menu/container screen. |
-| `frmPersonDateGrid` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only. |
-| `frmReading` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only; current Propers workflow owns readings. |
-| `frmReadingList` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only. |
-| `frmSchedule` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only; replaced by native schedule-pattern management. |
-| `frmService` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only; replaced by unified Worship Service editor. |
-| `frmServiceSchedule` | ChurchManager + JSForm | Frozen counterpart | Dormant | Not CM-only; replaced by native Service Participants. |
+| `frmAltReading` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; alternate readings were removed from the current workflow. |
+| `frmAnnouncementKiosk` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only. |
+| `frmAsset` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only. |
+| `frmChecklist` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; replaced by native checklist maintenance. |
+| `frmchoices` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; replaced by JSForm Choice Manager. |
+| `frmEditCheckList` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; replaced by native preparation checklist. |
+| `frmGenerateOS` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; replaced by unified worship planning. |
+| `frmGenerateWorshipPlanning` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; replaced by unified worship planning. |
+| `frmHymnHistory` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only. |
+| `frmHymnSearch` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; replaced by the native hymn picker. |
+| `frmHymnUsage` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; usage is handled by the unified workflow. |
+| `frmHymnUsageDisplay` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only. |
+| `frmMembershipMain` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; old container screen. |
+| `frmNote` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only. |
+| `frmOpenMembership` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; old menu/container screen. |
+| `frmOpenWorship` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; old menu/container screen. |
+| `frmPersonDateGrid` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only. |
+| `frmReading` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; current Propers workflow owns readings. |
+| `frmReadingList` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only. |
+| `frmSchedule` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; replaced by native schedule-pattern management. |
+| `frmService` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; replaced by unified Worship Service editor. |
+| `frmServiceSchedule` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; replaced by native Service Participants. |
 
 ## Legacy-only JSON screens
 
@@ -171,6 +172,5 @@ When changing a screen:
 2. Explain why any new handwritten ChurchManager-only screen cannot reasonably
    be expressed as a reusable JSForm capability.
 3. Never remove or alter a frozen Legacy screen as part of development cleanup.
-4. Keep dormant development definitions until their dependencies have been
-   checked; then remove them from development only.
+4. Remove obsolete definitions from development only after checking their dependencies.
 5. Distinguish automated structural validation from user-confirmed visual QA.

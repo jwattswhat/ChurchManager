@@ -39,7 +39,6 @@ class TestCopyrightSensitiveWorshipFields(unittest.TestCase):
         current_sources = (
             ROOT / "unified_worship_service_dialog.py",
             ROOT / "worship_service_dialog.py",
-            FORMS / "frmService.json",
             FORMS / "frmPropers.json",
             ROOT / "visual_reports" / "report_inventory.py",
             ROOT / "visual_reports" / "definitions" / "CMWP01.json",
@@ -634,17 +633,6 @@ class TestChurchManagerConfiguration(unittest.TestCase):
 
 
 class TestChurchManagerForms(unittest.TestCase):
-    def test_service_propers_lookup_displays_text_and_stores_id(self):
-        definition = load_json(FORMS / "frmService.json")["frmServiceFORM"]
-        control = definition["CONTROLS"]["PropersID"]
-        lookup = control["lookupchoices"]
-        self.assertEqual(control["type"], "ComboBox")
-        self.assertEqual(lookup["name"], "vwPropersLookup")
-        self.assertEqual(lookup["fields"], ["ID", "DisplayName"])
-        self.assertNotIn("condition", lookup)
-        self.assertNotIn("btnChangeLectionary", definition["CONTROLS"])
-        self.assertNotIn("frmOptions", definition["FORM"]["linkedform"])
-
     def test_propers_use_reusable_lectionary_system_and_optional_cycle(self):
         definition = load_json(FORMS / "frmPropers.json")["frmPropersFORM"]
         controls = definition["CONTROLS"]
@@ -663,13 +651,12 @@ class TestChurchManagerForms(unittest.TestCase):
         self.assertNotIn("SELECT * FROM tblPropers WHERE ID=%s", source)
 
     def test_worship_service_filters_propers_by_church_default_lectionary(self):
-        source = (ROOT / "cm.py").read_text(encoding="utf-8-sig")
+        source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8-sig")
         migration = (
             ROOT / "migrations" / "030_abbreviate_lsb_lectionary_names.sql"
         ).read_text(encoding="utf-8")
         self.assertIn("PrimaryLectionarySystemID FROM tblChurch", source)
-        self.assertIn('self.FORMNAME == "frmService"', source)
-        self.assertIn("wx.EVT_COMBOBOX", source)
+        self.assertIn("def propers(self, church_id)", source)
         self.assertIn("LSB Three-Year Lectionary", migration)
         self.assertNotIn("SET Name = 'Lutheran Service Book", migration)
 

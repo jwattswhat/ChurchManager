@@ -37,7 +37,6 @@ class FormConsistencyTests(unittest.TestCase):
             "frmFamilyDate": {"Date": "DatePickerCtrl"},
             "frmPersonDate": {"Date": "DatePickerCtrl"},
             "frmAttendanceEvent": {"DateTime": "DateTime"},
-            "frmServiceSchedule": {"DateTime": "DateTime"},
         }
         forms = {path.stem: form for path, _, form in load_forms()}
         for form_name, fields in expected.items():

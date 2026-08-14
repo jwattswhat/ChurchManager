@@ -113,7 +113,7 @@ class SundayContentRuleTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         for retired in ("frmOS.json", "frmOSList.json", "frmParticipant.json"):
             self.assertFalse((root / "Forms" / retired).exists())
-        for filename in ("frmPersonAddress.json", "frmPersonDateGrid.json"):
+        for filename in ("frmPersonAddress.json",):
             document = json.loads((root / "Forms" / filename).read_text(encoding="utf-8"))
             form = next(iter(document.values()))
             lookup = form["CONTROLS"]["PersonID"]["lookupchoices"]

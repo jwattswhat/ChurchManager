@@ -22,7 +22,9 @@ class TestChurchManagerScreenDesigner(unittest.TestCase):
 
         loader = JSForm.ScreenDefinitionLoader()
         paths = sorted(Path("Forms").glob("*.json"))
-        self.assertGreaterEqual(len(paths), 56)
+        # Development intentionally contains only the active JSON screens;
+        # obsolete definitions live solely in the frozen Legacy application.
+        self.assertGreaterEqual(len(paths), 34)
         for path in paths:
             with self.subTest(form=path.name):
                 model = JSForm.ScreenDesignerModel(loader.load(path))
@@ -113,7 +115,7 @@ class TestChurchManagerScreenDesigner(unittest.TestCase):
     def test_utility_dialogs_have_correct_identity(self):
         import json
 
-        for name in ("frmGenerateOS", "frmNotifyviaeMail"):
+        for name in ("frmNotifyviaeMail",):
             form = json.loads(Path("Forms", name + ".json").read_text(encoding="utf-8"))[name + "FORM"]["FORM"]
             self.assertEqual(form["name"], name)
             self.assertIn("Close", form["controls"])
