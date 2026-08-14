@@ -118,7 +118,7 @@
                 ],
                 "sizech": [
                     42,
-                    26
+                    30
                 ],
                 "label": "Parameters",
                 "layout": {
@@ -329,7 +329,7 @@
             "MissedWeeks": {
                 "name": "MissedWeeks",
                 "type": "TextNumber",
-                "posch": [18, 34],
+                "posch": [9, 34],
                 "sizech": [5, 2],
                 "value": 3,
                 "tooltip": "Enter the number of consecutive recorded worship weeks missed before a member is flagged."
@@ -340,7 +340,7 @@
                 "label": "Run Report",
                 "posch": [
                     9,
-                    37
+                    39
                 ],
                 "layout": {
                     "row": 40,

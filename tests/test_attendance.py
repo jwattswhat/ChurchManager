@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import unittest
 
 from attendance_dialog import AttendanceRepository
@@ -127,6 +128,18 @@ class AttendanceTests(unittest.TestCase):
         self.assertIn("MissedWeeks", migration)
         self.assertIn('"MissedWeeks"', report_form)
         self.assertIn('"value": 3', report_form)
+
+    def test_missed_week_parameter_stays_inside_parameter_box(self):
+        report_form = json.loads(
+            (ROOT / "Forms" / "frmReports.json").read_text(encoding="utf-8")
+        )["frmReportsFORM"]["CONTROLS"]
+        box = report_form["ParameterBox"]
+        field = report_form["MissedWeeks"]
+        self.assertLess(box["posch"][0], field["posch"][0])
+        self.assertLess(field["posch"][0], box["posch"][0] + box["sizech"][0])
+        self.assertLess(box["posch"][1], field["posch"][1])
+        self.assertLess(field["posch"][1], box["posch"][1] + box["sizech"][1])
+        self.assertEqual(field["posch"][0], report_form["ProjectID"]["posch"][0])
 
 
 if __name__ == "__main__":
