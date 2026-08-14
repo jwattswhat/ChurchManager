@@ -378,6 +378,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         for label, handler in (
             ("Edit Line...", self.on_edit_line),
             ("Select Hymn...", self.on_select_hymn),
+            ("Delete Line", self.on_delete_line),
             ("Move Up", lambda event: self.on_move_line(-1)),
             ("Move Down", lambda event: self.on_move_line(1)),
         ):
@@ -385,6 +386,9 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             button.Bind(wx.EVT_BUTTON, handler)
             if label.startswith("Select Hymn"):
                 self.select_hymn_button = button
+                button.Enable(False)
+            elif label == "Delete Line":
+                self.delete_line_button = button
                 button.Enable(False)
             line_actions.Add(button, 0, wx.RIGHT, 8)
         line_actions.AddStretchSpacer()
@@ -613,6 +617,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         )
         self.grid.DeleteAllItems()
         self.select_hymn_button.Enable(False)
+        self.delete_line_button.Enable(False)
         for index, line in enumerate(self.working_lines):
             item = self.grid.InsertItem(index, str(line["label"]))
             required = bool(line["included"] and line["source"] and not line["value"])
@@ -632,6 +637,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         index = self.selected_line_index()
         enabled = index is not None and self.working_lines[index]["source"] == "SERVICE_HYMN"
         self.select_hymn_button.Enable(enabled)
+        self.delete_line_button.Enable(index is not None)
 
     def on_checklist(self, _event):
         show_preparation_checklist(self, self.repository.connection, self.service_id)
@@ -702,6 +708,27 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
                 self.grid.Select(index)
         finally:
             dialog.Destroy()
+
+    def on_delete_line(self, _event):
+        index = self.selected_line_index()
+        if index is None:
+            return
+        line = self.working_lines[index]
+        if wx.MessageBox(
+            f"Delete '{line['label']}' from this service's weekly Order of Service?\n\n"
+            "The reusable template will not be changed.",
+            "Delete Weekly Order Line",
+            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING,
+            self,
+        ) != wx.YES:
+            return
+        del self.working_lines[index]
+        normalize_line_sequences(self.working_lines)
+        self.refresh_grid()
+        if self.working_lines:
+            target = min(index, len(self.working_lines) - 1)
+            self.grid.Select(target)
+            self.grid.EnsureVisible(target)
 
     def on_move_line(self, direction):
         index = self.selected_line_index()

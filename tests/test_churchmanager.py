@@ -120,6 +120,13 @@ def load_function_without_importing(module_path: Path, function_name: str, globa
 
 
 class TestWorshipPlanningStructure(unittest.TestCase):
+    def test_unified_service_can_delete_only_its_weekly_order_line(self):
+        source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
+        self.assertIn('(\"Delete Line\", self.on_delete_line)', source)
+        self.assertIn("del self.working_lines[index]", source)
+        self.assertIn("The reusable template will not be changed.", source)
+        self.assertIn("normalize_line_sequences(self.working_lines)", source)
+
     def test_deleting_custom_template_preserves_its_weekly_orders(self):
         migration = (
             ROOT / "migrations" / "054_preserve_weekly_order_snapshots.sql"
