@@ -52,6 +52,10 @@ class TestVisualReportInventory(unittest.TestCase):
         self.assertEqual(definition.controls["Hymns"]["repeatcollection"], "hymns")
         self.assertEqual(definition.controls["Participants"]["repeatcollection"], "participants")
 
+    def test_worship_planner_checklist_contract_includes_completion_source(self):
+        checklist = WORSHIP_PLANNING_CONTRACT.collection("checklist")
+        self.assertIn("CompletionSource", {field.name for field in checklist.fields})
+
     def test_worship_planner_provider_reads_only_report_views(self):
         source = (ROOT / "visual_reports" / "worship_planning_dataset.py").read_text(
             encoding="utf-8"

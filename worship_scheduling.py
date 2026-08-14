@@ -655,10 +655,16 @@ class ServiceParticipantsDialog(wx.Dialog):
         panel=wx.Panel(self); outer=wx.BoxSizer(wx.VERTICAL); heading=wx.StaticText(panel,label=(str(context[5]) + " - " + str(context[2])) if context else "Worship Service"); heading.SetFont(heading.GetFont().Bold()); outer.Add(heading,0,wx.ALL,10)
         self.grid=wx.ListCtrl(panel,style=wx.LC_REPORT|wx.LC_SINGLE_SEL)
         for label,width in (("Required position",200),("Participant",240),("Status",110),("Note",280)): self.grid.AppendColumn(label,width=width)
-        self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED,self.on_edit); outer.Add(self.grid,1,wx.EXPAND|wx.LEFT|wx.RIGHT,10)
+        self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED,self.on_edit)
+        self.grid.Bind(wx.EVT_LIST_ITEM_SELECTED,self.on_selection)
+        self.grid.Bind(wx.EVT_LIST_ITEM_DESELECTED,self.on_selection)
+        outer.Add(self.grid,1,wx.EXPAND|wx.LEFT|wx.RIGHT,10)
         actions=wx.BoxSizer(wx.HORIZONTAL)
         for label,handler in (("Add...",self.on_add),("Edit...",self.on_edit),("Remove",self.on_remove),("Preview Suggestions...",self.on_suggest)):
             b=wx.Button(panel,label=label); b.Bind(wx.EVT_BUTTON,handler); actions.Add(b,0,wx.RIGHT,7)
+            if label == "Remove": self.remove_button=b; b.Enable(False)
+        self.status=wx.StaticText(panel,label="Required positions remain visible as Open after an assignment is removed.")
+        outer.Add(self.status,0,wx.LEFT|wx.RIGHT|wx.TOP,10)
         actions.AddStretchSpacer(); actions.Add(wx.Button(panel,wx.ID_CANCEL,"Close")); outer.Add(actions,0,wx.EXPAND|wx.ALL,10); panel.SetSizer(outer); self.refresh()
     def refresh(self):
         assignments=self.repository.assignments(self.service_id); requirements=self.repository.requirements(self.service_id)
@@ -677,6 +683,8 @@ class ServiceParticipantsDialog(wx.Dialog):
                 self.grid.SetItemTextColour(item,wx.RED)
     def selected(self):
         index=self.grid.GetFirstSelected(); return self.rows[index] if index>=0 else None
+    def on_selection(self,_event=None):
+        row=self.selected(); self.remove_button.Enable(bool(row and row[4]))
     def _edit(self,row,required_role_id=None):
         dialog=AssignmentEditDialog(self,self.repository,row,required_role_id)
         try:
@@ -693,6 +701,8 @@ class ServiceParticipantsDialog(wx.Dialog):
         assignment=row[4] if row else None
         if assignment and wx.MessageBox(f"Remove {assignment[4]} as {assignment[2]}?","Remove Assignment",wx.YES_NO|wx.NO_DEFAULT|wx.ICON_WARNING,self)==wx.YES:
             self.repository.delete_assignment(assignment[0],self.service_id); self.refresh()
+            self.remove_button.Enable(False)
+            self.status.SetLabel(f"Removed {assignment[4]}. The required position remains Open.")
     def on_requirements(self,_event):
         dialog=RequirementDialog(self,self.repository,self.service_id)
         try:
@@ -718,6 +728,13 @@ class ServicePickerDialog(wx.Dialog):
 
 def show_participants(parent,connection):
     dialog=ParticipantManagerDialog(parent,connection)
+    try: return dialog.ShowModal()
+    finally: dialog.Destroy()
+
+
+def show_worship_roles(parent,connection):
+    repository=WorshipSchedulingRepository(connection)
+    dialog=RoleManagerDialog(parent,repository)
     try: return dialog.ShowModal()
     finally: dialog.Destroy()
 

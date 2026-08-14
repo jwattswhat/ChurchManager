@@ -122,7 +122,7 @@
                 "label": "Prayers",
                 "posch": [
                     2,
-                    20
+                    21
                 ],
                 "type": "StaticText",
                 "tooltip": "Open the prayers form.",
@@ -148,7 +148,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    19
+                    20
                 ],
                 "label": "Scheduling Patterns",
                 "tooltip": "Open the schedule form.",
@@ -165,6 +165,19 @@
                 ],
                 "label": "Service Participants",
                 "tooltip": "Assign participants to a worship service and fill required positions.",
+                "security": {
+                    "invoke": "worship.manage"
+                }
+            },
+            "lblWorshipPositions": {
+                "name": "lblWorshipPositions",
+                "label": "Worship Positions",
+                "posch": [
+                    2,
+                    19
+                ],
+                "type": "StaticText",
+                "tooltip": "Add, edit, deactivate, or safely delete worship positions.",
                 "security": {
                     "invoke": "worship.manage"
                 }
@@ -187,7 +200,7 @@
                 "name": "lblAttendanceEvent",
                 "posch": [
                     2,
-                    22
+                    23
                 ],
                 "label": "Attendance Events",
                 "tooltip": "Open the attendance event form.",
@@ -322,7 +335,7 @@
                 "label": "Announcements",
                 "posch": [
                     2,
-                    21
+                    22
                 ],
                 "tooltip": "Open the announcement form.",
                 "security": {

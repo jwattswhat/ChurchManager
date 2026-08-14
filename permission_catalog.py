@@ -12,6 +12,7 @@ MAIN_MENU_PERMISSIONS = {
     "lblWeeklyBulletinOrder": "worship.manage",
     "lblPrayers": "worship.manage",
     "lblParticipant": "worship.manage",
+    "lblWorshipPositions": "worship.manage",
     "lblSchedule": "worship.manage",
     "lblServiceSchedule": "worship.manage",
     "lblAttendanceEvent": "attendance.events.manage",

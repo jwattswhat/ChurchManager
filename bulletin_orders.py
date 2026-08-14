@@ -171,23 +171,6 @@ class BulletinOrderRepository:
             )
             weekly_orders = cursor.fetchone()[0]
             cursor.execute(
-                "UPDATE tblHymnUsage u "
-                "JOIN tblServiceBulletinOrderLine l ON l.ID=u.ServiceBulletinOrderLineID "
-                "JOIN tblServiceBulletinOrder o ON o.ServiceID=l.ServiceID "
-                "SET u.ServiceBulletinOrderLineID=NULL WHERE o.TemplateID=?",
-                (template_id,),
-            )
-            cursor.execute(
-                "DELETE l FROM tblServiceBulletinOrderLine l "
-                "JOIN tblServiceBulletinOrder o ON o.ServiceID=l.ServiceID "
-                "WHERE o.TemplateID=?",
-                (template_id,),
-            )
-            cursor.execute(
-                "DELETE FROM tblServiceBulletinOrder WHERE TemplateID=?",
-                (template_id,),
-            )
-            cursor.execute(
                 "DELETE FROM tblBulletinOrderTemplate WHERE ID=? AND IsStarter=0",
                 (template_id,),
             )
@@ -286,7 +269,8 @@ class WeeklyBulletinOrderRepository:
         cursor = self.connection.cursor()
         try:
             cursor.execute(
-                "SELECT ServiceID,TemplateID FROM tblServiceBulletinOrder WHERE ServiceID=?",
+                "SELECT ServiceID,TemplateID,COALESCE(TemplateName,'') "
+                "FROM tblServiceBulletinOrder WHERE ServiceID=?",
                 (service_id,),
             )
             return cursor.fetchone()
@@ -299,7 +283,7 @@ class WeeklyBulletinOrderRepository:
             cursor.execute(
                 "SELECT ID,Sequence,Included,LineType,Label,ValueSource,ValueKey,WeeklyValue,"
                 "ReferenceText,StyleName,LabelBold,ValueBold,Italic,IndentLevel,TabPosition,"
-                "TabAlignment,TabLeader,Note,TemplateLineID "
+                "TabAlignment,TabLeader,Note,TemplateLineID,ConditionType,ConditionValue "
                 "FROM tblServiceBulletinOrderLine WHERE ServiceID=? ORDER BY Sequence,ID",
                 (service_id,),
             )
@@ -330,8 +314,10 @@ class WeeklyBulletinOrderRepository:
             template_lines = self.templates.lines(template_id)
             cursor.execute("DELETE FROM tblServiceBulletinOrderLine WHERE ServiceID=?", (service_id,))
             cursor.execute(
-                "INSERT INTO tblServiceBulletinOrder (ServiceID,TemplateID) VALUES (?,?) "
-                "ON DUPLICATE KEY UPDATE TemplateID=VALUES(TemplateID),GeneratedPlainText=NULL,"
+                "INSERT INTO tblServiceBulletinOrder (ServiceID,TemplateID,TemplateName) "
+                "SELECT ?,ID,Name FROM tblBulletinOrderTemplate WHERE ID=? "
+                "ON DUPLICATE KEY UPDATE TemplateID=VALUES(TemplateID),"
+                "TemplateName=VALUES(TemplateName),GeneratedPlainText=NULL,"
                 "GeneratedHtml=NULL,GeneratedAt=NULL", (service_id, template_id),
             )
             cursor.execute(
@@ -346,11 +332,11 @@ class WeeklyBulletinOrderRepository:
                     "INSERT INTO tblServiceBulletinOrderLine "
                     "(ServiceID,TemplateLineID,Sequence,Included,LineType,Label,ValueSource,"
                     "ValueKey,ReferenceText,StyleName,LabelBold,ValueBold,Italic,IndentLevel,"
-                    "TabPosition,TabAlignment,TabLeader,Note) "
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    "TabPosition,TabAlignment,TabLeader,ConditionType,ConditionValue,Note) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (service_id, line[0], line[1], included, line[2], line[3], line[4],
                      line[5], line[6], line[7], line[8], line[9], line[10], line[11],
-                     line[12], line[13], line[14], line[17]),
+                     line[12], line[13], line[14], line[15], line[16], line[17]),
                 )
                 weekly_line_id = cursor.lastrowid
                 if line[4] == "SERVICE_HYMN":

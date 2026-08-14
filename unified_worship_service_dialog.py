@@ -12,6 +12,7 @@ from ui_dimensions import DATE_PICKER_SIZE, TIME_PICKER_SIZE
 from hymn_validation import duplicate_selection_status, normalize_tune
 from worship_scheduling import show_service_participants
 from worship_checklist import show_preparation_checklist
+from worship_checklist import WorshipChecklistRepository, checklist_counts
 
 from bulletin_orders import (
     BulletinOrderGenerator,
@@ -236,8 +237,10 @@ class UnifiedWorshipServiceRepository:
             cursor.execute("DELETE FROM tblHymnUsage WHERE ServiceID=?", (service_id,))
             cursor.execute("DELETE FROM tblServiceBulletinOrderLine WHERE ServiceID=?", (service_id,))
             cursor.execute(
-                "INSERT INTO tblServiceBulletinOrder (ServiceID,TemplateID) VALUES (?,?) "
-                "ON DUPLICATE KEY UPDATE TemplateID=VALUES(TemplateID),GeneratedPlainText=NULL,"
+                "INSERT INTO tblServiceBulletinOrder (ServiceID,TemplateID,TemplateName) "
+                "SELECT ?,ID,Name FROM tblBulletinOrderTemplate WHERE ID=? "
+                "ON DUPLICATE KEY UPDATE TemplateID=VALUES(TemplateID),"
+                "TemplateName=VALUES(TemplateName),GeneratedPlainText=NULL,"
                 "GeneratedHtml=NULL,GeneratedAt=NULL", (service_id, template_id),
             )
             for line in normalize_line_sequences(lines):
@@ -245,8 +248,8 @@ class UnifiedWorshipServiceRepository:
                     "INSERT INTO tblServiceBulletinOrderLine "
                     "(ServiceID,TemplateLineID,Sequence,Included,LineType,Label,ValueSource,"
                     "ValueKey,WeeklyValue,ReferenceText,StyleName,LabelBold,ValueBold,Italic,"
-                    "IndentLevel,TabPosition,TabAlignment,TabLeader,Note) "
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    "IndentLevel,TabPosition,TabAlignment,TabLeader,ConditionType,ConditionValue,Note) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (
                         service_id, line.get("template_line_id"), line["sequence"],
                         int(line["included"]), line["type"], line["label"], line["source"],
@@ -255,6 +258,7 @@ class UnifiedWorshipServiceRepository:
                         int(bool(line.get("value_bold"))), int(bool(line.get("italic"))),
                         int(line.get("indent") or 0), line.get("tab_position"),
                         line.get("tab_alignment") or "LEFT", line.get("tab_leader") or "NONE",
+                        line.get("condition_type") or "ALWAYS", line.get("condition_value"),
                         line.get("note") or None,
                     ),
                 )
@@ -379,12 +383,17 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         ):
             button = wx.Button(left, label=label)
             button.Bind(wx.EVT_BUTTON, handler)
+            if label.startswith("Select Hymn"):
+                self.select_hymn_button = button
+                button.Enable(False)
             line_actions.Add(button, 0, wx.RIGHT, 8)
         line_actions.AddStretchSpacer()
         line_actions.Add(wx.StaticText(left, label="Red lines require attention."), 0,
                          wx.ALIGN_CENTER_VERTICAL)
         left_box.Add(line_actions, 0, wx.EXPAND | wx.ALL, 8)
         self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_line)
+        self.grid.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_line_selection)
+        self.grid.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.on_line_selection)
         left.SetSizer(left_box)
 
         self.detail_box = wx.BoxSizer(wx.VERTICAL)
@@ -400,12 +409,14 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             ),
         )
         self.detail_box.Add(participants, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+        checklist_row = wx.BoxSizer(wx.HORIZONTAL)
         checklist = wx.Button(right, label="Preparation Checklist...")
         checklist.SetToolTip("Review preparation reminders and completion summaries.")
-        checklist.Bind(wx.EVT_BUTTON, lambda _event: show_preparation_checklist(
-            self, self.repository.connection, self.service_id,
-        ))
-        self.detail_box.Add(checklist, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+        checklist.Bind(wx.EVT_BUTTON, self.on_checklist)
+        checklist_row.Add(checklist, 0, wx.RIGHT, 8)
+        self.checklist_status = wx.StaticText(right, label="")
+        checklist_row.Add(self.checklist_status, 1, wx.ALIGN_CENTER_VERTICAL)
+        self.detail_box.Add(checklist_row, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
         self.fields = {}
         for key, label, multiline, inline in (
             ("church", "Church", False, True),
@@ -554,6 +565,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             for row in self.repository.weekly.lines(self.service_id)
         ]
         self.refresh_grid()
+        self.refresh_checklist_status()
 
     @staticmethod
     def _select(choice, rows, value):
@@ -572,6 +584,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             "italic": row[12], "indent": row[13], "tab_position": row[14],
             "tab_alignment": row[15], "tab_leader": row[16], "note": row[17],
             "template_line_id": row[18],
+            "condition_type": row[19] or "ALWAYS", "condition_value": row[20],
         }
 
     @staticmethod
@@ -590,7 +603,8 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             "style": row[7], "label_bold": row[8], "value_bold": row[9],
             "italic": row[10], "indent": row[11], "tab_position": row[12],
             "tab_alignment": row[13], "tab_leader": row[14], "note": row[17],
-            "template_line_id": row[0],
+            "template_line_id": row[0], "condition_type": row[15],
+            "condition_value": row[16],
         }
 
     def refresh_grid(self):
@@ -598,6 +612,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             self.working_lines
         )
         self.grid.DeleteAllItems()
+        self.select_hymn_button.Enable(False)
         for index, line in enumerate(self.working_lines):
             item = self.grid.InsertItem(index, str(line["label"]))
             required = bool(line["included"] and line["source"] and not line["value"])
@@ -612,6 +627,26 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
     def selected_line_index(self):
         selected = self.grid.GetFirstSelected()
         return None if selected < 0 else selected
+
+    def on_line_selection(self, _event=None):
+        index = self.selected_line_index()
+        enabled = index is not None and self.working_lines[index]["source"] == "SERVICE_HYMN"
+        self.select_hymn_button.Enable(enabled)
+
+    def on_checklist(self, _event):
+        show_preparation_checklist(self, self.repository.connection, self.service_id)
+        self.refresh_checklist_status()
+
+    def refresh_checklist_status(self):
+        repository = WorshipChecklistRepository(self.repository.connection)
+        rows = repository.items(self.service_id)
+        counts = checklist_counts(rows)
+        automatic = repository.automatic_summary(self.service_id)
+        self.checklist_status.SetLabel(
+            f"{counts['DONE']} done · {counts['NOT_DONE']} not done · "
+            f"{counts['NOT_NEEDED']} not needed\n"
+            f"Participants: {automatic['PARTICIPANTS']} · Hymns: {automatic['HYMNS'].lower()}"
+        )
 
     def on_edit_line(self, _event):
         index = self.selected_line_index()
@@ -715,23 +750,15 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             self.refresh_grid()
 
     def _refresh_conditional_lines(self):
-        template_id = self._choice_value(self.template, self.template_rows)
-        if template_id is None:
-            return
-        conditions = {
-            row[0]: (row[15], row[16])
-            for row in self.repository.templates.lines(template_id)
-        }
         proper_id = self._choice_value(self.fields["proper"], self.proper_rows)
         detail = self.repository.proper_detail(proper_id) if proper_id else None
         season = detail[2] if detail else ""
         communion = self.fields["communion"].GetValue()
         for line in self.working_lines:
-            condition = conditions.get(line.get("template_line_id"))
-            if condition:
-                line["included"] = BulletinOrderGenerator.condition_included(
-                    condition[0], condition[1], communion, season,
-                )
+            line["included"] = BulletinOrderGenerator.condition_included(
+                line.get("condition_type") or "ALWAYS", line.get("condition_value"),
+                communion, season,
+            )
 
     def on_view_proper(self, _event):
         selection = self.fields["proper"].GetSelection()

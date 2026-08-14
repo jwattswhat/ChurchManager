@@ -34,7 +34,7 @@ from weekly_bulletin_order_dialog import show_weekly_bulletin_order
 from worship_service_dialog import show_worship_services
 from worship_checklist import show_checklist_maintenance
 from worship_scheduling import (
-    show_participants, show_schedule_patterns, show_service_participants,
+    show_participants, show_schedule_patterns, show_service_participants, show_worship_roles,
 )
 from sunday_content_dialog import show_announcements, show_prayers, show_sunday_preview
 from report_support import get_today, load_report_config
@@ -362,6 +362,9 @@ def _buttonclick(event):
             return
         case "lblParticipant":
             show_participants(cmfrm.FRAME, context.connection)
+            return
+        case "lblWorshipPositions":
+            show_worship_roles(cmfrm.FRAME, context.connection)
             return
         case "lblPrayers":
             show_prayers(cmfrm.FRAME, context.connection)

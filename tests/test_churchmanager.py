@@ -120,17 +120,18 @@ def load_function_without_importing(module_path: Path, function_name: str, globa
 
 
 class TestWorshipPlanningStructure(unittest.TestCase):
-    def test_deleting_custom_template_removes_its_weekly_orders(self):
+    def test_deleting_custom_template_preserves_its_weekly_orders(self):
         migration = (
-            ROOT / "migrations" / "036_replace_weekly_order_with_template.sql"
+            ROOT / "migrations" / "054_preserve_weekly_order_snapshots.sql"
         ).read_text(encoding="utf-8")
-        self.assertIn("WHERE o.TemplateID IS NULL", migration)
-        self.assertIn("MODIFY COLUMN TemplateID int NOT NULL", migration)
-        self.assertIn("ON DELETE RESTRICT", migration)
+        self.assertIn("MODIFY COLUMN TemplateID int NULL", migration)
+        self.assertIn("TemplateName", migration)
+        self.assertIn("ON DELETE SET NULL", migration)
+        self.assertIn("ConditionType", migration)
         repository = (ROOT / "bulletin_orders.py").read_text(encoding="utf-8")
-        self.assertIn("DELETE l FROM tblServiceBulletinOrderLine", repository)
-        self.assertIn("DELETE FROM tblServiceBulletinOrder WHERE TemplateID=?", repository)
-        self.assertIn("SET u.ServiceBulletinOrderLineID=NULL", repository)
+        delete_method = repository.split("def delete_custom_template", 1)[1].split("def save_line", 1)[0]
+        self.assertNotIn("DELETE FROM tblServiceBulletinOrder WHERE TemplateID", delete_method)
+        self.assertNotIn("DELETE l FROM tblServiceBulletinOrderLine", delete_method)
 
     def test_replacement_template_reuses_exact_service_hymn_selections(self):
         repository = (ROOT / "bulletin_orders.py").read_text(encoding="utf-8")
@@ -988,11 +989,11 @@ class TestChurchManagerForms(unittest.TestCase):
         resource_items = [
             "lblOS", "lblCheckList", "lblPropers", "lblSermon", "lblHymnal",
             "lblHymn", "lblParticipant", "lblSchedule", "lblPrayers",
-            "lblAnnouncement", "lblAttendanceEvent",
+            "lblWorshipPositions", "lblAnnouncement", "lblAttendanceEvent",
         ]
         self.assertEqual(
             sorted(controls[name]["posch"][1] for name in resource_items),
-            list(range(12, 23)),
+            list(range(12, 24)),
         )
         self.assertTrue(all(controls[name]["label"] == controls[name]["label"].strip()
                             for name in resource_items))

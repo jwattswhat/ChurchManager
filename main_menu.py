@@ -29,7 +29,7 @@ FORM_ROUTES = {
 
 SPECIAL_CONTROLS = {
     "lblService", "lblOS", "lblCheckList", "lblWeeklyBulletinOrder", "lblGenerateOS", "lblNotifyParticipants", "lblSundayPrayers",
-    "lblParticipant", "lblSchedule", "lblPrayers", "lblAnnouncement", "lblChoices",
+    "lblParticipant", "lblWorshipPositions", "lblSchedule", "lblPrayers", "lblAnnouncement", "lblChoices",
     "lblAnnouncements", "lblServiceSchedule", "lblReports", "lblReportDesigner", "lblScreenDesigner", "lblBackupDB",
     "lblUsers",
     "lblAccountingSetup",

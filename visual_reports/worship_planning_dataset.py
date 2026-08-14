@@ -52,6 +52,7 @@ WORSHIP_PLANNING_CONTRACT = ReportDatasetContract(
             ReportField("Sequence", "Sequence", "integer"),
             ReportField("Task", "Preparation Item"), ReportField("Status", "Status"),
             ReportField("Note", "Note"),
+            ReportField("CompletionSource", "Completion Source"),
         )),
         ReportCollection("checklist_summary", "Checklist Summary (Optional)", (
             ReportField("Display", "Checklist Summary"),
@@ -152,7 +153,7 @@ class WorshipPlanningDatasetProvider:
             ),
             "checklist": self._placeholder(
                 checklist, Sequence=0, Task="No preparation checklist has been created.",
-                Status="NOT_DONE", Note="",
+                Status="NOT_DONE", Note="", CompletionSource="MANUAL",
             ),
             "checklist_summary": [{
                 "Display": f"{counts['DONE']} done · {counts['NOT_DONE']} not done · {counts['NOT_NEEDED']} not needed",

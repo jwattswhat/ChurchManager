@@ -443,6 +443,36 @@ class TestChurchManagerDatabase(unittest.TestCase):
         self.assertIn("accounting.transactions.create", permissions)
         self.assertNotIn("accounting.transactions.post", permissions)
 
+    def test_weekly_orders_are_independent_condition_aware_snapshots(self):
+        migration = self.query(
+            "SELECT version FROM schema_migrations "
+            "WHERE version='054_preserve_weekly_order_snapshots.sql'"
+        )
+        self.assertEqual(migration, [("054_preserve_weekly_order_snapshots.sql",)])
+        columns = {
+            row[0]: row[1]
+            for row in self.query(
+                "SELECT COLUMN_NAME,IS_NULLABLE FROM information_schema.COLUMNS "
+                "WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tblServiceBulletinOrder' "
+                "AND COLUMN_NAME IN ('TemplateID','TemplateName')"
+            )
+        }
+        self.assertEqual(columns, {"TemplateID": "YES", "TemplateName": "YES"})
+        line_columns = {
+            row[0] for row in self.query(
+                "SELECT COLUMN_NAME FROM information_schema.COLUMNS "
+                "WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tblServiceBulletinOrderLine' "
+                "AND COLUMN_NAME IN ('ConditionType','ConditionValue')"
+            )
+        }
+        self.assertEqual(line_columns, {"ConditionType", "ConditionValue"})
+        delete_rule = self.query(
+            "SELECT DELETE_RULE FROM information_schema.REFERENTIAL_CONSTRAINTS "
+            "WHERE CONSTRAINT_SCHEMA=DATABASE() AND TABLE_NAME='tblServiceBulletinOrder' "
+            "AND CONSTRAINT_NAME='fk_service_bulletin_order_template'"
+        )
+        self.assertEqual(delete_rule, [("SET NULL",)])
+
     def test_sample_accounting_setup_is_complete(self):
         rows = self.query(
             "SELECT o.ID, "
