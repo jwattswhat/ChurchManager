@@ -69,6 +69,12 @@ class WorshipChecklistTests(unittest.TestCase):
         self.assertIn("class ChecklistMaintenanceDialog", source)
         self.assertIn("Create Custom from Selected...", source)
 
+    def test_task_dialog_buttons_belong_to_its_panel(self):
+        source = (ROOT / "worship_checklist.py").read_text()
+        self.assertIn('wx.Button(panel, wx.ID_OK, "OK")', source)
+        self.assertIn('wx.Button(panel, wx.ID_CANCEL, "Cancel")', source)
+        self.assertNotIn("self.CreateSeparatedButtonSizer", source)
+
 
 if __name__ == "__main__":
     unittest.main()

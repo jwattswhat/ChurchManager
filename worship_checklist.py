@@ -437,7 +437,12 @@ class ChecklistTaskDialog(wx.Dialog):
         self.source.SetSelection(next((i for i,row in enumerate(self.SOURCES) if row[1]==source),0)); form.Add(self.source,1,wx.EXPAND)
         form.Add(wx.StaticText(panel,label="Required:"),0,wx.ALIGN_CENTER_VERTICAL)
         self.required=wx.CheckBox(panel,label="Include in overall Ready status"); self.required.SetValue(bool(required)); form.Add(self.required)
-        outer.Add(form,1,wx.EXPAND|wx.ALL,15); outer.Add(self.CreateSeparatedButtonSizer(wx.OK|wx.CANCEL),0,wx.EXPAND|wx.ALL,10)
+        outer.Add(form,1,wx.EXPAND|wx.ALL,15)
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        buttons.AddStretchSpacer()
+        buttons.Add(wx.Button(panel, wx.ID_OK, "OK"), 0, wx.RIGHT, 8)
+        buttons.Add(wx.Button(panel, wx.ID_CANCEL, "Cancel"))
+        outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 10)
         panel.SetSizer(outer)
 
     def values(self):
