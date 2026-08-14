@@ -178,8 +178,11 @@
                         "LastName",
                         "FirstName"
                     ],
-                    "orderby": "LastName,FirstName"
+                    "orderby": "LastName,FirstName",
+                    "allowblank": true,
+                    "blanklabel": "All"
                 },
+                "value": "All",
                 "tooltip": "Select the person."
             },
             "lblHymn": {

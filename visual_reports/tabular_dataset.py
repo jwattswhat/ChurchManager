@@ -102,7 +102,7 @@ class TabularDatasetProvider:
         raise ValueError(f"Report view is not approved: {view}")
 
     def _parameter_filters(self, spec, parameters):
-        field_names = {column.field for column in spec.columns}
+        field_names = {column.field for column in spec.columns} | set(spec.filter_fields)
         filters, values = [], []
         for parameter, field in (("PersonID", "PersonID"), ("HymnID", "HymnID"), ("ProjectID", "ProjectID"), ("ServiceID", "ServiceID")):
             value = parameters.get(parameter)

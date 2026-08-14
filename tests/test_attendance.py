@@ -4,6 +4,7 @@ import unittest
 
 from attendance_dialog import AttendanceRepository
 from visual_reports.report_inventory import REPORTS_BY_CODE
+from visual_reports.tabular_dataset import TabularDatasetProvider
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -105,6 +106,25 @@ class AttendanceTests(unittest.TestCase):
         self.assertIn('"CMAT03", "Attendance - Individual History"', inventory)
         self.assertIn("rpt_individual_attendance", migration)
         self.assertIn("PersonID", migration)
+        self.assertEqual(REPORTS_BY_CODE["CMAT03"].filter_fields, ("PersonID",))
+
+    def test_individual_history_supports_one_person_or_all_people(self):
+        report_form = json.loads(
+            (ROOT / "Forms" / "frmReports.json").read_text(encoding="utf-8")
+        )["frmReportsFORM"]["CONTROLS"]
+        lookup = report_form["PersonID"]["lookupchoices"]
+        self.assertTrue(lookup["allowblank"])
+        self.assertEqual(lookup["blanklabel"], "All")
+        provider = TabularDatasetProvider(object(), None)
+        filters, values = provider._parameter_filters(
+            REPORTS_BY_CODE["CMAT03"], {"PersonID": 27}
+        )
+        self.assertEqual(filters, ["PersonID=?"])
+        self.assertEqual(values, [27])
+        filters, values = provider._parameter_filters(
+            REPORTS_BY_CODE["CMAT03"], {"PersonID": None}
+        )
+        self.assertEqual((filters, values), ([], []))
 
     def test_pastors_attendance_comparison_uses_same_date_in_three_years(self):
         inventory = (ROOT / "visual_reports" / "report_inventory.py").read_text(encoding="utf-8")

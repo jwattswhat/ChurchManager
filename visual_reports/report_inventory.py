@@ -24,6 +24,7 @@ class ReportSpec:
     orientation: str = "portrait"
     dataset_version: int = 1
     row_color_field: str | None = None
+    filter_fields: tuple[str, ...] = ()
 
 
 def c(field, label, width, data_type="text", align="left"):
@@ -65,7 +66,8 @@ SPECS = (
         c("DateTime", "Date and Time", 100, "datetime"), c("LastName", "Last Name", 95),
         c("FirstName", "First Name", 90), c("Description", "Event", 145),
         c("AttendanceType", "Type", 90), c("Communion", "Communion", 70, "boolean"),
-        c("Note", "Note", 130)), "LastName, FirstName, DateTime DESC", 2, "landscape"),
+        c("Note", "Note", 130)), "LastName, FirstName, DateTime DESC", 2, "landscape",
+        filter_fields=("PersonID",)),
     ReportSpec("CMAT04", "Attendance - Pastor's Comparison", "reports.attendance.run", "rpt_pastors_attendance_comparison", (
         c("ReportYear", "Year", 65, "integer"),
         c("FullYearAttendance", "Full-year total", 100, "integer", "right"),
