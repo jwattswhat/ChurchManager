@@ -105,8 +105,12 @@ class WorshipChecklistRepository:
             "WHERE s.ID=? AND r.Active=1", (service_id,),
         ) or (0,)
         filled = self.one(
-            "SELECT COUNT(*) FROM tblServiceRole WHERE ServiceID=? "
-            "AND COALESCE(Status,'')<>'DECLINED'", (service_id,),
+            "SELECT COALESCE(SUM(LEAST(r.RequiredCount,COALESCE(a.AssignedCount,0))),0) "
+            "FROM tblService s JOIN tblWorshipRoleRequirement r "
+            "ON r.BulletinOrderTemplateID=s.BulletinOrderTemplateID AND r.Active=1 "
+            "LEFT JOIN (SELECT WorshipRoleID,COUNT(*) AssignedCount FROM tblServiceRole "
+            "WHERE ServiceID=? AND AssignmentStatus<>'DECLINED' GROUP BY WorshipRoleID) a "
+            "ON a.WorshipRoleID=r.WorshipRoleID WHERE s.ID=?", (service_id, service_id),
         ) or (0,)
         return {
             "HYMNS": "Complete" if hymn[0] and not (hymn[1] or 0) else "Not complete",

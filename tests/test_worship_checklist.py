@@ -28,6 +28,11 @@ class WorshipChecklistTests(unittest.TestCase):
         source = (ROOT / "visual_reports" / "definitions" / "CMWP01.json").read_text()
         self.assertNotIn('"repeatcollection": "checklist"', source)
 
+    def test_participant_summary_uses_current_assignment_status_column(self):
+        source = (ROOT / "worship_checklist.py").read_text()
+        self.assertIn("AssignmentStatus<>'DECLINED'", source)
+        self.assertNotIn("COALESCE(Status", source)
+
 
 if __name__ == "__main__":
     unittest.main()
