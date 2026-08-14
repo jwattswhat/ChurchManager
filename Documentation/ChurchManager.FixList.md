@@ -27,6 +27,19 @@ Items 1 through 3 should be completed before beginning a new major subsystem.
 Items 4 through 7 form the next ministry-development phase. Items 8 through 10
 should not delay a stable ChurchManager release.
 
+### Targeted worship enhancement: hymn stanza selection
+
+- Approved future design: [Hymn stanza selection specification](ChurchManager.HymnStanzaSelection.Specification.md).
+- Allow the planner to record selected stanzas for each hymn occurrence in a
+  weekly Order of Service.
+- Keep stanza selections attached to the individual weekly service line so the
+  same hymn can have different selections in different positions.
+- Include the selection in appropriate planning and bulletin-outline output.
+- Do not infer selections from historical free-form notes.
+- Treat this as a focused worship-planning enhancement, not a new major
+  subsystem; schedule it after the interrupted participant-email work unless a
+  more urgent defect intervenes.
+
 ### 1. User contact information
 
 - Proposed design: [ChurchManager user contact information specification](ChurchManager.UserContact.Specification.md)
