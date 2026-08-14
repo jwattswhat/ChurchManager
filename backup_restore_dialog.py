@@ -11,9 +11,22 @@ from backup_service import BackupError, BackupPreferences
 
 def mariadb_tools_directory(jsform):
     value = jsform.CONFIG.get_Config_Value("Location", "MySQLDump")
-    if not value:
-        raise BackupError("The MariaDB tools folder is not configured.")
-    return value
+    candidates = []
+    if value:
+        candidates.append(Path(value).expanduser())
+    program_files = Path(os.environ.get("ProgramFiles", r"C:\Program Files"))
+    candidates.extend(sorted(program_files.glob("MariaDB */bin"), reverse=True))
+    for candidate in candidates:
+        try:
+            from backup_service import BackupService
+            BackupService._tool(candidate, "mysqldump", "mariadb-dump")
+            BackupService._tool(candidate, "mariadb", "mysql")
+            return str(candidate)
+        except (OSError, BackupError):
+            continue
+    raise BackupError(
+        "MariaDB backup tools were not found. Install MariaDB client tools or correct Location/MySQLDump."
+    )
 
 
 class BackupRestoreDialog(wx.Dialog):

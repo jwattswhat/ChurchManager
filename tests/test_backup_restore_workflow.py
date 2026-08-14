@@ -30,6 +30,11 @@ class BackupRestoreWorkflowTests(unittest.TestCase):
         self.assertIn("--defaults-extra-file=", restore)
         self.assertNotIn('settings["password"]]', restore)
 
+    def test_tools_folder_can_recover_from_stale_configuration(self):
+        source = (ROOT / "backup_restore_dialog.py").read_text()
+        self.assertIn('glob("MariaDB */bin")', source)
+        self.assertIn('"mariadb-dump"', source)
+
 
 if __name__ == "__main__":
     unittest.main()

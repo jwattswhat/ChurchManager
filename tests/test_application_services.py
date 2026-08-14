@@ -27,6 +27,7 @@ class TestBackupService(unittest.TestCase):
             calls.append(command)
             stdout.write(b"backup")
         with tempfile.TemporaryDirectory() as folder:
+            (Path(folder) / "mysqldump.exe").write_bytes(b"")
             prefix = str(Path(folder) / "backup")
             result = BackupService(runner=runner, clock=lambda: FixedClock()).create(
                 {"server": "db", "database": "ChurchDBTest", "user": "church", "password": "secret"},
@@ -75,6 +76,7 @@ class TestBackupService(unittest.TestCase):
             calls.append(command)
             stdout.write(b"backup")
         with tempfile.TemporaryDirectory() as folder:
+            (Path(folder) / "mysqldump.exe").write_bytes(b"")
             result = BackupService(runner=runner, clock=lambda: FixedClock()).create_in_folder(
                 {"server": "db", "database": "ChurchDBTest", "user": "church", "password": "secret"},
                 folder, folder, automatic=True,
@@ -87,6 +89,7 @@ class TestBackupService(unittest.TestCase):
             calls.append(command)
             stdout.write(b"backup")
         with tempfile.TemporaryDirectory() as folder:
+            (Path(folder) / "mysqldump.exe").write_bytes(b"")
             BackupService(runner=runner).create(
                 {"server": "db", "port": 3307, "database": "ChurchDBTest",
                  "user": "church", "password": "secret"},
@@ -94,6 +97,14 @@ class TestBackupService(unittest.TestCase):
             )
             self.assertIn("--port", calls[0])
             self.assertIn("3307", calls[0])
+
+    def test_mariadb_dump_name_is_accepted_when_mysqldump_is_absent(self):
+        with tempfile.TemporaryDirectory() as folder:
+            executable = Path(folder) / "mariadb-dump.exe"
+            executable.write_bytes(b"")
+            self.assertEqual(
+                BackupService._tool(folder, "mysqldump", "mariadb-dump"), executable
+            )
 
     def test_prune_recognizes_older_duplicated_automatic_names(self):
         with tempfile.TemporaryDirectory() as folder:

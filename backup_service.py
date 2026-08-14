@@ -42,7 +42,7 @@ class BackupService:
                 option_path = Path(option_file.name)
             os.chmod(option_path, 0o600)
             command = [
-                str(Path(mysqldump_directory) / "mysqldump"),
+                str(self._tool(mysqldump_directory, "mysqldump", "mariadb-dump")),
                 "--defaults-extra-file={}".format(option_path),
                 "--host", settings["server"],
             ]
@@ -60,7 +60,7 @@ class BackupService:
                 destination.write("-- Database: {}\n".format(settings["database"]).encode("utf-8"))
                 shutil.copyfileobj(dump_source, destination)
         except (OSError, subprocess.SubprocessError) as error:
-            raise BackupError("The database backup could not be created.") from error
+            raise BackupError("The database backup could not be created: {}".format(error)) from error
         finally:
             if option_path:
                 option_path.unlink(missing_ok=True)
@@ -73,6 +73,19 @@ class BackupService:
         label = "Automatic" if automatic else "Manual"
         prefix = folder / label
         return self.create(settings, mysqldump_directory, prefix)
+
+    @staticmethod
+    def _tool(directory, *names):
+        directory = Path(directory)
+        for name in names:
+            for candidate in (directory / name, directory / (name + ".exe")):
+                if candidate.is_file():
+                    return candidate
+        raise FileNotFoundError(
+            "MariaDB tool not found in {} (expected {}).".format(
+                directory, " or ".join(names)
+            )
+        )
 
     @staticmethod
     def prune_automatic(folder, database, keep=30):
@@ -117,9 +130,7 @@ class BackupService:
                 option_file.write("[client]\nuser={}\npassword={}\n".format(settings["user"], settings["password"]))
                 option_path = Path(option_file.name)
             os.chmod(option_path, 0o600)
-            executable = Path(mariadb_directory) / "mariadb"
-            if not executable.with_suffix(".exe").exists() and not executable.exists():
-                executable = Path(mariadb_directory) / "mysql"
+            executable = self._tool(mariadb_directory, "mariadb", "mysql")
             command = [str(executable), "--defaults-extra-file={}".format(option_path),
                        "--host", settings["server"]]
             if settings.get("port"):
