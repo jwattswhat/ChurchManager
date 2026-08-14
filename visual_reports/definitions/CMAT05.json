@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMAT05",
-      "title": "Member Attendance Follow-up",
+      "title": "Attendance - Member Follow-up",
       "dataset": "churchmanager.cmat05",
       "datasetversion": 1,
       "pagesize": "letter",

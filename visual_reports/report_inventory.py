@@ -46,14 +46,14 @@ SPECS = (
         c("Report", "Code", 75), c("Title", "Report", 225), c("Params", "Parameters", 160),
         c("Note", "Notes", 155)), "Title", 1, "landscape"),
 
-    ReportSpec("CMAT01", "Attendance Event Listing", "reports.attendance.run", "rpt_attendance_event", (
+    ReportSpec("CMAT01", "Attendance - Event Listing", "reports.attendance.run", "rpt_attendance_event", (
         c("DateTime", "Date and Time", 95, "datetime"), c("Description", "Event", 155),
         c("AttendanceType", "Type", 80), c("HandCount", "Total", 55, "integer", "right"),
         c("KnownAttendance", "Known", 55, "integer", "right"),
         c("UnnamedAttendance", "Unnamed", 60, "integer", "right"),
         c("HandCountCommunion", "Communion", 65, "integer", "right")),
         "DateTime DESC", 2, "landscape", 2),
-    ReportSpec("CMAT02", "Weekly Attendance Summary", "reports.attendance.run", "rpt_attendance_weekly", (
+    ReportSpec("CMAT02", "Attendance - Weekly Summary", "reports.attendance.run", "rpt_attendance_weekly", (
         c("DateTime", "Week beginning", 105, "date"), c("AttendanceType", "Type", 120),
         c("EventCount", "Events", 60, "integer", "right"),
         c("Attendance", "Total", 70, "integer", "right"),
@@ -61,12 +61,12 @@ SPECS = (
         c("UnnamedAttendance", "Unnamed", 75, "integer", "right"),
         c("Communion", "Communion", 75, "integer", "right")),
         "DateTime DESC, AttendanceType", 2, dataset_version=2),
-    ReportSpec("CMAT03", "Individual Attendance History", "reports.attendance.run", "rpt_individual_attendance", (
+    ReportSpec("CMAT03", "Attendance - Individual History", "reports.attendance.run", "rpt_individual_attendance", (
         c("DateTime", "Date and Time", 100, "datetime"), c("LastName", "Last Name", 95),
         c("FirstName", "First Name", 90), c("Description", "Event", 145),
         c("AttendanceType", "Type", 90), c("Communion", "Communion", 70, "boolean"),
         c("Note", "Note", 130)), "LastName, FirstName, DateTime DESC", 2, "landscape"),
-    ReportSpec("CMAT04", "Pastor's Attendance Comparison", "reports.attendance.run", "rpt_pastors_attendance_comparison", (
+    ReportSpec("CMAT04", "Attendance - Pastor's Comparison", "reports.attendance.run", "rpt_pastors_attendance_comparison", (
         c("ReportYear", "Year", 65, "integer"),
         c("FullYearAttendance", "Full-year total", 100, "integer", "right"),
         c("ThroughDateAttendance", "Total through today", 115, "integer", "right"),
@@ -74,7 +74,7 @@ SPECS = (
         c("AverageThroughDate", "Average", 80, "decimal", "right"),
         c("CommunionThroughDate", "Communion", 90, "integer", "right")),
         "ReportYear DESC", 2),
-    ReportSpec("CMAT05", "Member Attendance Follow-up", "reports.attendance.run", "rpt_member_attendance_followup", (
+    ReportSpec("CMAT05", "Attendance - Member Follow-up", "reports.attendance.run", "rpt_member_attendance_followup", (
         c("LastName", "Last Name", 120), c("FirstName", "First Name", 110),
         c("LastAttended", "Last attended", 100, "date"),
         c("MissedWeeks", "Consecutive weeks missed", 130, "integer", "right"),

@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMAT02",
-      "title": "Weekly Attendance Summary",
+      "title": "Attendance - Weekly Summary",
       "dataset": "churchmanager.cmat02",
       "datasetversion": 2,
       "pagesize": "letter",

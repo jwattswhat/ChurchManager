@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMAT01",
-      "title": "Attendance Event Listing",
+      "title": "Attendance - Event Listing",
       "dataset": "churchmanager.cmat01",
       "datasetversion": 2,
       "pagesize": "letter",

@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMAT04",
-      "title": "Pastor's Attendance Comparison",
+      "title": "Attendance - Pastor's Comparison",
       "dataset": "churchmanager.cmat04",
       "datasetversion": 1,
       "pagesize": "letter",

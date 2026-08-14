@@ -66,8 +66,8 @@ class AttendanceTests(unittest.TestCase):
         migration = (ROOT / "migrations" / "057_improve_attendance_reports.sql").read_text(
             encoding="utf-8"
         )
-        self.assertIn('"CMAT01", "Attendance Event Listing"', inventory)
-        self.assertIn('"CMAT02", "Weekly Attendance Summary"', inventory)
+        self.assertIn('"CMAT01", "Attendance - Event Listing"', inventory)
+        self.assertIn('"CMAT02", "Attendance - Weekly Summary"', inventory)
         self.assertIn("rpt_attendance_weekly", inventory)
         self.assertIn("KnownAttendance", migration)
         self.assertIn("UnnamedAttendance", migration)
@@ -102,7 +102,7 @@ class AttendanceTests(unittest.TestCase):
         migration = (ROOT / "migrations" / "058_add_individual_attendance_report.sql").read_text(
             encoding="utf-8"
         )
-        self.assertIn('"CMAT03", "Individual Attendance History"', inventory)
+        self.assertIn('"CMAT03", "Attendance - Individual History"', inventory)
         self.assertIn("rpt_individual_attendance", migration)
         self.assertIn("PersonID", migration)
 
@@ -111,7 +111,7 @@ class AttendanceTests(unittest.TestCase):
         migration = (
             ROOT / "migrations" / "059_add_pastors_attendance_comparison.sql"
         ).read_text(encoding="utf-8")
-        self.assertIn('"CMAT04", "Pastor\'s Attendance Comparison"', inventory)
+        self.assertIn('"CMAT04", "Attendance - Pastor\'s Comparison"', inventory)
         self.assertIn("YEAR(CURDATE())-1", migration)
         self.assertIn("YEAR(CURDATE())-2", migration)
         self.assertIn("FullYearAttendance", migration)
@@ -123,7 +123,7 @@ class AttendanceTests(unittest.TestCase):
             ROOT / "migrations" / "060_add_member_attendance_followup.sql"
         ).read_text(encoding="utf-8")
         report_form = (ROOT / "Forms" / "frmReports.json").read_text(encoding="utf-8")
-        self.assertIn('"CMAT05", "Member Attendance Follow-up"', inventory)
+        self.assertIn('"CMAT05", "Attendance - Member Follow-up"', inventory)
         self.assertIn('row_color_field="FlagColor"', inventory)
         self.assertIn("MissedWeeks", migration)
         self.assertIn('"MissedWeeks"', report_form)
