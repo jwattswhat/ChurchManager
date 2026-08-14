@@ -17,6 +17,14 @@ def checklist_counts(rows):
     return counts
 
 
+def overall_checklist_status(rows, manually_confirmed=False):
+    """Return the plain-language state shown at the top of the checklist."""
+    if manually_confirmed:
+        return "Manually confirmed complete"
+    unfinished_required = any(bool(row[4]) and row[6] == "NOT_DONE" for row in rows)
+    return "Needs attention" if unfinished_required else "Ready"
+
+
 class WorshipChecklistRepository:
     def __init__(self, connection):
         self.connection = portable_connection(connection)
@@ -149,6 +157,12 @@ class PreparationChecklistDialog(wx.Dialog):
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
         self.heading = wx.StaticText(panel); self.heading.SetFont(self.heading.GetFont().Bold())
         outer.Add(self.heading, 0, wx.ALL, 10)
+        self.overall_status = wx.StaticText(panel)
+        status_font = self.overall_status.GetFont()
+        status_font.SetPointSize(status_font.GetPointSize() + 2)
+        status_font.SetWeight(wx.FONTWEIGHT_BOLD)
+        self.overall_status.SetFont(status_font)
+        outer.Add(self.overall_status, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
         self.summary = wx.StaticText(panel); self.summary.SetForegroundColour(wx.Colour(0, 90, 190))
         outer.Add(self.summary, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
         self.automatic = wx.StaticText(panel)
@@ -183,6 +197,11 @@ class PreparationChecklistDialog(wx.Dialog):
         self.rows=effective
         self.heading.SetLabel(f"{service[3] or 'Worship Service'} — {service[2]}")
         counts=checklist_counts(self.rows)
+        status = overall_checklist_status(self.rows, bool(service[4]))
+        self.overall_status.SetLabel("Overall status: " + status)
+        self.overall_status.SetForegroundColour(
+            wx.Colour(0, 120, 0) if status != "Needs attention" else wx.Colour(190, 45, 35)
+        )
         prefix="Checklist complete — manually confirmed.  " if service[4] else ""
         self.summary.SetLabel(prefix + f"{counts['DONE']} done · {counts['NOT_DONE']} not done · {counts['NOT_NEEDED']} not needed")
         self.automatic.SetLabel(f"Participants: {auto['PARTICIPANTS']}     Hymns: {auto['HYMNS']}     Order: {auto['ORDER']}")

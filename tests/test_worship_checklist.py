@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from worship_checklist import checklist_counts
+from worship_checklist import checklist_counts, overall_checklist_status
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,6 +37,16 @@ class WorshipChecklistTests(unittest.TestCase):
         source = (ROOT / "worship_checklist.py").read_text()
         self.assertIn("close.Bind(wx.EVT_BUTTON", source)
         self.assertIn("self.EndModal(wx.ID_CLOSE)", source)
+
+    def test_overall_status_respects_required_items_and_override(self):
+        unfinished = [(1, 1, "Required", "MANUAL", 1, "", "NOT_DONE")]
+        optional = [(1, 1, "Optional", "MANUAL", 0, "", "NOT_DONE")]
+        self.assertEqual(overall_checklist_status(unfinished), "Needs attention")
+        self.assertEqual(overall_checklist_status(optional), "Ready")
+        self.assertEqual(
+            overall_checklist_status(unfinished, manually_confirmed=True),
+            "Manually confirmed complete",
+        )
 
 
 if __name__ == "__main__":
