@@ -1,0 +1,35 @@
+import unittest
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class BackupRestoreWorkflowTests(unittest.TestCase):
+    def test_restore_permission_is_sensitive_and_master_only_by_default(self):
+        migration = (ROOT / "migrations" / "051_add_database_restore_permission.sql").read_text()
+        self.assertIn("application.database.restore", migration)
+        self.assertIn("Master Administrator", migration)
+
+    def test_restore_requires_confirmation_and_pre_restore_backup(self):
+        dialog = (ROOT / "backup_restore_dialog.py").read_text()
+        service = (ROOT / "backup_service.py").read_text()
+        self.assertIn('authorization.require("application.database.restore"', dialog)
+        self.assertIn("Type the active database name", dialog)
+        self.assertIn("safety = self.create_in_folder", service)
+        self.assertIn("The pre-restore backup was preserved", service)
+
+    def test_clean_exit_backup_is_once_per_day(self):
+        source = (ROOT / "backup_restore_dialog.py").read_text()
+        self.assertIn('values["last_automatic_date"]==current', source)
+        self.assertIn('values["last_automatic_date"]=current', source)
+
+    def test_restore_does_not_put_password_on_command_line(self):
+        source = (ROOT / "backup_service.py").read_text()
+        restore = source.split("def restore", 1)[1]
+        self.assertIn("--defaults-extra-file=", restore)
+        self.assertNotIn('settings["password"]]', restore)
+
+
+if __name__ == "__main__":
+    unittest.main()

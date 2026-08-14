@@ -3,7 +3,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from backup_service import BackupService
+from backup_service import BackupError, BackupPreferences, BackupService
 from process_service import ProcessService
 from report_service import ChurchManagerReportService
 
@@ -34,6 +34,35 @@ class TestBackupService(unittest.TestCase):
             )
             self.assertTrue(result.path.exists())
             self.assertNotIn("secret", " ".join(calls[0]))
+            self.assertEqual(BackupService.inspect_dump(result.path), "ChurchDBTest")
+
+    def test_unrecognized_dump_is_rejected(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "unknown.sql"
+            path.write_text("DROP DATABASE ChurchDB;", encoding="utf-8")
+            with self.assertRaises(BackupError):
+                BackupService.inspect_dump(path)
+
+    def test_backup_preferences_survive_database_restore(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "preferences.json"
+            store = BackupPreferences(path)
+            values = store.load()
+            values.update(folder="D:/Church Backups", automatic_on_exit=False,
+                          last_automatic_date="2026-08-14")
+            store.save(values)
+            self.assertEqual(store.load(), values)
+
+    def test_only_automatic_backups_are_pruned(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for number in range(4):
+                (root / f"Automatic.ChurchDBTest.Backup.{number}.SQL").write_text("backup")
+            manual = root / "Manual.ChurchDBTest.Backup.keep.SQL"
+            manual.write_text("manual")
+            BackupService.prune_automatic(root, "ChurchDBTest", keep=2)
+            self.assertEqual(len(list(root.glob("Automatic.*.SQL"))), 2)
+            self.assertTrue(manual.exists())
 
 
 class TestReportService(unittest.TestCase):

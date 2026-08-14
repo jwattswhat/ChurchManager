@@ -6,6 +6,8 @@
     
 """
 import os
+import subprocess
+import sys
 from pathlib import Path
 from datetime import datetime, timezone
 import wx
@@ -19,6 +21,7 @@ from login_dialog import change_own_password
 from authentication import MariaDBUserRepository
 from permission_catalog import MAIN_MENU_PERMISSIONS
 from backup_service import BackupError, BackupService
+from backup_restore_dialog import show_backup_restore, run_automatic_exit_backup
 from process_service import ProcessService
 from report_service import ChurchManagerReportService
 from report_access import ReportAccessService
@@ -654,7 +657,8 @@ def _buttonclick(event):
             )
             return
         case "lblBackupDB":
-            _runBackupDB()
+            show_backup_restore(cmfrm.FRAME, context, JSForm)
+            return
         case "lblUsers":
             show_user_administration(
                 cmfrm.FRAME, context.connection, context.session, context.authorization,
@@ -777,6 +781,23 @@ def main(argv=None):
         ),
     )
 
+    closing = {"started": False}
+    def on_main_close(event):
+        if closing["started"]:
+            event.Skip(); return
+        closing["started"] = True
+        if not getattr(context, "skip_auto_backup", False):
+            try:
+                run_automatic_exit_backup(context, JSForm)
+            except Exception as error:
+                wx.MessageBox(
+                    "The automatic database backup could not be created.\n\n{}\n\n"
+                    "ChurchManager will still close.".format(error),
+                    "Automatic Backup Failed", wx.OK | wx.ICON_WARNING, cmfrm.FRAME,
+                )
+        event.Skip()
+    cmfrm.FRAME.Bind(wx.EVT_CLOSE, on_main_close)
+
     for control_name in MENU_CONTROLS:
         if control_name in cmfrm.CONTROLID:
             cmfrm.CONTROLID[control_name].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
@@ -792,6 +813,17 @@ def main(argv=None):
 
     cmfrm.show()
     app.MainLoop()
+    restart = bool(getattr(context, "restart_requested", False))
+    try:
+        ChurchDB.DBConnection.close(); ChurchDB.JSConnection.close()
+    except Exception:
+        pass
+    if restart:
+        single_instance.release()
+        command = [sys.executable, str(Path(__file__).resolve())]
+        if context.test_mode:
+            command.append("--test")
+        subprocess.Popen(command)
 
 
 if __name__ == "__main__":
