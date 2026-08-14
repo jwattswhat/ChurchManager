@@ -7,9 +7,13 @@ import wx
 import JSForm
 
 import fnCMargParse
+from development_boundary import assert_development_isolation
 from authorization import ChurchManagerAuthorizationPolicy
 from churchmanager_mode import load_config, resolve_database
 from login_dialog import authenticate_user
+
+
+assert_development_isolation(JSForm)
 
 
 @dataclass

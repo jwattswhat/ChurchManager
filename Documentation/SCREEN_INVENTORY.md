@@ -2,8 +2,8 @@
 
 Last reviewed: August 14, 2026
 
-This is the maintained inventory of user-facing screens in the frozen Legacy
-application, JSForm, and the current ChurchManager application. Update this
+This is the maintained inventory of user-facing screens in the Frozen
+ChurchManager application, JSForm, and the current development application. Update this
 table whenever a screen is added, replaced, retired, or changes ownership.
 
 Status meanings:
@@ -11,16 +11,16 @@ Status meanings:
 - **Active**: reachable in the current application.
 - **Supporting**: opened from another active screen.
 - **Removed**: obsolete development definition was deleted after dependency review.
-- **Frozen**: retained only in the independent Legacy application.
+- **Frozen**: retained only in the independent Frozen ChurchManager application.
 - **Verify visually**: structurally tested, but awaiting the user's current visual check.
 
 ## Current and removed development JSON screens
 
 Active entries are ChurchManager definitions rendered by JSForm. Removed rows
-are retained here as cleanup history; their frozen Legacy counterparts were not
+are retained here as cleanup history; their Frozen application counterparts were not
 changed.
 
-| Screen | Development ownership | Legacy | Status | Why ChurchManager-only? |
+| Screen | Development ownership | Frozen application | Status | Why ChurchManager-only? |
 |---|---|---|---|---|
 | `frmMain` | ChurchManager + JSForm | Frozen counterpart | Active; visually approved | Not CM-only; JSForm renders the ChurchManager menu definition. |
 | `frmChurch` | ChurchManager + JSForm | Frozen counterpart | Active | Not CM-only; ordinary database form with CM-specific linked records. |
@@ -79,26 +79,28 @@ changed.
 | `frmService` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; replaced by unified Worship Service editor. |
 | `frmServiceSchedule` | ChurchManager + JSForm | Frozen counterpart | Removed from development | Not CM-only; replaced by native Service Participants. |
 
-## Legacy-only JSON screens
+## Frozen-application-only JSON screens
 
-These definitions exist only in the frozen Legacy application. Their current
+These definitions exist only in the Frozen ChurchManager application. Their current
 development replacements are shown for reference.
 
-| Legacy screen | Ownership | Status | Current replacement | Why ChurchManager-only? |
+| Frozen screen | Ownership | Status | Current replacement | Why ChurchManager-only? |
 |---|---|---|---|---|
-| `frmAnnouncement` | Legacy ChurchManager + frozen JSForm | Frozen | Native Announcements manager | Replacement is CM-only because recurrence rules, previews, and weekly applicability require workflow logic. |
-| `frmPrayer` | Legacy ChurchManager + frozen JSForm | Frozen | Native Prayers manager | Replacement is CM-only for the same scheduling and preview requirements. |
-| `frmParticipant` | Legacy ChurchManager + frozen JSForm | Frozen | Native Participants manager | Replacement is CM-only because member/nonmember identity and role rules span several tables. |
-| `frmOS` | Legacy ChurchManager + frozen JSForm | Frozen | Native Bulletin Order Templates | Replacement is CM-only because ordered lines, template copying, requirements, and protected starters are transactional. |
-| `frmOSList` | Legacy ChurchManager + frozen JSForm | Frozen | Native Bulletin Order Templates | Replacement is CM-only because it coordinates templates and dependent weekly orders. |
+| `frmAnnouncement` | Frozen ChurchManager + frozen JSForm | Frozen | Native Announcements manager | Replacement is CM-only because recurrence rules, previews, and weekly applicability require workflow logic. |
+| `frmPrayer` | Frozen ChurchManager + frozen JSForm | Frozen | Native Prayers manager | Replacement is CM-only for the same scheduling and preview requirements. |
+| `frmParticipant` | Frozen ChurchManager + frozen JSForm | Frozen | Native Participants manager | Replacement is CM-only because member/nonmember identity and role rules span several tables. |
+| `frmOS` | Frozen ChurchManager + frozen JSForm | Frozen | Native Bulletin Order Templates | Replacement is CM-only because ordered lines, template copying, requirements, and protected starters are transactional. |
+| `frmOSList` | Frozen ChurchManager + frozen JSForm | Frozen | Native Bulletin Order Templates | Replacement is CM-only because it coordinates templates and dependent weekly orders. |
 
 ## ChurchManager-only workflow screens
 
 These are handwritten wxPython screens. JSForm still supplies shared database
 and application infrastructure where appropriate, but it does not construct
-these screen layouts.
+these screen layouts. In the replacement column, **Legacy** means the obsolete
+JSForm-era screen or behavior in development; it does not mean the separate
+Frozen ChurchManager application.
 
-| Screen or screen family | Legacy | Status | Why ChurchManager-only? |
+| Screen or screen family | Replaces old JSForm screen | Status | Why ChurchManager-only? |
 |---|---|---|---|
 | Worship Services list | None | Active | Fast service picker, protected deletion, weekly-order status, and creation/discard workflow. |
 | Unified Worship Service editor | Legacy `frmService` | Active | Coordinates service fields, template application, Propers, hymns, participants, checklist, duplicate checks, and one transactional save. |
@@ -171,6 +173,6 @@ When changing a screen:
 1. Update its status and ownership here.
 2. Explain why any new handwritten ChurchManager-only screen cannot reasonably
    be expressed as a reusable JSForm capability.
-3. Never remove or alter a frozen Legacy screen as part of development cleanup.
+3. Never remove or alter a Frozen application screen as part of development cleanup.
 4. Remove obsolete definitions from development only after checking their dependencies.
 5. Distinguish automated structural validation from user-confirmed visual QA.
