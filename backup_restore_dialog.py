@@ -29,6 +29,18 @@ def mariadb_tools_directory(jsform):
     )
 
 
+def close_database_connections(context):
+    """Release ChurchManager's database sessions before replacing its database."""
+    for name in ("DBConnection", "JSConnection"):
+        connection = getattr(context.database, name, None)
+        if connection is None:
+            continue
+        try:
+            connection.close()
+        except Exception:
+            pass
+
+
 class BackupRestoreDialog(wx.Dialog):
     def __init__(self, parent, context, jsform):
         super().__init__(parent, title="ChurchManager Backup and Restore", size=(720, 430),
@@ -104,6 +116,8 @@ class BackupRestoreDialog(wx.Dialog):
         finally: prompt.Destroy()
         if wx.MessageBox("Final warning: restore the selected backup now?","Confirm Restore",wx.YES_NO|wx.NO_DEFAULT|wx.ICON_WARNING,self)!=wx.YES: return
         self.save_preferences()
+        close_database_connections(self.context)
+        self.context.skip_auto_backup = True
         busy = wx.BusyInfo(
             "Restoring the ChurchManager database...\n\nPlease wait. Do not close the program.",
             parent=self,
@@ -125,7 +139,13 @@ class BackupRestoreDialog(wx.Dialog):
         except Exception as error:
             del busy
             busy = None
-            wx.MessageBox(str(error),"Restore Failed",wx.OK|wx.ICON_ERROR,self)
+            self.context.restart_requested = True
+            wx.MessageBox(
+                "{}\n\nChurchManager must restart because its database connections were closed.".format(error),
+                "Restore Failed", wx.OK|wx.ICON_ERROR, self,
+            )
+            self.EndModal(wx.ID_CANCEL)
+            wx.CallAfter(self.GetParent().Close)
         finally:
             if busy is not None:
                 del busy

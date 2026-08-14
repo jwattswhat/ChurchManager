@@ -41,6 +41,14 @@ class BackupRestoreWorkflowTests(unittest.TestCase):
         self.assertIn("Do not close the program", source)
         self.assertIn("wx.BusyInfo", source)
 
+    def test_restore_releases_live_connections_before_import(self):
+        source = (ROOT / "backup_restore_dialog.py").read_text()
+        close_position = source.index("close_database_connections(self.context)")
+        restore_position = source.index("self.context.services.backups.restore(")
+        self.assertLess(close_position, restore_position)
+        self.assertIn('("DBConnection", "JSConnection")', source)
+        self.assertIn("must restart because its database connections were closed", source)
+
 
 if __name__ == "__main__":
     unittest.main()
