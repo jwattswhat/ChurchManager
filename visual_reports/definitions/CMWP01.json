@@ -60,8 +60,9 @@
         {"name": "Reference", "label": "Scripture reference", "collection": "readings", "field": "Reference", "width": 390}
       ]},
       "Hymns": {"type": "table", "band": "HymnDetail", "position": [0, 0], "size": [540, 34], "repeatcollection": "hymns", "columns": [
-        {"name": "UsedAs", "label": "HYMNS", "collection": "hymns", "field": "UsedAs", "width": 150},
-        {"name": "Hymn", "label": "Hymn number and title", "collection": "hymns", "field": "Hymn", "width": 390}
+        {"name": "UsedAs", "label": "HYMNS", "collection": "hymns", "field": "UsedAs", "width": 140},
+        {"name": "Title", "label": "Title", "collection": "hymns", "field": "Title", "width": 270},
+        {"name": "ReferenceText", "label": "Reference", "collection": "hymns", "field": "ReferenceText", "width": 130}
       ]},
       "Participants": {"type": "table", "band": "ParticipantDetail", "position": [0, 0], "size": [540, 34], "repeatcollection": "participants", "columns": [
         {"name": "Role", "label": "PARTICIPANTS", "collection": "participants", "field": "Role", "width": 150},

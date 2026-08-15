@@ -501,7 +501,10 @@ class TestChurchManagerDatabase(unittest.TestCase):
             "JOIN tblHymn hymn_record ON hymn_record.ID=hymn_usage.HymnID "
             "WHERE weekly_line.ValueSource='SERVICE_HYMN' AND "
             "(COALESCE(weekly_line.WeeklyValue,'')<>COALESCE(hymn_record.Title,'') OR "
-            "COALESCE(weekly_line.ReferenceText,'')<>COALESCE(hymn_record.Hymn,''))"
+            "COALESCE(weekly_line.ReferenceText,'')<>CONCAT(COALESCE(hymn_record.Hymn,''),"
+            "CASE WHEN hymn_usage.Stanzas IS NULL OR hymn_usage.Stanzas='' THEN '' "
+            "WHEN hymn_usage.Stanzas REGEXP '^[0-9]+$' THEN CONCAT(', st. ',hymn_usage.Stanzas) "
+            "ELSE CONCAT(', sts. ',REPLACE(hymn_usage.Stanzas,'-','–')) END))"
         )[0][0]
         self.assertEqual(mismatches, 0)
 

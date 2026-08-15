@@ -3,8 +3,8 @@ import unittest
 
 from sunday_content_rules import (
     ANNUAL_FIRST_SUNDAY, EVERY_SUNDAY, annual_date_rule, describe_rule,
-    is_active, matches_rule, monthly_rule, occurs_in_service_week, one_time_rule,
-    service_week,
+    is_active, matches_rule, monthly_rule, next_occurrences,
+    occurs_in_service_week, one_time_rule, parse_schedule, service_week,
 )
 
 
@@ -34,6 +34,60 @@ class SundayContentRuleTests(unittest.TestCase):
         self.assertTrue(is_active(rule, date(2026, 12, 25)))
         self.assertFalse(is_active(EVERY_SUNDAY, date(2026, 8, 16), end_date=date(2026, 8, 15)))
 
+    def test_controlled_natural_language_is_canonicalized(self):
+        text, rule = parse_schedule(" first and third sindays of the month ")
+        self.assertEqual(text, "First and third Sundays of each month")
+        self.assertEqual(rule, "RRULE:FREQ=MONTHLY;BYDAY=1SU,3SU")
+        self.assertEqual(describe_rule(rule), text)
+
+    def test_fixed_holidays_are_supported(self):
+        for phrase, expected, occurrence in (
+            ("Every Christmas Eve", "Every Christmas Eve", date(2026, 12, 24)),
+            ("Each Christmas Day", "Every Christmas Day", date(2026, 12, 25)),
+            ("Annually on New Year's Day", "Every New Year's Day", date(2027, 1, 1)),
+            ("Every New Year's Eve", "Every New Year's Eve", date(2026, 12, 31)),
+        ):
+            text, rule = parse_schedule(phrase)
+            self.assertEqual(text, expected)
+            self.assertTrue(matches_rule(rule, occurrence))
+
+    def test_each_and_every_are_interchangeable(self):
+        for each, every in (
+            ("Each Sunday", "Every Sunday"),
+            ("Each Christmas Eve", "Every Christmas Eve"),
+            ("Each year on October 1", "Every year on October 1"),
+        ):
+            self.assertEqual(parse_schedule(each), parse_schedule(every))
+
+    def test_first_sunday_strictly_after_fixed_date(self):
+        text, rule = parse_schedule("The first Sunday after December 1")
+        self.assertEqual(text, "First Sunday after December 1")
+        self.assertTrue(matches_rule(rule, date(2026, 12, 6)))
+        self.assertFalse(matches_rule(rule, date(2024, 12, 1)))
+        self.assertTrue(matches_rule(rule, date(2024, 12, 8)))
+
+    def test_first_sunday_after_fourth_of_july_aliases(self):
+        expected = parse_schedule("First Sunday after the Fourth of July")
+        self.assertEqual(expected[0], "First Sunday after the Fourth of July")
+        self.assertEqual(parse_schedule("First Sunday after 4th of July"), expected)
+        self.assertEqual(parse_schedule("First Sunday after Independence Day"), expected)
+        self.assertTrue(matches_rule(expected[1], date(2026, 7, 5)))
+        self.assertFalse(matches_rule(expected[1], date(2027, 7, 4)))
+        self.assertTrue(matches_rule(expected[1], date(2027, 7, 11)))
+
+    def test_movable_church_dates_are_rejected(self):
+        for phrase in (
+            "First Sunday of Pentecost", "Second Sunday in Advent", "Easter Day",
+            "Ash Wednesday", "Palm Sunday",
+        ):
+            with self.assertRaisesRegex(ValueError, "movable-feast"):
+                parse_schedule(phrase)
+
+    def test_one_time_phrase_and_next_occurrences(self):
+        text, rule = parse_schedule("Once on December 24, 2026")
+        self.assertEqual(text, "Once on December 24, 2026")
+        self.assertEqual(next_occurrences(rule, date(2026, 1, 1)), [date(2026, 12, 24)])
+
     def test_service_week_is_sunday_through_saturday(self):
         self.assertEqual(service_week(date(2026, 10, 1)), (date(2026, 9, 27), date(2026, 10, 3)))
 
@@ -62,7 +116,9 @@ class SundayContentRuleTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         dialog = (root / "sunday_content_dialog.py").read_text(encoding="utf-8")
         menu = (root / "main_menu.py").read_text(encoding="utf-8")
-        self.assertIn("class ScheduleRuleDialog", dialog)
+        self.assertIn("parse_schedule", dialog)
+        self.assertNotIn("class ScheduleRuleDialog", dialog)
+        self.assertNotIn("First Sunday\", \"Second Sunday", dialog)
         self.assertIn("class SundayContentPreviewDialog", dialog)
         self.assertIn('"lblPrayers", "lblAnnouncement"', menu)
 
@@ -90,6 +146,16 @@ class SundayContentRuleTests(unittest.TestCase):
         source = (root / "sunday_content_dialog.py").read_text(encoding="utf-8")
         self.assertIn('field = "PrayerCategory" if kind == "prayer" else "AnnouncementCategory"', source)
         self.assertNotIn("Electronic display only", source)
+
+    def test_standard_schedule_migration_adds_text_and_converts_rules(self):
+        from pathlib import Path
+        migration = (Path(__file__).resolve().parents[1] / "migrations" /
+                     "069_standardize_natural_language_schedules.sql").read_text(encoding="utf-8")
+        self.assertIn("ScheduleText", migration)
+        self.assertIn("RRULE:FREQ=WEEKLY;BYDAY=SU", migration)
+        self.assertIn("RDATE:", migration)
+        self.assertIn("rpt_sunday_prayer", migration)
+        self.assertIn("rpt_sunday_announcement", migration)
 
     def test_choice_cleanup_removes_legacy_rows_and_adds_active_lists(self):
         from pathlib import Path

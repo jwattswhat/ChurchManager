@@ -5,6 +5,10 @@ from __future__ import annotations
 import wx
 
 from bulletin_orders import portable_connection
+from hymn_stanzas import (
+    StanzaSelectionError, format_hymn_reference, format_stanza_notation,
+    normalize_stanzas,
+)
 
 
 def match_suggestions_to_slots(slots, suggestions):
@@ -59,7 +63,8 @@ class WeeklyWorshipPlanRepository:
         cursor = self.connection.cursor()
         try:
             cursor.execute(
-                "SELECT l.ID,l.ValueKey,COALESCE(h.Hymn,''),COALESCE(h.Title,''),u.HymnID "
+                "SELECT l.ID,l.ValueKey,COALESCE(h.Hymn,''),COALESCE(h.Title,''),u.HymnID,"
+                "u.Stanzas "
                 "FROM tblServiceBulletinOrderLine l "
                 "LEFT JOIN tblHymnUsage u ON u.ServiceBulletinOrderLineID=l.ID "
                 "LEFT JOIN tblHymn h ON h.ID=u.HymnID "
@@ -111,27 +116,70 @@ class WeeklyWorshipPlanRepository:
         finally:
             cursor.close()
 
-    def set_hymn(self, service_id, line_id, used_as, hymn_id):
+    def set_hymn(self, service_id, line_id, used_as, hymn_id, preserve_if_same=False):
         church_id = self.service(service_id)[0]
         cursor = self.connection.cursor()
         try:
+            existing_stanzas = None
+            if preserve_if_same and hymn_id is not None:
+                cursor.execute(
+                    "SELECT Stanzas FROM tblHymnUsage WHERE ServiceID=? "
+                    "AND ServiceBulletinOrderLineID=? AND HymnID=?",
+                    (service_id, line_id, hymn_id),
+                )
+                existing = cursor.fetchone()
+                existing_stanzas = existing[0] if existing else None
             cursor.execute(
                 "DELETE FROM tblHymnUsage WHERE ServiceID=? AND ServiceBulletinOrderLineID=?",
                 (service_id, line_id),
             )
             weekly_value = None
+            reference_text = None
             if hymn_id is not None:
                 cursor.execute("SELECT COALESCE(Hymn,''),COALESCE(Title,'') FROM tblHymn WHERE ID=?", (hymn_id,))
                 hymn = cursor.fetchone()
-                weekly_value = " ".join(str(value) for value in hymn if value).strip()
+                reference_text, weekly_value = hymn
                 cursor.execute(
                     "INSERT INTO tblHymnUsage "
-                    "(ChurchID,ServiceID,ServiceBulletinOrderLineID,HymnID,UsedAs) VALUES (?,?,?,?,?)",
-                    (church_id, service_id, line_id, hymn_id, used_as),
+                    "(ChurchID,ServiceID,ServiceBulletinOrderLineID,HymnID,UsedAs,Stanzas) "
+                    "VALUES (?,?,?,?,?,?)",
+                    (church_id, service_id, line_id, hymn_id, used_as, existing_stanzas),
                 )
             cursor.execute(
-                "UPDATE tblServiceBulletinOrderLine SET WeeklyValue=? WHERE ID=? AND ServiceID=?",
-                (weekly_value, line_id, service_id),
+                "UPDATE tblServiceBulletinOrderLine SET WeeklyValue=?,ReferenceText=? "
+                "WHERE ID=? AND ServiceID=?",
+                (weekly_value or None, format_hymn_reference(reference_text, existing_stanzas) or None,
+                 line_id, service_id),
+            )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
+    def set_stanzas(self, service_id, line_id, stanzas):
+        normalized = normalize_stanzas(stanzas)
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT COALESCE(h.Hymn,'') FROM tblHymnUsage u "
+                "JOIN tblHymn h ON h.ID=u.HymnID "
+                "WHERE u.ServiceID=? AND u.ServiceBulletinOrderLineID=?",
+                (service_id, line_id),
+            )
+            row = cursor.fetchone()
+            if not row:
+                raise ValueError("Select a hymn before entering its stanzas.")
+            cursor.execute(
+                "UPDATE tblHymnUsage SET Stanzas=? WHERE ServiceID=? "
+                "AND ServiceBulletinOrderLineID=?",
+                (normalized, service_id, line_id),
+            )
+            cursor.execute(
+                "UPDATE tblServiceBulletinOrderLine SET ReferenceText=? "
+                "WHERE ID=? AND ServiceID=?",
+                (format_hymn_reference(row[0], normalized) or None, line_id, service_id),
             )
             self.connection.commit()
         except Exception:
@@ -144,8 +192,10 @@ class WeeklyWorshipPlanRepository:
         slots = self.hymn_slots(service_id)
         assignments = match_suggestions_to_slots(slots, self.suggestions(propers_id))
         hymns_by_line = {line_id: hymn_id for line_id, _used_as, hymn_id in assignments}
-        for line_id, used_as, _hymn, _title, _hymn_id in slots:
-            self.set_hymn(service_id, line_id, used_as, hymns_by_line.get(line_id))
+        for line_id, used_as, _hymn, _title, _hymn_id, _stanzas in slots:
+            self.set_hymn(
+                service_id, line_id, used_as, hymns_by_line.get(line_id), preserve_if_same=True,
+            )
         return len(assignments)
 
     def readings(self, service_id):
@@ -195,22 +245,27 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
         hymns = wx.BoxSizer(wx.VERTICAL)
         self.hymn_grid = wx.ListCtrl(hymn_page, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         for label, width in (
-            ("Position", 170), ("Hymn", 90), ("Title", 270),
-            ("Suggested", 150), ("Status", 100),
+            ("Position", 160), ("Hymn", 85), ("Title", 235), ("Stanzas", 90),
+            ("Suggested", 145), ("Status", 95),
         ):
             self.hymn_grid.AppendColumn(label, width=width)
         hymns.Add(self.hymn_grid, 1, wx.EXPAND | wx.ALL, 8)
         hymn_buttons = wx.BoxSizer(wx.HORIZONTAL)
+        self.hymn_action_buttons = []
         for label, handler in (
             ("Apply Suggested Hymns", self.on_apply_suggestions),
             ("Select Hymn...", self.on_select_hymn),
+            ("Edit Stanzas...", self.on_edit_stanzas),
             ("Clear Selection", self.on_clear_hymn),
         ):
             button = wx.Button(hymn_page, label=label); button.Bind(wx.EVT_BUTTON, handler)
+            self.hymn_action_buttons.append(button)
             hymn_buttons.Add(button, 0, wx.RIGHT, 8)
         hymns.Add(hymn_buttons, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
         hymn_page.SetSizer(hymns)
         self.hymn_grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_select_hymn)
+        self.hymn_grid.Bind(wx.EVT_LIST_ITEM_SELECTED, self._update_hymn_buttons)
+        self.hymn_grid.Bind(wx.EVT_LIST_ITEM_DESELECTED, self._update_hymn_buttons)
 
         readings = wx.BoxSizer(wx.VERTICAL)
         self.reading_grid = wx.ListCtrl(reading_page, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
@@ -246,19 +301,21 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
             item = self.hymn_grid.InsertItem(index, str(row[1] or "Hymn"))
             self.hymn_grid.SetItem(item, 1, str(row[2]))
             self.hymn_grid.SetItem(item, 2, str(row[3]))
+            self.hymn_grid.SetItem(item, 3, format_stanza_notation(row[5]))
             matched = suggested_by_role.get(row[1], [])
-            self.hymn_grid.SetItem(item, 3, "; ".join(matched))
+            self.hymn_grid.SetItem(item, 4, "; ".join(matched))
             if row[0] in duplicate_lines:
-                self.hymn_grid.SetItem(item, 4, "DUPLICATE")
+                self.hymn_grid.SetItem(item, 5, "DUPLICATE")
                 self.hymn_grid.SetItemTextColour(item, wx.RED)
             elif not row[2] and not row[3]:
-                self.hymn_grid.SetItem(item, 4, "Unfinished")
+                self.hymn_grid.SetItem(item, 5, "Unfinished")
                 self.hymn_grid.SetItemTextColour(item, wx.RED)
         self.reading_rows = self.repository.readings(self.service_id)
         self.reading_grid.DeleteAllItems()
         for index, row in enumerate(self.reading_rows):
             item = self.reading_grid.InsertItem(index, str(row[0]))
             self.reading_grid.SetItem(item, 1, str(row[1] or ""))
+        self._update_hymn_buttons()
 
     def _selected(self, grid, rows):
         index = grid.GetFirstSelected()
@@ -290,6 +347,35 @@ class WeeklyWorshipPlanDialog(wx.Dialog):
             wx.OK | wx.ICON_INFORMATION,
             self,
         )
+
+    def _update_hymn_buttons(self, _event=None):
+        row = self._selected(self.hymn_grid, self.hymn_rows)
+        if hasattr(self, "hymn_action_buttons") and len(self.hymn_action_buttons) >= 4:
+            self.hymn_action_buttons[2].Enable(bool(row and row[4] is not None))
+            self.hymn_action_buttons[3].Enable(bool(row and row[4] is not None))
+
+    def on_edit_stanzas(self, _event):
+        row = self._selected(self.hymn_grid, self.hymn_rows)
+        if not row or row[4] is None:
+            return
+        dialog = wx.TextEntryDialog(
+            self,
+            "Enter stanza numbers, lists, or ranges (example: 1,3,11-12).\n\n"
+            f"{row[2]}  {row[3]}",
+            "Edit Hymn Stanzas",
+            str(row[5] or ""),
+        )
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            try:
+                self.repository.set_stanzas(self.service_id, row[0], dialog.GetValue())
+            except (StanzaSelectionError, ValueError) as error:
+                wx.MessageBox(str(error), "Invalid Stanza Selection", wx.OK | wx.ICON_WARNING, self)
+                return
+            self.refresh()
+        finally:
+            dialog.Destroy()
 
     def on_clear_hymn(self, _event):
         row = self._selected(self.hymn_grid, self.hymn_rows)

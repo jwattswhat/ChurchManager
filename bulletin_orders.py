@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import html
 
+from hymn_stanzas import format_hymn_reference
+
 
 class _PortableCursor:
     def __init__(self, cursor):
@@ -302,7 +304,7 @@ class WeeklyBulletinOrderRepository:
             if not service:
                 raise ValueError("The selected service is unavailable.")
             cursor.execute(
-                "SELECT u.HymnID,u.UsedAs,COALESCE(h.Hymn,''),COALESCE(h.Title,'') "
+                "SELECT u.HymnID,u.UsedAs,COALESCE(h.Hymn,''),COALESCE(h.Title,''),u.Stanzas "
                 "FROM tblHymnUsage u JOIN tblHymn h ON h.ID=u.HymnID "
                 "LEFT JOIN tblServiceBulletinOrderLine l "
                 "ON l.ID=u.ServiceBulletinOrderLineID "
@@ -346,17 +348,19 @@ class WeeklyBulletinOrderRepository:
                         None,
                     )
                     if match_index is not None:
-                        hymn_id, used_as, hymn_number, hymn_title = selected_hymns.pop(match_index)
+                        hymn_id, used_as, hymn_number, hymn_title, stanzas = selected_hymns.pop(match_index)
                         cursor.execute(
                             "INSERT INTO tblHymnUsage "
-                            "(ChurchID,ServiceID,ServiceBulletinOrderLineID,HymnID,UsedAs) "
-                            "VALUES (?,?,?,?,?)",
-                            (service[2], service_id, weekly_line_id, hymn_id, used_as),
+                            "(ChurchID,ServiceID,ServiceBulletinOrderLineID,HymnID,UsedAs,Stanzas) "
+                            "VALUES (?,?,?,?,?,?)",
+                            (service[2], service_id, weekly_line_id, hymn_id, used_as, stanzas),
                         )
                         cursor.execute(
                             "UPDATE tblServiceBulletinOrderLine SET WeeklyValue=?,ReferenceText=? "
                             "WHERE ID=?",
-                            (hymn_title or None, hymn_number or None, weekly_line_id),
+                            (hymn_title or None,
+                             format_hymn_reference(hymn_number, stanzas) or None,
+                             weekly_line_id),
                         )
             self.connection.commit()
             return len(template_lines)

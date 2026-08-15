@@ -1,231 +1,240 @@
 # ChurchManager Hymn Stanza Selection Specification
 
-**Status:** Proposed for approval; not yet implemented  
-**Prepared:** August 14, 2026  
-**Scope:** Development ChurchManager and ChurchDBTest only until separately approved for production  
-**Out of scope:** The separate Frozen ChurchManager application and its database
+**Status:** Implementation-ready; awaiting approval
 
-## 1. Objective
+**Prepared:** August 15, 2026
 
-Allow a worship planner to record which stanzas of each selected hymn will be sung at a particular service, preserve that choice in service history, and display it consistently in the weekly worship plan, bulletin order, reports, and other worship-planning outputs.
+**Scope:** Development ChurchManager and ChurchDBTest only
 
-Examples:
+**Out of scope:** Frozen ChurchManager-Legacy, production ChurchDB, and the JSForm framework
+
+## 1. Purpose
+
+Allow the worship planner to record which stanzas of each selected hymn will be sung at a particular service. The selection must remain attached to that exact service hymn usage and appear consistently on the planning screen, weekly Order of Service, and worship-planning reports.
+
+Examples of printed references:
 
 - `LSB 656`
+- `LSB 656, st. 3`
 - `LSB 656, sts. 1–4`
 - `LSB 581, sts. 1, 3, 11–12`
-- `LSB 442, st. 1` 
 
-Leaving the stanza selection blank means the service uses the complete hymn or that no stanza restriction has been specified.
+A blank stanza selection means that no stanza restriction was recorded; normally, the complete hymn is intended.
 
-## 2. User outcome
+## 2. Ownership boundary
 
-For every hymn assigned to a service-order position, the planner can:
+This is ChurchManager worship-domain behavior, not generic JSForm behavior.
 
-1. Select the hymn.
-2. Optionally enter the stanzas to be sung.
-3. See the stanza selection beside the hymn in the planning screen.
-4. Have the formatted selection appear automatically in the weekly order and reports.
-5. Edit or clear the stanza selection without reselecting the hymn.
-6. Preserve the selection as part of that service's historical hymn usage.
+- ChurchManager owns stanza parsing, hymn-reference formatting, persistence, and worship-planning rules.
+- JSForm requires no change.
+- ChurchManager-Legacy remains frozen and completely separate.
 
-## 3. Source-of-truth rule
+## 3. Source of truth
 
-The stanza selection belongs to `tblHymnUsage`, because it describes the use of a hymn in one particular service and order position.
+Add the stanza selection to `tblHymnUsage`, because it describes one hymn used in one service position.
 
 It does not belong to:
 
 - `tblHymn`, because the same hymn may use different stanzas at different services.
-- `tblProperHymnSuggestion`, because a suggestion should not silently impose service-specific stanza choices in the first implementation.
-- `tblServiceBulletinOrderLine.WeeklyValue`, because that is rendered display text rather than normalized worship-planning data.
+- `tblProperHymnSuggestion`, because a suggestion does not prescribe stanzas in this version.
+- `tblServiceBulletinOrderLine.WeeklyValue`, because that field is the displayed hymn title, not the normalized source record.
 
-`tblHymnUsage` is authoritative. `WeeklyValue` is regenerated from the selected hymn and stanza value.
+The authoritative relationships remain:
 
-## 4. Proposed data change
+- `tblHymnUsage.ServiceBulletinOrderLineID` identifies the weekly Order of Service line.
+- `tblHymnUsage.HymnID` identifies the selected hymn.
+- `tblHymnUsage.Stanzas` identifies the selected stanzas for that use.
 
-Add one nullable column to `tblHymnUsage`:
+## 4. Database change
+
+Migration **067** will add:
 
 ```sql
-Stanzas varchar(100) NULL
+ALTER TABLE tblHymnUsage
+    ADD COLUMN Stanzas varchar(100) NULL;
 ```
 
-The stored value is the normalized stanza expression only, without `st.`, `sts.`, the hymnal abbreviation, hymn number, or title.
+The guarded migration must add the column only when absent and update the worship-planning report view without removing unrelated fields.
 
-Examples of stored values:
+Stored values contain only the canonical stanza expression:
 
 - `1`
 - `1-4`
 - `1,3,11-12`
 
-Blank input is stored as `NULL`.
+Blank input is stored as `NULL`. Existing records remain unchanged and valid. No historical text will be parsed or backfilled.
 
-### Why a normalized string is appropriate initially
+## 5. Input and validation
 
-A fully relational row for every selected stanza would add complexity without a current requirement to search or report on individual stanza numbers. A normalized expression is sufficient for planning, display, export, and historical preservation.
+The user may enter:
 
-If ChurchManager later stores hymn texts stanza by stanza, the expression can be parsed into individual selections without changing the user-facing syntax.
+- one positive stanza number: `3`
+- a comma-separated list: `1,3,5`
+- an inclusive range: `1-4`
+- a mixture: `1,3,11-12`
+- spaces, which are removed during normalization
+- an en dash, which is normalized to `-`
+- pasted `st.` or `sts.` prefixes, which are removed
 
-## 5. Accepted input
+Reject:
 
-The editor accepts:
+- zero or negative numbers
+- descending ranges such as `4-2`
+- empty elements such as `1,,3`
+- nonnumeric content
+- open ranges such as `3-`
+- duplicate expanded stanza numbers, such as `1-3,3`
 
-- A single positive number: `3`
-- A comma-separated list: `1,3,5`
-- An inclusive range: `1-4`
-- Mixed lists and ranges: `1,3,11-12`
-- User-entered spaces, which are removed during normalization
-- An en dash in place of a hyphen, normalized to `-`
-- Optional pasted prefixes `st.` or `sts.`, removed during normalization
+The first version will not enforce a maximum stanza number because ChurchManager does not yet have authoritative stanza counts for every hymnal entry.
 
-The following are rejected:
+Invalid input must produce a plain-language message and make no database changes.
 
-- Zero or negative stanza numbers
-- Descending ranges such as `4-2`
-- Empty elements such as `1,,3`
-- Non-numeric labels
-- Open-ended ranges such as `3-`
-- Duplicate stanza numbers after expansion
+## 6. Shared ChurchManager functions
 
-The application does not initially reject a stanza number merely because it exceeds a hymn's known stanza count. ChurchManager does not yet have complete, authoritative stanza-count metadata for every hymnal entry. When a reliable count exists in a future hymnal model, the editor may warn without corrupting historical or alternate-edition selections.
+Add a small domain module, expected to be `hymn_stanzas.py`, with independently tested functions equivalent to:
 
-## 6. Canonical formatting
+```python
+normalize_stanzas(text) -> str | None
+format_stanza_notation(value) -> str
+format_hymn_reference(hymnal_abbreviation, hymn_number, stanzas) -> str
+```
 
-Display rules:
+Formatting rules:
 
-- No stanza restriction: `LSB 656 A Mighty Fortress Is Our God`
-- One stanza: `LSB 656, st. 3 A Mighty Fortress Is Our God`
-- More than one stanza or a range: `LSB 656, sts. 1–4 A Mighty Fortress Is Our God`
+- `NULL` -> no stanza suffix
+- `3` -> `st. 3`
+- `1-4` -> `sts. 1–4`
+- `1,3,11-12` -> `sts. 1, 3, 11–12`
 
-The user enters simple numeric syntax. ChurchManager supplies `st.` or `sts.` and converts stored hyphen ranges to en dashes for display.
+All ChurchManager screens and reports must use this shared formatter rather than reproduce the rules.
 
-The display formatter must be shared by:
+## 7. Planning-screen behavior
 
-- Weekly worship-plan screen
-- `tblServiceBulletinOrderLine.WeeklyValue`
-- Bulletin-order preview and generated order
-- Worship-planner reports
-- Hymn-usage history
-- Any future export or calendar summary containing service hymns
-
-## 7. Weekly worship-plan interface
-
-On the **Plan Hymns and Readings** dialog:
+On **Plan Hymns and Readings**:
 
 1. Add a **Stanzas** column between **Title** and **Suggested**.
 2. Add an **Edit Stanzas...** button.
-3. Double-clicking the Stanzas cell or invoking the button opens a small editor for the selected hymn slot.
-4. The editor shows the selected hymn number and title for context.
-5. The editor accepts a stanza expression and displays a concise example such as `1,3,11-12`.
-6. Saving validates and normalizes the expression.
-7. Clearing the field sets `Stanzas` to `NULL`.
-8. The command is disabled when the selected service slot has no hymn.
+3. Enable the button only when the selected row is a hymn position with a selected hymn.
+4. Show the hymn number and title in the editor for context.
+5. Show an example such as `1,3,11-12`.
+6. Validate and normalize on save.
+7. Clearing the entry stores `NULL`.
+8. Retain the existing double-click action for selecting or changing a hymn; stanza editing uses the clearly labeled button.
 
-Selecting a different hymn for the same slot clears the prior stanza selection by default. This prevents stanza choices from one hymn from being applied accidentally to another hymn.
+Screen columns remain separate:
 
-Clearing a hymn also clears its stanza selection because the associated `tblHymnUsage` row is deleted.
+- **Hymn:** hymn number
+- **Title:** hymn title
+- **Stanzas:** readable stanza expression
 
-## 8. Applying Proper hymn suggestions
+## 8. Weekly Order of Service synchronization
 
-The existing **Apply Suggested Hymns** operation replaces service-slot hymn usage rows. In the first implementation:
+The normalized hymn usage and weekly line must remain synchronized:
 
-- Applied suggestions have no stanza restriction.
-- Existing stanza choices are cleared when the hymn in a slot changes.
-- If an applied suggestion resolves to the same hymn already occupying that same slot, the current stanza choice should be retained.
+- `WeeklyValue` stores the hymn title only.
+- `ReferenceText` stores the formatted reference, such as `LSB 656, sts. 1–4`.
+- `tblHymnUsage.Stanzas` stores `1-4`.
 
-The last rule prevents a harmless refresh of suggestions from erasing deliberate planning work.
+Saving a stanza edit updates `tblHymnUsage.Stanzas` and the matching weekly line's `ReferenceText` in one transaction. Failure rolls back both changes.
 
-## 9. Bulletin-order behavior
+Direct free-form editing must not silently desynchronize a normalized hymn line. Hymn, title, reference, and stanza changes for `SERVICE_HYMN` lines must go through the hymn-planning workflow.
 
-When a service hymn is selected or its stanzas are edited, ChurchManager regenerates the corresponding weekly line from normalized data.
+## 9. Changing, clearing, and applying hymns
 
-The generated value includes:
+- Selecting a different hymn clears the previous stanza selection.
+- Clearing the hymn removes its `tblHymnUsage` record and therefore its stanza selection.
+- Reapplying a Proper suggestion that resolves to the same hymn in the same line preserves the stanzas.
+- Applying a different suggested hymn clears the stanzas.
+- A newly applied suggestion starts with `Stanzas=NULL`.
 
-- Hymnal abbreviation and hymn number as stored in the selected hymn entry
-- Stanza notation when supplied
-- Hymn title
+Proper suggestions continue to match service positions by exact **Suggested Use**, including repeated positions such as `Distribution Hymn`, and are consumed in order.
 
-The exact placement of the stanza notation must remain compatible with the bulletin's right-aligned hymn reference. If a bulletin template separates the label, title, and reference in the future, the stanza formatter should remain reusable rather than embedded in a template-specific string.
+## 10. Replacing the weekly template
 
-## 10. Reports and history
+Applying a different Order of Service template still wholly replaces the weekly order. Existing weekly line selections are rebuilt.
 
-Add `Stanzas` to the worship-planner hymn report view and any general hymn-usage view used by ChurchManager.
+When ChurchManager reattaches an already selected hymn to a compatible new line with the same exact `UsedAs` position, it must carry that hymn's `Stanzas` with it. If the selection cannot be reattached, both the hymn selection and its stanza selection are discarded. Stanzas must never transfer to a different hymn.
 
-Historical queries must be able to answer:
+## 11. Duplicate hymn rule
 
-- Which hymn was used?
-- At which service and position?
-- Which stanzas were selected?
+The existing duplicate-hymn warning remains unchanged:
 
-Existing rows remain valid with `Stanzas=NULL`, meaning no restriction was recorded.
+- Duplicate detection is based on `HymnID` within the service.
+- The same hymn is a duplicate even when different stanzas are selected.
+- Every occurrence of the duplicate is flagged.
+- The warning applies whether the duplicate came from suggestions or manual selection.
 
-The migration must not attempt to infer stanza selections from free-form historical service notes. For example, an old note saying `Hymn 581 verses 1, 3, 11, 12` is evidence that the feature is useful, but automatically associating such prose with the correct service-order slot would be unsafe.
+## 12. Reports and output
 
-## 11. Copyright and licensing
+Migration 067 will extend `rpt_worship_planner_hymn` to expose at least:
 
-Stanza selection metadata does not itself reproduce copyrighted hymn text or music. It may, however, help determine what was printed, projected, or streamed.
+- `HymnID`
+- `HymnNumber`
+- `Title`
+- `Stanzas`
+- `ReferenceText`
+- the existing compatible `Hymn` display value
 
-This feature does not claim to perform CCLI or ONE LICENSE reporting. It should preserve enough accurate service-level usage information to support a later copyright-reporting feature.
+The worship-planning report dataset contract will be extended additively so custom report layouts may place the stanza or formatted reference separately. Because existing fields remain intact, its compatible version remains 4. The starter planning report will display the formatted hymn reference without combining it with the title.
 
-## 12. Migration and compatibility
+Existing custom layouts that use the current `Hymn` field must remain loadable. Any contract-version upgrade must follow the existing report compatibility mechanism.
 
-The implementation should use the next available guarded migration and:
+Hymn-usage history must preserve and expose the recorded stanza selection when that history is displayed or reported.
 
-1. Add the nullable `Stanzas` column only if absent.
-2. Update relevant report views without dropping unrelated columns.
-3. Leave all existing hymn-usage rows unchanged.
-4. Avoid any production or Frozen-application connection.
-5. Be exercised first against ChurchDBTest.
+## 13. Copyright boundary
 
-No existing service requires backfill because `NULL` is a valid historical value.
+This feature stores only hymn-identification and stanza-selection metadata. It does not store hymn text, extract lyrics, produce licensing reports, or submit information to CCLI or ONE LICENSE.
 
-## 13. Proposed implementation components
+## 14. Files expected to change
 
-After approval, implementation is expected to touch:
+After approval, implementation is expected to include:
 
-- A new guarded MariaDB migration
+- `migrations/067_add_hymn_stanza_selections.sql`
+- new `hymn_stanzas.py`
 - `weekly_worship_plan_dialog.py`
-- The shared hymn-display formatting path, likely factored from current repository code
-- `bulletin_orders.py` where hymn weekly values are created or copied
-- Worship-planner report views
-- Unit tests for parsing, normalization, formatting, persistence, suggestion application, and UI presence
-- Database integration tests against ChurchDBTest
-- User documentation describing stanza syntax
+- `bulletin_orders.py`
+- worship-planning report view and dataset code
+- worship-planning starter report if needed
+- focused unit and database integration tests
+- relevant user documentation
 
-## 14. Acceptance criteria
+No JSForm or ChurchManager-Legacy file is expected to change.
 
-The feature is complete only when all of the following pass:
+## 15. Acceptance tests
 
-1. A planner can save `1,3,11-12` for a selected service hymn.
-2. It is stored canonically as `1,3,11-12` on the correct `tblHymnUsage` row.
-3. The planning screen displays `1, 3, 11–12` or another documented readable form.
-4. The weekly order displays the hymn with `sts. 1, 3, 11–12`.
-5. One selected stanza displays with singular `st.`.
-6. Blank input removes the restriction.
-7. Invalid expressions are rejected with a plain-language message and no partial database change.
-8. Changing or clearing the hymn does not leave stale stanza data.
-9. Reapplying the same suggested hymn preserves its stanza selection.
-10. Applying a different suggested hymn clears the old stanza selection.
-11. Reports include the stored stanza selection.
-12. Existing hymn usage remains unchanged and readable.
-13. LSB suggestion, bulletin-order, and hymn-history tests continue to pass.
-14. ChurchDBTest migration and application tests pass.
-15. No Frozen application file, runtime, configuration, or database is accessed or changed.
+The feature is complete when:
 
-## 15. Deferred enhancements
+1. `1,3,11-12` saves canonically on the correct `tblHymnUsage` row.
+2. One stanza formats with singular `st.`.
+3. Multiple stanzas or ranges format with plural `sts.` and readable spacing/en dashes.
+4. `WeeklyValue` remains the title and `ReferenceText` contains the formatted reference.
+5. Blank input removes the stanza restriction.
+6. Invalid input changes neither the usage row nor weekly line.
+7. Changing or clearing a hymn leaves no stale stanza data.
+8. Reapplying the same suggested hymn preserves stanzas.
+9. Applying a different suggested hymn clears stanzas.
+10. Replacing a template preserves stanzas only with a reattached matching hymn usage.
+11. Duplicate hymns are flagged regardless of differing stanzas.
+12. Planning reports expose and print stanza information correctly.
+13. Existing rows with `Stanzas=NULL` continue to work.
+14. Migration 067 applies successfully to ChurchDBTest.
+15. Focused tests and the full automated test suite pass.
+16. Manual GUI verification confirms selection, editing, clearing, suggestion application, template replacement, duplicate warnings, and report output.
+17. No production or ChurchManager-Legacy resource is accessed or changed.
 
-The first implementation intentionally defers:
+## 16. Deferred work
 
-- Stanza defaults on Proper hymn suggestions
-- Hymnal-entry stanza counts and validation against them
-- Separate assignments for choir, congregation, soloist, or alternating groups
-- Refrain-only and stanza/refrain performance patterns
-- Different tunes or harmonizations by stanza
-- Automatic lyric extraction or bulletin insertion
-- Automatic CCLI or ONE LICENSE submission
-- Recovery of stanza choices from historical free-form notes
+Deferred intentionally:
 
-These require the broader canonical hymn, text, tune, setting, and copyright model proposed for future multi-hymnal support.
+- default stanzas on Proper suggestions
+- validation against hymnal stanza counts
+- choir, soloist, congregation, or alternating-group assignments
+- refrain-only and stanza/refrain patterns
+- stanza-specific tunes or harmonizations
+- lyric insertion into bulletins
+- automatic copyright reporting
+- inference from historical free-form notes
 
-## 16. Approval boundary
+## 17. Approval boundary
 
-Approval of this specification authorizes implementation and testing in development ChurchManager and ChurchDBTest only. Production deployment would remain a separate reviewed action.
+Approval authorizes implementation and testing in development ChurchManager and ChurchDBTest only. Production deployment remains a separate reviewed action.

@@ -45,6 +45,9 @@ WORSHIP_PLANNING_CONTRACT = ReportDatasetContract(
         )),
         ReportCollection("hymns", "Selected Hymns", (
             ReportField("UsedAs", "Use"), ReportField("Hymn", "Hymn"),
+            ReportField("HymnNumber", "Hymn Number"),
+            ReportField("Title", "Title"), ReportField("Stanzas", "Stanzas"),
+            ReportField("ReferenceText", "Formatted Reference"),
         )),
         ReportCollection("participants", "Participants", (
             ReportField("Role", "Role"), ReportField("Name", "Participant"),
@@ -116,7 +119,8 @@ class WorshipPlanningDatasetProvider:
             "WHERE ServiceID=? ORDER BY SortOrder,ID", (service_id,),
         )
         hymns = self._rows(
-            "SELECT UsedAs,Hymn FROM rpt_worship_planner_hymn "
+            "SELECT UsedAs,Hymn,HymnNumber,Title,Stanzas,ReferenceText "
+            "FROM rpt_worship_planner_hymn "
             "WHERE ServiceID=? ORDER BY Sequence,ID", (service_id,),
         )
         requirements = self._rows(
@@ -150,7 +154,10 @@ class WorshipPlanningDatasetProvider:
                 order_lines, Sequence=0, Label="No weekly order of service has been saved.", Detail="",
             ),
             "readings": self._placeholder(readings, Reading="Readings", Reference="Not selected"),
-            "hymns": self._placeholder(hymns, UsedAs="Hymns", Hymn="Not selected"),
+            "hymns": self._placeholder(
+                hymns, UsedAs="Hymns", Hymn="Not selected", HymnNumber="", Title="",
+                Stanzas="", ReferenceText="",
+            ),
             "participants": self._placeholder(
                 participants, Role="Participants", Name="Not assigned", Status="Open",
             ),

@@ -63,6 +63,10 @@ class TestVisualReportInventory(unittest.TestCase):
         checklist = WORSHIP_PLANNING_CONTRACT.collection("checklist")
         self.assertIn("CompletionSource", {field.name for field in checklist.fields})
 
+    def test_worship_planner_hymns_expose_stanzas_and_separate_reference(self):
+        fields = {field.name for field in WORSHIP_PLANNING_CONTRACT.collection("hymns").fields}
+        self.assertTrue({"HymnNumber", "Title", "Stanzas", "ReferenceText"}.issubset(fields))
+
     def test_worship_planner_provider_reads_only_report_views(self):
         source = (ROOT / "visual_reports" / "worship_planning_dataset.py").read_text(
             encoding="utf-8"

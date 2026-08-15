@@ -10,6 +10,7 @@ import wx.adv
 
 from ui_dimensions import DATE_PICKER_SIZE, TIME_PICKER_SIZE
 from hymn_validation import duplicate_selection_status, normalize_tune
+from hymn_stanzas import StanzaSelectionError, format_hymn_reference, format_stanza_notation, normalize_stanzas
 from worship_scheduling import show_service_participants
 from worship_checklist import show_preparation_checklist
 from worship_checklist import WorshipChecklistRepository, checklist_counts
@@ -226,8 +227,9 @@ class UnifiedWorshipServiceRepository:
         return values
 
     def weekly_hymns(self, service_id):
-        return {row[0]: (row[1], row[2] or "") for row in self.all(
-            "SELECT u.ServiceBulletinOrderLineID,u.HymnID,COALESCE(h.Tune,'') "
+        return {row[0]: (row[1], row[2] or "", row[3], row[4] or "") for row in self.all(
+            "SELECT u.ServiceBulletinOrderLineID,u.HymnID,COALESCE(h.Tune,''),u.Stanzas,"
+            "COALESCE(h.Hymn,'') "
             "FROM tblHymnUsage u JOIN tblHymn h ON h.ID=u.HymnID "
             "WHERE u.ServiceID=? AND u.ServiceBulletinOrderLineID IS NOT NULL",
             (service_id,),
@@ -281,9 +283,10 @@ class UnifiedWorshipServiceRepository:
                 if line.get("hymn_id") is not None:
                     cursor.execute(
                         "INSERT INTO tblHymnUsage "
-                        "(ChurchID,ServiceID,ServiceBulletinOrderLineID,HymnID,UsedAs) "
-                        "VALUES (?,?,?,?,?)",
-                        (church_id, service_id, weekly_line_id, line["hymn_id"], line["key"]),
+                        "(ChurchID,ServiceID,ServiceBulletinOrderLineID,HymnID,UsedAs,Stanzas) "
+                        "VALUES (?,?,?,?,?,?)",
+                        (church_id, service_id, weekly_line_id, line["hymn_id"], line["key"],
+                         line.get("stanzas")),
                     )
             self.connection.commit()
         except Exception:
@@ -430,14 +433,15 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         template_row.Add(self.template, 1, wx.EXPAND)
         left_box.Add(template_row, 0, wx.EXPAND | wx.ALL, 8)
         self.grid = wx.ListCtrl(left, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-        for label, width in (("Service line", 270), ("Weekly value", 300),
-                             ("Reference", 150), ("Status", 100)):
+        for label, width in (("Service line", 225), ("Weekly value", 245),
+                             ("Reference", 145), ("Stanzas", 90), ("Status", 90)):
             self.grid.AppendColumn(label, width=width)
         left_box.Add(self.grid, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 8)
         line_actions = wx.BoxSizer(wx.HORIZONTAL)
         for label, handler in (
             ("Edit Line...", self.on_edit_line),
             ("Select Hymn...", self.on_select_hymn),
+            ("Edit Stanzas...", self.on_edit_stanzas),
             ("Delete Line", self.on_delete_line),
             ("Move Up", lambda event: self.on_move_line(-1)),
             ("Move Down", lambda event: self.on_move_line(1)),
@@ -446,6 +450,9 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             button.Bind(wx.EVT_BUTTON, handler)
             if label.startswith("Select Hymn"):
                 self.select_hymn_button = button
+                button.Enable(False)
+            elif label.startswith("Edit Stanzas"):
+                self.edit_stanzas_button = button
                 button.Enable(False)
             elif label == "Delete Line":
                 self.delete_line_button = button
@@ -648,7 +655,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             self.fields["service_time"].SetValue(time_value)
         hymn_assignments = self.repository.weekly_hymns(self.service_id)
         self.working_lines = [
-            self._weekly_line(row, *(hymn_assignments.get(row[0]) or (None, "")))
+            self._weekly_line(row, *(hymn_assignments.get(row[0]) or (None, "", None, "")))
             for row in self.repository.weekly.lines(self.service_id)
         ]
         self.refresh_grid()
@@ -687,12 +694,15 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         ))
 
     @staticmethod
-    def _weekly_line(row, hymn_id=None, tune=""):
+    def _weekly_line(row, hymn_id=None, tune="", stanzas=None, hymn_reference=""):
         return {
             "sequence": row[1], "included": bool(row[2]), "type": row[3],
             "label": row[4], "source": row[5], "key": row[6],
-            "value": row[7] or "", "reference": row[8] or "", "hymn_id": hymn_id,
-            "tune": tune or "",
+            "value": row[7] or "",
+            "reference": (format_hymn_reference(hymn_reference, stanzas)
+                          if hymn_id is not None else row[8] or ""),
+            "hymn_id": hymn_id,
+            "tune": tune or "", "stanzas": stanzas,
             "style": row[9], "label_bold": row[10], "value_bold": row[11],
             "italic": row[12], "indent": row[13], "tab_position": row[14],
             "tab_alignment": row[15], "tab_leader": row[16], "note": row[17],
@@ -712,7 +722,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         return {
             "sequence": row[1], "included": included, "type": row[2], "label": row[3],
             "source": row[4], "key": row[5], "value": "", "reference": row[6] or "",
-            "hymn_id": None, "tune": "",
+            "hymn_id": None, "tune": "", "stanzas": None,
             "style": row[7], "label_bold": row[8], "value_bold": row[9],
             "italic": row[10], "indent": row[11], "tab_position": row[12],
             "tab_alignment": row[13], "tab_leader": row[14], "note": row[17],
@@ -726,12 +736,15 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         )
         self.grid.DeleteAllItems()
         self.select_hymn_button.Enable(False)
+        self.edit_stanzas_button.Enable(False)
         self.delete_line_button.Enable(False)
         for index, line in enumerate(self.working_lines):
             item = self.grid.InsertItem(index, str(line["label"]))
             required = bool(line["included"] and line["source"] and not line["value"])
             status = duplicate_statuses[index] or ("Required" if required else "")
-            for column, value in enumerate((line["value"], line["reference"], status), 1):
+            for column, value in enumerate((
+                line["value"], line["reference"], format_stanza_notation(line.get("stanzas")), status,
+            ), 1):
                 self.grid.SetItem(item, column, str(value))
             if not line["included"]:
                 self.grid.SetItemTextColour(item, wx.Colour(130, 130, 130))
@@ -746,6 +759,9 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         index = self.selected_line_index()
         enabled = index is not None and self.working_lines[index]["source"] == "SERVICE_HYMN"
         self.select_hymn_button.Enable(enabled)
+        self.edit_stanzas_button.Enable(
+            bool(enabled and self.working_lines[index].get("hymn_id") is not None)
+        )
         self.delete_line_button.Enable(index is not None)
 
     def on_checklist(self, _event):
@@ -806,6 +822,8 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         try:
             if dialog.ShowModal() == wx.ID_OK:
                 selected = dialog.selected_hymn
+                if line.get("hymn_id") != selected[0]:
+                    line["stanzas"] = None
                 line["hymn_id"] = selected[0]
                 line["value"] = selected[2] or ""
                 line["reference"] = selected[1] or ""
@@ -816,8 +834,44 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
                 line["hymn_id"], line["value"], line["reference"], line["tune"] = (
                     None, "", "", ""
                 )
+                line["stanzas"] = None
                 self.refresh_grid()
                 self.grid.Select(index)
+        finally:
+            dialog.Destroy()
+
+    def on_edit_stanzas(self, _event):
+        index = self.selected_line_index()
+        if index is None:
+            return
+        line = self.working_lines[index]
+        if line["source"] != "SERVICE_HYMN" or line.get("hymn_id") is None:
+            wx.MessageBox("Select a hymn first.", "Edit Stanzas",
+                          wx.OK | wx.ICON_INFORMATION, self)
+            return
+        dialog = wx.TextEntryDialog(
+            self,
+            "Enter stanza numbers, lists, or ranges (example: 1,3,11-12).\n\n"
+            f"{line['reference']}  {line['value']}",
+            "Edit Hymn Stanzas",
+            str(line.get("stanzas") or ""),
+        )
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            try:
+                stanzas = normalize_stanzas(dialog.GetValue())
+            except StanzaSelectionError as error:
+                wx.MessageBox(str(error), "Invalid Stanza Selection",
+                              wx.OK | wx.ICON_WARNING, self)
+                return
+            hymn = self.repository.one(
+                "SELECT COALESCE(Hymn,'') FROM tblHymn WHERE ID=?", (line["hymn_id"],),
+            )
+            line["stanzas"] = stanzas
+            line["reference"] = format_hymn_reference(hymn[0] if hymn else "", stanzas)
+            self.refresh_grid()
+            self.grid.Select(index)
         finally:
             dialog.Destroy()
 
@@ -941,9 +995,13 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
                 if match is None:
                     line["value"], line["reference"] = "", ""
                     line["hymn_id"], line["tune"] = None, ""
+                    line["stanzas"] = None
                 else:
                     hymn = unused.pop(match)
-                    line["hymn_id"], line["reference"] = hymn[0], hymn[1]
+                    if line.get("hymn_id") != hymn[0]:
+                        line["stanzas"] = None
+                    line["hymn_id"] = hymn[0]
+                    line["reference"] = format_hymn_reference(hymn[1], line.get("stanzas"))
                     line["value"], line["tune"] = hymn[2], hymn[4]
         self.refresh_grid()
 
