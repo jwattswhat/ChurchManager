@@ -592,19 +592,6 @@
                     "invoke": "application.backup.run"
                 }
             },
-            "lblEnhancements": {
-                "name": "lblEnhancements",
-                "type": "StaticText",
-                "label": "Enhancements / Bugs",
-                "posch": [
-                    28,
-                    7
-                ],
-                "tooltip": "Open the enhancements and bug-tracking form.",
-                "security": {
-                    "invoke": "application.enhancements.manage"
-                }
-            },
             "lblSupportDiagnostics": {
                 "name": "lblSupportDiagnostics",
                 "type": "StaticText",

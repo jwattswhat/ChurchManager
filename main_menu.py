@@ -7,7 +7,6 @@ FORM_ROUTES = {
     "lblPropers": "frmPropers",
     "lblHymnal": "frmHymnal",
     "lblHymn": "frmHymn",
-    "lblEnhancements": "frmEnhancement",
     "lblFamily": "frmFamily",
     "lblPerson": "frmPerson",
     "lblConfig": "frmConfig",

@@ -48,7 +48,6 @@ INSERT INTO `tblreports` (`ID`, `Report`, `Title`, `Params`, `Batch`, `Note`) VA
 (2, 'CMWP01', 'Worship Planning Worksheet', '[ChurchID\r\nServiceID]\r\n', NULL, ''),
 (3, 'CMFD01', 'Congregation Family Directory', '[ChurchID]', NULL, ''),
 (5, 'CMPH02', 'Member Contact Listing', '[ChurchID\r\nProjectID]', NULL, ''),
-(6, 'CMEN01', 'Enhancements Report', NULL, NULL, ''),
 (7, 'CMHU01', 'Hymn Usage by Service', '[ChurchID]', NULL, ''),
 (8, 'CMHU02', 'Hymn Usage by Hymn', '[ChurchID]\r\n', NULL, ''),
 (9, 'CMPJ01', 'Projects', '[ChurchID\r\nProjectID]', NULL, ''),

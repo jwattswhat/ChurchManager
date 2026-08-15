@@ -1155,7 +1155,7 @@ class TestNonAccountingTestDataset(unittest.TestCase):
         self.assertIn("fk_reports_required_permission", source)
         self.assertIn("ALTER TABLE tblReports MODIFY RequiredPermissionID", source)
         for code in (
-            "CMAS01", "CMAT01", "CMBATCH00", "CMDO01", "CMEN01",
+            "CMAS01", "CMAT01", "CMBATCH00", "CMDO01",
             "CMHU01", "CMHU02", "CMHU03", "CMHU04", "CMJR01",
             "CMMD01", "CMMI01", "CMMI02", "CMMI03", "CMML01",
             "CMML02", "CMPA01", "CMPE01", "CMPH02", "CMPJ01",
@@ -1172,6 +1172,16 @@ class TestNonAccountingTestDataset(unittest.TestCase):
         self.assertIn("p.Name='reports.run'", source)
         for role in ("Master Administrator", "Pastor/Staff", "Volunteer", "Auditor"):
             self.assertIn("'{}'".format(role), source)
+
+    def test_obsolete_enhancement_tracker_is_retired(self):
+        migration = (
+            ROOT / "migrations" / "066_retire_enhancement_tracker.sql"
+        ).read_text(encoding="utf-8-sig")
+        self.assertIn("DROP VIEW IF EXISTS rpt_enhancement", migration)
+        self.assertIn("WHERE Report='CMEN01'", migration)
+        self.assertIn("DROP TABLE IF EXISTS tblEnhancement", migration)
+        self.assertNotIn("lblEnhancements", load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"])
+        self.assertFalse((ROOT / "visual_reports" / "definitions" / "CMEN01.json").exists())
 
     def test_report_screen_uses_compact_explicit_layout(self):
         report_form = next(iter(load_json(FORMS / "frmReports.json").values()))

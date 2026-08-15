@@ -97,7 +97,7 @@ class TabularDatasetProvider:
             return "rpt_task r JOIN rpt_project p ON p.ID=r.ProjectID", [f"p.ChurchID={marker}"], [church_id]
         if view in {"rpt_person_date", "rpt_person_contact"}:
             return f"{view} r JOIN rpt_membership_person p ON p.ID=r.PersonID", [f"p.ChurchID={marker}"], [church_id]
-        if view in {"rpt_enhancement", "rpt_report_catalog", "rpt_hymn"}:
+        if view in {"rpt_report_catalog", "rpt_hymn"}:
             return view, [], []
         raise ValueError(f"Report view is not approved: {view}")
 

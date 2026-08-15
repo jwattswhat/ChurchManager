@@ -39,10 +39,6 @@ SPECS = (
     ReportSpec("CMDO01", "Document Listing", "reports.general.run", "rpt_document", (
         c("DocumentType", "Type", 85), c("Date", "Date", 75, "date"),
         c("Title", "Title", 170), c("Document", "Document", 210)), "DocumentType, Date DESC, Title", 1),
-    ReportSpec("CMEN01", "Enhancement and Bug List", "reports.general.run", "rpt_enhancement", (
-        c("Priority", "Priority", 55), c("Module", "Module", 80), c("Screen", "Screen", 80),
-        c("Description", "Description", 235), c("DateDue", "Due", 70, "date"),
-        c("Complete", "Done", 45, "boolean")), "Complete, Priority, DateDue", 1, "landscape"),
     ReportSpec("CMRP01", "Available Reports Listing", "reports.general.run", "rpt_report_catalog", (
         c("Report", "Code", 75), c("Title", "Report", 225), c("Params", "Parameters", 160),
         c("Note", "Notes", 155)), "Title", 1, "landscape"),

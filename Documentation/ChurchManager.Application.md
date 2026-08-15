@@ -606,11 +606,11 @@ Key tables include:
 
 The repository's `Documents` directory is a filesystem archive and is not identical to the database's Document catalog. Moving or renaming cataloged files may break stored file references.
 
-### 8.16 Checklists and enhancements
+### 8.16 Checklists
 
-Checklist forms provide reusable or record-specific task lists. Enhancement records serve as an application improvement or issue log and can be printed through the Enhancements report.
-
-Some checklist and enhancement forms may be supplied by the fallback JSForm `Forms` directory rather than ChurchManager itself.
+Checklist forms provide reusable or record-specific task lists. Development
+work is maintained in the repository roadmap and issue tracker; the former
+database-backed enhancement tracker has been retired.
 
 ## 9. Reports
 
@@ -651,7 +651,6 @@ The installed SQL report data includes the following reports. The database curre
 | `CMWP01` | Worship Planning Worksheet |
 | `CMFD01` | Congregation Family Directory; the corresponding template is absent from the current pattern directory and may have been retired or renamed. |
 | `CMPH02` | Member Contact Listing |
-| `CMEN01` | Enhancements Report |
 | `CMHU01` | Hymn Usage by Service |
 | `CMHU02` | Hymn Usage by Hymn |
 | `CMPJ01` | Projects |
@@ -715,7 +714,7 @@ The following table groups the principal ChurchManager tables by purpose. The li
 | Attendance | `tblAttendanceEvent`, `tblAttendance` |
 | Communications | `tblPrayer`, `tblAnnouncement` |
 | Preserved historical data not used by ChurchManager | Financial and donor tables retained pending a separately approved database migration |
-| Work management | `tblProject`, `tblTask`, `tblTaskWorker`, `tblChecklist`, `tblAsset`, `tblEnhancement`, `tblJournal` |
+| Work management | `tblProject`, `tblTask`, `tblTaskWorker`, `tblChecklist`, `tblAsset`, `tblJournal` |
 
 ### Database conventions
 
