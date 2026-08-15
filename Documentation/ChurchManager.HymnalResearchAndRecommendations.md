@@ -15,27 +15,19 @@ Full lyrics, music images, harmonizations, recordings, and service music must no
 
 ### Non-negotiable identifier rule
 
-`HymnID` is a local MariaDB surrogate key only. It is never a portable hymn
-identity and must never be stored in an installation package, starter dataset,
-upgrade manifest, or cross-installation mapping.
+ChurchManager will use permanent, explicitly assigned numeric hymn identifiers.
+Each hymnal owns a permanent 5,000-number block, and the same entry has the same
+`HymnID` in every installation. Official package IDs are never auto-incremented,
+renumbered, reused, or translated according to installation order.
 
-Every portable hymnal entry must have a stable textual catalog key, for example
-`lsb:656`. The hymnal itself also requires a stable package key such as `lsb`.
-When a package is installed, ChurchManager resolves those keys to the numeric
-`tblHymnal.ID` and `tblHymn.ID` values created in that particular database.
-Different installations are expected to assign different numeric IDs.
+Local user-entered hymns occupy their own permanent range. Textual codes such as
+`lsb` remain package metadata and secondary validation, not replacement foreign
+keys. The complete design is defined in
+[Permanent Hymn Identifier Specification](ChurchManager.PermanentHymnIdentifiers.Specification.md).
 
-All dependent package records, including Proper hymn suggestions and Order of
-Service starter references, must use stable textual keys during import. The
-installer converts them to local foreign keys only after their referenced
-catalog entries exist. The entire package installation must be transactional:
-an unresolved or duplicate stable key aborts and rolls back the package rather
-than leaving partially linked records.
-
-Existing local worship history continues to use numeric foreign keys normally.
-Database backups preserve those local IDs. Catalog updates locate existing
-entries by their stable keys and must never renumber or reinterpret historical
-`HymnID` values.
+The proposed operational workflow for preparing, validating, packaging,
+installing, upgrading, and locally importing hymnals is documented in
+[Suggested Hymnal Import Process](ChurchManager.HymnalImportProcess.md).
 
 ## 1. Existing ChurchManager support
 

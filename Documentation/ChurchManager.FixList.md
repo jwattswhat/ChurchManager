@@ -74,11 +74,14 @@ should not delay a stable ChurchManager release.
 - Define separately installable packages for hymnals, lectionaries, and Orders
   of Service, including package identity, version, source, license, dependencies,
   and supported update behavior.
-- Treat numeric `HymnID` and `HymnalID` values as local database keys only.
-  Portable packages must use stable textual catalog keys; the installer resolves
-  those keys to local IDs transactionally and rolls back any unresolved mapping.
-- Prohibit raw installation-specific IDs in Proper suggestions, Order of Service
-  starters, package manifests, and cross-installation catalog updates.
+- Implement the approved
+  [Permanent Hymn Identifier Specification](ChurchManager.PermanentHymnIdentifiers.Specification.md):
+  permanent 5,000-entry hymnal blocks, a reserved local-user range, transactional
+  collision checks, and retirement rather than ID reuse or cascade deletion.
+- Implement the approved
+  [Suggested Hymnal Import Process](ChurchManager.HymnalImportProcess.md), keeping
+  curated permanent-ID packages separate from congregation-supplied local CSV
+  imports.
 - Distinguish an underlying hymn from its numbered and titled appearance in a
   particular hymnal.
 - Define how Proper hymn suggestions resolve against the congregation's selected
