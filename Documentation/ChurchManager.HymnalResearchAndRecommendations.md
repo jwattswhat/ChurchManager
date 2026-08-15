@@ -13,6 +13,30 @@ The central design requirement is to distinguish the underlying hymn from its nu
 
 Full lyrics, music images, harmonizations, recordings, and service music must not be imported merely because ChurchManager can store them. Each type of content requires appropriate copyright and license review.
 
+### Non-negotiable identifier rule
+
+`HymnID` is a local MariaDB surrogate key only. It is never a portable hymn
+identity and must never be stored in an installation package, starter dataset,
+upgrade manifest, or cross-installation mapping.
+
+Every portable hymnal entry must have a stable textual catalog key, for example
+`lsb:656`. The hymnal itself also requires a stable package key such as `lsb`.
+When a package is installed, ChurchManager resolves those keys to the numeric
+`tblHymnal.ID` and `tblHymn.ID` values created in that particular database.
+Different installations are expected to assign different numeric IDs.
+
+All dependent package records, including Proper hymn suggestions and Order of
+Service starter references, must use stable textual keys during import. The
+installer converts them to local foreign keys only after their referenced
+catalog entries exist. The entire package installation must be transactional:
+an unresolved or duplicate stable key aborts and rolls back the package rather
+than leaving partially linked records.
+
+Existing local worship history continues to use numeric foreign keys normally.
+Database backups preserve those local IDs. Catalog updates locate existing
+entries by their stable keys and must never renumber or reinterpret historical
+`HymnID` values.
+
 ## 1. Existing ChurchManager support
 
 ChurchManager already provides a useful foundation:
