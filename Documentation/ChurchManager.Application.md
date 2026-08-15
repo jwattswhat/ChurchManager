@@ -22,7 +22,7 @@ ChurchManager is a Windows desktop application for managing the administrative a
 - wxPython for its graphical interface;
 - MariaDB/MySQL for persistent data;
 - the companion JSForm framework for JSON-defined data-entry forms;
-- LimeReport for most formatted reports;
+- the JSForm visual report system and PDF renderer for formatted reports;
 - FPDF and custom Python scripts for some specialized output; and
 - Google Calendar and email integrations for selected workflows.
 
@@ -83,9 +83,9 @@ flowchart TB
 
     REPORTS --> RPTMETA["Report definitions<br/>tblReports"]
     RPTMETA --> DB
-    REPORTS --> LIME["LimeReport templates<br/>LimeReportPattern/*.lrxml"]
+    REPORTS --> VISUAL["JSForm visual definitions<br/>visual_reports/definitions/*.json"]
     REPORTS --> SCRIPTS["Specialized Python generators"]
-    LIME --> PDF["Generated PDF reports"]
+    VISUAL --> PDF["Generated PDF reports"]
     SCRIPTS --> OUTPUT["Orders of service, directories,<br/>bulletin text, and exports"]
 
     WORSHIP --> FILES["Sermons, outlines,<br/>hymn files, and inserts"]
@@ -94,7 +94,11 @@ flowchart TB
     BACKUP --> DUMPS["Sensitive SQL backup files<br/>BackupDB/"]
 ```
 
-The main menu is the operational hub. Most functional screens read from and write to ChurchDB. Reporting combines database records with LimeReport templates or specialized Python generators. Email, generated documents, filesystem archives, and database backups leave the central database flow and therefore require separate security and retention controls.
+The main menu is the operational hub. Most functional screens read from and
+write to ChurchDB. Reporting combines approved database datasets with JSForm
+visual definitions or specialized Python generators. Email, generated
+documents, filesystem archives, and database backups leave the central database
+flow and therefore require separate security and retention controls.
 
 ### 2.1 Main application
 
@@ -110,7 +114,7 @@ At runtime the dependency direction is:
 ChurchManager workflows and menu actions
     -> ChurchManager services and form factory
         -> JSForm public form, database, and reporting APIs
-            -> wxPython, MariaDB, and LimeReport
+            -> wxPython, MariaDB, and the JSForm PDF renderer
 ```
 
 ChurchManager has not replaced JSForm. `ChurchManagerFormFactory` creates the
@@ -174,7 +178,9 @@ The installed form engine also requires its support configuration to be availabl
 
 ### 2.4 ChurchManager reports and document generation
 
-Most formatted database reports use LimeReport `.lrxml` definitions in `LimeReportPattern`. Report metadata and required parameters are stored in `tblReports`.
+Formatted database reports use JSON definitions in `visual_reports/definitions`,
+approved dataset providers, and JSForm's PDF renderer. Report metadata,
+permissions, and required parameters are stored in `tblReports`.
 
 Other output is created by dedicated Python scripts, including:
 
@@ -193,7 +199,7 @@ Other output is created by dedicated Python scripts, including:
 | `ChurchManager-Test.bat` | Development/test launcher; requires a locally rebuilt `.runtime-venv`. |
 | `Forms/` | JSON definitions for application screens. |
 | `SQL/` | Database schema fragments, table dumps, views, imports, and maintenance queries. |
-| `LimeReportPattern/` | LimeReport report definitions. |
+| `visual_reports/definitions/` | Starter definitions for supported visual reports. |
 | `Documentation/` | Application and form documentation. |
 | `assets/` | Source artwork and other application-owned static assets. |
 | `migrations/` | Versioned ChurchDBTest schema migrations. |
@@ -215,7 +221,7 @@ The checked-in launcher and process calls are Windows-specific. The application 
 - wxPython;
 - network access to the MariaDB/MySQL server;
 - the sibling JSForm project available to Python as `JSForm`; and
-- LimeReport installed if formatted reports are required.
+- the JSForm reporting dependencies listed in `requirements-runtime.txt`.
 
 The current `requirements.txt` records historical package versions. Its important packages include:
 
@@ -236,7 +242,6 @@ The repository's `.venv` is tied to the machine on which it was created. A new m
 Depending on the features used, ChurchManager requires:
 
 - MariaDB/MySQL server containing ChurchDB;
-- LimeReport executable;
 - a PDF viewer;
 - Microsoft Word for some order-of-service and document conversion workflows;
 - Google Calendar API credentials and authorization token; and
@@ -280,8 +285,6 @@ ChurchManager and JSForm read path and formatting values from `tblConfig`. Commo
 | `Location/Form` | JSON form directory. |
 | `Location/Picture` | Pictures directory. |
 | `Location/Report` | Generated-report directory. |
-| `Location/ReportDescription` or `Location/LimeReportPattern` | LimeReport pattern directory. |
-| `Location/LimeReport` | Directory containing the LimeReport executable. |
 | `Location/MySQLDump` | Directory containing `mysqldump`. |
 | `Location/DBBackup` | Destination for database dumps. |
 | `Location/Sermon` | Sermon directory. |
@@ -309,11 +312,10 @@ production database names match. The framework configuration connection also
 uses `testing.jsform_database` (`JSFormTest`) instead of the production `JSForm`
 database.
 
-LimeReport templates retain their production definitions on disk. When a test
-session runs a report, ChurchManager creates a temporary copy whose embedded
-database target is `ChurchDBTest` (or `JSFormTest` for a framework report), runs
-that copy, and removes it afterward. Production report templates are never
-rewritten by test mode.
+Visual report definitions do not embed a database login. Test mode builds
+datasets from `ChurchDBTest`; production mode uses the explicitly configured
+production database. Definitions therefore require no environment-specific
+rewriting or temporary credential-bearing copy.
 
 Supported command-line options are:
 
@@ -622,7 +624,10 @@ The Reports screen reads report definitions from `tblReports`. A report definiti
 - optional batch members; and
 - notes.
 
-When a report is selected, the form enables the controls named in its parameter list. Running the report passes those values to JSForm's LimeReport runner, which generates and opens a PDF.
+When a report is selected, the form enables the controls named in its parameter
+list. Running the report builds an approved dataset, resolves the customized or
+starter JSON definition, and passes both to JSForm's PDF renderer. Unknown or
+retired report codes fail closed.
 
 Common parameters include:
 
@@ -679,20 +684,21 @@ Some menu actions bypass the general Reports screen:
 - Sunday Announcements runs `rptAnnouncement.py`.
 - Prepare Bulletin Order uses the structured weekly Order of Service.
 - Member Directory uses `rptMemberDirectory.py` where the menu item is enabled.
-- Prayer Requests can invoke LimeReport directly.
+- Prayer Requests uses the ordinary authorized visual-report pipeline.
 
 ### 9.4 Report troubleshooting
 
 If a report fails:
 
 1. Confirm the report exists in `tblReports`.
-2. Confirm the `.lrxml` filename matches the report code.
+2. Confirm `visual_reports/definitions/<code>.json` exists and validates.
 3. Confirm all requested parameter controls are enabled and populated.
-4. Confirm the LimeReport executable path.
-5. Confirm the pattern and output directories.
+4. Confirm the report code is in `OFFICIAL_CODES` and its dataset provider uses
+   approved report-safe views.
+5. Confirm the output directory is writable.
 6. Confirm the output PDF is not open or locked.
-7. Run the relevant query against a safe database client to verify it returns data.
-8. Review `Log.txt` and any terminal output.
+7. Run the relevant view against a safe database client to verify it returns data.
+8. Review Support Diagnostics and any terminal output.
 
 ## 10. Database overview
 
@@ -719,7 +725,8 @@ The following table groups the principal ChurchManager tables by purpose. The li
 - `ChurchDBTest` was migrated in August 2026 to InnoDB with explicit foreign keys. This test migration does not imply that production `ChurchDB` has been migrated.
 - Several scripts select `*` and access columns by numerical position. Changing schema order can therefore break application logic even when field names remain unchanged.
 
-Before changing the schema, search Python, JSON forms, SQL views, and LimeReport templates for every affected table and column.
+Before changing the schema, search Python, JSON forms, report definitions,
+dataset providers, and SQL views for every affected table and column.
 
 ## 11. Configuration and options
 
@@ -822,9 +829,11 @@ Keep the control name identical across all three locations.
 
 ### 14.3 Adding a report
 
-1. Create and test the LimeReport `.lrxml` template.
-2. Store it in `LimeReportPattern` using a unique report code.
-3. Add a matching `tblReports` row.
+1. Define an approved dataset contract and report-safe data source.
+2. Create and validate a JSON starter in `visual_reports/definitions` using a
+   unique report code.
+3. Register the specification in `visual_reports/report_inventory.py` and add a
+   matching `tblReports` row through a numbered migration.
 4. List parameter control names exactly as they appear on `frmReports`.
 5. Confirm all required parameter controls exist.
 6. Run the report with representative and empty data.
@@ -906,7 +915,7 @@ Much of the current code constructs SQL and external commands through string for
 | Update fails | Check required fields, database permissions, field types, date formats, and terminal/log errors. |
 | Linked form shows no records | Verify the parent has been saved and its ID is substituted into the linked form's condition. |
 | New linked record lacks its parent ID | Check the linked form's `fillonblank` mapping. |
-| Report fails or no PDF appears | Verify `tblReports`, pattern filename, required parameters, LimeReport path, report output path, and whether an older PDF is locked. |
+| Report fails or no PDF appears | Verify `tblReports`, the JSON starter, approved dataset/view, required parameters, output path, and whether an older PDF is locked. |
 | Order of service is incomplete | Verify service, propers, readings, hymns, OS components, and referenced files. |
 | Participant scheduling creates nothing | Verify the service date/time, propers season, participant roles, and matching schedule rules. Also check whether assignments already exist. |
 | Participant email has no recipients | Verify `tblServiceRole` assignments and participant email addresses. |

@@ -14,10 +14,8 @@ import contextlib
 import io
 import json
 import py_compile
-import re
 import tempfile
 import unittest
-import xml.etree.ElementTree as ET
 from datetime import date, datetime
 from pathlib import Path
 
@@ -26,7 +24,7 @@ from docx import Document
 
 ROOT = Path(__file__).resolve().parents[1]
 FORMS = ROOT / "Forms"
-REPORTS = ROOT / "LimeReportPattern"
+VISUAL_REPORTS = ROOT / "visual_reports" / "definitions"
 
 
 class TestCopyrightSensitiveWorshipFields(unittest.TestCase):
@@ -1083,7 +1081,7 @@ class TestChurchManagerForms(unittest.TestCase):
         self.assertTrue(removed_forms.isdisjoint({path.stem for path in FORMS.glob("*.json")}))
         self.assertTrue(removed_controls.isdisjoint(main["CONTROLS"]))
         self.assertTrue(removed_forms.isdisjoint(FORM_ROUTES.values()))
-        self.assertTrue(removed_reports.isdisjoint({path.stem for path in REPORTS.glob("*.lrxml")}))
+        self.assertTrue(removed_reports.isdisjoint({path.stem for path in VISUAL_REPORTS.glob("*.json")}))
         for report_code in removed_reports:
             self.assertIn(report_code, report_filter)
 
@@ -1097,83 +1095,13 @@ class TestChurchManagerReportAssets(unittest.TestCase):
         self.assertIn('enable_button("ChurchID")', report_case)
         self.assertIn('CONTROLID["ReportID"].SetFocus()', report_case)
 
-    def test_lime_report_test_template_changes_database_without_changing_source(self):
-        function = load_function_without_importing(
-            Path(r"C:\Users\Pastor\Documents\JSForm\fnReport.py"),
-            "prepare_lime_report_template",
-            {"Path": Path, "re": re, "tempfile": tempfile, "escape": lambda value: value},
-        )
-        with tempfile.TemporaryDirectory(prefix="lime_report_mode_") as folder:
-            source = Path(folder) / "sample.lrxml"
-            original = (
-                '<databaseName Type="QString">ChurchDB</databaseName>'
-                '<host Type="QString">192.0.2.10</host>'
-            )
-            source.write_text(original, encoding="utf-8")
-            staged_name, temporary = function(source, "ChurchDBTest")
-            staged = Path(staged_name)
-            self.assertEqual(source.read_text(encoding="utf-8"), original)
-            staged_text = staged.read_text(encoding="utf-8")
-            self.assertIn(">ChurchDBTest</databaseName>", staged_text)
-            self.assertIn(">localhost</host>", staged_text)
-            self.assertIsNotNone(temporary)
-            temporary.unlink(missing_ok=True)
-
-    def test_lime_report_production_staging_preserves_template_host(self):
-        function = load_function_without_importing(
-            Path(r"C:\Users\Pastor\Documents\JSForm\fnReport.py"),
-            "prepare_lime_report_template",
-            {"Path": Path, "re": re, "tempfile": tempfile, "escape": lambda value: value},
-        )
-        with tempfile.TemporaryDirectory(prefix="lime_report_mode_") as folder:
-            source = Path(folder) / "sample.lrxml"
-            original = (
-                '<databaseName Type="QString">ChurchDB</databaseName>'
-                '<host Type="QString">192.0.2.10</host>'
-            )
-            source.write_text(original, encoding="utf-8")
-            staged_name, temporary = function(source, "ChurchDB")
-            self.assertEqual(staged_name, str(source))
-            self.assertIsNone(temporary)
-            self.assertEqual(source.read_text(encoding="utf-8"), original)
-
-    def test_report_patterns_are_well_formed_xml(self):
-        files = sorted(REPORTS.glob("*.lrxml")) + sorted(REPORTS.glob("*.lrsml"))
-        self.assertGreater(files, [], "No ChurchManager report patterns found")
-        for path in files:
-            with self.subTest(report=path.name):
-                ET.parse(path)
-
-    def test_report_codes_are_unique_ignoring_case(self):
-        files = sorted(REPORTS.glob("*.lrxml")) + sorted(REPORTS.glob("*.lrsml"))
-        codes = [path.stem.casefold() for path in files]
-        self.assertEqual(len(codes), len(set(codes)), "Duplicate ChurchManager report code")
-
-    def test_report_templates_do_not_regress_known_standardization_defects(self):
-        files = sorted(REPORTS.glob("*.lrxml")) + sorted(REPORTS.glob("*.lrsml"))
-        combined = "\n".join(
-            path.read_text(encoding="utf-8-sig") for path in files
-        )
-        for obsolete in (
-            "Purchaced",
-            "Atttendance",
-            'dateTimeFormat(now(),"d-MMM-yy hh:ssa")',
-            'dateTimeFormat(now(),"d-MMM-yy hh:ss a")',
-            'dateTimeFormat(now(),"dd-MMM-yy hh:ss a")',
-            "Life in Christ\n\nMember Directory",
-        ):
-            with self.subTest(obsolete=obsolete):
-                self.assertNotIn(obsolete, combined)
-
-        expected_codes = {
-            "CMAD01.lrsml": "CMAD01",
-            "CMAT02.lrxml": "CMAT02",
-            "CMPJ02.lrxml": "CMPJ02",
-        }
-        for filename, code in expected_codes.items():
-            with self.subTest(report=filename):
-                text = (REPORTS / filename).read_text(encoding="utf-8-sig")
-                self.assertIn('<content Type="QString">{}</content>'.format(code), text)
+    def test_churchmanager_has_no_lime_report_runtime_assets(self):
+        patterns = ROOT / "LimeReportPattern"
+        self.assertFalse(any(patterns.glob("*.lrxml")))
+        self.assertFalse(any(patterns.glob("*.lrsml")))
+        source = (ROOT / "report_service.py").read_text(encoding="utf-8")
+        self.assertNotIn("LimeReportProcess", source)
+        self.assertNotIn("prepare_lime_report_template", source)
 
     def test_church_form_exposes_database_logo_image_picker(self):
         church = next(iter(load_json(FORMS / "frmChurch.json").values()))

@@ -124,10 +124,10 @@ table(doc,['Check','Procedure','Pass criteria'],[
 ('Application JSON parse','Parse every ChurchManager Forms/*.json file as application data.','All ChurchManager form files are valid JSON.'),
 ('Application form inventory','Check that each ChurchManager form referenced by cm.py or another ChurchManager module has a corresponding local definition or a documented dependency exception.','No missing ChurchManager form asset; no attempt is made to test the JSForm loader.'),
 ('Required files','Confirm cm.py, churchmanager.json, Forms, SQL, schema, report templates, and required scripts exist.','No required component is missing.'),
-('Report inventory','Compare report catalog entries in the test database with LimeReportPattern files.','Every enabled report maps to a real pattern; exceptions are documented.'),
+('Report inventory','Compare enabled test-database catalog entries with JSForm visual report definitions.','Every enabled report maps to an approved JSON starter and dataset contract.'),
 ('Secrets check','Review changed files, launch settings, logs, and instructions for passwords, tokens, or private exports.','No password appears in source, configuration, environment variables, command lines, logs, or packaged output.'),
 ],[1.2,3.3,2.0])
-callout(doc,'Known report exception','Historical catalog/template drift may include CMFD01 and CMCL01 without matching .lrxml files; CMMD01 may be related. Do not “fix” catalog data by assumption—verify against the test database and an expected report output first.')
+callout(doc,'Retired report codes','Migration 065 disables historical report codes that have no approved JSForm visual definition. Unknown codes fail closed rather than invoking an external report engine.')
 
 doc.add_heading('5. Startup and smoke test',level=1)
 for i,(a,e) in enumerate([
@@ -191,7 +191,7 @@ doc.add_heading('10. Integrations and failure handling',level=1)
 table(doc,['Integration','Normal test','Failure test'],[
 ('Database','Read, insert, update, navigate, and reopen representative records.','Disconnect or use an invalid test endpoint; verify the error is visible and no partial data is claimed saved.'),
 ('Filesystem','Open and generate disposable documents.','Use a missing/read-only test path; verify a useful failure and no silent record damage.'),
-('LimeReport','Generate a known report and inspect the PDF.','Use a missing test template or unavailable executable; verify diagnosis identifies the dependency.'),
+('Visual reports','Generate a known report and inspect the PDF.','Use a missing or invalid test definition; verify diagnosis identifies the definition or dataset problem.'),
 ('Email','Preview/send only to a controlled test address.','Remove the test address or deny connection; verify no false success message.'),
 ('Google Calendar','Read a controlled service-week calendar if authorization is available.','Test unavailable network/expired authorization; verify the application remains understandable and recoverable.'),
 ('Backup','Generate a test backup, verify nonzero size, and perform a restore drill.','Use an invalid test output path; verify “complete” is not accepted without a real file.'),
@@ -211,7 +211,7 @@ table(doc,['Changed component','Minimum focused tests'],[
 ('Database query/schema','Restore test baseline, CRUD for affected forms, relationship checks, reports that consume changed fields.'),
 ('fnSchedule.py','Controlled service, role eligibility, duplicate prevention, assignments, test-only notification.'),
 ('rpt*.py','Controlled inputs, generated file existence, content comparison, every-page visual inspection.'),
-('LimeReport pattern/catalog','Catalog mapping, parameters, PDF generation, grouping/totals, pagination, locked-output handling.'),
+('Visual report definition/catalog','Catalog mapping, approved dataset, parameters, PDF generation, grouping/totals, pagination, locked-output handling.'),
 ('Sermon/file handling','Stable IDs, search, link open, rename on disposable files, count and missing-file scan.'),
 ('Configuration/paths','Startup, all changed paths, missing-path behavior, no production crossover.'),
 ],[1.65,4.85])
@@ -233,7 +233,7 @@ doc.add_paragraph('ChurchManager currently relies heavily on manual and explorat
 for x in ['Non-interactive parsing and reference checks for ChurchManager application form files, without testing the JSForm parser itself.','ChurchManager module tests for menu dispatch, scheduling rules, date/week selection, output-path selection, and safe error handling using substituted dependencies.','A report-catalog validator for unique codes, template existence, parameter compatibility, and output creation.','Database integration tests for ChurchManager workflows using a disposable restored fixture.','Sermon archive checks for duplicate IDs, missing files, broken links, and portable-export completeness.','Golden-output comparisons for selected ChurchManager-generated documents, with a deliberate review process for approved layout changes.']: bullet(doc,x)
 
 doc.add_heading('Appendix C. Related project references',level=1)
-for x in ['Documentation/ChurchManager.Application.md — application operation, architecture, reports, backups, troubleshooting, and maintenance.','Documentation/form.documentation.md — reference for ChurchManager-owned JSON application definitions; framework testing is excluded.','tests/ — maintained ChurchManager application tests.','Forms/ and LimeReportPattern/ — ChurchManager screen definitions and visual report templates under test.','Separate future document — JSForm framework and module testing procedures.']: bullet(doc,x)
+for x in ['Documentation/ChurchManager.Application.md — application operation, architecture, reports, backups, troubleshooting, and maintenance.','Documentation/form.documentation.md — reference for ChurchManager-owned JSON application definitions; framework testing is excluded.','tests/ — maintained ChurchManager application tests.','Forms/ and visual_reports/definitions/ — ChurchManager screen and report definitions under test.','Separate future document — JSForm framework and module testing procedures.']: bullet(doc,x)
 
 # Keep headings with following content and set core metadata.
 for p in doc.paragraphs:

@@ -128,24 +128,18 @@ class TestBackupService(unittest.TestCase):
 
 
 class TestReportService(unittest.TestCase):
-    def test_catalog_reports_stay_on_jsform(self):
+    def test_catalog_report_without_visual_definition_fails_closed(self):
         checked = []
-        class JSFormStub:
-            @staticmethod
-            def RunReport(*arguments):
-                return arguments
         class AccessStub:
             @staticmethod
             def require_report(report_id):
                 checked.append(report_id)
-        settings = {"database": "ChurchDBTest"}
+                return ("LEGACY01", "reports.general.run")
         service = ChurchManagerReportService(
-            JSFormStub, object(), AccessStub(), connection_settings=settings
+            object(), object(), AccessStub(), connection_settings={"database": "ChurchDBTest"}
         )
-        self.assertEqual(
-            service.run_catalog_report(7, "form", "connection"),
-            (7, "form", "connection", settings),
-        )
+        with self.assertRaisesRegex(ValueError, "no approved JSForm visual definition"):
+            service.run_catalog_report(7, "form", "connection")
         self.assertEqual(checked, [7])
 
     def test_official_visual_report_uses_visual_pipeline(self):

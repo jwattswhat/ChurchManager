@@ -64,6 +64,18 @@ should not delay a stable ChurchManager release.
 
 ### 3. Release, installation, and recovery readiness
 
+#### LimeReports retirement workstream
+
+- Source implementation completed August 14, 2026.
+- All supported catalog reports use JSForm visual report definitions and the
+  internal PDF renderer.
+- The external LimeReports fallback, templates, diagnostics, and configuration
+  have been removed from ChurchManager.
+- Migration 065 disables obsolete catalog codes and removes obsolete path
+  settings.
+- Remaining acceptance work is the representative report-family visual review
+  documented in [LimeReports retirement](ChurchManager.LimeReports.Retirement.md).
+
 - Implement the proposed [ChurchManager error logging and support specification](ChurchManager.ErrorLogging.Specification.md)
   after the companion JSForm facility is approved and implemented.
 - Complete the formal visual acceptance review of all official reports.

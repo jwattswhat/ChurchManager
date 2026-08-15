@@ -62,6 +62,7 @@ read-only database checks and manual verification boundaries.
 - [Development guide](Documentation/DEVELOPMENT.md)
 - [Database inventory](Documentation/DATABASE_STRUCTURE_INVENTORY.md)
 - [Screen inventory](Documentation/SCREEN_INVENTORY.md)
+- [LimeReports retirement](Documentation/ChurchManager.LimeReports.Retirement.md)
 - [Migrations](migrations/README.md)
 - [Versioning](Documentation/VERSIONING.md)
 - [Contributing](CONTRIBUTING.md)

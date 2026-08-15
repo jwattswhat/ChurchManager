@@ -49,9 +49,6 @@ REQUIRED_TABLES = {
     "tblAccountingBudgetLine",
     "tblLectionarySystem",
 }
-REMOVED_REPORT_CODES = {"CFCA01", "CFCR01", "CFGR01", "CMDN01", "CMDN02"}
-
-
 def database_tests_enabled() -> bool:
     return os.environ.get("CHURCHMANAGER_RUN_DB_TESTS") == "1"
 
@@ -210,26 +207,14 @@ class TestChurchManagerDatabase(unittest.TestCase):
         )
         self.assertEqual(duplicates, [], "Duplicate report codes were found in tblReports")
 
-    def test_report_catalog_patterns_exist(self):
+    def test_available_report_catalog_uses_only_visual_definitions(self):
         rows = self.query(
             "SELECT DISTINCT Report FROM tblReports "
-            "WHERE Report IS NOT NULL AND Report <> '' "
-            "AND (Batch IS NULL OR TRIM(Batch) = '')"
+            "WHERE Available=1 AND Report IS NOT NULL AND Report <> ''"
         )
-        available = {
-            path.stem.casefold()
-            for pattern in ("*.lrxml", "*.lrsml")
-            for path in (ROOT / "LimeReportPattern").glob(pattern)
-        }
-        removed = {code.casefold() for code in REMOVED_REPORT_CODES}
         visual = {code.casefold() for code in OFFICIAL_CODES}
-        missing = sorted(
-            code for (code,) in rows
-            if str(code).casefold() not in available
-            and str(code).casefold() not in removed
-            and str(code).casefold() not in visual
-        )
-        self.assertEqual(missing, [], "Report catalog codes without local LimeReport patterns")
+        unexpected = sorted(code for (code,) in rows if str(code).casefold() not in visual)
+        self.assertEqual(unexpected, [], "Available catalog codes without JSForm visual definitions")
 
     def test_sample_operational_tables_are_readable(self):
         for table in sorted(REQUIRED_TABLES):

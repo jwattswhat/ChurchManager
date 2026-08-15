@@ -4,7 +4,8 @@ import unittest
 import JSForm
 
 from visual_reports.report_inventory import (
-    CONSOLIDATED_CODES, DISABLED_CODES, LAUNCHER_CODES, OFFICIAL_CODES, SPECS,
+    CONSOLIDATED_CODES, DISABLED_CODES, LAUNCHER_CODES, OFFICIAL_CODES,
+    RETIRED_CODES, SPECS,
 )
 from visual_reports.tabular_dataset import TabularDatasetProvider, contract_for
 from visual_reports.worship_planning_dataset import WORSHIP_PLANNING_CONTRACT
@@ -19,6 +20,7 @@ class TestVisualReportInventory(unittest.TestCase):
         self.assertEqual(CONSOLIDATED_CODES, {"CMAD01", "CMPH01"})
         self.assertEqual(DISABLED_CODES, {"CMSM01"})
         self.assertEqual(LAUNCHER_CODES, {"CMBATCH00"})
+        self.assertTrue(RETIRED_CODES.isdisjoint(OFFICIAL_CODES))
 
     def test_every_official_report_has_a_valid_starter(self):
         loader = JSForm.ReportDefinitionLoader()

@@ -248,21 +248,6 @@ class clsForm(JSForm.clsForm):
 
 
 def _buttonclick(event):
-    def _runSPrpt(event):
-        context.services.reports.run_catalog_report(2, frm, context.connection)
-
-    def _runPrayerRequests():
-        reportdescription = JSForm.CONFIG.get_Config_Value(
-            "Location", "ReportDescription"
-        )
-        report = JSForm.CONFIG.get_Config_Value("Location", "Report")
-        limedir = JSForm.CONFIG.get_Config_Value("Location", "LimeReport")
-        source_template = "{reportdescription}CMPR01.lrxml".format(reportdescription=reportdescription)
-        context.services.reports.run_lime_report(
-            source_template, "{report}CMPR01.pdf".format(report=report),
-            arguments["database"], limedir,
-        )
-
     def _runSundayPrayers():
         show_sunday_preview(
             cmfrm.FRAME, context.connection, "prayer", get_today(load_report_config()),

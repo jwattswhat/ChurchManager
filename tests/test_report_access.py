@@ -1,6 +1,5 @@
 import unittest
 from pathlib import Path
-import re
 
 from authorization import AuthorizationDenied
 from report_access import ReportAccessService
@@ -141,32 +140,6 @@ class TestReportViewMigration(unittest.TestCase):
         for table in forbidden:
             self.assertNotIn(f"FROM {table}", self.sql)
             self.assertNotIn(f"JOIN {table}", self.sql)
-
-    def test_lime_report_queries_use_only_report_views(self):
-        report_dir = Path(__file__).resolve().parents[1] / "LimeReportPattern"
-        templates = tuple(report_dir.glob("*.lrxml")) + tuple(report_dir.glob("*.lrsml"))
-        direct_table = re.compile(r"\b(?:FROM|JOIN)\s+tbl[A-Za-z0-9_]+", re.IGNORECASE)
-        violations = []
-        for path in templates:
-            match = direct_table.search(path.read_text(encoding="utf-8"))
-            if match:
-                violations.append(f"{path.name}: {match.group(0)}")
-        self.assertEqual(violations, [])
-
-    def test_permanent_lime_templates_store_no_database_credentials(self):
-        report_dir = Path(__file__).resolve().parents[1] / "LimeReportPattern"
-        templates = tuple(report_dir.glob("*.lrxml")) + tuple(report_dir.glob("*.lrsml"))
-        populated = re.compile(
-            r'<(?:databaseName|host|userName)\s+Type="QString">[^<]+</|'
-            r'<password\b[^>]*\bValue="[^"]+',
-            re.IGNORECASE,
-        )
-        violations = [
-            path.name for path in templates
-            if populated.search(path.read_text(encoding="utf-8"))
-        ]
-        self.assertEqual(violations, [])
-
 
 if __name__ == "__main__":
     unittest.main()

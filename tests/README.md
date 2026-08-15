@@ -20,7 +20,7 @@ The initial suite checks:
 - parsing and basic structure of all ChurchManager `Forms/*.json` definitions;
 - local targets for open-file and linked-form actions, file-picker directories,
   and main-menu controls bound by `cm.py`;
-- XML validity and code uniqueness of LimeReport patterns.
+- validity, code uniqueness, and dataset contracts of JSForm visual reports.
 
 A passing run ends with `OK` and returns exit code 0. A failing run identifies the
 specific module or asset and returns exit code 1.
