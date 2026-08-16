@@ -910,6 +910,9 @@ If this repository has been copied, synchronized to an untrusted service, or sha
 - Exclude OAuth tokens, client secrets, database dumps, logs, reports, and private documents from source control.
 - Encrypt off-site backups.
 - Restrict ChurchDB network access.
+- If future remote desktop access is permitted, use a safely configured,
+  encrypted, vendor-neutral VPN design. Never expose MariaDB or unrestricted
+  remote-desktop access directly to the public internet.
 - Use a least-privilege application account.
 - Limit report distribution according to its contents.
 - Establish a retention policy for attendance, Communion, membership, and pastoral records.

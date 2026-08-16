@@ -93,6 +93,25 @@ Log Out. A future release may add configurable inactivity locking. Sensitive
 operations may request password confirmation if congregational policy requires
 it.
 
+### 3.5 Future remote access boundary
+
+The initial ChurchManager deployment is private-network software. If remote
+desktop users are later supported, they must reach the congregation's private
+network through a safely configured encrypted VPN suitable for the local
+environment. ChurchManager does not endorse a particular VPN provider or
+product.
+
+MariaDB, database administration, Windows file sharing, and unrestricted remote
+desktop services must not be exposed directly to the public internet. Remote
+access design must include least-privilege and individually revocable VPN
+accounts, maintained endpoint devices, access-offboarding procedures, audit
+review, and a recovery plan.
+
+The VPN is only a network boundary. It does not replace individual
+ChurchManager authentication, permissions, database least privilege, auditing,
+session controls, or two-factor authentication required by a future remote,
+browser, or member-access project.
+
 ## 4. Master administrator
 
 ### 4.1 Initial master account

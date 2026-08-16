@@ -23,7 +23,7 @@ open-source church-management systems.
 | 11 | Later | Confidential contributions and pledges | Valuable, but requires a separate privacy-sensitive specification and subledger. |
 | 12 | Later | General events and calendar integration | Useful, but Google Calendar should remain the primary calendar platform. |
 | 13 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
-| Triggered | Conditional | Two-factor authentication | Required if remote, browser, or member access is introduced. |
+| Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
 
 Items 1 through 6 should be completed before beginning a new major subsystem.
 Items 7 through 10 form the next ministry-development phase. Items 11 through 13
@@ -324,12 +324,22 @@ future roadmap projects:
 - Avoid using arbitrary custom fields where a normalized ChurchManager
   relationship is more appropriate.
 
-### Conditional: two-factor authentication if remote access is introduced
+### Conditional: secure remote access and two-factor authentication
 
 - Two-factor authentication is not required for the current local-only use.
 - Require it as part of any future remote, browser, or member-portal project.
 - Include recovery codes, administrative recovery, auditing, and clear account
   ownership rules in its specification.
+- For remote use of the desktop application, recommend a professionally and
+  safely configured VPN appropriate to the congregation's network. Keep the
+  recommendation vendor-neutral.
+- Never expose MariaDB, its administration port, Windows file sharing, or an
+  unrestricted remote-desktop service directly to the public internet.
+- Require least-privilege VPN accounts, encrypted transport, revocable access,
+  endpoint updates, and documented removal of access when a user leaves a role.
+- A VPN protects the network path but does not replace individual ChurchManager
+  accounts, application permissions, database least privilege, auditing, or
+  future 2FA requirements.
 
 ## Integration candidates rather than native subsystems
 

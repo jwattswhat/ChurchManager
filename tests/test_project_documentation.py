@@ -52,6 +52,17 @@ class ProjectDocumentationTests(unittest.TestCase):
         self.assertIn("all email\ndelivery is disabled", specification)
         self.assertIn("### 4. Secure SMTP connection", roadmap)
 
+    def test_future_remote_access_requires_a_vendor_neutral_vpn(self):
+        roadmap = (ROOT / "Documentation" / "ChurchManager.FixList.md").read_text(
+            encoding="utf-8"
+        )
+        security = (
+            ROOT / "Documentation" / "ChurchManager.UserSecurity.Specification.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("recommendation vendor-neutral", roadmap)
+        self.assertIn("encrypted VPN", security)
+        self.assertIn("must not be exposed directly to the public internet", security)
+
     def test_license_and_readme_identify_gpl(self):
         license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
