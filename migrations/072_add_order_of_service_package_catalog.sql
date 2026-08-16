@@ -25,7 +25,7 @@ ALTER TABLE tblBulletinOrderTemplate
 
 UPDATE tblBulletinOrderTemplate
 SET TemplateKey=CASE
-    WHEN SourceLegacyName='STARTER:LCMS-DS1' THEN 'divine-service-setting-one'
+    WHEN IsStarter=1 AND Name='LCMS Divine Service One' THEN 'divine-service-setting-one'
     WHEN IsStarter=1 THEN CONCAT('starter-existing-',ID)
     ELSE CONCAT('local-',ID)
 END

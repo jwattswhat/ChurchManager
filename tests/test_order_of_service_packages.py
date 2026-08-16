@@ -109,6 +109,7 @@ class OrderOfServicePackageTests(unittest.TestCase):
         self.assertIn("DROP COLUMN IF EXISTS LegacyContent", source)
         self.assertIn("DROP COLUMN IF EXISTS GeneratedHtml", source)
         self.assertIn("ON DELETE RESTRICT", source)
+        self.assertNotIn("SourceLegacyName", source)
 
 
 if __name__ == "__main__":
