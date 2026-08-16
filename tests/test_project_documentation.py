@@ -15,6 +15,8 @@ class ProjectDocumentationTests(unittest.TestCase):
             "Documentation/ARCHITECTURE.md", "Documentation/DEVELOPMENT.md",
             "Documentation/ChurchManager.Application.md",
             "Documentation/ChurchManager.UserPersonLink.Specification.md",
+            "Documentation/ChurchManager.SMTPConnection.Specification.md",
+            "Documentation/ChurchManager.SMTPConnection.Review.md",
             "Documentation/DATABASE_STRUCTURE_INVENTORY.md",
             "Documentation/SCREEN_INVENTORY.md", "Documentation/VERSIONING.md",
         )
@@ -36,6 +38,18 @@ class ProjectDocumentationTests(unittest.TestCase):
         self.assertIn("temporary password is never", specification)
         self.assertIn("ChurchManager.UserPersonLink.Specification.md", roadmap)
         self.assertIn("optional person links", screens)
+
+    def test_secure_smtp_work_is_specified_and_on_the_roadmap(self):
+        specification = (
+            ROOT / "Documentation" / "ChurchManager.SMTPConnection.Specification.md"
+        ).read_text(encoding="utf-8")
+        roadmap = (ROOT / "Documentation" / "ChurchManager.FixList.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("Windows Credential Manager", specification)
+        self.assertIn("Plain unencrypted SMTP is prohibited", specification)
+        self.assertIn("Send Test Email", specification)
+        self.assertIn("### 4. Secure SMTP connection", roadmap)
 
     def test_license_and_readme_identify_gpl(self):
         license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")

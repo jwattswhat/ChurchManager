@@ -13,19 +13,20 @@ open-source church-management systems.
 | 1 | Completed | User contact information | Foundational contact fields and administration are implemented. |
 | 2 | Completed | Email and participant notification review | The weekly participant-notification workflow has been modernized. |
 | 3 | In acceptance | Optional user-to-person relationship | Source, migration, administration UI, safe auditing, and welcome email are implemented; database and visual acceptance remain. |
-| 4 | Immediate | Hymnal, lectionary, and Order of Service catalog design | Defines what the installer can safely and legally offer. |
-| 5 | Immediate | Release, installation, and recovery readiness | Stabilizes and packages the researched catalogs and existing application. |
-| 6 | Next | Pastoral follow-up | Highest-value ministry addition and a natural extension of attendance. |
-| 7 | Next | Import, export, and duplicate management | Protects data quality and makes adoption and recovery practical. |
-| 8 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
-| 9 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
-| 10 | Later | Confidential contributions and pledges | Valuable, but requires a separate privacy-sensitive specification and subledger. |
-| 11 | Later | General events and calendar integration | Useful, but Google Calendar should remain the primary calendar platform. |
-| 12 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
+| 4 | Immediate | Secure SMTP connection and email settings | Welcome and participant email require deliberate, testable, credential-safe configuration. |
+| 5 | Immediate | Hymnal, lectionary, and Order of Service catalog design | Defines what the installer can safely and legally offer. |
+| 6 | Immediate | Release, installation, and recovery readiness | Stabilizes and packages the researched catalogs and existing application. |
+| 7 | Next | Pastoral follow-up | Highest-value ministry addition and a natural extension of attendance. |
+| 8 | Next | Import, export, and duplicate management | Protects data quality and makes adoption and recovery practical. |
+| 9 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
+| 10 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
+| 11 | Later | Confidential contributions and pledges | Valuable, but requires a separate privacy-sensitive specification and subledger. |
+| 12 | Later | General events and calendar integration | Useful, but Google Calendar should remain the primary calendar platform. |
+| 13 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
 | Triggered | Conditional | Two-factor authentication | Required if remote, browser, or member access is introduced. |
 
-Items 1 through 5 should be completed before beginning a new major subsystem.
-Items 6 through 9 form the next ministry-development phase. Items 10 through 12
+Items 1 through 6 should be completed before beginning a new major subsystem.
+Items 7 through 10 form the next ministry-development phase. Items 11 through 13
 should not delay a stable ChurchManager release.
 
 ## Completed foundations retained for regression protection
@@ -111,7 +112,20 @@ future roadmap projects:
   acceptance work is applying migration 070 to `ChurchDBTest` and visually
   checking create, edit, unlink, and welcome-email actions.
 
-### 4. Hymnal, lectionary, and Order of Service catalog design
+### 4. Secure SMTP connection and email settings
+
+- Approved design: [Secure SMTP connection specification](ChurchManager.SMTPConnection.Specification.md).
+- Review findings: [SMTP connection review](ChurchManager.SMTPConnection.Review.md).
+- Move authentication secrets out of database configuration and into Windows
+  Credential Manager with strict test/production separation.
+- Add a protected Email Settings screen, offline validation, and an explicit
+  confirmed test-email workflow.
+- Require TLS, safe failure categories, redacted diagnostics, and one shared
+  mail factory for welcome and participant messages.
+- Revoke and remove any credential exposed in development source before testing
+  the replacement.
+
+### 5. Hymnal, lectionary, and Order of Service catalog design
 
 #### Hymnal catalog and import workstream
 
@@ -176,7 +190,7 @@ future roadmap projects:
 - Approve the catalog schema and package contents before installation development
   begins.
 
-### 5. Release, installation, and recovery readiness
+### 6. Release, installation, and recovery readiness
 
 #### LimeReports retirement workstream
 
@@ -241,7 +255,7 @@ future roadmap projects:
   implemented source so completed work is not presented as merely proposed and
   current backup/restore behavior is described accurately.
 
-### 6. Pastoral follow-up
+### 7. Pastoral follow-up
 
 - Create follow-up items from attendance warnings or manually.
 - Assign a follow-up to the pastor, an elder, or another authorized caregiver.
@@ -251,7 +265,7 @@ future roadmap projects:
   the main menu.
 - Provide a printable or exportable authorized follow-up list.
 
-### 7. Import, export, and duplicate management
+### 8. Import, export, and duplicate management
 
 - Add a central Data Management screen.
 - Import people and families from CSV with a preview and explicit field mapping.
@@ -262,7 +276,7 @@ future roadmap projects:
 - Record import results, rejected rows, and export history.
 - Provide a complete portable archive format where appropriate.
 
-### 8. Groups, committees, classes, and ministry teams
+### 9. Groups, committees, classes, and ministry teams
 
 - Add general groups independent of worship-participant roles.
 - Support leaders, members, group roles, active dates, notes, and categories.
@@ -271,7 +285,7 @@ future roadmap projects:
 - Permit group attendance and authorized group communication.
 - Add group rosters and participation reports.
 
-### 9. Volunteer availability and responses
+### 10. Volunteer availability and responses
 
 - Add participant availability and blockout dates.
 - Send explicit serve requests and reminders.
@@ -281,7 +295,7 @@ future roadmap projects:
 - Consider optional scheduling suggestions, but never silently replace existing
   assignments.
 
-### 10. Confidential contributions and pledges
+### 11. Confidential contributions and pledges
 
 - Design this as a separate confidential subledger with its own permissions.
 - Support contribution batches, donor accounts, funds/designations, pledges,
@@ -292,7 +306,7 @@ future roadmap projects:
 - Specify privacy, retention, audit, backup, and statement-delivery rules before
   implementation.
 
-### 11. General events and calendar integration
+### 12. General events and calendar integration
 
 - Add non-worship events with one-time or recurring dates.
 - Support simple invitations, RSVP/registration lists, attendance, and notes.
@@ -301,7 +315,7 @@ future roadmap projects:
 - Consider simple room or resource reservations only when a demonstrated need
   exists.
 
-### 12. Custom profile fields and controlled tags
+### 13. Custom profile fields and controlled tags
 
 - Allow authorized administrators to define optional person and family fields
   or tags.
