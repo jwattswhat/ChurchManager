@@ -74,8 +74,18 @@ should not delay a stable ChurchManager release.
 - Keep user email and phone independent from member contact records; linking must
   not silently copy or synchronize contact information.
 - Audit linking, changing, and unlinking a person from a user account.
+- Add an optional new-user welcome email that reuses the shared ChurchManager
+  email service. Include the username, instructions for opening ChurchManager,
+  notice that the temporary password must be changed at first login, and an
+  administrator contact; do not include the temporary password.
+- Require the administrator to communicate the temporary password through a
+  separate channel, while retaining `MustChangePassword=1` until the user
+  successfully replaces it.
+- Record only safe delivery metadata for the welcome message; never store the
+  temporary password in email history, logs, or audit JSON.
 - Cover existing databases, fresh installation, uniqueness, unlinking, User
-  Administration, and authorization with automated tests.
+  Administration, welcome-email delivery, password separation, and authorization
+  with automated tests.
 - Preserve the already completed participant design: `tblParticipant.PersonID`
   remains optional so worship participants may be members or outside people.
 
