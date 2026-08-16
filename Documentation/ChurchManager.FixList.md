@@ -28,40 +28,57 @@ Items 1 through 5 should be completed before beginning a new major subsystem.
 Items 6 through 9 form the next ministry-development phase. Items 10 through 12
 should not delay a stable ChurchManager release.
 
-### Targeted worship enhancement: hymn stanza selection
+## Completed foundations retained for regression protection
 
-- Approved future design: [Hymn stanza selection specification](ChurchManager.HymnStanzaSelection.Specification.md).
-- Allow the planner to record selected stanzas for each hymn occurrence in a
+These completed areas remain part of release testing even though they are not
+future roadmap projects:
+
+- application authentication, roles, permissions, security auditing, user
+  contact information, and password-change enforcement;
+- fund accounting through entry, review, posting, reporting, reconciliation,
+  budgets, close, and year-end close;
+- JSForm visual report generation and design, report security, ChurchManager
+  visual screen design, and starter/custom definition separation;
+- unified worship planning, weekly Orders of Service, hymn selection and stanza
+  selection, Propers/readings, participants, scheduling, required positions,
+  preparation checklists, and worship-planning reports;
+- natural-language prayer and announcement scheduling;
+- synchronized attendance entry and attendance reporting;
+- participant notification email, Gmail thread separation, and safe delivery
+  history;
+- protected backup/restore, automatic exit backup, single-instance startup,
+  responsive main menu, and support-diagnostics/error capture.
+
+### Completed worship enhancement: hymn stanza selection
+
+- Implemented design: [Hymn stanza selection specification](ChurchManager.HymnStanzaSelection.Specification.md).
+- The planner records selected stanzas for each hymn occurrence in a
   weekly Order of Service.
-- Keep stanza selections attached to the individual weekly service line so the
+- Stanza selections remain attached to the individual weekly service line so the
   same hymn can have different selections in different positions.
-- Include the selection in appropriate planning and bulletin-outline output.
-- Do not infer selections from historical free-form notes.
-- Treat this as a focused worship-planning enhancement, not a new major
-  subsystem; schedule it after the interrupted participant-email work unless a
-  more urgent defect intervenes.
+- Planning and bulletin-outline output include the selection.
+- Historical free-form notes are not treated as stanza selections.
 
 ### 1. User contact information
 
-- Proposed design: [ChurchManager user contact information specification](ChurchManager.UserContact.Specification.md)
-- Add email address and phone number to ChurchManager user accounts.
-- Update User Administration, database migrations, validation, auditing, and
-  tests.
-- Keep administrative user contact details separate from congregation member
+- Implemented design: [ChurchManager user contact information specification](ChurchManager.UserContact.Specification.md).
+- User accounts store validated email and phone values.
+- User Administration, migrations, auditing, permissions, display formatting,
+  and automated tests cover the fields.
+- Administrative contact details remain separate from congregation member
   records.
-- Define which security roles may view or edit this information.
 
 ### 2. Email and participant notification review
 
-- Modernize the shared ChurchManager email configuration and sending service.
-- Review Notify Participants from recipient selection through delivery.
-- Show recipients, missing addresses, subject, message, and attachment before
-  sending.
-- Generate and attach the current Worship Planning report.
-- Prevent duplicate recipients and report delivery failures clearly.
-- Record a safe communication history without storing credentials or
-  unnecessarily duplicating sensitive message content.
-- Preserve the rule that sending email is an explicit user action.
+- The shared ChurchManager email configuration and sending service are
+  implemented.
+- Notify Participants shows recipients, missing addresses, subject, message,
+  and the current Worship Planning report attachment before sending.
+- Duplicate recipients are suppressed and delivery failures are reported.
+- Safe communication history excludes credentials and unnecessary message
+  content.
+- Sending remains an explicit user action, and unique message identifiers avoid
+  Gmail incorrectly joining unrelated notices into one conversation.
 
 ### 3. Optional user-to-person relationship
 
@@ -168,10 +185,17 @@ should not delay a stable ChurchManager release.
 - Remaining acceptance work is the representative report-family visual review
   documented in [LimeReports retirement](ChurchManager.LimeReports.Retirement.md).
 
-- Implement the proposed [ChurchManager error logging and support specification](ChurchManager.ErrorLogging.Specification.md)
-  after the companion JSForm facility is approved and implemented.
+- Error logging and protected Support and Diagnostics are implemented from the
+  [ChurchManager error logging and support specification](ChurchManager.ErrorLogging.Specification.md);
+  retain them in release regression testing.
 - Complete the formal visual acceptance review of all official reports.
 - Record final acceptance of active ChurchManager screens and workflows.
+- Verify with a regression test that closing the main ChurchManager window closes
+  every owned child form and dialog without leaving hidden processes or database
+  connections open.
+- Audit remaining dynamically constructed SQL and external-command strings;
+  replace value interpolation with parameterized SQL and validated argument lists
+  before a public release.
 - Build a repeatable new-install and upgrade process.
 - Ask which hymnals and lectionary systems the congregation wants installed.
 - Review available Orders of Service and ask which starter templates should be installed.
@@ -194,10 +218,23 @@ should not delay a stable ChurchManager release.
   development database.
 - Document ordinary backup and restore procedures and the complete-backup
   format.
+- Perform a full fresh-install, upgrade, automatic-exit-backup, restore, and
+  restart dress rehearsal using non-production data.
+- Complete and sign off the
+  [Accounting Go-Live Checklist](ChurchManager.Accounting.GoLive.Checklist.md),
+  including opening balances, permissions, audit behavior, representative
+  reports, period controls, backup/restore evidence, and the exact approved
+  release commit or tag.
 - Confirm the permanent backup location is separate from MariaDB's data storage
   and from the same local-storage failure domain.
-- Review and archive or remove obsolete historical development SQL only after
-  the installer and numbered migrations are independently sufficient.
+- The obsolete historical development SQL tree and database model have been
+  removed from the current source tree; numbered migrations are authoritative.
+- Before configuring any public Git remote, purge the removed private SQL exports
+  from local Git history, verify they are absent from every reachable commit, and
+  retain a private recovery backup outside the public repository.
+- Reconcile specification status labels and operational documentation with the
+  implemented source so completed work is not presented as merely proposed and
+  current backup/restore behavior is described accurately.
 
 ### 6. Pastoral follow-up
 
