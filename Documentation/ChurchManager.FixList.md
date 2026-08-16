@@ -12,19 +12,20 @@ open-source church-management systems.
 |---:|---|---|---|
 | 1 | Completed | User contact information | Foundational contact fields and administration are implemented. |
 | 2 | Completed | Email and participant notification review | The weekly participant-notification workflow has been modernized. |
-| 3 | Immediate | Hymnal, lectionary, and Order of Service catalog design | Defines what the installer can safely and legally offer. |
-| 4 | Immediate | Release, installation, and recovery readiness | Stabilizes and packages the researched catalogs and existing application. |
-| 5 | Next | Pastoral follow-up | Highest-value ministry addition and a natural extension of attendance. |
-| 6 | Next | Import, export, and duplicate management | Protects data quality and makes adoption and recovery practical. |
-| 7 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
-| 8 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
-| 9 | Later | Confidential contributions and pledges | Valuable, but requires a separate privacy-sensitive specification and subledger. |
-| 10 | Later | General events and calendar integration | Useful, but Google Calendar should remain the primary calendar platform. |
-| 11 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
+| 3 | Immediate | Optional user-to-person relationship | Completes identity linkage while allowing users who are not congregation members. |
+| 4 | Immediate | Hymnal, lectionary, and Order of Service catalog design | Defines what the installer can safely and legally offer. |
+| 5 | Immediate | Release, installation, and recovery readiness | Stabilizes and packages the researched catalogs and existing application. |
+| 6 | Next | Pastoral follow-up | Highest-value ministry addition and a natural extension of attendance. |
+| 7 | Next | Import, export, and duplicate management | Protects data quality and makes adoption and recovery practical. |
+| 8 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
+| 9 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
+| 10 | Later | Confidential contributions and pledges | Valuable, but requires a separate privacy-sensitive specification and subledger. |
+| 11 | Later | General events and calendar integration | Useful, but Google Calendar should remain the primary calendar platform. |
+| 12 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
 | Triggered | Conditional | Two-factor authentication | Required if remote, browser, or member access is introduced. |
 
-Items 1 through 4 should be completed before beginning a new major subsystem.
-Items 5 through 8 form the next ministry-development phase. Items 9 through 11
+Items 1 through 5 should be completed before beginning a new major subsystem.
+Items 6 through 9 form the next ministry-development phase. Items 10 through 12
 should not delay a stable ChurchManager release.
 
 ### Targeted worship enhancement: hymn stanza selection
@@ -62,7 +63,23 @@ should not delay a stable ChurchManager release.
   unnecessarily duplicating sensitive message content.
 - Preserve the rule that sending email is an explicit user action.
 
-### 3. Hymnal, lectionary, and Order of Service catalog design
+### 3. Optional user-to-person relationship
+
+- Add nullable `tblUser.PersonID` with a unique foreign key to `tblPerson.ID`.
+- Permit users who are not congregation members by allowing the link to remain
+  blank.
+- Use `ON DELETE SET NULL` so removing a person record cannot remove or disable
+  an application account.
+- Add an optional Linked Person selector to User Administration.
+- Keep user email and phone independent from member contact records; linking must
+  not silently copy or synchronize contact information.
+- Audit linking, changing, and unlinking a person from a user account.
+- Cover existing databases, fresh installation, uniqueness, unlinking, User
+  Administration, and authorization with automated tests.
+- Preserve the already completed participant design: `tblParticipant.PersonID`
+  remains optional so worship participants may be members or outside people.
+
+### 4. Hymnal, lectionary, and Order of Service catalog design
 
 #### Hymnal catalog and import workstream
 
@@ -127,7 +144,7 @@ should not delay a stable ChurchManager release.
 - Approve the catalog schema and package contents before installation development
   begins.
 
-### 4. Release, installation, and recovery readiness
+### 5. Release, installation, and recovery readiness
 
 #### LimeReports retirement workstream
 
@@ -172,7 +189,7 @@ should not delay a stable ChurchManager release.
 - Review and archive or remove obsolete historical development SQL only after
   the installer and numbered migrations are independently sufficient.
 
-### 5. Pastoral follow-up
+### 6. Pastoral follow-up
 
 - Create follow-up items from attendance warnings or manually.
 - Assign a follow-up to the pastor, an elder, or another authorized caregiver.
@@ -182,7 +199,7 @@ should not delay a stable ChurchManager release.
   the main menu.
 - Provide a printable or exportable authorized follow-up list.
 
-### 6. Import, export, and duplicate management
+### 7. Import, export, and duplicate management
 
 - Add a central Data Management screen.
 - Import people and families from CSV with a preview and explicit field mapping.
@@ -193,7 +210,7 @@ should not delay a stable ChurchManager release.
 - Record import results, rejected rows, and export history.
 - Provide a complete portable archive format where appropriate.
 
-### 7. Groups, committees, classes, and ministry teams
+### 8. Groups, committees, classes, and ministry teams
 
 - Add general groups independent of worship-participant roles.
 - Support leaders, members, group roles, active dates, notes, and categories.
@@ -202,7 +219,7 @@ should not delay a stable ChurchManager release.
 - Permit group attendance and authorized group communication.
 - Add group rosters and participation reports.
 
-### 8. Volunteer availability and responses
+### 9. Volunteer availability and responses
 
 - Add participant availability and blockout dates.
 - Send explicit serve requests and reminders.
@@ -212,7 +229,7 @@ should not delay a stable ChurchManager release.
 - Consider optional scheduling suggestions, but never silently replace existing
   assignments.
 
-### 9. Confidential contributions and pledges
+### 10. Confidential contributions and pledges
 
 - Design this as a separate confidential subledger with its own permissions.
 - Support contribution batches, donor accounts, funds/designations, pledges,
@@ -223,7 +240,7 @@ should not delay a stable ChurchManager release.
 - Specify privacy, retention, audit, backup, and statement-delivery rules before
   implementation.
 
-### 10. General events and calendar integration
+### 11. General events and calendar integration
 
 - Add non-worship events with one-time or recurring dates.
 - Support simple invitations, RSVP/registration lists, attendance, and notes.
@@ -232,7 +249,7 @@ should not delay a stable ChurchManager release.
 - Consider simple room or resource reservations only when a demonstrated need
   exists.
 
-### 11. Custom profile fields and controlled tags
+### 12. Custom profile fields and controlled tags
 
 - Allow authorized administrators to define optional person and family fields
   or tags.
