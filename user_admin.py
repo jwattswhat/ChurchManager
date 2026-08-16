@@ -937,14 +937,17 @@ class UserAdministrationDialog(wx.Dialog):
 
 
 def show_user_administration(
-    parent, connection, session, authorization, minimum_length=12
+    parent, connection, session, authorization, minimum_length=12, test_mode=False,
 ):
     authorization.require("security.users.manage", "manage ChurchManager users")
     service = UserAdministrationService(
         connection, session.user_id,
         passwords=PasswordService(minimum_length=minimum_length),
     )
-    dialog = UserAdministrationDialog(parent, service, authorization)
+    dialog = UserAdministrationDialog(
+        parent, service, authorization,
+        mail_factory=lambda: configured_mail_service(test_mode=test_mode),
+    )
     try:
         dialog.ShowModal()
     finally:

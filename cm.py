@@ -373,6 +373,7 @@ def _buttonclick(event):
             show_participant_notifications(
                 cmfrm.FRAME, context.connection, context.authorization,
                 context.services.reports, context.services.processes,
+                test_mode=context.test_mode,
             )
             return
         case "lblSundayPrayers":
@@ -415,6 +416,7 @@ def _buttonclick(event):
             show_user_administration(
                 cmfrm.FRAME, context.connection, context.session, context.authorization,
                 minimum_length=4 if context.test_mode else 12,
+                test_mode=context.test_mode,
             )
         case "lblAccountingSetup":
             show_accounting_setup(

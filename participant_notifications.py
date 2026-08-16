@@ -162,8 +162,19 @@ class ParticipantNotificationService:
         )
 
 
-def configured_mail_service(config=JSForm.CONFIG):
-    """Adapt compatible historical SMTP settings to the new JSForm service."""
+class TestModeMailService:
+    """Fail closed so test-mode ChurchManager can never transmit email."""
+
+    MESSAGE = "Email delivery is disabled while ChurchManager is running in TEST MODE."
+
+    def send(self, _recipients, _message):
+        raise RuntimeError(self.MESSAGE)
+
+
+def configured_mail_service(config=JSForm.CONFIG, test_mode=False):
+    """Build mail delivery, or a fail-closed service when test mode is active."""
+    if test_mode:
+        return TestModeMailService()
     values = {str(name): value for name, value, *_rest in config.get_Config_Family("SMTP")}
     username = str(values.get("UserName") or "").strip() or None
     password = str(values.get("Password") or "") or None

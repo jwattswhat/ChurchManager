@@ -53,6 +53,8 @@ Automated tests use fake delivery and do not send real email.
   checks. It must not claim that provider authentication or delivery works.
 - Require STARTTLS or implicit TLS in normal ChurchManager use.
 - Make test and production mail credentials and sender identities independent.
+- Treat the ChurchManager `--test` switch as an absolute no-email boundary. It
+  prevents SMTP connection attempts regardless of saved configuration.
 - Keep actual sending explicit; startup, account creation, saving, and closing
   ChurchManager must never silently send email.
 - Retain SMTP as the initial transport while leaving the JSForm interface open

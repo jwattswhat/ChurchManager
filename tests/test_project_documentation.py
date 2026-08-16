@@ -49,6 +49,7 @@ class ProjectDocumentationTests(unittest.TestCase):
         self.assertIn("Windows Credential Manager", specification)
         self.assertIn("Plain unencrypted SMTP is prohibited", specification)
         self.assertIn("Send Test Email", specification)
+        self.assertIn("all email\ndelivery is disabled", specification)
         self.assertIn("### 4. Secure SMTP connection", roadmap)
 
     def test_license_and_readme_identify_gpl(self):

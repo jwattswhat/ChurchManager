@@ -117,10 +117,12 @@ class ParticipantNotificationDialog(wx.Dialog):
         )
 
 
-def show_participant_notifications(parent, connection, authorization, reports, processes):
+def show_participant_notifications(
+    parent, connection, authorization, reports, processes, test_mode=False,
+):
     repository = ParticipantNotificationRepository(connection)
     try:
-        mail = configured_mail_service()
+        mail = configured_mail_service(test_mode=test_mode)
     except Exception:
         mail = None
     service = ParticipantNotificationService(repository, authorization, reports, mail)

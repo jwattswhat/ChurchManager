@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 
+from participant_notifications import configured_mail_service
 from user_admin import UserAdministrationService
 
 
@@ -150,6 +151,21 @@ class UserPersonLinkTests(unittest.TestCase):
         self.assertIn("def list_available_people", source)
         self.assertIn("def send_welcome_email", source)
         self.assertIn("temporary password is not included", source)
+
+    def test_test_mode_mail_factory_cannot_send(self):
+        mail = configured_mail_service(test_mode=True)
+        with self.assertRaisesRegex(RuntimeError, "disabled.*TEST MODE"):
+            mail.send(("fictional@example.org",), object())
+
+    def test_application_passes_test_mode_to_every_mail_entry_point(self):
+        main_source = (ROOT / "cm.py").read_text(encoding="utf-8")
+        participant_source = (ROOT / "participant_notification_dialog.py").read_text(
+            encoding="utf-8"
+        )
+        user_source = (ROOT / "user_admin.py").read_text(encoding="utf-8")
+        self.assertGreaterEqual(main_source.count("test_mode=context.test_mode"), 2)
+        self.assertIn("configured_mail_service(test_mode=test_mode)", participant_source)
+        self.assertIn("configured_mail_service(test_mode=test_mode)", user_source)
 
 
 if __name__ == "__main__":

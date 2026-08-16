@@ -21,6 +21,10 @@ workflows.
 Email delivery remains optional. ChurchManager must work normally when email is
 not configured.
 
+When ChurchManager is started with `--test` (the testing switch), all email
+delivery is disabled at the shared mail-factory boundary. This applies even when
+valid SMTP settings and credentials are present.
+
 ## 2. Ownership boundary
 
 ### JSForm owns
@@ -216,6 +220,8 @@ revocation requires confirmation from the account owner.
 - An administrator may explicitly move the existing secret into Windows
   Credential Manager, after which the plaintext configuration value is cleared.
 - Test and production values are handled independently.
+- The `--test` switch overrides all mail configuration and returns a fail-closed
+  service that cannot open an SMTP connection.
 - Existing notification and welcome-email services change only their mail
   factory; their recipient and authorization rules remain intact.
 
@@ -240,8 +246,11 @@ Tests must not contact a real provider. They cover:
 
 ## 14. Manual acceptance
 
-Manual acceptance occurs only in `ChurchDBTest` with a mailbox controlled by the
-tester:
+The ordinary `--test` application cannot perform manual email acceptance because
+that switch prohibits all delivery. Connection acceptance therefore uses a
+separately reviewed mail-configuration harness, or a deliberately configured
+non-test ChurchManager run, with a mailbox controlled by the tester and no
+congregation recipients:
 
 1. save nonsecret settings;
 2. securely store the test credential;
@@ -251,7 +260,9 @@ tester:
 6. send a fictional participant notification to the test mailbox;
 7. confirm no unrelated send occurs;
 8. inspect audits and diagnostics for redaction; and
-9. remove or disable the test configuration if it is not intended for continued
+9. separately verify that launching ChurchManager with `--test` blocks the same
+   send before any network connection; and
+10. remove or disable the test configuration if it is not intended for continued
    use.
 
 Production mail configuration requires a separate deliberate setup and test.
