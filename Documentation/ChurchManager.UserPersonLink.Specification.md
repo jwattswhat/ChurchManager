@@ -49,6 +49,10 @@ that person's first name. The administrator may edit the proposed display name
 before saving. Selecting or changing a link while editing an existing user does
 not silently rename that established account.
 
+Usernames remain strictly unique. Display names are not unique because unrelated
+people may share a first name; when a proposed display name is already used,
+ChurchManager shows a non-blocking confirmation before creating the account.
+
 Changing or removing a link is atomic with the user-detail update. The service
 rechecks that the selected person still exists and is still available before
 committing.

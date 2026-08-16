@@ -156,6 +156,17 @@ class UserPersonLinkTests(unittest.TestCase):
         person = PersonChoice(23, "Johnson, Sarah - Reformation", "Sarah")
         self.assertEqual(person.first_name, "Sarah")
 
+    def test_duplicate_display_name_check_is_parameterized_and_nonblocking(self):
+        connection = Connection([(1,)])
+        service = UserAdministrationService(connection, acting_user_id=7)
+        self.assertTrue(service.display_name_in_use(" Sarah "))
+        sql, values = connection.cursor_value.calls[-1]
+        self.assertIn("LOWER(TRIM(DisplayName))=LOWER(?)", sql)
+        self.assertEqual(values, ("Sarah", 0))
+        source = (ROOT / "user_admin.py").read_text(encoding="utf-8")
+        self.assertIn("Create the account anyway?", source)
+        self.assertIn("wx.YES_NO | wx.NO_DEFAULT", source)
+
     def test_test_mode_mail_factory_cannot_send(self):
         mail = configured_mail_service(test_mode=True)
         with self.assertRaisesRegex(RuntimeError, "disabled.*TEST MODE"):

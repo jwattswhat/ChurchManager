@@ -135,6 +135,23 @@ class UserAdministrationService:
         finally:
             cursor.close()
 
+    def display_name_in_use(self, display_name, exclude_user_id=None):
+        """Return whether another account already uses the proposed display name."""
+        display_name = str(display_name or "").strip()
+        if not display_name:
+            return False
+        cursor = self._cursor()
+        try:
+            self.repository._execute(
+                cursor,
+                "SELECT COUNT(*) FROM tblUser "
+                "WHERE LOWER(TRIM(DisplayName))=LOWER(?) AND ID<>?",
+                (display_name, exclude_user_id or 0),
+            )
+            return bool(cursor.fetchone()[0])
+        finally:
+            cursor.close()
+
     def role_ids_for(self, user_id):
         cursor = self._cursor()
         try:
@@ -806,6 +823,15 @@ class UserAdministrationDialog(wx.Dialog):
                 return
             if dialog.password.GetValue() != dialog.confirmation.GetValue():
                 raise ValueError("The passwords do not match.")
+            if self.service.display_name_in_use(dialog.display_name.GetValue()):
+                if wx.MessageBox(
+                    "Another user already uses this display name. "
+                    "Create the account anyway?",
+                    "Display Name Already in Use",
+                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING,
+                    self,
+                ) != wx.YES:
+                    return
             user_id = self.service.create_user(
                 dialog.username.GetValue(), dialog.display_name.GetValue(),
                 dialog.password.GetValue(),
