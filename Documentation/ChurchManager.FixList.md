@@ -165,9 +165,10 @@ future roadmap projects:
 
 #### Order of Service catalog workstream
 
-- Proposed companion design: [Order of Service Catalog Specification](ChurchManager.OrderOfServiceCatalog.Specification.md).
-  Product-owner approval is required before package-schema migrations or an
-  importer are implemented.
+- Approved companion design: [Order of Service Catalog Specification](ChurchManager.OrderOfServiceCatalog.Specification.md).
+- Migration 072 and the metadata-only preflight validator implement the first
+  catalog foundation. The transactional importer and installer selection remain
+  subsequent work.
 - Define separately installable Order of Service packages with stable identity,
   version, source, license, dependencies, and supported update behavior.
 - Define how an Order of Service may reference a hymnal or service book while

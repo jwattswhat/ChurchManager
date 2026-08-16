@@ -1,6 +1,6 @@
 # ChurchManager Order of Service Catalog Specification
 
-**Status:** Proposed for product-owner approval
+**Status:** Approved August 16, 2026; catalog foundation implementation started
 
 **Prepared:** August 16, 2026
 
