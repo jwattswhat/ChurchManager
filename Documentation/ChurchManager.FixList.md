@@ -1,6 +1,6 @@
 # ChurchManager development roadmap
 
-Last reviewed: August 15, 2026
+Last reviewed: August 16, 2026
 
 This is the maintained ChurchManager development backlog. Priorities reflect
 the needs of a small congregation and a comparison with current paid and
@@ -64,20 +64,10 @@ should not delay a stable ChurchManager release.
 
 ### 3. Hymnal, lectionary, and Order of Service catalog design
 
+#### Hymnal catalog and import workstream
+
 - Use [Hymnal Research and Recommendations](ChurchManager.HymnalResearchAndRecommendations.md)
   as the starting point for the multi-hymnal catalog design.
-- Use [Revised Common Lectionary Research](ChurchManager.RevisedCommonLectionary.Research.md)
-  as the starting point for denomination-neutral lectionary support.
-- After product-owner approval, implement the
-  [Lectionary Catalog Specification](ChurchManager.LectionaryCatalog.Specification.md),
-  including stable package keys, flexible cycles,
-  service-owned reading snapshots, local customization, and the hard
-  metadata-only boundary.
-- Complete a companion Order of Service research document before designing the
-  installer catalog-selection pages.
-- Define separately installable packages for hymnals, lectionaries, and Orders
-  of Service, including package identity, version, source, license, dependencies,
-  and supported update behavior.
 - Implement the approved
   [Permanent Hymn Identifier Specification](ChurchManager.PermanentHymnIdentifiers.Specification.md):
   permanent 5,000-entry hymnal blocks, a reserved local-user range, transactional
@@ -90,6 +80,26 @@ should not delay a stable ChurchManager release.
   particular hymnal.
 - Define how Proper hymn suggestions resolve against the congregation's selected
   hymnal without assuming LSB numbering.
+- Define, validate, and test the permanent hymnal registry and reserved local-user
+  range before importing any additional hymnal package.
+- Build the curated hymnal-package validator and staged import workflow before
+  adding hymnal selection to installation.
+
+#### Lectionary catalog workstream
+
+- Use [Revised Common Lectionary Research](ChurchManager.RevisedCommonLectionary.Research.md)
+  as the starting point for denomination-neutral lectionary support.
+- After product-owner approval, implement the
+  [Lectionary Catalog Specification](ChurchManager.LectionaryCatalog.Specification.md),
+  including stable package keys, flexible cycles, service-owned reading
+  snapshots, local customization, and the hard metadata-only boundary.
+
+#### Order of Service catalog workstream
+
+- Complete a companion Order of Service research and specification document
+  before designing the installer catalog-selection pages.
+- Define separately installable Order of Service packages with stable identity,
+  version, source, license, dependencies, and supported update behavior.
 - Define how an Order of Service may reference a hymnal or service book while
   still permitting "No hymnal."
 - Make Order of Service packages metadata-only. Their schema may contain sequence,
@@ -106,6 +116,14 @@ should not delay a stable ChurchManager release.
   cover every rejection rule with automated tests.
 - Preserve customized catalog records and weekly service copies when starter
   packages are installed or upgraded.
+- Define and test starter installation, upgrade, retirement, and removal behavior
+  without changing congregation-created templates or saved weekly services.
+
+#### Shared catalog completion criteria
+
+- Define separately installable packages for hymnals, lectionaries, and Orders
+  of Service, including package identity, version, source, license, dependencies,
+  and supported update behavior.
 - Approve the catalog schema and package contents before installation development
   begins.
 
