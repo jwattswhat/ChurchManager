@@ -879,6 +879,17 @@ Minimum verification for a release should include:
 
 ## 15. Security and privacy
 
+ChurchManager distinguishes three related identities. `tblUser` is the login,
+permission, and audit identity. It may optionally link to one `tblPerson`, but
+users do not have to be congregation members and contact fields never
+synchronize automatically. `tblParticipant` remains separate because worship
+participants may also be members or outside people.
+
+User Administration may explicitly send a welcome email containing the username
+and first-login instructions. Temporary passwords must be communicated through
+a separate channel and must never appear in email, logs, audit details, or
+support packages.
+
 ### 15.1 Current risks requiring attention
 
 The current repository contains or has contained:

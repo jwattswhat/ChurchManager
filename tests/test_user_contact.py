@@ -99,7 +99,8 @@ class UserContactTests(unittest.TestCase):
 
     def test_user_administration_has_new_and_edit_contact_controls(self):
         source = (ROOT / "user_admin.py").read_text(encoding="utf-8")
-        self.assertIn('("Edit Contact", self.on_contact)', source)
+        self.assertIn('("Edit Details", self.on_contact)', source)
+        self.assertIn('("Send Welcome", self.on_welcome)', source)
         self.assertIn('grid.Add(wx.StaticText(self, label="Email"))', source)
         self.assertIn('grid.Add(wx.StaticText(self, label="Phone"))', source)
         self.assertIn('JSForm.phone_display(user.phone)', source)

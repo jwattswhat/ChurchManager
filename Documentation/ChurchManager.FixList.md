@@ -12,7 +12,7 @@ open-source church-management systems.
 |---:|---|---|---|
 | 1 | Completed | User contact information | Foundational contact fields and administration are implemented. |
 | 2 | Completed | Email and participant notification review | The weekly participant-notification workflow has been modernized. |
-| 3 | Immediate | Optional user-to-person relationship | Completes identity linkage while allowing users who are not congregation members. |
+| 3 | In acceptance | Optional user-to-person relationship | Source, migration, administration UI, safe auditing, and welcome email are implemented; database and visual acceptance remain. |
 | 4 | Immediate | Hymnal, lectionary, and Order of Service catalog design | Defines what the installer can safely and legally offer. |
 | 5 | Immediate | Release, installation, and recovery readiness | Stabilizes and packages the researched catalogs and existing application. |
 | 6 | Next | Pastoral follow-up | Highest-value ministry addition and a natural extension of attendance. |
@@ -82,7 +82,9 @@ future roadmap projects:
 
 ### 3. Optional user-to-person relationship
 
-- Add nullable `tblUser.PersonID` with a unique foreign key to `tblPerson.ID`.
+- Implemented design: [User-to-person link and welcome email specification](ChurchManager.UserPersonLink.Specification.md).
+- Migration 070 adds nullable `tblUser.PersonID` with a unique foreign key to
+  `tblPerson.ID`.
 - Permit users who are not congregation members by allowing the link to remain
   blank.
 - Use `ON DELETE SET NULL` so removing a person record cannot remove or disable
@@ -105,6 +107,9 @@ future roadmap projects:
   with automated tests.
 - Preserve the already completed participant design: `tblParticipant.PersonID`
   remains optional so worship participants may be members or outside people.
+- Source implementation and focused automated tests are complete. Remaining
+  acceptance work is applying migration 070 to `ChurchDBTest` and visually
+  checking create, edit, unlink, and welcome-email actions.
 
 ### 4. Hymnal, lectionary, and Order of Service catalog design
 

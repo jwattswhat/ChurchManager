@@ -312,7 +312,7 @@ The reusable ChurchManager security tables are:
 
 | Table | Purpose | Essential fields |
 | --- | --- | --- |
-| `tblUser` | Application identity | `ID`, `Username`, `DisplayName`, `PasswordHash`, `Active`, `MasterAdministrator`, `MustChangePassword`, `FailedLoginCount`, `LockedUntil`, `LastLoginAt`, timestamps |
+| `tblUser` | Application identity | `ID`, optional unique `PersonID`, `Username`, `DisplayName`, `Email`, `Phone`, `PasswordHash`, `Active`, `MasterAdministrator`, `MustChangePassword`, `FailedLoginCount`, `LockedUntil`, `LastLoginAt`, timestamps |
 | `tblRole` | Named permission grouping | `ID`, `Name`, `Description`, `SystemRole`, `Active` |
 | `tblPermission` | Stable permission catalog | `ID`, `Name`, `Description`, `Sensitive`, `Active` |
 | `tblUserRole` | User-to-role assignment | `ID`, `UserID`, `RoleID`, effective dates, assignment audit fields |
@@ -326,6 +326,12 @@ than deleted.
 Accounting may use `tblSecurityAuditEvent` for common identity/security events
 and retain `tblAccountingAuditEvent` for detailed ledger events. Both reference
 the same stable `tblUser.ID`.
+
+`tblUser.PersonID` may explicitly identify the corresponding congregation
+person, but remains nullable because an authorized ChurchManager user need not
+be a congregation member. The link does not synchronize user contact data with
+person, family, participant, or directory records. Deleting a linked person
+sets the user link to null and never removes the application account.
 
 ## 9. Audit requirements
 

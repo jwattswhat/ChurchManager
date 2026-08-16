@@ -22,6 +22,8 @@ they are not congregation membership records.
 - It remains separate from `tblPerson`, `tblPersonContact`, participants,
   families, and directory records.
 - No automatic link or synchronization with a member record will be created.
+- A later explicit optional link may identify the corresponding person without
+  changing ownership or synchronizing either record.
 - A person may have a ChurchManager account without being a congregation member.
 - Deleting, changing, or unlisting a member contact must not silently change an
   application user's contact information, or the reverse.
@@ -169,6 +171,18 @@ The feature is complete when:
 6. Validation and permission checks occur in the service layer.
 7. Audit and diagnostic records contain no contact values.
 8. Automated tests pass and the user approves the updated screen.
+
+## 13. Implemented identity extension
+
+Migration 070 and the
+[user-to-person link and welcome email specification](ChurchManager.UserPersonLink.Specification.md)
+add an explicit optional Linked Person selector. This does not change the
+approved contact-data boundary: user email and phone remain independent from
+all congregation contact records.
+
+The administration action is now labeled **Edit Details** because it edits the
+display name, contact fields, and optional person link. The grid also displays
+the linked person, and **Send Welcome** sends password-free account instructions.
 
 ## 12. Implementation sequence
 

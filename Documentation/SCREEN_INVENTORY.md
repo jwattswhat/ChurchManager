@@ -107,7 +107,7 @@ these screen layouts. The replacement column identifies retired JSForm-era scree
 | Sunday Content Preview | None | Supporting | Evaluates rules for a week before generating prayer or announcement output. |
 | Login and Initial Master User | None | Active | Authentication, password hashing, lockout, initialization, and audit behavior must not be editable form metadata. |
 | Change Password | None | Active | Requires secure verification, hashing, and test/production password policies. |
-| User Administration and New User | None | Active | Coordinates users, roles, status, password reset, and contact information securely. |
+| User Administration and New User | None | Active | Coordinates users, roles, status, password reset, contact information, optional person links, and password-free welcome email securely. |
 | Role Permissions | None | Supporting | Edits security grants with authorization and audit enforcement. |
 | Security Audit | None | Supporting | Read-only protected security history. |
 | Backup and Restore | None | Active; backup and temporary-clone restore verified 2026-08-14 | Runs external database tools, validates database identity, creates pre-restore backups, and requires protected confirmations. |
