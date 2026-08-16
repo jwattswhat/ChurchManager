@@ -17,6 +17,7 @@ class ProjectDocumentationTests(unittest.TestCase):
             "Documentation/ChurchManager.UserPersonLink.Specification.md",
             "Documentation/ChurchManager.SMTPConnection.Specification.md",
             "Documentation/ChurchManager.SMTPConnection.Review.md",
+            "Documentation/ChurchManager.OrderOfServiceCatalog.Specification.md",
             "Documentation/DATABASE_STRUCTURE_INVENTORY.md",
             "Documentation/SCREEN_INVENTORY.md", "Documentation/VERSIONING.md",
         )
