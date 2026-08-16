@@ -4,8 +4,7 @@ Last reviewed: 2026-08-14
 
 This inventory tracks old JSForm-era database structures that remain in the
 development ChurchManager system. In this document, **legacy** means obsolete
-development-era structure or behavior. It does not refer to, depend upon, or
-authorize changes to the separate Frozen ChurchManager application.
+development-era structure or behavior.
 
 ## Retired structures
 
@@ -22,7 +21,7 @@ authorize changes to the separate Frozen ChurchManager application.
 | `tblServiceRole.Role` | Removed by migration 053; `WorshipRoleID` is now required. | Retired. |
 | `tblParticipant.Roles` and `tblParticipant.Schedule` | Removed by migration 053 after migration 052 converted the remaining test participants. | Retired. |
 | `tblBulletinOrderTemplate.SourceLegacyName` and `tblBulletinOrderLine.LegacyContent` | Removed by migration 053 after conversion was verified. | Retired. |
-| Historical schema files under `SQL\` | Old database dumps and table exports; they are not the authoritative migration history. | Archive or remove them after confirming that the numbered migrations and documented installation process contain everything still required. |
+| Historical database exports formerly stored under `SQL\` | Removed after confirming that numbered migrations and the documented installation process are authoritative. | Retired. Database exports must remain outside source control. |
 
 ## Older-named structures that remain current
 

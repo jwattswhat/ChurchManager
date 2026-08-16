@@ -6,7 +6,7 @@
 
 **Scope:** Development ChurchManager and ChurchDBTest only
 
-**Out of scope:** Frozen ChurchManager-Legacy, production ChurchDB, and the JSForm framework
+**Out of scope:** Production ChurchDB and the JSForm framework
 
 ## 1. Purpose
 
@@ -27,7 +27,6 @@ This is ChurchManager worship-domain behavior, not generic JSForm behavior.
 
 - ChurchManager owns stanza parsing, hymn-reference formatting, persistence, and worship-planning rules.
 - JSForm requires no change.
-- ChurchManager-Legacy remains frozen and completely separate.
 
 ## 3. Source of truth
 
@@ -85,7 +84,11 @@ Reject:
 - open ranges such as `3-`
 - duplicate expanded stanza numbers, such as `1-3,3`
 
-The first version will not enforce a maximum stanza number because ChurchManager does not yet have authoritative stanza counts for every hymnal entry.
+The current implementation does not enforce a maximum stanza number because
+the existing catalog does not yet contain authoritative stanza counts for every
+hymnal entry. The approved hymnal-import design requires
+`PrintedStanzaCount`; once those packages are installed, ChurchManager may warn
+when a service selection exceeds the stanzas printed in that edition.
 
 Invalid input must produce a plain-language message and make no database changes.
 
@@ -198,7 +201,7 @@ After approval, implementation is expected to include:
 - focused unit and database integration tests
 - relevant user documentation
 
-No JSForm or ChurchManager-Legacy file is expected to change.
+No JSForm file is expected to change.
 
 ## 15. Acceptance tests
 
@@ -220,14 +223,14 @@ The feature is complete when:
 14. Migration 067 applies successfully to ChurchDBTest.
 15. Focused tests and the full automated test suite pass.
 16. Manual GUI verification confirms selection, editing, clearing, suggestion application, template replacement, duplicate warnings, and report output.
-17. No production or ChurchManager-Legacy resource is accessed or changed.
+17. No production resource is accessed or changed.
 
 ## 16. Deferred work
 
 Deferred intentionally:
 
 - default stanzas on Proper suggestions
-- validation against hymnal stanza counts
+- enforcement or warnings against imported hymnal `PrintedStanzaCount` values
 - choir, soloist, congregation, or alternating-group assignments
 - refrain-only and stanza/refrain patterns
 - stanza-specific tunes or harmonizations

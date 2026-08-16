@@ -90,12 +90,18 @@ Required `hymns.csv` columns:
 | `EntrySlot` | Slot 1 through 4,999 within the hymnal block |
 | `PrintedReference` | What users see, such as `LSB 656` |
 | `Title` | Hymn title or approved first line |
+| `PrintedStanzaCount` | Number of stanzas printed in this hymnal edition; use `0` for an entry that is not stanza-based |
 | `IsActive` | Whether the entry is available for new selection |
 
 Optional approved columns may include `Tune`, `Meter`, `Category`,
-`ScriptureReferences`, `Author`, `Composer`, `CopyrightNote`, and `Note`.
+`ScriptureReferences`, `FirstLine`, `Author`, `Translator`, `Composer`,
+`CopyrightNote`, `SourceNote`, and `Note`. These are passive catalog notes only;
+ChurchManager does not manage, verify, enforce, or report licensing.
 
-Full lyrics and binary files are not part of the ordinary hymnal package.
+ChurchManager produces service and bulletin outlines, not complete service text.
+Full lyrics, stanza text, liturgical text, music images, harmonizations,
+arrangements, recordings, and other binary content are outside the hymnal-package
+data model.
 
 ## 5. Phase D: normalize and assign permanent IDs
 
@@ -276,7 +282,7 @@ The process is ready for implementation when:
 
 - the permanent block registry is approved;
 - required and optional metadata fields are approved;
-- copyright-review responsibilities are assigned;
+- package sources and passive source notes are documented;
 - package and manifest schemas are written;
 - staging, preflight, preview, install, and rollback behavior are specified in
   testable terms;

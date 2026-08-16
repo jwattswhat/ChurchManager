@@ -6,7 +6,7 @@
 
 **Scope:** Development ChurchManager and ChurchDBTest only
 
-**Out of scope:** Frozen ChurchManager-Legacy, production ChurchDB, and the JSForm framework
+**Out of scope:** Production ChurchDB and the JSForm framework
 
 ## 1. Purpose
 
@@ -44,7 +44,6 @@ This is ChurchManager domain behavior.
 
 - ChurchManager owns the supported language, recurrence parsing, descriptions, service-week behavior, and database migration.
 - JSForm requires no change.
-- ChurchManager-Legacy remains frozen and separate.
 
 ## 4. Stored data
 
@@ -241,7 +240,7 @@ The work is complete when:
 - weekly service behavior remains correct
 - invalid schedules fail clearly and safely
 - all automated tests and ChurchDBTest acceptance checks pass
-- no JSForm or frozen legacy-system changes are required
+- no JSForm changes are required
 
 ## 14. Later possibilities, not part of version 1
 

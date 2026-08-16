@@ -16,9 +16,6 @@ framework components in JSForm. ChurchManager supplies approved report data;
 the designer controls presentation; a ChurchManager-owned renderer produces the
 final PDF.
 
-This project is independent of the legacy program and must not change or depend
-on the legacy ChurchManager installation.
-
 ## 2. Design principles
 
 1. Users design reports visually, without SQL or programming.
@@ -242,7 +239,7 @@ Imported definitions are schema-validated and cannot add dataset privileges.
 - Long names, empty fields, large families, and page-boundary cases render safely.
 - Fonts, images, headers, footers, and page numbers render correctly.
 - Structural PDF checks and rendered-page visual review are reported separately.
-- The legacy program and production database are never used by automated tests.
+- The production database is never used by automated tests.
 
 ## 13. Development sequence
 
@@ -273,4 +270,4 @@ Imported definitions are schema-validated and cannot add dataset privileges.
 
 This is a side project. Until its proof of concept is accepted, it does not
 replace the existing ChurchManager development sequence, and it does not require
-changes to production or the independent legacy program.
+changes to production.

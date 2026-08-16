@@ -6,7 +6,7 @@
 
 **Scope:** Development ChurchManager catalog design, installer packages, and ChurchDBTest
 
-**Out of scope:** Frozen ChurchManager-Legacy and production ChurchDB
+**Out of scope:** Production ChurchDB
 
 ## 1. Purpose
 
@@ -51,11 +51,10 @@ far beyond ChurchManager's foreseeable need.
 
 | HymnalID | HymnID range | Assignment |
 |---:|---:|---|
-| 0 | 1-4,999 | Reserved; never distributed |
-| 1 | 5,001-9,999 | Reserved for future system use |
-| 2 | 10,001-14,999 | Local user-entered hymns |
-| 3 | 15,001-19,999 | LSB - Lutheran Service Book |
-| 4 and above | successive 5,000-number blocks | Assigned permanently through the maintained registry |
+| 0 | 1-4,999 | Reserved and invalid; no actual hymnal record |
+| 1 | 5,001-9,999 | Local congregation hymns |
+| 2 | 10,001-14,999 | LSB - Lutheran Service Book |
+| 3 and above | successive 5,000-number blocks | Assigned permanently through the maintained registry |
 
 Values 0, 5,000, 10,000, 15,000, and every later block boundary are reserved
 slot-zero values. `NULL`, not zero, represents "No hymnal" where that is valid.
@@ -70,9 +69,9 @@ For a straightforward numbered hymn, the printed hymn number should normally be
 its entry slot. Under this rule, LSB 656 receives:
 
 ```text
-HymnalID = 3
+HymnalID = 2
 EntrySlot = 656
-HymnID = 15,656
+HymnID = 10,656
 ```
 
 The printed reference remains a separate database value. It is not calculated
@@ -94,8 +93,8 @@ derived differently by individual installations.
 All local user-entered hymns belong to the reserved local catalog:
 
 ```text
-HymnalID = 2
-HymnID range = 10,001 through 14,999
+HymnalID = 1
+HymnID range = 5,001 through 9,999
 ```
 
 ChurchManager assigns the next never-used value in this range. The ID becomes
@@ -157,8 +156,17 @@ Every hymnal package contains:
 - package code, title, version, source, and license information;
 - its assigned 5,000-number range;
 - an explicit permanent `HymnID` for every entry;
-- printed reference, title, tune, category, and other approved metadata; and
+- printed reference, title, `PrintedStanzaCount`, tune, category, and other
+  approved metadata; and
 - checksums for the package and its data files.
+
+`PrintedStanzaCount` is a required nonnegative integer describing the number of
+stanzas printed in that particular hymnal edition. Zero identifies an entry
+that is not stanza-based. The package does not contain lyrics or stanza text.
+
+ChurchManager uses this catalog to prepare outlines. It does not use hymnal
+packages to reproduce complete services, complete hymn texts, or copyrighted
+music.
 
 Proper suggestions and Order of Service starter packages reference the permanent
 numeric `HymnID` directly. They must declare the required hymnal-package version

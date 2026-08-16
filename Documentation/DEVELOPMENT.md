@@ -4,7 +4,7 @@
 
 Use `ChurchManager-Test.bat`, `.runtime-venv`, and `ChurchDBTest`. Confirm the
 window title identifies test mode before changing data. Production `ChurchDB`
-and the frozen ChurchManager-Legacy directory are never development targets.
+is never a development target.
 
 Install or refresh dependencies from `requirements-runtime.txt`. Credentials
 belong in Windows Credential Manager. Local connection files, OAuth tokens,

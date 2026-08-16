@@ -12,8 +12,8 @@ arrange and configure screens without hand-editing JSON. The designer uses the
 same named-root JSON format as existing JSForm screens and shares the mature
 interaction conventions of the JSForm report designer.
 
-The independent legacy program and production databases are outside this
-project and must not be opened or modified by the designer or its tests.
+Production databases are outside this project and must not be opened or modified
+by the designer or its tests.
 
 ## 2. Ownership boundary
 

@@ -3,7 +3,7 @@
 **Status:** Saved for future design and implementation  
 **Prepared:** August 14, 2026  
 **Scope:** Development ChurchManager only  
-**Out of scope:** The separate Frozen ChurchManager application and its database
+**Out of scope:** Production ChurchDB
 
 ## Executive conclusion
 
@@ -11,7 +11,11 @@ ChurchManager should support multiple hymnals through a general music-catalog mo
 
 The central design requirement is to distinguish the underlying hymn from its numbered appearance in a particular hymnal. The same hymn may appear in several books with different numbers, translations, tunes, harmonizations, stanza counts, and copyright conditions. Proper hymn suggestions should ultimately identify the underlying hymn and then resolve it to the congregation's selected hymnal.
 
-Full lyrics, music images, harmonizations, recordings, and service music must not be imported merely because ChurchManager can store them. Each type of content requires appropriate copyright and license review.
+ChurchManager's purpose is to prepare service and bulletin outlines, not to
+print complete services. Full lyrics, stanza text, liturgical text, music
+images, harmonizations, arrangements, recordings, and other protected content
+must not be imported merely because ChurchManager can store them. Each type of
+content requires separate copyright and license review.
 
 ### Non-negotiable identifier rule
 
@@ -308,7 +312,11 @@ The proposed first implementation stores a normalized expression such as `1,3,11
 
 This is deliberately service-specific. The same hymn can use different stanzas in different services.
 
-Future hymnal-entry metadata may provide a known printed stanza count and warn when a selection does not match that particular edition. It must not assume that every hymnal prints the same stanza set.
+Every imported hymnal entry must provide `PrintedStanzaCount` for that edition;
+zero identifies an entry that is not stanza-based. This supports warnings when
+a service selection exceeds the stanzas printed in that edition. It must not
+assume that every hymnal prints the same stanza set, and the count does not
+authorize storing or reproducing stanza text.
 
 ## 8. Services may use more than one hymnal
 

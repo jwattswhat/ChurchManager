@@ -4,8 +4,7 @@ Last reviewed: August 15, 2026
 
 This is the maintained ChurchManager development backlog. Priorities reflect
 the needs of a small congregation and a comparison with current paid and
-open-source church-management systems. The independent Frozen ChurchManager
-application is outside this roadmap and must not be changed.
+open-source church-management systems.
 
 ## Authoritative priority sequence
 
@@ -69,6 +68,11 @@ should not delay a stable ChurchManager release.
   as the starting point for the multi-hymnal catalog design.
 - Use [Revised Common Lectionary Research](ChurchManager.RevisedCommonLectionary.Research.md)
   as the starting point for denomination-neutral lectionary support.
+- After product-owner approval, implement the
+  [Lectionary Catalog Specification](ChurchManager.LectionaryCatalog.Specification.md),
+  including stable package keys, flexible cycles,
+  service-owned reading snapshots, local customization, and the hard
+  metadata-only boundary.
 - Complete a companion Order of Service research document before designing the
   installer catalog-selection pages.
 - Define separately installable packages for hymnals, lectionaries, and Orders
@@ -88,8 +92,18 @@ should not delay a stable ChurchManager release.
   hymnal without assuming LSB numbering.
 - Define how an Order of Service may reference a hymnal or service book while
   still permitting "No hymnal."
-- Inventory material that may be distributed freely, material requiring user
-  import or proof of license, and material ChurchManager must never package.
+- Make Order of Service packages metadata-only. Their schema may contain sequence,
+  short outline labels, item types, references, conditions, inclusion choices,
+  required positions, and brief planning notes, but no full liturgical or musical
+  content fields.
+- Exclude full liturgical wording, published prayers or collects, responsive text,
+  meaningful-length verbatim rubrics, psalm or canticle text, tones, musical
+  settings, hymn lyrics, notation, accompaniment material, publisher artwork, and
+  page images from packages, database records, customized templates, weekly
+  copies, and generated output.
+- Add package-schema and import validation that rejects unapproved content fields,
+  long-form body fields, HTML or rich-text bodies, and embedded or linked media;
+  cover every rejection rule with automated tests.
 - Preserve customized catalog records and weekly service copies when starter
   packages are installed or upgraded.
 - Approve the catalog schema and package contents before installation development

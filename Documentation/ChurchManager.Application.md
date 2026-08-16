@@ -195,10 +195,8 @@ Other output is created by dedicated Python scripts, including:
 | Path | Purpose |
 | --- | --- |
 | `cm.py` | Main ChurchManager application and menu dispatch. |
-| `ChurchManager.bat` | Compatibility launcher for the frozen legacy installation. |
 | `ChurchManager-Test.bat` | Development/test launcher; requires a locally rebuilt `.runtime-venv`. |
 | `Forms/` | JSON definitions for application screens. |
-| `SQL/` | Database schema fragments, table dumps, views, imports, and maintenance queries. |
 | `visual_reports/definitions/` | Starter definitions for supported visual reports. |
 | `Documentation/` | Application and form documentation. |
 | `assets/` | Source artwork and other application-owned static assets. |
@@ -208,7 +206,7 @@ Other output is created by dedicated Python scripts, including:
 | `visual_reports/` | ChurchManager integration for the JSForm visual report system. |
 | `schema/` | JSON Schema used or considered for validating ChurchManager form definitions. |
 
-Operational sermons, pictures, outlines, inserts, bulletins, and the frozen runtime are stored with the independent legacy installation. Congregational administrative documents are stored in `C:\Users\Pastor\Documents\Church Documents`. Historical database dumps are stored in `D:\Backup.ChurchManager\DatabaseArchive`.
+Congregational administrative documents are stored in `C:\Users\Pastor\Documents\Church Documents`. Historical database dumps are stored in `D:\Backup.ChurchManager\DatabaseArchive`.
 
 ## 4. Requirements
 
@@ -298,7 +296,8 @@ Exact entries depend on the current database. Use the Config screen to inspect i
 
 ### 5.5 Configure the launcher
 
-`ChurchManager.bat` changes to the application directory, activates `.venv`, and starts `cm.py` with database arguments:
+`ChurchManager-Test.bat` changes to the application directory, activates the
+project runtime, and starts `cm.py` with guarded test-database arguments.
 
 ```text
 python cm.py --server SERVER --database ChurchDB --user USER
@@ -345,7 +344,7 @@ Before regular use, verify that:
 
 ### Starting
 
-Run `ChurchManager.bat` from Windows. At startup the application:
+Run `ChurchManager-Test.bat` from Windows. At startup the application:
 
 1. parses database arguments;
 2. initializes wxPython;
@@ -503,16 +502,25 @@ This creates a durable connection between the database record and filesystem art
 
 Reusable Order of Service templates are maintained through Bulletin Order Templates. Each template owns its ordered lines, optional hymnal, and normal required participant positions. Customized copies may be edited; starter templates remain protected.
 
-The generator combines data such as:
+The generator combines outline metadata such as:
 
 - order-of-service lines and headings;
-- prepared content;
-- hymns and hymn files;
+- short planning labels;
+- hymn titles and printed references;
 - readings and references;
 - propers; and
 - service-specific selections.
 
-The Worship Service screen combines the selected template with that week's readings, hymns, and service-specific values. It saves a weekly outline that can be previewed or exported as plain text. The output is an outline for insertion into a bulletin, not the complete copyrighted liturgical text.
+The Worship Service screen combines the selected template with that week's readings, hymns, and service-specific values. It saves a weekly outline that can be previewed or exported as plain text. The output is an outline for insertion into a bulletin, not a complete service text.
+
+This is a structural boundary, not a licensing option. Order of Service packages,
+database records, customized templates, weekly copies, and generated output must
+not contain fields or attachments for full liturgical wording; complete prayers or
+collects copied from publications; responsive pastor-and-congregation text;
+meaningful-length verbatim rubrics; psalm or canticle text; psalm tones or musical
+settings; hymn lyrics; music notation; accompaniment material; or publisher
+artwork or page images. The schema is limited to sequence, short outline labels,
+item types, references, conditions, inclusion choices, and brief planning notes.
 
 ### 8.8 Prayers
 
@@ -785,7 +793,7 @@ Never overwrite the only known copy of the current database during a restoration
 
 ### Google Calendar
 
-`liccalendar.py` authorizes against Google Calendar, determines the next Sunday, and retrieves events related to the service week. It uses local OAuth client and token files.
+`liccalendar.py` authorizes against Google Calendar, determines the next Sunday, and retrieves events related to the service week. Its OAuth client and token files are stored outside the project under `%LOCALAPPDATA%\ChurchManager\OAuth`.
 
 OAuth files grant access and must not be committed, emailed, or stored with public source code. If exposed, revoke the authorization and issue new credentials.
 
@@ -1015,7 +1023,6 @@ Recommended modernization order:
 
 - [ChurchManager JSON Form Definition Reference](form.documentation.md)
 - Original historical form notes: `form.documentation.txt`
-- SQL and database artifacts: `SQL/`
 - Form definitions: `Forms/`
 
 The separate JSForm framework guide is needed only by a developer changing the underlying form engine; it is not part of the ChurchManager application manual.

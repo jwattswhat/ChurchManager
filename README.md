@@ -12,9 +12,9 @@ The authoritative development version is in
 active pre-release development. Development and testing use `ChurchDBTest`;
 production data must never be used as a development target.
 
-This repository is independent of the frozen **ChurchManager-Legacy** program.
-Nothing in this project may import, launch, edit, migrate, or otherwise depend
-on the legacy project's source files. Legacy changes belong in its own project.
+This repository is a self-contained ChurchManager application. Runtime files,
+configuration, database structures, tests, and launchers must remain within its
+documented application and JSForm boundaries.
 
 ## Capabilities
 
@@ -36,9 +36,7 @@ database. Install the packages in [`requirements-runtime.txt`](requirements-runt
 into a fresh environment. Database structure is advanced by the ordered,
 checksum-protected migrations in [`migrations`](migrations/README.md).
 
-Start the development application with `ChurchManager-Test.bat`. The production
-delegating launcher and frozen legacy installation are outside development
-scope.
+Start the development application with `ChurchManager-Test.bat`.
 
 Never put passwords on a command line or in configuration committed to Git.
 ChurchManager retrieves database secrets from Windows Credential Manager.

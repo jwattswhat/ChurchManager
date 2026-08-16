@@ -1,6 +1,6 @@
 # ChurchManager Accounting Go-Live Checklist
 
-This checklist controls the first production use of ChurchManager fund accounting. Development and legacy ChurchManager remain independent programs until the authorized cutover date.
+This checklist controls the first production use of ChurchManager fund accounting.
 
 ## 1. Release readiness
 
@@ -33,7 +33,6 @@ Certified local backup:
 
 ## 3. Production isolation and database preparation
 
-- [ ] Confirm the legacy program still points only to its legacy production database.
 - [ ] Confirm development/test ChurchManager points only to `ChurchDBTest` and `JSFormTest`.
 - [ ] Choose the new production database names and hosting computer.
 - [ ] Confirm production is not hosted on removable SD-card storage.
@@ -66,15 +65,14 @@ Certified local backup:
 ## 6. Cutover and opening balances
 
 - [ ] Choose and document the cutover date.
-- [ ] Complete all legacy activity through the day before cutover.
 - [ ] Reconcile every bank account through the cutover date.
-- [ ] Obtain approved account-and-fund opening balances from the legacy records.
+- [ ] Obtain approved account-and-fund opening balances from the congregation's financial records.
 - [ ] Enter one balanced `Opening Balances` transaction using only asset, liability, and net-asset accounts.
 - [ ] Attach the approved source balance report.
 - [ ] Independently approve or use the documented small-congregation override.
 - [ ] Post the opening-balance transaction.
 - [ ] Confirm trial balance difference is `$0.00`.
-- [ ] Confirm financial position and fund balances agree with approved legacy reports.
+- [ ] Confirm financial position and fund balances agree with approved source reports.
 - [ ] Confirm bank reconciliation beginning balances agree with statements.
 
 ## 7. Report and workflow acceptance
@@ -96,7 +94,6 @@ Certified local backup:
 - [ ] Congregational officer or authorized reviewer signoff obtained.
 - [ ] Backup/restore certification reviewed and accepted.
 - [ ] Cutover date and responsible persons recorded.
-- [ ] Legacy system designated read-only after cutover, with retention period documented.
 - [ ] Go-live authorized.
 
 ### Signoff
@@ -106,4 +103,3 @@ Certified local backup:
 | Accounting operator |  |  |  |
 | Authorized reviewer |  |  |  |
 | ChurchManager administrator |  |  |  |
-

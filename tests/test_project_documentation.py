@@ -26,7 +26,7 @@ class ProjectDocumentationTests(unittest.TestCase):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         self.assertIn("GPL-3.0-or-later", license_text)
         self.assertIn("GPL-3.0-or-later", readme)
-        self.assertIn("ChurchManager-Legacy", readme)
+        self.assertIn("self-contained ChurchManager application", readme)
 
     def test_top_level_python_modules_have_docstrings(self):
         for path in ROOT.glob("*.py"):

@@ -1,7 +1,6 @@
 # ChurchManager architecture
 
-ChurchManager is an application built on JSForm, not a fork or extension of the
-frozen ChurchManager-Legacy program.
+ChurchManager is an application built on JSForm.
 
 ```text
 wxPython application and main menu
@@ -23,7 +22,6 @@ wxPython application and main menu
 | User roles, permissions, privacy rules, audit policy | ChurchManager |
 | Worship, attendance, communications, and accounting workflows | ChurchManager |
 | Starter and customized ChurchManager forms/reports | ChurchManager assets using JSForm formats |
-| Frozen historical program and its runtime | ChurchManager-Legacy, outside this repository |
 
 ## Application composition
 

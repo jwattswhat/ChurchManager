@@ -7,7 +7,6 @@ clearer, and more useful to small churches.
 
 - Work only in this ChurchManager repository and its documented JSForm
   dependency.
-- Never modify or depend on the frozen ChurchManager-Legacy project.
 - Develop against `ChurchDBTest`, never production `ChurchDB`.
 - Put reusable form, layout, report, value-conversion, and designer behavior in
   JSForm. Keep church workflows, permissions, database schema, and domain rules

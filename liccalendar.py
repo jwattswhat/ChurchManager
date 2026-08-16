@@ -2,7 +2,8 @@
 
 from __future__ import print_function
 import datetime
-import os.path
+import os
+from pathlib import Path
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -10,6 +11,11 @@ from googleapiclient.discovery import build
 
 # Google Calendar API scope for read-only access
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
+OAUTH_DIRECTORY = Path(
+    os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local")
+) / "ChurchManager" / "OAuth"
+CLIENT_SECRET_PATH = OAUTH_DIRECTORY / "client_secret.json"
+TOKEN_PATH = OAUTH_DIRECTORY / "token.json"
 
 
 def get_next_sunday():
@@ -53,17 +59,21 @@ def get_week_events(service, sunday):
 
 
 def main():
+    """Authorize locally and display the coming week's calendar events."""
+    OAUTH_DIRECTORY.mkdir(parents=True, exist_ok=True)
     creds = None
-    if os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    if TOKEN_PATH.exists():
+        creds = Credentials.from_authorized_user_file(str(TOKEN_PATH), SCOPES)
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file("client_secret_565047851417-o4acc580v6bjeh1ekoddt5q47lgdt2id.apps.googleusercontent.com.json", SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(
+                str(CLIENT_SECRET_PATH), SCOPES
+            )
             creds = flow.run_local_server(port=0)
-        with open("token.json", "w") as token:
+        with TOKEN_PATH.open("w", encoding="utf-8") as token:
             token.write(creds.to_json())
 
     service = build("calendar", "v3", credentials=creds)

@@ -10,8 +10,6 @@
 
 **Framework dependency:** JSForm centralized error reporting
 
-**Excluded application:** Independent Frozen ChurchManager
-
 ## 1. Purpose
 
 ChurchManager shall integrate the centralized JSForm error-reporting service so
@@ -25,8 +23,7 @@ will provide the underlying capture, redaction, rotation, error dialog, and
 support-package facilities.
 
 This specification applies only to the current development ChurchManager
-project. It must not read, modify, launch, or install files in the independent
-Frozen ChurchManager project.
+project.
 
 ## 2. Dependency
 
@@ -64,7 +61,6 @@ ChurchManager error reporting shall not:
   or email messages in support packages;
 - expose raw SQL parameters or current screen-field values;
 - recover or continue after an operation whose transactional state is unknown;
-- access the Frozen ChurchManager application or its database configuration;
 - permit a test support operation to connect to or alter production data.
 
 ## 5. Ownership boundary
@@ -299,7 +295,6 @@ Support packages default to:
 The user may choose another package destination. Logs must not default to:
 
 - the ChurchManager source directory;
-- the Frozen ChurchManager directory;
 - MariaDB's data directory;
 - the database backup directory;
 - a report or attachment directory.
@@ -349,8 +344,6 @@ Diagnostic logs and support packages are not ChurchManager audit records.
 - Support-package creation is read-only and may not open another database.
 - Automated tests may use only temporary logs and approved test databases.
 - No automated error test may connect to production ChurchDB.
-- The development application must not use error logging to inspect or modify
-  the Frozen ChurchManager project.
 
 ## 16. Testing requirements
 
@@ -395,7 +388,7 @@ The ChurchManager integration is complete when:
 8. Diagnostic logging works when the ChurchManager database is unavailable or
    intentionally disconnected.
 9. Security and accounting audit tests continue to pass independently.
-10. Test/production guards and the Frozen-project boundary remain intact.
+10. Test/production guards remain intact.
 11. JSForm and ChurchManager automated suites pass.
 12. The user approves the error dialog and Support and Diagnostics screen.
 

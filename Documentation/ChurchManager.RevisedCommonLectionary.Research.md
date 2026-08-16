@@ -2,7 +2,7 @@
 
 **Status:** Research and design recommendation; not approved for implementation  
 **Prepared:** August 14, 2026  
-**Scope:** Development ChurchManager only. The separate Frozen ChurchManager application is outside scope.
+**Scope:** Development ChurchManager only.
 
 ## Executive conclusion
 
@@ -248,7 +248,7 @@ The resolver should return candidate appointments for a date rather than choosin
 
 1. **Approve the functional design.** Settle whether RCL support is intended for general ecumenical use, a particular congregation, or both.
 2. **Design the normalized option model.** Do not import data until track, pairing, alternate, and service-selection behavior is defined.
-3. **Create guarded migrations in ChurchDBTest only.** Production ChurchDB and the Frozen application remain out of scope.
+3. **Create guarded migrations in ChurchDBTest only.** Production ChurchDB remains out of scope.
 4. **Add service-level reading selection and persistence.** Make one source feed all worship outputs.
 5. **Build a reproducible importer from the official CCT citation tables.** Do not manually transcribe the full lectionary.
 6. **Import the stable 1992 RCL first.** Keep the provisional update disabled or separately selectable.
@@ -270,7 +270,7 @@ An RCL implementation should not be considered complete until tests demonstrate:
 - A service preserves its selected readings after catalog changes.
 - Bulletin, worship planner, reporting, and sermon matching use the same service-level selection.
 - LSB data and behavior remain unchanged.
-- No development action touches the separate Frozen application or its database.
+- No development action touches production ChurchDB.
 
 ## 12. Copyright and data-source boundaries
 

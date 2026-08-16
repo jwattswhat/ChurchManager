@@ -16,6 +16,8 @@ root-reset.*.log
 mariadb-service-localhost.ini
 token.json
 client_secret_*.json
+SQL/
+*.mwb
 OS.json
 OS.txt
 announcement.txt
