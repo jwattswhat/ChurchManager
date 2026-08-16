@@ -1,6 +1,6 @@
 # ChurchManager Order of Service Catalog Specification
 
-**Status:** Approved August 16, 2026; catalog foundation implementation started
+**Status:** Approved August 16, 2026; schema, validator, and transactional importer implemented
 
 **Prepared:** August 16, 2026
 
@@ -96,6 +96,7 @@ Ownership is explicit:
 | `PackageCode` | Immutable unique stable code |
 | `PackageVersion` | Installed semantic or source version |
 | `Title` | User-facing package title |
+| `TemplatePrefix` | Uppercase catalog abbreviation followed by one space, such as `LSB ` |
 | `SourceName` | Responsible publisher, body, or package maintainer |
 | `SourceReference` | Short provenance reference or URL |
 | `PackageNotice` | Passive source/license note; not enforcement |
@@ -255,6 +256,11 @@ The template catalog marks starters and custom templates distinctly. Users may:
 - create a local template from scratch;
 - edit and delete only local templates; and
 - see package source and version without editing package ownership.
+
+Every imported starter name begins with its package's catalog abbreviation and
+one space. For example: `LSB Divine Service, Setting One`, `LSB Matins`, and
+`LSB Vespers`. The same convention applies to every future hymnal or service-book
+package; underscores are not used as the display separator.
 
 Deleting a local template must explain that saved weekly Orders of Service are
 preserved. The warning must not claim that weekly snapshots will be deleted.

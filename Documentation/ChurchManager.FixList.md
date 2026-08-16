@@ -166,9 +166,12 @@ future roadmap projects:
 #### Order of Service catalog workstream
 
 - Approved companion design: [Order of Service Catalog Specification](ChurchManager.OrderOfServiceCatalog.Specification.md).
-- Migration 072 and the metadata-only preflight validator implement the first
-  catalog foundation. The transactional importer and installer selection remain
-  subsequent work.
+- Migrations 072-073, the metadata-only preflight validator, and transactional
+  importer implement the catalog foundation. Installer selection and curated
+  package data remain subsequent work.
+- The LSB Order of Service package must include every supported LSB service
+  outline, and imported names use the `LSB ` prefix. Future service-book packages
+  use their own uppercase abbreviation followed by one space.
 - Define separately installable Order of Service packages with stable identity,
   version, source, license, dependencies, and supported update behavior.
 - Define how an Order of Service may reference a hymnal or service book while
