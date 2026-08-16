@@ -52,6 +52,7 @@ class SecurityAuditSummary:
 class PersonChoice:
     id: int
     display: str
+    first_name: str
 
 
 class UserAdministrationService:
@@ -110,14 +111,15 @@ class UserAdministrationService:
                 "SELECT p.ID,CONCAT(TRIM(CONCAT(COALESCE(p.LastName,''), "
                 "CASE WHEN COALESCE(p.LastName,'')<>'' AND COALESCE(p.FirstName,'')<>'' "
                 "THEN ', ' ELSE '' END,COALESCE(p.FirstName,''))), "
-                "CASE WHEN COALESCE(c.Church,'')<>'' THEN CONCAT(' - ',c.Church) ELSE '' END) "
+                "CASE WHEN COALESCE(c.Church,'')<>'' THEN CONCAT(' - ',c.Church) ELSE '' END), "
+                "COALESCE(p.FirstName,'') "
                 "FROM tblPerson p LEFT JOIN tblChurch c ON c.ID=p.ChurchID "
                 "LEFT JOIN tblUser u ON u.PersonID=p.ID "
                 "WHERE u.ID IS NULL OR u.ID=? "
                 "ORDER BY p.LastName,p.FirstName,p.ID",
                 (user_id,),
             )
-            return [PersonChoice(row[0], row[1]) for row in cursor.fetchall()]
+            return [PersonChoice(row[0], row[1], row[2]) for row in cursor.fetchall()]
         finally:
             cursor.close()
 
@@ -596,6 +598,7 @@ class NewUserDialog(PasswordEntryDialog):
             self, choices=["Not linked to a congregation person"] + [item.display for item in people],
         )
         self.person.SetSelection(0)
+        self.person.Bind(wx.EVT_CHOICE, self.on_person_selected)
         grid.Add(self.person, 1, wx.EXPAND)
         grid.Add(wx.StaticText(self, label="Temporary password"))
         self.password = wx.TextCtrl(self, style=wx.TE_PASSWORD)
@@ -612,6 +615,12 @@ class NewUserDialog(PasswordEntryDialog):
         root.Add(grid, 1, wx.ALL | wx.EXPAND, 12)
         root.Add(self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL), 0, wx.ALL | wx.EXPAND, 10)
         self.SetSizerAndFit(root)
+
+    def on_person_selected(self, _event):
+        """Use the linked person's first name as the editable display default."""
+        selection = self.person.GetSelection()
+        if selection > 0:
+            self.display_name.SetValue(self.people[selection - 1].first_name)
 
 
 class UserContactDialog(wx.Dialog):

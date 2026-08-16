@@ -8,7 +8,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from participant_notifications import configured_mail_service
-from user_admin import UserAdministrationService
+from user_admin import PersonChoice, UserAdministrationService
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -151,6 +151,10 @@ class UserPersonLinkTests(unittest.TestCase):
         self.assertIn("def list_available_people", source)
         self.assertIn("def send_welcome_email", source)
         self.assertIn("temporary password is not included", source)
+        self.assertIn("self.person.Bind(wx.EVT_CHOICE, self.on_person_selected)", source)
+        self.assertIn("self.people[selection - 1].first_name", source)
+        person = PersonChoice(23, "Johnson, Sarah - Reformation", "Sarah")
+        self.assertEqual(person.first_name, "Sarah")
 
     def test_test_mode_mail_factory_cannot_send(self):
         mail = configured_mail_service(test_mode=True)

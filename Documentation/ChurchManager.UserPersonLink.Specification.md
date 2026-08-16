@@ -44,6 +44,11 @@ selector when creating or editing a user. Only people not already linked to a
 different account are offered. The current link remains available while that
 user is edited.
 
+When a person is selected while creating a new user, Display name defaults to
+that person's first name. The administrator may edit the proposed display name
+before saving. Selecting or changing a link while editing an existing user does
+not silently rename that established account.
+
 Changing or removing a link is atomic with the user-detail update. The service
 rechecks that the selected person still exists and is still available before
 committing.
