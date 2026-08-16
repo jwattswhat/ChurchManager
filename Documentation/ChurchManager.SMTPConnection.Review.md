@@ -7,9 +7,11 @@
 ## 1. Current connection path
 
 ChurchManager participant notifications and user welcome messages call
-`configured_mail_service()` in `participant_notifications.py`. That adapter reads
-the `SMTP` configuration family and constructs the provider-neutral JSForm
-`MailSettings`, `SMTPTransport`, and `MailService` objects.
+`configured_mail_service()` in `participant_notifications.py` now delegates to
+the protected ChurchManager mail-settings service. Non-secret settings are read
+from `tblMailSettings`; the password is read only from Windows Credential
+Manager. JSForm still provides the provider-neutral `MailSettings`,
+`SMTPTransport`, and `MailService` objects.
 
 JSForm currently supports SMTP over implicit TLS or STARTTLS, validates the
 sender and reply-to addresses, sends each recipient separately, creates a fresh
@@ -20,9 +22,8 @@ Automated tests use fake delivery and do not send real email.
 
 ## 2. Gaps found
 
-1. The SMTP password is still read from ordinary `tblConfig`/`jsConfig` data.
-   It should instead be retrieved from Windows Credential Manager or a future
-   provider token store.
+1. Resolved: the SMTP password is no longer read from ordinary configuration
+   data and is never stored in the ChurchManager database.
 2. There is no protected ChurchManager mail-settings screen.
 3. The approved **Test Configuration** workflow has not been implemented.
 4. The current adapter supplies Gmail-oriented defaults even when no provider

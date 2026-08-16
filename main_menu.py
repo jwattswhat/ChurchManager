@@ -28,7 +28,7 @@ SPECIAL_CONTROLS = {
     "lblService", "lblOS", "lblCheckList", "lblWeeklyBulletinOrder", "lblGenerateOS", "lblNotifyParticipants", "lblSundayPrayers",
     "lblParticipant", "lblWorshipPositions", "lblSchedule", "lblPrayers", "lblAnnouncement", "lblChoices",
     "lblAnnouncements", "lblServiceSchedule", "lblReports", "lblReportDesigner", "lblScreenDesigner", "lblBackupDB",
-    "lblUsers", "lblSupportDiagnostics", "lblAttendanceEvent", "lblRecordAttendance",
+    "lblUsers", "lblEmailSettings", "lblSupportDiagnostics", "lblAttendanceEvent", "lblRecordAttendance",
     "lblAccountingSetup",
     "lblAccountingTransactions",
     "lblAccountingReview",

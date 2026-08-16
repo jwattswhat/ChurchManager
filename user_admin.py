@@ -981,7 +981,7 @@ def show_user_administration(
     )
     dialog = UserAdministrationDialog(
         parent, service, authorization,
-        mail_factory=lambda: configured_mail_service(test_mode=test_mode),
+        mail_factory=lambda: configured_mail_service(test_mode=test_mode, connection=connection),
     )
     try:
         dialog.ShowModal()

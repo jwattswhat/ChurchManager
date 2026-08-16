@@ -243,7 +243,8 @@ Depending on the features used, ChurchManager requires:
 - a PDF viewer;
 - Microsoft Word for some order-of-service and document conversion workflows;
 - Google Calendar API credentials and authorization token; and
-- email configuration compatible with JSForm's SMTP wrapper.
+- protected email configuration using JSForm's SMTP transport and Windows
+  Credential Manager; test mode cannot send email.
 
 ## 5. Installation and initial setup
 

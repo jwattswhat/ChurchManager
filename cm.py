@@ -64,6 +64,7 @@ from churchmanager_error_support import (
     update_runtime_context,
 )
 from participant_notification_dialog import show_participant_notifications
+from mail_settings import show_mail_settings
 
 
 arguments = None
@@ -409,6 +410,10 @@ def _buttonclick(event):
             return
         case "lblBackupDB":
             show_backup_restore(cmfrm.FRAME, context, JSForm)
+            return
+        case "lblEmailSettings":
+            show_mail_settings(cmfrm.FRAME, context.connection, context.authorization, context.test_mode)
+            return
         case "lblSupportDiagnostics":
             show_support_diagnostics(cmfrm.FRAME)
             return

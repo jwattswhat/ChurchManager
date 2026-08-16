@@ -179,8 +179,8 @@ class UserPersonLinkTests(unittest.TestCase):
         )
         user_source = (ROOT / "user_admin.py").read_text(encoding="utf-8")
         self.assertGreaterEqual(main_source.count("test_mode=context.test_mode"), 2)
-        self.assertIn("configured_mail_service(test_mode=test_mode)", participant_source)
-        self.assertIn("configured_mail_service(test_mode=test_mode)", user_source)
+        self.assertIn("configured_mail_service(test_mode=test_mode, connection=connection)", participant_source)
+        self.assertIn("configured_mail_service(test_mode=test_mode, connection=connection)", user_source)
 
 
 if __name__ == "__main__":

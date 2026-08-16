@@ -605,6 +605,14 @@
                     "invoke": "application.support.create"
                 }
             },
+            "lblEmailSettings": {
+                "name": "lblEmailSettings",
+                "type": "StaticText",
+                "label": "Email Settings",
+                "posch": [28, 7],
+                "tooltip": "Configure protected outgoing email settings.",
+                "security": {"invoke": "application.config.manage"}
+            },
             "SessionBox": {
                 "name": "SessionBox",
                 "type": "StaticBox",

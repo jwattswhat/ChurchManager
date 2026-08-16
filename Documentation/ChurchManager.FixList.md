@@ -124,6 +124,12 @@ future roadmap projects:
   mail factory for welcome and participant messages.
 - Revoke and remove any credential exposed in development source before testing
   the replacement.
+- Implemented: migration 071 stores only non-secret settings, the protected
+  Email Settings screen manages the Windows credential, and mail entry points
+  fail closed before database, credential, or network access in test mode.
+- Remaining deployment action: revoke any historical provider credential that
+  may remain in repository history and enter a new application password through
+  Email Settings outside test mode.
 
 ### 5. Hymnal, lectionary, and Order of Service catalog design
 

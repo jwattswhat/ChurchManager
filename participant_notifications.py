@@ -171,21 +171,11 @@ class TestModeMailService:
         raise RuntimeError(self.MESSAGE)
 
 
-def configured_mail_service(config=JSForm.CONFIG, test_mode=False):
-    """Build mail delivery, or a fail-closed service when test mode is active."""
+def configured_mail_service(config=JSForm.CONFIG, test_mode=False, connection=None):
+    """Build protected mail delivery, or fail closed in test mode."""
     if test_mode:
         return TestModeMailService()
-    values = {str(name): value for name, value, *_rest in config.get_Config_Family("SMTP")}
-    username = str(values.get("UserName") or "").strip() or None
-    password = str(values.get("Password") or "") or None
-    settings = JSForm.MailSettings(
-        host=str(values.get("Server") or "smtp.gmail.com").strip(),
-        port=int(values.get("Port") or 587),
-        username=username,
-        password=password,
-        sender_address=str(values.get("SenderAddress") or username or "").strip(),
-        sender_name=str(values.get("SenderName") or "ChurchManager").strip(),
-        security=str(values.get("Security") or "starttls").strip().casefold(),
-        reply_to=str(values.get("ReplyTo") or "").strip() or None,
-    )
-    return JSForm.MailService(JSForm.SMTPTransport(settings))
+    if connection is None:
+        raise JSForm.MailConfigurationError("The ChurchManager database connection is required.")
+    from mail_settings import ChurchMailServiceFactory
+    return ChurchMailServiceFactory(connection, test_mode=False).build()

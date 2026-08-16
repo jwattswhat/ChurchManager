@@ -122,7 +122,7 @@ def show_participant_notifications(
 ):
     repository = ParticipantNotificationRepository(connection)
     try:
-        mail = configured_mail_service(test_mode=test_mode)
+        mail = configured_mail_service(test_mode=test_mode, connection=connection)
     except Exception:
         mail = None
     service = ParticipantNotificationService(repository, authorization, reports, mail)
