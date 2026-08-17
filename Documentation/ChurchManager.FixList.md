@@ -306,6 +306,10 @@ future roadmap projects:
   the Windows/runtime prerequisites, MariaDB client and backup tools, free
   space, bundled package integrity, and unresolved catalog dependencies without
   opening a database, requesting a credential, or changing the computer.
+- The password-free installation-plan engine is implemented. It validates the
+  congregation, safe database and administrator identifiers, optional package
+  selections, catalog dependencies, and independent default catalogs before
+  any installation action is permitted.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local

@@ -15,6 +15,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from hymnal_packages import HymnalPackageValidator, load_hymnal_package
 from lectionary_packages import LectionaryPackageValidator, load_lectionary_package
 from order_of_service_packages import (
     OrderOfServicePackageValidator,
@@ -135,10 +136,26 @@ def catalog_inventory(root=ROOT):
     root = Path(root)
     packages = []
     hymnals = root / "packages" / "hymnal"
-    hymnal_codes = {
-        str(_untrusted_manifest(path).get("package_code") or "").casefold()
-        for path in hymnals.glob("*.json")
-    } if hymnals.is_dir() else set()
+    hymnal_codes = set()
+    for path in sorted(hymnals.glob("*.json")) if hymnals.is_dir() else ():
+        raw = _untrusted_manifest(path)
+        try:
+            package, checksum = load_hymnal_package(path)
+            summary = HymnalPackageValidator().validate(package, checksum)
+            hymnal_codes.add(summary.package_code.casefold())
+            packages.append(CatalogPackage(
+                "hymnal", summary.package_code,
+                str(package.get("title") or summary.package_code),
+                summary.package_version, path, True, True,
+                "Validated and available.",
+            ))
+        except Exception as error:
+            packages.append(CatalogPackage(
+                "hymnal", str(raw.get("package_code") or path.stem),
+                str(raw.get("title") or path.stem),
+                str(raw.get("package_version") or ""), path, False, False,
+                str(error),
+            ))
 
     for path in sorted((root / "packages" / "lectionary").glob("*.json")):
         raw = _untrusted_manifest(path)
