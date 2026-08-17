@@ -147,10 +147,11 @@ future roadmap projects:
 - Hymnal and hymn titles are normalized to Title Case during conversion and
   package import. Common connecting words remain lowercase inside a title, and
   intentional uppercase abbreviations remain uppercase.
-- Migration 074 is accepted on `ChurchDBTest`. Remaining acceptance work is to
-  visually test local hymn creation and retirement, review the permanent-ID
-  conversion results, and build the complete curated LSB hymnal metadata
-  package with verified stanza counts.
+- Migration 074 is accepted on `ChurchDBTest`, and local hymn creation and
+  retirement have passed visual acceptance. The deterministic LSB package
+  builder and 636-row stanza-review ledger are implemented. Remaining catalog
+  work is human verification of every printed stanza count; the builder refuses
+  to publish the final package while any row remains pending or lacks evidence.
 
 - Use [Hymnal Research and Recommendations](ChurchManager.HymnalResearchAndRecommendations.md)
   as the starting point for the multi-hymnal catalog design.

@@ -123,6 +123,13 @@ For each entry:
 
 The import tool proposes values but does not silently resolve ambiguous records.
 
+For the reference LSB package, `data/lsb_printed_hymn_review.csv` is the human
+review ledger and `build_lsb_hymnal_package.py` is the deterministic builder.
+The builder requires all 636 printed hymn identities from 331 through 966 and
+refuses to publish a package until every stanza count is marked `VERIFIED` with
+a source, reviewer, and review date. An unknown stanza count is never converted
+to zero, because zero has a different semantic meaning in the package schema.
+
 ## 6. Phase E: validate the package
 
 Automated preflight must reject the package when:

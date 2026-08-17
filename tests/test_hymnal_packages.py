@@ -1,6 +1,7 @@
 """Contract tests for permanent-ID metadata-only hymnal packages."""
 
 from copy import deepcopy
+import csv
 import json
 from pathlib import Path
 import tempfile
@@ -11,6 +12,9 @@ from hymnal_packages import (
     canonical_hymnal_checksum, load_hymnal_package,
 )
 from hymn_titles import title_case
+from build_lsb_hymnal_package import (
+    build_package as build_lsb_package, initialize_review, reviewed_rows,
+)
 from local_hymns import LocalHymnCapacityError, LocalHymnIDAllocator
 
 
@@ -80,6 +84,40 @@ class RecordingConnection:
 
 
 class HymnalPackageTests(unittest.TestCase):
+    def test_lsb_review_has_all_printed_hymns_and_fails_closed_while_pending(self):
+        with tempfile.TemporaryDirectory() as folder:
+            review = Path(folder) / "review.csv"
+            self.assertEqual(initialize_review(review_path=review), 636)
+            with review.open(encoding="utf-8-sig") as stream:
+                rows = list(csv.DictReader(stream))
+            self.assertEqual((rows[0]["HymnNumber"], rows[-1]["HymnNumber"]), ("331", "966"))
+            with self.assertRaisesRegex(HymnalPackageError, "636 LSB stanza counts remain unverified"):
+                reviewed_rows(review_path=review)
+
+    def test_lsb_builder_uses_permanent_ids_and_requires_review_evidence(self):
+        with tempfile.TemporaryDirectory() as folder:
+            review = Path(folder) / "review.csv"
+            initialize_review(review_path=review)
+            with review.open(newline="", encoding="utf-8-sig") as stream:
+                rows = list(csv.DictReader(stream))
+                fields = list(rows[0])
+            for row in rows:
+                row.update({
+                    "PrintedStanzaCount": "4", "VerificationStatus": "VERIFIED",
+                    "VerificationSource": "Owned pew edition", "VerifiedBy": "Reviewer",
+                    "VerifiedDate": "2026-08-17",
+                })
+            with review.open("w", newline="", encoding="utf-8-sig") as stream:
+                writer = csv.DictWriter(stream, fieldnames=fields)
+                writer.writeheader(); writer.writerows(rows)
+            value = build_lsb_package(review_path=review)
+            self.assertEqual(len(value["entries"]), 636)
+            self.assertEqual(
+                (value["entries"][0]["hymn_id"], value["entries"][-1]["hymn_id"]),
+                (10331, 10966),
+            )
+            HymnalPackageValidator().validate(value, value["checksum"])
+
     def test_valid_package_uses_permanent_block(self):
         result = HymnalPackageValidator().validate(package(), "a" * 64)
         self.assertEqual((result.hymnal_id, result.entry_count), (3, 1))
