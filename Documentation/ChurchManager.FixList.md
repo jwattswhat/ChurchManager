@@ -195,6 +195,9 @@ future roadmap projects:
   Services themselves remain, with their Proper selection cleared. Obsolete
   production-import utilities were removed so the catalog cannot be
   accidentally reintroduced.
+- Migration 082 clears all disposable worship-service records and their linked
+  attendance events only when the active database is exactly `ChurchDBTest`.
+  It is inert on every production or differently named database.
 - Preserve the reviewed distribution scope inside every checksum-protected
   lectionary package and installed package record. `LOCAL_ONLY` is displayed in
   the package manager and cannot be silently treated as redistributable.
