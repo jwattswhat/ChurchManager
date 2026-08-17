@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="ChurchManager"
+           Manufacturer="ChurchManager Project"
+           Version="$(var.ProductVersion)"
+           UpgradeCode="A1C2E1E4-8B77-4B6C-AB3F-F1C02E9E4E44"
+           Language="1033"
+           Scope="perMachine">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of ChurchManager is already installed." />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="ChurchManager" />
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder" />
+    <StandardDirectory Id="DesktopFolder" />
+
+    <Files Directory="INSTALLFOLDER" Include="!(bindpath.AppFiles)\**">
+      <Exclude Files="!(bindpath.AppFiles)\ChurchManager.exe" />
+      <Exclude Files="!(bindpath.AppFiles)\ChurchManagerSetup.exe" />
+    </Files>
+
+    <Component Directory="INSTALLFOLDER">
+      <File Id="ChurchManagerExe" Source="!(bindpath.AppFiles)\ChurchManager.exe">
+        <Shortcut Id="ChurchManagerStartMenuShortcut"
+                  Directory="ProgramMenuFolder"
+                  Name="ChurchManager"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <Shortcut Id="ChurchManagerDesktopShortcut"
+                  Directory="DesktopFolder"
+                  Name="ChurchManager"
+                  WorkingDirectory="INSTALLFOLDER" />
+      </File>
+    </Component>
+    <Component Directory="INSTALLFOLDER">
+      <File Id="ChurchManagerSetupExe" Source="!(bindpath.AppFiles)\ChurchManagerSetup.exe">
+        <Shortcut Id="ChurchManagerSetupStartMenuShortcut"
+                  Directory="ProgramMenuFolder"
+                  Name="ChurchManager Setup"
+                  WorkingDirectory="INSTALLFOLDER" />
+      </File>
+    </Component>
+  </Package>
+</Wix>

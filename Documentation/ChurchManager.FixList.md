@@ -390,13 +390,15 @@ future roadmap projects:
   2026, recovering a deliberately changed congregation record, verifying all
   84 migration records and the pre-restore safety backup, and removing all
   disposable resources. Repair and installed-build rehearsals remain.
-- Reproducible PyInstaller onedir specifications now build the ordinary
-  ChurchManager and protected Setup executables with the compatible JSForm
+- A reproducible PyInstaller shared onedir specification now builds the ordinary
+  ChurchManager and protected Setup executables with one compatible JSForm
   runtime, application forms, canonical installation data, catalog packages,
   report definitions, icon, and visually accepted User Guide. Both packaged
   executables passed the password-free resource proof for release 0.2.0-dev on
-  August 17, 2026. Traditional MSI construction, repair, signing, and
-  clean-machine visual acceptance remain.
+  August 17, 2026. WiX v5 MSI source defines per-machine application files,
+  shortcuts, and major-upgrade protection without claiming congregation-owned
+  data. Compiler validation, repair, signing, and clean-machine visual
+  acceptance remain.
 - Installed configuration now resolves to the writable local application-data
   folder and is initialized from a non-secret template. Source development
   retains its repository configuration, and neither mode stores a database

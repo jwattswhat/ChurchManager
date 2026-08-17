@@ -3,6 +3,7 @@
 import unittest
 import json
 import tempfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from unittest.mock import patch
 
@@ -34,7 +35,7 @@ class InstalledLauncherTests(unittest.TestCase):
         setup.assert_called_once()
 
     def test_specs_include_framework_forms_baseline_catalogs_and_guide(self):
-        for filename in ("ChurchManager.spec", "ChurchManagerSetup.spec"):
+        for filename in ("ChurchManager.spec", "ChurchManagerSetup.spec", "ChurchManagerBundle.spec"):
             source = (ROOT / "packaging" / filename).read_text(encoding="utf-8")
             for required in (
                 "JSForm/Forms", "installation", "migrations", "packages",
@@ -42,6 +43,19 @@ class InstalledLauncherTests(unittest.TestCase):
                 "ChurchManager.UserGuide.pdf", 'console=False',
             ):
                 self.assertIn(required, source)
+
+    def test_bundle_and_msi_define_both_installed_entry_points(self):
+        bundle = (ROOT / "packaging" / "ChurchManagerBundle.spec").read_text(encoding="utf-8")
+        self.assertIn('name="ChurchManager"', bundle)
+        self.assertIn('name="ChurchManagerSetup"', bundle)
+        installer = ROOT / "packaging" / "ChurchManager.wxs"
+        ET.parse(installer)
+        source = installer.read_text(encoding="utf-8")
+        self.assertIn("ChurchManager.exe", source)
+        self.assertIn("ChurchManagerSetup.exe", source)
+        self.assertIn("MajorUpgrade", source)
+        self.assertNotIn("AppData", source)
+        self.assertNotIn("Backup", source)
 
     def test_package_check_reports_missing_resources_without_database_access(self):
         with tempfile.TemporaryDirectory() as temporary:

@@ -156,20 +156,25 @@ the same user-facing term.
 ### Windows executable bundles
 
 Install the development-only builder from `requirements-build.txt`, then create
-the two self-contained application folders:
+the shared release folder containing both entry points:
 
 ```powershell
-.\.runtime-venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --distpath dist --workpath build packaging\ChurchManager.spec
-.\.runtime-venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --distpath dist --workpath build packaging\ChurchManagerSetup.spec
+.\.runtime-venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --distpath dist --workpath build packaging\ChurchManagerBundle.spec
 ```
 
-The results are `dist\ChurchManager\ChurchManager.exe` and
-`dist\ChurchManagerSetup\ChurchManagerSetup.exe`. Before constructing an MSI,
+The results are `dist\ChurchManagerBundle\ChurchManager.exe` and
+`dist\ChurchManagerBundle\ChurchManagerSetup.exe`, sharing one compatible
+runtime. Before constructing an MSI,
 run each executable with `--package-check <evidence.json>` and require a zero
 exit code plus `"passed": true`. The check is noninteractive, opens no database,
 and verifies the release number, forms, schema, seed, migrations, catalogs,
 report definitions, and User Guide. Build output is reproducible release input
 and is not committed.
+
+`packaging\ChurchManager.wxs` is the maintained WiX v5 source for the
+traditional per-machine MSI. It harvests the verified bundle, creates ordinary
+and protected-setup shortcuts, supports major upgrades, and owns no database,
+backup, attachment, custom definition, preference, or log location.
 
 Remove `-dev` only for a supported release. Run all tests, apply migrations to a
 fresh test database, exercise backup and restore, inspect representative reports,

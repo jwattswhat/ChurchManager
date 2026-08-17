@@ -269,12 +269,15 @@ The beta is complete only when:
    migration records, verified the pre-restore safety backup, and removed all
    disposable resources. The repair rehearsal remains.
 10. Prepare the beta kit and complete beta acceptance. The reproducible
-    PyInstaller 6.21 onedir builds for `ChurchManager.exe` and
-    `ChurchManagerSetup.exe` are implemented. Both packaged executables passed
+    PyInstaller 6.21 shared onedir build for `ChurchManager.exe` and
+    `ChurchManagerSetup.exe` is implemented. Both packaged executables passed
     the noninteractive resource proof on August 17, 2026: release 0.2.0-dev,
     34 forms, 84 migrations, two catalog packages, and no missing required
-    resources. Traditional MSI construction, repair rehearsal, signing, and
-    clean-machine visual acceptance remain.
+    resources. The combined release folder contains 390 files totaling
+    88,067,288 bytes. WiX v5 MSI source now defines per-machine installation,
+    major-upgrade protection, application and setup shortcuts, and an
+    application-file-only uninstall boundary. Compiler validation, MSI repair
+    rehearsal, signing, and clean-machine visual acceptance remain.
 11. Ship the visually verified, version-matched User Guide PDF and verify the
     main-menu Help control on an installed build.
 
