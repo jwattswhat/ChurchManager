@@ -81,6 +81,7 @@ class BaselineInstaller:
             object_count = int(cursor.fetchone()[0])
             if not object_count:
                 raise BaselineInstallationError("The installed schema contains no objects.")
+            self.connection.commit()
             return {
                 "database_objects": object_count,
                 "represented_migrations": migration_count,

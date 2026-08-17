@@ -345,6 +345,11 @@ future roadmap projects:
   review remain. The 0.2.0-dev candidate contains 84 represented migrations;
   its schema SHA-256 is
   `3333f3ade00a89c944462b95581990fa83612458ef31e49695296ecb4869e375`.
+- Disposable live-baseline acceptance is implemented. It creates only a unique
+  `CMFreshAcceptance_...` database and `cm_accept_...` local account, verifies
+  the baseline and migration ledger through that account, and removes both on
+  success or failure. Live acceptance passed August 17, 2026: 84 migration
+  checksums and the canonical schema digest verified, and cleanup completed.
 - The first task-oriented User Guide is maintained as Markdown and rendered as
   a visually inspected PDF. A signed-in **Help - User Guide** control opens it
   from the main menu without requiring an administrative permission. Installer

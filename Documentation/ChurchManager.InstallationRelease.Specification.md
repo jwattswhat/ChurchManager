@@ -220,7 +220,9 @@ The beta is complete only when:
    that it creates an empty database and establishes accurate migration history.
    The fail-closed schema-hygiene scanner and deterministic structure-only
    generator are complete. The 0.2.0-dev candidate and manifest have been
-   generated and independently checked; isolated database installation remains.
+   generated and independently checked. The guarded disposable-database command
+   installed and verified the candidate against local MariaDB on August 17,
+   2026, then removed its isolated database and account successfully.
 5. Add first-master-administrator creation.
 6. Add transactional catalog installation and congregation defaults.
 7. Add the nontechnical wizard around the tested services.

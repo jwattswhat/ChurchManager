@@ -33,9 +33,13 @@ class Cursor:
 class Connection:
     def __init__(self, responses):
         self.value = Cursor(responses)
+        self.committed = False
 
     def cursor(self):
         return self.value
+
+    def commit(self):
+        self.committed = True
 
 
 class BaselineInstallerTests(unittest.TestCase):
@@ -95,6 +99,7 @@ class BaselineInstallerTests(unittest.TestCase):
         )
         self.assertEqual(result["represented_migrations"], 1)
         self.assertEqual(result["database_objects"], 2)
+        self.assertTrue(connection.committed)
         self.assertTrue(connection.value.closed)
 
 

@@ -83,6 +83,18 @@ schema. The command previews and validates by default; `--write` creates
 The export is structure-only. It verifies the complete migration ledger first
 and never places the database password on the process command line.
 
+Preview the disposable live acceptance target without connecting to MariaDB:
+
+```powershell
+.\.runtime-venv\Scripts\python.exe accept_fresh_install_baseline.py
+```
+
+With `--apply`, the command prompts privately for the local MariaDB root
+password, creates a uniquely named `CMFreshAcceptance_...` database and scoped
+account, installs and verifies the baseline, and removes both temporary objects.
+It refuses cleanup unless both identifiers carry the acceptance-only prefixes.
+Never use `--keep` except for a specifically reviewed isolated inspection.
+
 ```powershell
 .\.runtime-venv\Scripts\python.exe run_churchdb_migrations.py --apply
 ```
