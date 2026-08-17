@@ -99,6 +99,7 @@ constraints are required.
 | `SourceName` | Responsible body or approved source |
 | `SourceReference` | Short source citation or URL |
 | `PackageNotice` | Passive provenance note, not license enforcement |
+| `DistributionScope` | `REDISTRIBUTABLE` or `LOCAL_ONLY`, copied from the reviewed provenance approval |
 | `InstalledAt` | Installation timestamp |
 | `IsActive` | Available for new selections |
 
@@ -508,5 +509,10 @@ catalog rows in one transaction, and never deletes service snapshots or local
 records. Reinstalling or upgrading the package may reactivate its owned keys.
 The ordinary Lectionary System and Propers forms disable package-owned fields
 and reject direct update or deletion attempts. Local rows remain editable.
+Migration 079 closes the local-package provenance loop: the approved
+`distribution_scope` is embedded in the checksum-protected JSON, validated on
+every load, stored with the installed package, and shown by the package manager.
+Missing, unknown, or provenance-mismatched scope values fail closed. Existing
+installed records default conservatively to `LOCAL_ONLY` during migration.
 Existing ChurchManager behavior remains in place until their migrations and
 application changes are completed and verified.

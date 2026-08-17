@@ -16,6 +16,11 @@ The builder validates provenance, removes any draft checksum, calculates a new
 checksum over canonical package data, and runs the same fail-closed validator
 used by ChurchManager. It writes nothing if either input fails.
 
+The approved `distribution_scope` is copied into the finished package before
+its checksum is calculated. It therefore travels with the package, is visible
+in the package manager, and cannot be changed without invalidating the file.
+The builder rejects a draft that claims a different scope from its approval.
+
 ## Provenance approval template
 
 ```json
@@ -38,6 +43,8 @@ used by ChurchManager. It writes nothing if either input fails.
 does not authorize adding the resulting package to the public ChurchManager
 repository. It merely records that a congregation has separately established a
 lawful local basis for using its own citation metadata.
+An omitted or unrecognized scope is rejected; it is never inferred from the
+package title, filename, source, or installation location.
 
 Installed packages are retired rather than destructively deleted. ChurchManager
 requires the church default to be changed first, deactivates only records owned

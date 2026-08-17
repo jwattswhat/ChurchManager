@@ -73,6 +73,7 @@ class ValidatedLectionaryPackage:
 
     package_code: str
     package_version: str
+    distribution_scope: str
     system_count: int
     edition_count: int
     cycle_count: int
@@ -85,7 +86,8 @@ class LectionaryPackageValidator:
 
     MANIFEST_FIELDS = frozenset({
         "package_code", "package_version", "schema_version", "checksum", "title",
-        "source_name", "source_reference", "package_notice", "systems",
+        "source_name", "source_reference", "package_notice", "distribution_scope",
+        "systems",
     })
     SYSTEM_FIELDS = frozenset({"system_key", "name", "note", "editions"})
     EDITION_FIELDS = frozenset({
@@ -106,6 +108,7 @@ class LectionaryPackageValidator:
     STATUSES = frozenset({"STABLE", "TRIAL", "RETIRED", "LOCAL"})
     ROLES = frozenset({"FIRST_READING", "PSALM_CANTICLE", "SECOND_READING", "GOSPEL"})
     OPTION_TYPES = frozenset({"DEFAULT", "ALTERNATE", "OPTIONAL_EXTENSION", "VARIANT"})
+    DISTRIBUTION_SCOPES = frozenset({"REDISTRIBUTABLE", "LOCAL_ONLY"})
     FORBIDDEN_FIELD_PARTS = (
         "scripture_text", "full_text", "body", "prayer", "collect_text", "rubric",
         "lyrics", "music", "notation", "score", "audio", "recording", "image",
@@ -123,6 +126,11 @@ class LectionaryPackageValidator:
         if code.startswith("local-"):
             raise LectionaryPackageError("A distributed package cannot claim the local namespace.")
         version = self._text(package.get("package_version"), 50, "package version")
+        distribution_scope = str(package.get("distribution_scope") or "").upper()
+        if distribution_scope not in self.DISTRIBUTION_SCOPES:
+            raise LectionaryPackageError(
+                "Distribution scope must be REDISTRIBUTABLE or LOCAL_ONLY."
+            )
         if package.get("schema_version") != self.supported_schema:
             raise LectionaryPackageError("The lectionary package schema version is not supported.")
         checksum = str(package.get("checksum") or "").casefold()
@@ -142,7 +150,7 @@ class LectionaryPackageValidator:
         counts = [0, 0, 0, 0, 0]
         for system in systems:
             self._system(system, code, identities, counts)
-        return ValidatedLectionaryPackage(code, version, *counts)
+        return ValidatedLectionaryPackage(code, version, distribution_scope, *counts)
 
     def _system(self, system, package_code, identities, counts):
         self._object(system, self.SYSTEM_FIELDS, "system")

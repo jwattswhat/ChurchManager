@@ -190,6 +190,9 @@ future roadmap projects:
   and RCL packages are blocked pending written electronic-redistribution
   permission. Narrow permission-request drafts and the local-only fallback are
   documented in `ChurchManager.LectionaryPackageProvenance.md`.
+- Preserve the reviewed distribution scope inside every checksum-protected
+  lectionary package and installed package record. `LOCAL_ONLY` is displayed in
+  the package manager and cannot be silently treated as redistributable.
 - The current ChurchDBTest lectionary catalog is reference-only. Export it for
   citation, role, color, and hymn-suggestion reconciliation, then replace it
   cleanly; do not preserve its IDs or obsolete structure.

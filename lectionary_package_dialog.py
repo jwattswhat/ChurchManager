@@ -20,7 +20,8 @@ class LectionaryPackageRepository:
         cursor = self.connection.cursor()
         try:
             cursor.execute(
-                "SELECT PackageCode,Title,PackageVersion,SourceName,InstalledAt,IsActive "
+                "SELECT PackageCode,Title,PackageVersion,DistributionScope,SourceName,"
+                "InstalledAt,IsActive "
                 "FROM tblLectionaryPackage ORDER BY Title,PackageCode"
             )
             return cursor.fetchall()
@@ -97,7 +98,7 @@ class LectionaryPackageDialog(wx.Dialog):
         self.grid = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         for label, width in (
             ("Package", 170), ("Title", 260), ("Version", 100),
-            ("Source", 220), ("Installed", 140), ("Active", 70),
+            ("Scope", 120), ("Source", 180), ("Installed", 140), ("Active", 70),
         ):
             self.grid.AppendColumn(label, width=width)
         outer.Add(self.grid, 1, wx.EXPAND | wx.ALL, 10)
@@ -134,7 +135,7 @@ class LectionaryPackageDialog(wx.Dialog):
         for index, row in enumerate(self.repository.installed()):
             self.grid.InsertItem(index, str(row[0]))
             for column, value in enumerate(row[1:], 1):
-                if column == 5:
+                if column == 6:
                     value = "Yes" if value else "No"
                 self.grid.SetItem(index, column, str(value or ""))
 
@@ -160,6 +161,7 @@ class LectionaryPackageDialog(wx.Dialog):
         self.package, self.checksum, self.path = package, checksum, path
         self.preview.SetLabel(
             f"{package['title']}  |  Version {summary.package_version}\n"
+            f"Distribution: {summary.distribution_scope.replace('_', ' ').title()}\n"
             f"Source: {package['source_name']} — {package['source_reference']}\n"
             f"{summary.system_count} system(s), {summary.edition_count} edition(s), "
             f"{summary.cycle_count} cycle(s), {summary.proper_count} Propers, "

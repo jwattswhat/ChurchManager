@@ -18,6 +18,7 @@ def package():
         "schema_version": 1, "checksum": "a" * 64, "title": "Sample Lectionary",
         "source_name": "Approved source", "source_reference": "Metadata reference",
         "package_notice": "Biblical citations and planning metadata only.",
+        "distribution_scope": "REDISTRIBUTABLE",
         "systems": [{
             "system_key": "sample-lectionary-system", "name": "Sample System", "note": "",
             "editions": [{
@@ -55,6 +56,7 @@ class LectionaryPackageTests(unittest.TestCase):
              result.proper_count, result.appointment_count),
             (1, 1, 3, 1, 1),
         )
+        self.assertEqual(result.distribution_scope, "REDISTRIBUTABLE")
         value = package(); value["systems"][0]["editions"][0]["cycles"] = []
         value["systems"][0]["editions"][0]["propers"][0]["cycle_key"] = None
         self.assertEqual(LectionaryPackageValidator().validate(value).cycle_count, 0)
@@ -103,6 +105,18 @@ class LectionaryPackageTests(unittest.TestCase):
         value = package(); value["package_code"] = "local-user"
         with self.assertRaisesRegex(LectionaryPackageError, "local namespace"):
             LectionaryPackageValidator().validate(value)
+
+    def test_distribution_scope_is_explicit_and_bounded(self):
+        for scope in (None, "PRIVATE", ""):
+            with self.subTest(scope=scope):
+                value = package(); value["distribution_scope"] = scope
+                with self.assertRaisesRegex(LectionaryPackageError, "Distribution scope"):
+                    LectionaryPackageValidator().validate(value)
+        value = package(); value["distribution_scope"] = "LOCAL_ONLY"
+        self.assertEqual(
+            LectionaryPackageValidator().validate(value).distribution_scope,
+            "LOCAL_ONLY",
+        )
 
     def test_loader_verifies_checksum_and_duplicate_fields(self):
         value = package(); value["checksum"] = canonical_lectionary_checksum(value)

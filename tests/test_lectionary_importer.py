@@ -72,6 +72,7 @@ def valid_package():
         "package_code": "sample", "package_version": "1.0", "schema_version": 1,
         "checksum": "0" * 64, "title": "Sample", "source_name": "Source",
         "source_reference": "Citation index", "package_notice": "Metadata only",
+        "distribution_scope": "REDISTRIBUTABLE",
         "systems": [{
             "system_key": "sample-system", "name": "Sample", "note": "",
             "editions": [{

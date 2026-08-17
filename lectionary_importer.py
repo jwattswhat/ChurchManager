@@ -101,20 +101,22 @@ class LectionaryPackageImporter:
         )
         values = (
             package["package_version"], package["title"], package["source_name"],
-            package["source_reference"], package["package_notice"], checksum,
+            package["source_reference"], package["package_notice"],
+            package["distribution_scope"], checksum,
         )
         if row:
             package_id = row[0]
             cursor.execute(
                 "UPDATE tblLectionaryPackage SET PackageVersion=?,Title=?,SourceName=?,"
-                "SourceReference=?,PackageNotice=?,Checksum=?,IsActive=1 WHERE ID=?",
+                "SourceReference=?,PackageNotice=?,DistributionScope=?,Checksum=?,"
+                "IsActive=1 WHERE ID=?",
                 values + (package_id,),
             )
             return package_id, "UPGRADE"
         cursor.execute(
             "INSERT INTO tblLectionaryPackage "
-            "(PackageCode,PackageVersion,Title,SourceName,SourceReference,PackageNotice,Checksum) "
-            "VALUES (?,?,?,?,?,?,?)", (code,) + values,
+            "(PackageCode,PackageVersion,Title,SourceName,SourceReference,PackageNotice,"
+            "DistributionScope,Checksum) VALUES (?,?,?,?,?,?,?,?)", (code,) + values,
         )
         return cursor.lastrowid, "INSTALL"
 

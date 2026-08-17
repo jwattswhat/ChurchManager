@@ -30,6 +30,22 @@ class LectionaryPackageBuilderTests(unittest.TestCase):
         self.assertEqual(len(package["checksum"]), 64)
         self.assertNotEqual(package["checksum"], "wrong")
         self.assertEqual(summary.package_code, "sample")
+        self.assertEqual(package["distribution_scope"], "REDISTRIBUTABLE")
+
+    def test_builder_embeds_local_only_scope_and_rejects_a_mismatch(self):
+        package = valid_package()
+        item = approval(package)
+        item["distribution_scope"] = "LOCAL_ONLY"
+        package.pop("distribution_scope")
+        built, summary = build_package(package, item)
+        self.assertEqual(built["distribution_scope"], "LOCAL_ONLY")
+        self.assertEqual(summary.distribution_scope, "LOCAL_ONLY")
+
+        package = valid_package()
+        item = approval(package)
+        item["distribution_scope"] = "LOCAL_ONLY"
+        with self.assertRaisesRegex(LectionaryPackageError, "does not match"):
+            build_package(package, item)
 
     def test_pending_or_unconfirmed_provenance_is_rejected(self):
         package = valid_package()

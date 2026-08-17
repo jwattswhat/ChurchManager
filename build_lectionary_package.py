@@ -57,7 +57,14 @@ def build_package(draft, provenance):
         raise LectionaryPackageError("The package draft must be an object.")
     package = dict(draft)
     package.pop("checksum", None)
-    validate_provenance(provenance, package)
+    provenance = validate_provenance(provenance, package)
+    approved_scope = str(provenance["distribution_scope"]).upper()
+    claimed_scope = str(package.get("distribution_scope") or "").upper()
+    if claimed_scope and claimed_scope != approved_scope:
+        raise LectionaryPackageError(
+            "Draft distribution scope does not match the provenance approval."
+        )
+    package["distribution_scope"] = approved_scope
     package["checksum"] = canonical_lectionary_checksum(package)
     summary = LectionaryPackageValidator().validate(package, package["checksum"])
     return package, summary
