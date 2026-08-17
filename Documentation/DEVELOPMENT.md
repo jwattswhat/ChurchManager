@@ -10,6 +10,25 @@ Install or refresh dependencies from `requirements-runtime.txt`. Credentials
 belong in Windows Credential Manager. Local connection files, OAuth tokens,
 dumps, generated output, and logs are ignored and must remain untracked.
 
+## Resetting routine test activity
+
+`reset_test_activity.py` preserves congregation, membership, users,
+permissions, choices, installed catalogs, report and screen definitions, and
+accounting setup. It removes Worship Services and their dependent attendance,
+weekly orders, participants, hymn usage, reading snapshots, and checklist
+results. It also removes accounting transactions, attachments, bank-import
+activity, reconciliations, budgets, and accounting audit events, then reopens
+the retained fiscal years and periods.
+
+The command is restricted to local `ChurchDBTest`. Without `--apply` it only
+prints counts. With `--apply` it first creates and SHA-256-verifies a complete
+SQL dump under `BackupDB/ChurchDBTest.pre-activity-reset`.
+
+```powershell
+.\.runtime-venv\Scripts\python.exe reset_test_activity.py
+.\.runtime-venv\Scripts\python.exe reset_test_activity.py --apply
+```
+
 ## Database changes
 
 Add the next numbered SQL migration and make it repeat-safe where practical.

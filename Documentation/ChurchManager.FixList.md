@@ -300,6 +300,11 @@ future roadmap projects:
 
 ### 6. Release, installation, and recovery readiness
 
+- A guarded routine test-activity reset preserves the reusable ChurchDBTest
+  baseline while clearing worship and accounting activity. It previews counts,
+  creates and verifies a complete SQL backup, runs only against local
+  `ChurchDBTest`, and verifies that every covered activity table is empty.
+
 #### LimeReports retirement workstream
 
 - Source implementation completed August 14, 2026.
