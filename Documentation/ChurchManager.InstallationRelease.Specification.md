@@ -239,6 +239,11 @@ The beta is complete only when:
    a password-free review, guarded installation, cleanup, and verification.
    Visual acceptance and a second isolated `--apply` dress rehearsal remain.
 8. Add backup proof, final verification, and safe failure recovery.
+   **Implemented.** A fresh installation creates a labeled SQL dump, verifies
+   its database identity, minimum size, table definitions, and SHA-256 digest,
+   and includes the proof in its password-free completion report. Database and
+   account creation are removed after incomplete setup; configuration and the
+   Windows credential are restored together if final persistence fails.
 9. Exercise fresh install, upgrade, repair, and restore in isolated databases.
 10. Prepare the beta kit and complete beta acceptance.
 11. Ship the visually verified, version-matched User Guide PDF and verify the

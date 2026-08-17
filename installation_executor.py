@@ -15,6 +15,7 @@ from database_provisioning import FreshDatabaseProvisioner, quote_identifier
 from hymnal_packages import HymnalPackageImporter, load_hymnal_package
 from initial_master import InitialMasterBootstrapper
 from installation_plan import InstallationPlan
+from installation_backup import InitialBackupVerifier
 from lectionary_importer import LectionaryPackageImporter
 from lectionary_packages import load_lectionary_package
 from migration_service import MigrationService
@@ -43,6 +44,25 @@ class InstallationResult:
     represented_migrations: int
     active_permissions: int
     installed_packages: tuple[str, ...]
+    backup_path: Path
+    backup_size_bytes: int
+    backup_sha256: str
+
+    def completion_report(self):
+        """Return a plain-language, password-free installation summary."""
+        return (
+            "ChurchManager installation completed and verified.\n\n"
+            f"Database: {self.database_name}\n"
+            f"Database objects: {self.database_objects}\n"
+            f"Migrations represented: {self.represented_migrations}\n"
+            f"Active permissions: {self.active_permissions}\n"
+            f"Master Administrator ID: {self.master_user_id}\n"
+            f"Catalog packages: {len(self.installed_packages)}\n"
+            f"First backup: {self.backup_path}\n"
+            f"Backup size: {self.backup_size_bytes:,} bytes\n"
+            f"Backup SHA-256: {self.backup_sha256}\n\n"
+            "The Master Administrator must change the temporary password at first login."
+        )
 
 
 class FreshInstallationExecutor:
@@ -65,7 +85,8 @@ class FreshInstallationExecutor:
 
     def install(
         self, plan, application_user, application_password,
-        master_password, master_confirmation,
+        master_password, master_confirmation, *,
+        dump_directory, backup_folder, completion_callback=None,
     ):
         """Apply a validated plan and return only non-secret verification data."""
         if not isinstance(plan, InstallationPlan):
@@ -73,6 +94,7 @@ class FreshInstallationExecutor:
         host = "127.0.0.1"
         provisioned = None
         connection = None
+        proof = None
         try:
             self.progress("Creating the ChurchManager database...")
             provisioned = FreshDatabaseProvisioner(
@@ -118,13 +140,26 @@ class FreshInstallationExecutor:
             )
             installed = self._install_packages(connection, plan, church_id)
             self._verify(connection, plan, church_id, master_id, installed)
-            self.progress("Fresh installation verified.")
-            return InstallationResult(
+            self.progress("Creating and verifying the first database backup...")
+            proof = InitialBackupVerifier().create({
+                "server": host,
+                "port": 3306,
+                "database": plan.database_name,
+                "user": application_user,
+                "password": application_password,
+            }, dump_directory, backup_folder)
+            result = InstallationResult(
                 plan.database_name, application_user, church_id, master_id,
                 evidence["database_objects"],
                 evidence["represented_migrations"],
                 evidence["active_permissions"], tuple(installed),
+                proof.path, proof.size_bytes, proof.sha256,
             )
+            if completion_callback:
+                self.progress("Saving the verified local application connection...")
+                completion_callback(result, application_password)
+            self.progress("Fresh installation verified.")
+            return result
         except Exception as error:
             if connection is not None:
                 try:
@@ -136,6 +171,8 @@ class FreshInstallationExecutor:
                 self._remove_incomplete(
                     plan.database_name, application_user, host,
                 )
+            if proof is not None:
+                proof.path.unlink(missing_ok=True)
             if isinstance(error, InstallationExecutionError):
                 raise
             raise InstallationExecutionError(

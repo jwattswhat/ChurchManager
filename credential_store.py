@@ -17,3 +17,8 @@ def write_credential(target, username, password):
 def read_credential(target):
     """Read a ChurchManager database credential from Windows."""
     return _STORE.read(target)
+
+
+def delete_credential(target):
+    """Remove one ChurchManager credential when setup rollback requires it."""
+    return _STORE.delete(target)

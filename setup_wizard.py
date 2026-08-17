@@ -8,6 +8,7 @@ its services have passed visual and isolated-database acceptance.
 from __future__ import annotations
 
 import json
+import os
 import re
 import secrets
 from pathlib import Path
@@ -15,14 +16,14 @@ from pathlib import Path
 import wx
 import wx.adv
 
-from credential_store import write_credential
+from credential_store import delete_credential, read_credential, write_credential
 from installation_executor import FreshInstallationExecutor
 from installation_plan import (
     InstallationPlanError,
     InstallationRequest,
     build_installation_plan,
 )
-from installation_readiness import inspect_readiness
+from installation_readiness import find_mariadb_tool, inspect_readiness
 
 
 ROOT = Path(__file__).resolve().parent
@@ -52,6 +53,31 @@ def save_installed_configuration(database_name, application_user, path=CONFIG_PA
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(config, indent=4) + "\n", encoding="utf-8")
     temporary.replace(path)
+
+
+def finalize_installed_connection(
+    result, application_password, *, path=CONFIG_PATH,
+    credential_reader=read_credential, credential_writer=write_credential,
+    credential_deleter=delete_credential,
+):
+    """Persist configuration and credential together, restoring both on failure."""
+    target = "ChurchManager/Production"
+    path = Path(path)
+    previous_config = path.read_bytes()
+    try:
+        previous_credential = credential_reader(target)
+    except KeyError:
+        previous_credential = None
+    try:
+        credential_writer(target, result.application_user, application_password)
+        save_installed_configuration(result.database_name, result.application_user, path)
+    except Exception:
+        path.write_bytes(previous_config)
+        if previous_credential is None:
+            credential_deleter(target)
+        else:
+            credential_writer(target, *previous_credential)
+        raise
 
 
 class SetupPage(wx.adv.WizardPageSimple):
@@ -317,20 +343,15 @@ class ChurchManagerSetupWizard(wx.adv.Wizard):
             result = executor.install(
                 self.plan, account, application_password,
                 self.master_password.GetValue(), self.master_confirmation.GetValue(),
+                dump_directory=find_mariadb_tool("mariadb-dump.exe").parent,
+                backup_folder=(
+                    Path(os.environ.get("LOCALAPPDATA", self.root))
+                    / "ChurchManager" / "Backups"
+                ),
+                completion_callback=finalize_installed_connection,
             )
-            write_credential("ChurchManager/Production", account, application_password)
-            save_installed_configuration(result.database_name, result.application_user)
             self.installed = True
-            self.finish_text.SetValue(
-                "ChurchManager installation completed and verified.\n\n"
-                f"Database: {result.database_name}\n"
-                f"Database objects: {result.database_objects}\n"
-                f"Migrations represented: {result.represented_migrations}\n"
-                f"Active permissions: {result.active_permissions}\n"
-                f"Master Administrator ID: {result.master_user_id}\n"
-                f"Catalog packages: {len(result.installed_packages)}\n\n"
-                "The Master Administrator must change the temporary password at first login."
-            )
+            self.finish_text.SetValue(result.completion_report())
         except Exception as error:
             self.finish_text.SetValue(
                 "ChurchManager installation did not complete.\n\n" + str(error)

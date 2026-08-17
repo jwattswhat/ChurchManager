@@ -37,6 +37,7 @@ class InstallationExecutorTests(unittest.TestCase):
             FreshInstallationExecutor._first_edition_key({"systems": []})
 
     @patch("installation_executor.InitialMasterBootstrapper")
+    @patch("installation_executor.InitialBackupVerifier")
     @patch("installation_executor.MigrationService")
     @patch("installation_executor.BaselineInstaller")
     @patch("installation_executor.load_seed", return_value=("seed", {}))
@@ -44,7 +45,7 @@ class InstallationExecutorTests(unittest.TestCase):
     @patch("installation_executor.FreshDatabaseProvisioner")
     def test_orchestrates_verified_fresh_install(
         self, provisioner, _baseline_load, _seed_load, baseline_installer,
-        migrations, master,
+        migrations, backup, master,
     ):
         provisioner.return_value.create.return_value = object()
         baseline_installer.return_value.install.return_value = {
@@ -56,6 +57,11 @@ class InstallationExecutorTests(unittest.TestCase):
             "MigrationResult", (), {"pending": (), "newly_applied": ()},
         )()
         master.return_value.create.return_value = 1
+        backup.return_value.create.return_value = type(
+            "Proof", (), {
+                "path": Path("first.sql"), "size_bytes": 2048, "sha256": "a" * 64,
+            },
+        )()
         connection = Connection()
         executor = FreshInstallationExecutor(
             Mock(), lambda **_values: connection, root=Path(tempfile.gettempdir()),
@@ -65,6 +71,7 @@ class InstallationExecutorTests(unittest.TestCase):
         executor._verify = Mock()
         result = executor.install(
             self.plan(), "cm_grace", "a" * 20, "long master password", "long master password",
+            dump_directory=Path("tools"), backup_folder=Path("backups"),
         )
         self.assertEqual((result.church_id, result.master_user_id), (2, 1))
         self.assertTrue(connection.closed)
@@ -73,7 +80,10 @@ class InstallationExecutorTests(unittest.TestCase):
     def test_rejects_unvalidated_plan(self):
         executor = FreshInstallationExecutor(Mock(), Mock())
         with self.assertRaisesRegex(InstallationExecutionError, "plan is invalid"):
-            executor.install(object(), "account", "x" * 20, "password", "password")
+            executor.install(
+                object(), "account", "x" * 20, "password", "password",
+                dump_directory=Path("tools"), backup_folder=Path("backups"),
+            )
 
 
 if __name__ == "__main__":

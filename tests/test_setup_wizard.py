@@ -1,9 +1,14 @@
 import json
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
-from setup_wizard import application_account_name, save_installed_configuration
+from setup_wizard import (
+    application_account_name,
+    finalize_installed_connection,
+    save_installed_configuration,
+)
 
 
 class SetupWizardSupportTests(unittest.TestCase):
@@ -26,6 +31,36 @@ class SetupWizardSupportTests(unittest.TestCase):
             self.assertEqual(value["testing"]["database"], "ChurchDBTest")
             self.assertTrue(value["security"]["production_enabled"])
             self.assertTrue(value["security"]["testing_enabled"])
+
+    def test_failed_configuration_save_restores_credential_and_config(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "churchmanager.json"
+            original = {"database_settings": {}, "security": {}}
+            path.write_text(json.dumps(original), encoding="utf-8")
+            writes = []
+            result = type("Result", (), {
+                "database_name": "ChurchManager_New",
+                "application_user": "cm_new",
+            })()
+
+            def writer(*values):
+                writes.append(values)
+
+            with mock.patch(
+                "setup_wizard.save_installed_configuration",
+                side_effect=PermissionError("blocked"),
+            ):
+                with self.assertRaises(PermissionError):
+                    finalize_installed_connection(
+                        result, "new secret", path=path,
+                        credential_reader=lambda _target: ("old_user", "old_secret"),
+                        credential_writer=writer,
+                        credential_deleter=lambda _target: None,
+                    )
+            self.assertEqual(json.loads(path.read_text()), original)
+            self.assertEqual(writes[-1], (
+                "ChurchManager/Production", "old_user", "old_secret",
+            ))
 
 
 if __name__ == "__main__":

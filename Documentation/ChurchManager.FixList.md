@@ -371,6 +371,12 @@ future roadmap projects:
   connections at the verified new database, and removes incomplete fresh
   database/account creation after a failure. Visual acceptance and an isolated
   apply-mode dress rehearsal remain.
+- Fresh-install backup proof and final persistence recovery are implemented.
+  Setup verifies the first dump's ChurchManager label, database name, table
+  definitions, size, and SHA-256 digest. The completion report contains that
+  evidence without credentials. A failed final configuration or Credential
+  Manager write restores both previous values before the incomplete new
+  database and account are removed.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local
