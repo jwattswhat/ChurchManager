@@ -198,6 +198,9 @@ future roadmap projects:
   reading appointments, including automatic A/B/C cycles and reversible
   retirement. Appointment entry enforces the metadata-only boundary by storing
   biblical references rather than Scripture text.
+- Local reading maintenance supports data-defined alternatives, tracks, option
+  groups, defaults, and optional same-Proper response pairing. It prevents
+  self-pairing and rejects pairings outside the active local Proper.
 - Migration 080 completes the runtime cutover to an edition-only congregation
   default. Church Information presents one unambiguous active-edition selector,
   and Worship Planning no longer falls back to the obsolete system-level

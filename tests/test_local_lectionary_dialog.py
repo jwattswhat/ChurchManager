@@ -53,6 +53,9 @@ class LocalLectionaryDialogTests(unittest.TestCase):
         self.assertIn("class _AppointmentsDialog", source)
         self.assertIn('("Readings...", self.on_readings)', source)
         self.assertIn("Enter the biblical citation only", source)
+        self.assertIn("PairedAppointmentID", source)
+        self.assertIn("A reading appointment cannot be paired with itself", source)
+        self.assertIn("No paired response", source)
 
     def test_unchanged_local_records_are_not_treated_as_missing(self):
         source = Path("local_lectionary_dialog.py").read_text(encoding="utf-8")

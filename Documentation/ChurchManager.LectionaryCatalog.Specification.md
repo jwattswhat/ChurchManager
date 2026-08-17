@@ -373,7 +373,9 @@ metadata-only validation rules.
 The Local Lectionaries screen provides citation-only appointment maintenance.
 It records normalized and display roles, biblical citations, order, option type,
 default status, optional track/group codes, and a brief planning note. It does
-not accept or store Scripture body text.
+not accept or store Scripture body text. A local appointment may optionally be
+paired with another active appointment from the same Proper; it cannot pair to
+itself or to a record owned by another Proper or installed package.
 
 ## 14. Initial supported packages
 
@@ -528,6 +530,7 @@ Custom cycles can be added, edited, retired, and restored without changing
 their stable identity. Package-owned catalogs never appear in this editor.
 The edition's **Propers...** editor creates edition-bound Propers with optional
 cycle membership, calendar metadata, colors, notes, immutable local keys, and
-reversible retirement. Citation-only reading appointments are the next layer.
-Existing ChurchManager behavior remains in place until their migrations and
-application changes are completed and verified.
+reversible retirement. Its **Readings...** editor maintains citation-only
+appointments, alternatives, defaults, tracks, groups, and paired responses.
+Migration 080 completes the runtime cutover to the edition-level church default;
+Worship Planning no longer falls back to the obsolete system-level setting.

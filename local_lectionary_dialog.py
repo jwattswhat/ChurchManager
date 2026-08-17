@@ -125,7 +125,8 @@ class LocalLectionaryRepository:
         try:
             cursor.execute(
                 "SELECT r.ID,r.DisplayRole,r.DisplayCitation,r.Role,r.Sequence,r.OptionType,"
-                "r.IsDefault,r.IsActive,r.TrackCode,r.OptionGroupCode,r.Note "
+                "r.IsDefault,r.IsActive,r.TrackCode,r.OptionGroupCode,r.Note,"
+                "r.PairedAppointmentID "
                 "FROM tblReading r JOIN tblPropers p ON p.ID=r.PropersID "
                 "JOIN tblLectionaryEdition e ON e.ID=p.LectionaryEditionID "
                 "WHERE r.PropersID=? AND r.PackageID IS NULL AND p.PackageID IS NULL "
@@ -138,7 +139,7 @@ class LocalLectionaryRepository:
 
     def save_appointment(self, record_id, proper_id, display_role, citation, role,
                          sequence, option_type, is_default, track_code,
-                         option_group_code, note):
+                         option_group_code, paired_appointment_id, note):
         """Create or update one metadata-only appointment on a local Proper."""
         display_role = clean_name(display_role, "Reading role")
         citation = clean_citation(citation)
@@ -163,11 +164,22 @@ class LocalLectionaryRepository:
                 "AND e.PackageID IS NULL",
                 (proper_id,), "The local Proper is unavailable.",
             )
+            if paired_appointment_id is not None:
+                if paired_appointment_id == record_id:
+                    raise ValueError("A reading appointment cannot be paired with itself.")
+                self._require_record(
+                    cursor,
+                    "SELECT ID FROM tblReading WHERE ID=? AND PropersID=? "
+                    "AND PackageID IS NULL AND IsActive=1",
+                    (paired_appointment_id, proper_id),
+                    "Select an active local appointment from this Proper as the pairing.",
+                )
             values = (
                 proper_id, role, display_role, display_role, citation, citation,
                 citation.casefold(), str(track_code or "").strip() or None,
                 str(option_group_code or "").strip() or None, option_type,
-                sequence, int(bool(is_default)), str(note or "").strip() or None,
+                paired_appointment_id, sequence, int(bool(is_default)),
+                str(note or "").strip() or None,
             )
             if record_id is None:
                 cursor.execute(
@@ -175,7 +187,7 @@ class LocalLectionaryRepository:
                     "Reading,Reference,DisplayCitation,NormalizedCitation,TrackCode,"
                     "OptionGroupCode,OptionType,PairedAppointmentID,Sequence,IsDefault,"
                     "PackageID,IsStarter,IsActive,Note) "
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,NULL,?,?,NULL,0,1,?)",
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,NULL,0,1,?)",
                     (proper_id, local_key("appointment")) + values[1:],
                 )
                 record_id = cursor.lastrowid
@@ -190,7 +202,8 @@ class LocalLectionaryRepository:
                 cursor.execute(
                     "UPDATE tblReading SET PropersID=?,Role=?,DisplayRole=?,Reading=?,"
                     "Reference=?,DisplayCitation=?,NormalizedCitation=?,TrackCode=?,"
-                    "OptionGroupCode=?,OptionType=?,Sequence=?,IsDefault=?,Note=? "
+                    "OptionGroupCode=?,OptionType=?,PairedAppointmentID=?,Sequence=?,"
+                    "IsDefault=?,Note=? "
                     "WHERE ID=? AND PackageID IS NULL",
                     values + (record_id,),
                 )
@@ -632,7 +645,7 @@ class _AppointmentDialog(wx.Dialog):
     )
     OPTIONS = ("DEFAULT", "ALTERNATE", "OPTIONAL_EXTENSION", "VARIANT")
 
-    def __init__(self, parent, row=None):
+    def __init__(self, parent, appointments, row=None):
         super().__init__(parent, title="Reading Appointment", size=(590, 510))
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
         notice = wx.StaticText(panel, label=(
@@ -655,6 +668,14 @@ class _AppointmentDialog(wx.Dialog):
         self.default.SetValue(bool(row[6]) if row else True)
         self.track = wx.TextCtrl(panel, value=str(row[8] or "") if row else "")
         self.group = wx.TextCtrl(panel, value=str(row[9] or "") if row else "")
+        self.pairings = [(None, "No paired response")] + [
+            (item[0], f"{item[1]} — {item[2]}")
+            for item in appointments if row is None or item[0] != row[0]
+        ]
+        self.pairing = wx.Choice(panel, choices=[item[1] for item in self.pairings])
+        paired_id = row[11] if row else None
+        self.pairing.SetSelection(next((i for i, item in enumerate(self.pairings)
+                                        if item[0] == paired_id), 0))
         self.note = wx.TextCtrl(panel, value=str(row[10] or "") if row else "",
                                 style=wx.TE_MULTILINE)
         for label, control in (
@@ -662,6 +683,7 @@ class _AppointmentDialog(wx.Dialog):
             ("Scripture citation", self.citation), ("Sequence", self.sequence),
             ("Option type", self.option), ("Default", self.default),
             ("Track code", self.track), ("Option group", self.group),
+            ("Paired response", self.pairing),
             ("Brief note", self.note),
         ):
             grid.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
@@ -672,6 +694,9 @@ class _AppointmentDialog(wx.Dialog):
 
     def role_code(self):
         return self.ROLES[self.role.GetSelection()][0]
+
+    def paired_appointment_id(self):
+        return self.pairings[self.pairing.GetSelection()][0]
 
 
 class _AppointmentsDialog(wx.Dialog):
@@ -720,7 +745,7 @@ class _AppointmentsDialog(wx.Dialog):
         index = self.grid.GetFirstSelected()
         if index >= 0: self._edit(self.rows[index])
     def _edit(self, row):
-        dialog = _AppointmentDialog(self, row)
+        dialog = _AppointmentDialog(self, self.rows, row)
         try:
             if dialog.ShowModal() != wx.ID_OK: return
             try:
@@ -729,7 +754,8 @@ class _AppointmentsDialog(wx.Dialog):
                     dialog.display_role.GetValue(), dialog.citation.GetValue(),
                     dialog.role_code(), dialog.sequence.GetValue(),
                     dialog.option.GetStringSelection(), dialog.default.GetValue(),
-                    dialog.track.GetValue(), dialog.group.GetValue(), dialog.note.GetValue(),
+                    dialog.track.GetValue(), dialog.group.GetValue(),
+                    dialog.paired_appointment_id(), dialog.note.GetValue(),
                 )
                 self.refresh(appointment_id)
             except Exception as error:
