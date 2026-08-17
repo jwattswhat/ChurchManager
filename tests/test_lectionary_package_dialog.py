@@ -24,6 +24,10 @@ class LectionaryPackageDialogTests(unittest.TestCase):
         self.assertIn("Install / Upgrade", source)
         self.assertIn("wx.NO_DEFAULT", source)
         self.assertIn("application.config.manage", source)
+        self.assertIn("Retire Selected", source)
+        self.assertIn("PrimaryLectionaryEditionID", source)
+        self.assertIn("WHERE PackageID=?", source)
+        self.assertNotIn("DELETE FROM tblLectionary", source)
 
 
 if __name__ == "__main__":

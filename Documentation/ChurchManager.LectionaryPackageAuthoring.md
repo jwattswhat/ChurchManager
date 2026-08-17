@@ -39,6 +39,10 @@ does not authorize adding the resulting package to the public ChurchManager
 repository. It merely records that a congregation has separately established a
 lawful local basis for using its own citation metadata.
 
+Installed packages are retired rather than destructively deleted. ChurchManager
+requires the church default to be changed first, deactivates only records owned
+by that package, and preserves service-owned reading snapshots and local data.
+
 The approval must identify the actual source owner and a concrete redistribution
 or local-use basis. Owning a printed book is not, by itself, a redistribution
 authorization. ChurchManager does not determine or enforce licensing; the

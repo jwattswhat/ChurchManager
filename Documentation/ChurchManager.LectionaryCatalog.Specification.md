@@ -494,5 +494,9 @@ scope, and concrete authority basis, and explicitly confirms metadata-only
 content. It then generates the checksum and reuses the installation validator.
 The maintained authoring procedure is documented in
 `ChurchManager.LectionaryPackageAuthoring.md`.
+The package manager also supports guarded retirement. It refuses retirement
+while a church default references the package, deactivates only package-owned
+catalog rows in one transaction, and never deletes service snapshots or local
+records. Reinstalling or upgrading the package may reactivate its owned keys.
 Existing ChurchManager behavior remains in place until their migrations and
 application changes are completed and verified.

@@ -27,6 +27,47 @@ class LectionaryPackageRepository:
         finally:
             cursor.close()
 
+    def retire(self, package_code):
+        """Retire only package-owned catalog rows, preserving all history."""
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute("START TRANSACTION")
+            cursor.execute(
+                "SELECT ID,Title,IsActive FROM tblLectionaryPackage "
+                "WHERE PackageCode=? FOR UPDATE", (package_code,),
+            )
+            package = cursor.fetchone()
+            if not package:
+                raise ValueError("The selected lectionary package is unavailable.")
+            if not package[2]:
+                raise ValueError("The selected lectionary package is already retired.")
+            cursor.execute(
+                "SELECT COUNT(*) FROM tblChurch c JOIN tblLectionaryEdition e "
+                "ON e.ID=c.PrimaryLectionaryEditionID WHERE e.PackageID=?", (package[0],),
+            )
+            if cursor.fetchone()[0]:
+                raise ValueError(
+                    "Change each church using this package to another default edition before retiring it."
+                )
+            for table, active in (
+                ("tblReading", "IsActive"), ("tblPropers", "IsActive"),
+                ("tblLectionaryEdition", "IsActive"),
+                ("tblLectionarySystem", "Active"),
+            ):
+                cursor.execute(
+                    f"UPDATE {table} SET {active}=0 WHERE PackageID=?", (package[0],),
+                )
+            cursor.execute(
+                "UPDATE tblLectionaryPackage SET IsActive=0 WHERE ID=?", (package[0],),
+            )
+            self.connection.commit()
+            return package[1]
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
 
 class LectionaryPackageDialog(wx.Dialog):
     """Preview and explicitly install checksum-protected lectionary packages."""
@@ -72,12 +113,18 @@ class LectionaryPackageDialog(wx.Dialog):
         self.install_button.Enable(False)
         self.install_button.Bind(wx.EVT_BUTTON, self.on_install)
         actions.Add(self.install_button, 0, wx.RIGHT, 8)
+        self.retire_button = wx.Button(panel, label="Retire Selected")
+        self.retire_button.Enable(False)
+        self.retire_button.Bind(wx.EVT_BUTTON, self.on_retire)
+        actions.Add(self.retire_button, 0, wx.RIGHT, 8)
         actions.AddStretchSpacer()
         close = wx.Button(panel, wx.ID_CLOSE, "Close")
         close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE))
         actions.Add(close)
         outer.Add(actions, 0, wx.EXPAND | wx.ALL, 10)
         panel.SetSizer(outer)
+        self.grid.Bind(wx.EVT_LIST_ITEM_SELECTED, lambda _event: self.retire_button.Enable(True))
+        self.grid.Bind(wx.EVT_LIST_ITEM_DESELECTED, lambda _event: self.retire_button.Enable(False))
         self.refresh()
         self.CentreOnParent()
 
@@ -143,6 +190,26 @@ class LectionaryPackageDialog(wx.Dialog):
             f"Package {result.package_code} {result.package_version} was installed successfully.",
             "Lectionary Package", wx.OK | wx.ICON_INFORMATION, self,
         )
+
+    def on_retire(self, _event):
+        selected = self.grid.GetFirstSelected()
+        if selected == -1:
+            return
+        package_code = self.grid.GetItemText(selected, 0)
+        title = self.grid.GetItemText(selected, 1)
+        if wx.MessageBox(
+            f"Retire '{title}'?\n\nIt will no longer be offered for new services. "
+            "Saved Worship Services and local records will not be deleted.",
+            "Retire Lectionary Package", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self,
+        ) != wx.YES:
+            return
+        try:
+            self.repository.retire(package_code)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Retire Package", wx.OK | wx.ICON_ERROR, self)
+            return
+        self.refresh()
+        self.retire_button.Enable(False)
 
 
 def show_lectionary_packages(parent, connection, authorization):
