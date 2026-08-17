@@ -25,7 +25,8 @@ class RemoveLSBLectionaryCatalogTests(unittest.TestCase):
             "tblLectionaryCycle", "tblLectionaryEdition", "tblLectionarySystem",
         ):
             self.assertIn(f"DELETE FROM {table}", self.source)
-        self.assertIn("DELETE FROM tblServiceReadingSelection", self.source)
+        self.assertIn("DELETE FROM tblServiceReadingSnapshot", self.source)
+        self.assertNotIn("tblServiceReadingSelection", self.source)
         self.assertLess(
             self.source.index("DELETE FROM tblReading"),
             self.source.index("DELETE FROM tblPropers"),

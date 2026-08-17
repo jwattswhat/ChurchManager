@@ -698,7 +698,7 @@ class TestChurchManagerForms(unittest.TestCase):
         self.assertIn("p.IsActive=1 AND e.IsActive=1", source)
         self.assertIn("def propers(self, church_id)", source)
         self.assertIn("DELETE FROM tblLectionarySystem", migration)
-        self.assertIn("DELETE FROM tblServiceReadingSelection", migration)
+        self.assertIn("DELETE FROM tblServiceReadingSnapshot", migration)
 
     def test_user_administration_is_a_protected_main_menu_action(self):
         definition = next(iter(load_json(FORMS / "frmMain.json").values()))

@@ -1,5 +1,5 @@
 -- Remove the non-distributable LSB lectionary catalog from the new system.
--- Historical service reading snapshots remain intact and source links are cleared.
+-- Historical service reading snapshots for removed LSB Propers are discarded.
 
 CREATE TEMPORARY TABLE cm_remove_lectionary_system (
     ID int PRIMARY KEY
@@ -57,7 +57,7 @@ UPDATE tblService
 SET PropersID=NULL
 WHERE PropersID IN (SELECT ID FROM cm_remove_proper);
 
-DELETE FROM tblServiceReadingSelection
+DELETE FROM tblServiceReadingSnapshot
 WHERE ServiceID IN (SELECT ID FROM cm_remove_service_snapshot);
 
 UPDATE tblReading
