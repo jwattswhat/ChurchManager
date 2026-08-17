@@ -101,6 +101,21 @@ database writes, mail, calendar operations, restores, and visual judgment.
 Rendered reports must be inspected for clipping, wrapping, pagination, privacy,
 and starter/custom fallback.
 
+### User Guide
+
+`Documentation/ChurchManager.UserGuide.md` is the maintained user-facing source.
+After every user-visible workflow or label change, update that source and rebuild
+the PDF that the main-menu **Help - User Guide** control opens:
+
+```powershell
+python tools\build_user_guide.py
+```
+
+The final artifact is `output/pdf/ChurchManager.UserGuide.pdf`. Render every
+page to images and inspect it before release. The installer must place the same
+verified PDF in its documented application resources; it must not generate a
+different guide during setup.
+
 ## Documentation maintenance
 
 Documentation is shipped behavior. Every change should review:
@@ -109,6 +124,7 @@ Documentation is shipped behavior. Every change should review:
 - `ChurchManager.Application.md` for runtime and operational changes;
 - `DATABASE_STRUCTURE_INVENTORY.md` and migration docs for schema changes;
 - `SCREEN_INVENTORY.md` for screen ownership or replacement;
+- `ChurchManager.UserGuide.md` and its rendered PDF for user-visible changes;
 - the applicable specification for policy or workflow changes;
 - security and support guidance for sensitive behavior; and
 - version notes for releases or compatibility changes.

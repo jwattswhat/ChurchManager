@@ -18,7 +18,7 @@ Active entries are ChurchManager definitions rendered by JSForm. Removed rows ar
 
 | Screen | Development ownership | Status | Why ChurchManager-only? |
 |---|---|---|---|
-| `frmMain` | ChurchManager + JSForm | Active; visually approved | Not CM-only; JSForm renders the ChurchManager menu definition. |
+| `frmMain` | ChurchManager + JSForm | Active; visually approved; User Guide Help added | Not CM-only; JSForm renders the ChurchManager menu definition while ChurchManager opens the maintained PDF guide. |
 | `frmChurch` | ChurchManager + JSForm | Active | Not CM-only; ordinary database form with CM-specific linked records. |
 | `frmFamily` | ChurchManager + JSForm | Active | Not CM-only; JSForm supplies record editing and child forms. |
 | `frmFamilyAddress` | ChurchManager + JSForm | Supporting | Not CM-only. |

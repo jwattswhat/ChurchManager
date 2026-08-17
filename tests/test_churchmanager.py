@@ -758,7 +758,7 @@ class TestChurchManagerForms(unittest.TestCase):
         from main_menu import SESSION_CONTROLS
 
         controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
-        self.assertEqual(SESSION_CONTROLS, {"lblChangePassword", "lblLogout"})
+        self.assertEqual(SESSION_CONTROLS, {"lblHelp", "lblChangePassword", "lblLogout"})
         self.assertIn("lblCurrentUser", controls)
         self.assertIn("LOGOUT", (ROOT / "cm.py").read_text(encoding="utf-8-sig"))
 

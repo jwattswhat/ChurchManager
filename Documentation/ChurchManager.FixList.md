@@ -329,7 +329,9 @@ future roadmap projects:
   retired conversion fields and tables, obsolete JSForm database structures,
   test-only objects, development-account definers, and machine-specific values.
   Findings must be removed or individually documented and approved before a
-  release baseline is accepted.
+  release baseline is accepted. The guarded baseline loader/installer now
+  verifies the schema checksum and exact represented-migration ledger before
+  operating and refuses a nonempty target database.
 - The automated schema-hygiene gate is implemented and tested. It reports exact
   line numbers for obsolete identifiers and retired tables, test database
   names, account definers and grants, database-selection statements, fixture
@@ -340,7 +342,13 @@ future roadmap projects:
   keeps the database password off the process command line, canonicalizes
   permitted dump state, enforces schema hygiene, and produces a schema checksum
   plus the exact represented-migration ledger. Live candidate generation and
-  review remain.
+  review remain. The 0.2.0-dev candidate contains 84 represented migrations;
+  its schema SHA-256 is
+  `3333f3ade00a89c944462b95581990fa83612458ef31e49695296ecb4869e375`.
+- The first task-oriented User Guide is maintained as Markdown and rendered as
+  a visually inspected PDF. A signed-in **Help - User Guide** control opens it
+  from the main menu without requiring an administrative permission. Installer
+  packaging and installed-build acceptance remain.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local

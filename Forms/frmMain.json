@@ -631,7 +631,7 @@
                 ],
                 "sizech": [
                     12,
-                    6
+                    7
                 ],
                 "layout": {
                     "row": 2,
@@ -653,9 +653,19 @@
                 "label": "Change Password",
                 "posch": [
                     15,
-                    23
+                    24
                 ],
                 "tooltip": "Change your ChurchManager password."
+            },
+            "lblHelp": {
+                "name": "lblHelp",
+                "type": "StaticText",
+                "label": "Help - User Guide",
+                "posch": [
+                    15,
+                    23
+                ],
+                "tooltip": "Open the ChurchManager User Guide."
             },
             "lblLogout": {
                 "name": "lblLogout",
@@ -663,7 +673,7 @@
                 "label": "Log Out",
                 "posch": [
                     15,
-                    24
+                    25
                 ],
                 "tooltip": "End the current ChurchManager session."
             },

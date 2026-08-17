@@ -178,6 +178,7 @@ Successful installation requires evidence that:
 - selected packages and dependencies are installed at the selected versions;
 - unselected optional packages were not installed;
 - starter screens and reports validate;
+- the version-matched User Guide PDF is installed and opens from the main menu;
 - the application can authenticate and open its main menu;
 - a nonempty SQL backup was created and its SHA-256 digest verified; and
 - test mode cannot send email.
@@ -217,15 +218,17 @@ The beta is complete only when:
    independent of development data, account definers, and machine-specific
    paths; scan it for obsolete compatibility structures such as `OldID`; prove
    that it creates an empty database and establishes accurate migration history.
-   The fail-closed schema-hygiene scanner is complete; baseline generation and
-   deterministic structure-only generator are complete. Generating, reviewing,
-   and installing the current candidate in an isolated database remain.
+   The fail-closed schema-hygiene scanner and deterministic structure-only
+   generator are complete. The 0.2.0-dev candidate and manifest have been
+   generated and independently checked; isolated database installation remains.
 5. Add first-master-administrator creation.
 6. Add transactional catalog installation and congregation defaults.
 7. Add the nontechnical wizard around the tested services.
 8. Add backup proof, final verification, and safe failure recovery.
 9. Exercise fresh install, upgrade, repair, and restore in isolated databases.
 10. Prepare the beta kit and complete beta acceptance.
+11. Ship the visually verified, version-matched User Guide PDF and verify the
+    main-menu Help control on an installed build.
 
 ## 10. Acceptance criteria
 

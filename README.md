@@ -55,6 +55,8 @@ read-only database checks and manual verification boundaries.
 
 ## Documentation map
 
+- [User Guide source](Documentation/ChurchManager.UserGuide.md) - the application
+  opens the maintained PDF edition from **Help - User Guide** on the main menu.
 - [Installation, upgrade, and beta release specification](Documentation/ChurchManager.InstallationRelease.Specification.md)
 - [Application guide](Documentation/ChurchManager.Application.md)
 - [Architecture](Documentation/ARCHITECTURE.md)

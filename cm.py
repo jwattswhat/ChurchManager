@@ -68,6 +68,7 @@ from mail_settings import show_mail_settings
 from local_hymns import LocalHymnIDAllocator
 from lectionary_package_dialog import show_lectionary_packages
 from local_lectionary_dialog import show_local_lectionaries
+from user_help import UserGuideError, open_user_guide
 
 
 arguments = None
@@ -408,6 +409,12 @@ def _buttonclick(event):
         dlg.Destroy()
 
     select = event.GetEventObject().GetName()
+    if select == "lblHelp":
+        try:
+            open_user_guide()
+        except UserGuideError as error:
+            wx.MessageBox(str(error), "User Guide", wx.OK | wx.ICON_ERROR, cmfrm.FRAME)
+        return
     if select == "lblChangePassword":
         change_own_password(
             context.connection, context.session, cmfrm.FRAME,
