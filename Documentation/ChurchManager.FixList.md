@@ -300,8 +300,12 @@ future roadmap projects:
 
 ### 6. Release, installation, and recovery readiness
 
-- Proposed design awaiting approval:
+- Approved design:
   [Installation, Upgrade, and Beta Release Specification](ChurchManager.InstallationRelease.Specification.md).
+- The read-only installation readiness inspector is implemented. It verifies
+  the Windows/runtime prerequisites, MariaDB client and backup tools, free
+  space, bundled package integrity, and unresolved catalog dependencies without
+  opening a database, requesting a credential, or changing the computer.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local

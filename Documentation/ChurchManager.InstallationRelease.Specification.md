@@ -1,7 +1,9 @@
 # ChurchManager Installation, Upgrade, and Beta Release Specification
 
-**Status:** Proposed for approval  
-**Date:** August 17, 2026  
+**Status:** Approved
+
+**Date:** August 17, 2026
+
 **Scope:** Fresh installation, upgrades, catalog selection, recovery validation,
 and beta-release qualification for ChurchManager
 
@@ -34,6 +36,36 @@ previous ChurchManager installation.
    selects a reviewed import or restore operation.
 
 ## 3. Supported workflows
+
+### 3.0 Windows packaging boundary
+
+ChurchManager shall use a signed traditional Windows Installer (`.msi`) package
+for application-owned files, shortcuts, version registration, repair, upgrade,
+and uninstall. The MSI may be produced with WiX or another standards-compliant
+Windows Installer toolchain.
+
+The MSI and the ChurchManager Setup Wizard have separate responsibilities:
+
+- the MSI installs the ChurchManager application, its compatible JSForm runtime,
+  bundled Python runtime and dependencies, icons, shortcuts, and uninstaller;
+- the Setup Wizard configures MariaDB, congregation information, the first
+  master administrator, catalogs, writable data locations, and backup proof.
+
+The installed user-facing entry points are `ChurchManager.exe` for ordinary
+operation and `ChurchManagerSetup.exe` for first-run or protected maintenance
+setup. Both include the compatible Python and JSForm runtime; an end user does
+not install Python, activate a virtual environment, or run a batch file.
+
+Uninstalling ChurchManager must not delete a congregation database, attachments,
+backups, custom reports, custom screens, or other congregation-owned data.
+Application binaries are installed in a protected program location. Mutable
+preferences, logs, attachments, backups, and user customizations are stored in
+documented writable data locations rather than beside installed binaries.
+
+MSIX is not the initial packaging target because ChurchManager is a traditional
+desktop application that coordinates an external database, helper programs, and
+writable operational resources. It may be reconsidered only after the MSI-based
+release is stable and an identified distribution need justifies it.
 
 ### 3.1 Fresh installation
 
@@ -159,7 +191,7 @@ The beta is complete only when:
 
 ## 9. Implementation sequence
 
-1. Build a read-only readiness inspector and package inventory.
+1. Build a read-only readiness inspector and package inventory. **Completed.**
 2. Build and test an installation plan model with dependency validation.
 3. Add guarded database/account creation and migration execution.
 4. Add first-master-administrator creation.

@@ -10,6 +10,18 @@ Install or refresh dependencies from `requirements-runtime.txt`. Credentials
 belong in Windows Credential Manager. Local connection files, OAuth tokens,
 dumps, generated output, and logs are ignored and must remain untracked.
 
+Before building or exercising the fresh-install workflow, run the read-only
+readiness inspector:
+
+```powershell
+.\.runtime-venv\Scripts\python.exe inspect_installation_readiness.py
+```
+
+It checks the runtime, MariaDB command-line tools, free space, and bundled
+catalog packages. It does not connect to a database, request a credential, or
+change the computer. A valid catalog may be shown as blocked when a required
+package, such as its associated hymnal, is not yet bundled.
+
 ## Resetting routine test activity
 
 `reset_test_activity.py` preserves congregation, membership, users,
