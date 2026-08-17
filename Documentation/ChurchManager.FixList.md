@@ -190,6 +190,11 @@ future roadmap projects:
   and RCL packages are blocked pending written electronic-redistribution
   permission. Narrow permission-request drafts and the local-only fallback are
   documented in `ChurchManager.LectionaryPackageProvenance.md`.
+- Migration 081 removes the former LSB lectionary catalog, its dependent
+  Propers/readings/suggestions, and related development service snapshots.
+  Services themselves remain, with their Proper selection cleared. Obsolete
+  production-import utilities were removed so the catalog cannot be
+  accidentally reintroduced.
 - Preserve the reviewed distribution scope inside every checksum-protected
   lectionary package and installed package record. `LOCAL_ONLY` is displayed in
   the package manager and cannot be silently treated as redistributable.

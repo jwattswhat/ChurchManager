@@ -385,8 +385,8 @@ itself or to a record owned by another Proper or installed package.
 
 ## 14. Initial supported packages
 
-The first implementation should support the package framework before assuming a
-particular package is distributable. Candidate packages are:
+The first implementation supports the package framework without assuming a
+particular publisher-specific package is distributable. Research candidates are:
 
 - LSB Three-Year Lectionary;
 - LSB One-Year Lectionary; and
@@ -396,6 +396,10 @@ Each package requires separately documented source provenance and permission to
 redistribute its citation compilation. The RCL provisional trial material, if
 approved later, is installed as a separate edition or overlay and never replaces
 the 1992 edition silently.
+
+No LSB lectionary catalog is bundled or retained in the development database.
+An exact LSB edition may be created locally by a congregation or installed later
+only if the project obtains appropriate electronic-redistribution permission.
 
 The August 17, 2026 provenance review is recorded in
 `ChurchManager.LectionaryPackageProvenance.md`. Official CCT and CPH policies

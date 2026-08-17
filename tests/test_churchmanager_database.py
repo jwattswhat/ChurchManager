@@ -415,26 +415,18 @@ class TestChurchManagerDatabase(unittest.TestCase):
         )[0][0]
         self.assertEqual(orphan_count, 0)
 
-    def test_imported_lsb_lectionary_names_use_abbreviation(self):
+    def test_lsb_lectionary_catalog_has_been_removed(self):
         migration = self.query(
             "SELECT version FROM schema_migrations "
-            "WHERE version='030_abbreviate_lsb_lectionary_names.sql'"
+            "WHERE version='081_remove_lsb_lectionary_catalog.sql'"
         )
-        self.assertEqual(migration, [("030_abbreviate_lsb_lectionary_names.sql",)])
+        self.assertEqual(migration, [("081_remove_lsb_lectionary_catalog.sql",)])
         names = {
             row[0] for row in self.query(
                 "SELECT Name FROM tblLectionarySystem WHERE Name LIKE 'LSB %'"
             )
         }
-        self.assertEqual(
-            names,
-            {
-                "LSB Three-Year Lectionary",
-                "LSB One-Year Lectionary",
-                "LSB Feasts and Festivals",
-                "LSB Occasions",
-            },
-        )
+        self.assertEqual(names, set())
         long_names = self.query(
             "SELECT Name FROM tblLectionarySystem "
             "WHERE Name LIKE 'Lutheran Service Book %'"

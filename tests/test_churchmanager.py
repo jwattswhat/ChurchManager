@@ -691,14 +691,14 @@ class TestChurchManagerForms(unittest.TestCase):
     def test_worship_service_filters_propers_by_church_default_lectionary(self):
         source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8-sig")
         migration = (
-            ROOT / "migrations" / "030_abbreviate_lsb_lectionary_names.sql"
+            ROOT / "migrations" / "081_remove_lsb_lectionary_catalog.sql"
         ).read_text(encoding="utf-8")
         self.assertIn("PrimaryLectionaryEditionID", source)
         self.assertNotIn("PrimaryLectionarySystemID", source)
         self.assertIn("p.IsActive=1 AND e.IsActive=1", source)
         self.assertIn("def propers(self, church_id)", source)
-        self.assertIn("LSB Three-Year Lectionary", migration)
-        self.assertNotIn("SET Name = 'Lutheran Service Book", migration)
+        self.assertIn("DELETE FROM tblLectionarySystem", migration)
+        self.assertIn("DELETE FROM tblServiceReadingSelection", migration)
 
     def test_user_administration_is_a_protected_main_menu_action(self):
         definition = next(iter(load_json(FORMS / "frmMain.json").values()))
