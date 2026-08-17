@@ -1137,6 +1137,7 @@ class TestNonAccountingTestDataset(unittest.TestCase):
         self.assertIn('parser.add_argument("--apply"', source)
         self.assertIn("connection.rollback()", source)
         self.assertNotIn("INSERT INTO tblAccounting", source)
+        self.assertNotIn("Synthetic Test Hymnal", source)
 
     def test_seeder_uses_fictional_church_logo_and_runtime_password_prompt(self):
         source = (ROOT / "seed_nonaccounting_test_data.py").read_text(

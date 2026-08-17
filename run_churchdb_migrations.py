@@ -10,11 +10,26 @@ from pathlib import Path
 import mariadb
 
 from churchmanager_mode import resolve_database
+from hymn_titles import title_case
 
 
 ROOT = Path(__file__).resolve().parent
 MIGRATIONS = ROOT / "migrations"
 OBSOLETE_STRUCTURE_CLEANUP = "053_remove_obsolete_jsform_database_structures.sql"
+PERMANENT_HYMN_CATALOG = "074_add_permanent_hymn_catalog.sql"
+
+
+def normalize_hymn_catalog_titles(cursor):
+    """Apply the approved title-case conversion to hymnal and hymn titles."""
+    for table in ("tblHymnal", "tblHymn"):
+        cursor.execute(f"SELECT ID,Title FROM {table}")
+        changes = [
+            (title_case(title), record_id)
+            for record_id, title in cursor.fetchall()
+            if title_case(title) != str(title or "")
+        ]
+        if changes:
+            cursor.executemany(f"UPDATE {table} SET Title=? WHERE ID=?", changes)
 
 
 def migration_files():
@@ -204,6 +219,8 @@ def main():
                     raise RuntimeError(
                         f"Migration {path.name} failed at: {first_line}"
                     ) from error
+            if path.name == PERMANENT_HYMN_CATALOG:
+                normalize_hymn_catalog_titles(cursor)
             cursor.execute(
                 "INSERT INTO schema_migrations (version, checksum) VALUES (?, ?)",
                 (path.name, checksum),

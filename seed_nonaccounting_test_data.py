@@ -162,11 +162,6 @@ def main():
                     "INSERT INTO tblGroupMember (GroupID,GroupRole,PersonID,StartDate,Notes) "
                     "VALUES (?,?,?,'2025-01-01',?)", (group_id, role, person_id, MARKER)
                 )
-        if not scalar(cursor, "SELECT COUNT(*) FROM tblHymnal WHERE Note=?", (MARKER,)):
-            cursor.execute(
-                "INSERT INTO tblHymnal (Hymnal,Title,Publisher,Note) "
-                "VALUES ('TEST','Synthetic Test Hymnal','ChurchManager Test Data',?)", (MARKER,)
-            )
         if not scalar(cursor, "SELECT COUNT(*) FROM tblJournal WHERE Note=?", (MARKER,)):
             cursor.execute(
                 "INSERT INTO tblJournal (ChurchID,Event,Complete,StartDate,EndDate,Note) "

@@ -10,6 +10,7 @@ from hymnal_packages import (
     HymnalPackageError, HymnalPackageImporter, HymnalPackageValidator,
     canonical_hymnal_checksum, load_hymnal_package,
 )
+from hymn_titles import title_case
 from local_hymns import LocalHymnCapacityError, LocalHymnIDAllocator
 
 
@@ -124,12 +125,16 @@ class HymnalPackageTests(unittest.TestCase):
 
     def test_import_is_transactional_and_uses_explicit_ids(self):
         connection = RecordingConnection()
-        result = HymnalPackageImporter(connection).install(package(), "a" * 64)
+        value = package()
+        value["title"] = "fictional hymnal"
+        result = HymnalPackageImporter(connection).install(value, "a" * 64)
         self.assertEqual(result.entry_count, 1)
         self.assertEqual((connection.commits, connection.rollbacks), (1, 0))
         sql = "\n".join(call[0] for call in connection.calls)
         self.assertIn("INSERT INTO tblHymn (ID,HymnalID", sql)
         self.assertIn("INSERT INTO tblHymnalPackageImport", sql)
+        hymnal_insert = next(call for call in connection.calls if "INSERT INTO tblHymnal (ID" in call[0])
+        self.assertIn("Fictional Hymnal", hymnal_insert[1])
 
     def test_identity_collision_and_failure_roll_back(self):
         connection = RecordingConnection(hymn_row=(4, 1, "OTHER 1"))
@@ -148,9 +153,28 @@ class HymnalPackageTests(unittest.TestCase):
         self.assertIn("tblHymnIDConversionLog", source)
         self.assertIn("UPDATE tblHymnUsage", source)
         self.assertIn("UPDATE tblProperHymnSuggestion", source)
+        self.assertIn("Synthetic Test Hymnal", source)
+        self.assertIn("DELETE FROM tblService", source)
+        self.assertIn("BETWEEN 1 AND 966", source)
+        self.assertIn("Publisher='Local Congregation'", source)
+        self.assertIn("DROP PROCEDURE IF EXISTS cm_migrate_permanent_lsb_hymn_ids", source)
         self.assertEqual(source.count("ON DELETE RESTRICT"), 3)
         self.assertIn("MODIFY COLUMN ID int NOT NULL", source)
         self.assertNotIn("FOREIGN_KEY_CHECKS=0", source)
+
+    def test_hymn_titles_use_stable_title_case(self):
+        self.assertEqual(
+            title_case("Savior of the nations, come"),
+            "Savior of the Nations, Come",
+        )
+        self.assertEqual(title_case("O Lord, how shall I meet You"), "O Lord, How Shall I Meet You")
+        self.assertEqual(title_case("Hark! A thrilling voice is sounding"), "Hark! A Thrilling Voice Is Sounding")
+        self.assertEqual(title_case("LSB service-builder index"), "LSB Service-Builder Index")
+
+    def test_migration_runner_applies_title_case_conversion(self):
+        source = (ROOT / "run_churchdb_migrations.py").read_text(encoding="utf-8")
+        self.assertIn("normalize_hymn_catalog_titles(cursor)", source)
+        self.assertIn("PERMANENT_HYMN_CATALOG", source)
 
     def test_local_allocator_never_uses_packaged_block(self):
         connection = RecordingConnection()

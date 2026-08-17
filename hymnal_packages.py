@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from bulletin_orders import portable_connection
+from hymn_titles import title_case
 
 
 _KEY = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
@@ -229,7 +230,7 @@ class HymnalPackageImporter:
                 cursor.execute(
                     "UPDATE tblHymnal SET Hymnal=?,Title=?,Publisher=?,PackageVersion=?,Edition=?,"
                     "PublicationYear=?,ISBN=?,IsActive=1 WHERE ID=? AND PackageCode=?",
-                    (package["abbreviation"], package["title"], package["publisher"],
+                    (package["abbreviation"], title_case(package["title"]), package["publisher"],
                      package["package_version"], package["edition"], package.get("publication_year"),
                      package.get("isbn"), summary.hymnal_id, summary.package_code),
                 )
@@ -238,7 +239,7 @@ class HymnalPackageImporter:
                     "INSERT INTO tblHymnal (ID,Hymnal,Title,Publisher,Note,PackageCode,PackageVersion,"
                     "Edition,PublicationYear,ISBN,HymnIDStart,HymnIDEnd,IsActive) "
                     "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,1)",
-                    (summary.hymnal_id, package["abbreviation"], package["title"],
+                    (summary.hymnal_id, package["abbreviation"], title_case(package["title"]),
                      package["publisher"], package["distribution_notice"], summary.package_code,
                      package["package_version"], package["edition"], package.get("publication_year"),
                      package.get("isbn"), package["hymn_id_start"], package["hymn_id_end"]),
@@ -273,7 +274,7 @@ class HymnalPackageImporter:
         ):
             raise HymnalPackageError("An existing HymnID has a different permanent identity.")
         values = (
-            entry["title"], entry.get("tune"), entry.get("scripture_references"),
+            title_case(entry["title"]), entry.get("tune"), entry.get("scripture_references"),
             entry.get("category"), entry["printed_stanza_count"], int(entry["is_active"]),
             entry.get("first_line"), entry.get("meter"), entry.get("author"),
             entry.get("translator"), entry.get("composer"), entry.get("source_note"),

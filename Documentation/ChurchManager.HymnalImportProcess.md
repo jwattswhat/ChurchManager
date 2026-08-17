@@ -89,7 +89,7 @@ Required `hymns.csv` columns:
 | `HymnalID` | Permanent hymnal registry identifier |
 | `EntrySlot` | Slot 1 through 4,999 within the hymnal block |
 | `PrintedReference` | What users see, such as `LSB 656` |
-| `Title` | Hymn title or approved first line |
+| `Title` | Hymn title or approved first line; normalized to Title Case during import |
 | `PrintedStanzaCount` | Number of stanzas printed in this hymnal edition; use `0` for an entry that is not stanza-based |
 | `IsActive` | Whether the entry is available for new selection |
 

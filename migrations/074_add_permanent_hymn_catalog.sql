@@ -79,12 +79,69 @@ CREATE TABLE IF NOT EXISTS tblHymnIDConversionLog (
     UNIQUE KEY uq_hymn_permanent_conversion (MigrationCode,PermanentHymnID)
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC;
 
+DROP PROCEDURE IF EXISTS cm_migrate_permanent_lsb_hymn_ids;
 DELIMITER $$
 CREATE PROCEDURE cm_migrate_permanent_lsb_hymn_ids()
 BEGIN
     DECLARE lsb_count int DEFAULT 0;
     DECLARE lsb_old_id int DEFAULT NULL;
     DECLARE invalid_count int DEFAULT 0;
+
+    -- ChurchDBTest worship records are disposable at this conversion boundary.
+    -- Remove them before pruning synthetic or out-of-scope hymn records so no
+    -- historical service can retain an invalid hymn reference.
+    DELETE attendance_record FROM tblAttendance attendance_record
+    JOIN tblAttendanceEvent attendance_event
+      ON attendance_event.ID=attendance_record.AttendanceEventID
+    WHERE attendance_event.ServiceID IS NOT NULL;
+    DELETE FROM tblAttendanceEvent WHERE ServiceID IS NOT NULL;
+    DELETE FROM tblSecurityAuditEvent
+    WHERE EntityType='WORSHIP_SERVICE' OR Action='WORSHIP_SERVICE_DELETED';
+    DELETE FROM tblService;
+
+    -- Remove the old synthetic test catalog and anything tied specifically to
+    -- it. A prior interrupted run may already have moved its T001-T008 entries
+    -- into the Local block, so recognize those fixtures by their stable codes.
+    DELETE suggestion FROM tblProperHymnSuggestion suggestion
+    JOIN tblHymn hymn ON hymn.ID=suggestion.HymnID
+    LEFT JOIN tblHymnal hymnal ON hymnal.ID=hymn.HymnalID
+    WHERE (
+        UPPER(TRIM(hymnal.Hymnal))='TEST'
+        AND hymnal.Title='Synthetic Test Hymnal'
+        AND hymnal.Publisher='ChurchManager Test Data'
+    ) OR (hymn.Hymn REGEXP '^T00[1-8]$' AND hymn.Title LIKE 'Test % Hymn');
+    DELETE allocation FROM tblLocalHymnIDAllocation allocation
+    JOIN tblHymn hymn ON hymn.ID=allocation.HymnID
+    WHERE hymn.Hymn REGEXP '^T00[1-8]$' AND hymn.Title LIKE 'Test % Hymn';
+    DELETE FROM tblHymn
+    WHERE (Hymn REGEXP '^T00[1-8]$' AND Title LIKE 'Test % Hymn')
+       OR HymnalID IN (
+           SELECT ID FROM tblHymnal
+           WHERE UPPER(TRIM(Hymnal))='TEST'
+             AND Title='Synthetic Test Hymnal'
+             AND Publisher='ChurchManager Test Data'
+       );
+    UPDATE tblChurch SET PrimaryHymnalID=NULL
+    WHERE PrimaryHymnalID IN (
+        SELECT ID FROM tblHymnal
+        WHERE UPPER(TRIM(Hymnal))='TEST'
+          AND Title='Synthetic Test Hymnal'
+          AND Publisher='ChurchManager Test Data'
+    );
+    DELETE FROM tblBulletinOrderTemplate
+    WHERE HymnalID IN (
+        SELECT ID FROM tblHymnal
+        WHERE UPPER(TRIM(Hymnal))='TEST'
+          AND Title='Synthetic Test Hymnal'
+          AND Publisher='ChurchManager Test Data'
+    );
+    DELETE FROM tblHymnal
+    WHERE UPPER(TRIM(Hymnal))='TEST'
+      AND Title='Synthetic Test Hymnal'
+      AND Publisher='ChurchManager Test Data';
+    DELETE FROM tblHymnIDConversionLog
+    WHERE MigrationCode='074_permanent_local_ids'
+      AND PrintedReference REGEXP '^T00[1-8]$';
 
     SELECT COUNT(*),MIN(ID) INTO lsb_count,lsb_old_id
     FROM tblHymnal WHERE UPPER(TRIM(Hymnal))='LSB';
@@ -93,7 +150,12 @@ BEGIN
     END IF;
 
     SELECT COUNT(*) INTO invalid_count FROM tblHymnal
-    WHERE UPPER(TRIM(Hymnal)) NOT IN ('LSB','LOCAL');
+    WHERE UPPER(TRIM(Hymnal)) NOT IN ('LSB','LOCAL')
+      AND NOT (
+          UPPER(TRIM(Hymnal))='TEST'
+          AND Title='Synthetic Test Hymnal'
+          AND Publisher='ChurchManager Test Data'
+      );
     IF invalid_count > 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Unregistered hymnals must receive an approved permanent block before migration';
     END IF;
@@ -142,15 +204,64 @@ BEGIN
     INSERT INTO tblHymnal
         (ID,Hymnal,Title,Publisher,Note,PackageCode,PackageVersion,Edition,
          HymnIDStart,HymnIDEnd,IsActive)
-    SELECT 1,'LOCAL','Local Congregation Hymns',NULL,
+    SELECT 1,'LOCAL','Local Congregation Hymns','Local Congregation',
            'Congregation-owned hymn metadata. IDs are never reused.',
            'local','1.0.0','Local',5001,9999,1
     WHERE NOT EXISTS (SELECT 1 FROM tblHymnal WHERE ID=1);
     UPDATE tblHymnal SET
-        Hymnal='LOCAL',Title='Local Congregation Hymns',PackageCode='local',
+        Hymnal='LOCAL',Title='Local Congregation Hymns',
+        Publisher='Local Congregation',PackageCode='local',
         PackageVersion='1.0.0',Edition='Local',HymnIDStart=5001,HymnIDEnd=9999,
         IsActive=1
     WHERE ID=1;
+
+    DROP TEMPORARY TABLE IF EXISTS tmp_local_hymn_id_map;
+    CREATE TEMPORARY TABLE tmp_local_hymn_id_map (
+        OldHymnID int NOT NULL PRIMARY KEY,
+        PermanentHymnID int NOT NULL UNIQUE,
+        EntrySlot smallint unsigned NOT NULL UNIQUE,
+        PrintedReference varchar(50) NOT NULL
+    ) ENGINE=InnoDB;
+    INSERT INTO tmp_local_hymn_id_map
+        (OldHymnID,PermanentHymnID,EntrySlot,PrintedReference)
+    SELECT ID,5000+ID,ID,COALESCE(NULLIF(PrintedReference,''),Hymn)
+    FROM tblHymn WHERE HymnalID=1 AND ID BETWEEN 1 AND 4999;
+
+    SELECT COUNT(*) INTO invalid_count
+    FROM tmp_local_hymn_id_map map
+    JOIN tblHymn existing ON existing.ID=map.PermanentHymnID;
+    IF invalid_count > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='A permanent local HymnID is already occupied';
+    END IF;
+
+    INSERT INTO tblHymn
+        (ID,HymnalID,Hymn,Title,Tune,BibleText,Category,File,Image,Note,
+         EntrySlot,PrintedReference,PrintedStanzaCount,IsActive,PackageOwned,
+         FirstLine,Meter,Author,Translator,Composer,SourceNote,
+         TextCopyrightStatus,TuneCopyrightStatus,SettingCopyrightStatus,
+         CopyrightOwner,CopyrightYear,LicenseSource,LicenseReference,
+         CopyrightNote,CopyrightVerifiedDate,CopyrightVerifiedBy)
+    SELECT map.PermanentHymnID,1,old.Hymn,old.Title,old.Tune,old.BibleText,
+           old.Category,old.File,old.Image,old.Note,map.EntrySlot,map.PrintedReference,
+           old.PrintedStanzaCount,old.IsActive,0,old.FirstLine,old.Meter,
+           old.Author,old.Translator,old.Composer,old.SourceNote,old.TextCopyrightStatus,
+           old.TuneCopyrightStatus,old.SettingCopyrightStatus,old.CopyrightOwner,
+           old.CopyrightYear,old.LicenseSource,old.LicenseReference,
+           old.CopyrightNote,old.CopyrightVerifiedDate,old.CopyrightVerifiedBy
+    FROM tmp_local_hymn_id_map map JOIN tblHymn old ON old.ID=map.OldHymnID;
+
+    INSERT INTO tblHymnIDConversionLog
+        (MigrationCode,HymnalID,OldHymnID,PermanentHymnID,EntrySlot,PrintedReference)
+    SELECT '074_permanent_local_ids',1,OldHymnID,PermanentHymnID,EntrySlot,PrintedReference
+    FROM tmp_local_hymn_id_map;
+    UPDATE tblHymnUsage usage_record
+    JOIN tmp_local_hymn_id_map map ON map.OldHymnID=usage_record.HymnID
+    SET usage_record.HymnID=map.PermanentHymnID;
+    UPDATE tblProperHymnSuggestion suggestion
+    JOIN tmp_local_hymn_id_map map ON map.OldHymnID=suggestion.HymnID
+    SET suggestion.HymnID=map.PermanentHymnID;
+    DELETE old FROM tblHymn old
+    JOIN tmp_local_hymn_id_map map ON map.OldHymnID=old.ID;
 
     SELECT COUNT(*) INTO invalid_count FROM tblHymn
     WHERE HymnalID=1 AND (ID<5001 OR ID>9999);
@@ -162,16 +273,19 @@ BEGIN
     UPDATE tblHymn SET EntrySlot=ID-5000,
         PrintedReference=COALESCE(NULLIF(PrintedReference,''),Hymn),PackageOwned=0
     WHERE HymnalID=1;
+    DROP TEMPORARY TABLE tmp_local_hymn_id_map;
 
-    SELECT COUNT(*) INTO invalid_count
-    FROM tblHymn
+    DELETE suggestion FROM tblProperHymnSuggestion suggestion
+    JOIN tblHymn hymn ON hymn.ID=suggestion.HymnID
+    WHERE hymn.HymnalID=2 AND NOT (
+        TRIM(Hymn) REGEXP '^(LSB[[:space:]]+)?[0-9]+$'
+        AND CAST(SUBSTRING_INDEX(TRIM(Hymn),' ',-1) AS UNSIGNED) BETWEEN 1 AND 966
+    );
+    DELETE FROM tblHymn
     WHERE HymnalID=2 AND NOT (
         TRIM(Hymn) REGEXP '^(LSB[[:space:]]+)?[0-9]+$'
         AND CAST(SUBSTRING_INDEX(TRIM(Hymn),' ',-1) AS UNSIGNED) BETWEEN 1 AND 966
     );
-    IF invalid_count > 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='LSB conversion contains a non-printed or ambiguous hymn number';
-    END IF;
 
     SELECT COUNT(*) INTO invalid_count FROM (
         SELECT CAST(SUBSTRING_INDEX(TRIM(Hymn),' ',-1) AS UNSIGNED) AS slot_number

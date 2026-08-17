@@ -139,9 +139,18 @@ future roadmap projects:
   permanent registry foundation, fail-closed LSB conversion, package preflight,
   transactional import, local 5,001-9,999 allocation, retirement, passive
   copyright/source metadata, and import/conversion logging.
-- Remaining acceptance work: apply migration 074 to `ChurchDBTest`, reconcile
-  its conversion log, visually test local hymn creation/retirement, and build
-  the complete curated LSB hymnal metadata package with verified stanza counts.
+- Migration 074 removes the former ChurchDBTest synthetic hymnals, their sample
+  entries, and disposable worship-service data instead of assigning permanent
+  identities to fixtures. It also removes LSB entries outside the approved
+  printed-edition range of 1-966. The test-data seeder no longer creates a fake
+  distributable hymnal.
+- Hymnal and hymn titles are normalized to Title Case during conversion and
+  package import. Common connecting words remain lowercase inside a title, and
+  intentional uppercase abbreviations remain uppercase.
+- Migration 074 is accepted on `ChurchDBTest`. Remaining acceptance work is to
+  visually test local hymn creation and retirement, review the permanent-ID
+  conversion results, and build the complete curated LSB hymnal metadata
+  package with verified stanza counts.
 
 - Use [Hymnal Research and Recommendations](ChurchManager.HymnalResearchAndRecommendations.md)
   as the starting point for the multi-hymnal catalog design.
