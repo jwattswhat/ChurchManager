@@ -1,6 +1,6 @@
 # ChurchManager Lectionary Catalog Specification
 
-**Status:** Proposed; awaiting approval
+**Status:** Approved; implementation in progress
 
 **Prepared:** August 16, 2026
 
@@ -382,23 +382,31 @@ redistribute its citation compilation. The RCL provisional trial material, if
 approved later, is installed as a separate edition or overlay and never replaces
 the 1992 edition silently.
 
-## 15. Migration of current development data
+## 15. Replacement of current development data
 
-Current ChurchDBTest records are migrated only after explicit approval:
+The current ChurchDBTest lectionary catalog is disposable reference material,
+not data that must retain identity. It is replaced cleanly:
 
 1. Create and verify a ChurchDBTest backup.
-2. Inventory each current `tblLectionarySystem`, Proper, reading, and Proper hymn
-   suggestion.
-3. Assign proposed package or local stable keys without relying on current
-   auto-increment values.
-4. Map current systems to editions and cycles.
-5. Normalize reading roles and citations without importing Scripture text.
-6. Preserve all Proper hymn-suggestion relationships.
-7. Create service-reading snapshots for any service whose readings must remain
-   historically fixed.
-8. Record old-to-new mappings, exceptions, and row-count reconciliation.
-9. Apply all changes in guarded transactions.
-10. Do not apply development migrations to production ChurchDB.
+2. Export each current system, Proper, reading, color, and Proper hymn suggestion
+   into a read-only staging inventory.
+3. Compare that inventory with the approved package source to find useful
+   corrections, omissions, role mappings, and hymn suggestions.
+4. Record every accepted correction in the maintained package source, not as an
+   undocumented database exception.
+5. Produce a reconciliation report listing accepted, rejected, duplicate, and
+   unresolved reference records.
+6. Delete the disposable current lectionary catalog and its dependent test
+   planning data in a guarded development migration.
+7. Install the approved packages into the clean normalized structure.
+8. Verify row counts, relationships, citations, colors, and Proper hymn
+   suggestions against the package manifests.
+9. Do not preserve old auto-increment IDs, old schema assumptions, or obsolete
+   lectionary records merely for compatibility.
+
+No existing ChurchDBTest worship-service history requires conversion. The new
+service-reading snapshot model becomes authoritative for services created after
+the replacement.
 
 ## 16. Validation and tests
 
@@ -445,8 +453,11 @@ The design is ready for implementation when:
 
 ## 18. Implementation status
 
-This document specifies future behavior. It does not claim that the proposed
-tables, package importer, calendar resolver, service-reading snapshots, or
-validators have been implemented. Existing ChurchManager behavior remains in
-place until approved migrations and application changes are completed and
-verified.
+The checksum-protected package loader and denomination-neutral, metadata-only
+validator are implemented in `lectionary_packages.py`. They enforce stable
+package namespaces, flexible data-defined cycles, citation-only appointments,
+valid alternatives and pairings, bounded passive metadata, and rejection of
+unknown or content-bearing fields. The proposed database tables, importer,
+calendar resolver, and service-reading snapshots remain future implementation.
+Existing ChurchManager behavior remains in place until their migrations and
+application changes are completed and verified.

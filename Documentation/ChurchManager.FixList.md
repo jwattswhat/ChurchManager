@@ -176,7 +176,13 @@ future roadmap projects:
 
 - Use [Revised Common Lectionary Research](ChurchManager.RevisedCommonLectionary.Research.md)
   as the starting point for denomination-neutral lectionary support.
-- After product-owner approval, implement the
+- The package loader and fail-closed metadata-only validator are implemented;
+  database normalization, transactional import, service-owned reading snapshots,
+  and candidate package provenance remain in progress.
+- The current ChurchDBTest lectionary catalog is reference-only. Export it for
+  citation, role, color, and hymn-suggestion reconciliation, then replace it
+  cleanly; do not preserve its IDs or obsolete structure.
+- Implement the
   [Lectionary Catalog Specification](ChurchManager.LectionaryCatalog.Specification.md),
   including stable package keys, flexible cycles, service-owned reading
   snapshots, local customization, and the hard metadata-only boundary.
