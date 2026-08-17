@@ -194,9 +194,15 @@ future roadmap projects:
   lectionary package and installed package record. `LOCAL_ONLY` is displayed in
   the package manager and cannot be silently treated as redistributable.
 - Local Lectionaries now provides protected, nontechnical maintenance of
-  congregation-owned systems, editions, and cycles, including automatic A/B/C
-  cycles and reversible retirement. The visual local Proper editor is
-  implemented; citation-only appointment maintenance remains next.
+  congregation-owned systems, editions, cycles, Propers, and citation-only
+  reading appointments, including automatic A/B/C cycles and reversible
+  retirement. Appointment entry enforces the metadata-only boundary by storing
+  biblical references rather than Scripture text.
+- A future redistributable ChurchManager lectionary may provide independently
+  authored three-year and one-year citation metadata, but it must not reproduce
+  or claim to be Lutheran Service Book data. Exact publisher-specific editions
+  remain local-only unless written electronic-redistribution permission is
+  obtained.
 - The current ChurchDBTest lectionary catalog is reference-only. Export it for
   citation, role, color, and hymn-suggestion reconciliation, then replace it
   cleanly; do not preserve its IDs or obsolete structure.

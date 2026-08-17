@@ -3,7 +3,7 @@
 from pathlib import Path
 import unittest
 
-from local_lectionary_dialog import clean_name, local_key
+from local_lectionary_dialog import clean_citation, clean_name, local_key
 from main_menu import FORM_ROUTES, SPECIAL_CONTROLS
 
 
@@ -17,6 +17,11 @@ class LocalLectionaryDialogTests(unittest.TestCase):
         self.assertEqual(clean_name("  Parish Cycle "), "Parish Cycle")
         with self.assertRaises(ValueError): clean_name(" ")
         with self.assertRaises(ValueError): clean_name("x" * 256)
+
+    def test_reading_appointments_accept_citations_not_body_text(self):
+        self.assertEqual(clean_citation("  John  3:16-17 "), "John 3:16-17")
+        with self.assertRaises(ValueError): clean_citation(" ")
+        with self.assertRaises(ValueError): clean_citation("John 3:16\nFor God so loved")
 
     def test_main_menu_uses_protected_local_editor(self):
         self.assertNotIn("lblPropers", FORM_ROUTES)
@@ -43,6 +48,11 @@ class LocalLectionaryDialogTests(unittest.TestCase):
         self.assertIn('("Propers...", self.on_propers)', source)
         self.assertIn("class _PropersDialog", source)
         self.assertIn("rule_date(calendar_rule, 2026)", source)
+        self.assertIn("def save_appointment", source)
+        self.assertIn("def set_appointment_active", source)
+        self.assertIn("class _AppointmentsDialog", source)
+        self.assertIn('("Readings...", self.on_readings)', source)
+        self.assertIn("Enter the biblical citation only", source)
 
     def test_unchanged_local_records_are_not_treated_as_missing(self):
         source = Path("local_lectionary_dialog.py").read_text(encoding="utf-8")

@@ -23,6 +23,19 @@ def clean_name(value, label="Name"):
     return value
 
 
+def clean_citation(value):
+    """Return a bounded Scripture citation without accepting body text."""
+    raw = str(value or "")
+    if "\n" in raw or "\r" in raw:
+        raise ValueError("Enter a Scripture citation only, not Scripture text.")
+    value = " ".join(raw.split())
+    if not value:
+        raise ValueError("Scripture citation is required.")
+    if len(value) > 500:
+        raise ValueError("Enter a Scripture citation only, not Scripture text.")
+    return value
+
+
 def dialog_buttons(panel):
     """Create standard buttons whose parent matches the panel's sizer."""
     buttons = wx.StdDialogButtonSizer()
@@ -103,6 +116,113 @@ class LocalLectionaryRepository:
                 (edition_id,),
             )
             return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def appointments(self, proper_id):
+        """Return citation-only appointments belonging to one local Proper."""
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT r.ID,r.DisplayRole,r.DisplayCitation,r.Role,r.Sequence,r.OptionType,"
+                "r.IsDefault,r.IsActive,r.TrackCode,r.OptionGroupCode,r.Note "
+                "FROM tblReading r JOIN tblPropers p ON p.ID=r.PropersID "
+                "JOIN tblLectionaryEdition e ON e.ID=p.LectionaryEditionID "
+                "WHERE r.PropersID=? AND r.PackageID IS NULL AND p.PackageID IS NULL "
+                "AND e.PackageID IS NULL ORDER BY r.IsActive DESC,r.Sequence,r.ID",
+                (proper_id,),
+            )
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def save_appointment(self, record_id, proper_id, display_role, citation, role,
+                         sequence, option_type, is_default, track_code,
+                         option_group_code, note):
+        """Create or update one metadata-only appointment on a local Proper."""
+        display_role = clean_name(display_role, "Reading role")
+        citation = clean_citation(citation)
+        role = str(role or "").strip().upper()
+        if role not in {"FIRST_READING", "PSALM_CANTICLE", "SECOND_READING", "GOSPEL"}:
+            raise ValueError("Select a supported normalized reading role.")
+        option_type = str(option_type or "DEFAULT").strip().upper()
+        if option_type not in {"DEFAULT", "ALTERNATE", "OPTIONAL_EXTENSION", "VARIANT"}:
+            raise ValueError("Select a supported appointment option type.")
+        try:
+            sequence = int(str(sequence).strip())
+        except ValueError as error:
+            raise ValueError("Sequence must be a positive whole number.") from error
+        if sequence < 1:
+            raise ValueError("Sequence must be a positive whole number.")
+        cursor = self.connection.cursor()
+        try:
+            self._require_record(
+                cursor,
+                "SELECT p.ID FROM tblPropers p JOIN tblLectionaryEdition e "
+                "ON e.ID=p.LectionaryEditionID WHERE p.ID=? AND p.PackageID IS NULL "
+                "AND e.PackageID IS NULL",
+                (proper_id,), "The local Proper is unavailable.",
+            )
+            values = (
+                proper_id, role, display_role, display_role, citation, citation,
+                citation.casefold(), str(track_code or "").strip() or None,
+                str(option_group_code or "").strip() or None, option_type,
+                sequence, int(bool(is_default)), str(note or "").strip() or None,
+            )
+            if record_id is None:
+                cursor.execute(
+                    "INSERT INTO tblReading (PropersID,AppointmentKey,Role,DisplayRole,"
+                    "Reading,Reference,DisplayCitation,NormalizedCitation,TrackCode,"
+                    "OptionGroupCode,OptionType,PairedAppointmentID,Sequence,IsDefault,"
+                    "PackageID,IsStarter,IsActive,Note) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,NULL,?,?,NULL,0,1,?)",
+                    (proper_id, local_key("appointment")) + values[1:],
+                )
+                record_id = cursor.lastrowid
+            else:
+                self._require_record(
+                    cursor,
+                    "SELECT r.ID FROM tblReading r JOIN tblPropers p ON p.ID=r.PropersID "
+                    "WHERE r.ID=? AND r.PropersID=? AND r.PackageID IS NULL "
+                    "AND p.PackageID IS NULL",
+                    (record_id, proper_id), "The local reading appointment is unavailable.",
+                )
+                cursor.execute(
+                    "UPDATE tblReading SET PropersID=?,Role=?,DisplayRole=?,Reading=?,"
+                    "Reference=?,DisplayCitation=?,NormalizedCitation=?,TrackCode=?,"
+                    "OptionGroupCode=?,OptionType=?,Sequence=?,IsDefault=?,Note=? "
+                    "WHERE ID=? AND PackageID IS NULL",
+                    values + (record_id,),
+                )
+            self.connection.commit()
+            return record_id
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
+    def set_appointment_active(self, appointment_id, proper_id, active):
+        """Retire or restore an appointment without deleting history."""
+        cursor = self.connection.cursor()
+        try:
+            self._require_record(
+                cursor,
+                "SELECT r.ID FROM tblReading r JOIN tblPropers p ON p.ID=r.PropersID "
+                "WHERE r.ID=? AND r.PropersID=? AND r.PackageID IS NULL "
+                "AND p.PackageID IS NULL",
+                (appointment_id, proper_id),
+                "The local reading appointment is unavailable.",
+            )
+            cursor.execute(
+                "UPDATE tblReading SET IsActive=? WHERE ID=? AND PropersID=? "
+                "AND PackageID IS NULL",
+                (int(bool(active)), appointment_id, proper_id),
+            )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
         finally:
             cursor.close()
 
@@ -501,6 +621,131 @@ class _ProperDialog(wx.Dialog):
         return self.cycles[self.cycle.GetSelection()][0]
 
 
+class _AppointmentDialog(wx.Dialog):
+    """Edit one citation-only reading appointment."""
+
+    ROLES = (
+        ("FIRST_READING", "First Reading"),
+        ("PSALM_CANTICLE", "Psalm or Canticle"),
+        ("SECOND_READING", "Second Reading"),
+        ("GOSPEL", "Gospel"),
+    )
+    OPTIONS = ("DEFAULT", "ALTERNATE", "OPTIONAL_EXTENSION", "VARIANT")
+
+    def __init__(self, parent, row=None):
+        super().__init__(parent, title="Reading Appointment", size=(590, 510))
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        notice = wx.StaticText(panel, label=(
+            "Enter the biblical citation only. Do not enter or paste Scripture text."
+        ))
+        notice.SetForegroundColour(wx.Colour(0, 90, 190))
+        outer.Add(notice, 0, wx.EXPAND | wx.ALL, 12)
+        grid = wx.FlexGridSizer(2, 8, 8); grid.AddGrowableCol(1, 1)
+        self.role = wx.Choice(panel, choices=[item[1] for item in self.ROLES])
+        role = str(row[3] or "FIRST_READING") if row else "FIRST_READING"
+        self.role.SetSelection(next((i for i, item in enumerate(self.ROLES)
+                                     if item[0] == role), 0))
+        self.display_role = wx.TextCtrl(panel, value=str(row[1] or "") if row else "")
+        self.citation = wx.TextCtrl(panel, value=str(row[2] or "") if row else "")
+        self.sequence = wx.SpinCtrl(panel, min=1, max=9999,
+                                    initial=int(row[4]) if row else 1)
+        self.option = wx.Choice(panel, choices=list(self.OPTIONS))
+        self.option.SetStringSelection(str(row[5] or "DEFAULT") if row else "DEFAULT")
+        self.default = wx.CheckBox(panel, label="Use as the default choice")
+        self.default.SetValue(bool(row[6]) if row else True)
+        self.track = wx.TextCtrl(panel, value=str(row[8] or "") if row else "")
+        self.group = wx.TextCtrl(panel, value=str(row[9] or "") if row else "")
+        self.note = wx.TextCtrl(panel, value=str(row[10] or "") if row else "",
+                                style=wx.TE_MULTILINE)
+        for label, control in (
+            ("Normalized role", self.role), ("Display label", self.display_role),
+            ("Scripture citation", self.citation), ("Sequence", self.sequence),
+            ("Option type", self.option), ("Default", self.default),
+            ("Track code", self.track), ("Option group", self.group),
+            ("Brief note", self.note),
+        ):
+            grid.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+            grid.Add(control, 1, wx.EXPAND)
+        outer.Add(grid, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        outer.Add(dialog_buttons(panel), 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        panel.SetSizer(outer)
+
+    def role_code(self):
+        return self.ROLES[self.role.GetSelection()][0]
+
+
+class _AppointmentsDialog(wx.Dialog):
+    """Maintain local reading citations for a single Proper."""
+
+    def __init__(self, parent, repository, proper):
+        super().__init__(parent, title=f"Reading Appointments — {proper[1]}",
+                         size=(980, 570),
+                         style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        self.repository = repository; self.proper = proper; self.rows = []
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        note = wx.StaticText(panel, label=(
+            "Maintain citation-only appointments. Double-click a row to edit it."
+        ))
+        note.SetForegroundColour(wx.Colour(0, 90, 190)); outer.Add(note, 0, wx.ALL, 10)
+        self.grid = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        for label, width in (("Role", 170), ("Citation", 270), ("Type", 145),
+                             ("Sequence", 80), ("Default", 75), ("Active", 65)):
+            self.grid.AppendColumn(label, width=width)
+        outer.Add(self.grid, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
+        actions = wx.BoxSizer(wx.HORIZONTAL)
+        for label, handler in (("Add Reading", self.on_add), ("Edit Reading", self.on_edit),
+                               ("Retire / Restore", self.on_toggle)):
+            button = wx.Button(panel, label=label); button.Bind(wx.EVT_BUTTON, handler)
+            actions.Add(button, 0, wx.RIGHT, 7)
+        actions.AddStretchSpacer(); close = wx.Button(panel, wx.ID_CLOSE, "Close")
+        close.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_CLOSE)); actions.Add(close)
+        outer.Add(actions, 0, wx.EXPAND | wx.ALL, 10); panel.SetSizer(outer)
+        self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit)
+        self.refresh(); self.CentreOnParent()
+
+    def refresh(self, selected_id=None):
+        self.rows = self.repository.appointments(self.proper[0]); self.grid.DeleteAllItems()
+        for index, row in enumerate(self.rows):
+            self.grid.InsertItem(index, str(row[1] or ""))
+            self.grid.SetItem(index, 1, str(row[2] or ""))
+            self.grid.SetItem(index, 2, str(row[5] or ""))
+            self.grid.SetItem(index, 3, str(row[4]))
+            self.grid.SetItem(index, 4, "Yes" if row[6] else "No")
+            self.grid.SetItem(index, 5, "Yes" if row[7] else "No")
+            if not row[7]: self.grid.SetItemTextColour(index, wx.Colour(120, 120, 120))
+            if row[0] == selected_id: self.grid.Select(index)
+
+    def on_add(self, _event): self._edit(None)
+    def on_edit(self, _event):
+        index = self.grid.GetFirstSelected()
+        if index >= 0: self._edit(self.rows[index])
+    def _edit(self, row):
+        dialog = _AppointmentDialog(self, row)
+        try:
+            if dialog.ShowModal() != wx.ID_OK: return
+            try:
+                appointment_id = self.repository.save_appointment(
+                    row[0] if row else None, self.proper[0],
+                    dialog.display_role.GetValue(), dialog.citation.GetValue(),
+                    dialog.role_code(), dialog.sequence.GetValue(),
+                    dialog.option.GetStringSelection(), dialog.default.GetValue(),
+                    dialog.track.GetValue(), dialog.group.GetValue(), dialog.note.GetValue(),
+                )
+                self.refresh(appointment_id)
+            except Exception as error:
+                wx.MessageBox(str(error), "Reading Appointment", wx.OK | wx.ICON_ERROR, self)
+        finally: dialog.Destroy()
+    def on_toggle(self, _event):
+        index = self.grid.GetFirstSelected()
+        if index < 0: return
+        row = self.rows[index]
+        try:
+            self.repository.set_appointment_active(row[0], self.proper[0], not row[7])
+            self.refresh(row[0])
+        except Exception as error:
+            wx.MessageBox(str(error), "Reading Appointment", wx.OK | wx.ICON_ERROR, self)
+
+
 class _PropersDialog(wx.Dialog):
     def __init__(self, parent, repository, edition):
         super().__init__(parent, title=f"Local Propers — {edition[1]}", size=(940, 600),
@@ -519,6 +764,7 @@ class _PropersDialog(wx.Dialog):
         outer.Add(self.grid, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
         actions = wx.BoxSizer(wx.HORIZONTAL)
         for label, handler in (("Add Proper", self.on_add), ("Edit Proper", self.on_edit),
+                               ("Readings...", self.on_readings),
                                ("Retire / Restore", self.on_toggle)):
             button = wx.Button(panel, label=label); button.Bind(wx.EVT_BUTTON, handler)
             actions.Add(button, 0, wx.RIGHT, 7)
@@ -564,6 +810,13 @@ class _PropersDialog(wx.Dialog):
             self.repository.set_proper_active(row[0], self.edition[0], not row[7]); self.refresh(row[0])
         except Exception as error:
             wx.MessageBox(str(error), "Local Proper", wx.OK | wx.ICON_ERROR, self)
+
+    def on_readings(self, _event):
+        index = self.grid.GetFirstSelected()
+        if index < 0: return
+        dialog = _AppointmentsDialog(self, self.repository, self.rows[index])
+        try: dialog.ShowModal()
+        finally: dialog.Destroy()
 
 
 class LocalLectionaryDialog(wx.Dialog):

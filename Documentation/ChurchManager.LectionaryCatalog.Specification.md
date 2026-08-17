@@ -369,6 +369,11 @@ appointments from scratch or by copying starter data. Local records are clearly
 marked as customized and are fully editable. They remain subject to the same
 metadata-only validation rules.
 
+The Local Lectionaries screen provides citation-only appointment maintenance.
+It records normalized and display roles, biblical citations, order, option type,
+default status, optional track/group codes, and a brief planning note. It does
+not accept or store Scripture body text.
+
 ## 14. Initial supported packages
 
 The first implementation should support the package framework before assuming a
