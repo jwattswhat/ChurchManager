@@ -213,7 +213,7 @@ The beta is complete only when:
    **Completed.**
 3. Add guarded database/account creation and migration execution. The reusable
    checksum-verified migration service and guarded fresh-database provisioner
-   are complete. Isolated live acceptance remains.
+   are complete. Isolated live acceptance passed on August 17, 2026.
 4. Generate, review, and checksum a canonical current baseline schema that is
    independent of development data, account definers, and machine-specific
    paths; scan it for obsolete compatibility structures such as `OldID`; prove
@@ -228,6 +228,10 @@ The beta is complete only when:
 5. Add first-master-administrator creation. **Completed and accepted against an
    isolated fresh database on August 17, 2026.**
 6. Add transactional catalog installation and congregation defaults.
+   **Completed.** Hymnal, lectionary, and Order of Service packages use their
+   validated transactional importers; dependencies are checked before
+   installation; and primary hymnal and default lectionary choices are stored
+   independently and may remain unset.
 7. Add the nontechnical wizard around the tested services.
 8. Add backup proof, final verification, and safe failure recovery.
 9. Exercise fresh install, upgrade, repair, and restore in isolated databases.

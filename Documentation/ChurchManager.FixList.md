@@ -360,6 +360,10 @@ future roadmap projects:
   role, and a corrected `Initial application setup` audit reason. Isolated live
   acceptance passed August 17, 2026, including authentication verification for
   Master Administrator ID 1 and complete cleanup of the disposable database.
+- Installation catalog services are ready for wizard integration. Hymnal,
+  lectionary, and Order of Service packages validate before transactional
+  installation; package dependencies are enforced; and congregation primary
+  hymnal and default lectionary selections are independent and optional.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local
