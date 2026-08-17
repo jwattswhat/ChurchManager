@@ -55,6 +55,7 @@ read-only database checks and manual verification boundaries.
 
 ## Documentation map
 
+- [Installation, upgrade, and beta release specification](Documentation/ChurchManager.InstallationRelease.Specification.md)
 - [Application guide](Documentation/ChurchManager.Application.md)
 - [Architecture](Documentation/ARCHITECTURE.md)
 - [Development guide](Documentation/DEVELOPMENT.md)

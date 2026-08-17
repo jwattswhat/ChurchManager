@@ -300,6 +300,8 @@ future roadmap projects:
 
 ### 6. Release, installation, and recovery readiness
 
+- Proposed design awaiting approval:
+  [Installation, Upgrade, and Beta Release Specification](ChurchManager.InstallationRelease.Specification.md).
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local
