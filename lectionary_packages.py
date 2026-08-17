@@ -9,6 +9,8 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
+from lectionary_calendar import LectionaryCalendarError, rule_date, validate_cycle_rule
+
 
 _KEY = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 _CHECKSUM = re.compile(r"^[0-9a-f]{64}$")
@@ -88,7 +90,8 @@ class LectionaryPackageValidator:
     SYSTEM_FIELDS = frozenset({"system_key", "name", "note", "editions"})
     EDITION_FIELDS = frozenset({
         "edition_key", "name", "edition_year", "status", "valid_from",
-        "valid_through", "source_note", "cycles", "propers",
+        "valid_through", "source_note", "resolver_version", "cycle_rule",
+        "cycles", "propers",
     })
     CYCLE_FIELDS = frozenset({"cycle_key", "display_name", "sequence", "is_active"})
     PROPER_FIELDS = frozenset({
@@ -165,6 +168,8 @@ class LectionaryPackageValidator:
             raise LectionaryPackageError("Edition year must be an integer or null.")
         self._date_range(edition.get("valid_from"), edition.get("valid_through"))
         self._text(edition.get("source_note", ""), 1000, "source note", required=False)
+        self._text(edition.get("resolver_version", "1"), 20, "resolver version")
+        self._text(edition.get("cycle_rule", "none"), 100, "cycle rule")
         cycles = edition.get("cycles", [])
         propers = edition.get("propers")
         if not isinstance(cycles, list) or not isinstance(propers, list) or not propers:
@@ -180,6 +185,14 @@ class LectionaryPackageValidator:
             self._text(cycle.get("display_name"), 100, "cycle display name")
             if not isinstance(cycle.get("is_active"), bool):
                 raise LectionaryPackageError("Cycle active values must be true or false.")
+        try:
+            validate_cycle_rule(
+                edition.get("cycle_rule", "none"),
+                [(item["cycle_key"], item["display_name"], item["sequence"], item["is_active"])
+                 for item in cycles],
+            )
+        except LectionaryCalendarError as error:
+            raise LectionaryPackageError(str(error)) from error
         counts[1] += 1
         counts[2] += len(cycles)
         for proper in propers:
@@ -197,6 +210,11 @@ class LectionaryPackageValidator:
         self._positive_integer(proper.get("sort"), "Proper sort", allow_zero=True)
         for field in ("default_color", "alternate_color", "calendar_rule"):
             self._text(proper.get(field, ""), 255, field.replace("_", " "), required=False)
+        if proper.get("calendar_rule"):
+            try:
+                rule_date(proper["calendar_rule"], 2024)
+            except LectionaryCalendarError as error:
+                raise LectionaryPackageError(str(error)) from error
         self._text(proper.get("note", ""), 1000, "Proper note", required=False)
         appointments = proper.get("appointments")
         if not isinstance(appointments, list) or not appointments:

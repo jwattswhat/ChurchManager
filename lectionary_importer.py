@@ -167,19 +167,21 @@ class LectionaryPackageImporter:
             system_id, edition["name"], edition.get("edition_year"),
             str(edition["status"]).upper(), edition.get("valid_from") or None,
             edition.get("valid_through") or None, package_id,
-            edition.get("source_note") or None,
+            edition.get("source_note") or None, edition.get("resolver_version") or "1",
+            edition.get("cycle_rule") or "none",
         )
         if edition_id:
             cursor.execute(
                 "UPDATE tblLectionaryEdition SET LectionarySystemID=?,Name=?,EditionYear=?,"
                 "Status=?,ValidFrom=?,ValidThrough=?,PackageID=?,IsStarter=1,IsActive=1,"
-                "SourceNote=? WHERE ID=?", values + (edition_id,),
+                "SourceNote=?,ResolverVersion=?,CycleRule=? WHERE ID=?", values + (edition_id,),
             )
             return edition_id
         cursor.execute(
             "INSERT INTO tblLectionaryEdition "
             "(EditionCode,LectionarySystemID,Name,EditionYear,Status,ValidFrom,ValidThrough,"
-            "PackageID,IsStarter,IsActive,SourceNote) VALUES (?,?,?,?,?,?,?,?,1,1,?)",
+            "PackageID,IsStarter,IsActive,SourceNote,ResolverVersion,CycleRule) "
+            "VALUES (?,?,?,?,?,?,?,?,1,1,?,?,?)",
             (key,) + values,
         )
         return cursor.lastrowid

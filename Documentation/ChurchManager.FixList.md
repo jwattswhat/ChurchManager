@@ -180,7 +180,9 @@ future roadmap projects:
   additive versioned-catalog migration, and transactional package importer are
   implemented. Service-owned reading snapshots are implemented for newly saved
   services and used by the Worship Planning report. Installer integration,
-  clean cutover, and candidate package provenance remain in progress.
+  clean cutover, and candidate package provenance remain in progress. The
+  bounded calendar resolver is implemented; UI candidate selection and package
+  calendar data remain to be connected.
 - The current ChurchDBTest lectionary catalog is reference-only. Export it for
   citation, role, color, and hymn-suggestion reconciliation, then replace it
   cleanly; do not preserve its IDs or obsolete structure.

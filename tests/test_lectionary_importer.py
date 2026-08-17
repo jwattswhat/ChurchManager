@@ -77,7 +77,8 @@ def valid_package():
             "editions": [{
                 "edition_key": "sample-edition", "name": "Sample Edition",
                 "edition_year": 2026, "status": "STABLE", "valid_from": None,
-                "valid_through": None, "source_note": "", "cycles": [],
+                "valid_through": None, "source_note": "", "resolver_version": "1",
+                "cycle_rule": "none", "cycles": [],
                 "propers": [{
                     "proper_key": "sample-proper", "cycle_key": None,
                     "liturgical_date": "Sample Sunday", "season": "Sample", "sort": 1,

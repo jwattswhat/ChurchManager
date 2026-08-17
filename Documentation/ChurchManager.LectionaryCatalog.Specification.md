@@ -473,6 +473,12 @@ save transaction now create service-owned reading snapshots, including the
 display citation actually saved in the weekly outline and passive source keys
 when available. Worship Planning reports read those snapshots rather than the
 mutable catalog. The calendar resolver, approved package data, installer UI,
-and clean cutover remain future work.
+and clean cutover remain future work. `lectionary_calendar.py` implements the
+first versioned resolver and installed-edition repository. Its rule language is
+intentionally bounded to fixed month/day dates, Easter offsets, numbered Advent
+Sundays, and the strict first Sunday after a month/day. Edition cycle rotation
+requires an explicit Advent-year anchor and declared active cycle key. It
+returns every match with an explanation and never applies feast precedence or
+interprets a liturgical title as a rule.
 Existing ChurchManager behavior remains in place until their migrations and
 application changes are completed and verified.
