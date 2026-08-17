@@ -518,6 +518,7 @@ The main-menu **Local Lectionaries** editor is the first nontechnical local
 authoring surface. It lists only records without a package owner, creates
 immutable `local-` system and edition keys, supports retirement instead of
 deletion, and automatically creates Year A/B/C cycle rows for an A/B/C edition.
-Package-owned catalogs never appear in this editor.
+Custom cycles can be added, edited, retired, and restored without changing
+their stable identity. Package-owned catalogs never appear in this editor.
 Existing ChurchManager behavior remains in place until their migrations and
 application changes are completed and verified.

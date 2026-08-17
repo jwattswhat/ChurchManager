@@ -60,6 +60,21 @@ class LocalLectionaryRepository:
         finally:
             cursor.close()
 
+    def cycles(self, edition_id):
+        """Return cycles belonging to one local edition."""
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT c.ID,c.DisplayName,c.Sequence,c.IsActive,c.CycleCode "
+                "FROM tblLectionaryCycle c JOIN tblLectionaryEdition e "
+                "ON e.ID=c.LectionaryEditionID WHERE c.LectionaryEditionID=? "
+                "AND e.PackageID IS NULL ORDER BY c.IsActive DESC,c.Sequence,c.DisplayName",
+                (edition_id,),
+            )
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
     def save_system(self, record_id, name, cycle_type, note):
         """Create or update one local system without touching package data."""
         name = clean_name(name, "System name")
@@ -177,6 +192,69 @@ class LocalLectionaryRepository:
         finally:
             cursor.close()
 
+    def save_cycle(self, record_id, edition_id, display_name, sequence):
+        """Create or update a cycle under a congregation-owned edition."""
+        display_name = clean_name(display_name, "Cycle name")
+        try:
+            sequence = int(str(sequence).strip())
+        except ValueError as error:
+            raise ValueError("Cycle sequence must be a positive whole number.") from error
+        if sequence < 1:
+            raise ValueError("Cycle sequence must be a positive whole number.")
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT ID FROM tblLectionaryEdition WHERE ID=? AND PackageID IS NULL "
+                "AND IsActive=1", (edition_id,),
+            )
+            if not cursor.fetchone():
+                raise ValueError("Select an active local edition.")
+            if record_id is None:
+                cursor.execute(
+                    "INSERT INTO tblLectionaryCycle "
+                    "(LectionaryEditionID,CycleCode,DisplayName,Sequence,IsActive) "
+                    "VALUES (?,?,?,?,1)",
+                    (edition_id, local_key("cycle"), display_name, sequence),
+                )
+                record_id = cursor.lastrowid
+            else:
+                cursor.execute(
+                    "UPDATE tblLectionaryCycle c JOIN tblLectionaryEdition e "
+                    "ON e.ID=c.LectionaryEditionID SET c.DisplayName=?,c.Sequence=? "
+                    "WHERE c.ID=? AND c.LectionaryEditionID=? AND e.PackageID IS NULL",
+                    (display_name, sequence, record_id, edition_id),
+                )
+                if cursor.rowcount != 1:
+                    raise ValueError("The local lectionary cycle is unavailable.")
+            self.connection.commit()
+            return record_id
+        except Exception as error:
+            self.connection.rollback()
+            if "duplicate" in str(error).casefold():
+                raise ValueError("That cycle sequence is already used in this edition.") from error
+            raise
+        finally:
+            cursor.close()
+
+    def set_cycle_active(self, cycle_id, edition_id, active):
+        """Retire or restore a cycle only when its edition is local."""
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "UPDATE tblLectionaryCycle c JOIN tblLectionaryEdition e "
+                "ON e.ID=c.LectionaryEditionID SET c.IsActive=? "
+                "WHERE c.ID=? AND c.LectionaryEditionID=? AND e.PackageID IS NULL",
+                (int(bool(active)), cycle_id, edition_id),
+            )
+            if cursor.rowcount != 1:
+                raise ValueError("The local lectionary cycle is unavailable.")
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
 
 class _SystemDialog(wx.Dialog):
     def __init__(self, parent, row=None):
@@ -219,6 +297,22 @@ class _EditionDialog(wx.Dialog):
         panel.SetSizer(outer)
 
 
+class _CycleDialog(wx.Dialog):
+    def __init__(self, parent, row=None):
+        super().__init__(parent, title="Local Lectionary Cycle", size=(440, 210))
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        grid = wx.FlexGridSizer(2, 8, 8); grid.AddGrowableCol(1, 1)
+        self.name = wx.TextCtrl(panel, value=str(row[1] or "") if row else "")
+        self.sequence = wx.SpinCtrl(panel, min=1, max=9999,
+                                    initial=int(row[2]) if row else 1)
+        for label, control in (("Cycle name", self.name), ("Sequence", self.sequence)):
+            grid.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+            grid.Add(control, 1, wx.EXPAND)
+        outer.Add(grid, 1, wx.EXPAND | wx.ALL, 12)
+        outer.Add(dialog_buttons(panel), 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        panel.SetSizer(outer)
+
+
 class LocalLectionaryDialog(wx.Dialog):
     """Present the local system/edition hierarchy without package-owned rows."""
 
@@ -227,7 +321,7 @@ class LocalLectionaryDialog(wx.Dialog):
         super().__init__(parent, title="Local Lectionaries", size=(980, 600),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.repository = LocalLectionaryRepository(connection)
-        self.system_rows = []; self.edition_rows = []
+        self.system_rows = []; self.edition_rows = []; self.cycle_rows = []
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
         note = wx.StaticText(panel, label=(
             "Create congregation-owned lectionaries here. Installed package records are "
@@ -239,12 +333,20 @@ class LocalLectionaryDialog(wx.Dialog):
         self.editions_grid = self._list(
             panel, (("Edition", 260), ("Year", 70), ("Cycle rotation", 150), ("Active", 70)),
         )
+        self.cycles_grid = self._list(
+            panel, (("Cycle", 250), ("Sequence", 90), ("Active", 70)),
+        )
         body.Add(self._section(panel, "Local systems", self.systems,
                               (("Add", self.on_add_system), ("Edit", self.on_edit_system),
                                ("Retire / Restore", self.on_toggle_system))), 1, wx.EXPAND | wx.RIGHT, 8)
-        body.Add(self._section(panel, "Editions", self.editions_grid,
-                              (("Add", self.on_add_edition), ("Edit", self.on_edit_edition),
-                               ("Retire / Restore", self.on_toggle_edition))), 1, wx.EXPAND)
+        right = wx.BoxSizer(wx.VERTICAL)
+        right.Add(self._section(panel, "Editions", self.editions_grid,
+                               (("Add", self.on_add_edition), ("Edit", self.on_edit_edition),
+                                ("Retire / Restore", self.on_toggle_edition))), 1, wx.EXPAND | wx.BOTTOM, 8)
+        right.Add(self._section(panel, "Cycles", self.cycles_grid,
+                               (("Add", self.on_add_cycle), ("Edit", self.on_edit_cycle),
+                                ("Retire / Restore", self.on_toggle_cycle))), 1, wx.EXPAND)
+        body.Add(right, 1, wx.EXPAND)
         outer.Add(body, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
         close = wx.Button(panel, wx.ID_CLOSE, "Close"); close.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_CLOSE))
         row = wx.BoxSizer(wx.HORIZONTAL); row.AddStretchSpacer(); row.Add(close)
@@ -252,6 +354,8 @@ class LocalLectionaryDialog(wx.Dialog):
         self.systems.Bind(wx.EVT_LIST_ITEM_SELECTED, lambda _e: self.refresh_editions())
         self.systems.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_system)
         self.editions_grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_edition)
+        self.editions_grid.Bind(wx.EVT_LIST_ITEM_SELECTED, lambda _e: self.refresh_cycles())
+        self.cycles_grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_cycle)
         self.refresh_systems(); self.CentreOnParent()
 
     @staticmethod
@@ -286,6 +390,18 @@ class LocalLectionaryDialog(wx.Dialog):
             self.editions_grid.InsertItem(pos, str(row[1])); self.editions_grid.SetItem(pos, 1, str(row[2] or ""))
             self.editions_grid.SetItem(pos, 2, str(row[3])); self.editions_grid.SetItem(pos, 3, "Yes" if row[4] else "No")
             if row[0] == selected_id: self.editions_grid.Select(pos)
+        if self.edition_rows and self.editions_grid.GetFirstSelected() < 0:
+            self.editions_grid.Select(0)
+        self.refresh_cycles()
+
+    def refresh_cycles(self, selected_id=None):
+        index = self.editions_grid.GetFirstSelected(); self.cycles_grid.DeleteAllItems()
+        self.cycle_rows = [] if index < 0 else self.repository.cycles(self.edition_rows[index][0])
+        for pos, row in enumerate(self.cycle_rows):
+            self.cycles_grid.InsertItem(pos, str(row[1]))
+            self.cycles_grid.SetItem(pos, 1, str(row[2]))
+            self.cycles_grid.SetItem(pos, 2, "Yes" if row[3] else "No")
+            if row[0] == selected_id: self.cycles_grid.Select(pos)
 
     def _error(self, action):
         try: action()
@@ -325,6 +441,28 @@ class LocalLectionaryDialog(wx.Dialog):
         index = self.editions_grid.GetFirstSelected()
         if index >= 0:
             row = self.edition_rows[index]; self._error(lambda: (self.repository.set_active("tblLectionaryEdition", row[0], not row[4]), self.refresh_editions(row[0])))
+
+    def on_add_cycle(self, _event): self._edit_cycle(None)
+    def on_edit_cycle(self, _event):
+        index = self.cycles_grid.GetFirstSelected()
+        if index >= 0: self._edit_cycle(self.cycle_rows[index])
+    def _edit_cycle(self, row):
+        edition = self.editions_grid.GetFirstSelected()
+        if edition < 0: return
+        edition_id = self.edition_rows[edition][0]
+        dialog = _CycleDialog(self, row)
+        try:
+            if dialog.ShowModal() != wx.ID_OK: return
+            self._error(lambda: self.refresh_cycles(self.repository.save_cycle(
+                row[0] if row else None, edition_id, dialog.name.GetValue(),
+                dialog.sequence.GetValue())))
+        finally: dialog.Destroy()
+    def on_toggle_cycle(self, _event):
+        edition = self.editions_grid.GetFirstSelected(); cycle = self.cycles_grid.GetFirstSelected()
+        if edition >= 0 and cycle >= 0:
+            row = self.cycle_rows[cycle]; edition_id = self.edition_rows[edition][0]
+            self._error(lambda: (self.repository.set_cycle_active(
+                row[0], edition_id, not row[3]), self.refresh_cycles(row[0])))
 
 
 def show_local_lectionaries(parent, connection, authorization):

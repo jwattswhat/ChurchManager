@@ -33,6 +33,9 @@ class LocalLectionaryDialogTests(unittest.TestCase):
                       '("c", "Year C", 3)'):
             self.assertIn(value, source)
         self.assertIn("ON DUPLICATE KEY UPDATE", source)
+        self.assertIn("def save_cycle", source)
+        self.assertIn("def set_cycle_active", source)
+        self.assertIn("JOIN tblLectionaryEdition e", source)
 
 
 if __name__ == "__main__":
