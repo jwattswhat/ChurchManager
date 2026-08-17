@@ -370,6 +370,12 @@ appointments from scratch or by copying starter data. Local records are clearly
 marked as customized and are fully editable. They remain subject to the same
 metadata-only validation rules.
 
+Copying an installed edition creates an independent local system, edition,
+cycles, Propers, and active citation appointments in one transaction. Every
+copied record receives a new immutable `local-` key, paired appointments are
+remapped to the copied identities, and package upgrades never overwrite the
+local copy.
+
 The Local Lectionaries screen provides citation-only appointment maintenance.
 It records normalized and display roles, biblical citations, order, option type,
 default status, optional track/group codes, and a brief planning note. It does

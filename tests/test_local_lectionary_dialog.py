@@ -56,6 +56,10 @@ class LocalLectionaryDialogTests(unittest.TestCase):
         self.assertIn("PairedAppointmentID", source)
         self.assertIn("A reading appointment cannot be paired with itself", source)
         self.assertIn("No paired response", source)
+        self.assertIn("def copy_packaged_edition", source)
+        self.assertIn("class _CopyEditionDialog", source)
+        self.assertIn("Copy Installed Edition...", source)
+        self.assertIn("future package updates will not change this copy", source)
 
     def test_unchanged_local_records_are_not_treated_as_missing(self):
         source = Path("local_lectionary_dialog.py").read_text(encoding="utf-8")

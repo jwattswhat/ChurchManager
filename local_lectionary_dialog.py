@@ -74,6 +74,127 @@ class LocalLectionaryRepository:
         finally:
             cursor.close()
 
+    def packaged_editions(self):
+        """Return active protected editions available as local-copy sources."""
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT e.ID,CONCAT(s.Name,' — ',e.Name),s.Name,e.Name "
+                "FROM tblLectionaryEdition e JOIN tblLectionarySystem s "
+                "ON s.ID=e.LectionarySystemID JOIN tblLectionaryPackage p "
+                "ON p.ID=e.PackageID WHERE e.PackageID IS NOT NULL "
+                "AND e.IsActive=1 AND s.Active=1 AND p.IsActive=1 "
+                "ORDER BY s.Name,e.Name"
+            )
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def copy_packaged_edition(self, edition_id, system_name, edition_name):
+        """Copy active metadata from a protected edition into a new local catalog."""
+        system_name = clean_name(system_name, "Local system name")
+        edition_name = clean_name(edition_name, "Local edition name")
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT s.CycleType,e.EditionYear,e.CycleRule,e.SourceNote,s.Name,e.Name "
+                "FROM tblLectionaryEdition e JOIN tblLectionarySystem s "
+                "ON s.ID=e.LectionarySystemID JOIN tblLectionaryPackage p "
+                "ON p.ID=e.PackageID WHERE e.ID=? AND e.PackageID IS NOT NULL "
+                "AND e.IsActive=1 AND s.Active=1 AND p.IsActive=1",
+                (edition_id,),
+            )
+            source = cursor.fetchone()
+            if not source:
+                raise ValueError("The selected installed edition is unavailable.")
+            provenance = f"Local editable copy of {source[4]} — {source[5]}."
+            cursor.execute(
+                "INSERT INTO tblLectionarySystem "
+                "(SystemCode,Name,CycleType,Active,Note,PackageID,IsStarter) "
+                "VALUES (?,?,?,1,?,NULL,0)",
+                (local_key("system"), system_name, source[0], provenance),
+            )
+            system_id = cursor.lastrowid
+            cursor.execute(
+                "INSERT INTO tblLectionaryEdition "
+                "(LectionarySystemID,EditionCode,Name,EditionYear,Status,PackageID,"
+                "IsStarter,IsActive,SourceNote,ResolverVersion,CycleRule) "
+                "VALUES (?,?,?,?,'LOCAL',NULL,0,1,?,'1',?)",
+                (system_id, local_key("edition"), edition_name, source[1],
+                 provenance, source[2]),
+            )
+            new_edition_id = cursor.lastrowid
+            cursor.execute(
+                "SELECT ID,CycleCode,DisplayName,Sequence FROM tblLectionaryCycle "
+                "WHERE LectionaryEditionID=? AND IsActive=1 ORDER BY Sequence,ID",
+                (edition_id,),
+            )
+            cycle_ids = {}
+            for old_id, _code, display, sequence in cursor.fetchall():
+                cursor.execute(
+                    "INSERT INTO tblLectionaryCycle "
+                    "(LectionaryEditionID,CycleCode,DisplayName,Sequence,IsActive) "
+                    "VALUES (?,?,?,?,1)",
+                    (new_edition_id, local_key("cycle"), display, sequence),
+                )
+                cycle_ids[old_id] = cursor.lastrowid
+            cursor.execute(
+                "SELECT ID,LectionaryCycleID,Cycle,Sort,Season,LiturgicalDate,Color,AltColor,"
+                "CalendarRule,Theme,Note,SourceNote FROM tblPropers "
+                "WHERE LectionaryEditionID=? AND IsActive=1 ORDER BY Sort,ID",
+                (edition_id,),
+            )
+            proper_ids = {}
+            for row in cursor.fetchall():
+                cursor.execute(
+                    "INSERT INTO tblPropers "
+                    "(LectionarySystemID,LectionaryEditionID,LectionaryCycleID,ProperKey,"
+                    "Cycle,Sort,Season,LiturgicalDate,Color,AltColor,CalendarRule,PackageID,"
+                    "IsStarter,IsActive,Theme,Note,SourceNote) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,NULL,0,1,?,?,?)",
+                    (system_id, new_edition_id, cycle_ids.get(row[1]),
+                     local_key("proper")) + row[2:],
+                )
+                proper_ids[row[0]] = cursor.lastrowid
+            appointment_ids = {}
+            pending_pairs = []
+            for old_proper_id, new_proper_id in proper_ids.items():
+                cursor.execute(
+                    "SELECT ID,Role,DisplayRole,Reading,Reference,DisplayCitation,"
+                    "NormalizedCitation,TrackCode,OptionGroupCode,OptionType,"
+                    "PairedAppointmentID,Sequence,IsDefault,Note FROM tblReading "
+                    "WHERE PropersID=? AND IsActive=1 ORDER BY COALESCE(Sequence,ID),ID",
+                    (old_proper_id,),
+                )
+                for row in cursor.fetchall():
+                    cursor.execute(
+                        "INSERT INTO tblReading "
+                        "(PropersID,AppointmentKey,Role,DisplayRole,Reading,Reference,"
+                        "DisplayCitation,NormalizedCitation,TrackCode,OptionGroupCode,"
+                        "OptionType,PairedAppointmentID,Sequence,IsDefault,PackageID,"
+                        "IsStarter,IsActive,Note) "
+                        "VALUES (?,?,?,?,?,?,?,?,?,?,?,NULL,?,?,NULL,0,1,?)",
+                        (new_proper_id, local_key("appointment")) + row[1:10]
+                        + row[11:],
+                    )
+                    appointment_ids[row[0]] = cursor.lastrowid
+                    pending_pairs.append((cursor.lastrowid, row[10]))
+            for new_id, old_pair_id in pending_pairs:
+                if old_pair_id in appointment_ids:
+                    cursor.execute(
+                        "UPDATE tblReading SET PairedAppointmentID=? WHERE ID=?",
+                        (appointment_ids[old_pair_id], new_id),
+                    )
+            self.connection.commit()
+            return system_id
+        except Exception as error:
+            self.connection.rollback()
+            if "duplicate" in str(error).casefold():
+                raise ValueError("That local lectionary system or edition name is already used.") from error
+            raise
+        finally:
+            cursor.close()
+
     def editions(self, system_id):
         cursor = self.connection.cursor()
         try:
@@ -845,6 +966,46 @@ class _PropersDialog(wx.Dialog):
         finally: dialog.Destroy()
 
 
+class _CopyEditionDialog(wx.Dialog):
+    """Collect the source and names for an editable local edition copy."""
+
+    def __init__(self, parent, editions):
+        super().__init__(parent, title="Copy Installed Lectionary Edition", size=(650, 300))
+        self.editions = editions
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        note = wx.StaticText(panel, label=(
+            "Create a separate congregation-owned copy. The installed edition remains "
+            "protected and future package updates will not change this copy."
+        ))
+        note.Wrap(610); note.SetForegroundColour(wx.Colour(0, 90, 190))
+        outer.Add(note, 0, wx.EXPAND | wx.ALL, 12)
+        grid = wx.FlexGridSizer(2, 8, 8); grid.AddGrowableCol(1, 1)
+        self.source = wx.Choice(panel, choices=[row[1] for row in editions])
+        if editions: self.source.SetSelection(0)
+        self.system_name = wx.TextCtrl(panel)
+        self.edition_name = wx.TextCtrl(panel)
+        for label, control in (("Installed edition", self.source),
+                               ("Local system name", self.system_name),
+                               ("Local edition name", self.edition_name)):
+            grid.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+            grid.Add(control, 1, wx.EXPAND)
+        outer.Add(grid, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
+        outer.Add(dialog_buttons(panel), 0, wx.EXPAND | wx.ALL, 12)
+        panel.SetSizer(outer)
+        self.source.Bind(wx.EVT_CHOICE, self.on_source)
+        self.on_source(None)
+
+    def on_source(self, _event):
+        index = self.source.GetSelection()
+        if index < 0: return
+        row = self.editions[index]
+        self.system_name.SetValue(f"{row[2]} Custom")
+        self.edition_name.SetValue(f"{row[3]} Custom")
+
+    def edition_id(self):
+        return self.editions[self.source.GetSelection()][0]
+
+
 class LocalLectionaryDialog(wx.Dialog):
     """Present the local system/edition hierarchy without package-owned rows."""
 
@@ -881,8 +1042,10 @@ class LocalLectionaryDialog(wx.Dialog):
                                 ("Retire / Restore", self.on_toggle_cycle))), 1, wx.EXPAND)
         body.Add(right, 1, wx.EXPAND)
         outer.Add(body, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
+        copy_button = wx.Button(panel, label="Copy Installed Edition...")
+        copy_button.Bind(wx.EVT_BUTTON, self.on_copy_edition)
         close = wx.Button(panel, wx.ID_CLOSE, "Close"); close.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_CLOSE))
-        row = wx.BoxSizer(wx.HORIZONTAL); row.AddStretchSpacer(); row.Add(close)
+        row = wx.BoxSizer(wx.HORIZONTAL); row.Add(copy_button); row.AddStretchSpacer(); row.Add(close)
         outer.Add(row, 0, wx.EXPAND | wx.ALL, 10); panel.SetSizer(outer)
         self.systems.Bind(wx.EVT_LIST_ITEM_SELECTED, lambda _e: self.refresh_editions())
         self.systems.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_system)
@@ -941,6 +1104,27 @@ class LocalLectionaryDialog(wx.Dialog):
         except Exception as error: wx.MessageBox(str(error), "Local Lectionary", wx.OK | wx.ICON_ERROR, self)
 
     def on_add_system(self, _event): self._edit_system(None)
+
+    def on_copy_edition(self, _event):
+        editions = self.repository.packaged_editions()
+        if not editions:
+            wx.MessageBox(
+                "No active installed lectionary edition is available to copy.",
+                "Copy Installed Edition", wx.OK | wx.ICON_INFORMATION, self,
+            )
+            return
+        dialog = _CopyEditionDialog(self, editions)
+        try:
+            if dialog.ShowModal() != wx.ID_OK: return
+            self._error(lambda: self.refresh_systems(
+                self.repository.copy_packaged_edition(
+                    dialog.edition_id(), dialog.system_name.GetValue(),
+                    dialog.edition_name.GetValue(),
+                )
+            ))
+        finally:
+            dialog.Destroy()
+
     def on_edit_system(self, _event):
         index = self.systems.GetFirstSelected()
         if index >= 0: self._edit_system(self.system_rows[index])

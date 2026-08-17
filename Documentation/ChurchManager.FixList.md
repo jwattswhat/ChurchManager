@@ -201,6 +201,10 @@ future roadmap projects:
 - Local reading maintenance supports data-defined alternatives, tracks, option
   groups, defaults, and optional same-Proper response pairing. It prevents
   self-pairing and rejects pairings outside the active local Proper.
+- An active installed edition can be copied into a new congregation-owned
+  system and edition. The transaction assigns new local keys to every copied
+  cycle, Proper, and appointment, remaps paired responses, and leaves the
+  protected source and saved services unchanged.
 - Migration 080 completes the runtime cutover to an edition-only congregation
   default. Church Information presents one unambiguous active-edition selector,
   and Worship Planning no longer falls back to the obsolete system-level
