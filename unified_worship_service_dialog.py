@@ -273,7 +273,7 @@ class UnifiedWorshipServiceRepository:
                 "SELECT ?,ID,Name FROM tblBulletinOrderTemplate WHERE ID=? "
                 "ON DUPLICATE KEY UPDATE TemplateID=VALUES(TemplateID),"
                 "TemplateName=VALUES(TemplateName),GeneratedPlainText=NULL,"
-                "GeneratedHtml=NULL,GeneratedAt=NULL", (service_id, template_id),
+                "GeneratedAt=NULL", (service_id, template_id),
             )
             for line in normalize_line_sequences(lines):
                 cursor.execute(

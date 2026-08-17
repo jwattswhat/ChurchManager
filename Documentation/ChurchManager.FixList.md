@@ -208,6 +208,9 @@ future roadmap projects:
 - Church Information presents the primary hymnal and default lectionary as one
   aligned, consistently sized catalog-selection column rather than separate
   responsive-grid columns.
+- Worship Service saving no longer references the removed
+  `tblServiceBulletinOrder.GeneratedHtml` field. Weekly Orders of Service remain
+  outline-only and invalidate only their permitted generated plain-text cache.
 - Migration 081 removes the former LSB lectionary catalog, its dependent
   Propers/readings/suggestions, and related development service snapshots.
   Services themselves remain, with their Proper selection cleared. Obsolete
