@@ -468,7 +468,11 @@ upgrade boundary: it validates before writing, protects key ownership, retires
 omitted package rows, resolves paired appointments after identity assignment,
 optionally sets a package-owned primary edition, records the import, and rolls
 back every write on failure. It deliberately leaves the current catalog
-operational during transition. The calendar resolver, service-reading snapshots,
-approved package data, installer UI, and clean cutover remain future work.
+operational during transition. Migration 077 and the unified Worship Service
+save transaction now create service-owned reading snapshots, including the
+display citation actually saved in the weekly outline and passive source keys
+when available. Worship Planning reports read those snapshots rather than the
+mutable catalog. The calendar resolver, approved package data, installer UI,
+and clean cutover remain future work.
 Existing ChurchManager behavior remains in place until their migrations and
 application changes are completed and verified.

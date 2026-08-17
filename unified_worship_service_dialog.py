@@ -288,12 +288,81 @@ class UnifiedWorshipServiceRepository:
                         (church_id, service_id, weekly_line_id, line["hymn_id"], line["key"],
                          line.get("stanzas")),
                     )
+            self._sync_reading_snapshots(cursor, service_id, service_values[2], lines)
             self.connection.commit()
         except Exception:
             self.connection.rollback()
             raise
         finally:
             cursor.close()
+
+    @staticmethod
+    def _reading_role(value):
+        """Map familiar outline labels to normalized appointment roles."""
+        text = str(value or "").strip().casefold()
+        if text in {"old testament", "old testament reading", "first reading"}:
+            return "FIRST_READING"
+        if text in {"epistle", "epistle reading", "second reading"}:
+            return "SECOND_READING"
+        if text in {"gospel", "holy gospel"}:
+            return "GOSPEL"
+        if text in {"psalm", "psalm/canticle", "canticle"}:
+            return "PSALM_CANTICLE"
+        return ""
+
+    def _sync_reading_snapshots(self, cursor, service_id, proper_id, lines):
+        """Replace service-owned citations from the weekly outline being saved."""
+        cursor.execute("DELETE FROM tblServiceReadingSnapshot WHERE ServiceID=?", (service_id,))
+        context = None
+        appointments = []
+        if proper_id:
+            cursor.execute(
+                "SELECT p.ID,ls.SystemCode,COALESCE(e.EditionCode,''),p.ProperKey,"
+                "ls.Name,COALESCE(e.Name,''),COALESCE(c.DisplayName,p.Cycle,''),"
+                "p.LiturgicalDate FROM tblPropers p "
+                "JOIN tblLectionarySystem ls ON ls.ID=p.LectionarySystemID "
+                "LEFT JOIN tblLectionaryEdition e ON e.ID=p.LectionaryEditionID "
+                "LEFT JOIN tblLectionaryCycle c ON c.ID=p.LectionaryCycleID WHERE p.ID=?",
+                (proper_id,),
+            )
+            context = cursor.fetchone()
+            cursor.execute(
+                "SELECT ID,AppointmentKey,COALESCE(Role,''),COALESCE(DisplayRole,Reading,''),"
+                "COALESCE(DisplayCitation,Reference,''),COALESCE(NormalizedCitation,''),"
+                "COALESCE(TrackCode,''),COALESCE(OptionGroupCode,''),COALESCE(OptionType,'') "
+                "FROM tblReading WHERE PropersID=? ORDER BY COALESCE(Sequence,ID),ID",
+                (proper_id,),
+            )
+            appointments = cursor.fetchall()
+        for line in lines:
+            if not line.get("included") or str(line.get("type") or "").upper() != "READING":
+                continue
+            label = str(line.get("label") or line.get("key") or "Reading").strip()
+            key = str(line.get("key") or label).strip()
+            role = self._reading_role(key) or self._reading_role(label)
+            source = next((row for row in appointments if role and row[2] == role), None)
+            if source is None:
+                wanted = {key.casefold(), label.casefold()}
+                source = next((row for row in appointments if row[3].casefold() in wanted), None)
+            citation = str(line.get("value") or line.get("reference") or "").strip()
+            cursor.execute(
+                "INSERT INTO tblServiceReadingSnapshot "
+                "(ServiceID,SourceProperID,SourceAppointmentID,SourceSystemCode,"
+                "SourceEditionCode,SourceProperKey,SourceAppointmentKey,SystemName,EditionName,"
+                "CycleName,ProperName,Role,Reading,Reference,NormalizedCitation,TrackCode,"
+                "OptionGroupCode,OptionType,Sequence) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (
+                    service_id, proper_id if context else None, source[0] if source else None,
+                    context[1] if context else None, context[2] if context else None,
+                    context[3] if context else None, source[1] if source else None,
+                    context[4] if context else None, context[5] if context else None,
+                    context[6] if context else None, context[7] if context else None,
+                    source[2] if source and source[2] else role or None, label, citation,
+                    source[5] if source else None, source[6] if source else None,
+                    source[7] if source else None, source[8] if source else None,
+                    int(line["sequence"]),
+                ),
+            )
 
     def _sync_empty_attendance_event(
         self, cursor, service_id, church_id, date_time, liturgical_date, communion_offered,

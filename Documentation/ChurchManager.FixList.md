@@ -178,8 +178,9 @@ future roadmap projects:
   as the starting point for denomination-neutral lectionary support.
 - The package loader, fail-closed metadata-only validator, reference exporter,
   additive versioned-catalog migration, and transactional package importer are
-  implemented. Service-owned reading snapshots, installer integration, clean
-  cutover, and candidate package provenance remain in progress.
+  implemented. Service-owned reading snapshots are implemented for newly saved
+  services and used by the Worship Planning report. Installer integration,
+  clean cutover, and candidate package provenance remain in progress.
 - The current ChurchDBTest lectionary catalog is reference-only. Export it for
   citation, role, color, and hymn-suggestion reconciliation, then replace it
   cleanly; do not preserve its IDs or obsolete structure.
