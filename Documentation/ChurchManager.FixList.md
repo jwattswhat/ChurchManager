@@ -202,6 +202,9 @@ future roadmap projects:
 - Migration 083 removes the obsolete required `tblLectionarySystem.OldID`
   column found on databases upgraded from the original application. Package
   installation now creates systems solely through their stable package keys.
+- Migration 084 removes the corresponding obsolete required
+  `tblReading.OldID` column. Imported citation appointments now use their stable
+  package appointment keys without requiring an unused historical identifier.
 - Migration 081 removes the former LSB lectionary catalog, its dependent
   Propers/readings/suggestions, and related development service snapshots.
   Services themselves remain, with their Proper selection cleared. Obsolete
