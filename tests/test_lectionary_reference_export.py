@@ -26,12 +26,18 @@ class LectionaryReferenceExportTests(unittest.TestCase):
 
     def test_allowlist_contains_no_content_bearing_fields(self):
         names = {field.casefold() for fields in ALLOWED.values() for field in fields}
-        for forbidden in ("scripturetext", "fulltext", "lyrics", "music", "image", "html"):
+        for forbidden in (
+            "scripturetext", "fulltext", "lyrics", "music", "image", "html", "theme", "note",
+        ):
             self.assertNotIn(forbidden, names)
 
     def test_binary_values_are_rejected(self):
         with self.assertRaisesRegex(ValueError, "Binary content"):
             build_inventory([{"ID": 1, "Name": b"bad"}], [], [], [])
+
+    def test_markup_values_are_rejected_even_in_allowed_fields(self):
+        with self.assertRaisesRegex(ValueError, "Markup content"):
+            build_inventory([{"ID": 1, "Name": "<html>not metadata</html>"}], [], [], [])
 
 
 if __name__ == "__main__":

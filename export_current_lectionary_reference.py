@@ -16,14 +16,14 @@ OUTPUT = ROOT / "ConversionLogs" / "CurrentLectionaryReference.json"
 SUMMARY = ROOT / "ConversionLogs" / "CurrentLectionaryReference.md"
 LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
 ALLOWED = {
-    "systems": ("ID", "Name", "CycleType", "Active", "Note"),
+    "systems": ("ID", "Name", "CycleType", "Active"),
     "propers": (
         "ID", "LectionarySystemID", "Cycle", "Sort", "Season",
-        "LiturgicalDate", "Color", "AltColor", "Theme", "Note",
+        "LiturgicalDate", "Color", "AltColor",
     ),
-    "readings": ("ID", "PropersID", "Reading", "Reference", "Note"),
+    "readings": ("ID", "PropersID", "Reading", "Reference"),
     "hymn_suggestions": (
-        "ID", "PropersID", "HymnID", "SuggestedAs", "Note",
+        "ID", "PropersID", "HymnID", "SuggestedAs",
         "PrintedReference", "Hymn", "Title",
     ),
 }
@@ -34,6 +34,8 @@ def _safe(value):
         return value.isoformat()
     if isinstance(value, bytes):
         raise ValueError("Binary content is not permitted in the lectionary reference inventory.")
+    if isinstance(value, str) and ("<html" in value.casefold() or "<font" in value.casefold()):
+        raise ValueError("Markup content is not permitted in the lectionary reference inventory.")
     return value
 
 

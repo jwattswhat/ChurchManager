@@ -460,7 +460,11 @@ valid alternatives and pairings, bounded passive metadata, and rejection of
 unknown or content-bearing fields. `export_current_lectionary_reference.py`
 creates a read-only, allowlisted reconciliation inventory from the configured
 local test database; it is explicitly not an installable package and preserves
-no old identity. The proposed database tables, importer, calendar resolver, and
-service-reading snapshots remain future implementation.
+no old identity. Migration 076 additively introduces the package registry,
+versioned editions, flexible cycles, permanent Proper and appointment keys,
+passive package ownership, import history, and an edition-level church default.
+It deliberately leaves the current catalog operational during transition. The
+transactional importer, calendar resolver, and service-reading snapshots remain
+future implementation.
 Existing ChurchManager behavior remains in place until their migrations and
 application changes are completed and verified.
