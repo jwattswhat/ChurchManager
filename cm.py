@@ -79,7 +79,12 @@ single_instance = None
 
 class clsForm(JSForm.clsForm):
     def fill_form(self, record):
-        """Fill a form and protect permanent hymn identity controls."""
+        """Fill a form and protect package-owned catalog controls."""
+        for name in getattr(self, "_package_disabled_controls", set()):
+            control = self.CONTROLID.get(name)
+            if control:
+                control.Enable(True)
+        self._package_disabled_controls = set()
         result = super().fill_form(record)
         if self.FORMNAME == "frmHymn" and record:
             packaged = bool(record.get("PackageOwned")) or int(record.get("ID") or 0) >= 10001
@@ -87,6 +92,16 @@ class clsForm(JSForm.clsForm):
                 self.CONTROLID["HymnalID"].Disable()
             if "Hymn" in self.CONTROLID:
                 self.CONTROLID["Hymn"].Enable(not packaged)
+        if self.FORMNAME in {"frmLectionarySystem", "frmPropers"} and record:
+            packaged = record.get("PackageID") is not None or bool(record.get("IsStarter"))
+            if packaged:
+                for name in record:
+                    if name in {"ID", "PackageID", "IsStarter"}:
+                        continue
+                    control = self.CONTROLID.get(name)
+                    if control and hasattr(control, "Enable"):
+                        control.Enable(False)
+                        self._package_disabled_controls.add(name)
         return result
 
     def new_record(self):
@@ -108,6 +123,13 @@ class clsForm(JSForm.clsForm):
 
     def _on_update_record_click(self, event):
         """Synchronize local hymn identity metadata before the normal save."""
+        if self._protected_lectionary_record():
+            wx.MessageBox(
+                "Packaged lectionary records are read-only. Install an updated package "
+                "or create a local record instead.",
+                "Protected Lectionary Record", wx.OK | wx.ICON_INFORMATION, self.FORM,
+            )
+            return
         if self.FORMNAME == "frmHymn" and self.RECORDS and self.RECORDS.current():
             record = self.RECORDS.current()
             if record.get("HymnalID") == 1 or 5001 <= int(record.get("ID") or 0) <= 9999:
@@ -118,6 +140,13 @@ class clsForm(JSForm.clsForm):
 
     def _on_delete_record_click(self, event):
         """Retire hymn metadata instead of physically deleting permanent IDs."""
+        if self._protected_lectionary_record():
+            wx.MessageBox(
+                "Packaged lectionary records cannot be deleted here. Retire the owning "
+                "package from Lectionary Packages instead.",
+                "Protected Lectionary Record", wx.OK | wx.ICON_INFORMATION, self.FORM,
+            )
+            return
         if self.FORMNAME != "frmHymn":
             return super()._on_delete_record_click(event)
         record = self.RECORDS.current() if self.RECORDS else None
@@ -138,6 +167,15 @@ class clsForm(JSForm.clsForm):
         record["IsActive"] = 0
         self.RECORDS.original.saverecord(record)
         self.fill_form(record)
+
+    def _protected_lectionary_record(self):
+        """Return true when the current form row belongs to an installed package."""
+        if self.FORMNAME not in {"frmLectionarySystem", "frmPropers"}:
+            return False
+        record = self.RECORDS.current() if self.RECORDS else None
+        return bool(record and (
+            record.get("PackageID") is not None or record.get("IsStarter")
+        ))
 
     def _refresh_parent_grid(self, control_name):
         parent = self.PARENT

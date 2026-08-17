@@ -498,5 +498,7 @@ The package manager also supports guarded retirement. It refuses retirement
 while a church default references the package, deactivates only package-owned
 catalog rows in one transaction, and never deletes service snapshots or local
 records. Reinstalling or upgrading the package may reactivate its owned keys.
+The ordinary Lectionary System and Propers forms disable package-owned fields
+and reject direct update or deletion attempts. Local rows remain editable.
 Existing ChurchManager behavior remains in place until their migrations and
 application changes are completed and verified.
