@@ -101,7 +101,9 @@ class MariaDBUserRepository:
     def has_users(self) -> bool:
         return bool(self._execute_one("SELECT COUNT(*) FROM tblUser")[0])
 
-    def create_initial_master(self, username, display_name, password_hash):
+    def create_initial_master(
+        self, username, display_name, password_hash, email=None, phone=None,
+    ):
         cursor = self.connection.cursor()
         try:
             self._execute(cursor, "SELECT COUNT(*) FROM tblUser")
@@ -109,9 +111,9 @@ class MariaDBUserRepository:
                 raise RuntimeError("Initial setup is unavailable after users exist.")
             self._execute(cursor,
                 "INSERT INTO tblUser "
-                "(Username, DisplayName, PasswordHash, Active, "
-                "MasterAdministrator, MustChangePassword) VALUES (?, ?, ?, 1, 1, 0)",
-                (username, display_name, password_hash),
+                "(Username, DisplayName, Email, Phone, PasswordHash, Active, "
+                "MasterAdministrator, MustChangePassword) VALUES (?, ?, ?, ?, ?, 1, 1, 1)",
+                (username, display_name, email, phone, password_hash),
             )
             user_id = cursor.lastrowid
             self._execute(cursor, "SELECT ID FROM tblRole WHERE Name='Master Administrator'")

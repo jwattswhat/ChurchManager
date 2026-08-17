@@ -25,6 +25,16 @@ installation and development procedures are maintained separately.
 
 ## 1. Getting started
 
+### Installing ChurchManager
+
+The ChurchManager Setup wizard checks the computer first, then collects the
+local database connection, congregation name, first Master Administrator, and
+optional catalog choices. Its review page never displays a password. The
+temporary Master Administrator password must be changed at first login.
+
+During development the wizard opens in **preview mode**, which validates the
+complete plan without creating a database or changing saved credentials.
+
 ### Sign in
 
 Start ChurchManager from its Windows shortcut. Enter the user name and password

@@ -232,7 +232,12 @@ The beta is complete only when:
    validated transactional importers; dependencies are checked before
    installation; and primary hymnal and default lectionary choices are stored
    independently and may remain unset.
-7. Add the nontechnical wizard around the tested services.
+7. Add the nontechnical wizard around the tested services. **Implemented for
+   safe preview and development acceptance.** The wizard covers system checks,
+   local database credentials, congregation identity, the first Master
+   Administrator and optional contact information, optional catalog selection,
+   a password-free review, guarded installation, cleanup, and verification.
+   Visual acceptance and a second isolated `--apply` dress rehearsal remain.
 8. Add backup proof, final verification, and safe failure recovery.
 9. Exercise fresh install, upgrade, repair, and restore in isolated databases.
 10. Prepare the beta kit and complete beta acceptance.

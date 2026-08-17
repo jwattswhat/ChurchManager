@@ -92,9 +92,9 @@ def accept(admin_password, *, host="127.0.0.1", port=3306, keep=False, notify=pr
             master_password, master_password,
         )
         account = MariaDBUserRepository(application).find_by_username("acceptance_admin")
-        if not account or not account.is_master:
+        if not account or not account.is_master or not account.must_change_password:
             raise FreshInstallAcceptanceError(
-                "The initial Master Administrator did not verify."
+                "The initial Master Administrator did not verify its temporary-password policy."
             )
         if not PasswordService().verify(account.password_hash, master_password):
             raise FreshInstallAcceptanceError(

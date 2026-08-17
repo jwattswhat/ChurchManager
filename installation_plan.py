@@ -29,6 +29,8 @@ class InstallationRequest:
     order_of_service_packages: tuple[str, ...] = ()
     primary_hymnal: str | None = None
     default_lectionary: str | None = None
+    master_email: str | None = None
+    master_phone: str | None = None
 
 
 @dataclass(frozen=True)
@@ -42,6 +44,8 @@ class InstallationPlan:
     selected_packages: tuple[CatalogPackage, ...]
     primary_hymnal: str | None
     default_lectionary: str | None
+    master_email: str | None = None
+    master_phone: str | None = None
 
 
 def _required_text(value, label, maximum):
@@ -72,6 +76,12 @@ def build_installation_plan(request, readiness):
             "Master username must contain at least three letters, numbers, periods, hyphens, or underscores.",
         )
     display_name = _required_text(request.master_display_name, "Master display name", 255)
+    email = str(request.master_email or "").strip() or None
+    phone = str(request.master_phone or "").strip() or None
+    if email and (len(email) > 254 or "@" not in email):
+        raise InstallationPlanError("Administrator email address is invalid.")
+    if phone and len(phone) > 50:
+        raise InstallationPlanError("Administrator phone number is too long.")
 
     available = {(item.family, item.code.casefold()): item for item in readiness.packages}
     selections = {
@@ -111,4 +121,5 @@ def build_installation_plan(request, readiness):
 
     return InstallationPlan(
         church, database, username, display_name, tuple(selected), primary, default,
+        email, phone,
     )

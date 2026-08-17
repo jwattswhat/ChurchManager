@@ -364,6 +364,13 @@ future roadmap projects:
   lectionary, and Order of Service packages validate before transactional
   installation; package dependencies are enforced; and congregation primary
   hymnal and default lectionary selections are independent and optional.
+- The nontechnical fresh-install wizard is implemented with a safe preview
+  default. It collects no secrets in its review, generates the least-privilege
+  database-account password internally, uses Windows Credential Manager only
+  after successful installation, points both ChurchManager and JSForm
+  connections at the verified new database, and removes incomplete fresh
+  database/account creation after a failure. Visual acceptance and an isolated
+  apply-mode dress rehearsal remain.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local
