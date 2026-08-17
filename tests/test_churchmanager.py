@@ -699,7 +699,7 @@ class TestChurchManagerForms(unittest.TestCase):
         migration = (
             ROOT / "migrations" / "053_remove_obsolete_jsform_database_structures.sql"
         ).read_text(encoding="utf-8")
-        runner = (ROOT / "run_churchdb_migrations.py").read_text(encoding="utf-8-sig")
+        runner = (ROOT / "migration_hooks.py").read_text(encoding="utf-8-sig")
         for table in ("tblOrderofService", "tblSchedule", "tblCheckList"):
             self.assertIn(f"DROP TABLE IF EXISTS {table}", migration)
         for column in ("OrderofService", "CheckListID", "Roles", "Schedule"):

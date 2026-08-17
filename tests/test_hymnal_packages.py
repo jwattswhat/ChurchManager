@@ -210,7 +210,7 @@ class HymnalPackageTests(unittest.TestCase):
         self.assertEqual(title_case("LSB service-builder index"), "LSB Service-Builder Index")
 
     def test_migration_runner_applies_title_case_conversion(self):
-        source = (ROOT / "run_churchdb_migrations.py").read_text(encoding="utf-8")
+        source = (ROOT / "migration_hooks.py").read_text(encoding="utf-8")
         self.assertIn("normalize_hymn_catalog_titles(cursor)", source)
         self.assertIn("PERMANENT_HYMN_CATALOG", source)
 

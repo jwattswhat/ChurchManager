@@ -252,8 +252,12 @@ The beta is complete only when:
    permissions, created and authenticated the initial Master Administrator,
    installed the distributable historic one-year lectionary, verified a
    277,721-byte first backup and its SHA-256 digest, and then removed the
-   isolated database, account, and backup. Upgrade, repair, and restore
-   rehearsals remain.
+   isolated database, account, and backup. A guarded upgrade service now
+   previews immutable migration history, requires and verifies a pre-upgrade
+   backup, applies only pending migrations through the same approved conversion
+   hooks as the migration runner, and preserves the backup if verification
+   fails. The isolated upgrade rehearsal and the repair and restore rehearsals
+   remain.
 10. Prepare the beta kit and complete beta acceptance.
 11. Ship the visually verified, version-matched User Guide PDF and verify the
     main-menu Help control on an installed build.
