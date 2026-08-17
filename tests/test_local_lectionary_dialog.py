@@ -44,6 +44,12 @@ class LocalLectionaryDialogTests(unittest.TestCase):
         self.assertIn("class _PropersDialog", source)
         self.assertIn("rule_date(calendar_rule, 2026)", source)
 
+    def test_unchanged_local_records_are_not_treated_as_missing(self):
+        source = Path("local_lectionary_dialog.py").read_text(encoding="utf-8")
+        self.assertIn("def _require_record", source)
+        self.assertIn("zero affected rows when an UPDATE writes", source)
+        self.assertNotIn("if cursor.rowcount != 1", source)
+
 
 if __name__ == "__main__":
     unittest.main()

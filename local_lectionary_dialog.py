@@ -38,6 +38,18 @@ class LocalLectionaryRepository:
     def __init__(self, connection):
         self.connection = portable_connection(connection)
 
+    @staticmethod
+    def _require_record(cursor, sql, values, message):
+        """Confirm a protected local record exists before allowing an update.
+
+        MariaDB reports zero affected rows when an UPDATE writes the values that
+        are already stored.  Existence must therefore be checked separately from
+        ``rowcount`` so an unchanged record remains a valid save.
+        """
+        cursor.execute(sql, values)
+        if not cursor.fetchone():
+            raise ValueError(message)
+
     def systems(self):
         cursor = self.connection.cursor()
         try:
@@ -110,13 +122,16 @@ class LocalLectionaryRepository:
                 )
                 record_id = cursor.lastrowid
             else:
+                self._require_record(
+                    cursor,
+                    "SELECT ID FROM tblLectionarySystem WHERE ID=? AND PackageID IS NULL",
+                    (record_id,), "The local lectionary system is unavailable.",
+                )
                 cursor.execute(
                     "UPDATE tblLectionarySystem SET Name=?,CycleType=?,Note=? "
                     "WHERE ID=? AND PackageID IS NULL",
                     (name, cycle_type, str(note or "").strip() or None, record_id),
                 )
-                if cursor.rowcount != 1:
-                    raise ValueError("The local lectionary system is unavailable.")
             self.connection.commit()
             return record_id
         except Exception:
@@ -165,13 +180,16 @@ class LocalLectionaryRepository:
                 )
                 record_id = cursor.lastrowid
             else:
+                self._require_record(
+                    cursor,
+                    "SELECT ID FROM tblLectionaryEdition WHERE ID=? AND PackageID IS NULL",
+                    (record_id,), "The local lectionary edition is unavailable.",
+                )
                 cursor.execute(
                     "UPDATE tblLectionaryEdition SET LectionarySystemID=?,Name=?,"
                     "EditionYear=?,SourceNote=?,CycleRule=? WHERE ID=? AND PackageID IS NULL",
                     values + (record_id,),
                 )
-                if cursor.rowcount != 1:
-                    raise ValueError("The local lectionary edition is unavailable.")
             if system[1] == "ABC":
                 for code, display, sequence in (
                     ("a", "Year A", 1), ("b", "Year B", 2), ("c", "Year C", 3),
@@ -198,12 +216,14 @@ class LocalLectionaryRepository:
         active_column = "Active" if table == "tblLectionarySystem" else "IsActive"
         cursor = self.connection.cursor()
         try:
+            self._require_record(
+                cursor, f"SELECT ID FROM {table} WHERE ID=? AND PackageID IS NULL",
+                (record_id,), "The local lectionary record is unavailable.",
+            )
             cursor.execute(
                 f"UPDATE {table} SET {active_column}=? WHERE ID=? AND PackageID IS NULL",
                 (int(bool(active)), record_id),
             )
-            if cursor.rowcount != 1:
-                raise ValueError("The local lectionary record is unavailable.")
             self.connection.commit()
         except Exception:
             self.connection.rollback()
@@ -237,14 +257,20 @@ class LocalLectionaryRepository:
                 )
                 record_id = cursor.lastrowid
             else:
+                self._require_record(
+                    cursor,
+                    "SELECT c.ID FROM tblLectionaryCycle c JOIN tblLectionaryEdition e "
+                    "ON e.ID=c.LectionaryEditionID WHERE c.ID=? "
+                    "AND c.LectionaryEditionID=? AND e.PackageID IS NULL",
+                    (record_id, edition_id),
+                    "The local lectionary cycle is unavailable.",
+                )
                 cursor.execute(
                     "UPDATE tblLectionaryCycle c JOIN tblLectionaryEdition e "
                     "ON e.ID=c.LectionaryEditionID SET c.DisplayName=?,c.Sequence=? "
                     "WHERE c.ID=? AND c.LectionaryEditionID=? AND e.PackageID IS NULL",
                     (display_name, sequence, record_id, edition_id),
                 )
-                if cursor.rowcount != 1:
-                    raise ValueError("The local lectionary cycle is unavailable.")
             self.connection.commit()
             return record_id
         except Exception as error:
@@ -259,14 +285,19 @@ class LocalLectionaryRepository:
         """Retire or restore a cycle only when its edition is local."""
         cursor = self.connection.cursor()
         try:
+            self._require_record(
+                cursor,
+                "SELECT c.ID FROM tblLectionaryCycle c JOIN tblLectionaryEdition e "
+                "ON e.ID=c.LectionaryEditionID WHERE c.ID=? "
+                "AND c.LectionaryEditionID=? AND e.PackageID IS NULL",
+                (cycle_id, edition_id), "The local lectionary cycle is unavailable.",
+            )
             cursor.execute(
                 "UPDATE tblLectionaryCycle c JOIN tblLectionaryEdition e "
                 "ON e.ID=c.LectionaryEditionID SET c.IsActive=? "
                 "WHERE c.ID=? AND c.LectionaryEditionID=? AND e.PackageID IS NULL",
                 (int(bool(active)), cycle_id, edition_id),
             )
-            if cursor.rowcount != 1:
-                raise ValueError("The local lectionary cycle is unavailable.")
             self.connection.commit()
         except Exception:
             self.connection.rollback()
@@ -327,14 +358,20 @@ class LocalLectionaryRepository:
                 )
                 record_id = cursor.lastrowid
             else:
+                self._require_record(
+                    cursor,
+                    "SELECT p.ID FROM tblPropers p JOIN tblLectionaryEdition e "
+                    "ON e.ID=p.LectionaryEditionID WHERE p.ID=? "
+                    "AND p.LectionaryEditionID=? AND p.PackageID IS NULL "
+                    "AND e.PackageID IS NULL",
+                    (record_id, edition_id), "The local Proper is unavailable.",
+                )
                 cursor.execute(
                     "UPDATE tblPropers SET LectionarySystemID=?,LectionaryEditionID=?,"
                     "LectionaryCycleID=?,Cycle=?,Sort=?,Season=?,LiturgicalDate=?,Color=?,"
                     "AltColor=?,CalendarRule=?,Note=? WHERE ID=? AND PackageID IS NULL",
                     values + (record_id,),
                 )
-                if cursor.rowcount != 1:
-                    raise ValueError("The local Proper is unavailable.")
             self.connection.commit()
             return record_id
         except Exception:
@@ -347,14 +384,20 @@ class LocalLectionaryRepository:
         """Retire or restore a Proper only inside its local edition."""
         cursor = self.connection.cursor()
         try:
+            self._require_record(
+                cursor,
+                "SELECT p.ID FROM tblPropers p JOIN tblLectionaryEdition e "
+                "ON e.ID=p.LectionaryEditionID WHERE p.ID=? "
+                "AND p.LectionaryEditionID=? AND p.PackageID IS NULL "
+                "AND e.PackageID IS NULL",
+                (proper_id, edition_id), "The local Proper is unavailable.",
+            )
             cursor.execute(
                 "UPDATE tblPropers p JOIN tblLectionaryEdition e "
                 "ON e.ID=p.LectionaryEditionID SET p.IsActive=? "
                 "WHERE p.ID=? AND p.LectionaryEditionID=? AND p.PackageID IS NULL "
                 "AND e.PackageID IS NULL", (int(bool(active)), proper_id, edition_id),
             )
-            if cursor.rowcount != 1:
-                raise ValueError("The local Proper is unavailable.")
             self.connection.commit()
         except Exception:
             self.connection.rollback()
