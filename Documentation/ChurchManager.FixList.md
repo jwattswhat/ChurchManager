@@ -193,6 +193,9 @@ future roadmap projects:
 - Preserve the reviewed distribution scope inside every checksum-protected
   lectionary package and installed package record. `LOCAL_ONLY` is displayed in
   the package manager and cannot be silently treated as redistributable.
+- Local Lectionaries now provides protected, nontechnical maintenance of
+  congregation-owned systems and editions, including automatic A/B/C cycles.
+  Proper and appointment editing will be added to the same local-only surface.
 - The current ChurchDBTest lectionary catalog is reference-only. Export it for
   citation, role, color, and hymn-suggestion reconciliation, then replace it
   cleanly; do not preserve its IDs or obsolete structure.

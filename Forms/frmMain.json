@@ -98,8 +98,8 @@
                     2,
                     14
                 ],
-                "label": "Propers",
-                "tooltip": "Open the propers form.",
+                "label": "Local Lectionaries",
+                "tooltip": "Create and maintain congregation-owned lectionary catalogs.",
                 "security": {
                     "invoke": "worship.manage"
                 }

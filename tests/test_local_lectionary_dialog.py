@@ -1,0 +1,39 @@
+"""Tests for permission-independent local lectionary maintenance."""
+
+from pathlib import Path
+import unittest
+
+from local_lectionary_dialog import clean_name, local_key
+from main_menu import FORM_ROUTES, SPECIAL_CONTROLS
+
+
+class LocalLectionaryDialogTests(unittest.TestCase):
+    def test_local_keys_are_unique_and_reserved(self):
+        first = local_key("system"); second = local_key("system")
+        self.assertTrue(first.startswith("local-system-"))
+        self.assertNotEqual(first, second)
+
+    def test_names_are_required_and_bounded(self):
+        self.assertEqual(clean_name("  Parish Cycle "), "Parish Cycle")
+        with self.assertRaises(ValueError): clean_name(" ")
+        with self.assertRaises(ValueError): clean_name("x" * 256)
+
+    def test_main_menu_uses_protected_local_editor(self):
+        self.assertNotIn("lblPropers", FORM_ROUTES)
+        self.assertIn("lblPropers", SPECIAL_CONTROLS)
+        source = Path("cm.py").read_text(encoding="utf-8")
+        self.assertIn('case "lblPropers":', source)
+        self.assertIn("show_local_lectionaries", source)
+
+    def test_repository_queries_exclude_package_owned_rows(self):
+        source = Path("local_lectionary_dialog.py").read_text(encoding="utf-8")
+        self.assertGreaterEqual(source.count("PackageID IS NULL"), 6)
+        self.assertNotIn("DELETE FROM", source)
+        for value in ('("a", "Year A", 1)', '("b", "Year B", 2)',
+                      '("c", "Year C", 3)'):
+            self.assertIn(value, source)
+        self.assertIn("ON DUPLICATE KEY UPDATE", source)
+
+
+if __name__ == "__main__":
+    unittest.main()

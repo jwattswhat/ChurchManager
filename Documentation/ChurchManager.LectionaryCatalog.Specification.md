@@ -514,5 +514,10 @@ Migration 079 closes the local-package provenance loop: the approved
 every load, stored with the installed package, and shown by the package manager.
 Missing, unknown, or provenance-mismatched scope values fail closed. Existing
 installed records default conservatively to `LOCAL_ONLY` during migration.
+The main-menu **Local Lectionaries** editor is the first nontechnical local
+authoring surface. It lists only records without a package owner, creates
+immutable `local-` system and edition keys, supports retirement instead of
+deletion, and automatically creates Year A/B/C cycle rows for an A/B/C edition.
+Package-owned catalogs never appear in this editor.
 Existing ChurchManager behavior remains in place until their migrations and
 application changes are completed and verified.

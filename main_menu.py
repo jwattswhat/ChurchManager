@@ -4,7 +4,6 @@
 FORM_ROUTES = {
     "lblChurch": "frmChurch",
     "lblSermon": "frmSermon",
-    "lblPropers": "frmPropers",
     "lblHymnal": "frmHymnal",
     "lblHymn": "frmHymn",
     "lblFamily": "frmFamily",
@@ -28,7 +27,7 @@ SPECIAL_CONTROLS = {
     "lblService", "lblOS", "lblCheckList", "lblWeeklyBulletinOrder", "lblGenerateOS", "lblNotifyParticipants", "lblSundayPrayers",
     "lblParticipant", "lblWorshipPositions", "lblSchedule", "lblPrayers", "lblAnnouncement", "lblChoices",
     "lblAnnouncements", "lblServiceSchedule", "lblReports", "lblReportDesigner", "lblScreenDesigner", "lblBackupDB",
-    "lblUsers", "lblEmailSettings", "lblSupportDiagnostics", "lblLectionaryPackages", "lblAttendanceEvent", "lblRecordAttendance",
+    "lblUsers", "lblEmailSettings", "lblSupportDiagnostics", "lblLectionaryPackages", "lblPropers", "lblAttendanceEvent", "lblRecordAttendance",
     "lblAccountingSetup",
     "lblAccountingTransactions",
     "lblAccountingReview",

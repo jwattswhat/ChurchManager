@@ -1,0 +1,334 @@
+"""Manage congregation-created lectionary systems and editions."""
+
+from __future__ import annotations
+
+from uuid import uuid4
+
+import wx
+
+from bulletin_orders import portable_connection
+def local_key(kind):
+    """Return an immutable key in ChurchManager's reserved local namespace."""
+    return f"local-{kind}-{uuid4().hex}"
+
+
+def clean_name(value, label="Name"):
+    """Return a bounded required display name."""
+    value = str(value or "").strip()
+    if not value:
+        raise ValueError(f"{label} is required.")
+    if len(value) > 255:
+        raise ValueError(f"{label} is too long.")
+    return value
+
+
+def dialog_buttons(panel):
+    """Create standard buttons whose parent matches the panel's sizer."""
+    buttons = wx.StdDialogButtonSizer()
+    buttons.AddButton(wx.Button(panel, wx.ID_OK))
+    buttons.AddButton(wx.Button(panel, wx.ID_CANCEL))
+    buttons.Realize()
+    return buttons
+
+
+class LocalLectionaryRepository:
+    """Persist only unowned local systems and editions."""
+
+    def __init__(self, connection):
+        self.connection = portable_connection(connection)
+
+    def systems(self):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT ID,Name,CycleType,Active,Note FROM tblLectionarySystem "
+                "WHERE PackageID IS NULL ORDER BY Active DESC,Name"
+            )
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def editions(self, system_id):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT ID,Name,EditionYear,CycleRule,IsActive,SourceNote "
+                "FROM tblLectionaryEdition WHERE LectionarySystemID=? "
+                "AND PackageID IS NULL ORDER BY IsActive DESC,Name", (system_id,),
+            )
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def save_system(self, record_id, name, cycle_type, note):
+        """Create or update one local system without touching package data."""
+        name = clean_name(name, "System name")
+        if cycle_type not in {"None", "ABC", "Custom"}:
+            raise ValueError("Cycle type must be None, ABC, or Custom.")
+        cursor = self.connection.cursor()
+        try:
+            if record_id is None:
+                cursor.execute(
+                    "INSERT INTO tblLectionarySystem "
+                    "(SystemCode,Name,CycleType,Active,Note,PackageID,IsStarter) "
+                    "VALUES (?,?,?,1,?,NULL,0)",
+                    (local_key("system"), name, cycle_type, str(note or "").strip() or None),
+                )
+                record_id = cursor.lastrowid
+            else:
+                cursor.execute(
+                    "UPDATE tblLectionarySystem SET Name=?,CycleType=?,Note=? "
+                    "WHERE ID=? AND PackageID IS NULL",
+                    (name, cycle_type, str(note or "").strip() or None, record_id),
+                )
+                if cursor.rowcount != 1:
+                    raise ValueError("The local lectionary system is unavailable.")
+            self.connection.commit()
+            return record_id
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
+    def save_edition(self, record_id, system_id, name, year, cycle_rule, source_note):
+        """Create or update an edition owned by a local system."""
+        name = clean_name(name, "Edition name")
+        year = str(year or "").strip()
+        if year:
+            try:
+                year = int(year)
+            except ValueError as error:
+                raise ValueError("Edition year must be a four-digit year or blank.") from error
+            if year < 1000 or year > 9999:
+                raise ValueError("Edition year must be a four-digit year or blank.")
+        else:
+            year = None
+        cycle_rule = str(cycle_rule or "none").strip().casefold() or "none"
+        if cycle_rule not in {"none", "advent-year-abc"}:
+            raise ValueError("Cycle rotation must be none or Advent-year A/B/C.")
+        source_note = str(source_note or "").strip()
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT ID,CycleType FROM tblLectionarySystem WHERE ID=? AND PackageID IS NULL "
+                "AND Active=1", (system_id,),
+            )
+            system = cursor.fetchone()
+            if not system:
+                raise ValueError("Select an active local lectionary system.")
+            if cycle_rule == "advent-year-abc" and system[1] != "ABC":
+                raise ValueError("Advent-year A/B/C rotation requires an A/B/C system.")
+            values = (system_id, name, year, source_note or None, cycle_rule)
+            if record_id is None:
+                cursor.execute(
+                    "INSERT INTO tblLectionaryEdition "
+                    "(LectionarySystemID,EditionCode,Name,EditionYear,Status,PackageID,"
+                    "IsStarter,IsActive,SourceNote,ResolverVersion,CycleRule) "
+                    "VALUES (?,?,?,?,'LOCAL',NULL,0,1,?,'1',?)",
+                    (system_id, local_key("edition"), name, year,
+                     source_note or None, cycle_rule),
+                )
+                record_id = cursor.lastrowid
+            else:
+                cursor.execute(
+                    "UPDATE tblLectionaryEdition SET LectionarySystemID=?,Name=?,"
+                    "EditionYear=?,SourceNote=?,CycleRule=? WHERE ID=? AND PackageID IS NULL",
+                    values + (record_id,),
+                )
+                if cursor.rowcount != 1:
+                    raise ValueError("The local lectionary edition is unavailable.")
+            if system[1] == "ABC":
+                for code, display, sequence in (
+                    ("a", "Year A", 1), ("b", "Year B", 2), ("c", "Year C", 3),
+                ):
+                    cursor.execute(
+                        "INSERT INTO tblLectionaryCycle "
+                        "(LectionaryEditionID,CycleCode,DisplayName,Sequence,IsActive) "
+                        "VALUES (?,?,?,?,1) ON DUPLICATE KEY UPDATE "
+                        "DisplayName=VALUES(DisplayName),Sequence=VALUES(Sequence),IsActive=1",
+                        (record_id, code, display, sequence),
+                    )
+            self.connection.commit()
+            return record_id
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
+    def set_active(self, table, record_id, active):
+        """Activate or retire a local system or edition."""
+        if table not in {"tblLectionarySystem", "tblLectionaryEdition"}:
+            raise ValueError("Unsupported local lectionary record type.")
+        active_column = "Active" if table == "tblLectionarySystem" else "IsActive"
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                f"UPDATE {table} SET {active_column}=? WHERE ID=? AND PackageID IS NULL",
+                (int(bool(active)), record_id),
+            )
+            if cursor.rowcount != 1:
+                raise ValueError("The local lectionary record is unavailable.")
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
+
+class _SystemDialog(wx.Dialog):
+    def __init__(self, parent, row=None):
+        super().__init__(parent, title="Local Lectionary System", size=(500, 330))
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        grid = wx.FlexGridSizer(2, 8, 8); grid.AddGrowableCol(1, 1)
+        self.name = wx.TextCtrl(panel, value=str(row[1] or "") if row else "")
+        self.cycle = wx.Choice(panel, choices=["None", "ABC", "Custom"])
+        self.cycle.SetStringSelection(str(row[2]) if row else "None")
+        self.note = wx.TextCtrl(panel, value=str(row[4] or "") if row else "",
+                                style=wx.TE_MULTILINE)
+        for label, control in (("System name", self.name), ("Cycle type", self.cycle),
+                               ("Note", self.note)):
+            grid.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+            grid.Add(control, 1, wx.EXPAND)
+        outer.Add(grid, 1, wx.EXPAND | wx.ALL, 12)
+        outer.Add(dialog_buttons(panel), 0,
+                  wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        panel.SetSizer(outer)
+
+
+class _EditionDialog(wx.Dialog):
+    def __init__(self, parent, row=None):
+        super().__init__(parent, title="Local Lectionary Edition", size=(540, 360))
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        grid = wx.FlexGridSizer(2, 8, 8); grid.AddGrowableCol(1, 1)
+        self.name = wx.TextCtrl(panel, value=str(row[1] or "") if row else "")
+        self.year = wx.TextCtrl(panel, value=str(row[2] or "") if row else "")
+        self.rule = wx.Choice(panel, choices=["none", "advent-year-abc"])
+        self.rule.SetStringSelection(str(row[3] or "none") if row else "none")
+        self.note = wx.TextCtrl(panel, value=str(row[5] or "") if row else "",
+                                style=wx.TE_MULTILINE)
+        for label, control in (("Edition name", self.name), ("Edition year", self.year),
+                               ("Cycle rotation", self.rule), ("Source note", self.note)):
+            grid.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+            grid.Add(control, 1, wx.EXPAND)
+        outer.Add(grid, 1, wx.EXPAND | wx.ALL, 12)
+        outer.Add(dialog_buttons(panel), 0,
+                  wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        panel.SetSizer(outer)
+
+
+class LocalLectionaryDialog(wx.Dialog):
+    """Present the local system/edition hierarchy without package-owned rows."""
+
+    def __init__(self, parent, connection, authorization):
+        authorization.require("worship.manage", operation="Manage local lectionaries")
+        super().__init__(parent, title="Local Lectionaries", size=(980, 600),
+                         style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        self.repository = LocalLectionaryRepository(connection)
+        self.system_rows = []; self.edition_rows = []
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        note = wx.StaticText(panel, label=(
+            "Create congregation-owned lectionaries here. Installed package records are "
+            "protected and are managed separately under Lectionary Packages."
+        ))
+        note.SetForegroundColour(wx.Colour(0, 90, 190)); outer.Add(note, 0, wx.ALL, 10)
+        body = wx.BoxSizer(wx.HORIZONTAL)
+        self.systems = self._list(panel, (("System", 250), ("Cycle", 90), ("Active", 70)))
+        self.editions_grid = self._list(
+            panel, (("Edition", 260), ("Year", 70), ("Cycle rotation", 150), ("Active", 70)),
+        )
+        body.Add(self._section(panel, "Local systems", self.systems,
+                              (("Add", self.on_add_system), ("Edit", self.on_edit_system),
+                               ("Retire / Restore", self.on_toggle_system))), 1, wx.EXPAND | wx.RIGHT, 8)
+        body.Add(self._section(panel, "Editions", self.editions_grid,
+                              (("Add", self.on_add_edition), ("Edit", self.on_edit_edition),
+                               ("Retire / Restore", self.on_toggle_edition))), 1, wx.EXPAND)
+        outer.Add(body, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
+        close = wx.Button(panel, wx.ID_CLOSE, "Close"); close.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_CLOSE))
+        row = wx.BoxSizer(wx.HORIZONTAL); row.AddStretchSpacer(); row.Add(close)
+        outer.Add(row, 0, wx.EXPAND | wx.ALL, 10); panel.SetSizer(outer)
+        self.systems.Bind(wx.EVT_LIST_ITEM_SELECTED, lambda _e: self.refresh_editions())
+        self.systems.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_system)
+        self.editions_grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_edition)
+        self.refresh_systems(); self.CentreOnParent()
+
+    @staticmethod
+    def _list(parent, columns):
+        control = wx.ListCtrl(parent, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        for label, width in columns: control.AppendColumn(label, width=width)
+        return control
+
+    @staticmethod
+    def _section(parent, label, control, buttons):
+        box = wx.StaticBoxSizer(wx.VERTICAL, parent, label); box.Add(control, 1, wx.EXPAND | wx.ALL, 6)
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        for text, handler in buttons:
+            button = wx.Button(parent, label=text); button.Bind(wx.EVT_BUTTON, handler); row.Add(button, 0, wx.RIGHT, 6)
+        box.Add(row, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 6); return box
+
+    def refresh_systems(self, selected_id=None):
+        self.system_rows = self.repository.systems(); self.systems.DeleteAllItems()
+        select = -1
+        for index, row in enumerate(self.system_rows):
+            self.systems.InsertItem(index, str(row[1])); self.systems.SetItem(index, 1, str(row[2]))
+            self.systems.SetItem(index, 2, "Yes" if row[3] else "No")
+            if row[0] == selected_id: select = index
+        if select < 0 and self.system_rows: select = 0
+        if select >= 0: self.systems.Select(select)
+        self.refresh_editions()
+
+    def refresh_editions(self, selected_id=None):
+        index = self.systems.GetFirstSelected(); self.editions_grid.DeleteAllItems()
+        self.edition_rows = [] if index < 0 else self.repository.editions(self.system_rows[index][0])
+        for pos, row in enumerate(self.edition_rows):
+            self.editions_grid.InsertItem(pos, str(row[1])); self.editions_grid.SetItem(pos, 1, str(row[2] or ""))
+            self.editions_grid.SetItem(pos, 2, str(row[3])); self.editions_grid.SetItem(pos, 3, "Yes" if row[4] else "No")
+            if row[0] == selected_id: self.editions_grid.Select(pos)
+
+    def _error(self, action):
+        try: action()
+        except Exception as error: wx.MessageBox(str(error), "Local Lectionary", wx.OK | wx.ICON_ERROR, self)
+
+    def on_add_system(self, _event): self._edit_system(None)
+    def on_edit_system(self, _event):
+        index = self.systems.GetFirstSelected()
+        if index >= 0: self._edit_system(self.system_rows[index])
+    def _edit_system(self, row):
+        dialog = _SystemDialog(self, row)
+        try:
+            if dialog.ShowModal() != wx.ID_OK: return
+            self._error(lambda: self.refresh_systems(self.repository.save_system(
+                row[0] if row else None, dialog.name.GetValue(), dialog.cycle.GetStringSelection(), dialog.note.GetValue())))
+        finally: dialog.Destroy()
+    def on_toggle_system(self, _event):
+        index = self.systems.GetFirstSelected()
+        if index >= 0:
+            row = self.system_rows[index]; self._error(lambda: (self.repository.set_active("tblLectionarySystem", row[0], not row[3]), self.refresh_systems(row[0])))
+
+    def on_add_edition(self, _event): self._edit_edition(None)
+    def on_edit_edition(self, _event):
+        index = self.editions_grid.GetFirstSelected()
+        if index >= 0: self._edit_edition(self.edition_rows[index])
+    def _edit_edition(self, row):
+        system = self.systems.GetFirstSelected()
+        if system < 0: return
+        dialog = _EditionDialog(self, row)
+        try:
+            if dialog.ShowModal() != wx.ID_OK: return
+            self._error(lambda: self.refresh_editions(self.repository.save_edition(
+                row[0] if row else None, self.system_rows[system][0], dialog.name.GetValue(),
+                dialog.year.GetValue(), dialog.rule.GetStringSelection(), dialog.note.GetValue())))
+        finally: dialog.Destroy()
+    def on_toggle_edition(self, _event):
+        index = self.editions_grid.GetFirstSelected()
+        if index >= 0:
+            row = self.edition_rows[index]; self._error(lambda: (self.repository.set_active("tblLectionaryEdition", row[0], not row[4]), self.refresh_editions(row[0])))
+
+
+def show_local_lectionaries(parent, connection, authorization):
+    """Open local lectionary maintenance."""
+    dialog = LocalLectionaryDialog(parent, connection, authorization)
+    try: dialog.ShowModal()
+    finally: dialog.Destroy()

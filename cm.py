@@ -67,6 +67,7 @@ from participant_notification_dialog import show_participant_notifications
 from mail_settings import show_mail_settings
 from local_hymns import LocalHymnIDAllocator
 from lectionary_package_dialog import show_lectionary_packages
+from local_lectionary_dialog import show_local_lectionaries
 
 
 arguments = None
@@ -520,6 +521,11 @@ def _buttonclick(event):
             return
         case "lblLectionaryPackages":
             show_lectionary_packages(
+                cmfrm.FRAME, context.connection, context.authorization,
+            )
+            return
+        case "lblPropers":
+            show_local_lectionaries(
                 cmfrm.FRAME, context.connection, context.authorization,
             )
             return
