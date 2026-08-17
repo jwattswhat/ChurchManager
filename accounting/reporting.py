@@ -9,6 +9,7 @@ import tempfile
 import JSForm
 
 from process_service import ProcessService
+from configuration_paths import writable_directory
 from visual_reports.designer import ensure_user_definition, resolve_report_definition
 
 from .trial_balance_service import TrialBalanceService
@@ -27,7 +28,7 @@ from .audit_service import AccountingAuditService
 
 
 ACCOUNTING_DEFINITIONS = Path(__file__).resolve().parent / "report_definitions"
-REPORT_OUTPUTS = Path(__file__).resolve().parents[1] / "Reports"
+REPORT_OUTPUTS = writable_directory("Reports")
 
 
 def field(name, label, data_type="text"):

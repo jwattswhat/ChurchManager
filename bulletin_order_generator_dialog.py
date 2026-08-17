@@ -174,8 +174,8 @@ class PrepareBulletinOrderDialog(wx.Dialog):
                       "HTML": ("html", "HTML files (*.html)|*.html"),
                       "Word Document": ("docx", "Word documents (*.docx)|*.docx")}
         extension, wildcard = extensions[selected]
-        reports = Path(__file__).resolve().parent / "Reports"
-        reports.mkdir(exist_ok=True)
+        from configuration_paths import writable_directory
+        reports = writable_directory("Reports")
         dialog = wx.FileDialog(self, "Save Bulletin Order", defaultDir=str(reports),
                                defaultFile=f"Bulletin Order.{extension}", wildcard=wildcard,
                                style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)

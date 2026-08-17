@@ -10,6 +10,8 @@ LocalTestMigrationBackups/
 BackupDB/
 Backups/
 tmp/
+build/
+dist/
 Log.txt
 root-reset.*.log
 .local-mariadb.ini

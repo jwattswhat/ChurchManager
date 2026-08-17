@@ -5,7 +5,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from configuration_paths import ROOT, configuration_path, ensure_configuration
+from configuration_paths import (
+    ROOT, application_data_root, configuration_path, ensure_configuration,
+    writable_directory,
+)
 
 
 class ConfigurationPathTests(unittest.TestCase):
@@ -37,6 +40,21 @@ class ConfigurationPathTests(unittest.TestCase):
             self.assertNotIn("password", values["database_settings"])
             self.assertEqual(values["database_settings"]["host"], "127.0.0.1")
             self.assertFalse(values["security"]["production_enabled"])
+
+    def test_installed_outputs_use_local_application_data(self):
+        environment = {"LOCALAPPDATA": r"C:\Users\Example\AppData\Local"}
+        self.assertEqual(
+            application_data_root(frozen=True, environment=environment),
+            Path(r"C:\Users\Example\AppData\Local\ChurchManager"),
+        )
+
+    def test_writable_directory_creates_requested_child(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            target = writable_directory(
+                "Reports", frozen=True, environment={"LOCALAPPDATA": temporary},
+            )
+            self.assertTrue(target.is_dir())
+            self.assertEqual(target.name, "Reports")
 
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ import JSForm
 import mariadb
 
 from churchmanager_mode import load_config, resolve_database
+from configuration_paths import writable_directory
 from visual_reports.directory_dataset import DIRECTORY_CONTRACT
 from visual_reports.directory_dataset import DirectoryDatasetProvider
 from visual_reports.report_inventory import REPORTS_BY_CODE
@@ -214,7 +215,7 @@ def open_directory_designer(local_app_data=None, authorization=None):
             dataset_contract=contract,
             preview_handler=preview_handler,
             starter_definition_path=starter if starter.is_file() else None,
-            export_directory=ROOT.parent / "Reports",
+            export_directory=writable_directory("Reports"),
         )
 
     return JSForm.open_report_catalog(

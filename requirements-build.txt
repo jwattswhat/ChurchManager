@@ -1,0 +1,2 @@
+# Reproducible Windows executable builder; not installed on end-user computers.
+PyInstaller==6.21.0

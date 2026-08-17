@@ -268,7 +268,13 @@ The beta is complete only when:
    congregation record from the verified first-install backup, verified all 84
    migration records, verified the pre-restore safety backup, and removed all
    disposable resources. The repair rehearsal remains.
-10. Prepare the beta kit and complete beta acceptance.
+10. Prepare the beta kit and complete beta acceptance. The reproducible
+    PyInstaller 6.21 onedir builds for `ChurchManager.exe` and
+    `ChurchManagerSetup.exe` are implemented. Both packaged executables passed
+    the noninteractive resource proof on August 17, 2026: release 0.2.0-dev,
+    34 forms, 84 migrations, two catalog packages, and no missing required
+    resources. Traditional MSI construction, repair rehearsal, signing, and
+    clean-machine visual acceptance remain.
 11. Ship the visually verified, version-matched User Guide PDF and verify the
     main-menu Help control on an installed build.
 

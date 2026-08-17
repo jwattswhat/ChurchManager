@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from configuration_paths import writable_directory
 from visual_reports.designer import (
     STARTERS, resolve_report_definition, user_definition_directory,
 )
@@ -56,7 +57,7 @@ class ChurchManagerReportService:
             dataset = TabularDatasetProvider(connection, self.access.authorization).build(
                 code, church_id, parameters,
             )
-        output = Path(__file__).resolve().parent / "Reports" / f"{code}.pdf"
+        output = writable_directory("Reports") / f"{code}.pdf"
         rendered = self.jsform.PDFReportRenderer().render(definition, dataset, output)
         self.processes.open_file(rendered)
         return rendered
@@ -70,7 +71,7 @@ class ChurchManagerReportService:
         dataset = WorshipPlanningDatasetProvider(
             connection, self.access.authorization,
         ).build(church_id, service_id)
-        output = Path(output or (Path(__file__).resolve().parent / "Reports" / "CMWP01.pdf"))
+        output = Path(output or (writable_directory("Reports") / "CMWP01.pdf"))
         rendered = self.jsform.PDFReportRenderer().render(definition, dataset, output)
         if open_output:
             self.processes.open_file(rendered)
