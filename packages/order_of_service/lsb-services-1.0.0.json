@@ -1,0 +1,2454 @@
+{
+  "package_code": "lsb-service-outlines",
+  "package_version": "1.0.0",
+  "title": "LSB Order of Service Outlines",
+  "template_prefix": "LSB ",
+  "source_name": "Lutheran Service Book",
+  "source_reference": "Official CPH LSB contents listing and congregation-owned publication",
+  "package_notice": "Planning metadata and short labels only; no liturgical text, lyrics, music, prayers, rubrics, or artwork.",
+  "hymnal_package_code": "lsb",
+  "minimum_hymnal_version": "1.0.0",
+  "schema_version": 1,
+  "checksum": "2db500fd93e20e367968a9863ac722ace0f41d46c82e7a3a31dc1c60e3b7be6c",
+  "templates": [
+    {
+      "template_key": "lsb-divine-service-setting-one",
+      "name": "LSB Divine Service, Setting One",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "preparation",
+          "sequence": 1,
+          "line_type": "HEADING",
+          "label": "Preparation",
+          "reference": "LSB p. 151"
+        },
+        {
+          "line_key": "hymn-of-invocation",
+          "sequence": 2,
+          "line_type": "HYMN",
+          "label": "Hymn of Invocation",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn-of-invocation",
+          "reference": "Hymn of Invocation"
+        },
+        {
+          "line_key": "confession-and-absolution",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Confession and Absolution"
+        },
+        {
+          "line_key": "service-of-the-word",
+          "sequence": 4,
+          "line_type": "HEADING",
+          "label": "Service of the Word"
+        },
+        {
+          "line_key": "introit-or-psalm",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Introit or Psalm"
+        },
+        {
+          "line_key": "kyrie",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Kyrie"
+        },
+        {
+          "line_key": "hymn-of-praise",
+          "sequence": 7,
+          "line_type": "HYMN",
+          "label": "Hymn of Praise",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn-of-praise",
+          "reference": "Hymn of Praise"
+        },
+        {
+          "line_key": "salutation-and-collect-of-the-day",
+          "sequence": 8,
+          "line_type": "LITURGY",
+          "label": "Salutation and Collect of the Day"
+        },
+        {
+          "line_key": "old-testament-reading",
+          "sequence": 9,
+          "line_type": "READING",
+          "label": "Old Testament Reading"
+        },
+        {
+          "line_key": "epistle",
+          "sequence": 10,
+          "line_type": "READING",
+          "label": "Epistle"
+        },
+        {
+          "line_key": "verse",
+          "sequence": 11,
+          "line_type": "LITURGY",
+          "label": "Verse"
+        },
+        {
+          "line_key": "holy-gospel",
+          "sequence": 12,
+          "line_type": "READING",
+          "label": "Holy Gospel"
+        },
+        {
+          "line_key": "creed",
+          "sequence": 13,
+          "line_type": "LITURGY",
+          "label": "Creed"
+        },
+        {
+          "line_key": "hymn-of-the-day",
+          "sequence": 14,
+          "line_type": "HYMN",
+          "label": "Hymn of the Day",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn-of-the-day",
+          "reference": "Hymn of the Day"
+        },
+        {
+          "line_key": "sermon",
+          "sequence": 15,
+          "line_type": "SERMON",
+          "label": "Sermon"
+        },
+        {
+          "line_key": "offering",
+          "sequence": 16,
+          "line_type": "OFFERING",
+          "label": "Offering"
+        },
+        {
+          "line_key": "prayer-of-the-church",
+          "sequence": 17,
+          "line_type": "LITURGY",
+          "label": "Prayer of the Church"
+        },
+        {
+          "line_key": "service-of-the-sacrament",
+          "sequence": 18,
+          "line_type": "COMMUNION",
+          "label": "Service of the Sacrament",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "preface",
+          "sequence": 19,
+          "line_type": "LITURGY",
+          "label": "Preface"
+        },
+        {
+          "line_key": "sanctus",
+          "sequence": 20,
+          "line_type": "LITURGY",
+          "label": "Sanctus"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 21,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "words-of-institution",
+          "sequence": 22,
+          "line_type": "LITURGY",
+          "label": "Words of Institution"
+        },
+        {
+          "line_key": "pax-domini",
+          "sequence": 23,
+          "line_type": "LITURGY",
+          "label": "Pax Domini"
+        },
+        {
+          "line_key": "agnus-dei",
+          "sequence": 24,
+          "line_type": "LITURGY",
+          "label": "Agnus Dei"
+        },
+        {
+          "line_key": "distribution",
+          "sequence": 25,
+          "line_type": "COMMUNION",
+          "label": "Distribution",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "distribution-hymn",
+          "sequence": 26,
+          "line_type": "HYMN",
+          "label": "Distribution Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "distribution-hymn",
+          "reference": "Distribution Hymn",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "distribution-hymn-2",
+          "sequence": 27,
+          "line_type": "HYMN",
+          "label": "Distribution Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "distribution-hymn",
+          "reference": "Distribution Hymn",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "distribution-hymn-3",
+          "sequence": 28,
+          "line_type": "HYMN",
+          "label": "Distribution Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "distribution-hymn",
+          "reference": "Distribution Hymn",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "post-communion-canticle",
+          "sequence": 29,
+          "line_type": "LITURGY",
+          "label": "Post-Communion Canticle"
+        },
+        {
+          "line_key": "post-communion-collect",
+          "sequence": 30,
+          "line_type": "LITURGY",
+          "label": "Post-Communion Collect"
+        },
+        {
+          "line_key": "benediction",
+          "sequence": 31,
+          "line_type": "LITURGY",
+          "label": "Benediction"
+        },
+        {
+          "line_key": "closing-hymn",
+          "sequence": 32,
+          "line_type": "HYMN",
+          "label": "Closing Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "closing-hymn",
+          "reference": "Closing Hymn"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-divine-service-setting-two",
+      "name": "LSB Divine Service, Setting Two",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "preparation",
+          "sequence": 1,
+          "line_type": "HEADING",
+          "label": "Preparation",
+          "reference": "LSB p. 167"
+        },
+        {
+          "line_key": "hymn-of-invocation",
+          "sequence": 2,
+          "line_type": "HYMN",
+          "label": "Hymn of Invocation",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn-of-invocation",
+          "reference": "Hymn of Invocation"
+        },
+        {
+          "line_key": "confession-and-absolution",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Confession and Absolution"
+        },
+        {
+          "line_key": "service-of-the-word",
+          "sequence": 4,
+          "line_type": "HEADING",
+          "label": "Service of the Word"
+        },
+        {
+          "line_key": "introit-or-psalm",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Introit or Psalm"
+        },
+        {
+          "line_key": "kyrie",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Kyrie"
+        },
+        {
+          "line_key": "hymn-of-praise",
+          "sequence": 7,
+          "line_type": "HYMN",
+          "label": "Hymn of Praise",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn-of-praise",
+          "reference": "Hymn of Praise"
+        },
+        {
+          "line_key": "salutation-and-collect-of-the-day",
+          "sequence": 8,
+          "line_type": "LITURGY",
+          "label": "Salutation and Collect of the Day"
+        },
+        {
+          "line_key": "old-testament-reading",
+          "sequence": 9,
+          "line_type": "READING",
+          "label": "Old Testament Reading"
+        },
+        {
+          "line_key": "epistle",
+          "sequence": 10,
+          "line_type": "READING",
+          "label": "Epistle"
+        },
+        {
+          "line_key": "verse",
+          "sequence": 11,
+          "line_type": "LITURGY",
+          "label": "Verse"
+        },
+        {
+          "line_key": "holy-gospel",
+          "sequence": 12,
+          "line_type": "READING",
+          "label": "Holy Gospel"
+        },
+        {
+          "line_key": "creed",
+          "sequence": 13,
+          "line_type": "LITURGY",
+          "label": "Creed"
+        },
+        {
+          "line_key": "hymn-of-the-day",
+          "sequence": 14,
+          "line_type": "HYMN",
+          "label": "Hymn of the Day",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn-of-the-day",
+          "reference": "Hymn of the Day"
+        },
+        {
+          "line_key": "sermon",
+          "sequence": 15,
+          "line_type": "SERMON",
+          "label": "Sermon"
+        },
+        {
+          "line_key": "offering",
+          "sequence": 16,
+          "line_type": "OFFERING",
+          "label": "Offering"
+        },
+        {
+          "line_key": "prayer-of-the-church",
+          "sequence": 17,
+          "line_type": "LITURGY",
+          "label": "Prayer of the Church"
+        },
+        {
+          "line_key": "service-of-the-sacrament",
+          "sequence": 18,
+          "line_type": "COMMUNION",
+          "label": "Service of the Sacrament",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "preface",
+          "sequence": 19,
+          "line_type": "LITURGY",
+          "label": "Preface"
+        },
+        {
+          "line_key": "sanctus",
+          "sequence": 20,
+          "line_type": "LITURGY",
+          "label": "Sanctus"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 21,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "words-of-institution",
+          "sequence": 22,
+          "line_type": "LITURGY",
+          "label": "Words of Institution"
+        },
+        {
+          "line_key": "pax-domini",
+          "sequence": 23,
+          "line_type": "LITURGY",
+          "label": "Pax Domini"
+        },
+        {
+          "line_key": "agnus-dei",
+          "sequence": 24,
+          "line_type": "LITURGY",
+          "label": "Agnus Dei"
+        },
+        {
+          "line_key": "distribution",
+          "sequence": 25,
+          "line_type": "COMMUNION",
+          "label": "Distribution",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "distribution-hymn",
+          "sequence": 26,
+          "line_type": "HYMN",
+          "label": "Distribution Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "distribution-hymn",
+          "reference": "Distribution Hymn",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "distribution-hymn-2",
+          "sequence": 27,
+          "line_type": "HYMN",
+          "label": "Distribution Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "distribution-hymn",
+          "reference": "Distribution Hymn",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "distribution-hymn-3",
+          "sequence": 28,
+          "line_type": "HYMN",
+          "label": "Distribution Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "distribution-hymn",
+          "reference": "Distribution Hymn",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "post-communion-canticle",
+          "sequence": 29,
+          "line_type": "LITURGY",
+          "label": "Post-Communion Canticle"
+        },
+        {
+          "line_key": "post-communion-collect",
+          "sequence": 30,
+          "line_type": "LITURGY",
+          "label": "Post-Communion Collect"
+        },
+        {
+          "line_key": "benediction",
+          "sequence": 31,
+          "line_type": "LITURGY",
+          "label": "Benediction"
+        },
+        {
+          "line_key": "closing-hymn",
+          "sequence": 32,
+          "line_type": "HYMN",
+          "label": "Closing Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "closing-hymn",
+          "reference": "Closing Hymn"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-divine-service-setting-three",
+      "name": "LSB Divine Service, Setting Three",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "preparation",
+          "sequence": 1,
+          "line_type": "HEADING",
+          "label": "Preparation",
+          "reference": "LSB p. 184"
+        },
+        {
+          "line_key": "hymn-of-invocation",
+          "sequence": 2,
+          "line_type": "HYMN",
+          "label": "Hymn of Invocation",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn-of-invocation",
+          "reference": "Hymn of Invocation"
+        },
+        {
+          "line_key": "confession-and-absolution",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Confession and Absolution"
+        },
+        {
+          "line_key": "service-of-the-word",
+          "sequence": 4,
+          "line_type": "HEADING",
+          "label": "Service of the Word"
+        },
+        {
+          "line_key": "introit-or-psalm",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Introit or Psalm"
+        },
+        {
+          "line_key": "kyrie",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Kyrie"
+        },
+        {
+          "line_key": "hymn-of-praise",
+          "sequence": 7,
+          "line_type": "HYMN",
+          "label": "Hymn of Praise",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn-of-praise",
+          "reference": "Hymn of Praise"
+        },
+        {
+          "line_key": "salutation-and-collect-of-the-day",
+          "sequence": 8,
+          "line_type": "LITURGY",
+          "label": "Salutation and Collect of the Day"
+        },
+        {
+          "line_key": "old-testament-reading",
+          "sequence": 9,
+          "line_type": "READING",
+          "label": "Old Testament Reading"
+        },
+        {
+          "line_key": "epistle",
+          "sequence": 10,
+          "line_type": "READING",
+          "label": "Epistle"
+        },
+        {
+          "line_key": "verse",
+          "sequence": 11,
+          "line_type": "LITURGY",
+          "label": "Verse"
+        },
+        {
+          "line_key": "holy-gospel",
+          "sequence": 12,
+          "line_type": "READING",
+          "label": "Holy Gospel"
+        },
+        {
+          "line_key": "creed",
+          "sequence": 13,
+          "line_type": "LITURGY",
+          "label": "Creed"
+        },
+        {
+          "line_key": "hymn-of-the-day",
+          "sequence": 14,
+          "line_type": "HYMN",
+          "label": "Hymn of the Day",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn-of-the-day",
+          "reference": "Hymn of the Day"
+        },
+        {
+          "line_key": "sermon",
+          "sequence": 15,
+          "line_type": "SERMON",
+          "label": "Sermon"
+        },
+        {
+          "line_key": "offering",
+          "sequence": 16,
+          "line_type": "OFFERING",
+          "label": "Offering"
+        },
+        {
+          "line_key": "prayer-of-the-church",
+          "sequence": 17,
+          "line_type": "LITURGY",
+          "label": "Prayer of the Church"
+        },
+        {
+          "line_key": "service-of-the-sacrament",
+          "sequence": 18,
+          "line_type": "COMMUNION",
+          "label": "Service of the Sacrament",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "preface",
+          "sequence": 19,
+          "line_type": "LITURGY",
+          "label": "Preface"
+        },
+        {
+          "line_key": "sanctus",
+          "sequence": 20,
+          "line_type": "LITURGY",
+          "label": "Sanctus"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 21,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "words-of-institution",
+          "sequence": 22,
+          "line_type": "LITURGY",
+          "label": "Words of Institution"
+        },
+        {
+          "line_key": "pax-domini",
+          "sequence": 23,
+          "line_type": "LITURGY",
+          "label": "Pax Domini"
+        },
+        {
+          "line_key": "agnus-dei",
+          "sequence": 24,
+          "line_type": "LITURGY",
+          "label": "Agnus Dei"
+        },
+        {
+          "line_key": "distribution",
+          "sequence": 25,
+          "line_type": "COMMUNION",
+          "label": "Distribution",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "distribution-hymn",
+          "sequence": 26,
+          "line_type": "HYMN",
+          "label": "Distribution Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "distribution-hymn",
+          "reference": "Distribution Hymn",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "distribution-hymn-2",
+          "sequence": 27,
+          "line_type": "HYMN",
+          "label": "Distribution Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "distribution-hymn",
+          "reference": "Distribution Hymn",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "distribution-hymn-3",
+          "sequence": 28,
+          "line_type": "HYMN",
+          "label": "Distribution Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "distribution-hymn",
+          "reference": "Distribution Hymn",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "post-communion-canticle",
+          "sequence": 29,
+          "line_type": "LITURGY",
+          "label": "Post-Communion Canticle"
+        },
+        {
+          "line_key": "post-communion-collect",
+          "sequence": 30,
+          "line_type": "LITURGY",
+          "label": "Post-Communion Collect"
+        },
+        {
+          "line_key": "benediction",
+          "sequence": 31,
+          "line_type": "LITURGY",
+          "label": "Benediction"
+        },
+        {
+          "line_key": "closing-hymn",
+          "sequence": 32,
+          "line_type": "HYMN",
+          "label": "Closing Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "closing-hymn",
+          "reference": "Closing Hymn"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-divine-service-setting-four",
+      "name": "LSB Divine Service, Setting Four",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "preparation",
+          "sequence": 1,
+          "line_type": "HEADING",
+          "label": "Preparation",
+          "reference": "LSB p. 203"
+        },
+        {
+          "line_key": "hymn-of-invocation",
+          "sequence": 2,
+          "line_type": "HYMN",
+          "label": "Hymn of Invocation",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn-of-invocation",
+          "reference": "Hymn of Invocation"
+        },
+        {
+          "line_key": "confession-and-absolution",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Confession and Absolution"
+        },
+        {
+          "line_key": "service-of-the-word",
+          "sequence": 4,
+          "line_type": "HEADING",
+          "label": "Service of the Word"
+        },
+        {
+          "line_key": "introit-or-psalm",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Introit or Psalm"
+        },
+        {
+          "line_key": "kyrie",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Kyrie"
+        },
+        {
+          "line_key": "hymn-of-praise",
+          "sequence": 7,
+          "line_type": "HYMN",
+          "label": "Hymn of Praise",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn-of-praise",
+          "reference": "Hymn of Praise"
+        },
+        {
+          "line_key": "salutation-and-collect-of-the-day",
+          "sequence": 8,
+          "line_type": "LITURGY",
+          "label": "Salutation and Collect of the Day"
+        },
+        {
+          "line_key": "old-testament-reading",
+          "sequence": 9,
+          "line_type": "READING",
+          "label": "Old Testament Reading"
+        },
+        {
+          "line_key": "epistle",
+          "sequence": 10,
+          "line_type": "READING",
+          "label": "Epistle"
+        },
+        {
+          "line_key": "verse",
+          "sequence": 11,
+          "line_type": "LITURGY",
+          "label": "Verse"
+        },
+        {
+          "line_key": "holy-gospel",
+          "sequence": 12,
+          "line_type": "READING",
+          "label": "Holy Gospel"
+        },
+        {
+          "line_key": "creed",
+          "sequence": 13,
+          "line_type": "LITURGY",
+          "label": "Creed"
+        },
+        {
+          "line_key": "hymn-of-the-day",
+          "sequence": 14,
+          "line_type": "HYMN",
+          "label": "Hymn of the Day",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn-of-the-day",
+          "reference": "Hymn of the Day"
+        },
+        {
+          "line_key": "sermon",
+          "sequence": 15,
+          "line_type": "SERMON",
+          "label": "Sermon"
+        },
+        {
+          "line_key": "offering",
+          "sequence": 16,
+          "line_type": "OFFERING",
+          "label": "Offering"
+        },
+        {
+          "line_key": "prayer-of-the-church",
+          "sequence": 17,
+          "line_type": "LITURGY",
+          "label": "Prayer of the Church"
+        },
+        {
+          "line_key": "service-of-the-sacrament",
+          "sequence": 18,
+          "line_type": "COMMUNION",
+          "label": "Service of the Sacrament",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "preface",
+          "sequence": 19,
+          "line_type": "LITURGY",
+          "label": "Preface"
+        },
+        {
+          "line_key": "sanctus",
+          "sequence": 20,
+          "line_type": "LITURGY",
+          "label": "Sanctus"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 21,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "words-of-institution",
+          "sequence": 22,
+          "line_type": "LITURGY",
+          "label": "Words of Institution"
+        },
+        {
+          "line_key": "pax-domini",
+          "sequence": 23,
+          "line_type": "LITURGY",
+          "label": "Pax Domini"
+        },
+        {
+          "line_key": "agnus-dei",
+          "sequence": 24,
+          "line_type": "LITURGY",
+          "label": "Agnus Dei"
+        },
+        {
+          "line_key": "distribution",
+          "sequence": 25,
+          "line_type": "COMMUNION",
+          "label": "Distribution",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "distribution-hymn",
+          "sequence": 26,
+          "line_type": "HYMN",
+          "label": "Distribution Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "distribution-hymn",
+          "reference": "Distribution Hymn",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "distribution-hymn-2",
+          "sequence": 27,
+          "line_type": "HYMN",
+          "label": "Distribution Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "distribution-hymn",
+          "reference": "Distribution Hymn",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "distribution-hymn-3",
+          "sequence": 28,
+          "line_type": "HYMN",
+          "label": "Distribution Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "distribution-hymn",
+          "reference": "Distribution Hymn",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "post-communion-canticle",
+          "sequence": 29,
+          "line_type": "LITURGY",
+          "label": "Post-Communion Canticle"
+        },
+        {
+          "line_key": "post-communion-collect",
+          "sequence": 30,
+          "line_type": "LITURGY",
+          "label": "Post-Communion Collect"
+        },
+        {
+          "line_key": "benediction",
+          "sequence": 31,
+          "line_type": "LITURGY",
+          "label": "Benediction"
+        },
+        {
+          "line_key": "closing-hymn",
+          "sequence": 32,
+          "line_type": "HYMN",
+          "label": "Closing Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "closing-hymn",
+          "reference": "Closing Hymn"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-divine-service-setting-five",
+      "name": "LSB Divine Service, Setting Five",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "preparation",
+          "sequence": 1,
+          "line_type": "HEADING",
+          "label": "Preparation",
+          "reference": "LSB p. 213"
+        },
+        {
+          "line_key": "hymn-of-invocation",
+          "sequence": 2,
+          "line_type": "HYMN",
+          "label": "Hymn of Invocation",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn-of-invocation",
+          "reference": "Hymn of Invocation"
+        },
+        {
+          "line_key": "confession-and-absolution",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Confession and Absolution"
+        },
+        {
+          "line_key": "service-of-the-word",
+          "sequence": 4,
+          "line_type": "HEADING",
+          "label": "Service of the Word"
+        },
+        {
+          "line_key": "introit-or-psalm",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Introit or Psalm"
+        },
+        {
+          "line_key": "kyrie",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Kyrie"
+        },
+        {
+          "line_key": "hymn-of-praise",
+          "sequence": 7,
+          "line_type": "HYMN",
+          "label": "Hymn of Praise",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn-of-praise",
+          "reference": "Hymn of Praise"
+        },
+        {
+          "line_key": "salutation-and-collect-of-the-day",
+          "sequence": 8,
+          "line_type": "LITURGY",
+          "label": "Salutation and Collect of the Day"
+        },
+        {
+          "line_key": "old-testament-reading",
+          "sequence": 9,
+          "line_type": "READING",
+          "label": "Old Testament Reading"
+        },
+        {
+          "line_key": "epistle",
+          "sequence": 10,
+          "line_type": "READING",
+          "label": "Epistle"
+        },
+        {
+          "line_key": "verse",
+          "sequence": 11,
+          "line_type": "LITURGY",
+          "label": "Verse"
+        },
+        {
+          "line_key": "holy-gospel",
+          "sequence": 12,
+          "line_type": "READING",
+          "label": "Holy Gospel"
+        },
+        {
+          "line_key": "creed",
+          "sequence": 13,
+          "line_type": "LITURGY",
+          "label": "Creed"
+        },
+        {
+          "line_key": "hymn-of-the-day",
+          "sequence": 14,
+          "line_type": "HYMN",
+          "label": "Hymn of the Day",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn-of-the-day",
+          "reference": "Hymn of the Day"
+        },
+        {
+          "line_key": "sermon",
+          "sequence": 15,
+          "line_type": "SERMON",
+          "label": "Sermon"
+        },
+        {
+          "line_key": "offering",
+          "sequence": 16,
+          "line_type": "OFFERING",
+          "label": "Offering"
+        },
+        {
+          "line_key": "prayer-of-the-church",
+          "sequence": 17,
+          "line_type": "LITURGY",
+          "label": "Prayer of the Church"
+        },
+        {
+          "line_key": "service-of-the-sacrament",
+          "sequence": 18,
+          "line_type": "COMMUNION",
+          "label": "Service of the Sacrament",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "preface",
+          "sequence": 19,
+          "line_type": "LITURGY",
+          "label": "Preface"
+        },
+        {
+          "line_key": "sanctus",
+          "sequence": 20,
+          "line_type": "LITURGY",
+          "label": "Sanctus"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 21,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "words-of-institution",
+          "sequence": 22,
+          "line_type": "LITURGY",
+          "label": "Words of Institution"
+        },
+        {
+          "line_key": "pax-domini",
+          "sequence": 23,
+          "line_type": "LITURGY",
+          "label": "Pax Domini"
+        },
+        {
+          "line_key": "agnus-dei",
+          "sequence": 24,
+          "line_type": "LITURGY",
+          "label": "Agnus Dei"
+        },
+        {
+          "line_key": "distribution",
+          "sequence": 25,
+          "line_type": "COMMUNION",
+          "label": "Distribution",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "distribution-hymn",
+          "sequence": 26,
+          "line_type": "HYMN",
+          "label": "Distribution Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "distribution-hymn",
+          "reference": "Distribution Hymn",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "distribution-hymn-2",
+          "sequence": 27,
+          "line_type": "HYMN",
+          "label": "Distribution Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "distribution-hymn",
+          "reference": "Distribution Hymn",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "distribution-hymn-3",
+          "sequence": 28,
+          "line_type": "HYMN",
+          "label": "Distribution Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "distribution-hymn",
+          "reference": "Distribution Hymn",
+          "condition": "COMMUNION"
+        },
+        {
+          "line_key": "post-communion-canticle",
+          "sequence": 29,
+          "line_type": "LITURGY",
+          "label": "Post-Communion Canticle"
+        },
+        {
+          "line_key": "post-communion-collect",
+          "sequence": 30,
+          "line_type": "LITURGY",
+          "label": "Post-Communion Collect"
+        },
+        {
+          "line_key": "benediction",
+          "sequence": 31,
+          "line_type": "LITURGY",
+          "label": "Benediction"
+        },
+        {
+          "line_key": "closing-hymn",
+          "sequence": 32,
+          "line_type": "HYMN",
+          "label": "Closing Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "closing-hymn",
+          "reference": "Closing Hymn"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-matins",
+      "name": "LSB Matins",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "opening",
+          "sequence": 1,
+          "line_type": "HEADING",
+          "label": "Opening",
+          "reference": "LSB p. 219"
+        },
+        {
+          "line_key": "invitatory",
+          "sequence": 2,
+          "line_type": "LITURGY",
+          "label": "Invitatory"
+        },
+        {
+          "line_key": "venite",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Venite"
+        },
+        {
+          "line_key": "psalmody",
+          "sequence": 4,
+          "line_type": "LITURGY",
+          "label": "Psalmody"
+        },
+        {
+          "line_key": "office-hymn",
+          "sequence": 5,
+          "line_type": "HYMN",
+          "label": "Office Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "office-hymn",
+          "reference": "Office Hymn"
+        },
+        {
+          "line_key": "reading",
+          "sequence": 6,
+          "line_type": "READING",
+          "label": "Reading"
+        },
+        {
+          "line_key": "responsory",
+          "sequence": 7,
+          "line_type": "LITURGY",
+          "label": "Responsory"
+        },
+        {
+          "line_key": "sermon",
+          "sequence": 8,
+          "line_type": "SERMON",
+          "label": "Sermon"
+        },
+        {
+          "line_key": "canticle",
+          "sequence": 9,
+          "line_type": "LITURGY",
+          "label": "Canticle"
+        },
+        {
+          "line_key": "prayer",
+          "sequence": 10,
+          "line_type": "LITURGY",
+          "label": "Prayer"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 11,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "collects",
+          "sequence": 12,
+          "line_type": "LITURGY",
+          "label": "Collects"
+        },
+        {
+          "line_key": "benedicamus",
+          "sequence": 13,
+          "line_type": "LITURGY",
+          "label": "Benedicamus"
+        },
+        {
+          "line_key": "benediction",
+          "sequence": 14,
+          "line_type": "LITURGY",
+          "label": "Benediction"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-vespers",
+      "name": "LSB Vespers",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "opening",
+          "sequence": 1,
+          "line_type": "HEADING",
+          "label": "Opening",
+          "reference": "LSB p. 229"
+        },
+        {
+          "line_key": "psalmody",
+          "sequence": 2,
+          "line_type": "LITURGY",
+          "label": "Psalmody"
+        },
+        {
+          "line_key": "office-hymn",
+          "sequence": 3,
+          "line_type": "HYMN",
+          "label": "Office Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "office-hymn",
+          "reference": "Office Hymn"
+        },
+        {
+          "line_key": "reading",
+          "sequence": 4,
+          "line_type": "READING",
+          "label": "Reading"
+        },
+        {
+          "line_key": "responsory",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Responsory"
+        },
+        {
+          "line_key": "sermon",
+          "sequence": 6,
+          "line_type": "SERMON",
+          "label": "Sermon"
+        },
+        {
+          "line_key": "magnificat",
+          "sequence": 7,
+          "line_type": "LITURGY",
+          "label": "Magnificat"
+        },
+        {
+          "line_key": "prayer",
+          "sequence": 8,
+          "line_type": "LITURGY",
+          "label": "Prayer"
+        },
+        {
+          "line_key": "kyrie",
+          "sequence": 9,
+          "line_type": "LITURGY",
+          "label": "Kyrie"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 10,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "collects",
+          "sequence": 11,
+          "line_type": "LITURGY",
+          "label": "Collects"
+        },
+        {
+          "line_key": "benedicamus",
+          "sequence": 12,
+          "line_type": "LITURGY",
+          "label": "Benedicamus"
+        },
+        {
+          "line_key": "benediction",
+          "sequence": 13,
+          "line_type": "LITURGY",
+          "label": "Benediction"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-morning-prayer",
+      "name": "LSB Morning Prayer",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "opening",
+          "sequence": 1,
+          "line_type": "HEADING",
+          "label": "Opening",
+          "reference": "LSB p. 235"
+        },
+        {
+          "line_key": "confession-and-absolution",
+          "sequence": 2,
+          "line_type": "LITURGY",
+          "label": "Confession and Absolution"
+        },
+        {
+          "line_key": "psalmody",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Psalmody"
+        },
+        {
+          "line_key": "office-hymn",
+          "sequence": 4,
+          "line_type": "HYMN",
+          "label": "Office Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "office-hymn",
+          "reference": "Office Hymn"
+        },
+        {
+          "line_key": "reading",
+          "sequence": 5,
+          "line_type": "READING",
+          "label": "Reading"
+        },
+        {
+          "line_key": "responsory",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Responsory"
+        },
+        {
+          "line_key": "sermon",
+          "sequence": 7,
+          "line_type": "SERMON",
+          "label": "Sermon"
+        },
+        {
+          "line_key": "benedictus",
+          "sequence": 8,
+          "line_type": "LITURGY",
+          "label": "Benedictus"
+        },
+        {
+          "line_key": "prayer",
+          "sequence": 9,
+          "line_type": "LITURGY",
+          "label": "Prayer"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 10,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "collects",
+          "sequence": 11,
+          "line_type": "LITURGY",
+          "label": "Collects"
+        },
+        {
+          "line_key": "benedicamus",
+          "sequence": 12,
+          "line_type": "LITURGY",
+          "label": "Benedicamus"
+        },
+        {
+          "line_key": "benediction",
+          "sequence": 13,
+          "line_type": "LITURGY",
+          "label": "Benediction"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-evening-prayer",
+      "name": "LSB Evening Prayer",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "opening",
+          "sequence": 1,
+          "line_type": "HEADING",
+          "label": "Opening",
+          "reference": "LSB p. 243"
+        },
+        {
+          "line_key": "service-of-light",
+          "sequence": 2,
+          "line_type": "HEADING",
+          "label": "Service of Light"
+        },
+        {
+          "line_key": "psalmody",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Psalmody"
+        },
+        {
+          "line_key": "office-hymn",
+          "sequence": 4,
+          "line_type": "HYMN",
+          "label": "Office Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "office-hymn",
+          "reference": "Office Hymn"
+        },
+        {
+          "line_key": "reading",
+          "sequence": 5,
+          "line_type": "READING",
+          "label": "Reading"
+        },
+        {
+          "line_key": "responsory",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Responsory"
+        },
+        {
+          "line_key": "sermon",
+          "sequence": 7,
+          "line_type": "SERMON",
+          "label": "Sermon"
+        },
+        {
+          "line_key": "magnificat",
+          "sequence": 8,
+          "line_type": "LITURGY",
+          "label": "Magnificat"
+        },
+        {
+          "line_key": "prayer",
+          "sequence": 9,
+          "line_type": "LITURGY",
+          "label": "Prayer"
+        },
+        {
+          "line_key": "litany",
+          "sequence": 10,
+          "line_type": "LITURGY",
+          "label": "Litany"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 11,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "collects",
+          "sequence": 12,
+          "line_type": "LITURGY",
+          "label": "Collects"
+        },
+        {
+          "line_key": "benedicamus",
+          "sequence": 13,
+          "line_type": "LITURGY",
+          "label": "Benedicamus"
+        },
+        {
+          "line_key": "benediction",
+          "sequence": 14,
+          "line_type": "LITURGY",
+          "label": "Benediction"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-compline",
+      "name": "LSB Compline",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "opening",
+          "sequence": 1,
+          "line_type": "HEADING",
+          "label": "Opening",
+          "reference": "LSB p. 253"
+        },
+        {
+          "line_key": "confession-and-absolution",
+          "sequence": 2,
+          "line_type": "LITURGY",
+          "label": "Confession and Absolution"
+        },
+        {
+          "line_key": "psalmody",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Psalmody"
+        },
+        {
+          "line_key": "office-hymn",
+          "sequence": 4,
+          "line_type": "HYMN",
+          "label": "Office Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "office-hymn",
+          "reference": "Office Hymn"
+        },
+        {
+          "line_key": "reading",
+          "sequence": 5,
+          "line_type": "READING",
+          "label": "Reading"
+        },
+        {
+          "line_key": "responsory",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Responsory"
+        },
+        {
+          "line_key": "prayer",
+          "sequence": 7,
+          "line_type": "LITURGY",
+          "label": "Prayer"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 8,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "collects",
+          "sequence": 9,
+          "line_type": "LITURGY",
+          "label": "Collects"
+        },
+        {
+          "line_key": "nunc-dimittis",
+          "sequence": 10,
+          "line_type": "LITURGY",
+          "label": "Nunc Dimittis"
+        },
+        {
+          "line_key": "benediction",
+          "sequence": 11,
+          "line_type": "LITURGY",
+          "label": "Benediction"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-service-of-prayer-and-preaching",
+      "name": "LSB Service of Prayer and Preaching",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "opening-hymn",
+          "sequence": 1,
+          "line_type": "HYMN",
+          "label": "Opening Hymn",
+          "reference": "Opening Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "opening-hymn"
+        },
+        {
+          "line_key": "opening",
+          "sequence": 2,
+          "line_type": "HEADING",
+          "label": "Opening"
+        },
+        {
+          "line_key": "old-testament-canticle",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Old Testament Canticle"
+        },
+        {
+          "line_key": "reading",
+          "sequence": 4,
+          "line_type": "READING",
+          "label": "Reading"
+        },
+        {
+          "line_key": "responsory",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Responsory"
+        },
+        {
+          "line_key": "catechism",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Catechism"
+        },
+        {
+          "line_key": "sermon",
+          "sequence": 7,
+          "line_type": "SERMON",
+          "label": "Sermon"
+        },
+        {
+          "line_key": "hymn",
+          "sequence": 8,
+          "line_type": "HYMN",
+          "label": "Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn",
+          "reference": "Hymn"
+        },
+        {
+          "line_key": "prayer",
+          "sequence": 9,
+          "line_type": "LITURGY",
+          "label": "Prayer"
+        },
+        {
+          "line_key": "litany",
+          "sequence": 10,
+          "line_type": "LITURGY",
+          "label": "Litany"
+        },
+        {
+          "line_key": "collects",
+          "sequence": 11,
+          "line_type": "LITURGY",
+          "label": "Collects"
+        },
+        {
+          "line_key": "new-testament-canticle",
+          "sequence": 12,
+          "line_type": "LITURGY",
+          "label": "New Testament Canticle"
+        },
+        {
+          "line_key": "benediction",
+          "sequence": 13,
+          "line_type": "LITURGY",
+          "label": "Benediction"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-responsive-prayer-1",
+      "name": "LSB Responsive Prayer 1—Suffrages",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "opening",
+          "sequence": 1,
+          "line_type": "HEADING",
+          "label": "Opening",
+          "reference": "LSB p. 282"
+        },
+        {
+          "line_key": "creed",
+          "sequence": 2,
+          "line_type": "LITURGY",
+          "label": "Creed"
+        },
+        {
+          "line_key": "versicles",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Versicles"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 4,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "collects",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Collects"
+        },
+        {
+          "line_key": "morning-or-evening-prayer",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Morning or Evening Prayer"
+        },
+        {
+          "line_key": "benedicamus",
+          "sequence": 7,
+          "line_type": "LITURGY",
+          "label": "Benedicamus"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-responsive-prayer-2",
+      "name": "LSB Responsive Prayer 2",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "opening",
+          "sequence": 1,
+          "line_type": "HEADING",
+          "label": "Opening",
+          "reference": "LSB p. 285"
+        },
+        {
+          "line_key": "reading",
+          "sequence": 2,
+          "line_type": "READING",
+          "label": "Reading"
+        },
+        {
+          "line_key": "responsory",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Responsory"
+        },
+        {
+          "line_key": "creed",
+          "sequence": 4,
+          "line_type": "LITURGY",
+          "label": "Creed"
+        },
+        {
+          "line_key": "litany",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Litany"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "collects",
+          "sequence": 7,
+          "line_type": "LITURGY",
+          "label": "Collects"
+        },
+        {
+          "line_key": "benedicamus",
+          "sequence": 8,
+          "line_type": "LITURGY",
+          "label": "Benedicamus"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-the-litany",
+      "name": "LSB The Litany",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "opening-hymn",
+          "sequence": 1,
+          "line_type": "HYMN",
+          "label": "Opening Hymn",
+          "reference": "Opening Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "opening-hymn"
+        },
+        {
+          "line_key": "invocation",
+          "sequence": 2,
+          "line_type": "LITURGY",
+          "label": "Invocation"
+        },
+        {
+          "line_key": "the-litany",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "The Litany"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 4,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "collect",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Collect"
+        },
+        {
+          "line_key": "closing-hymn",
+          "sequence": 6,
+          "line_type": "HYMN",
+          "label": "Closing Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "closing-hymn",
+          "reference": "Closing Hymn"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-corporate-confession-and-absolution",
+      "name": "LSB Corporate Confession and Absolution",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "opening-hymn",
+          "sequence": 1,
+          "line_type": "HYMN",
+          "label": "Opening Hymn",
+          "reference": "Opening Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "opening-hymn"
+        },
+        {
+          "line_key": "invocation",
+          "sequence": 2,
+          "line_type": "LITURGY",
+          "label": "Invocation"
+        },
+        {
+          "line_key": "exhortation",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Exhortation"
+        },
+        {
+          "line_key": "confession",
+          "sequence": 4,
+          "line_type": "LITURGY",
+          "label": "Confession"
+        },
+        {
+          "line_key": "absolution",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Absolution"
+        },
+        {
+          "line_key": "thanksgiving",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Thanksgiving"
+        },
+        {
+          "line_key": "closing-hymn",
+          "sequence": 7,
+          "line_type": "HYMN",
+          "label": "Closing Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "closing-hymn",
+          "reference": "Closing Hymn"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-holy-baptism",
+      "name": "LSB Holy Baptism",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "opening-hymn",
+          "sequence": 1,
+          "line_type": "HYMN",
+          "label": "Opening Hymn",
+          "reference": "Opening Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "opening-hymn"
+        },
+        {
+          "line_key": "invocation",
+          "sequence": 2,
+          "line_type": "LITURGY",
+          "label": "Invocation"
+        },
+        {
+          "line_key": "presentation",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Presentation"
+        },
+        {
+          "line_key": "readings",
+          "sequence": 4,
+          "line_type": "READING",
+          "label": "Readings"
+        },
+        {
+          "line_key": "address",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Address"
+        },
+        {
+          "line_key": "renunciation",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Renunciation"
+        },
+        {
+          "line_key": "creed",
+          "sequence": 7,
+          "line_type": "LITURGY",
+          "label": "Creed"
+        },
+        {
+          "line_key": "baptism",
+          "sequence": 8,
+          "line_type": "LITURGY",
+          "label": "Baptism"
+        },
+        {
+          "line_key": "blessing",
+          "sequence": 9,
+          "line_type": "LITURGY",
+          "label": "Blessing"
+        },
+        {
+          "line_key": "prayer",
+          "sequence": 10,
+          "line_type": "LITURGY",
+          "label": "Prayer"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 11,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "closing-hymn",
+          "sequence": 12,
+          "line_type": "HYMN",
+          "label": "Closing Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "closing-hymn",
+          "reference": "Closing Hymn"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-holy-baptism-alternate",
+      "name": "LSB Holy Baptism—Alternate Form",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "opening-hymn",
+          "sequence": 1,
+          "line_type": "HYMN",
+          "label": "Opening Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "opening-hymn",
+          "reference": "Opening Hymn"
+        },
+        {
+          "line_key": "invocation",
+          "sequence": 2,
+          "line_type": "LITURGY",
+          "label": "Invocation"
+        },
+        {
+          "line_key": "presentation",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Presentation"
+        },
+        {
+          "line_key": "readings",
+          "sequence": 4,
+          "line_type": "READING",
+          "label": "Readings"
+        },
+        {
+          "line_key": "address",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Address"
+        },
+        {
+          "line_key": "renunciation",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Renunciation"
+        },
+        {
+          "line_key": "creed",
+          "sequence": 7,
+          "line_type": "LITURGY",
+          "label": "Creed"
+        },
+        {
+          "line_key": "baptism",
+          "sequence": 8,
+          "line_type": "LITURGY",
+          "label": "Baptism"
+        },
+        {
+          "line_key": "blessing",
+          "sequence": 9,
+          "line_type": "LITURGY",
+          "label": "Blessing"
+        },
+        {
+          "line_key": "prayer",
+          "sequence": 10,
+          "line_type": "LITURGY",
+          "label": "Prayer"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 11,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "closing-hymn",
+          "sequence": 12,
+          "line_type": "HYMN",
+          "label": "Closing Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "closing-hymn",
+          "reference": "Closing Hymn"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-confirmation",
+      "name": "LSB Confirmation",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "opening-hymn",
+          "sequence": 1,
+          "line_type": "HYMN",
+          "label": "Opening Hymn",
+          "reference": "Opening Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "opening-hymn"
+        },
+        {
+          "line_key": "presentation",
+          "sequence": 2,
+          "line_type": "LITURGY",
+          "label": "Presentation"
+        },
+        {
+          "line_key": "address",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Address"
+        },
+        {
+          "line_key": "creed",
+          "sequence": 4,
+          "line_type": "LITURGY",
+          "label": "Creed"
+        },
+        {
+          "line_key": "questions",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Questions"
+        },
+        {
+          "line_key": "blessing",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Blessing"
+        },
+        {
+          "line_key": "prayer",
+          "sequence": 7,
+          "line_type": "LITURGY",
+          "label": "Prayer"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 8,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "closing-hymn",
+          "sequence": 9,
+          "line_type": "HYMN",
+          "label": "Closing Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "closing-hymn",
+          "reference": "Closing Hymn"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-holy-matrimony",
+      "name": "LSB Holy Matrimony",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "processional-hymn",
+          "sequence": 1,
+          "line_type": "HYMN",
+          "label": "Processional Hymn",
+          "reference": "Processional Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "processional-hymn"
+        },
+        {
+          "line_key": "invocation",
+          "sequence": 2,
+          "line_type": "LITURGY",
+          "label": "Invocation"
+        },
+        {
+          "line_key": "readings",
+          "sequence": 3,
+          "line_type": "READING",
+          "label": "Readings"
+        },
+        {
+          "line_key": "address",
+          "sequence": 4,
+          "line_type": "LITURGY",
+          "label": "Address"
+        },
+        {
+          "line_key": "declaration-of-intent",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Declaration of Intent"
+        },
+        {
+          "line_key": "vows",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Vows"
+        },
+        {
+          "line_key": "giving-of-rings",
+          "sequence": 7,
+          "line_type": "LITURGY",
+          "label": "Giving of Rings"
+        },
+        {
+          "line_key": "blessing",
+          "sequence": 8,
+          "line_type": "LITURGY",
+          "label": "Blessing"
+        },
+        {
+          "line_key": "prayer",
+          "sequence": 9,
+          "line_type": "LITURGY",
+          "label": "Prayer"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 10,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "benediction",
+          "sequence": 11,
+          "line_type": "LITURGY",
+          "label": "Benediction"
+        },
+        {
+          "line_key": "recessional-hymn",
+          "sequence": 12,
+          "line_type": "HYMN",
+          "label": "Recessional Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "recessional-hymn",
+          "reference": "Recessional Hymn"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-entrance-of-the-body",
+      "name": "LSB Entrance of the Body into the Church",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "opening",
+          "sequence": 1,
+          "line_type": "HEADING",
+          "label": "Opening"
+        },
+        {
+          "line_key": "entrance",
+          "sequence": 2,
+          "line_type": "LITURGY",
+          "label": "Entrance"
+        },
+        {
+          "line_key": "processional-hymn",
+          "sequence": 3,
+          "line_type": "HYMN",
+          "label": "Processional Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "processional-hymn",
+          "reference": "Processional Hymn"
+        },
+        {
+          "line_key": "remembrance-of-baptism",
+          "sequence": 4,
+          "line_type": "LITURGY",
+          "label": "Remembrance of Baptism"
+        },
+        {
+          "line_key": "prayer",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Prayer"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-funeral-service",
+      "name": "LSB Funeral Service",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "opening",
+          "sequence": 1,
+          "line_type": "HEADING",
+          "label": "Opening",
+          "reference": "LSB p. 278"
+        },
+        {
+          "line_key": "processional-hymn",
+          "sequence": 2,
+          "line_type": "HYMN",
+          "label": "Processional Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "processional-hymn",
+          "reference": "Processional Hymn"
+        },
+        {
+          "line_key": "remembrance-of-baptism",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Remembrance of Baptism"
+        },
+        {
+          "line_key": "psalm",
+          "sequence": 4,
+          "line_type": "LITURGY",
+          "label": "Psalm"
+        },
+        {
+          "line_key": "kyrie",
+          "sequence": 5,
+          "line_type": "LITURGY",
+          "label": "Kyrie"
+        },
+        {
+          "line_key": "prayer",
+          "sequence": 6,
+          "line_type": "LITURGY",
+          "label": "Prayer"
+        },
+        {
+          "line_key": "old-testament-reading",
+          "sequence": 7,
+          "line_type": "READING",
+          "label": "Old Testament Reading"
+        },
+        {
+          "line_key": "epistle",
+          "sequence": 8,
+          "line_type": "READING",
+          "label": "Epistle"
+        },
+        {
+          "line_key": "holy-gospel",
+          "sequence": 9,
+          "line_type": "READING",
+          "label": "Holy Gospel"
+        },
+        {
+          "line_key": "hymn",
+          "sequence": 10,
+          "line_type": "HYMN",
+          "label": "Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "hymn",
+          "reference": "Hymn"
+        },
+        {
+          "line_key": "sermon",
+          "sequence": 11,
+          "line_type": "SERMON",
+          "label": "Sermon"
+        },
+        {
+          "line_key": "creed",
+          "sequence": 12,
+          "line_type": "LITURGY",
+          "label": "Creed"
+        },
+        {
+          "line_key": "prayer-of-the-church",
+          "sequence": 13,
+          "line_type": "LITURGY",
+          "label": "Prayer of the Church"
+        },
+        {
+          "line_key": "lord-s-prayer",
+          "sequence": 14,
+          "line_type": "LITURGY",
+          "label": "Lord's Prayer"
+        },
+        {
+          "line_key": "nunc-dimittis",
+          "sequence": 15,
+          "line_type": "LITURGY",
+          "label": "Nunc Dimittis"
+        },
+        {
+          "line_key": "commendation",
+          "sequence": 16,
+          "line_type": "LITURGY",
+          "label": "Commendation"
+        },
+        {
+          "line_key": "benediction",
+          "sequence": 17,
+          "line_type": "LITURGY",
+          "label": "Benediction"
+        },
+        {
+          "line_key": "recessional-hymn",
+          "sequence": 18,
+          "line_type": "HYMN",
+          "label": "Recessional Hymn",
+          "value_source": "SUGGESTED_USE",
+          "value_key": "recessional-hymn",
+          "reference": "Recessional Hymn"
+        }
+      ],
+      "required_positions": []
+    },
+    {
+      "template_key": "lsb-individual-confession-and-absolution",
+      "name": "LSB Individual Confession and Absolution",
+      "description": "Metadata-only planning outline; no published service text is included.",
+      "hymnal_package_code": "lsb",
+      "lines": [
+        {
+          "line_key": "opening",
+          "sequence": 1,
+          "line_type": "HEADING",
+          "label": "Opening",
+          "reference": "LSB p. 292"
+        },
+        {
+          "line_key": "confession",
+          "sequence": 2,
+          "line_type": "LITURGY",
+          "label": "Confession"
+        },
+        {
+          "line_key": "absolution",
+          "sequence": 3,
+          "line_type": "LITURGY",
+          "label": "Absolution"
+        },
+        {
+          "line_key": "closing",
+          "sequence": 4,
+          "line_type": "HEADING",
+          "label": "Closing"
+        }
+      ],
+      "required_positions": []
+    }
+  ]
+}

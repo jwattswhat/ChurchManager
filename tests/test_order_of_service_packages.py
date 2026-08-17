@@ -14,6 +14,7 @@ from order_of_service_packages import (
 
 
 ROOT = Path(__file__).parents[1]
+LSB_PACKAGE = ROOT / "packages" / "order_of_service" / "lsb-services-1.0.0.json"
 
 
 class RecordingCursor:
@@ -224,6 +225,27 @@ class OrderOfServicePackageTests(unittest.TestCase):
             path.write_text('{"checksum":"x","checksum":"y"}', encoding="utf-8")
             with self.assertRaisesRegex(OrderOfServicePackageError, "Duplicate JSON field"):
                 load_order_of_service_package(path)
+
+    def test_curated_lsb_package_is_complete_and_safe(self):
+        value, checksum = load_order_of_service_package(LSB_PACKAGE)
+        result = OrderOfServicePackageValidator({"lsb"}).validate(value, checksum)
+        self.assertEqual(result.template_count, 22)
+        self.assertGreater(result.line_count, 300)
+        self.assertEqual(result.role_count, 0)
+        self.assertTrue(all(item["name"].startswith("LSB ") for item in value["templates"]))
+        self.assertEqual(len({item["template_key"] for item in value["templates"]}), 22)
+
+    def test_lsb_package_build_is_reproducible(self):
+        from build_lsb_order_of_service_package import build_package
+        stored, _checksum = load_order_of_service_package(LSB_PACKAGE)
+        self.assertEqual(build_package(), stored)
+
+    def test_installer_is_guarded_to_local_test_database(self):
+        source = (ROOT / "install_order_of_service_package.py").read_text(encoding="utf-8")
+        self.assertIn('!= "churchdbtest"', source)
+        self.assertIn('not in {"127.0.0.1", "localhost", "::1"}', source)
+        self.assertIn("getpass.getpass", source)
+        self.assertIn("Exactly one installed LSB hymnal record is required", source)
 
 
 if __name__ == "__main__":

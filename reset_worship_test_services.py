@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import getpass
 import hashlib
 import json
 import subprocess
@@ -29,17 +30,21 @@ TABLES = (
 def settings():
     config = json.loads((ROOT / "churchmanager.json").read_text(encoding="utf-8-sig"))
     database = config["database_settings"]
-    resolved = resolve_database(
-        {
-            "server": database["host"],
-            "database": database["database"],
-            "user": database["user"],
-            "password": None,
-            "test_mode": True,
-            "jsform_database": None,
-        },
-        config,
-    )
+    arguments = {
+        "server": database["host"],
+        "database": database["database"],
+        "user": database["user"],
+        "password": None,
+        "test_mode": True,
+        "jsform_database": None,
+    }
+    try:
+        resolved = resolve_database(arguments, config)
+    except KeyError:
+        arguments["password"] = getpass.getpass(
+            f"MariaDB password for {database['user']}: "
+        )
+        resolved = resolve_database(arguments, config)
     if str(resolved["server"]).casefold() not in {"127.0.0.1", "localhost", "::1"}:
         raise RuntimeError("Safety stop: worship cleanup is restricted to local MariaDB.")
     if str(resolved["database"]).casefold() != "churchdbtest":

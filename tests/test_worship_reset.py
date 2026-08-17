@@ -18,6 +18,11 @@ class WorshipResetTests(unittest.TestCase):
         self.assertIn("ChurchDBTest.pre-worship-reset", source)
         self.assertIn("cleanup_verified=true", source)
 
+    def test_missing_saved_credential_uses_hidden_password_prompt(self):
+        source = Path(reset.__file__).read_text(encoding="utf-8")
+        self.assertIn("except KeyError", source)
+        self.assertIn("getpass.getpass", source)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,7 +1,6 @@
 # LSB Order of Service Package Inventory
 
-**Status:** Approved scope inventory; outline data still requires metadata-only
-curation and package validation
+**Status:** Implemented as validated package `lsb-services-1.0.0.json`
 
 **Prepared:** August 16, 2026
 
@@ -76,3 +75,22 @@ copy the wording, music, rubrics, prayers, or other protected content.
   electronic LSB, but the resulting package remains an outline rather than a
   reproduction.
 - The complete set is installed or upgraded transactionally as one package.
+
+## Delivered package
+
+The reproducible package source is
+`packages/order_of_service/lsb-services-1.0.0.json`. It contains 22 templates
+and 338 planning lines. Its checksum, prefix, dependencies, field lengths,
+line types, conditions, and content boundary are checked before any database
+write. Starter templates deliberately contain no required participant roles;
+roles may be added to local customized templates.
+
+Use these commands from the ChurchManager project directory:
+
+```powershell
+.\.runtime-venv\Scripts\python.exe install_order_of_service_package.py
+.\.runtime-venv\Scripts\python.exe install_order_of_service_package.py --apply
+```
+
+The first command performs validation only. The second installs or upgrades
+the package atomically and is hard-limited to local `ChurchDBTest`.
