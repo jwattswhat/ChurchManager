@@ -1,7 +1,20 @@
 # ChurchManager Lectionary Package Provenance Decision
 
 **Reviewed:** August 17, 2026  
-**Status:** Distribution blocked pending written permission
+**Status:** Publisher-specific packages blocked; public-domain package approved
+
+## Public-domain historic one-year package
+
+ChurchManager distributes `cm-historic-one-year` from the 1919 *Common Service
+Book of the Lutheran Church*, a United States public-domain publication. The
+package contains only occasion names, calendar rules, reading roles, and
+biblical citations. It contains no Scripture text, collects, prayers, rubrics,
+music, or other liturgical wording.
+
+The package is intentionally named **ChurchManager Historic One-Year
+Lectionary**. It is not represented as TLH, LSB, RCL, or as a current official
+edition of any church body. Version 1.0.0 contains 62 core Sunday and major-day
+Propers with 124 Epistle/Gospel appointments.
 
 ## Decision
 
@@ -103,5 +116,6 @@ you require.
 
 The validator, builder, package manager, local-only scope, calendar resolver,
 and service snapshots remain useful now. Installation may accept a congregation's
-lawfully prepared `LOCAL_ONLY` package, but ChurchManager's maintained public
-package inventory remains empty until written permission is documented.
+lawfully prepared `LOCAL_ONLY` package. The maintained public inventory contains
+only independently approved public-domain packages; LSB and RCL packages remain
+blocked until written permission is documented.

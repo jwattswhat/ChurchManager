@@ -18,6 +18,12 @@ _CITATION = re.compile(
     r"^[1-3]?[A-Za-z][A-Za-z .'-]*\s+\d+[A-Za-z]?(?::\d+[A-Za-z]?(?:[-–]\d+[A-Za-z]?)?)?"
     r"(?:\s*[,;]\s*(?:[1-3]?[A-Za-z][A-Za-z .'-]*\s+)?\d+[A-Za-z]?(?::\d+[A-Za-z]?(?:[-–]\d+[A-Za-z]?)?)?)*$"
 )
+_BOOK = r"(?:[1-3]\s+)?[A-Za-z][A-Za-z .'-]*"
+_VERSE = r"\d+[A-Za-z]?(?:[-\u2013](?:\d+:)?\d+[A-Za-z]?)?"
+_CITATION = re.compile(
+    rf"^{_BOOK}\s+\d+[A-Za-z]?(?::{_VERSE})?"
+    rf"(?:\s*[,;]\s*(?:{_BOOK}\s+)?\d+[A-Za-z]?(?::{_VERSE})?)*$"
+)
 _MARKUP = re.compile(
     r"(?:<\s*/?\s*[a-z][^>]*>|\bdata:|\bfile:|\\rtf|!\[[^]]*\]\(|"
     r"\.(?:png|jpe?g|gif|svg|mp3|wav|pdf)\b)", re.IGNORECASE,

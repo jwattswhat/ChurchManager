@@ -9,7 +9,8 @@ class LectionaryProvenanceDocumentationTests(unittest.TestCase):
         text = Path(
             "Documentation/ChurchManager.LectionaryPackageProvenance.md"
         ).read_text(encoding="utf-8")
-        self.assertIn("Distribution blocked pending written permission", text)
+        self.assertIn("Publisher-specific packages blocked", text)
+        self.assertIn("cm-historic-one-year", text)
         self.assertIn("LOCAL_ONLY", text)
         self.assertIn("must not commit or distribute", text)
         self.assertIn("Scripture text", text)

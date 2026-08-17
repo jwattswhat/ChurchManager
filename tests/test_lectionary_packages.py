@@ -106,6 +106,16 @@ class LectionaryPackageTests(unittest.TestCase):
         with self.assertRaisesRegex(LectionaryPackageError, "local namespace"):
             LectionaryPackageValidator().validate(value)
 
+    def test_numbered_books_and_cross_chapter_ranges_are_valid_citations(self):
+        for citation in ("1 Corinthians 4:1-5", "Isaiah 52:13-53:12",
+                         "John 15:26-16:4"):
+            with self.subTest(citation=citation):
+                value = package()
+                item = value["systems"][0]["editions"][0]["propers"][0]["appointments"][0]
+                item["display_citation"] = citation
+                item["normalized_citation"] = citation
+                LectionaryPackageValidator().validate(value)
+
     def test_distribution_scope_is_explicit_and_bounded(self):
         for scope in (None, "PRIVATE", ""):
             with self.subTest(scope=scope):
