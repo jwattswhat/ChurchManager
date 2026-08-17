@@ -335,6 +335,12 @@ future roadmap projects:
   names, account definers and grants, database-selection statements, fixture
   data, destructive dump statements, persisted auto-increment state, and
   machine-specific paths.
+- The deterministic baseline generator is implemented. It operates only on
+  fully migrated local ChurchDBTest, exports structure rather than records,
+  keeps the database password off the process command line, canonicalizes
+  permitted dump state, enforces schema hygiene, and produces a schema checksum
+  plus the exact represented-migration ledger. Live candidate generation and
+  review remain.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local

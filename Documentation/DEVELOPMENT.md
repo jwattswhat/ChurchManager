@@ -71,6 +71,18 @@ values. A finding must be removed or explicitly documented and approved.
 The reusable enforcement is in `schema_hygiene.py`; baseline generation must
 call `require_clean_schema` before writing an accepted release artifact.
 
+Generate the candidate deterministically from the fully migrated local test
+schema. The command previews and validates by default; `--write` creates
+`installation/baseline_schema.sql` and its checksum/migration manifest:
+
+```powershell
+.\.runtime-venv\Scripts\python.exe generate_installation_baseline.py
+.\.runtime-venv\Scripts\python.exe generate_installation_baseline.py --write
+```
+
+The export is structure-only. It verifies the complete migration ledger first
+and never places the database password on the process command line.
+
 ```powershell
 .\.runtime-venv\Scripts\python.exe run_churchdb_migrations.py --apply
 ```

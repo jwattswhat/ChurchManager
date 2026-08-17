@@ -218,7 +218,8 @@ The beta is complete only when:
    paths; scan it for obsolete compatibility structures such as `OldID`; prove
    that it creates an empty database and establishes accurate migration history.
    The fail-closed schema-hygiene scanner is complete; baseline generation and
-   isolated installation remain.
+   deterministic structure-only generator are complete. Generating, reviewing,
+   and installing the current candidate in an isolated database remain.
 5. Add first-master-administrator creation.
 6. Add transactional catalog installation and congregation defaults.
 7. Add the nontechnical wizard around the tested services.
