@@ -319,6 +319,12 @@ future roadmap projects:
   database-scoped application account with a parameterized generated password,
   and cleans up only newly created resources if provisioning fails. It has not
   yet been exercised against a live isolated database.
+- Fresh-install review confirmed that migration 001 assumes the original base
+  tables and therefore cannot initialize an empty database. The installer must
+  use a reviewed, checksum-protected canonical baseline schema, seed accurate
+  migration history for the migrations represented by that baseline, and then
+  apply only later pending migrations. Creating and verifying this baseline is
+  the next release-readiness step.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local

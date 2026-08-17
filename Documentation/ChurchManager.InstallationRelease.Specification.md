@@ -77,7 +77,10 @@ The installer shall:
 3. Confirm that the database does not already exist.
 4. Test an administrative MariaDB connection without retaining its credential.
 5. Create the database and a least-privilege ChurchManager database account.
-6. Apply every numbered migration in order and verify their checksums.
+6. Install the release's checksum-protected canonical baseline schema, record
+   the numbered migrations represented by that baseline with their exact
+   checksums, and then apply any later pending migrations in order. Historical
+   upgrade migrations are not assumed to create an empty database.
 7. Create the first master administrator with a temporary password that must be
    changed at first login.
 8. Present separately selectable hymnal, lectionary, and Order of Service
@@ -157,6 +160,7 @@ login but does not require it for a small congregation.
 Successful installation requires evidence that:
 
 - all numbered migrations are applied with expected checksums;
+- the installed baseline schema version and checksum match the release;
 - the application and JSForm schema/resources are compatible;
 - exactly one initial active master administrator exists;
 - selected packages and dependencies are installed at the selected versions;
@@ -197,12 +201,16 @@ The beta is complete only when:
 3. Add guarded database/account creation and migration execution. The reusable
    checksum-verified migration service and guarded fresh-database provisioner
    are complete. Isolated live acceptance remains.
-4. Add first-master-administrator creation.
-5. Add transactional catalog installation and congregation defaults.
-6. Add the nontechnical wizard around the tested services.
-7. Add backup proof, final verification, and safe failure recovery.
-8. Exercise fresh install, upgrade, repair, and restore in isolated databases.
-9. Prepare the beta kit and complete beta acceptance.
+4. Generate, review, and checksum a canonical current baseline schema that is
+   independent of development data, account definers, and machine-specific
+   paths; prove that it creates an empty database and establishes accurate
+   migration history.
+5. Add first-master-administrator creation.
+6. Add transactional catalog installation and congregation defaults.
+7. Add the nontechnical wizard around the tested services.
+8. Add backup proof, final verification, and safe failure recovery.
+9. Exercise fresh install, upgrade, repair, and restore in isolated databases.
+10. Prepare the beta kit and complete beta acceptance.
 
 ## 10. Acceptance criteria
 

@@ -58,6 +58,12 @@ creates only a local MariaDB application account scoped to the new database.
 Automated tests use fake connections; live acceptance must use a newly named,
 isolated database and must never target ChurchDB or ChurchDBTest.
 
+The numbered migrations preserve upgrade history; they are not an empty-
+database bootstrap sequence. In particular, migration 001 expects the original
+tables to exist. Fresh installation therefore uses a separately reviewed,
+versioned baseline schema and records the exact migration checksums represented
+by that baseline before applying newer pending migrations.
+
 ```powershell
 .\.runtime-venv\Scripts\python.exe run_churchdb_migrations.py --apply
 ```
