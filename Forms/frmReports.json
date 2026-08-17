@@ -10,7 +10,7 @@
             ],
             "sizech": [
                 45,
-                40
+                46
             ],
             "stylelist": [
                 "CAPTION"
@@ -118,7 +118,7 @@
                 ],
                 "sizech": [
                     42,
-                    30
+                    36
                 ],
                 "label": "Parameters",
                 "layout": {
@@ -212,12 +212,30 @@
                 },
                 "tooltip": "Select the hymn."
             },
+            "lblHymnal": {
+                "name": "lblHymnal",
+                "type": "StaticText",
+                "posch": [2, 19],
+                "label": "Hymnal:"
+            },
+            "HymnalID": {
+                "name": "HymnalID",
+                "type": "ComboBox",
+                "posch": [9, 19],
+                "sizech": [25, 2],
+                "lookupchoices": {
+                    "name": "tblHymnal",
+                    "fields": ["ID", "Hymnal", "Title"],
+                    "orderby": "Hymnal"
+                },
+                "tooltip": "Select the hymnal whose favorite hymns should be listed."
+            },
             "lblStartDate": {
                 "name": "lblStartDate",
                 "type": "StaticText",
                 "posch": [
                     2,
-                    19
+                    22
                 ],
                 "label": "Start Date:"
             },
@@ -226,7 +244,7 @@
                 "type": "DatePickerCtrl",
                 "posch": [
                     9,
-                    19
+                    22
                 ],
                 "format": "%Y/%m/%d",
                 "tooltip": "Select the start date."
@@ -236,7 +254,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    22
+                    25
                 ],
                 "label": "End Date:"
             },
@@ -245,7 +263,7 @@
                 "type": "DatePickerCtrl",
                 "posch": [
                     9,
-                    22
+                    25
                 ],
                 "format": "%Y/%m/%d",
                 "tooltip": "Select the end date."
@@ -255,7 +273,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    25
+                    28
                 ],
                 "label": "Attend Type:"
             },
@@ -264,7 +282,7 @@
                 "type": "ComboBox",
                 "posch": [
                     9,
-                    25
+                    28
                 ],
                 "sizech": [
                     25,
@@ -278,7 +296,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    28
+                    31
                 ],
                 "label": "Detail:"
             },
@@ -287,7 +305,7 @@
                 "type": "CheckBox",
                 "posch": [
                     9,
-                    28
+                    31
                 ],
                 "value": 0,
                 "tooltip": "Include detailed information in reports that support it."
@@ -297,7 +315,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    31
+                    34
                 ],
                 "label": "Project:"
             },
@@ -306,7 +324,7 @@
                 "type": "ComboBox",
                 "posch": [
                     9,
-                    31
+                    34
                 ],
                 "sizech": [
                     25,
@@ -326,13 +344,13 @@
             "lblMissedWeeks": {
                 "name": "lblMissedWeeks",
                 "type": "StaticText",
-                "posch": [2, 34],
+                "posch": [2, 37],
                 "label": "Flag after missed weeks:"
             },
             "MissedWeeks": {
                 "name": "MissedWeeks",
                 "type": "TextNumber",
-                "posch": [9, 34],
+                "posch": [9, 37],
                 "sizech": [5, 2],
                 "value": 3,
                 "tooltip": "Enter the number of consecutive recorded worship weeks missed before a member is flagged."
@@ -343,7 +361,7 @@
                 "label": "Run Report",
                 "posch": [
                     9,
-                    39
+                    42
                 ],
                 "layout": {
                     "row": 40,

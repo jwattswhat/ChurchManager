@@ -90,6 +90,11 @@ SPECS = (
     ReportSpec("CMHU04", "Recent Hymn Usage", "reports.worship.run", "rpt_hymn_usage", (
         c("ServiceID", "Service", 75, "integer"), c("HymnID", "Hymn ID", 70, "integer"),
         c("UsedAs", "Used As", 120), c("Note", "Notes", 275)), "ServiceID DESC", 2),
+    ReportSpec("CMHU05", "Favorite Hymns", "reports.worship.run", "rpt_favorite_hymn", (
+        c("PrintedReference", "Hymn", 80), c("Title", "Title", 190),
+        c("Tune", "Tune", 145), c("Category", "Category", 100),
+        c("BibleText", "Scripture", 95)), "PrintedReference, Title", 2,
+        filter_fields=("HymnalID",)),
     ReportSpec("CMWS01", "Worship Services by Date", "reports.worship.run", "rpt_service", (
         c("DateTime", "Date and Time", 100, "datetime"), c("LiturgicalDate", "Liturgical Day", 150),
         c("Location", "Location", 95), c("OrderofService", "Service", 110),

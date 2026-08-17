@@ -652,6 +652,7 @@ Common parameters include:
 - `ProjectID`
 - `PersonID`
 - `HymnID`
+- `HymnalID`
 - `AttendanceType`
 - `Detail`
 - `StartDate`
@@ -681,6 +682,7 @@ The installed SQL report data includes the following reports. The database curre
 | `CMMI02` | All Member Information listing |
 | `CMMI03` | Member Update Forms |
 | `CMHU04` | Hymn Usage Since a Date |
+| `CMHU05` | Favorite Hymns for a selected hymnal |
 | `CMAT01` | Attendance Event Listing |
 | `CMJR01` | Journal report |
 | `CMAS01` | Asset Listing |
@@ -690,6 +692,18 @@ Additional templates currently present include attendance, membership, project,
 prayer, and worship reports whose exact titles should be confirmed against the
 live `tblReports` data. Removed financial and donor report codes are filtered from
 the report menu even when historical `tblReports` rows remain in a database.
+
+#### Favorite hymns
+
+To mark a hymn as a favorite, open **Hymns** and include the whole tag
+`#favorite` anywhere in its Note field. The tag is not case-sensitive and may
+appear alongside an ordinary note. Remove that tag to remove the hymn from the
+favorites list.
+
+To print the list, open **Reports**, select **Favorite Hymns**, choose the
+hymnal, and select **Run Report**. Only active hymns in the selected hymnal are
+included. The report prints catalog metadata only: the hymn reference, title,
+tune, category, and Scripture reference. It does not print lyrics or music.
 
 ### 9.3 Specialized reports
 

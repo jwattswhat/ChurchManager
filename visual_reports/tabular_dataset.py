@@ -97,14 +97,18 @@ class TabularDatasetProvider:
             return "rpt_task r JOIN rpt_project p ON p.ID=r.ProjectID", [f"p.ChurchID={marker}"], [church_id]
         if view in {"rpt_person_date", "rpt_person_contact"}:
             return f"{view} r JOIN rpt_membership_person p ON p.ID=r.PersonID", [f"p.ChurchID={marker}"], [church_id]
-        if view in {"rpt_report_catalog", "rpt_hymn"}:
+        if view in {"rpt_report_catalog", "rpt_hymn", "rpt_favorite_hymn"}:
             return view, [], []
         raise ValueError(f"Report view is not approved: {view}")
 
     def _parameter_filters(self, spec, parameters):
         field_names = {column.field for column in spec.columns} | set(spec.filter_fields)
         filters, values = [], []
-        for parameter, field in (("PersonID", "PersonID"), ("HymnID", "HymnID"), ("ProjectID", "ProjectID"), ("ServiceID", "ServiceID")):
+        for parameter, field in (
+            ("PersonID", "PersonID"), ("HymnID", "HymnID"),
+            ("HymnalID", "HymnalID"), ("ProjectID", "ProjectID"),
+            ("ServiceID", "ServiceID"),
+        ):
             value = parameters.get(parameter)
             if value not in (None, "", "All") and field in field_names:
                 filters.append(f"{field}={self.marker}")

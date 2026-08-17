@@ -15,8 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class TestVisualReportInventory(unittest.TestCase):
-    def test_inventory_has_29_official_reports_and_declared_exceptions(self):
-        self.assertEqual(len(OFFICIAL_CODES), 29)
+    def test_inventory_has_30_official_reports_and_declared_exceptions(self):
+        self.assertEqual(len(OFFICIAL_CODES), 30)
         self.assertEqual(CONSOLIDATED_CODES, {"CMAD01", "CMPH01"})
         self.assertEqual(DISABLED_CODES, {"CMSM01"})
         self.assertEqual(LAUNCHER_CODES, {"CMBATCH00"})
@@ -113,6 +113,17 @@ class TestVisualReportInventory(unittest.TestCase):
             with self.subTest(code=spec.code, view=spec.view):
                 source, _where, _values = provider._scope(spec.view, 1)
                 self.assertIn(spec.view, source)
+
+    def test_favorite_hymns_report_requires_a_hymnal_and_exact_tag_view(self):
+        spec = next(item for item in SPECS if item.code == "CMHU05")
+        self.assertEqual(spec.filter_fields, ("HymnalID",))
+        migration = (ROOT / "migrations" / "075_add_favorite_hymns_report.sql").read_text(
+            encoding="utf-8-sig"
+        )
+        self.assertIn("rpt_favorite_hymn", migration)
+        self.assertIn("#favorite", migration)
+        self.assertIn("HymnalID=2 AND EntrySlot=363", migration)
+        self.assertIn("'CMHU05','Favorite Hymns'", migration)
 
 
 if __name__ == "__main__":
