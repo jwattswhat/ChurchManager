@@ -1,15 +1,18 @@
 """Database-mode selection and safety checks for ChurchManager."""
 
 import json
-from pathlib import Path
 from credential_store import read_credential
+from configuration_paths import configuration_path, ensure_configuration
 
 
-CONFIG_PATH = Path(__file__).with_name("churchmanager.json")
+CONFIG_PATH = configuration_path()
 
 
-def load_config(path=CONFIG_PATH):
-    with open(path, "r", encoding="utf-8-sig") as config_file:
+def load_config(path=None):
+    """Load the development or writable installed configuration."""
+
+    selected = ensure_configuration(path or configuration_path())
+    with selected.open("r", encoding="utf-8-sig") as config_file:
         return json.load(config_file)
 
 

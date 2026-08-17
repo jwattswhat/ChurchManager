@@ -390,6 +390,10 @@ future roadmap projects:
   2026, recovering a deliberately changed congregation record, verifying all
   84 migration records and the pre-restore safety backup, and removing all
   disposable resources. Repair and installed-build rehearsals remain.
+- Installed configuration now resolves to the writable local application-data
+  folder and is initialized from a non-secret template. Source development
+  retains its repository configuration, and neither mode stores a database
+  password in JSON.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local

@@ -104,6 +104,10 @@ silently retained.
     required JSForm resources.
 13. Create the attachment, backup, log, and local-preference directories with
     appropriate user access.
+    Installed configuration is copied from a non-secret application template
+    into `%LOCALAPPDATA%\ChurchManager`; development continues to use the
+    repository configuration. The installed executable never needs to modify
+    files under Program Files.
 14. Create and verify a first SQL backup.
 15. Run a readiness check and present a plain-language completion report.
 

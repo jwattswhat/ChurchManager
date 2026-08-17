@@ -17,6 +17,7 @@ import wx
 import wx.adv
 
 from credential_store import delete_credential, read_credential, write_credential
+from configuration_paths import configuration_path, ensure_configuration
 from installation_executor import FreshInstallationExecutor
 from installation_plan import (
     InstallationPlanError,
@@ -27,7 +28,7 @@ from installation_readiness import find_mariadb_tool, inspect_readiness
 
 
 ROOT = Path(__file__).resolve().parent
-CONFIG_PATH = ROOT / "churchmanager.json"
+CONFIG_PATH = configuration_path()
 
 
 def application_account_name(database_name):
@@ -38,7 +39,7 @@ def application_account_name(database_name):
 
 def save_installed_configuration(database_name, application_user, path=CONFIG_PATH):
     """Atomically save non-secret local production connection settings."""
-    path = Path(path)
+    path = ensure_configuration(path)
     config = json.loads(path.read_text(encoding="utf-8-sig"))
     values = config.setdefault("database_settings", {})
     values.update({
@@ -62,7 +63,7 @@ def finalize_installed_connection(
 ):
     """Persist configuration and credential together, restoring both on failure."""
     target = "ChurchManager/Production"
-    path = Path(path)
+    path = ensure_configuration(path)
     previous_config = path.read_bytes()
     try:
         previous_credential = credential_reader(target)
