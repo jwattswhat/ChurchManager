@@ -475,6 +475,13 @@ Because report and order-of-service scripts rely on positional fields in some qu
 
 ### 8.5 Hymns and hymn usage
 
+Hymn identity is permanent. Each registered hymnal owns a fixed 5,000-number
+block; the LSB block is 10,001-14,999 and congregation-owned entries use
+5,001-9,999. Printed hymn numbers remain display metadata rather than database
+keys. Packaged and historically used hymns are retired instead of physically
+deleted. Hymnal packages contain catalog metadata only and never include lyrics,
+music, notation, recordings, or publisher artwork.
+
 The hymn subsystem includes:
 
 - hymnal records;

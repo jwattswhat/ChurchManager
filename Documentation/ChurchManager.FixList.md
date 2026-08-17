@@ -14,7 +14,7 @@ open-source church-management systems.
 | 2 | Completed | Email and participant notification review | The weekly participant-notification workflow has been modernized. |
 | 3 | In acceptance | Optional user-to-person relationship | Source, migration, administration UI, safe auditing, and welcome email are implemented; database and visual acceptance remain. |
 | 4 | Immediate | Secure SMTP connection and email settings | Welcome and participant email require deliberate, testable, credential-safe configuration. |
-| 5 | Immediate | Hymnal, lectionary, and Order of Service catalog design | Defines what the installer can safely and legally offer. |
+| 5 | In progress | Hymnal, lectionary, and Order of Service catalogs | Order of Service packaging is implemented; permanent hymn IDs and hymnal packaging are in database acceptance, followed by lectionary packaging. |
 | 6 | Immediate | Release, installation, and recovery readiness | Stabilizes and packages the researched catalogs and existing application. |
 | 7 | Next | Pastoral follow-up | Highest-value ministry addition and a natural extension of attendance. |
 | 8 | Next | Import, export, and duplicate management | Protects data quality and makes adoption and recovery practical. |
@@ -135,6 +135,14 @@ future roadmap projects:
 
 #### Hymnal catalog and import workstream
 
+- Migration 074, `hymnal_packages.py`, and `local_hymns.py` implement the
+  permanent registry foundation, fail-closed LSB conversion, package preflight,
+  transactional import, local 5,001-9,999 allocation, retirement, passive
+  copyright/source metadata, and import/conversion logging.
+- Remaining acceptance work: apply migration 074 to `ChurchDBTest`, reconcile
+  its conversion log, visually test local hymn creation/retirement, and build
+  the complete curated LSB hymnal metadata package with verified stanza counts.
+
 - Use [Hymnal Research and Recommendations](ChurchManager.HymnalResearchAndRecommendations.md)
   as the starting point for the multi-hymnal catalog design.
 - Implement the approved
@@ -166,9 +174,10 @@ future roadmap projects:
 #### Order of Service catalog workstream
 
 - Approved companion design: [Order of Service Catalog Specification](ChurchManager.OrderOfServiceCatalog.Specification.md).
-- Migrations 072-073, the metadata-only preflight validator, and transactional
-  importer implement the catalog foundation. Installer selection and curated
-  package data remain subsequent work.
+- Migrations 072-073, the metadata-only preflight validator, transactional
+  importer, guarded installer, and complete 22-template/338-line LSB package
+  implement the first Order of Service catalog. Fresh-install selection remains
+  part of the release installer workstream.
 - The LSB Order of Service package must include every supported LSB service
   outline, and imported names use the `LSB ` prefix. Future service-book packages
   use their own uppercase abbreviation followed by one space.

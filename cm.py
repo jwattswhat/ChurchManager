@@ -65,6 +65,7 @@ from churchmanager_error_support import (
 )
 from participant_notification_dialog import show_participant_notifications
 from mail_settings import show_mail_settings
+from local_hymns import LocalHymnIDAllocator
 
 
 arguments = None
@@ -76,6 +77,67 @@ single_instance = None
 
 
 class clsForm(JSForm.clsForm):
+    def fill_form(self, record):
+        """Fill a form and protect permanent hymn identity controls."""
+        result = super().fill_form(record)
+        if self.FORMNAME == "frmHymn" and record:
+            packaged = bool(record.get("PackageOwned")) or int(record.get("ID") or 0) >= 10001
+            if "HymnalID" in self.CONTROLID:
+                self.CONTROLID["HymnalID"].Disable()
+            if "Hymn" in self.CONTROLID:
+                self.CONTROLID["Hymn"].Enable(not packaged)
+        return result
+
+    def new_record(self):
+        """Create records, assigning permanent IDs to local hymns."""
+        super().new_record()
+        if self.FORMNAME != "frmHymn" or not self.RECORDS or not self.RECORDS.current():
+            return
+        if self.RECORDS.original.record.get("ID") is not None:
+            return
+        record = self.RECORDS.current()
+        if record.get("ID") is None:
+            hymn_id, entry_slot = LocalHymnIDAllocator(self.DBConnection).allocate()
+            record["ID"] = hymn_id
+            record["HymnalID"] = 1
+            record["EntrySlot"] = entry_slot
+            record["PackageOwned"] = 0
+            record["IsActive"] = 1
+            self.fill_form(record)
+
+    def _on_update_record_click(self, event):
+        """Synchronize local hymn identity metadata before the normal save."""
+        if self.FORMNAME == "frmHymn" and self.RECORDS and self.RECORDS.current():
+            record = self.RECORDS.current()
+            if record.get("HymnalID") == 1 or 5001 <= int(record.get("ID") or 0) <= 9999:
+                self.CONTROLID["HymnalID"].SetValue(1)
+                record["HymnalID"] = 1
+                record["PrintedReference"] = self.CONTROLID["Hymn"].GetValue().strip()
+        super()._on_update_record_click(event)
+
+    def _on_delete_record_click(self, event):
+        """Retire hymn metadata instead of physically deleting permanent IDs."""
+        if self.FORMNAME != "frmHymn":
+            return super()._on_delete_record_click(event)
+        record = self.RECORDS.current() if self.RECORDS else None
+        if not record or record.get("ID") is None:
+            return
+        if record.get("PackageOwned") or int(record["ID"]) >= 10001:
+            wx.MessageBox(
+                "Packaged hymns cannot be deleted. A package update may retire an entry.",
+                "Protected Hymn", wx.OK | wx.ICON_INFORMATION, self.FORM,
+            )
+            return
+        if wx.MessageBox(
+            "Retire this local hymn? Its permanent ID will never be reused.",
+            "Retire Hymn", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self.FORM,
+        ) != wx.YES:
+            return
+        LocalHymnIDAllocator(self.DBConnection).retire(record["ID"])
+        record["IsActive"] = 0
+        self.RECORDS.original.saverecord(record)
+        self.fill_form(record)
+
     def _refresh_parent_grid(self, control_name):
         parent = self.PARENT
         if not parent or control_name not in getattr(parent, "CONTROLID", {}):

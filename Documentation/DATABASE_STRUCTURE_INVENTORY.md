@@ -36,6 +36,9 @@ their age or naming:
 | `tblPrayer` | Stores current prayer content and its normalized schedule/category information. |
 | `tblAnnouncement` | Stores current announcement content and its normalized schedule/category information. |
 | `tblHymnal` | Stores installed hymnals. |
+| `tblHymnalPackageImport` | Records transactional hymnal package installs and upgrades without credentials or protected content. |
+| `tblHymnIDConversionLog` | Preserves the reviewed old-to-permanent hymn ID mapping used by structural migrations. |
+| `tblLocalHymnIDAllocation` | Permanently reserves congregation-owned hymn IDs so retired IDs are never reused. |
 | `tblHymn` | Stores hymns belonging to installed hymnals. |
 | `tblHymnUsage` | Preserves hymn-selection and usage history. |
 

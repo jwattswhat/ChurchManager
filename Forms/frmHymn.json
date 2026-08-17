@@ -11,7 +11,7 @@
             },
             "stylelist": ["CAPTION"],
             "posch": [0, 0],
-            "sizech": [46, 27],
+            "sizech": [46, 31],
             "theme": "churchmanager"
         },
         "CONTROLS": {
@@ -99,17 +99,38 @@
                 "sizech": [32, 2],
                 "tooltip": "Select or enter the hymn category."
             },
+            "lblPrintedStanzaCount": {
+                "name": "lblPrintedStanzaCount",
+                "type": "StaticText",
+                "label": "Printed stanzas:",
+                "posch": [1, 13]
+            },
+            "PrintedStanzaCount": {
+                "name": "PrintedStanzaCount",
+                "type": "TextNumber",
+                "posch": [11, 13],
+                "sizech": [8, 2],
+                "tooltip": "Enter the number of stanzas printed in this hymnal; use zero when not stanza-based."
+            },
+            "IsActive": {
+                "name": "IsActive",
+                "type": "CheckBox",
+                "label": "Available for new services",
+                "posch": [22, 13],
+                "sizech": [21, 2],
+                "tooltip": "Inactive hymns remain available in historical records."
+            },
             "lblNote": {
                 "name": "lblNote",
                 "type": "StaticText",
                 "label": "Notes:",
-                "posch": [1, 13]
+                "posch": [1, 15]
             },
             "Note": {
                 "name": "Note",
                 "type": "MultiLine",
                 "stylelist": ["MULTILINE"],
-                "posch": [11, 13],
+                "posch": [11, 15],
                 "sizech": [32, 6],
                 "tooltip": "Enter notes. Multiple lines are allowed."
             }

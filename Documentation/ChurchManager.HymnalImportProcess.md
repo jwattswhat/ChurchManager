@@ -1,6 +1,6 @@
 # Suggested ChurchManager Hymnal Import Process
 
-**Status:** Proposed; awaiting approval
+**Status:** Approved; implementation in progress
 
 **Prepared:** August 15, 2026
 
@@ -256,7 +256,7 @@ Local CSV imports use a simpler screen but retain strict safeguards.
 2. ChurchManager previews and maps columns.
 3. It detects possible duplicates against both official and local catalogs.
 4. The user reviews every ambiguous match.
-5. New records receive the next never-used ID from 10,001 through 14,999.
+5. New records receive the next never-used ID from 5,001 through 9,999.
 6. Imported records are assigned to the local-user hymnal catalog.
 7. The import commits transactionally and produces a result log.
 

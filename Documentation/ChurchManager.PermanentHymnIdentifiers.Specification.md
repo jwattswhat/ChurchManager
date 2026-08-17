@@ -1,6 +1,6 @@
 # ChurchManager Permanent Hymn Identifier Specification
 
-**Status:** Proposed; awaiting approval
+**Status:** Approved; implementation in progress
 
 **Prepared:** August 15, 2026
 
