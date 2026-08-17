@@ -384,8 +384,9 @@ future roadmap projects:
   disposable database, account, and backup resource. The guarded upgrade
   service is implemented with immutable-history preview, mandatory verified
   pre-upgrade backup, shared migration conversion hooks, and failure rollback.
-  Its isolated rehearsal, plus repair, restore, and installed-build rehearsals,
-  remain.
+  Its isolated rehearsal passed August 17, 2026 with one acceptance-only
+  migration, a verified 277,823-byte pre-upgrade backup, final clean preview,
+  and complete cleanup. Repair, restore, and installed-build rehearsals remain.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local

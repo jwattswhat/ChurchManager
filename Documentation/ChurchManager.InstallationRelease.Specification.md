@@ -256,8 +256,11 @@ The beta is complete only when:
    previews immutable migration history, requires and verifies a pre-upgrade
    backup, applies only pending migrations through the same approved conversion
    hooks as the migration runner, and preserves the backup if verification
-   fails. The isolated upgrade rehearsal and the repair and restore rehearsals
-   remain.
+   fails. The isolated upgrade rehearsal passed August 17, 2026: it detected
+   exactly one acceptance-only pending migration, verified a 277,823-byte
+   pre-upgrade backup and SHA-256 digest, applied and re-verified the change,
+   and removed the disposable database, account, and backups. Repair and
+   restore rehearsals remain.
 10. Prepare the beta kit and complete beta acceptance.
 11. Ship the visually verified, version-matched User Guide PDF and verify the
     main-menu Help control on an installed build.
