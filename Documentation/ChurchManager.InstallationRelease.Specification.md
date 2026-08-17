@@ -237,7 +237,8 @@ The beta is complete only when:
    local database credentials, congregation identity, the first Master
    Administrator and optional contact information, optional catalog selection,
    a password-free review, guarded installation, cleanup, and verification.
-   Visual acceptance and a second isolated `--apply` dress rehearsal remain.
+   Visual acceptance remains. The isolated service-level `--apply` dress
+   rehearsal passed August 17, 2026.
 8. Add backup proof, final verification, and safe failure recovery.
    **Implemented.** A fresh installation creates a labeled SQL dump, verifies
    its database identity, minimum size, table definitions, and SHA-256 digest,
@@ -245,6 +246,14 @@ The beta is complete only when:
    account creation are removed after incomplete setup; configuration and the
    Windows credential are restored together if final persistence fails.
 9. Exercise fresh install, upgrade, repair, and restore in isolated databases.
+   The complete fresh-install service rehearsal passed August 17, 2026. It
+   created an isolated database and least-privilege account, installed 138
+   database objects, represented 84 migrations, established 43 active
+   permissions, created and authenticated the initial Master Administrator,
+   installed the distributable historic one-year lectionary, verified a
+   277,721-byte first backup and its SHA-256 digest, and then removed the
+   isolated database, account, and backup. Upgrade, repair, and restore
+   rehearsals remain.
 10. Prepare the beta kit and complete beta acceptance.
 11. Ship the visually verified, version-matched User Guide PDF and verify the
     main-menu Help control on an installed build.

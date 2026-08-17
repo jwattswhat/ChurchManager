@@ -377,6 +377,12 @@ future roadmap projects:
   evidence without credentials. A failed final configuration or Credential
   Manager write restores both previous values before the incomplete new
   database and account are removed.
+- The isolated fresh-install service rehearsal passed August 17, 2026. The
+  executor installed the verified schema and starter data, initial master,
+  public lectionary, and first backup; authenticated the temporary master;
+  verified the 277,721-byte dump and SHA-256 digest; and removed every
+  disposable database, account, and backup resource. Upgrade, repair, restore,
+  and installed-build rehearsals remain.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local
