@@ -386,7 +386,10 @@ future roadmap projects:
   pre-upgrade backup, shared migration conversion hooks, and failure rollback.
   Its isolated rehearsal passed August 17, 2026 with one acceptance-only
   migration, a verified 277,823-byte pre-upgrade backup, final clean preview,
-  and complete cleanup. Repair, restore, and installed-build rehearsals remain.
+  and complete cleanup. The isolated restore rehearsal also passed August 17,
+  2026, recovering a deliberately changed congregation record, verifying all
+  84 migration records and the pre-restore safety backup, and removing all
+  disposable resources. Repair and installed-build rehearsals remain.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local

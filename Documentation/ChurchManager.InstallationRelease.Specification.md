@@ -259,8 +259,11 @@ The beta is complete only when:
    fails. The isolated upgrade rehearsal passed August 17, 2026: it detected
    exactly one acceptance-only pending migration, verified a 277,823-byte
    pre-upgrade backup and SHA-256 digest, applied and re-verified the change,
-   and removed the disposable database, account, and backups. Repair and
-   restore rehearsals remain.
+   and removed the disposable database, account, and backups. The isolated
+   restore rehearsal passed August 17, 2026: it restored a deliberately changed
+   congregation record from the verified first-install backup, verified all 84
+   migration records, verified the pre-restore safety backup, and removed all
+   disposable resources. The repair rehearsal remains.
 10. Prepare the beta kit and complete beta acceptance.
 11. Ship the visually verified, version-matched User Guide PDF and verify the
     main-menu Help control on an installed build.
