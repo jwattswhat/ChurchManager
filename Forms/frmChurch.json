@@ -253,48 +253,25 @@
                 "posch": [33, 19],
                 "tooltip": "Review, add, or edit hymnals."
             },
-            "lblPrimaryLectionarySystemID": {
-                "name": "lblPrimaryLectionarySystemID",
-                "type": "StaticText",
-                "label": "Default lectionary:",
-                "posch": [1, 21]
-            },
-            "PrimaryLectionarySystemID": {
-                "name": "PrimaryLectionarySystemID",
-                "type": "ComboBox",
-                "lookupchoices": {"name": "tblLectionarySystem", "fields": ["ID", "Name"], "orderby": "Name", "allowblank": true, "blanklabel": "No default lectionary"},
-                "posch": [10, 21],
-                "sizech": [20, 2],
-                "tooltip": "Select the lectionary system normally used by this church, or choose no default."
-            },
-            "btnLectionaryCatalog": {
-                "name": "btnLectionaryCatalog",
-                "type": "Button",
-                "label": "Lectionaries...",
-                "action": ["openlinkedform", "frmLectionarySystem"],
-                "posch": [33, 21],
-                "tooltip": "Review, add, or edit lectionary systems."
-            },
             "lblPrimaryLectionaryEditionID": {
                 "name": "lblPrimaryLectionaryEditionID",
                 "type": "StaticText",
-                "label": "Default edition:",
-                "posch": [1, 23]
+                "label": "Default lectionary:",
+                "posch": [1, 21]
             },
             "PrimaryLectionaryEditionID": {
                 "name": "PrimaryLectionaryEditionID",
                 "type": "ComboBox",
                 "lookupchoices": {
-                    "name": "tblLectionaryEdition",
-                    "fields": ["ID", "Name"],
-                    "condition": "IsActive = 1",
-                    "orderby": "Name",
+                    "name": "vwLectionaryEditionLookup",
+                    "fields": ["ID", "DisplayName"],
+                    "orderby": "DisplayName",
                     "allowblank": true,
                     "blanklabel": "No default edition"
                 },
-                "posch": [10, 23],
-                "sizech": [20, 2],
-                "tooltip": "Select the installed lectionary edition used for date suggestions, or choose no default."
+                "posch": [10, 21],
+                "sizech": [25, 2],
+                "tooltip": "Select the installed or local lectionary edition used by this church."
             },
             "lblNote": {
                 "name": "lblNote",
@@ -302,7 +279,7 @@
                 "label": "Note:",
                 "posch": [
                     1,
-                    25
+                    23
                 ]
             },
             "Note": {
@@ -313,7 +290,7 @@
                 ],
                 "posch": [
                     6,
-                    25
+                    23
                 ],
                 "sizech": [
                     24,

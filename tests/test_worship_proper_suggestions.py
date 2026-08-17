@@ -10,7 +10,7 @@ class WorshipProperSuggestionTests(unittest.TestCase):
         form = json.loads(Path("Forms/frmChurch.json").read_text(encoding="utf-8"))
         controls = form["frmChurchFORM"]["CONTROLS"]
         field = controls["PrimaryLectionaryEditionID"]
-        self.assertEqual(field["lookupchoices"]["name"], "tblLectionaryEdition")
+        self.assertEqual(field["lookupchoices"]["name"], "vwLectionaryEditionLookup")
         self.assertTrue(field["lookupchoices"]["allowblank"])
 
     def test_worship_editor_requires_review_and_never_auto_selects_first_candidate(self):

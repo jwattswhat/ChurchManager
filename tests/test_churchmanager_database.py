@@ -402,16 +402,16 @@ class TestChurchManagerDatabase(unittest.TestCase):
             "WHERE version='029_add_church_primary_lectionary.sql'"
         )
         self.assertEqual(migration, [("029_add_church_primary_lectionary.sql",)])
-        column = self.query(
-            "SELECT IS_NULLABLE FROM information_schema.COLUMNS "
+        old_column = self.query(
+            "SELECT COUNT(*) FROM information_schema.COLUMNS "
             "WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tblChurch' "
             "AND COLUMN_NAME='PrimaryLectionarySystemID'"
         )
-        self.assertEqual(column, [("YES",)])
+        self.assertEqual(old_column, [(0,)])
         orphan_count = self.query(
             "SELECT COUNT(*) FROM tblChurch c "
-            "LEFT JOIN tblLectionarySystem ls ON ls.ID=c.PrimaryLectionarySystemID "
-            "WHERE c.PrimaryLectionarySystemID IS NOT NULL AND ls.ID IS NULL"
+            "LEFT JOIN tblLectionaryEdition e ON e.ID=c.PrimaryLectionaryEditionID "
+            "WHERE c.PrimaryLectionaryEditionID IS NOT NULL AND e.ID IS NULL"
         )[0][0]
         self.assertEqual(orphan_count, 0)
 

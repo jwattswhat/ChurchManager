@@ -167,9 +167,9 @@ class UnifiedWorshipServiceRepository:
         if not proper_id:
             return "Not selected"
         row = self.one(
-            "SELECT CONCAT(ls.Name,CASE WHEN COALESCE(p.Cycle,'')='' THEN '' "
+            "SELECT CONCAT(e.Name,CASE WHEN COALESCE(p.Cycle,'')='' THEN '' "
             "ELSE CONCAT(' - Year ',p.Cycle) END,' - ',p.LiturgicalDate) "
-            "FROM tblPropers p JOIN tblLectionarySystem ls ON ls.ID=p.LectionarySystemID "
+            "FROM tblPropers p JOIN tblLectionaryEdition e ON e.ID=p.LectionaryEditionID "
             "WHERE p.ID=?", (proper_id,),
         )
         return row[0] if row else "Not selected"
@@ -185,18 +185,13 @@ class UnifiedWorshipServiceRepository:
 
     def propers(self, church_id):
         return self.all(
-            "SELECT p.ID,CONCAT(ls.Name,CASE WHEN COALESCE(p.Cycle,'')='' THEN '' "
+            "SELECT p.ID,CONCAT(e.Name,CASE WHEN COALESCE(p.Cycle,'')='' THEN '' "
             "ELSE CONCAT(' - Year ',p.Cycle) END,' - ',p.LiturgicalDate) "
-            "FROM tblPropers p JOIN tblLectionarySystem ls ON ls.ID=p.LectionarySystemID "
-            "WHERE ("
-            " (SELECT PrimaryLectionaryEditionID FROM tblChurch WHERE ID=?) IS NOT NULL "
-            " AND p.LectionaryEditionID=(SELECT PrimaryLectionaryEditionID FROM tblChurch WHERE ID=?)"
-            ") OR ("
-            " (SELECT PrimaryLectionaryEditionID FROM tblChurch WHERE ID=?) IS NULL AND ("
-            "  (SELECT PrimaryLectionarySystemID FROM tblChurch WHERE ID=?) IS NULL "
-            "  OR p.LectionarySystemID=(SELECT PrimaryLectionarySystemID FROM tblChurch WHERE ID=?)"
-            " )) ORDER BY ls.Name,p.Cycle,p.Sort,p.ID",
-            (church_id, church_id, church_id, church_id, church_id),
+            "FROM tblPropers p JOIN tblLectionaryEdition e ON e.ID=p.LectionaryEditionID "
+            "WHERE p.IsActive=1 AND e.IsActive=1 "
+            "AND p.LectionaryEditionID=(SELECT PrimaryLectionaryEditionID "
+            "FROM tblChurch WHERE ID=?) ORDER BY e.Name,p.Cycle,p.Sort,p.ID",
+            (church_id,),
         )
 
     def suggested_propers(self, church_id, civil_date):
@@ -212,7 +207,9 @@ class UnifiedWorshipServiceRepository:
 
     def proper_values(self, proper_id):
         readings = self.all(
-            "SELECT Reading,Reference FROM tblReading WHERE PropersID=? ORDER BY ID",
+            "SELECT COALESCE(DisplayRole,Reading),COALESCE(DisplayCitation,Reference) "
+            "FROM tblReading WHERE PropersID=? AND IsActive=1 AND IsDefault=1 "
+            "ORDER BY COALESCE(Sequence,ID),ID",
             (proper_id,),
         ) if proper_id else []
         hymns = self.all(

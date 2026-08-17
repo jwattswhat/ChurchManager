@@ -198,6 +198,11 @@ future roadmap projects:
   reading appointments, including automatic A/B/C cycles and reversible
   retirement. Appointment entry enforces the metadata-only boundary by storing
   biblical references rather than Scripture text.
+- Migration 080 completes the runtime cutover to an edition-only congregation
+  default. Church Information presents one unambiguous active-edition selector,
+  and Worship Planning no longer falls back to the obsolete system-level
+  setting. Local appointment roles and citations are used when a Proper is
+  applied.
 - A future redistributable ChurchManager lectionary may provide independently
   authored three-year and one-year citation metadata, but it must not reproduce
   or claim to be Lutheran Service Book data. Exact publisher-specific editions

@@ -260,17 +260,18 @@ class TestWorshipPlanningStructure(unittest.TestCase):
         )
         self.assertIn("WHERE HymnalID=?", weekly_plan)
 
-    def test_church_can_select_an_optional_default_lectionary(self):
-        migration = (ROOT / "migrations" / "029_add_church_primary_lectionary.sql").read_text(
+    def test_church_selects_an_optional_default_lectionary_edition(self):
+        migration = (ROOT / "migrations" / "080_complete_lectionary_edition_cutover.sql").read_text(
             encoding="utf-8"
         )
         church = load_json(FORMS / "frmChurch.json")["frmChurchFORM"]
-        control = church["CONTROLS"]["PrimaryLectionarySystemID"]
-        self.assertIn("PrimaryLectionarySystemID int NULL", migration)
-        self.assertIn("REFERENCES tblLectionarySystem(ID)", migration)
-        self.assertEqual(control["lookupchoices"]["name"], "tblLectionarySystem")
+        control = church["CONTROLS"]["PrimaryLectionaryEditionID"]
+        self.assertIn("DROP COLUMN IF EXISTS PrimaryLectionarySystemID", migration)
+        self.assertIn("vwLectionaryEditionLookup", migration)
+        self.assertNotIn("PrimaryLectionarySystemID", church["CONTROLS"])
+        self.assertEqual(control["lookupchoices"]["name"], "vwLectionaryEditionLookup")
         self.assertTrue(control["lookupchoices"]["allowblank"])
-        self.assertEqual(control["lookupchoices"]["blanklabel"], "No default lectionary")
+        self.assertEqual(control["lookupchoices"]["blanklabel"], "No default edition")
 
 
 class TestChurchManagerPython(unittest.TestCase):
@@ -692,7 +693,9 @@ class TestChurchManagerForms(unittest.TestCase):
         migration = (
             ROOT / "migrations" / "030_abbreviate_lsb_lectionary_names.sql"
         ).read_text(encoding="utf-8")
-        self.assertIn("PrimaryLectionarySystemID FROM tblChurch", source)
+        self.assertIn("PrimaryLectionaryEditionID", source)
+        self.assertNotIn("PrimaryLectionarySystemID", source)
+        self.assertIn("p.IsActive=1 AND e.IsActive=1", source)
         self.assertIn("def propers(self, church_id)", source)
         self.assertIn("LSB Three-Year Lectionary", migration)
         self.assertNotIn("SET Name = 'Lutheran Service Book", migration)

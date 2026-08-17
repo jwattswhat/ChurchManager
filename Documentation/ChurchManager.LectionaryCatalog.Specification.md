@@ -219,8 +219,9 @@ in application code.
 
 ## 7. Congregation settings
 
-`tblChurch` retains a nullable primary lectionary selection, migrated from
-`PrimaryLectionarySystemID` to the installed edition where necessary.
+`tblChurch` retains a nullable `PrimaryLectionaryEditionID`. The obsolete
+system-level default is removed after catalog conversion; runtime selection must
+never fall back to it.
 
 Optional congregation defaults may include:
 
