@@ -75,6 +75,24 @@ class LocalLectionaryRepository:
         finally:
             cursor.close()
 
+    def propers(self, edition_id):
+        """Return active and retired Propers belonging to one local edition."""
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT p.ID,p.LiturgicalDate,p.Season,p.Sort,p.Color,p.AltColor,"
+                "p.CalendarRule,p.IsActive,p.Note,p.LectionaryCycleID,"
+                "COALESCE(c.DisplayName,'No cycle') FROM tblPropers p "
+                "JOIN tblLectionaryEdition e ON e.ID=p.LectionaryEditionID "
+                "LEFT JOIN tblLectionaryCycle c ON c.ID=p.LectionaryCycleID "
+                "WHERE p.LectionaryEditionID=? AND p.PackageID IS NULL "
+                "AND e.PackageID IS NULL ORDER BY p.IsActive DESC,p.Sort,p.LiturgicalDate",
+                (edition_id,),
+            )
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
     def save_system(self, record_id, name, cycle_type, note):
         """Create or update one local system without touching package data."""
         name = clean_name(name, "System name")
@@ -248,6 +266,88 @@ class LocalLectionaryRepository:
             )
             if cursor.rowcount != 1:
                 raise ValueError("The local lectionary cycle is unavailable.")
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
+    def save_proper(self, record_id, edition_id, cycle_id, liturgical_date,
+                    season, sort, color, alternate_color, calendar_rule, note):
+        """Create or update a citation-only Proper under a local edition."""
+        liturgical_date = clean_name(liturgical_date, "Liturgical date")
+        try:
+            sort = int(str(sort).strip())
+        except ValueError as error:
+            raise ValueError("Sort must be a whole number.") from error
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT LectionarySystemID FROM tblLectionaryEdition "
+                "WHERE ID=? AND PackageID IS NULL AND IsActive=1", (edition_id,),
+            )
+            edition = cursor.fetchone()
+            if not edition:
+                raise ValueError("Select an active local edition.")
+            if cycle_id is not None:
+                cursor.execute(
+                    "SELECT ID,CycleCode FROM tblLectionaryCycle WHERE ID=? "
+                    "AND LectionaryEditionID=? AND IsActive=1", (cycle_id, edition_id),
+                )
+                cycle = cursor.fetchone()
+                if not cycle:
+                    raise ValueError("Select an active cycle from this edition.")
+                cycle_label = str(cycle[1]).upper()
+            else:
+                cycle_label = None
+            values = (
+                edition[0], edition_id, cycle_id, cycle_label, sort,
+                str(season or "").strip() or None, liturgical_date,
+                str(color or "").strip() or None,
+                str(alternate_color or "").strip() or None,
+                str(calendar_rule or "").strip().casefold() or None,
+                str(note or "").strip() or None,
+            )
+            if record_id is None:
+                cursor.execute(
+                    "INSERT INTO tblPropers "
+                    "(LectionarySystemID,LectionaryEditionID,LectionaryCycleID,ProperKey,"
+                    "Cycle,Sort,Season,LiturgicalDate,Color,AltColor,CalendarRule,PackageID,"
+                    "IsStarter,IsActive,Theme,Note,SourceNote) "
+                    "VALUES (?,?,?, ?,?,?,?,?,?,?,?,NULL,0,1,'',?,NULL)",
+                    values[:3] + (local_key("proper"),) + values[3:],
+                )
+                record_id = cursor.lastrowid
+            else:
+                cursor.execute(
+                    "UPDATE tblPropers SET LectionarySystemID=?,LectionaryEditionID=?,"
+                    "LectionaryCycleID=?,Cycle=?,Sort=?,Season=?,LiturgicalDate=?,Color=?,"
+                    "AltColor=?,CalendarRule=?,Note=? WHERE ID=? AND PackageID IS NULL",
+                    values + (record_id,),
+                )
+                if cursor.rowcount != 1:
+                    raise ValueError("The local Proper is unavailable.")
+            self.connection.commit()
+            return record_id
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
+    def set_proper_active(self, proper_id, edition_id, active):
+        """Retire or restore a Proper only inside its local edition."""
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "UPDATE tblPropers p JOIN tblLectionaryEdition e "
+                "ON e.ID=p.LectionaryEditionID SET p.IsActive=? "
+                "WHERE p.ID=? AND p.LectionaryEditionID=? AND p.PackageID IS NULL "
+                "AND e.PackageID IS NULL", (int(bool(active)), proper_id, edition_id),
+            )
+            if cursor.rowcount != 1:
+                raise ValueError("The local Proper is unavailable.")
             self.connection.commit()
         except Exception:
             self.connection.rollback()

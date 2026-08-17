@@ -36,6 +36,10 @@ class LocalLectionaryDialogTests(unittest.TestCase):
         self.assertIn("def save_cycle", source)
         self.assertIn("def set_cycle_active", source)
         self.assertIn("JOIN tblLectionaryEdition e", source)
+        self.assertIn("def save_proper", source)
+        self.assertIn("def set_proper_active", source)
+        self.assertIn("local_key(\"proper\")", source)
+        self.assertIn("p.PackageID IS NULL", source)
 
 
 if __name__ == "__main__":
