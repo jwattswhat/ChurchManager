@@ -205,6 +205,9 @@ future roadmap projects:
 - Migration 084 removes the corresponding obsolete required
   `tblReading.OldID` column. Imported citation appointments now use their stable
   package appointment keys without requiring an unused historical identifier.
+- Church Information presents the primary hymnal and default lectionary as one
+  aligned, consistently sized catalog-selection column rather than separate
+  responsive-grid columns.
 - Migration 081 removes the former LSB lectionary catalog, its dependent
   Propers/readings/suggestions, and related development service snapshots.
   Services themselves remain, with their Proper selection cleared. Obsolete

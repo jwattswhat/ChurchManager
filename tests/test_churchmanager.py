@@ -272,6 +272,12 @@ class TestWorshipPlanningStructure(unittest.TestCase):
         self.assertEqual(control["lookupchoices"]["name"], "vwLectionaryEditionLookup")
         self.assertTrue(control["lookupchoices"]["allowblank"])
         self.assertEqual(control["lookupchoices"]["blanklabel"], "No default edition")
+        self.assertEqual(
+            control["posch"][0], church["CONTROLS"]["PrimaryHymnalID"]["posch"][0]
+        )
+        self.assertEqual(
+            control["sizech"], church["CONTROLS"]["PrimaryHymnalID"]["sizech"]
+        )
 
 
 class TestChurchManagerPython(unittest.TestCase):

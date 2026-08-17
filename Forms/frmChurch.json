@@ -241,8 +241,8 @@
                 "name": "PrimaryHymnalID",
                 "type": "ComboBox",
                 "lookupchoices": {"name": "tblHymnal", "fields": ["ID", "Hymnal", "Title"], "orderby": "Title", "allowblank": true, "blanklabel": "No primary hymnal"},
-                "posch": [8, 19],
-                "sizech": [22, 2],
+                "posch": [6, 19],
+                "sizech": [24, 2],
                 "tooltip": "Select the hymnal normally used by this church."
             },
             "btnHymnalCatalog": {
@@ -269,8 +269,8 @@
                     "allowblank": true,
                     "blanklabel": "No default edition"
                 },
-                "posch": [10, 21],
-                "sizech": [25, 2],
+                "posch": [6, 21],
+                "sizech": [24, 2],
                 "tooltip": "Select the installed or local lectionary edition used by this church."
             },
             "lblNote": {
