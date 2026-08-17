@@ -199,6 +199,9 @@ future roadmap projects:
   protected package screen, selection as the church default edition, creation
   of a new Worship Service, and verification of its Proper, readings,
   liturgical date, color, and Worship Planning report.
+- Migration 083 removes the obsolete required `tblLectionarySystem.OldID`
+  column found on databases upgraded from the original application. Package
+  installation now creates systems solely through their stable package keys.
 - Migration 081 removes the former LSB lectionary catalog, its dependent
   Propers/readings/suggestions, and related development service snapshots.
   Services themselves remain, with their Proper selection cleared. Obsolete
