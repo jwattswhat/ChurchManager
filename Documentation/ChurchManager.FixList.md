@@ -330,6 +330,11 @@ future roadmap projects:
   test-only objects, development-account definers, and machine-specific values.
   Findings must be removed or individually documented and approved before a
   release baseline is accepted.
+- The automated schema-hygiene gate is implemented and tested. It reports exact
+  line numbers for obsolete identifiers and retired tables, test database
+  names, account definers and grants, database-selection statements, fixture
+  data, destructive dump statements, persisted auto-increment state, and
+  machine-specific paths.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local

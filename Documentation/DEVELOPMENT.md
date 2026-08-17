@@ -68,6 +68,8 @@ Never promote an unreviewed schema-only dump into the baseline. Run the
 schema-hygiene checks for obsolete identifiers such as `OldID`, retired
 conversion structures, test fixtures, account definers, and machine-specific
 values. A finding must be removed or explicitly documented and approved.
+The reusable enforcement is in `schema_hygiene.py`; baseline generation must
+call `require_clean_schema` before writing an accepted release artifact.
 
 ```powershell
 .\.runtime-venv\Scripts\python.exe run_churchdb_migrations.py --apply
