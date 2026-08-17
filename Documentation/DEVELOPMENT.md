@@ -82,6 +82,12 @@ schema. The command previews and validates by default; `--write` creates
 
 The export is structure-only. It verifies the complete migration ledger first
 and never places the database password on the process command line.
+Required non-congregation starter records are maintained separately in
+`installation/baseline_seed.sql` and its manifest. The seed is deterministically
+derived from approved catalog mutations in immutable migrations plus explicitly
+reviewed current-schema worship roles. It must never contain a church, person,
+family, user, activity record, test fixture, or optional hymnal, lectionary, or
+Order of Service package.
 
 Preview the disposable live acceptance target without connecting to MariaDB:
 

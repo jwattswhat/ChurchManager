@@ -349,7 +349,8 @@ future roadmap projects:
   `CMFreshAcceptance_...` database and `cm_accept_...` local account, verifies
   the baseline and migration ledger through that account, and removes both on
   success or failure. Live acceptance passed August 17, 2026: 84 migration
-  checksums and the canonical schema digest verified, and cleanup completed.
+  checksums, 138 database objects, 67 starter-data statements, 43 active
+  permissions, and both canonical digests verified; cleanup completed.
 - The first task-oriented User Guide is maintained as Markdown and rendered as
   a visually inspected PDF. A signed-in **Help - User Guide** control opens it
   from the main menu without requiring an administrative permission. Installer

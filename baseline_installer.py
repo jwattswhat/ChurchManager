@@ -8,6 +8,7 @@ from pathlib import Path
 
 from migration_service import MigrationService, split_sql_statements
 from schema_hygiene import require_clean_schema
+from baseline_seed import build_seed_artifact
 
 
 class BaselineInstallationError(RuntimeError):
@@ -35,6 +36,23 @@ def load_baseline(schema_path, manifest_path, migration_directory):
     return schema, manifest
 
 
+def load_seed(seed_path, seed_manifest_path, migration_directory):
+    """Load and verify starter data against its checksum and migration sources."""
+    sql = Path(seed_path).read_text(encoding="utf-8")
+    manifest = json.loads(Path(seed_manifest_path).read_text(encoding="utf-8"))
+    expected = build_seed_artifact(migration_directory, manifest.get("release_version"))
+    digest = hashlib.sha256(sql.encode("utf-8")).hexdigest()
+    if manifest.get("format_version") != 1:
+        raise BaselineInstallationError("The seed manifest format is unsupported.")
+    if manifest.get("seed_sha256") != digest:
+        raise BaselineInstallationError("The starter-data checksum does not match.")
+    if manifest != expected.manifest or sql != expected.sql:
+        raise BaselineInstallationError(
+            "The starter data does not match the release migrations."
+        )
+    return sql, manifest
+
+
 class BaselineInstaller:
     """Apply a verified baseline only to the currently selected empty database."""
 
@@ -42,7 +60,7 @@ class BaselineInstaller:
         self.connection = connection
         self.database_errors = database_errors
 
-    def install(self, schema, manifest):
+    def install(self, schema, manifest, seed_sql):
         """Create schema objects, seed migration history, and verify the result."""
         cursor = self.connection.cursor()
         try:
@@ -64,6 +82,17 @@ class BaselineInstaller:
                     raise BaselineInstallationError(
                         "Baseline installation failed at: " + first_line
                     ) from error
+            seed_statements = split_sql_statements(seed_sql)
+            if not seed_statements:
+                raise BaselineInstallationError("The starter-data baseline is empty.")
+            for statement in seed_statements:
+                try:
+                    cursor.execute(statement)
+                except self.database_errors as error:
+                    first_line = statement.splitlines()[0][:120]
+                    raise BaselineInstallationError(
+                        "Starter-data installation failed at: " + first_line
+                    ) from error
             for record in manifest["represented_migrations"]:
                 cursor.execute(
                     "INSERT INTO schema_migrations (version, checksum) VALUES (?, ?)",
@@ -81,10 +110,20 @@ class BaselineInstaller:
             object_count = int(cursor.fetchone()[0])
             if not object_count:
                 raise BaselineInstallationError("The installed schema contains no objects.")
+            cursor.execute("SELECT COUNT(*) FROM tblRole WHERE Name='Master Administrator'")
+            if int(cursor.fetchone()[0]) != 1:
+                raise BaselineInstallationError(
+                    "The Master Administrator role was not installed."
+                )
+            cursor.execute("SELECT COUNT(*) FROM tblPermission WHERE Active=1")
+            permission_count = int(cursor.fetchone()[0])
+            if not permission_count:
+                raise BaselineInstallationError("No active permissions were installed.")
             self.connection.commit()
             return {
                 "database_objects": object_count,
                 "represented_migrations": migration_count,
+                "active_permissions": permission_count,
                 "schema_sha256": manifest["schema_sha256"],
             }
         finally:

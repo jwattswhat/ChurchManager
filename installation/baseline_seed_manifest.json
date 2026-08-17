@@ -1,0 +1,151 @@
+{
+  "artifact": "ChurchManager fresh-install starter-data baseline",
+  "format_version": 1,
+  "release_version": "0.2.0-dev",
+  "seed_sha256": "dac0b9c3bcd162cbf2da3539750a518ed3177aa5830fc7ff046eb1a392df3859",
+  "statement_count": 67,
+  "source_migrations": [
+    {
+      "version": "003_add_user_security.sql",
+      "checksum": "0148fdef680eb3c65684dd1fbabe732722f06b1fb81a14638ff79ef62b0587ff",
+      "statements": 2
+    },
+    {
+      "version": "004_add_main_menu_permissions.sql",
+      "checksum": "d57da764a3eee1a7a35cb53d44e6a36e06868f08ea607d6d691bd1fe24dc745d",
+      "statements": 3
+    },
+    {
+      "version": "006_add_accounting_ledger_foundation.sql",
+      "checksum": "fe353af5523795a88f9871b3fb6d996b85bc60abe74abe1421520b82b9a19ca8",
+      "statements": 6
+    },
+    {
+      "version": "009_add_audited_solo_approval.sql",
+      "checksum": "2356caaa23f41d4098e376536da7ff109b098cb312e6e7d3968385374492d02a",
+      "statements": 2
+    },
+    {
+      "version": "013_add_accounting_budgets.sql",
+      "checksum": "de475a44acabf1504231185dbae0cdd029b110cda80a41b8eb9a61bc93529091",
+      "statements": 3
+    },
+    {
+      "version": "015_add_report_permissions.sql",
+      "checksum": "d127457784d426f3d807e12c4037ca9fcf8643d64ccc9a371b52b64845340d29",
+      "statements": 12
+    },
+    {
+      "version": "016_grant_report_screen_access.sql",
+      "checksum": "92dcc245216dab32ed41d44ec5db98c56608d7a15c0baa8c86169ccf9b87aca2",
+      "statements": 1
+    },
+    {
+      "version": "018_add_report_designer_permission.sql",
+      "checksum": "9bf25404543dba25e5c65630b5bcf84418c7fb5aceab1b891b59aed8bb79ab24",
+      "statements": 2
+    },
+    {
+      "version": "019_register_visual_report_inventory.sql",
+      "checksum": "f3c5cfdc588ea8c16c1d72cc9b66574322abe6688b39c2c292bec39f726c3308",
+      "statements": 2
+    },
+    {
+      "version": "020_add_accounting_report_designer_permission.sql",
+      "checksum": "71189a4a64bbf773819dd3e23f3ea4b521d39d7a36f48471496728fd935a1cb3",
+      "statements": 2
+    },
+    {
+      "version": "021_add_screen_designer_permission.sql",
+      "checksum": "e25cb60135c983a3f089337b5748ebc14dac1b4aa1a85bfa194ea76cf92b284a",
+      "statements": 2
+    },
+    {
+      "version": "047_normalize_sunday_content_categories.sql",
+      "checksum": "511d31b4d4f4c7b1318b3af7cc360238d4f4bbdf8e72953f37392bd1e2efc827",
+      "statements": 2
+    },
+    {
+      "version": "048_clean_and_complete_choices.sql",
+      "checksum": "e7436b941eb70cfafd161e53ebc380a87ed49de1ffb0a950ceca43153372cbaf",
+      "statements": 5
+    },
+    {
+      "version": "049_enforce_unique_choice_fields.sql",
+      "checksum": "d99c4bd6cb39f6581a2bf0e99b57acaebce9944a23f99a30a0e753a3e76fe790",
+      "statements": 1
+    },
+    {
+      "version": "050_normalize_worship_preparation_checklists.sql",
+      "checksum": "a8d6b918b04f9aea85eb351a8fed685aff28625c5fea7b69f3cf1ce1f63cdcff",
+      "statements": 2
+    },
+    {
+      "version": "051_add_database_restore_permission.sql",
+      "checksum": "ddbef7597263dc9ac6aaa515632ab4c232aec19f9a0797de541fa23a01cefff3",
+      "statements": 2
+    },
+    {
+      "version": "057_improve_attendance_reports.sql",
+      "checksum": "c2a4e94c64f74e06ec0332e144b6cd358ff5bf4991f1e5b99969bedab6819bd8",
+      "statements": 1
+    },
+    {
+      "version": "058_add_individual_attendance_report.sql",
+      "checksum": "202c32d0aa4c1c4d8dea0be94e5d7894cb5ef9249dc670ac650582407a70fb75",
+      "statements": 1
+    },
+    {
+      "version": "059_add_pastors_attendance_comparison.sql",
+      "checksum": "c0019e2b2f3f1f3f49e0df4dc9b76ba51de402067482d8c6017e599eca35fac3",
+      "statements": 1
+    },
+    {
+      "version": "060_add_member_attendance_followup.sql",
+      "checksum": "b5f74d5df794f1014e256b2d793b69502cc2ff3977aa65db305426369417bb51",
+      "statements": 1
+    },
+    {
+      "version": "061_group_attendance_report_titles.sql",
+      "checksum": "07525787944ef9f35391b88113e7f02474f8c37cffaa0be4fd41e5b7a398146c",
+      "statements": 5
+    },
+    {
+      "version": "062_add_support_diagnostics_permission.sql",
+      "checksum": "9cf454424ccb67ad20c5608b7d6847c2aa6c6878651fbbc1c2e5d6aeca766ca2",
+      "statements": 2
+    },
+    {
+      "version": "065_retire_limereports_runtime.sql",
+      "checksum": "0a65f91f89572f515966e4aab1cb368c7dbc97401e953b22422705db743e9275",
+      "statements": 1
+    },
+    {
+      "version": "066_retire_enhancement_tracker.sql",
+      "checksum": "d38f7ec2445d72b1b140e24458598d5fd19164af73ee3d22e560f755080a8b0d",
+      "statements": 3
+    },
+    {
+      "version": "071_add_secure_mail_settings.sql",
+      "checksum": "21bb26d93ef171005a864c310f74a5118fdbefdaec42b10d4f2e1b46d3f83e30",
+      "statements": 1
+    },
+    {
+      "version": "075_add_favorite_hymns_report.sql",
+      "checksum": "8e263e214281d077c114f85af318dac8b853ac367d09ac77e5e1094d5c3459e4",
+      "statements": 1
+    }
+  ],
+  "current_schema_statements": 1,
+  "tables": [
+    "tblchoices",
+    "tblmailsettings",
+    "tblpermission",
+    "tblreports",
+    "tblrole",
+    "tblrolepermission",
+    "tblworshipchecklisttemplate",
+    "tblworshipchecklisttemplateitem",
+    "tblworshiprole"
+  ]
+}

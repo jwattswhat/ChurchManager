@@ -85,20 +85,21 @@ class BaselineInstallerTests(unittest.TestCase):
         with self.assertRaisesRegex(BaselineInstallationError, "empty database"):
             BaselineInstaller(connection).install("CREATE TABLE x (ID int);", {
                 "represented_migrations": [], "schema_sha256": "a" * 64,
-            })
+            }, "INSERT INTO tblRole VALUES (1);")
 
     def test_installs_and_verifies(self):
-        connection = Connection(((0,), (1,), (2,)))
+        connection = Connection(((0,), (1,), (2,), (1,), (5,)))
         manifest = {
             "represented_migrations": [{"version": "001.sql", "checksum": "a" * 64}],
             "schema_sha256": "b" * 64,
         }
         result = BaselineInstaller(connection).install(
             "CREATE TABLE schema_migrations (version varchar(100), checksum char(64));",
-            manifest,
+            manifest, "INSERT INTO tblRole VALUES (1);",
         )
         self.assertEqual(result["represented_migrations"], 1)
         self.assertEqual(result["database_objects"], 2)
+        self.assertEqual(result["active_permissions"], 5)
         self.assertTrue(connection.committed)
         self.assertTrue(connection.value.closed)
 

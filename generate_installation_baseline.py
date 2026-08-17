@@ -13,6 +13,7 @@ from pathlib import Path
 import mariadb
 
 from baseline_schema import build_baseline_artifact, write_baseline_artifact
+from baseline_seed import build_seed_artifact, write_seed_artifact
 from churchmanager_mode import resolve_database
 from churchmanager_version import __version__
 from installation_readiness import find_mariadb_tool
@@ -108,14 +109,20 @@ def main():
     artifact = build_baseline_artifact(
         dump_schema(resolved), resolved["database"], MIGRATIONS, __version__,
     )
+    seed = build_seed_artifact(MIGRATIONS, __version__)
     print(f"schema_sha256={artifact.manifest['schema_sha256']}")
     print(f"migrations={len(artifact.manifest['represented_migrations'])}")
+    print(f"seed_sha256={seed.manifest['seed_sha256']}")
+    print(f"seed_statements={seed.manifest['statement_count']}")
     if not args.write:
         print("Baseline is clean. No files written; re-run with --write.")
         return 0
     schema, manifest = write_baseline_artifact(artifact, OUTPUT)
+    seed_sql, seed_manifest = write_seed_artifact(seed, OUTPUT)
     print(f"schema={schema}")
     print(f"manifest={manifest}")
+    print(f"seed={seed_sql}")
+    print(f"seed_manifest={seed_manifest}")
     return 0
 
 

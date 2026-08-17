@@ -10,7 +10,7 @@ from pathlib import Path
 
 import mariadb
 
-from baseline_installer import BaselineInstaller, load_baseline
+from baseline_installer import BaselineInstaller, load_baseline, load_seed
 from database_provisioning import FreshDatabaseProvisioner, quote_identifier
 from migration_service import MigrationService
 
@@ -19,6 +19,8 @@ ROOT = Path(__file__).resolve().parent
 MIGRATIONS = ROOT / "migrations"
 SCHEMA = ROOT / "installation" / "baseline_schema.sql"
 MANIFEST = ROOT / "installation" / "baseline_manifest.json"
+SEED = ROOT / "installation" / "baseline_seed.sql"
+SEED_MANIFEST = ROOT / "installation" / "baseline_seed_manifest.json"
 SAFE_PREFIX = "CMFreshAcceptance_"
 SAFE_ACCOUNT_PREFIX = "cm_accept_"
 
@@ -50,6 +52,7 @@ def _drop_disposable(admin_connection, database_name, account_name):
 def accept(admin_password, *, host="127.0.0.1", port=3306, keep=False, notify=print):
     """Create, install, verify, and normally remove one isolated database."""
     schema, manifest = load_baseline(SCHEMA, MANIFEST, MIGRATIONS)
+    seed_sql, seed_manifest = load_seed(SEED, SEED_MANIFEST, MIGRATIONS)
     database_name, account_name = disposable_names()
     application_password = secrets.token_urlsafe(32)
     admin = None
@@ -73,7 +76,7 @@ def accept(admin_password, *, host="127.0.0.1", port=3306, keep=False, notify=pr
         )
         result = BaselineInstaller(
             application, database_errors=(mariadb.Error,),
-        ).install(schema, manifest)
+        ).install(schema, manifest, seed_sql)
         migration_result = MigrationService(
             application, MIGRATIONS, database_errors=(mariadb.Error,),
         ).run()
@@ -84,6 +87,8 @@ def accept(admin_password, *, host="127.0.0.1", port=3306, keep=False, notify=pr
         succeeded = True
         notify(f"verified {result['database_objects']} database objects")
         notify(f"verified {result['represented_migrations']} migration checksums")
+        notify(f"verified {result['active_permissions']} active permissions")
+        notify(f"verified starter-data SHA-256 {seed_manifest['seed_sha256']}")
         notify(f"verified schema SHA-256 {result['schema_sha256']}")
         return result
     except mariadb.Error as error:
@@ -111,10 +116,13 @@ def main(argv=None):
     )
     args = parser.parse_args(argv)
     schema, manifest = load_baseline(SCHEMA, MANIFEST, MIGRATIONS)
+    seed_sql, seed_manifest = load_seed(SEED, SEED_MANIFEST, MIGRATIONS)
     database_name, account_name = disposable_names()
     print(f"release={manifest['release_version']}")
     print(f"schema_bytes={len(schema.encode('utf-8'))}")
     print(f"represented_migrations={len(manifest['represented_migrations'])}")
+    print(f"seed_bytes={len(seed_sql.encode('utf-8'))}")
+    print(f"seed_statements={seed_manifest['statement_count']}")
     print(f"temporary_database_pattern={database_name}")
     print(f"temporary_account_pattern={account_name}")
     if not args.apply:
