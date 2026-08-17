@@ -325,6 +325,11 @@ future roadmap projects:
   migration history for the migrations represented by that baseline, and then
   apply only later pending migrations. Creating and verifying this baseline is
   the next release-readiness step.
+- Baseline generation includes an explicit schema-hygiene gate for `OldID`,
+  retired conversion fields and tables, obsolete JSForm database structures,
+  test-only objects, development-account definers, and machine-specific values.
+  Findings must be removed or individually documented and approved before a
+  release baseline is accepted.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local

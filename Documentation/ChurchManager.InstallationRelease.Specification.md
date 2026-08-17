@@ -81,6 +81,15 @@ The installer shall:
    the numbered migrations represented by that baseline with their exact
    checksums, and then apply any later pending migrations in order. Historical
    upgrade migrations are not assumed to create an empty database.
+
+The baseline is not accepted merely because a schema-only export succeeds. A
+schema-hygiene gate must reject obsolete compatibility residue, including
+`OldID` columns, retired source-conversion fields, retired tables, obsolete
+JSForm database structures, test-only objects or defaults, database-account
+definitions, machine-specific paths, and object definers tied to a development
+account. Any exception must be named, justified, and approved; broad words such
+as "legacy" in a current identifier are treated as a finding rather than being
+silently retained.
 7. Create the first master administrator with a temporary password that must be
    changed at first login.
 8. Present separately selectable hymnal, lectionary, and Order of Service
@@ -161,6 +170,9 @@ Successful installation requires evidence that:
 
 - all numbered migrations are applied with expected checksums;
 - the installed baseline schema version and checksum match the release;
+- the baseline schema-hygiene scan reports no unapproved obsolete identifiers,
+  retired structures, test fixtures, account definers, or machine-specific
+  values;
 - the application and JSForm schema/resources are compatible;
 - exactly one initial active master administrator exists;
 - selected packages and dependencies are installed at the selected versions;
@@ -203,8 +215,8 @@ The beta is complete only when:
    are complete. Isolated live acceptance remains.
 4. Generate, review, and checksum a canonical current baseline schema that is
    independent of development data, account definers, and machine-specific
-   paths; prove that it creates an empty database and establishes accurate
-   migration history.
+   paths; scan it for obsolete compatibility structures such as `OldID`; prove
+   that it creates an empty database and establishes accurate migration history.
 5. Add first-master-administrator creation.
 6. Add transactional catalog installation and congregation defaults.
 7. Add the nontechnical wizard around the tested services.

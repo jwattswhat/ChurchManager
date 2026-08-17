@@ -64,6 +64,11 @@ tables to exist. Fresh installation therefore uses a separately reviewed,
 versioned baseline schema and records the exact migration checksums represented
 by that baseline before applying newer pending migrations.
 
+Never promote an unreviewed schema-only dump into the baseline. Run the
+schema-hygiene checks for obsolete identifiers such as `OldID`, retired
+conversion structures, test fixtures, account definers, and machine-specific
+values. A finding must be removed or explicitly documented and approved.
+
 ```powershell
 .\.runtime-venv\Scripts\python.exe run_churchdb_migrations.py --apply
 ```
