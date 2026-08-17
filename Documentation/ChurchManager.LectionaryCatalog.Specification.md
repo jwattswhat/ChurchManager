@@ -520,9 +520,8 @@ immutable `local-` system and edition keys, supports retirement instead of
 deletion, and automatically creates Year A/B/C cycle rows for an A/B/C edition.
 Custom cycles can be added, edited, retired, and restored without changing
 their stable identity. Package-owned catalogs never appear in this editor.
-The local repository layer also creates edition-bound Propers with optional
+The edition's **Propers...** editor creates edition-bound Propers with optional
 cycle membership, calendar metadata, colors, notes, immutable local keys, and
-reversible retirement. Its visual Proper and appointment editor is the next
-authoring layer.
+reversible retirement. Citation-only reading appointments are the next layer.
 Existing ChurchManager behavior remains in place until their migrations and
 application changes are completed and verified.

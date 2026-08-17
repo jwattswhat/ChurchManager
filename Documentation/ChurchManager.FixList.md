@@ -195,8 +195,8 @@ future roadmap projects:
   the package manager and cannot be silently treated as redistributable.
 - Local Lectionaries now provides protected, nontechnical maintenance of
   congregation-owned systems, editions, and cycles, including automatic A/B/C
-  cycles and reversible retirement. The protected local Proper repository is
-  implemented; its visual Proper and appointment surface remains next.
+  cycles and reversible retirement. The visual local Proper editor is
+  implemented; citation-only appointment maintenance remains next.
 - The current ChurchDBTest lectionary catalog is reference-only. Export it for
   citation, role, color, and hymn-suggestion reconciliation, then replace it
   cleanly; do not preserve its IDs or obsolete structure.

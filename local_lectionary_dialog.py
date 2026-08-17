@@ -7,6 +7,7 @@ from uuid import uuid4
 import wx
 
 from bulletin_orders import portable_connection
+from lectionary_calendar import LectionaryCalendarError, rule_date
 def local_key(kind):
     """Return an immutable key in ChurchManager's reserved local namespace."""
     return f"local-{kind}-{uuid4().hex}"
@@ -281,6 +282,12 @@ class LocalLectionaryRepository:
             sort = int(str(sort).strip())
         except ValueError as error:
             raise ValueError("Sort must be a whole number.") from error
+        calendar_rule = str(calendar_rule or "").strip().casefold()
+        if calendar_rule:
+            try:
+                rule_date(calendar_rule, 2026)
+            except LectionaryCalendarError as error:
+                raise ValueError(str(error)) from error
         cursor = self.connection.cursor()
         try:
             cursor.execute(
@@ -306,7 +313,7 @@ class LocalLectionaryRepository:
                 str(season or "").strip() or None, liturgical_date,
                 str(color or "").strip() or None,
                 str(alternate_color or "").strip() or None,
-                str(calendar_rule or "").strip().casefold() or None,
+                calendar_rule or None,
                 str(note or "").strip() or None,
             )
             if record_id is None:
@@ -413,6 +420,109 @@ class _CycleDialog(wx.Dialog):
         panel.SetSizer(outer)
 
 
+class _ProperDialog(wx.Dialog):
+    def __init__(self, parent, cycles, row=None):
+        super().__init__(parent, title="Local Proper", size=(610, 540))
+        self.cycles = [(None, "No cycle")] + [(item[0], item[1]) for item in cycles if item[3]]
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        grid = wx.FlexGridSizer(2, 8, 8); grid.AddGrowableCol(1, 1)
+        self.date = wx.TextCtrl(panel, value=str(row[1] or "") if row else "")
+        self.season = wx.TextCtrl(panel, value=str(row[2] or "") if row else "")
+        self.sort = wx.SpinCtrl(panel, min=0, max=999999, initial=int(row[3]) if row else 10)
+        self.cycle = wx.Choice(panel, choices=[item[1] for item in self.cycles])
+        cycle_id = row[9] if row else None
+        self.cycle.SetSelection(next((i for i, item in enumerate(self.cycles) if item[0] == cycle_id), 0))
+        self.color = wx.TextCtrl(panel, value=str(row[4] or "") if row else "")
+        self.alt_color = wx.TextCtrl(panel, value=str(row[5] or "") if row else "")
+        self.rule = wx.TextCtrl(panel, value=str(row[6] or "") if row else "")
+        self.note = wx.TextCtrl(panel, value=str(row[8] or "") if row else "", style=wx.TE_MULTILINE)
+        for label, control in (
+            ("Liturgical date", self.date), ("Season", self.season), ("Cycle", self.cycle),
+            ("Sort", self.sort), ("Liturgical color", self.color),
+            ("Alternate color", self.alt_color), ("Calendar rule", self.rule),
+            ("Note", self.note),
+        ):
+            grid.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+            grid.Add(control, 1, wx.EXPAND)
+        help_text = wx.StaticText(panel, label=(
+            "Calendar rules are optional. Examples: fixed:12-25, easter-offset:0, "
+            "advent-sunday-1, first-sunday-after:07-04."
+        ))
+        help_text.SetForegroundColour(wx.Colour(0, 90, 190))
+        outer.Add(grid, 1, wx.EXPAND | wx.ALL, 12)
+        outer.Add(help_text, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        outer.Add(dialog_buttons(panel), 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        panel.SetSizer(outer)
+
+    def cycle_id(self):
+        return self.cycles[self.cycle.GetSelection()][0]
+
+
+class _PropersDialog(wx.Dialog):
+    def __init__(self, parent, repository, edition):
+        super().__init__(parent, title=f"Local Propers — {edition[1]}", size=(940, 600),
+                         style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        self.repository = repository; self.edition = edition; self.rows = []
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        note = wx.StaticText(panel, label=(
+            "These Propers belong to this congregation. Double-click a row to edit it."
+        ))
+        note.SetForegroundColour(wx.Colour(0, 90, 190)); outer.Add(note, 0, wx.ALL, 10)
+        self.grid = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        for label, width in (("Liturgical date", 250), ("Season", 120), ("Cycle", 100),
+                             ("Sort", 65), ("Color", 90), ("Calendar rule", 190),
+                             ("Active", 65)):
+            self.grid.AppendColumn(label, width=width)
+        outer.Add(self.grid, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
+        actions = wx.BoxSizer(wx.HORIZONTAL)
+        for label, handler in (("Add Proper", self.on_add), ("Edit Proper", self.on_edit),
+                               ("Retire / Restore", self.on_toggle)):
+            button = wx.Button(panel, label=label); button.Bind(wx.EVT_BUTTON, handler)
+            actions.Add(button, 0, wx.RIGHT, 7)
+        actions.AddStretchSpacer(); close = wx.Button(panel, wx.ID_CLOSE, "Close")
+        close.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_CLOSE)); actions.Add(close)
+        outer.Add(actions, 0, wx.EXPAND | wx.ALL, 10); panel.SetSizer(outer)
+        self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit)
+        self.refresh(); self.CentreOnParent()
+
+    def refresh(self, selected_id=None):
+        self.rows = self.repository.propers(self.edition[0]); self.grid.DeleteAllItems()
+        for index, row in enumerate(self.rows):
+            self.grid.InsertItem(index, str(row[1])); self.grid.SetItem(index, 1, str(row[2] or ""))
+            self.grid.SetItem(index, 2, str(row[10])); self.grid.SetItem(index, 3, str(row[3]))
+            self.grid.SetItem(index, 4, str(row[4] or "")); self.grid.SetItem(index, 5, str(row[6] or ""))
+            self.grid.SetItem(index, 6, "Yes" if row[7] else "No")
+            if row[0] == selected_id: self.grid.Select(index)
+
+    def on_add(self, _event): self._edit(None)
+    def on_edit(self, _event):
+        index = self.grid.GetFirstSelected()
+        if index >= 0: self._edit(self.rows[index])
+    def _edit(self, row):
+        cycles = self.repository.cycles(self.edition[0]); dialog = _ProperDialog(self, cycles, row)
+        try:
+            if dialog.ShowModal() != wx.ID_OK: return
+            try:
+                proper_id = self.repository.save_proper(
+                    row[0] if row else None, self.edition[0], dialog.cycle_id(),
+                    dialog.date.GetValue(), dialog.season.GetValue(), dialog.sort.GetValue(),
+                    dialog.color.GetValue(), dialog.alt_color.GetValue(), dialog.rule.GetValue(),
+                    dialog.note.GetValue(),
+                )
+                self.refresh(proper_id)
+            except Exception as error:
+                wx.MessageBox(str(error), "Local Proper", wx.OK | wx.ICON_ERROR, self)
+        finally: dialog.Destroy()
+    def on_toggle(self, _event):
+        index = self.grid.GetFirstSelected()
+        if index < 0: return
+        row = self.rows[index]
+        try:
+            self.repository.set_proper_active(row[0], self.edition[0], not row[7]); self.refresh(row[0])
+        except Exception as error:
+            wx.MessageBox(str(error), "Local Proper", wx.OK | wx.ICON_ERROR, self)
+
+
 class LocalLectionaryDialog(wx.Dialog):
     """Present the local system/edition hierarchy without package-owned rows."""
 
@@ -442,7 +552,8 @@ class LocalLectionaryDialog(wx.Dialog):
         right = wx.BoxSizer(wx.VERTICAL)
         right.Add(self._section(panel, "Editions", self.editions_grid,
                                (("Add", self.on_add_edition), ("Edit", self.on_edit_edition),
-                                ("Retire / Restore", self.on_toggle_edition))), 1, wx.EXPAND | wx.BOTTOM, 8)
+                                ("Retire / Restore", self.on_toggle_edition),
+                                ("Propers...", self.on_propers))), 1, wx.EXPAND | wx.BOTTOM, 8)
         right.Add(self._section(panel, "Cycles", self.cycles_grid,
                                (("Add", self.on_add_cycle), ("Edit", self.on_edit_cycle),
                                 ("Retire / Restore", self.on_toggle_cycle))), 1, wx.EXPAND)
@@ -541,6 +652,13 @@ class LocalLectionaryDialog(wx.Dialog):
         index = self.editions_grid.GetFirstSelected()
         if index >= 0:
             row = self.edition_rows[index]; self._error(lambda: (self.repository.set_active("tblLectionaryEdition", row[0], not row[4]), self.refresh_editions(row[0])))
+
+    def on_propers(self, _event):
+        index = self.editions_grid.GetFirstSelected()
+        if index < 0: return
+        dialog = _PropersDialog(self, self.repository, self.edition_rows[index])
+        try: dialog.ShowModal()
+        finally: dialog.Destroy()
 
     def on_add_cycle(self, _event): self._edit_cycle(None)
     def on_edit_cycle(self, _event):

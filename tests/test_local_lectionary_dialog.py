@@ -40,6 +40,9 @@ class LocalLectionaryDialogTests(unittest.TestCase):
         self.assertIn("def set_proper_active", source)
         self.assertIn("local_key(\"proper\")", source)
         self.assertIn("p.PackageID IS NULL", source)
+        self.assertIn('("Propers...", self.on_propers)', source)
+        self.assertIn("class _PropersDialog", source)
+        self.assertIn("rule_date(calendar_rule, 2026)", source)
 
 
 if __name__ == "__main__":
