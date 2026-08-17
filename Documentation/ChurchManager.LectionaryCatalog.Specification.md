@@ -382,6 +382,14 @@ redistribute its citation compilation. The RCL provisional trial material, if
 approved later, is installed as a separate edition or overlay and never replaces
 the 1992 edition silently.
 
+The August 17, 2026 provenance review is recorded in
+`ChurchManager.LectionaryPackageProvenance.md`. Official CCT and CPH policies
+support congregational uses but do not grant this independent open-source
+project an unambiguous right to redistribute their electronic citation tables.
+Accordingly, public LSB and RCL packages remain blocked pending written
+permission. A documented `LOCAL_ONLY` congregation package is never committed
+to or distributed with ChurchManager.
+
 ## 15. Replacement of current development data
 
 The current ChurchDBTest lectionary catalog is disposable reference material,

@@ -186,6 +186,10 @@ future roadmap projects:
   calendar data remains to be supplied. The provenance-gated reproducible
   package builder and authoring guide are implemented; no candidate package is
   approved merely by this tooling.
+- The official CCT and CPH policies were reviewed August 17, 2026. Public LSB
+  and RCL packages are blocked pending written electronic-redistribution
+  permission. Narrow permission-request drafts and the local-only fallback are
+  documented in `ChurchManager.LectionaryPackageProvenance.md`.
 - The current ChurchDBTest lectionary catalog is reference-only. Export it for
   citation, role, color, and hymn-suggestion reconciliation, then replace it
   cleanly; do not preserve its IDs or obsolete structure.
