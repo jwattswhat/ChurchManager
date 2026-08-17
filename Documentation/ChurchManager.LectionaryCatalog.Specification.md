@@ -479,6 +479,9 @@ intentionally bounded to fixed month/day dates, Easter offsets, numbered Advent
 Sundays, and the strict first Sunday after a month/day. Edition cycle rotation
 requires an explicit Advent-year anchor and declared active cycle key. It
 returns every match with an explanation and never applies feast precedence or
-interprets a liturgical title as a rule.
+interprets a liturgical title as a rule. Church Information can select the
+primary installed edition. Worship Service offers `Suggest Proper...`, displays
+all explicit matches and their explanations, and applies only the candidate the
+user selects; no match or ambiguous match is silently resolved.
 Existing ChurchManager behavior remains in place until their migrations and
 application changes are completed and verified.

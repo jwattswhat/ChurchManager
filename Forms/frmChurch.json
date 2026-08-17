@@ -275,13 +275,34 @@
                 "posch": [33, 21],
                 "tooltip": "Review, add, or edit lectionary systems."
             },
+            "lblPrimaryLectionaryEditionID": {
+                "name": "lblPrimaryLectionaryEditionID",
+                "type": "StaticText",
+                "label": "Default edition:",
+                "posch": [1, 23]
+            },
+            "PrimaryLectionaryEditionID": {
+                "name": "PrimaryLectionaryEditionID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblLectionaryEdition",
+                    "fields": ["ID", "Name"],
+                    "condition": "IsActive = 1",
+                    "orderby": "Name",
+                    "allowblank": true,
+                    "blanklabel": "No default edition"
+                },
+                "posch": [10, 23],
+                "sizech": [20, 2],
+                "tooltip": "Select the installed lectionary edition used for date suggestions, or choose no default."
+            },
             "lblNote": {
                 "name": "lblNote",
                 "type": "StaticText",
                 "label": "Note:",
                 "posch": [
                     1,
-                    23
+                    25
                 ]
             },
             "Note": {
@@ -292,7 +313,7 @@
                 ],
                 "posch": [
                     6,
-                    23
+                    25
                 ],
                 "sizech": [
                     24,

@@ -15,6 +15,7 @@ from worship_scheduling import show_service_participants
 from worship_checklist import show_preparation_checklist
 from worship_checklist import WorshipChecklistRepository, checklist_counts
 from liturgical_colors import liturgical_color_hex
+from lectionary_calendar import LectionaryCalendarRepository, LectionaryCalendarError
 
 from bulletin_orders import (
     BulletinOrderGenerator,
@@ -187,10 +188,27 @@ class UnifiedWorshipServiceRepository:
             "SELECT p.ID,CONCAT(ls.Name,CASE WHEN COALESCE(p.Cycle,'')='' THEN '' "
             "ELSE CONCAT(' - Year ',p.Cycle) END,' - ',p.LiturgicalDate) "
             "FROM tblPropers p JOIN tblLectionarySystem ls ON ls.ID=p.LectionarySystemID "
-            "WHERE (SELECT PrimaryLectionarySystemID FROM tblChurch WHERE ID=?) IS NULL "
-            "OR p.LectionarySystemID=(SELECT PrimaryLectionarySystemID FROM tblChurch WHERE ID=?) "
-            "ORDER BY ls.Name,p.Cycle,p.Sort,p.ID", (church_id, church_id),
+            "WHERE ("
+            " (SELECT PrimaryLectionaryEditionID FROM tblChurch WHERE ID=?) IS NOT NULL "
+            " AND p.LectionaryEditionID=(SELECT PrimaryLectionaryEditionID FROM tblChurch WHERE ID=?)"
+            ") OR ("
+            " (SELECT PrimaryLectionaryEditionID FROM tblChurch WHERE ID=?) IS NULL AND ("
+            "  (SELECT PrimaryLectionarySystemID FROM tblChurch WHERE ID=?) IS NULL "
+            "  OR p.LectionarySystemID=(SELECT PrimaryLectionarySystemID FROM tblChurch WHERE ID=?)"
+            " )) ORDER BY ls.Name,p.Cycle,p.Sort,p.ID",
+            (church_id, church_id, church_id, church_id, church_id),
         )
+
+    def suggested_propers(self, church_id, civil_date):
+        """Return explicit date candidates for the church's primary edition."""
+        row = self.one(
+            "SELECT PrimaryLectionaryEditionID FROM tblChurch WHERE ID=?", (church_id,),
+        )
+        if not row or row[0] is None:
+            raise LectionaryCalendarError(
+                "Select a primary lectionary edition in Church Information before using suggestions."
+            )
+        return LectionaryCalendarRepository(self.connection).resolve(row[0], civil_date)
 
     def proper_values(self, proper_id):
         readings = self.all(
@@ -573,6 +591,12 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             self._add_field(right, key, label, multiline, inline)
             if key == "proper":
                 proper_row = wx.BoxSizer(wx.HORIZONTAL)
+                suggest_proper = wx.Button(right, label="Suggest Proper...")
+                suggest_proper.SetToolTip(
+                    "Show every Proper explicitly matching the service date for the primary edition."
+                )
+                suggest_proper.Bind(wx.EVT_BUTTON, self.on_suggest_proper)
+                proper_row.Add(suggest_proper, 0, wx.RIGHT, 8)
                 view_proper = wx.Button(right, label="View Proper...")
                 view_proper.Bind(wx.EVT_BUTTON, self.on_view_proper)
                 proper_row.Add(view_proper, 0, wx.RIGHT, 18)
@@ -1043,6 +1067,42 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         finally:
             dialog.Destroy()
 
+    def on_suggest_proper(self, _event):
+        """Present date matches without silently choosing liturgical precedence."""
+        selected_date = self.fields["service_date"].GetValue()
+        civil_date = datetime(
+            selected_date.GetYear(), selected_date.GetMonth() + 1, selected_date.GetDay(),
+        ).date()
+        try:
+            candidates = self.repository.suggested_propers(self.record[1], civil_date)
+        except LectionaryCalendarError as error:
+            wx.MessageBox(str(error), "Proper Suggestions", wx.OK | wx.ICON_INFORMATION, self)
+            return
+        if not candidates:
+            wx.MessageBox(
+                "No explicit calendar rule in the primary lectionary edition matches this date.",
+                "Proper Suggestions", wx.OK | wx.ICON_INFORMATION, self,
+            )
+            return
+        dialog = ProperCandidateDialog(self, civil_date, candidates)
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            proper_id = dialog.selected_proper_id()
+            index = next(
+                (i for i, row in enumerate(self.proper_rows) if row[0] == proper_id), None,
+            )
+            if index is None:
+                wx.MessageBox(
+                    "The selected Proper is not available in the current church selection.",
+                    "Proper Suggestions", wx.OK | wx.ICON_WARNING, self,
+                )
+                return
+            self.fields["proper"].SetSelection(index)
+            self.apply_proper()
+        finally:
+            dialog.Destroy()
+
     def apply_proper(self):
         selection = self.fields["proper"].GetSelection()
         proper_id = None if selection == wx.NOT_FOUND else self.proper_rows[selection][0]
@@ -1134,6 +1194,52 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         except Exception as error:
             wx.MessageBox(str(error), "Unable to Save Worship Service",
                           wx.OK | wx.ICON_ERROR, self)
+
+
+class ProperCandidateDialog(wx.Dialog):
+    """Require an explicit choice when one or more calendar rules match."""
+
+    def __init__(self, parent, civil_date, candidates):
+        super().__init__(
+            parent, title="Proper Suggestions", size=(900, 430),
+            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
+        )
+        self.candidates = list(candidates)
+        panel = wx.Panel(self)
+        outer = wx.BoxSizer(wx.VERTICAL)
+        heading = wx.StaticText(
+            panel,
+            label=f"Explicit matches for {civil_date.strftime('%B %d, %Y')}. "
+                  "Select the Proper to apply; ChurchManager will not choose precedence.",
+        )
+        heading.SetForegroundColour(wx.Colour(0, 90, 190))
+        outer.Add(heading, 0, wx.ALL, 10)
+        self.grid = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        for label, width in (
+            ("Liturgical date", 250), ("Season", 110), ("Cycle", 80),
+            ("Why it matched", 390),
+        ):
+            self.grid.AppendColumn(label, width=width)
+        for index, item in enumerate(self.candidates):
+            self.grid.InsertItem(index, item.liturgical_date)
+            self.grid.SetItem(index, 1, item.season)
+            self.grid.SetItem(index, 2, item.cycle_key.upper())
+            self.grid.SetItem(index, 3, item.explanation)
+        if self.candidates:
+            self.grid.Select(0)
+        self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self._accept)
+        outer.Add(self.grid, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
+        buttons = self.CreateStdDialogButtonSizer(wx.OK | wx.CANCEL)
+        outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 10)
+        panel.SetSizer(outer)
+
+    def _accept(self, _event):
+        self.EndModal(wx.ID_OK)
+
+    def selected_proper_id(self):
+        """Return the selected stable database identity, if any."""
+        selected = self.grid.GetFirstSelected()
+        return None if selected == -1 else self.candidates[selected].proper_id
 
 
 class HymnPickerDialog(wx.Dialog):
