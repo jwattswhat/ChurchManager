@@ -172,6 +172,7 @@ future roadmap projects:
 - The LSB Order of Service package must include every supported LSB service
   outline, and imported names use the `LSB ` prefix. Future service-book packages
   use their own uppercase abbreviation followed by one space.
+- Maintained scope inventory: [LSB Order of Service Package Inventory](ChurchManager.LSBOrderOfService.Inventory.md).
 - Define separately installable Order of Service packages with stable identity,
   version, source, license, dependencies, and supported update behavior.
 - Define how an Order of Service may reference a hymnal or service book while

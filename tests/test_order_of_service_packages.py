@@ -1,12 +1,15 @@
 """Contract tests for safe Order of Service package catalogs."""
 
 from copy import deepcopy
+import json
 from pathlib import Path
+import tempfile
 import unittest
 
 from order_of_service_packages import (
     OrderOfServicePackageError, OrderOfServicePackageImporter,
-    OrderOfServicePackageValidator,
+    OrderOfServicePackageValidator, canonical_package_checksum,
+    load_order_of_service_package,
 )
 
 
@@ -200,6 +203,27 @@ class OrderOfServicePackageTests(unittest.TestCase):
         with self.assertRaisesRegex(OrderOfServicePackageError, "cannot overwrite"):
             importer.install(package())
         self.assertEqual(connection.rollbacks, 1)
+
+    def test_package_loader_verifies_canonical_checksum(self):
+        value = package(); value["checksum"] = canonical_package_checksum(value)
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "package.json"
+            path.write_text(json.dumps(value, indent=2), encoding="utf-8")
+            loaded, checksum = load_order_of_service_package(path)
+        self.assertEqual(loaded["package_code"], value["package_code"])
+        self.assertEqual(checksum, value["checksum"])
+
+    def test_package_loader_rejects_tampering_and_duplicate_json_fields(self):
+        value = package(); value["checksum"] = canonical_package_checksum(value)
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "package.json"
+            value["title"] = "Tampered"
+            path.write_text(json.dumps(value), encoding="utf-8")
+            with self.assertRaisesRegex(OrderOfServicePackageError, "checksum"):
+                load_order_of_service_package(path)
+            path.write_text('{"checksum":"x","checksum":"y"}', encoding="utf-8")
+            with self.assertRaisesRegex(OrderOfServicePackageError, "Duplicate JSON field"):
+                load_order_of_service_package(path)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import re
+import hashlib
+import json
 from dataclasses import dataclass
+from pathlib import Path
 
 from bulletin_orders import portable_connection
 
@@ -18,6 +21,45 @@ _MARKUP = re.compile(
 
 class OrderOfServicePackageError(ValueError):
     """Raised when package preflight finds unsafe or inconsistent metadata."""
+
+
+def canonical_package_checksum(package):
+    """Hash canonical package content while excluding its self-referential checksum."""
+    if not isinstance(package, dict):
+        raise OrderOfServicePackageError("The package manifest must be an object.")
+    content = dict(package)
+    content.pop("checksum", None)
+    encoded = json.dumps(
+        content, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def load_order_of_service_package(path, maximum_bytes=2_000_000):
+    """Load one bounded JSON package and reject duplicate keys or bad checksums."""
+    path = Path(path)
+    if not path.is_file():
+        raise OrderOfServicePackageError("The Order of Service package is unavailable.")
+    if path.stat().st_size > maximum_bytes:
+        raise OrderOfServicePackageError("The Order of Service package is too large.")
+
+    def unique_object(pairs):
+        value = {}
+        for key, item in pairs:
+            if key in value:
+                raise OrderOfServicePackageError(f"Duplicate JSON field: {key}.")
+            value[key] = item
+        return value
+
+    try:
+        package = json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=unique_object)
+    except (UnicodeError, json.JSONDecodeError) as error:
+        raise OrderOfServicePackageError("The Order of Service package is not valid UTF-8 JSON.") from error
+    expected = str(package.get("checksum") or "").casefold() if isinstance(package, dict) else ""
+    actual = canonical_package_checksum(package)
+    if expected != actual:
+        raise OrderOfServicePackageError("The package checksum does not match its contents.")
+    return package, actual
 
 
 @dataclass(frozen=True)
