@@ -1,6 +1,6 @@
 # ChurchManager development roadmap
 
-Last reviewed: August 16, 2026
+Last reviewed: August 17, 2026
 
 This is the maintained ChurchManager development backlog. Priorities reflect
 the needs of a small congregation and a comparison with current paid and
@@ -352,6 +352,26 @@ future roadmap projects:
   format.
 - Perform a full fresh-install, upgrade, automatic-exit-backup, restore, and
   restart dress rehearsal using non-production data.
+- Conduct a structured beta-testing phase after the fresh-install dress
+  rehearsal and before the first stable release:
+  - recruit a small group representing pastors, office staff, worship planners,
+    treasurers, and congregations with one-person administration;
+  - provide a documented test installation and sample database rather than any
+    congregation's production records;
+  - give testers task-based acceptance scripts covering installation, people,
+    worship planning, attendance, reports, backup and restore, user security,
+    and the accounting workflows appropriate to their role;
+  - collect defects, usability observations, environment details, and safe
+    diagnostic packages through one maintained feedback list;
+  - classify findings as release-blocking, important, or post-release rather
+    than expanding the beta without limit;
+  - require explicit permission before receiving a tester's database or other
+    potentially confidential congregation data;
+  - repeat regression tests after every beta correction and verify upgrades
+    from the prior beta build; and
+  - define beta exit criteria: no unresolved release-blocking defects, clean
+    installation and upgrade, verified backup and restore, accepted core
+    workflows, reconciled documentation, and an identified release commit.
 - Complete and sign off the
   [Accounting Go-Live Checklist](ChurchManager.Accounting.GoLive.Checklist.md),
   including opening balances, permissions, audit behavior, representative
