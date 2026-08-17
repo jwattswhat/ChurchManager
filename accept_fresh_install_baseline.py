@@ -13,6 +13,8 @@ import mariadb
 from baseline_installer import BaselineInstaller, load_baseline, load_seed
 from database_provisioning import FreshDatabaseProvisioner, quote_identifier
 from migration_service import MigrationService
+from authentication import MariaDBUserRepository, PasswordService
+from initial_master import InitialMasterBootstrapper
 
 
 ROOT = Path(__file__).resolve().parent
@@ -84,11 +86,27 @@ def accept(admin_password, *, host="127.0.0.1", port=3306, keep=False, notify=pr
             raise FreshInstallAcceptanceError(
                 "The installed baseline left numbered migrations pending."
             )
+        master_password = secrets.token_urlsafe(24)
+        master_id = InitialMasterBootstrapper(application).create(
+            "acceptance_admin", "Acceptance Administrator",
+            master_password, master_password,
+        )
+        account = MariaDBUserRepository(application).find_by_username("acceptance_admin")
+        if not account or not account.is_master:
+            raise FreshInstallAcceptanceError(
+                "The initial Master Administrator did not verify."
+            )
+        if not PasswordService().verify(account.password_hash, master_password):
+            raise FreshInstallAcceptanceError(
+                "The initial Master Administrator password did not verify."
+            )
+        master_password = ""
         succeeded = True
         notify(f"verified {result['database_objects']} database objects")
         notify(f"verified {result['represented_migrations']} migration checksums")
         notify(f"verified {result['active_permissions']} active permissions")
         notify(f"verified starter-data SHA-256 {seed_manifest['seed_sha256']}")
+        notify(f"verified initial Master Administrator ID {master_id}")
         notify(f"verified schema SHA-256 {result['schema_sha256']}")
         return result
     except mariadb.Error as error:

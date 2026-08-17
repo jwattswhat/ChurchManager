@@ -225,7 +225,8 @@ The beta is complete only when:
    starter-data baseline against local MariaDB on August 17, 2026, then removed
    its isolated database and account successfully. The accepted seed contains
    67 statements and established 43 active permissions.
-5. Add first-master-administrator creation.
+5. Add first-master-administrator creation. **Completed and accepted against an
+   isolated fresh database on August 17, 2026.**
 6. Add transactional catalog installation and congregation defaults.
 7. Add the nontechnical wizard around the tested services.
 8. Add backup proof, final verification, and safe failure recovery.

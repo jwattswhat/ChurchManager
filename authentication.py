@@ -126,7 +126,7 @@ class MariaDBUserRepository:
             self._execute(cursor,
                 "INSERT INTO tblSecurityAuditEvent "
                 "(UserID, Action, EntityType, EntityID, Reason) "
-                "VALUES (?, 'MASTER_BOOTSTRAPPED', 'User', ?, 'Initial test setup')",
+                "VALUES (?, 'MASTER_BOOTSTRAPPED', 'User', ?, 'Initial application setup')",
                 (user_id, str(user_id)),
             )
             self.connection.commit()

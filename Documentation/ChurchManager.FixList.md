@@ -355,6 +355,11 @@ future roadmap projects:
   a visually inspected PDF. A signed-in **Help - User Guide** control opens it
   from the main menu without requiring an administrative permission. Installer
   packaging and installed-build acceptance remain.
+- Initial Master Administrator bootstrap is implemented using the production
+  Argon2id policy, the existing one-user atomic guard, the installed system
+  role, and a corrected `Initial application setup` audit reason. Isolated live
+  acceptance passed August 17, 2026, including authentication verification for
+  Master Administrator ID 1 and complete cleanup of the disposable database.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local
