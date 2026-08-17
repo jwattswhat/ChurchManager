@@ -60,6 +60,8 @@ class LocalLectionaryDialogTests(unittest.TestCase):
         self.assertIn("class _CopyEditionDialog", source)
         self.assertIn("Copy Installed Edition...", source)
         self.assertIn("future package updates will not change this copy", source)
+        self.assertIn("No Installed Edition to Copy", source)
+        self.assertIn("Install an approved lectionary package", source)
 
     def test_unchanged_local_records_are_not_treated_as_missing(self):
         source = Path("local_lectionary_dialog.py").read_text(encoding="utf-8")

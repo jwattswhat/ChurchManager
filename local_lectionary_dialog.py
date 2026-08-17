@@ -1042,7 +1042,16 @@ class LocalLectionaryDialog(wx.Dialog):
                                 ("Retire / Restore", self.on_toggle_cycle))), 1, wx.EXPAND)
         body.Add(right, 1, wx.EXPAND)
         outer.Add(body, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
-        copy_button = wx.Button(panel, label="Copy Installed Edition...")
+        self.copy_sources = self.repository.packaged_editions()
+        copy_label = ("Copy Installed Edition..." if self.copy_sources
+                      else "No Installed Edition to Copy")
+        copy_button = wx.Button(panel, label=copy_label)
+        copy_button.Enable(bool(self.copy_sources))
+        copy_button.SetToolTip(
+            "Create an editable local copy of a protected installed edition."
+            if self.copy_sources else
+            "Install an approved lectionary package before creating a local copy."
+        )
         copy_button.Bind(wx.EVT_BUTTON, self.on_copy_edition)
         close = wx.Button(panel, wx.ID_CLOSE, "Close"); close.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_CLOSE))
         row = wx.BoxSizer(wx.HORIZONTAL); row.Add(copy_button); row.AddStretchSpacer(); row.Add(close)

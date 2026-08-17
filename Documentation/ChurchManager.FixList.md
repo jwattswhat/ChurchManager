@@ -205,6 +205,8 @@ future roadmap projects:
   system and edition. The transaction assigns new local keys to every copied
   cycle, Proper, and appointment, remaps paired responses, and leaves the
   protected source and saved services unchanged.
+  When no approved package edition is installed, the copy action is visibly
+  disabled and explains that prerequisite instead of appearing to do nothing.
 - Migration 080 completes the runtime cutover to an edition-only congregation
   default. Church Information presents one unambiguous active-edition selector,
   and Worship Planning no longer falls back to the obsolete system-level
