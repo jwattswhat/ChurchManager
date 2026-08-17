@@ -66,6 +66,7 @@ from churchmanager_error_support import (
 from participant_notification_dialog import show_participant_notifications
 from mail_settings import show_mail_settings
 from local_hymns import LocalHymnIDAllocator
+from lectionary_package_dialog import show_lectionary_packages
 
 
 arguments = None
@@ -478,6 +479,11 @@ def _buttonclick(event):
             return
         case "lblSupportDiagnostics":
             show_support_diagnostics(cmfrm.FRAME)
+            return
+        case "lblLectionaryPackages":
+            show_lectionary_packages(
+                cmfrm.FRAME, context.connection, context.authorization,
+            )
             return
         case "lblUsers":
             show_user_administration(

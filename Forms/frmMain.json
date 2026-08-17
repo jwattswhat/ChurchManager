@@ -605,6 +605,14 @@
                     "invoke": "application.support.create"
                 }
             },
+            "lblLectionaryPackages": {
+                "name": "lblLectionaryPackages",
+                "type": "StaticText",
+                "label": "Lectionary Packages",
+                "posch": [28, 9],
+                "tooltip": "Validate, preview, install, or upgrade lectionary metadata packages.",
+                "security": {"invoke": "application.config.manage"}
+            },
             "lblEmailSettings": {
                 "name": "lblEmailSettings",
                 "type": "StaticText",

@@ -39,6 +39,7 @@ MAIN_MENU_PERMISSIONS = {
     "lblEmailSettings": "application.config.manage",
     "lblBackupDB": "application.backup.run",
     "lblSupportDiagnostics": "application.support.create",
+    "lblLectionaryPackages": "application.config.manage",
     "lblAccountingSetup": "accounting.master_data.manage",
     "lblAccountingAccounts": "accounting.master_data.manage",
     "lblAccountingFunds": "accounting.master_data.manage",

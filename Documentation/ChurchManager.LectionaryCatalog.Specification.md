@@ -483,5 +483,9 @@ interprets a liturgical title as a rule. Church Information can select the
 primary installed edition. Worship Service offers `Suggest Proper...`, displays
 all explicit matches and their explanations, and applies only the candidate the
 user selects; no match or ambiguous match is silently resolved.
+The protected `Lectionary Packages` screen lists installed packages and requires
+an administrator to choose, checksum-validate, preview, review source metadata
+and counts, confirm, and then transactionally install or upgrade a package. A
+package cannot be installed directly from an unreviewed file selection.
 Existing ChurchManager behavior remains in place until their migrations and
 application changes are completed and verified.
