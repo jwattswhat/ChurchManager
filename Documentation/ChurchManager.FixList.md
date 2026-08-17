@@ -310,6 +310,10 @@ future roadmap projects:
   congregation, safe database and administrator identifiers, optional package
   selections, catalog dependencies, and independent default catalogs before
   any installation action is permitted.
+- The numbered migration runner now delegates to a reusable checksum-verified
+  migration service. The existing development command retains its strict
+  ChurchDBTest target guard, while the future setup executable must supply its
+  own explicitly opened fresh-database connection.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local

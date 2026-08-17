@@ -46,6 +46,12 @@ SQL dump under `BackupDB/ChurchDBTest.pre-activity-reset`.
 Add the next numbered SQL migration and make it repeat-safe where practical.
 Never edit a migration after it has been recorded as applied. Run:
 
+`migration_service.py` is the reusable migration engine used by both the
+development command and the future setup executable. It accepts an already-open
+connection and never discovers a target or credential. Target safety remains
+the caller's responsibility; `run_churchdb_migrations.py` therefore retains its
+strict ChurchDBTest-only guard.
+
 ```powershell
 .\.runtime-venv\Scripts\python.exe run_churchdb_migrations.py --apply
 ```

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
 
@@ -11,6 +10,7 @@ import mariadb
 
 from churchmanager_mode import resolve_database
 from hymn_titles import title_case
+from migration_service import MigrationService, split_sql_statements
 
 
 ROOT = Path(__file__).resolve().parent
@@ -37,28 +37,8 @@ def migration_files():
 
 
 def statements(sql):
-    delimiter = ";"
-    buffer = []
-    result = []
-    for line in sql.splitlines():
-        stripped = line.strip()
-        if not stripped or stripped.startswith("--"):
-            continue
-        if stripped.upper().startswith("DELIMITER "):
-            delimiter = stripped.split(None, 1)[1]
-            continue
-        buffer.append(line)
-        joined = "\n".join(buffer).rstrip()
-        if joined.endswith(delimiter):
-            statement = joined[:-len(delimiter)].strip()
-            if statement:
-                result.append(statement)
-            buffer = []
-    if buffer:
-        statement = "\n".join(buffer).strip()
-        if statement:
-            result.append(statement)
-    return result
+    """Backward-compatible facade for migration statement parsing."""
+    return split_sql_statements(sql)
 
 
 def settings():
@@ -174,60 +154,24 @@ def main():
         password=resolved["password"],
         autocommit=True,
     )
-    cursor = connection.cursor()
     try:
-        cursor.execute(
-            "SELECT COUNT(*) FROM information_schema.TABLES "
-            "WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='schema_migrations'"
-        )
-        if cursor.fetchone()[0]:
-            cursor.execute("SELECT version, checksum FROM schema_migrations")
-            applied = dict(cursor.fetchall())
-        else:
-            applied = {}
-        pending = []
-        for path in migration_files():
-            sql = path.read_text(encoding="utf-8-sig")
-            checksum = hashlib.sha256(sql.encode("utf-8")).hexdigest()
-            if path.name in applied:
-                if applied[path.name] != checksum:
-                    raise RuntimeError(f"Applied migration checksum changed: {path.name}")
-                print(f"applied {path.name}")
-            else:
-                pending.append((path, sql, checksum))
-                print(f"pending {path.name}")
-        if pending and not args.apply:
+        def before_apply(cursor, record):
+            if record.version == OBSOLETE_STRUCTURE_CLEANUP:
+                verify_obsolete_structure_conversion(cursor)
+
+        def after_apply(cursor, record):
+            if record.version == PERMANENT_HYMN_CATALOG:
+                normalize_hymn_catalog_titles(cursor)
+
+        result = MigrationService(
+            connection, MIGRATIONS, database_errors=(mariadb.Error,),
+            before_apply=before_apply, after_apply=after_apply,
+        ).run(apply=args.apply, notify=print)
+        if result.pending and not args.apply:
             print("No changes made. Re-run with --apply.")
             return 2
-        if pending:
-            cursor.execute(
-                "CREATE TABLE IF NOT EXISTS schema_migrations ("
-                "version varchar(100) NOT NULL PRIMARY KEY, "
-                "checksum char(64) NOT NULL, "
-                "applied_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP"
-                ") ENGINE=InnoDB"
-            )
-        for path, sql, checksum in pending:
-            print(f"applying {path.name}")
-            if path.name == OBSOLETE_STRUCTURE_CLEANUP:
-                verify_obsolete_structure_conversion(cursor)
-            for statement in statements(sql):
-                try:
-                    cursor.execute(statement)
-                except mariadb.Error as error:
-                    first_line = statement.splitlines()[0][:120]
-                    raise RuntimeError(
-                        f"Migration {path.name} failed at: {first_line}"
-                    ) from error
-            if path.name == PERMANENT_HYMN_CATALOG:
-                normalize_hymn_catalog_titles(cursor)
-            cursor.execute(
-                "INSERT INTO schema_migrations (version, checksum) VALUES (?, ?)",
-                (path.name, checksum),
-            )
         return 0
     finally:
-        cursor.close()
         connection.close()
 
 
