@@ -314,6 +314,11 @@ future roadmap projects:
   migration service. The existing development command retains its strict
   ChurchDBTest target guard, while the future setup executable must supply its
   own explicitly opened fresh-database connection.
+- Guarded fresh-database provisioning is implemented. It requires exact-name
+  confirmation, refuses existing databases and accounts, creates a local
+  database-scoped application account with a parameterized generated password,
+  and cleans up only newly created resources if provisioning fails. It has not
+  yet been exercised against a live isolated database.
 - A guarded routine test-activity reset preserves the reusable ChurchDBTest
   baseline while clearing worship and accounting activity. It previews counts,
   creates and verifies a complete SQL backup, runs only against local

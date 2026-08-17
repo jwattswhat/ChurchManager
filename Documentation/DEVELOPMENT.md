@@ -52,6 +52,12 @@ connection and never discovers a target or credential. Target safety remains
 the caller's responsibility; `run_churchdb_migrations.py` therefore retains its
 strict ChurchDBTest-only guard.
 
+`database_provisioning.py` is reserved for the fresh-install setup workflow. It
+refuses an existing database, requires exact-name confirmation, and initially
+creates only a local MariaDB application account scoped to the new database.
+Automated tests use fake connections; live acceptance must use a newly named,
+isolated database and must never target ChurchDB or ChurchDBTest.
+
 ```powershell
 .\.runtime-venv\Scripts\python.exe run_churchdb_migrations.py --apply
 ```

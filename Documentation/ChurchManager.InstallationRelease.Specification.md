@@ -195,8 +195,8 @@ The beta is complete only when:
 2. Build and test an installation plan model with dependency validation.
    **Completed.**
 3. Add guarded database/account creation and migration execution. The reusable
-   checksum-verified migration service is complete; database and account
-   creation remain.
+   checksum-verified migration service and guarded fresh-database provisioner
+   are complete. Isolated live acceptance remains.
 4. Add first-master-administrator creation.
 5. Add transactional catalog installation and congregation defaults.
 6. Add the nontechnical wizard around the tested services.
