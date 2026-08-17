@@ -183,7 +183,9 @@ future roadmap projects:
   clean cutover, and candidate package provenance remain in progress. The
   bounded calendar resolver, explicit Worship Service candidate-selection UI,
   and protected package installation screen are implemented; approved package
-  calendar data remains to be supplied.
+  calendar data remains to be supplied. The provenance-gated reproducible
+  package builder and authoring guide are implemented; no candidate package is
+  approved merely by this tooling.
 - The current ChurchDBTest lectionary catalog is reference-only. Export it for
   citation, role, color, and hymn-suggestion reconciliation, then replace it
   cleanly; do not preserve its IDs or obsolete structure.

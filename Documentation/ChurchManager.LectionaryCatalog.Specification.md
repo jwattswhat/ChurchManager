@@ -487,5 +487,12 @@ The protected `Lectionary Packages` screen lists installed packages and requires
 an administrator to choose, checksum-validate, preview, review source metadata
 and counts, confirm, and then transactionally install or upgrade a package. A
 package cannot be installed directly from an unreviewed file selection.
+`build_lectionary_package.py` provides the corresponding authoring boundary. It
+requires a separate approved provenance record whose package code and version
+match the draft, identifies the reviewer, owner, review date, distribution
+scope, and concrete authority basis, and explicitly confirms metadata-only
+content. It then generates the checksum and reuses the installation validator.
+The maintained authoring procedure is documented in
+`ChurchManager.LectionaryPackageAuthoring.md`.
 Existing ChurchManager behavior remains in place until their migrations and
 application changes are completed and verified.
