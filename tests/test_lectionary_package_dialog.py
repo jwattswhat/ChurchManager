@@ -27,6 +27,8 @@ class LectionaryPackageDialogTests(unittest.TestCase):
         self.assertIn("Retire Selected", source)
         self.assertIn('("Scope", 120)', source)
         self.assertIn("summary.distribution_scope", source)
+        self.assertIn('INCLUDED_PACKAGE_DIRECTORY', source)
+        self.assertIn('defaultDir=str(INCLUDED_PACKAGE_DIRECTORY)', source)
         self.assertIn("PrimaryLectionaryEditionID", source)
         self.assertIn("WHERE PackageID=?", source)
         self.assertNotIn("DELETE FROM tblLectionary", source)

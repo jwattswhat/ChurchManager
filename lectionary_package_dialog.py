@@ -10,6 +10,9 @@ from lectionary_importer import LectionaryPackageImporter
 from lectionary_packages import LectionaryPackageValidator, load_lectionary_package
 
 
+INCLUDED_PACKAGE_DIRECTORY = Path(__file__).resolve().parent / "packages" / "lectionary"
+
+
 class LectionaryPackageRepository:
     """Read installed package summaries without exposing package internals."""
 
@@ -140,8 +143,10 @@ class LectionaryPackageDialog(wx.Dialog):
                 self.grid.SetItem(index, column, str(value or ""))
 
     def on_choose(self, _event):
+        """Choose an included or externally supplied lectionary package."""
         dialog = wx.FileDialog(
             self, "Choose Lectionary Package", wildcard="JSON package (*.json)|*.json",
+            defaultDir=str(INCLUDED_PACKAGE_DIRECTORY),
             style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST,
         )
         try:

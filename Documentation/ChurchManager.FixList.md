@@ -190,6 +190,15 @@ future roadmap projects:
   and RCL packages are blocked pending written electronic-redistribution
   permission. Narrow permission-request drafts and the local-only fallback are
   documented in `ChurchManager.LectionaryPackageProvenance.md`.
+- The redistributable ChurchManager Historic One-Year Lectionary package is
+  complete. It contains 62 Sundays and major days with 124 citation-only
+  Epistle and Gospel appointments derived from the public-domain 1919 Common
+  Service Book. The package manager opens in the included-package directory so
+  an administrator can install it without locating an internal source folder.
+- Remaining acceptance for the included package is installation through the
+  protected package screen, selection as the church default edition, creation
+  of a new Worship Service, and verification of its Proper, readings,
+  liturgical date, color, and Worship Planning report.
 - Migration 081 removes the former LSB lectionary catalog, its dependent
   Propers/readings/suggestions, and related development service snapshots.
   Services themselves remain, with their Proper selection cleared. Obsolete
