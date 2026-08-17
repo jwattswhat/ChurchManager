@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import time
 from datetime import datetime
 import wx
@@ -847,7 +848,9 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
 
     def on_line_selection(self, _event=None):
         index = self.selected_line_index()
-        enabled = index is not None and self.working_lines[index]["source"] == "SERVICE_HYMN"
+        enabled = index is not None and str(
+            self.working_lines[index].get("type") or ""
+        ).upper() == "HYMN"
         self.select_hymn_button.Enable(enabled)
         self.edit_stanzas_button.Enable(
             bool(enabled and self.working_lines[index].get("hymn_id") is not None)
@@ -874,7 +877,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         if index is None:
             return
         line = self.working_lines[index]
-        if line["source"] == "SERVICE_HYMN":
+        if str(line.get("type") or "").upper() == "HYMN":
             self.on_select_hymn(None)
             return
         dialog = wx.TextEntryDialog(
@@ -888,7 +891,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
                 line["value"] = dialog.GetValue().strip()
                 # A typed value is not a catalog-backed hymn selection. The hymn
                 # chooser added in the next stage will set this ID explicitly.
-                if line["source"] == "SERVICE_HYMN":
+                if str(line.get("type") or "").upper() == "HYMN":
                     line["hymn_id"] = None
                 self.refresh_grid()
                 self.grid.Select(index)
@@ -900,7 +903,7 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         if index is None:
             return
         line = self.working_lines[index]
-        if line["source"] != "SERVICE_HYMN":
+        if str(line.get("type") or "").upper() != "HYMN":
             wx.MessageBox("Select a hymn line first.", "Select Hymn",
                           wx.OK | wx.ICON_INFORMATION, self)
             return
@@ -935,7 +938,8 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
         if index is None:
             return
         line = self.working_lines[index]
-        if line["source"] != "SERVICE_HYMN" or line.get("hymn_id") is None:
+        if (str(line.get("type") or "").upper() != "HYMN"
+                or line.get("hymn_id") is None):
             wx.MessageBox("Select a hymn first.", "Edit Stanzas",
                           wx.OK | wx.ICON_INFORMATION, self)
             return
@@ -1111,13 +1115,33 @@ class UnifiedWorshipServiceEditor(wx.Dialog):
             self.fields["liturgical"].SetValue("")
         self._show_liturgical_color_for_selected_proper()
         self._refresh_conditional_lines()
-        readings_by_use = {row[0]: row[1] for row in readings}
+        readings_by_role = {
+            self.repository._reading_role(row[0]): row[1]
+            for row in readings if self.repository._reading_role(row[0])
+        }
+        readings_by_label = {str(row[0]).strip().casefold(): row[1] for row in readings}
         unused = list(suggestions)
         for line in self.working_lines:
-            if line["source"] == "SERVICE_READING":
-                line["value"] = readings_by_use.get(line["key"], "")
-            elif line["source"] == "SERVICE_HYMN":
-                match = next((i for i, hymn in enumerate(unused) if hymn[3] == line["key"]), None)
+            line_type = str(line.get("type") or "").upper()
+            if line_type == "READING":
+                role = (
+                    self.repository._reading_role(line.get("key"))
+                    or self.repository._reading_role(line.get("label"))
+                )
+                line["value"] = (
+                    readings_by_role.get(role, "")
+                    or readings_by_label.get(str(line.get("label") or "").strip().casefold(), "")
+                )
+            elif line_type == "HYMN":
+                wanted = re.sub(
+                    r"[^a-z0-9]+", "-",
+                    str(line.get("key") or line.get("label") or "").casefold(),
+                ).strip("-")
+                match = next((
+                    i for i, hymn in enumerate(unused)
+                    if re.sub(r"[^a-z0-9]+", "-", str(hymn[3] or "").casefold()).strip("-")
+                    == wanted
+                ), None)
                 if match is None:
                     line["value"], line["reference"] = "", ""
                     line["hymn_id"], line["tune"] = None, ""

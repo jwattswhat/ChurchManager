@@ -211,6 +211,10 @@ future roadmap projects:
 - Worship Service saving no longer references the removed
   `tblServiceBulletinOrder.GeneratedHtml` field. Weekly Orders of Service remain
   outline-only and invalidate only their permitted generated plain-text cache.
+- Worship Service line actions now use the package-defined line type rather
+  than an obsolete `SERVICE_HYMN` source value. Included Order of Service
+  packages can select hymns and apply Proper readings and hymn suggestions
+  while preserving exact suggested-use matching after harmless key formatting.
 - Migration 081 removes the former LSB lectionary catalog, its dependent
   Propers/readings/suggestions, and related development service snapshots.
   Services themselves remain, with their Proper selection cleared. Obsolete

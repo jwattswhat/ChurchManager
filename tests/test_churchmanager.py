@@ -286,6 +286,13 @@ class TestChurchManagerPython(unittest.TestCase):
         self.assertNotIn("GeneratedHtml", source)
         self.assertIn("GeneratedPlainText=NULL", source)
 
+    def test_worship_line_actions_use_line_type_for_packaged_templates(self):
+        source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
+        self.assertIn('upper() == "HYMN"', source)
+        self.assertIn('line_type == "READING"', source)
+        self.assertIn('line_type == "HYMN"', source)
+        self.assertNotIn('line["source"] != "SERVICE_HYMN"', source)
+
     def test_unified_worship_repository_uses_portable_connection(self):
         source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
         self.assertIn("self.connection = portable_connection(connection)", source)
