@@ -82,19 +82,35 @@ WHERE ID IN (SELECT ID FROM cm_remove_lectionary_edition);
 DELETE FROM tblLectionarySystem
 WHERE ID IN (SELECT ID FROM cm_remove_lectionary_system);
 
-DELETE history
-FROM tblLectionaryPackageImport history
-JOIN cm_remove_lectionary_edition removed ON removed.PackageID=history.LectionaryPackageID
-LEFT JOIN tblLectionaryEdition retained ON retained.PackageID=history.LectionaryPackageID
-LEFT JOIN tblLectionarySystem retained_system ON retained_system.PackageID=history.LectionaryPackageID
-WHERE retained.ID IS NULL AND retained_system.ID IS NULL;
+DELETE FROM tblLectionaryPackageImport
+WHERE LectionaryPackageID IN (
+    SELECT PackageID
+    FROM cm_remove_lectionary_edition
+    WHERE PackageID IS NOT NULL
+)
+AND NOT EXISTS (
+    SELECT 1 FROM tblLectionaryEdition retained
+    WHERE retained.PackageID=tblLectionaryPackageImport.LectionaryPackageID
+)
+AND NOT EXISTS (
+    SELECT 1 FROM tblLectionarySystem retained_system
+    WHERE retained_system.PackageID=tblLectionaryPackageImport.LectionaryPackageID
+);
 
-DELETE package
-FROM tblLectionaryPackage package
-JOIN cm_remove_lectionary_edition removed ON removed.PackageID=package.ID
-LEFT JOIN tblLectionaryEdition retained ON retained.PackageID=package.ID
-LEFT JOIN tblLectionarySystem retained_system ON retained_system.PackageID=package.ID
-WHERE retained.ID IS NULL AND retained_system.ID IS NULL;
+DELETE FROM tblLectionaryPackage
+WHERE ID IN (
+    SELECT PackageID
+    FROM cm_remove_lectionary_edition
+    WHERE PackageID IS NOT NULL
+)
+AND NOT EXISTS (
+    SELECT 1 FROM tblLectionaryEdition retained
+    WHERE retained.PackageID=tblLectionaryPackage.ID
+)
+AND NOT EXISTS (
+    SELECT 1 FROM tblLectionarySystem retained_system
+    WHERE retained_system.PackageID=tblLectionaryPackage.ID
+);
 
 DROP TEMPORARY TABLE cm_remove_appointment;
 DROP TEMPORARY TABLE cm_remove_service_snapshot;
