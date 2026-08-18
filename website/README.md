@@ -37,6 +37,8 @@ For each release:
 3. Confirm the documentation and support links.
 4. Test every link and review the page at desktop and phone widths.
 5. Review public wording when a major capability changes.
+6. Confirm every Upcoming Update still has an approved specification and is
+   clearly distinguished from released functionality.
 
 The full design and publication checklist is in
 `Documentation/ChurchManager.Website.Specification.md`.

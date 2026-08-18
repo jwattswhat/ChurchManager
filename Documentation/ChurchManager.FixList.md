@@ -17,11 +17,11 @@ open-source church-management systems.
 | 5 | In progress | Hymnal, lectionary, and Order of Service catalogs | Order of Service packaging is implemented; permanent hymn IDs and hymnal packaging are in database acceptance, followed by lectionary packaging. |
 | 6 | Immediate | Release, installation, and recovery readiness | Stabilizes and packages the researched catalogs and existing application. |
 | 6A | Immediate | Open-source publication and distribution | Publishes reviewed source and signed release artifacts without exposing congregation data, credentials, or copyrighted content. |
-| 7 | Next | Pastoral follow-up | Highest-value ministry addition and a natural extension of attendance. |
+| 7 | Next | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Highest-value ministry addition and a natural extension of attendance; specification approved. |
 | 8 | Next | Import, export, and duplicate management | Protects data quality and makes adoption and recovery practical. |
 | 9 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
 | 10 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
-| 11 | Later | Confidential member giving, envelopes, and pledges | Adds envelope-based giving records and donor statements, but requires a separate privacy-sensitive specification and subledger. |
+| 11 | Later | [Confidential member giving, envelopes, and pledges](ChurchManager.MemberGiving.Specification.md) | Adds envelope-based giving records and donor statements through the approved privacy-sensitive specification and separate subledger. |
 | 12 | Later | General events and calendar integration | Useful, but Google Calendar should remain the primary calendar platform. |
 | 13 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
 | Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
@@ -547,9 +547,17 @@ future roadmap projects:
 
 ### 7. Pastoral follow-up
 
+- Research completed: [Pastoral care systems research and ChurchManager recommendations](ChurchManager.PastoralCare.Research.md).
+- Proposed implementation specification: [ChurchManager pastoral care specification](ChurchManager.PastoralCare.Specification.md).
+- Recommended first release: a protected Pastoral Care subsystem with separate
+  care needs, care actions, and optional restricted minimum-necessary notes.
+- Do not reuse ordinary Tasks or store counseling transcripts, clinical detail,
+  attachments, automated spiritual assessments, or giving-based care triggers.
 - Create follow-up items from attendance warnings or manually.
 - Assign a follow-up to the pastor, an elder, or another authorized caregiver.
 - Record contact attempts, outcome, next-follow-up date, and completion.
+- Support regular shut-in and homebound Communion visits using the same
+  natural-language recurrence control as Prayers and Announcements.
 - Protect pastoral notes with a separate sensitive permission.
 - Show actionable overdue follow-ups without exposing confidential detail on
   the main menu.

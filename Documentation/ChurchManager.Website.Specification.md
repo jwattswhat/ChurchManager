@@ -55,6 +55,12 @@ Version 1 is one responsive page with these sections:
    worship or hymn text.
 9. **Footer** — version, license, source, support, privacy, and copyright.
 
+The page also includes a compact **Upcoming Updates** section between
+Capabilities and Screenshots. It may name only work backed by an approved
+repository specification, and it must clearly distinguish planned work from
+features available in the current release. The initial entries are Pastoral
+Care and Member Giving and Envelopes.
+
 No blog, news system, testimonials, mailing list, search, account area, shopping
 cart, live chat, or content-management system is needed for the initial site.
 
