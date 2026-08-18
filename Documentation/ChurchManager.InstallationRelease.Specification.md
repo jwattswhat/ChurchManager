@@ -196,6 +196,10 @@ bounded beta phase. Beta builds use a versioned release candidate and provide a
 sample database plus task-based scripts for pastors, office staff, worship
 planners, treasurers, and one-person administrators.
 
+ChurchManager officially entered beta testing on August 17, 2026 as release
+`0.2.0-beta.1`. Beta findings are corrected on the existing development line,
+covered by regression tests, and recorded in the maintained fix list.
+
 Feedback is recorded in one maintained list with environment, reproducible
 steps, safe diagnostic ID, severity, resolution, and regression result. A
 tester database or confidential record is accepted only with explicit

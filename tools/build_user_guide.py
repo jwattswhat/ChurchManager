@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import runpy
 from pathlib import Path
 
 from reportlab.lib import colors
@@ -20,6 +21,7 @@ from reportlab.platypus import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+__version__ = runpy.run_path(ROOT / "churchmanager_version.py")["__version__"]
 SOURCE = ROOT / "Documentation" / "ChurchManager.UserGuide.md"
 OUTPUT = ROOT / "output" / "pdf" / "ChurchManager.UserGuide.pdf"
 
@@ -74,7 +76,7 @@ def _page(canvas, document):
     canvas.line(0.7 * inch, 0.58 * inch, width - 0.7 * inch, 0.58 * inch)
     canvas.setFont("Helvetica", 8)
     canvas.setFillColor(colors.HexColor("#526574"))
-    canvas.drawString(0.7 * inch, 0.38 * inch, "ChurchManager User Guide - 0.2.0-dev")
+    canvas.drawString(0.7 * inch, 0.38 * inch, f"ChurchManager User Guide - {__version__}")
     canvas.drawRightString(width - 0.7 * inch, 0.38 * inch, f"Page {document.page}")
     canvas.restoreState()
 

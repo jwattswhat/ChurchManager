@@ -2,7 +2,7 @@
 
 ChurchManager uses semantic versioning and has one authoritative version in
 `churchmanager_version.py`. The current installation-readiness development
-baseline is `0.2.0-dev`.
+first beta baseline is `0.2.0-beta.1`.
 
 - Patch versions identify compatible bug fixes.
 - Minor versions identify completed compatible features.

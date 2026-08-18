@@ -76,6 +76,7 @@ class InstalledLauncherTests(unittest.TestCase):
 
     def test_release_suffix_is_removed_from_numeric_msi_version(self):
         self.assertEqual(msi_version("0.2.0-dev"), "0.2.0")
+        self.assertEqual(msi_version("0.2.0-beta.1"), "0.2.0")
         with self.assertRaises(ValueError):
             msi_version("0.2-dev")
 

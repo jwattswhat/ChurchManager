@@ -457,6 +457,8 @@ future roadmap projects:
   restart dress rehearsal using non-production data.
 - Conduct a structured beta-testing phase after the fresh-install dress
   rehearsal and before the first stable release:
+  - **Active:** ChurchManager entered beta testing as `0.2.0-beta.1` on
+    August 17, 2026;
   - recruit a small group representing pastors, office staff, worship planners,
     treasurers, and congregations with one-person administration;
   - provide a documented test installation and sample database rather than any

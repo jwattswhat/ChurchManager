@@ -1,6 +1,7 @@
 # ChurchManager User Guide
 
-**Version 0.2.0-dev**  
+**Version 0.2.0-beta.1**
+
 **For congregations using ChurchManager**
 
 ChurchManager brings worship planning, people and family records, attendance,
@@ -286,5 +287,5 @@ version when requesting help.
 ---
 
 ChurchManager is open-source congregation software. This guide describes the
-0.2.0-dev development release and will be revised as beta testing identifies
+0.2.0-beta.1 beta release and will be revised as beta testing identifies
 additional instructions or screenshots that are needed.

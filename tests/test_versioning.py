@@ -9,14 +9,14 @@ from startup import main_window_title
 
 
 class VersioningTests(unittest.TestCase):
-    def test_application_version_is_semantic_development_version(self):
-        self.assertRegex(__version__, r"^\d+\.\d+\.\d+-dev$")
+    def test_application_version_is_an_approved_semantic_prerelease(self):
+        self.assertRegex(__version__, r"^\d+\.\d+\.\d+-(?:dev|beta\.\d+)$")
 
     def test_window_titles_include_version_and_preserve_test_warning(self):
-        self.assertEqual(main_window_title({"test_mode": False}), "ChurchManager 0.2.0-dev")
+        self.assertEqual(main_window_title({"test_mode": False}), "ChurchManager 0.2.0-beta.1")
         self.assertEqual(
             main_window_title({"test_mode": True, "database": "ChurchDBTest"}),
-            "ChurchManager 0.2.0-dev - TEST MODE - ChurchDBTest",
+            "ChurchManager 0.2.0-beta.1 - TEST MODE - ChurchDBTest",
         )
 
     def test_framework_has_independent_semantic_version(self):
