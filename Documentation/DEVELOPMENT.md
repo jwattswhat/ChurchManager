@@ -176,6 +176,19 @@ traditional per-machine MSI. It harvests the verified bundle, creates ordinary
 and protected-setup shortcuts, supports major upgrades, and owns no database,
 backup, attachment, custom definition, preference, or log location.
 
+With the repository-local .NET and WiX tools installed, the complete Windows
+release build is one command:
+
+```powershell
+.\.runtime-venv\Scripts\python.exe build_windows_release.py
+```
+
+The command rebuilds the shared bundle, runs the noninteractive proof through
+both executables, builds the versioned MSI, and writes
+`dist\windows-release-evidence.json` with byte counts and the MSI SHA-256.
+WiX ICE validation additionally requires the Windows Installer service; run it
+on the clean Windows acceptance computer before release signing.
+
 Remove `-dev` only for a supported release. Run all tests, apply migrations to a
 fresh test database, exercise backup and restore, inspect representative reports,
 review ignored sensitive files, and confirm ChurchManager and required JSForm

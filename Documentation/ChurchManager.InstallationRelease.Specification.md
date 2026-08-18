@@ -276,8 +276,14 @@ The beta is complete only when:
     resources. The combined release folder contains 390 files totaling
     88,067,288 bytes. WiX v5 MSI source now defines per-machine installation,
     major-upgrade protection, application and setup shortcuts, and an
-    application-file-only uninstall boundary. Compiler validation, MSI repair
-    rehearsal, signing, and clean-machine visual acceptance remain.
+    application-file-only uninstall boundary. The first compiled MSI was
+    decompiled successfully on August 17, 2026 and contained all 390 release
+    files, 390 components, both entry-point executables, and all three intended
+    shortcuts. The verified repeat build was 37,025,537 bytes with SHA-256
+    `55ada55b111a8f4ed562c7615446f3fbec037617527551cb735cc455f52c8c67`.
+    ICE validation could not run because the Windows Installer service was
+    unavailable on the development computer; clean-machine ICE validation,
+    MSI repair rehearsal, signing, and visual acceptance remain.
 11. Ship the visually verified, version-matched User Guide PDF and verify the
     main-menu Help control on an installed build.
 

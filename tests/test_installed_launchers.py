@@ -10,6 +10,7 @@ from unittest.mock import patch
 import installed_launcher
 import installed_package_check
 import installed_setup
+from build_windows_release import msi_version
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -72,6 +73,11 @@ class InstalledLauncherTests(unittest.TestCase):
             result = installed_setup.main(["--package-check", "proof.json"])
         self.assertEqual(result, 0)
         check.assert_called_once_with("proof.json")
+
+    def test_release_suffix_is_removed_from_numeric_msi_version(self):
+        self.assertEqual(msi_version("0.2.0-dev"), "0.2.0")
+        with self.assertRaises(ValueError):
+            msi_version("0.2-dev")
 
 
 if __name__ == "__main__":
