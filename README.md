@@ -66,6 +66,8 @@ read-only database checks and manual verification boundaries.
 - [LimeReports retirement](Documentation/ChurchManager.LimeReports.Retirement.md)
 - [Migrations](migrations/README.md)
 - [Versioning](Documentation/VERSIONING.md)
+- [Public website specification](Documentation/ChurchManager.Website.Specification.md)
+- [Visual identity specification](Documentation/ChurchManager.VisualIdentity.Specification.md)
 - [Contributing](CONTRIBUTING.md)
 - [Security](SECURITY.md)
 - [Support](SUPPORT.md)

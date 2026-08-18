@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ChurchManager visual identity proof</title>
+  <style>
+    :root { --navy:#0B315B; --gold:#F2B632; --blue:#1F6F9F; --quiet:#EAF3F8; --ink:#17232C; }
+    * { box-sizing: border-box; }
+    body { margin:0; color:var(--ink); background:#f6f8f9; font-family:"Segoe UI",system-ui,sans-serif; }
+    main { max-width:1180px; margin:auto; padding:60px 28px 90px; }
+    h1 { margin:0 0 8px; color:var(--navy); font-size:clamp(2.2rem,5vw,4.2rem); letter-spacing:-.04em; }
+    .intro { max-width:760px; color:#586A77; font-size:1.1rem; }
+    .status { display:inline-block; margin-bottom:18px; color:var(--blue); font-size:.78rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+    .board { display:grid; grid-template-columns:repeat(2,1fr); gap:22px; margin-top:42px; }
+    .card { min-height:310px; padding:30px; background:white; border:1px solid #d3dde3; border-radius:18px; }
+    .card h2 { margin:0 0 22px; color:var(--navy); font-size:1rem; }
+    .mark { display:block; width:min(260px,70%); margin:0 auto; }
+    .horizontal { grid-column:1/-1; min-height:280px; }
+    .horizontal img { display:block; width:min(920px,100%); margin:42px auto 0; }
+    .dark { color:white; background:var(--navy); border-color:var(--navy); }
+    .dark h2 { color:white; }
+    .dark .mark { filter:brightness(0) invert(1); }
+    .palette { display:grid; grid-template-columns:repeat(6,1fr); grid-column:1/-1; padding:0; overflow:hidden; }
+    .swatch { min-height:180px; padding:22px 16px; display:flex; flex-direction:column; justify-content:flex-end; font-size:.82rem; }
+    .swatch strong { display:block; }
+    .navy{background:var(--navy);color:white}.gold{background:var(--gold)}.blue{background:var(--blue);color:white}.quiet{background:var(--quiet)}.ink{background:var(--ink);color:white}.white{background:white}
+    .note { grid-column:1/-1; padding:22px 26px; color:#4d606d; background:#fff8e8; border-left:5px solid var(--gold); border-radius:10px; }
+    @media(max-width:760px){.board{grid-template-columns:1fr}.horizontal,.palette,.note{grid-column:auto}.palette{grid-template-columns:repeat(2,1fr)}.horizontal img{margin-top:65px}}
+  </style>
+</head>
+<body>
+  <main>
+    <span class="status">Draft for approval</span>
+    <h1>ChurchManager visual identity</h1>
+    <p class="intro">A restrained identity built from the current application icon: congregation above, organized records below. The mark is independent of any one church or denomination.</p>
+    <div class="board">
+      <section class="card"><h2>Primary application mark</h2><img class="mark" src="../assets/brand/ChurchManager-mark.svg" alt="ChurchManager church and records mark"></section>
+      <section class="card"><h2>One-color mark</h2><img class="mark" src="../assets/brand/ChurchManager-mark-monochrome.svg" alt="One-color ChurchManager mark"></section>
+      <section class="card horizontal"><h2>Horizontal website and document logo</h2><img src="../assets/brand/ChurchManager-logo-horizontal.svg" alt="ChurchManager horizontal logo"></section>
+      <section class="card palette" aria-label="ChurchManager color palette">
+        <div class="swatch navy"><strong>Navy</strong>#0B315B</div><div class="swatch gold"><strong>Gold</strong>#F2B632</div><div class="swatch blue"><strong>Ministry Blue</strong>#1F6F9F</div><div class="swatch quiet"><strong>Quiet Blue</strong>#EAF3F8</div><div class="swatch ink"><strong>Ink</strong>#17232C</div><div class="swatch white"><strong>White</strong>#FFFFFF</div>
+      </section>
+      <p class="note"><strong>Nothing has been replaced yet.</strong> The current application icon stays in place until this identity is approved and the complete PNG and ICO export set has been visually checked.</p>
+    </div>
+  </main>
+</body>
+</html>

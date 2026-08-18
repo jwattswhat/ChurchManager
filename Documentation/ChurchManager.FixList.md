@@ -1,6 +1,6 @@
 # ChurchManager development roadmap
 
-Last reviewed: August 17, 2026
+Last reviewed: August 18, 2026
 
 This is the maintained ChurchManager development backlog. Priorities reflect
 the needs of a small congregation and a comparison with current paid and
@@ -16,16 +16,17 @@ open-source church-management systems.
 | 4 | Immediate | Secure SMTP connection and email settings | Welcome and participant email require deliberate, testable, credential-safe configuration. |
 | 5 | In progress | Hymnal, lectionary, and Order of Service catalogs | Order of Service packaging is implemented; permanent hymn IDs and hymnal packaging are in database acceptance, followed by lectionary packaging. |
 | 6 | Immediate | Release, installation, and recovery readiness | Stabilizes and packages the researched catalogs and existing application. |
+| 6A | Immediate | Open-source publication and distribution | Publishes reviewed source and signed release artifacts without exposing congregation data, credentials, or copyrighted content. |
 | 7 | Next | Pastoral follow-up | Highest-value ministry addition and a natural extension of attendance. |
 | 8 | Next | Import, export, and duplicate management | Protects data quality and makes adoption and recovery practical. |
 | 9 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
 | 10 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
-| 11 | Later | Confidential contributions and pledges | Valuable, but requires a separate privacy-sensitive specification and subledger. |
+| 11 | Later | Confidential member giving, envelopes, and pledges | Adds envelope-based giving records and donor statements, but requires a separate privacy-sensitive specification and subledger. |
 | 12 | Later | General events and calendar integration | Useful, but Google Calendar should remain the primary calendar platform. |
 | 13 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
 | Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
 
-Items 1 through 6 should be completed before beginning a new major subsystem.
+Items 1 through 6A should be completed before beginning a new major subsystem.
 Items 7 through 10 form the next ministry-development phase. Items 11 through 13
 should not delay a stable ChurchManager release.
 
@@ -493,6 +494,57 @@ future roadmap projects:
   implemented source so completed work is not presented as merely proposed and
   current backup/restore behavior is described accurately.
 
+### 6A. Open-source publication and distribution
+
+- Approved design: [ChurchManager public website specification](ChurchManager.Website.Specification.md).
+- Approved identity: [ChurchManager visual identity specification](ChurchManager.VisualIdentity.Specification.md).
+- A destination-independent static prototype is maintained in `website/`; its
+  download, repository, documentation, support, and screenshot placeholders
+  must remain inactive until approved public destinations and artifacts exist.
+- Maintain separate public repositories for ChurchManager and JSForm.
+- Use GitHub as the primary source repository, issue tracker, contributor
+  workflow, and binary-release location. Attach the Windows MSI, checksum,
+  release notes, user documentation, and known issues to versioned releases.
+- Publish a simple, accessible static ChurchManager project website using GitHub
+  Pages, initially under the project address and later under a verified custom
+  domain if desired. The website is the public front door, not a browser-hosted
+  version of ChurchManager.
+- Include a plain-language overview, supported Windows versions, screenshots,
+  current release and verified download link, checksum and installation
+  instructions, user and treasurer documentation, feature summary, beta status
+  and known limitations, source and license links, issue/support instructions,
+  security-reporting instructions, privacy statement, and copyright/content
+  boundaries.
+- Generate website download links and displayed version information from the
+  maintained release metadata so the website cannot silently advertise an old
+  installer. Test every public link as part of release acceptance.
+- Keep the public website static and free of congregation logins, member data,
+  donor data, database connectivity, analytics requiring unnecessary tracking,
+  or uploaded diagnostic packages.
+- Add a read-only Codeberg mirror after the primary repositories are stable.
+  Keep issues and pull requests on GitHub so users and maintainers do not have
+  to follow multiple active trackers.
+- Consider SourceForge later as an installer-download mirror when release volume
+  justifies it; do not use it as the primary development repository.
+- Consider PyPI only when JSForm is packaged as a conventional reusable Python
+  library. Do not distribute the complete ChurchManager desktop application
+  through PyPI.
+- Consider WinGet after ChurchManager reaches a stable release and has a
+  suitably signed Windows installer.
+- Before making either repository public, audit the current tree and every
+  reachable Git commit for database credentials, congregation or donor data,
+  dumps, backups, logs, attachments, test images, and non-distributable hymnal,
+  lectionary, or Order of Service content.
+- Verify the MIT license, third-party notices, dependency licenses, copyright
+  boundaries, security-reporting instructions, contribution guidance, build
+  reproducibility, and release checksums.
+- Keep sample databases entirely fictitious. Never publish a tester's database
+  or a sanitized-looking copy of congregation data without an explicit,
+  independently verified release process.
+- Publish from an identified release commit and signed or annotated version tag;
+  retain a private complete backup before any history-rewriting cleanup needed
+  for the initial public release.
+
 ### 7. Pastoral follow-up
 
 - Create follow-up items from attendance warnings or manually.
@@ -533,16 +585,28 @@ future roadmap projects:
 - Consider optional scheduling suggestions, but never silently replace existing
   assignments.
 
-### 11. Confidential contributions and pledges
+### 11. Confidential member giving, envelopes, and pledges
 
+- Approved design: [Member giving and envelope tracking specification](ChurchManager.MemberGiving.Specification.md).
+- Maintained treasurer guidance: [Congregation treasurer guide](ChurchManager.CongregationTreasurerGuide.md).
 - Design this as a separate confidential subledger with its own permissions.
-- Support contribution batches, donor accounts, funds/designations, pledges,
-  non-cash gifts, corrections, and year-end statements.
+- Support contributor accounts linked optionally to a person or family; outside
+  donors must also be allowed without creating congregation-member records.
+- Assign and maintain envelope numbers with effective dates so numbers can be
+  reused in a later year without changing historical giving records.
+- Support contribution batches, envelope entry, loose or anonymous offerings,
+  funds/designations, pledges, non-cash gifts, corrections, and year-end
+  statements.
+- Provide contribution history, envelope-assignment, batch-control, and donor
+  statement reports while suppressing unlisted contact information.
 - Import contribution files where practical.
 - Post summarized, balanced deposits into fund accounting without exposing
   donor identity in the general ledger.
-- Specify privacy, retention, audit, backup, and statement-delivery rules before
-  implementation.
+- Keep envelope and donor details out of ordinary accounting screens and
+  reports; access requires dedicated giving permissions.
+- Specify privacy, retention, audit, backup, correction, and statement-delivery
+  rules before implementation. Do not treat existing prototype giving tables as
+  the approved design or migrate their data without a separate reviewed plan.
 
 ### 12. General events and calendar integration
 
