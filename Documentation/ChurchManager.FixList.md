@@ -17,17 +17,17 @@ open-source church-management systems.
 | 5 | In progress | Hymnal, lectionary, and Order of Service catalogs | Order of Service packaging is implemented; permanent hymn IDs and hymnal packaging are in database acceptance, followed by lectionary packaging. |
 | 6 | Immediate | Release, installation, and recovery readiness | Stabilizes and packages the researched catalogs and existing application. |
 | 6A | Immediate | Open-source publication and distribution | Publishes reviewed source and signed release artifacts without exposing congregation data, credentials, or copyrighted content. |
-| 7 | Next | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Highest-value ministry addition and a natural extension of attendance; specification approved. |
-| 8 | Next | Import, export, and duplicate management | Protects data quality and makes adoption and recovery practical. |
-| 9 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
-| 10 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
-| 11 | Later | [Confidential member giving, envelopes, and pledges](ChurchManager.MemberGiving.Specification.md) | Adds envelope-based giving records and donor statements through the approved privacy-sensitive specification and separate subledger. |
+| 7 | In progress | [Confidential member giving, envelopes, and pledges](ChurchManager.MemberGiving.Specification.md) | User-selected first `0.3.0-dev` feature; approved confidential subledger design. |
+| 8 | Next | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Approved ministry design; encryption foundation is complete and remaining implementation follows Giving. |
+| 9 | Next | Import, export, and duplicate management | Protects data quality and makes adoption and recovery practical. |
+| 10 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
+| 11 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
 | 12 | Later | General events and calendar integration | Useful, but Google Calendar should remain the primary calendar platform. |
 | 13 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
 | Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
 
 Items 1 through 6A should be completed before beginning a new major subsystem.
-Items 7 through 10 form the next ministry-development phase. Items 11 through 13
+Items 7 through 11 form the next ministry-development phase. Items 12 through 13
 should not delay a stable ChurchManager release.
 
 ## Completed foundations retained for regression protection
@@ -545,55 +545,7 @@ future roadmap projects:
   retain a private complete backup before any history-rewriting cleanup needed
   for the initial public release.
 
-### 7. Pastoral follow-up
-
-- Research completed: [Pastoral care systems research and ChurchManager recommendations](ChurchManager.PastoralCare.Research.md).
-- Proposed implementation specification: [ChurchManager pastoral care specification](ChurchManager.PastoralCare.Specification.md).
-- Recommended first release: a protected Pastoral Care subsystem with separate
-  care needs, care actions, and optional restricted minimum-necessary notes.
-- Do not reuse ordinary Tasks or store counseling transcripts, clinical detail,
-  attachments, automated spiritual assessments, or giving-based care triggers.
-- Create follow-up items from attendance warnings or manually.
-- Assign a follow-up to the pastor, an elder, or another authorized caregiver.
-- Record contact attempts, outcome, next-follow-up date, and completion.
-- Support regular shut-in and homebound Communion visits using the same
-  natural-language recurrence control as Prayers and Announcements.
-- Protect pastoral notes with a separate sensitive permission.
-- Show actionable overdue follow-ups without exposing confidential detail on
-  the main menu.
-- Provide a printable or exportable authorized follow-up list.
-
-### 8. Import, export, and duplicate management
-
-- Add a central Data Management screen.
-- Import people and families from CSV with a preview and explicit field mapping.
-- Detect likely duplicate people, families, email addresses, and phone numbers.
-- Require review before merging records.
-- Export only approved datasets and always enforce unlisted/private contact
-  restrictions.
-- Record import results, rejected rows, and export history.
-- Provide a complete portable archive format where appropriate.
-
-### 9. Groups, committees, classes, and ministry teams
-
-- Add general groups independent of worship-participant roles.
-- Support leaders, members, group roles, active dates, notes, and categories.
-- Accommodate boards, committees, Bible studies, Sunday school, choir,
-  confirmation, altar guild, outreach, and temporary teams.
-- Permit group attendance and authorized group communication.
-- Add group rosters and participation reports.
-
-### 10. Volunteer availability and responses
-
-- Add participant availability and blockout dates.
-- Send explicit serve requests and reminders.
-- Record accepted, declined, and pending responses.
-- Show last-served information and scheduling conflicts.
-- Preserve manual scheduling and small-congregation flexibility.
-- Consider optional scheduling suggestions, but never silently replace existing
-  assignments.
-
-### 11. Confidential member giving, envelopes, and pledges
+### 7. Confidential member giving, envelopes, and pledges
 
 - Approved design: [Member giving and envelope tracking specification](ChurchManager.MemberGiving.Specification.md).
 - Maintained treasurer guidance: [Congregation treasurer guide](ChurchManager.CongregationTreasurerGuide.md).
@@ -615,6 +567,54 @@ future roadmap projects:
 - Specify privacy, retention, audit, backup, correction, and statement-delivery
   rules before implementation. Do not treat existing prototype giving tables as
   the approved design or migrate their data without a separate reviewed plan.
+
+### 8. Pastoral follow-up
+
+- Research completed: [Pastoral care systems research and ChurchManager recommendations](ChurchManager.PastoralCare.Research.md).
+- Proposed implementation specification: [ChurchManager pastoral care specification](ChurchManager.PastoralCare.Specification.md).
+- Recommended first release: a protected Pastoral Care subsystem with separate
+  care needs, care actions, and optional restricted minimum-necessary notes.
+- Do not reuse ordinary Tasks or store counseling transcripts, clinical detail,
+  attachments, automated spiritual assessments, or giving-based care triggers.
+- Create follow-up items from attendance warnings or manually.
+- Assign a follow-up to the pastor, an elder, or another authorized caregiver.
+- Record contact attempts, outcome, next-follow-up date, and completion.
+- Support regular shut-in and homebound Communion visits using the same
+  natural-language recurrence control as Prayers and Announcements.
+- Protect pastoral notes with a separate sensitive permission.
+- Show actionable overdue follow-ups without exposing confidential detail on
+  the main menu.
+- Provide a printable or exportable authorized follow-up list.
+
+### 9. Import, export, and duplicate management
+
+- Add a central Data Management screen.
+- Import people and families from CSV with a preview and explicit field mapping.
+- Detect likely duplicate people, families, email addresses, and phone numbers.
+- Require review before merging records.
+- Export only approved datasets and always enforce unlisted/private contact
+  restrictions.
+- Record import results, rejected rows, and export history.
+- Provide a complete portable archive format where appropriate.
+
+### 10. Groups, committees, classes, and ministry teams
+
+- Add general groups independent of worship-participant roles.
+- Support leaders, members, group roles, active dates, notes, and categories.
+- Accommodate boards, committees, Bible studies, Sunday school, choir,
+  confirmation, altar guild, outreach, and temporary teams.
+- Permit group attendance and authorized group communication.
+- Add group rosters and participation reports.
+
+### 11. Volunteer availability and responses
+
+- Add participant availability and blockout dates.
+- Send explicit serve requests and reminders.
+- Record accepted, declined, and pending responses.
+- Show last-served information and scheduling conflicts.
+- Preserve manual scheduling and small-congregation flexibility.
+- Consider optional scheduling suggestions, but never silently replace existing
+  assignments.
 
 ### 12. General events and calendar integration
 
