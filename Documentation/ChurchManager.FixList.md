@@ -560,7 +560,9 @@ future roadmap projects:
   confidential statement contact fields, active status, and dated envelope
   history with overlap prevention. Selecting a directory record previews its
   current name, address, and email as statement defaults; numeric envelope
-  values are canonicalized before conflict checks. Batch entry is next.
+  values are canonicalized before conflict checks. Approved-purpose maintenance
+  now records authorization, effective dates, statement treatment, control and
+  discretion, and the accounting destination. Batch entry is next.
 - Design this as a separate confidential subledger with its own permissions.
 - Support contributor accounts linked optionally to a person or family; outside
   donors must also be allowed without creating congregation-member records.

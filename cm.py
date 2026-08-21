@@ -70,6 +70,7 @@ from lectionary_package_dialog import show_lectionary_packages
 from local_lectionary_dialog import show_local_lectionaries
 from user_help import UserGuideError, open_user_guide
 from giving.contributor_dialog import show_contributors
+from giving.purpose_dialog import show_giving_purposes
 
 
 arguments = None
@@ -534,6 +535,9 @@ def _buttonclick(event):
             return
         case "lblGivingContributors":
             show_contributors(cmfrm.FRAME, context.connection)
+            return
+        case "lblGivingPurposes":
+            show_giving_purposes(cmfrm.FRAME, context.connection)
             return
         case "lblPropers":
             show_local_lectionaries(

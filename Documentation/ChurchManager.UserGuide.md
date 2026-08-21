@@ -135,9 +135,18 @@ maintained as an outside contributor. Statement identity and contact fields do
 not silently synchronize with the membership directory.
 
 Numeric envelope numbers are normalized, so `001`, `01`, and `1` are the same
-number. Each assignment has a starting date and may have an ending date. ChurchManager
-prevents the same number from being assigned to different contributors during
-overlapping dates. Double-click an envelope-history row to edit it.
+number. Each assignment has a starting date and may have an ending date.
+ChurchManager prevents the same number from being assigned to different
+contributors during overlapping dates. Double-click an envelope-history row to
+edit it.
+
+### Approved giving purposes
+
+Before entering contribution batches, a giving administrator records each
+congregation-approved purpose, its approval date and authority, effective
+dates, statement treatment, and accounting organization, fund, and revenue
+account. The required control-and-discretion confirmation documents that the
+congregation—not an individual donor—controls use of the gift.
 
 ## 4. Worship planning
 

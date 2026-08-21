@@ -248,7 +248,7 @@
                 },
                 "sizech": [
                     12,
-                    10
+                    11
                 ]
             },
             "lblPerson": {
@@ -418,6 +418,14 @@
                 "label": "Contributors and Envelopes",
                 "tooltip": "Maintain confidential giving identities and dated envelope assignments.",
                 "security": {"invoke": "giving.contributors.manage"}
+            },
+            "lblGivingPurposes": {
+                "name": "lblGivingPurposes",
+                "type": "StaticText",
+                "posch": [15, 11],
+                "label": "Approved Giving Purposes",
+                "tooltip": "Maintain congregation-approved purposes and their accounting destinations.",
+                "security": {"invoke": "giving.purposes.manage"}
             },
             "BulletinBox": {
                 "name": "BulletinBox",
