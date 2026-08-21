@@ -2,12 +2,21 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import wx
 
 from authentication import (
     AuthenticationError, AuthenticationService, MariaDBUserRepository,
     PasswordService,
 )
+from churchmanager_version import __version__
+
+
+ROOT = Path(__file__).resolve().parent
+APPLICATION_ICON = ROOT / "cm.ico"
+COPYRIGHT_NOTICE = "Copyright © 2026 Rev. Jonathan C. Watt"
+LICENSE_NOTICE = "Free and open-source software · GNU GPL v3 or later"
 
 
 class _CredentialDialog(wx.Dialog):
@@ -26,14 +35,61 @@ class _CredentialDialog(wx.Dialog):
 
 
 class LoginDialog(_CredentialDialog):
-    def __init__(self, parent=None):
+    """Present congregation-branded credentials without changing authentication."""
+
+    def __init__(self, parent=None, congregation_name="Local Congregation"):
         super().__init__(parent, title="ChurchManager Login")
+        if APPLICATION_ICON.exists():
+            self.SetIcon(wx.Icon(str(APPLICATION_ICON), wx.BITMAP_TYPE_ICO))
+
+        identity = wx.BoxSizer(wx.HORIZONTAL)
+        if APPLICATION_ICON.exists():
+            bitmap = wx.Bitmap(str(APPLICATION_ICON), wx.BITMAP_TYPE_ICO)
+            identity.Add(wx.StaticBitmap(self, bitmap=bitmap), 0,
+                         wx.ALIGN_TOP | wx.RIGHT, 14)
+        names = wx.BoxSizer(wx.VERTICAL)
+        product = wx.StaticText(self, label="ChurchManager")
+        product.SetFont(product.GetFont().Bold().Larger().Larger())
+        names.Add(product, 0, wx.BOTTOM, 3)
+        church = wx.StaticText(self, label=congregation_name or "Local Congregation")
+        church.SetFont(church.GetFont().Bold())
+        names.Add(church, 0, wx.BOTTOM, 4)
+        names.Add(wx.StaticText(self, label=f"Version {__version__}"))
+        identity.Add(names, 1, wx.EXPAND)
+
         fields = wx.FlexGridSizer(2, 2, 10, 10)
         fields.AddGrowableCol(1, 1)
         self.username = self.add_field(fields, "Username")
         self.password = self.add_field(fields, "Password", wx.TE_PASSWORD)
-        self.finish(fields)
+        root = wx.BoxSizer(wx.VERTICAL)
+        root.Add(identity, 0, wx.ALL | wx.EXPAND, 18)
+        root.Add(wx.StaticLine(self), 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 18)
+        root.Add(fields, 0, wx.ALL | wx.EXPAND, 18)
+        root.Add(wx.StaticText(self, label=COPYRIGHT_NOTICE), 0,
+                 wx.LEFT | wx.RIGHT | wx.ALIGN_CENTER_HORIZONTAL, 18)
+        license_text = wx.StaticText(self, label=LICENSE_NOTICE)
+        license_text.SetForegroundColour(wx.Colour(70, 70, 70))
+        root.Add(license_text, 0, wx.LEFT | wx.RIGHT | wx.TOP |
+                 wx.ALIGN_CENTER_HORIZONTAL, 18)
+        root.Add(self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL), 0,
+                 wx.ALL | wx.EXPAND, 14)
+        self.SetSizerAndFit(root)
+        self.SetMinSize((500, self.GetSize().height))
+        self.CentreOnScreen()
         self.username.SetFocus()
+
+
+def congregation_name(connection):
+    """Return the configured local congregation name for login presentation."""
+    cursor = connection.cursor()
+    try:
+        cursor.execute("SELECT ChurchName FROM tblChurch ORDER BY ID LIMIT 1")
+        row = cursor.fetchone()
+        return str(row[0]).strip() if row and row[0] else "Local Congregation"
+    except Exception:
+        return "Local Congregation"
+    finally:
+        cursor.close()
 
 
 class InitialMasterDialog(_CredentialDialog):
@@ -168,8 +224,9 @@ def authenticate_user(connection, parent=None, minimum_length=12):
     if not ensure_initial_master(repository, passwords, parent):
         return None
     service = AuthenticationService(repository, passwords)
+    local_church = congregation_name(connection)
     while True:
-        dialog = LoginDialog(parent)
+        dialog = LoginDialog(parent, local_church)
         try:
             if dialog.ShowModal() != wx.ID_OK:
                 return None

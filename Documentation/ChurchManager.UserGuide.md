@@ -43,6 +43,10 @@ provided by the congregation administrator. A temporary password must be
 changed when requested. Each person should use an individual account; accounts
 must not be shared.
 
+The login window identifies ChurchManager, the local congregation, the installed
+version, and the open-source license. Confirm the congregation name before
+signing in, especially when working with a test or support installation.
+
 The title bar clearly identifies a test database. Work entered in TEST MODE is
 not production congregation data.
 
