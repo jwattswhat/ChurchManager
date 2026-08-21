@@ -528,7 +528,9 @@ Rollout sequence:
    draft corrections and deletion, receiving bank account, complete accounting
    dimensions, privacy-safe summarized transaction creation, and atomic posting
    synchronization are implemented; posted correction entry remains.)*
-6. Implement reports and statements.
+6. Implement reports and statements. *(The protected donor-free `GIVE-BATCH`
+   Batch Control Summary PDF and its on-screen review are implemented;
+   contributor statements and the remaining report inventory continue next.)*
 7. Add import preview and validation.
 8. Create isolated test data and complete automated regression tests.
 9. Perform user acceptance with a sample collection, split gift, anonymous

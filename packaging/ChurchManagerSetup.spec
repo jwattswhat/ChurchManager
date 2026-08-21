@@ -18,6 +18,7 @@ datas = [
     (str(ROOT / "packages"), "packages"),
     (str(ROOT / "visual_reports" / "definitions"), "visual_reports/definitions"),
     (str(ROOT / "accounting" / "report_definitions"), "accounting/report_definitions"),
+    (str(ROOT / "giving" / "report_definitions"), "giving/report_definitions"),
     (str(JSFORM / "schema"), "JSForm/schema"),
     (str(JSFORM / "jsformschema.json"), "JSForm"),
     (str(ROOT / "output" / "pdf" / "ChurchManager.UserGuide.pdf"), "Documentation"),

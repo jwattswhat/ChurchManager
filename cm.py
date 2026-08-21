@@ -547,7 +547,9 @@ def _buttonclick(event):
             )
             return
         case "lblGivingReports":
-            show_giving_reports(cmfrm.FRAME, context.connection, context.authorization)
+            show_giving_reports(
+                cmfrm.FRAME, context.connection, context.authorization, context.session
+            )
             return
         case "lblPropers":
             show_local_lectionaries(

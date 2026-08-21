@@ -7,6 +7,11 @@ from pathlib import Path
 
 from giving.report_dialog import GivingReportsDialog, show_giving_reports
 from giving.report_service import GivingReportService
+from giving.reporting import (
+    BATCH_SUMMARY_CONTRACT, BATCH_SUMMARY_MANIFEST, DEFINITIONS,
+    GivingBatchSummaryProvider,
+)
+import JSForm
 
 
 class GivingReportTests(unittest.TestCase):
@@ -44,6 +49,15 @@ class GivingReportTests(unittest.TestCase):
         self.assertEqual(control["security"]["invoke"], "giving.reports.summary")
         self.assertIn('"lblGivingReports": "giving.reports.summary"',
                       Path("permission_catalog.py").read_text(encoding="utf-8"))
+
+    def test_batch_summary_pdf_is_protected_and_donor_free(self):
+        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "GIVE-BATCH.json")
+        BATCH_SUMMARY_MANIFEST.validate(definition)
+        self.assertEqual(BATCH_SUMMARY_CONTRACT.required_permission, "giving.reports.summary")
+        source = inspect.getsource(GivingBatchSummaryProvider)
+        self.assertNotIn("tblContributionContributor", source)
+        self.assertNotIn("ContributorID", source)
+        self.assertIn('label="Preview PDF"', inspect.getsource(GivingReportsDialog))
 
 
 if __name__ == "__main__":

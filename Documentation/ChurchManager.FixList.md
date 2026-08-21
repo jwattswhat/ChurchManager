@@ -580,8 +580,10 @@ future roadmap projects:
   Posting atomically marks the linked giving batch Posted.
   Giving Reports now provides a donor-free batch control summary and a
   separately permission-controlled contributor history for Ready and Posted
-  gifts. Quarterly, annual, and custom-range contribution statements follow
-  after these operational totals are accepted.
+  gifts. The protected `GIVE-BATCH` PDF prints the donor-free batch controls for
+  the selected dates without entering the unrestricted report catalog or
+  designer. Quarterly, annual, and custom-range contribution statements follow
+  next.
 - Design this as a separate confidential subledger with its own permissions.
 - Support contributor accounts linked optionally to a person or family; outside
   donors must also be allowed without creating congregation-member records.

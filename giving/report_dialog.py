@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 
 import wx
 import wx.adv
 
 from giving.report_service import GivingReportService
+from giving.reporting import GivingVisualReportService
 
 
 def _python_date(control):
@@ -31,11 +32,12 @@ def _run_time():
 class GivingReportsDialog(wx.Dialog):
     """Show donor-free controls and separately authorized donor history."""
 
-    def __init__(self, parent, connection, authorization):
+    def __init__(self, parent, connection, authorization, session):
         super().__init__(parent, title="Giving Reports", size=(1120, 700),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.service = GivingReportService(connection)
         self.authorization = authorization
+        self.report_service = GivingVisualReportService(connection, authorization, session)
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
         notice = wx.StaticText(
             panel,
@@ -68,11 +70,14 @@ class GivingReportsDialog(wx.Dialog):
         self.summary_start, self.summary_end = self._date_controls(panel)
         self.summary_run = wx.Button(panel, label="Refresh Batch Summary")
         self.summary_run.Bind(wx.EVT_BUTTON, self.on_summary)
+        preview = wx.Button(panel, label="Preview PDF")
+        preview.Bind(wx.EVT_BUTTON, self.on_summary_pdf)
         filters = wx.BoxSizer(wx.HORIZONTAL)
         for label, control in (("From", self.summary_start), ("Through", self.summary_end)):
             filters.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
             filters.Add(control, 0, wx.RIGHT, 12)
-        filters.Add(self.summary_run); root.Add(filters, 0, wx.ALL, 10)
+        filters.Add(self.summary_run, 0, wx.RIGHT, 8)
+        filters.Add(preview); root.Add(filters, 0, wx.ALL, 10)
         self.summary_list = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         columns = (("Date",95),("Description",230),("Organization",200),("Status",80),
                    ("Control",100),("Entered",100),("Difference",100),("Accounting",100))
@@ -179,11 +184,21 @@ class GivingReportsDialog(wx.Dialog):
         self.history_total.GetParent().Layout()
         self.history_total.Refresh()
 
+    def on_summary_pdf(self, _event=None):
+        """Render the selected donor-free batch controls as a protected PDF."""
+        try:
+            first, last = self._dates(self.summary_start, self.summary_end)
+            self.report_service.run_batch_summary(
+                date.fromisoformat(first), date.fromisoformat(last),
+            )
+        except Exception as error:
+            wx.MessageBox(str(error), "Giving Batch Summary", wx.OK | wx.ICON_ERROR, self)
 
-def show_giving_reports(parent, connection, authorization):
+
+def show_giving_reports(parent, connection, authorization, session):
     """Open Giving reports after enforcing the summary-report entry permission."""
     authorization.require("giving.reports.summary", "run Giving reports")
-    dialog = GivingReportsDialog(parent, connection, authorization)
+    dialog = GivingReportsDialog(parent, connection, authorization, session)
     try:
         dialog.ShowModal()
     finally:

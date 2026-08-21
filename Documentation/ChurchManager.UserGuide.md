@@ -187,8 +187,9 @@ history permission also receive **Contributor History**, which shows one
 contributor's Ready and Posted allocations for the selected dates. Draft gifts
 are deliberately excluded from contributor history. The **Refresh** buttons
 update the on-screen review and display the completion time beneath the grid;
-they do not create a PDF. Printable Giving reports and contribution statements
-are separate later steps in the Giving roadmap.
+they do not create a PDF. **Preview PDF** on the Batch Control Summary creates
+the protected donor-free `GIVE-BATCH` report for the selected dates. Contributor
+statements remain a separate permission-protected step in the Giving roadmap.
 
 ## 4. Worship planning
 
