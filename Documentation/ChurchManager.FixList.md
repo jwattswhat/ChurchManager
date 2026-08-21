@@ -570,7 +570,9 @@ future roadmap projects:
   difference, are now available from the main menu. Permission-controlled batch
   review now explains unresolved envelopes, totals, allocations, purpose
   mappings, donor directions, and duplicate references before marking a batch
-  Ready. Draft correction and deletion are next.
+  Ready. Draft contributions can now be opened by double-click, fully corrected,
+  or deleted with confirmation; each operation recalculates totals and writes a
+  privacy-safe audit event. Accounting posting integration is next.
 - Design this as a separate confidential subledger with its own permissions.
 - Support contributor accounts linked optionally to a person or family; outside
   donors must also be allowed without creating congregation-member records.

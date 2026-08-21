@@ -39,6 +39,13 @@ class GivingBatchDialogTests(unittest.TestCase):
         self.assertIn("review.Enable(can_review)", source)
         self.assertIn("This batch is not ready", source)
 
+    def test_draft_gifts_support_double_click_edit_and_guarded_delete(self):
+        source = inspect.getsource(batch_dialog.BatchEditorDialog)
+        self.assertIn("EVT_LIST_ITEM_ACTIVATED", source)
+        self.assertIn("Edit Contribution", source)
+        self.assertIn("Delete Contribution", source)
+        self.assertIn("YES_NO | wx.NO_DEFAULT", source)
+
 
 if __name__ == "__main__":
     unittest.main()

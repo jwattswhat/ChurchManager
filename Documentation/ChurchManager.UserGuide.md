@@ -168,6 +168,12 @@ including an unresolved envelope, control-total difference, incomplete split,
 expired purpose or accounting destination, donor-direction review, or duplicate
 check/reference value. A batch changes to **Ready** only when every check passes.
 
+While a batch remains Draft, double-click a contribution—or select **Edit
+Contribution**—to correct its contributor, envelope, amount, method, statement
+treatment, note, or purpose allocations. **Delete Contribution** requires
+confirmation. Both operations immediately recalculate the batch total and add
+a privacy-safe audit event. Ready and posted gifts cannot be edited or deleted.
+
 ## 4. Worship planning
 
 ### Create a worship service

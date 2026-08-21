@@ -76,6 +76,22 @@ class DraftBatchService:
             (batch_id, self.church_id()),
         )
 
+    def gift(self, batch_id, contribution_id):
+        """Return one editable draft gift and its allocations."""
+        rows = self.all(
+            "SELECT g.ID,g.ContributorID,COALESCE(g.EnteredEnvelopeNumber,''),g.ContributionMethod,"
+            "COALESCE(g.ReferenceValue,''),g.ReceivedDate,g.Amount,g.StatementEligibility,COALESCE(g.Note,'') "
+            "FROM tblContribution g JOIN tblContributionBatch b ON b.ID=g.BatchID "
+            "WHERE g.ID=? AND g.BatchID=? AND b.ChurchID=? AND b.Status='DRAFT'",
+            (contribution_id, batch_id, self.church_id()))
+        if not rows: return None
+        allocations = self.all(
+            "SELECT a.PurposeID,a.OrganizationID,a.FundID,a.RevenueAccountID,a.Amount,"
+            "COALESCE(a.DonorRestrictionNote,''),p.Name FROM tblContributionAllocation a "
+            "LEFT JOIN tblContributionPurpose p ON p.ID=a.PurposeID WHERE a.ContributionID=? ORDER BY a.ID",
+            (contribution_id,))
+        return rows[0], allocations
+
     def create_batch(self, *, batch_date: date, description: str, organization_id: int,
                      control_total=None, service_id=None, attendance_event_id=None,
                      deposit_date=None, bank_account_id=None):
@@ -188,6 +204,64 @@ class DraftBatchService:
         finally:
             cursor.close()
 
+    def update_monetary_gift(self, contribution_id, **values):
+        """Replace an editable gift and its allocations while retaining its identity."""
+        batch_id = values["batch_id"]; received_date = values["received_date"]
+        allocations = list(values["allocations"])
+        amount = validate_allocations(values["amount"], [item[4] for item in allocations])
+        method = str(values.get("method") or "").upper()
+        if method not in {"CASH", "CHECK", "ELECTRONIC", "OTHER"}:
+            raise GivingValidationError("Select a valid monetary contribution method.")
+        eligibility = str(values.get("statement_eligibility") or "").upper()
+        if eligibility not in {"ELIGIBLE", "INELIGIBLE", "REVIEW"}:
+            raise GivingValidationError("Select a valid statement treatment.")
+        envelope = str(values.get("envelope_number") or "").strip() or None
+        contributor_id = values.get("contributor_id")
+        if contributor_id is None and envelope: contributor_id = self.resolve_envelope(envelope, received_date)
+        church_id = self.church_id(); cursor = self.connection.cursor()
+        try:
+            cursor.execute("SELECT OrganizationID,Status FROM tblContributionBatch "
+                           "WHERE ID=? AND ChurchID=? FOR UPDATE", (batch_id, church_id))
+            batch = cursor.fetchone()
+            if not batch or batch[1] != "DRAFT":
+                raise GivingValidationError("Only a draft contribution can be changed.")
+            if any(item[1] != batch[0] for item in allocations):
+                raise GivingValidationError("Every allocation must use the batch organization.")
+            cursor.execute("UPDATE tblContribution SET ContributorID=?,EnteredEnvelopeNumber=?,"
+                           "ContributionMethod=?,ReferenceValue=?,ReceivedDate=?,Amount=?,StatementEligibility=?,Note=? "
+                           "WHERE ID=? AND BatchID=?",
+                           (contributor_id, envelope, method, values.get("reference") or None,
+                            received_date, amount, eligibility, values.get("note") or None,
+                            contribution_id, batch_id))
+            if cursor.rowcount != 1: raise GivingValidationError("The selected contribution is unavailable.")
+            cursor.execute("DELETE FROM tblContributionAllocation WHERE ContributionID=?", (contribution_id,))
+            self._insert_allocations(cursor, contribution_id, allocations)
+            self._refresh_total(cursor, batch_id)
+            self._audit(cursor, church_id, "CONTRIBUTION_UPDATED", "BATCH", batch_id,
+                        f"Draft batch {batch_id}")
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback(); raise
+        finally: cursor.close()
+
+    def delete_gift(self, batch_id, contribution_id):
+        """Delete one draft gift, refresh totals, and retain a safe audit event."""
+        church_id = self.church_id(); cursor = self.connection.cursor()
+        try:
+            cursor.execute("SELECT Status FROM tblContributionBatch WHERE ID=? AND ChurchID=? FOR UPDATE",
+                           (batch_id, church_id)); row = cursor.fetchone()
+            if not row or row[0] != "DRAFT": raise GivingValidationError("Only a draft contribution can be deleted.")
+            cursor.execute("DELETE FROM tblContributionAllocation WHERE ContributionID=?", (contribution_id,))
+            cursor.execute("DELETE FROM tblContribution WHERE ID=? AND BatchID=?", (contribution_id, batch_id))
+            if cursor.rowcount != 1: raise GivingValidationError("The selected contribution is unavailable.")
+            self._refresh_total(cursor, batch_id)
+            self._audit(cursor, church_id, "CONTRIBUTION_DELETED", "BATCH", batch_id,
+                        f"Draft batch {batch_id}")
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback(); raise
+        finally: cursor.close()
+
     def review_issues(self, batch_id):
         """Return privacy-safe reasons a draft batch cannot yet be marked ready."""
         cursor = self.connection.cursor()
@@ -269,3 +343,17 @@ class DraftBatchService:
         cursor.execute("INSERT INTO tblContributionAuditEvent "
                        "(ChurchID,UserID,Action,EntityType,EntityID,SafeReference) VALUES (?,?,?,?,?,?)",
                        (church_id, self.user_id, action, entity_type, entity_id, safe_reference))
+
+    @staticmethod
+    def _insert_allocations(cursor, contribution_id, allocations):
+        for purpose_id, organization_id, fund_id, account_id, amount, restriction in allocations:
+            cursor.execute("INSERT INTO tblContributionAllocation "
+                           "(ContributionID,PurposeID,OrganizationID,FundID,RevenueAccountID,Amount,DonorRestrictionNote) "
+                           "VALUES (?,?,?,?,?,?,?)",
+                           (contribution_id, purpose_id, organization_id, fund_id, account_id,
+                            Decimal(str(amount)).quantize(Decimal("0.01")), restriction or None))
+
+    @staticmethod
+    def _refresh_total(cursor, batch_id):
+        cursor.execute("UPDATE tblContributionBatch SET CalculatedTotal=(SELECT COALESCE(SUM(Amount),0) "
+                       "FROM tblContribution WHERE BatchID=?),Version=Version+1 WHERE ID=?", (batch_id, batch_id))

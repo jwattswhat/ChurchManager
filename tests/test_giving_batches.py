@@ -13,9 +13,11 @@ class Cursor:
         self.connection = connection
         self.lastrowid = 0
         self.rows = []
+        self.rowcount = 0
 
     def execute(self, sql, values=()):
         self.connection.calls.append((sql, values))
+        self.rowcount = 0
         if "SELECT ID FROM tblChurch" in sql:
             self.rows = [(7,)]
         elif "SELECT OrganizationID,Status FROM tblContributionBatch" in sql:
@@ -32,6 +34,8 @@ class Cursor:
             self.lastrowid = 21
         elif sql.startswith("INSERT INTO tblContribution "):
             self.lastrowid = 31
+        elif sql.startswith("UPDATE tblContribution SET") or sql.startswith("DELETE FROM tblContribution WHERE"):
+            self.rowcount = 1
         else:
             self.rows = []
 
@@ -103,6 +107,28 @@ class DraftBatchServiceTests(unittest.TestCase):
         self.assertEqual(connection.commits, 1)
         self.assertTrue(any("Status='READY'" in sql for sql, _ in connection.calls))
         self.assertTrue(any("BATCH_MARKED_READY" in str(values) for _, values in connection.calls))
+
+    def test_update_replaces_allocations_and_recalculates_total(self):
+        connection = Connection()
+        DraftBatchService(connection, 3).update_monetary_gift(
+            31, batch_id=21, received_date=date.today(), amount="30.00",
+            allocations=[(8, 4, 5, 6, "30.00", None)], contributor_id=45,
+            envelope_number="12", method="CHECK", reference="1002",
+            statement_eligibility="ELIGIBLE", note=None)
+        sql = "\n".join(item[0] for item in connection.calls)
+        self.assertIn("UPDATE tblContribution SET", sql)
+        self.assertIn("DELETE FROM tblContributionAllocation", sql)
+        self.assertIn("CONTRIBUTION_UPDATED", str(connection.calls))
+        self.assertEqual(connection.commits, 1)
+
+    def test_delete_removes_allocations_then_gift_and_recalculates(self):
+        connection = Connection()
+        DraftBatchService(connection, 3).delete_gift(21, 31)
+        calls = [item[0] for item in connection.calls]
+        allocation = next(i for i, sql in enumerate(calls) if sql.startswith("DELETE FROM tblContributionAllocation"))
+        gift = next(i for i, sql in enumerate(calls) if sql.startswith("DELETE FROM tblContribution WHERE"))
+        self.assertLess(allocation, gift)
+        self.assertIn("CONTRIBUTION_DELETED", str(connection.calls))
 
 
 if __name__ == "__main__": unittest.main()

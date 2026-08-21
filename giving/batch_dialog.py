@@ -91,7 +91,7 @@ class GiftDialog(wx.Dialog):
     TREATMENTS = (("Eligible", "ELIGIBLE"), ("Needs review", "REVIEW"),
                   ("Not eligible", "INELIGIBLE"))
 
-    def __init__(self, parent, service, batch):
+    def __init__(self, parent, service, batch, gift=None):
         super().__init__(parent, title="Add Contribution", size=(760, 620),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.service = service; self.batch = batch; self.contributors = service.contributors()
@@ -123,6 +123,21 @@ class GiftDialog(wx.Dialog):
         row.Add(add, 0, wx.RIGHT, 6); row.Add(remove); outer.Add(row, 0, wx.ALL, 12)
         outer.Add(_dialog_buttons(panel), 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
         panel.SetSizer(outer)
+        self.contribution_id = None
+        if gift: self.load_gift(*gift)
+
+    def load_gift(self, header, allocations):
+        """Populate the dialog from one existing draft contribution."""
+        self.contribution_id = header[0]
+        for index, row in enumerate(self.contributors):
+            if row[0] == header[1]: self.contributor.SetSelection(index + 1); break
+        self.envelope.SetValue(header[2]); self.method.SetSelection(self.METHODS.index(header[3]))
+        self.reference.SetValue(header[4]); value = header[5]
+        self.received.SetValue(wx.DateTime.FromDMY(value.day, value.month - 1, value.year))
+        self.amount.SetValue(f"{header[6]:.2f}")
+        self.treatment.SetSelection([item[1] for item in self.TREATMENTS].index(header[7]))
+        self.note.SetValue(header[8]); self.allocations = [((row[0],row[1],row[2],row[3],f"{row[4]:.2f}",row[5] or ""),row[6] or "Unavailable purpose") for row in allocations]
+        self.refresh()
 
     def on_add(self, _event=None):
         if not self.purposes:
@@ -169,8 +184,11 @@ class BatchEditorDialog(wx.Dialog):
         for index, (label, width) in enumerate((("Date",95),("Contributor",250),("Envelope",85),("Method",95),("Amount",110),("Statement",95))):
             self.list.InsertColumn(index, label, width=width)
         outer.Add(self.list, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
+        self.list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit)
         buttons = wx.BoxSizer(wx.HORIZONTAL); add = wx.Button(panel, label="Add Contribution")
-        add.Bind(wx.EVT_BUTTON, self.on_add); buttons.Add(add); buttons.AddStretchSpacer()
+        edit = wx.Button(panel, label="Edit Contribution"); delete = wx.Button(panel, label="Delete Contribution")
+        add.Bind(wx.EVT_BUTTON, self.on_add); edit.Bind(wx.EVT_BUTTON, self.on_edit); delete.Bind(wx.EVT_BUTTON, self.on_delete)
+        buttons.Add(add,0,wx.RIGHT,6); buttons.Add(edit,0,wx.RIGHT,6); buttons.Add(delete); buttons.AddStretchSpacer()
         review = wx.Button(panel, label="Review / Mark Ready")
         review.Bind(wx.EVT_BUTTON, self.on_review); review.Enable(can_review); buttons.Add(review, 0, wx.RIGHT, 8)
         close = wx.Button(panel, wx.ID_CLOSE); close.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_CLOSE)); buttons.Add(close)
@@ -196,6 +214,27 @@ class BatchEditorDialog(wx.Dialog):
                 self.service.save_monetary_gift(**dialog.values()); self.refresh()
         except Exception as error: wx.MessageBox(str(error), "Unable to Save Contribution", wx.OK | wx.ICON_ERROR, self)
         finally: dialog.Destroy()
+
+    def on_edit(self, _event=None):
+        selected = self.list.GetFirstSelected()
+        if selected < 0: return
+        gift = self.service.gift(self.batch_id, self.rows[selected][0])
+        if not gift: return
+        dialog = GiftDialog(self, self.service, self.batch, gift)
+        try:
+            if dialog.ShowModal() == wx.ID_OK:
+                self.service.update_monetary_gift(dialog.contribution_id, **dialog.values()); self.refresh()
+        except Exception as error: wx.MessageBox(str(error), "Unable to Update Contribution", wx.OK | wx.ICON_ERROR, self)
+        finally: dialog.Destroy()
+
+    def on_delete(self, _event=None):
+        selected = self.list.GetFirstSelected()
+        if selected < 0: return
+        if wx.MessageBox("Delete this draft contribution?", "Delete Contribution",
+                         wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES: return
+        try:
+            self.service.delete_gift(self.batch_id, self.rows[selected][0]); self.refresh()
+        except Exception as error: wx.MessageBox(str(error), "Unable to Delete Contribution", wx.OK | wx.ICON_ERROR, self)
 
     def on_review(self, _event=None):
         issues = self.service.review_issues(self.batch_id)
