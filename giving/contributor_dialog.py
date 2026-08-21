@@ -6,6 +6,7 @@ import wx
 import wx.adv
 
 from bulletin_orders import portable_connection
+from giving.annual_envelopes import show_annual_envelope_assignment
 from giving.validation import (
     GivingValidationError,
     validate_contributor_links,
@@ -244,10 +245,12 @@ class ContributorDialog(wx.Dialog):
 
     TYPES = (("Person", "PERSON"), ("Family", "FAMILY"), ("Outside contributor", "EXTERNAL"))
 
-    def __init__(self, parent, connection):
+    def __init__(self, parent, connection, user_id=None):
         super().__init__(parent, title="Contributors and Envelopes", size=(1120, 720),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.repository = ContributorRepository(connection)
+        self.connection = connection
+        self.user_id = user_id
         self.rows = []; self.envelope_rows = []; self.current_id = None
         self.people = self.repository.people(); self.families = self.repository.families()
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
@@ -285,7 +288,8 @@ class ContributorDialog(wx.Dialog):
         for i, (label, width) in enumerate((("Envelope", 100), ("From", 105), ("Through", 105), ("Note", 260))): self.envelopes.InsertColumn(i, label, width=width)
         self.envelopes.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_edit_envelope); right.Add(self.envelopes, 1, wx.EXPAND)
         env_buttons = wx.BoxSizer(wx.HORIZONTAL)
-        for label, handler in (("Assign Envelope", self.on_add_envelope), ("Edit", self.on_edit_envelope), ("Delete", self.on_delete_envelope)):
+        for label, handler in (("Assign Envelope", self.on_add_envelope), ("Edit", self.on_edit_envelope), ("Delete", self.on_delete_envelope),
+                               ("Annual Assignment...", self.on_annual_assignment)):
             button = wx.Button(panel, label=label); button.Bind(wx.EVT_BUTTON, handler); env_buttons.Add(button, 0, wx.RIGHT, 6)
         right.Add(env_buttons, 0, wx.TOP, 8); body.Add(right, 1, wx.EXPAND)
         outer.Add(body, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
@@ -386,10 +390,15 @@ class ContributorDialog(wx.Dialog):
         if wx.MessageBox("Delete this envelope assignment?", "Delete Envelope", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) == wx.YES:
             self.repository.delete_envelope(self.envelope_rows[selected][0], self.current_id); self.refresh_envelopes()
 
+    def on_annual_assignment(self, _event=None):
+        """Create a previewed annual assignment sequence for active contributors."""
+        if show_annual_envelope_assignment(self, self.connection, self.user_id) == wx.ID_OK:
+            self.refresh_envelopes()
 
-def show_contributors(parent, connection):
+
+def show_contributors(parent, connection, session=None):
     """Open confidential contributor and envelope maintenance."""
-    dialog = ContributorDialog(parent, connection)
+    dialog = ContributorDialog(parent, connection, getattr(session, "user_id", None))
     try:
         dialog.ShowModal()
     finally:

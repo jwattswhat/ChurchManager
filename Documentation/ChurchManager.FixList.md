@@ -593,9 +593,14 @@ future roadmap projects:
 - Keep the normal installation seed clean. Package a separate, clearly
   fictional and repeatable Beta Test Dataset that testers can reset safely;
   include Giving statement fixtures without making them production defaults.
-- The approved remaining envelope-box work now includes a previewed annual
-  assignment tool with either complete renumbering or preservation plus gap
-  filling, and printable box labels plus an assignment register.
+  The versioned package and guarded fresh-install/reset contract are specified
+  in `ChurchManager.BetaTestDataset.Specification.md`; build its manifest,
+  isolated acceptance, and optional beta-setup integration before the next beta
+  installer is produced.
+- Annual envelope-box assignment is implemented with a complete preview,
+  either complete renumbering or preservation plus gap filling, guarded
+  year-conflict handling, and one audited transaction. Printable box labels
+  plus an assignment register remain next.
 - Design this as a separate confidential subledger with its own permissions.
 - Support contributor accounts linked optionally to a person or family; outside
   donors must also be allowed without creating congregation-member records.

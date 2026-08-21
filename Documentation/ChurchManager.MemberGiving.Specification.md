@@ -274,6 +274,11 @@ numbers, effective dates, and the resulting highest box number before changing
 the database. Applying the preview is one audited transaction. The tool never
 changes historical contribution ownership or entered envelope text.
 
+The annual assignment screen is available from contributor maintenance. It
+includes only active contributors, sorts them by statement display order,
+refuses to overwrite assignments that already begin in the selected year, and
+requires a fresh preview whenever its options or underlying data change.
+
 Envelope-box labels are a protected Giving report. The user selects the annual
 assignment period, label-sheet format, and whether inactive or outside
 contributors are included. Each label contains the box number and statement

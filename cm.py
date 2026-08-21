@@ -536,7 +536,7 @@ def _buttonclick(event):
             )
             return
         case "lblGivingContributors":
-            show_contributors(cmfrm.FRAME, context.connection)
+            show_contributors(cmfrm.FRAME, context.connection, context.session)
             return
         case "lblGivingPurposes":
             show_giving_purposes(cmfrm.FRAME, context.connection)
