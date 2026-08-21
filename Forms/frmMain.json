@@ -248,7 +248,7 @@
                 },
                 "sizech": [
                     12,
-                    11
+                    12
                 ]
             },
             "lblPerson": {
@@ -360,7 +360,7 @@
                 "name": "ReportBox",
                 "posch": [
                     14,
-                    12
+                    13
                 ],
                 "sizech": [
                     12,
@@ -377,7 +377,7 @@
                 "type": "StaticText",
                 "posch": [
                     15,
-                    13
+                    14
                 ],
                 "label": "Reports",
                 "tooltip": "Open the reports form.",
@@ -390,7 +390,7 @@
                 "type": "StaticText",
                 "posch": [
                     15,
-                    14
+                    15
                 ],
                 "label": "Report Designer",
                 "tooltip": "Customize approved ChurchManager report layouts.",
@@ -403,7 +403,7 @@
                 "type": "StaticText",
                 "posch": [
                     15,
-                    15
+                    16
                 ],
                 "label": "Screen Designer",
                 "tooltip": "Customize approved ChurchManager screen layouts.",
@@ -426,6 +426,14 @@
                 "label": "Approved Giving Purposes",
                 "tooltip": "Maintain congregation-approved purposes and their accounting destinations.",
                 "security": {"invoke": "giving.purposes.manage"}
+            },
+            "lblContributionBatches": {
+                "name": "lblContributionBatches",
+                "type": "StaticText",
+                "posch": [15, 12],
+                "label": "Contribution Batches",
+                "tooltip": "Enter confidential draft contribution batches and split gifts.",
+                "security": {"invoke": "giving.batches.enter"}
             },
             "BulletinBox": {
                 "name": "BulletinBox",

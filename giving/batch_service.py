@@ -40,6 +40,42 @@ class DraftBatchService:
             "ORDER BY b.BatchDate DESC,b.ID DESC", (self.church_id(),),
         )
 
+    def organizations(self):
+        """Return active accounting organizations available to new batches."""
+        return self.all("SELECT ID,LegalName FROM tblAccountingOrganization WHERE Active=1 ORDER BY LegalName")
+
+    def contributors(self):
+        """Return active contributor identities for confidential entry."""
+        return self.all("SELECT ID,DisplayName FROM tblContributionContributor "
+                        "WHERE ChurchID=? AND IsActive=1 ORDER BY DisplayName,ID", (self.church_id(),))
+
+    def purposes(self, organization_id, received_date):
+        """Return approved purposes and their accounting mappings for a gift date."""
+        return self.all(
+            "SELECT ID,Name,OrganizationID,FundID,RevenueAccountID,StatementTreatment "
+            "FROM tblContributionPurpose WHERE ChurchID=? AND OrganizationID=? AND IsActive=1 "
+            "AND EffectiveFrom<=? AND (EffectiveThrough IS NULL OR EffectiveThrough>=?) "
+            "ORDER BY Name,ID", (self.church_id(), organization_id, received_date, received_date),
+        )
+
+    def batch(self, batch_id):
+        """Return one batch header scoped to this church."""
+        rows = self.all("SELECT ID,BatchDate,Description,OrganizationID,ControlTotal,CalculatedTotal,"
+                        "Status,Version FROM tblContributionBatch WHERE ID=? AND ChurchID=?",
+                        (batch_id, self.church_id()))
+        return rows[0] if rows else None
+
+    def contributions(self, batch_id):
+        """Return gift-entry rows without notes or acknowledgment details."""
+        return self.all(
+            "SELECT g.ID,g.ReceivedDate,COALESCE(c.DisplayName,'Anonymous'),"
+            "COALESCE(g.EnteredEnvelopeNumber,''),g.ContributionMethod,g.Amount,"
+            "g.StatementEligibility FROM tblContribution g LEFT JOIN tblContributionContributor c "
+            "ON c.ID=g.ContributorID JOIN tblContributionBatch b ON b.ID=g.BatchID "
+            "WHERE g.BatchID=? AND b.ChurchID=? ORDER BY g.ID",
+            (batch_id, self.church_id()),
+        )
+
     def create_batch(self, *, batch_date: date, description: str, organization_id: int,
                      control_total=None, service_id=None, attendance_event_id=None,
                      deposit_date=None, bank_account_id=None):

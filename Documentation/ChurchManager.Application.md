@@ -195,7 +195,8 @@ Other output is created by dedicated Python scripts, including:
 | Path | Purpose |
 | --- | --- |
 | `cm.py` | Main ChurchManager application and menu dispatch. |
-| `ChurchManager-Test.bat` | Development/test launcher; requires a locally rebuilt `.runtime-venv`. |
+| `ChurchManager-Test.pyw` | Windowless development/test launcher; requires a locally rebuilt `.runtime-venv`. |
+| `ChurchManager-Test.bat` | Diagnostic development launcher that intentionally keeps a console visible. |
 | `Forms/` | JSON definitions for application screens. |
 | `visual_reports/definitions/` | Starter definitions for supported visual reports. |
 | `Documentation/` | Application and form documentation. |
@@ -297,14 +298,14 @@ Exact entries depend on the current database. Use the Config screen to inspect i
 
 ### 5.5 Configure the launcher
 
-`ChurchManager-Test.bat` changes to the application directory, activates the
+`ChurchManager-Test.pyw` changes to the application directory, verifies the
 project runtime, and starts `cm.py` with guarded test-database arguments.
 
 ```text
 python cm.py --server SERVER --database ChurchDB --user USER
 ```
 
-For an isolated test session, run `ChurchManager-Test.bat` or add `--test` to
+For an isolated test session, run `ChurchManager-Test.pyw` or add `--test` to
 the command. Test mode ignores the normal database name and uses the database
 configured at `testing.database` in `churchmanager.json`. The main window title
 clearly displays `TEST MODE`, and ChurchManager refuses to start if the test and
@@ -345,7 +346,7 @@ Before regular use, verify that:
 
 ### Starting
 
-Run `ChurchManager-Test.bat` from Windows. At startup the application:
+Run `ChurchManager-Test.pyw` from Windows. At startup the application:
 
 1. parses database arguments;
 2. initializes wxPython;

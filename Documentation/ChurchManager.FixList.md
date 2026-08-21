@@ -565,7 +565,9 @@ future roadmap projects:
   discretion, and the accounting destination. The draft-batch service now
   creates privacy-safe audited batches, resolves envelopes by the received
   date, requires exact split allocations, and refreshes calculated totals in
-  one transaction. The batch-entry screen is next.
+  one transaction. Draft batch creation and confidential monetary gift entry,
+  including multi-purpose allocations and a continuously refreshed control
+  difference, are now available from the main menu. Batch review is next.
 - Design this as a separate confidential subledger with its own permissions.
 - Support contributor accounts linked optionally to a person or family; outside
   donors must also be allowed without creating congregation-member records.

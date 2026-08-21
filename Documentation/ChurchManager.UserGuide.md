@@ -148,6 +148,20 @@ dates, statement treatment, and accounting organization, fund, and revenue
 account. The required control-and-discretion confirmation documents that the
 congregation—not an individual donor—controls use of the gift.
 
+### Contribution batches
+
+Open **Contribution Batches** to begin a confidential draft for a Sunday
+offering, special collection, or other deposit. Enter the batch date,
+description, accounting organization, and—when known—the expected control
+total. Open the batch and add each monetary contribution.
+
+Choose a contributor directly or enter an envelope number and leave the
+contributor at **Anonymous / resolve from envelope**. ChurchManager resolves
+the envelope assignment that was effective on the gift's received date. A gift
+may be divided among several approved purposes, but the allocations must equal
+the gift amount exactly. The batch header refreshes its entered total and any
+remaining difference after every saved gift.
+
 ## 4. Worship planning
 
 ### Create a worship service

@@ -2,7 +2,7 @@
 
 ## Safe environment
 
-Use `ChurchManager-Test.bat`, `.runtime-venv`, and `ChurchDBTest`. Confirm the
+Use `ChurchManager-Test.pyw`, `.runtime-venv`, and `ChurchDBTest`. Confirm the
 window title identifies test mode before changing data. Production `ChurchDB`
 is never a development target.
 

@@ -36,7 +36,10 @@ database. Install the packages in [`requirements-runtime.txt`](requirements-runt
 into a fresh environment. Database structure is advanced by the ordered,
 checksum-protected migrations in [`migrations`](migrations/README.md).
 
-Start the development application with `ChurchManager-Test.bat`.
+Start the development application with `ChurchManager-Test.pyw`. It uses
+`pythonw.exe`, so the login and application open without a console window.
+`ChurchManager-Test.bat` remains available when a developer specifically needs
+to see terminal diagnostics.
 
 Never put passwords on a command line or in configuration committed to Git.
 ChurchManager retrieves database secrets from Windows Credential Manager.

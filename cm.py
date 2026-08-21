@@ -71,6 +71,7 @@ from local_lectionary_dialog import show_local_lectionaries
 from user_help import UserGuideError, open_user_guide
 from giving.contributor_dialog import show_contributors
 from giving.purpose_dialog import show_giving_purposes
+from giving.batch_dialog import show_contribution_batches
 
 
 arguments = None
@@ -538,6 +539,9 @@ def _buttonclick(event):
             return
         case "lblGivingPurposes":
             show_giving_purposes(cmfrm.FRAME, context.connection)
+            return
+        case "lblContributionBatches":
+            show_contribution_batches(cmfrm.FRAME, context.connection, context.session)
             return
         case "lblPropers":
             show_local_lectionaries(

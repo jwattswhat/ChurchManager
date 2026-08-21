@@ -67,4 +67,5 @@ MAIN_MENU_PERMISSIONS = {
     "lblAccountingYearEnd": "accounting.periods.override",
     "lblGivingContributors": "giving.contributors.manage",
     "lblGivingPurposes": "giving.purposes.manage",
+    "lblContributionBatches": "giving.batches.enter",
 }

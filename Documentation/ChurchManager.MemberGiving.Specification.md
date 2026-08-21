@@ -516,8 +516,7 @@ Rollout sequence:
 3. Implement schema and service-level validation. *(Implemented through draft
    batch creation and monetary gift allocation.)*
 4. Implement contributor/envelope and batch-entry screens. *(Contributor,
-   envelope, and approved-purpose maintenance are implemented; batch entry is
-   in progress.)*
+   envelope, approved-purpose, and draft monetary batch entry are implemented.)*
 5. Implement posting integration and corrections.
 6. Implement reports and statements.
 7. Add import preview and validation.
