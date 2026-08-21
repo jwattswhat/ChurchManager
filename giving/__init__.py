@@ -1,5 +1,7 @@
 """Confidential ChurchManager member-giving services."""
 
+from .batch_service import DraftBatchService
+
 from .validation import (
     GivingValidationError,
     envelope_periods_overlap,
@@ -10,6 +12,7 @@ from .validation import (
 )
 
 __all__ = [
+    "DraftBatchService",
     "GivingValidationError",
     "envelope_periods_overlap",
     "validate_allocations",

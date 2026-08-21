@@ -513,8 +513,11 @@ Rollout sequence:
 
 1. Approve this specification.
 2. Confirm permissions and accounting mappings.
-3. Implement schema and service-level validation.
-4. Implement contributor/envelope and batch-entry screens.
+3. Implement schema and service-level validation. *(Implemented through draft
+   batch creation and monetary gift allocation.)*
+4. Implement contributor/envelope and batch-entry screens. *(Contributor,
+   envelope, and approved-purpose maintenance are implemented; batch entry is
+   in progress.)*
 5. Implement posting integration and corrections.
 6. Implement reports and statements.
 7. Add import preview and validation.
