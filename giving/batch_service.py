@@ -188,6 +188,71 @@ class DraftBatchService:
         finally:
             cursor.close()
 
+    def review_issues(self, batch_id):
+        """Return privacy-safe reasons a draft batch cannot yet be marked ready."""
+        cursor = self.connection.cursor()
+        try:
+            return self._review_issues(cursor, batch_id, self.church_id())
+        finally:
+            cursor.close()
+
+    def mark_ready(self, batch_id):
+        """Atomically validate and move a complete draft batch to Ready."""
+        church_id = self.church_id(); cursor = self.connection.cursor()
+        try:
+            cursor.execute("SELECT Status FROM tblContributionBatch WHERE ID=? AND ChurchID=? FOR UPDATE",
+                           (batch_id, church_id))
+            row = cursor.fetchone()
+            if not row: raise GivingValidationError("The selected contribution batch is unavailable.")
+            if row[0] != "DRAFT": raise GivingValidationError("Only a draft batch can be marked ready.")
+            issues = self._review_issues(cursor, batch_id, church_id)
+            if issues: raise GivingValidationError("The batch is not ready:\n- " + "\n- ".join(issues))
+            cursor.execute("UPDATE tblContributionBatch SET Status='READY',ReviewedByUserID=?,"
+                           "ReviewedAt=CURRENT_TIMESTAMP(6),Version=Version+1 WHERE ID=? AND Status='DRAFT'",
+                           (self.user_id, batch_id))
+            self._audit(cursor, church_id, "BATCH_MARKED_READY", "BATCH", batch_id,
+                        f"Ready batch {batch_id}")
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback(); raise
+        finally:
+            cursor.close()
+
+    def _review_issues(self, cursor, batch_id, church_id):
+        cursor.execute("SELECT ControlTotal,CalculatedTotal FROM tblContributionBatch "
+                       "WHERE ID=? AND ChurchID=?", (batch_id, church_id))
+        batch = cursor.fetchone()
+        if not batch: return ["The batch is unavailable."]
+        issues = []
+        if batch[1] <= 0: issues.append("Enter at least one monetary contribution.")
+        if batch[0] is not None and batch[0] != batch[1]: issues.append("The entered total does not equal the control total.")
+        checks = (
+            ("SELECT COUNT(*) FROM tblContribution WHERE BatchID=? AND EnteredEnvelopeNumber IS NOT NULL "
+             "AND EnteredEnvelopeNumber<>'' AND ContributorID IS NULL",
+             "Resolve or deliberately clear every unknown envelope number."),
+            ("SELECT COUNT(*) FROM tblContribution WHERE BatchID=? AND DirectionStatus='REVIEW'",
+             "Resolve every donor-direction review."),
+            ("SELECT COUNT(*) FROM (SELECT g.ID,g.Amount,COALESCE(SUM(a.Amount),0) Allocated "
+             "FROM tblContribution g LEFT JOIN tblContributionAllocation a ON a.ContributionID=g.ID "
+             "WHERE g.BatchID=? GROUP BY g.ID,g.Amount HAVING Allocated<>g.Amount) invalid",
+             "Every contribution must be allocated exactly."),
+            ("SELECT COUNT(*) FROM tblContributionAllocation a JOIN tblContribution g ON g.ID=a.ContributionID "
+             "LEFT JOIN tblContributionPurpose p ON p.ID=a.PurposeID "
+             "LEFT JOIN tblAccountingFund f ON f.ID=a.FundID LEFT JOIN tblAccountingAccount ac ON ac.ID=a.RevenueAccountID "
+             "WHERE g.BatchID=? AND (p.ID IS NULL OR p.IsActive=0 OR p.ControlAndDiscretionConfirmed=0 "
+             "OR p.EffectiveFrom>g.ReceivedDate OR (p.EffectiveThrough IS NOT NULL AND p.EffectiveThrough<g.ReceivedDate) "
+             "OR f.Active=0 OR ac.Active=0 OR ac.PostingAllowed=0 OR ac.AccountType<>'REVENUE')",
+             "Every allocation must use an effective approved purpose and active accounting destination."),
+            ("SELECT COUNT(*) FROM (SELECT ContributionMethod,ReferenceValue,COUNT(*) Uses FROM tblContribution "
+             "WHERE BatchID=? AND ReferenceValue IS NOT NULL AND ReferenceValue<>'' "
+             "GROUP BY ContributionMethod,ReferenceValue HAVING Uses>1) duplicate_reference",
+             "Resolve duplicate check or reference values."),
+        )
+        for sql, message in checks:
+            cursor.execute(sql, (batch_id,))
+            if cursor.fetchone()[0]: issues.append(message)
+        return issues
+
     @staticmethod
     def _optional_money(value, label):
         if value in (None, ""):

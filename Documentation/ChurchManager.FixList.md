@@ -567,7 +567,10 @@ future roadmap projects:
   date, requires exact split allocations, and refreshes calculated totals in
   one transaction. Draft batch creation and confidential monetary gift entry,
   including multi-purpose allocations and a continuously refreshed control
-  difference, are now available from the main menu. Batch review is next.
+  difference, are now available from the main menu. Permission-controlled batch
+  review now explains unresolved envelopes, totals, allocations, purpose
+  mappings, donor directions, and duplicate references before marking a batch
+  Ready. Draft correction and deletion are next.
 - Design this as a separate confidential subledger with its own permissions.
 - Support contributor accounts linked optionally to a person or family; outside
   donors must also be allowed without creating congregation-member records.

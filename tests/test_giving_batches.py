@@ -18,8 +18,14 @@ class Cursor:
         self.connection.calls.append((sql, values))
         if "SELECT ID FROM tblChurch" in sql:
             self.rows = [(7,)]
-        elif "FROM tblContributionBatch" in sql and "FOR UPDATE" in sql:
+        elif "SELECT OrganizationID,Status FROM tblContributionBatch" in sql:
             self.rows = [self.connection.batch]
+        elif "SELECT Status FROM tblContributionBatch" in sql:
+            self.rows = [(self.connection.batch[1],)]
+        elif "SELECT ControlTotal,CalculatedTotal" in sql:
+            self.rows = [self.connection.totals]
+        elif sql.startswith("SELECT COUNT(*)"):
+            self.rows = [(self.connection.review_counts.pop(0),)]
         elif "FROM tblContributionEnvelopeAssignment" in sql:
             self.rows = list(self.connection.envelopes)
         elif sql.startswith("INSERT INTO tblContributionBatch"):
@@ -38,6 +44,7 @@ class Connection:
     def __init__(self):
         self.calls, self.commits, self.rollbacks = [], 0, 0
         self.batch, self.envelopes = (4, "DRAFT"), []
+        self.totals, self.review_counts = (Decimal("25.00"), Decimal("25.00")), [0, 0, 0, 0, 0]
     def cursor(self): return Cursor(self)
     def commit(self): self.commits += 1
     def rollback(self): self.rollbacks += 1
@@ -81,6 +88,21 @@ class DraftBatchServiceTests(unittest.TestCase):
                 batch_id=21, received_date=date.today(), amount="25.00",
                 allocations=[(8, 4, 5, 6, "25.00", None)])
         self.assertEqual(connection.rollbacks, 1)
+
+    def test_review_reports_control_difference_and_unresolved_items(self):
+        connection = Connection()
+        connection.totals = (Decimal("30.00"), Decimal("25.00"))
+        connection.review_counts = [1, 0, 0, 0, 0]
+        issues = DraftBatchService(connection, 3).review_issues(21)
+        self.assertIn("control total", " ".join(issues))
+        self.assertIn("envelope", " ".join(issues))
+
+    def test_complete_draft_is_marked_ready_and_audited(self):
+        connection = Connection()
+        DraftBatchService(connection, 3).mark_ready(21)
+        self.assertEqual(connection.commits, 1)
+        self.assertTrue(any("Status='READY'" in sql for sql, _ in connection.calls))
+        self.assertTrue(any("BATCH_MARKED_READY" in str(values) for _, values in connection.calls))
 
 
 if __name__ == "__main__": unittest.main()

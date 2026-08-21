@@ -162,6 +162,12 @@ may be divided among several approved purposes, but the allocations must equal
 the gift amount exactly. The batch header refreshes its entered total and any
 remaining difference after every saved gift.
 
+Users with **Review contribution batches** permission can select **Review / Mark
+Ready**. ChurchManager first lists anything that still needs attention,
+including an unresolved envelope, control-total difference, incomplete split,
+expired purpose or accounting destination, donor-direction review, or duplicate
+check/reference value. A batch changes to **Ready** only when every check passes.
+
 ## 4. Worship planning
 
 ### Create a worship service

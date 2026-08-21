@@ -517,7 +517,8 @@ Rollout sequence:
    batch creation and monetary gift allocation.)*
 4. Implement contributor/envelope and batch-entry screens. *(Contributor,
    envelope, approved-purpose, and draft monetary batch entry are implemented.)*
-5. Implement posting integration and corrections.
+5. Implement posting integration and corrections. *(The Ready review gate is
+   implemented; draft corrections and accounting posting remain.)*
 6. Implement reports and statements.
 7. Add import preview and validation.
 8. Create isolated test data and complete automated regression tests.

@@ -158,7 +158,7 @@ class GiftDialog(wx.Dialog):
 class BatchEditorDialog(wx.Dialog):
     """Show one draft batch and add confidential contribution rows."""
 
-    def __init__(self, parent, service, batch_id):
+    def __init__(self, parent, service, batch_id, can_review=False):
         super().__init__(parent, title="Contribution Batch Entry", size=(980, 650),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.service = service; self.batch_id = batch_id; panel = wx.Panel(self)
@@ -171,6 +171,8 @@ class BatchEditorDialog(wx.Dialog):
         outer.Add(self.list, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
         buttons = wx.BoxSizer(wx.HORIZONTAL); add = wx.Button(panel, label="Add Contribution")
         add.Bind(wx.EVT_BUTTON, self.on_add); buttons.Add(add); buttons.AddStretchSpacer()
+        review = wx.Button(panel, label="Review / Mark Ready")
+        review.Bind(wx.EVT_BUTTON, self.on_review); review.Enable(can_review); buttons.Add(review, 0, wx.RIGHT, 8)
         close = wx.Button(panel, wx.ID_CLOSE); close.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_CLOSE)); buttons.Add(close)
         outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 12); panel.SetSizer(outer); self.refresh()
 
@@ -195,14 +197,28 @@ class BatchEditorDialog(wx.Dialog):
         except Exception as error: wx.MessageBox(str(error), "Unable to Save Contribution", wx.OK | wx.ICON_ERROR, self)
         finally: dialog.Destroy()
 
+    def on_review(self, _event=None):
+        issues = self.service.review_issues(self.batch_id)
+        if issues:
+            wx.MessageBox("This batch is not ready:\n\n- " + "\n- ".join(issues),
+                          "Batch Review", wx.OK | wx.ICON_WARNING, self); return
+        if wx.MessageBox("All review checks passed. Mark this batch Ready?",
+                         "Batch Review", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self) != wx.YES:
+            return
+        try:
+            self.service.mark_ready(self.batch_id); self.EndModal(wx.ID_OK)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Mark Batch Ready", wx.OK | wx.ICON_ERROR, self)
+
 
 class BatchCatalogDialog(wx.Dialog):
     """List draft batches and open confidential batch entry."""
 
-    def __init__(self, parent, connection, session):
+    def __init__(self, parent, connection, session, authorization):
         super().__init__(parent, title="Contribution Batches", size=(920, 570),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
-        self.service = DraftBatchService(connection, session.user_id); panel = wx.Panel(self)
+        self.service = DraftBatchService(connection, session.user_id)
+        self.can_review = authorization.has_permission("giving.batches.review"); panel = wx.Panel(self)
         outer = wx.BoxSizer(wx.VERTICAL); heading = wx.StaticText(panel, label="Draft Contribution Batches")
         heading.SetFont(heading.GetFont().Bold().Larger()); outer.Add(heading, 0, wx.ALL, 12)
         self.list = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
@@ -233,13 +249,14 @@ class BatchCatalogDialog(wx.Dialog):
         if selected>=0:self._open(self.rows[selected][0])
 
     def _open(self,batch_id):
-        dialog=BatchEditorDialog(self,self.service,batch_id)
+        dialog=BatchEditorDialog(self,self.service,batch_id,self.can_review)
         try:dialog.ShowModal()
         finally:dialog.Destroy();self.refresh()
 
 
-def show_contribution_batches(parent, connection, session):
+def show_contribution_batches(parent, connection, session, authorization):
     """Open confidential draft contribution-batch entry."""
-    dialog = BatchCatalogDialog(parent, connection, session)
+    authorization.require("giving.batches.enter", "enter contribution batches")
+    dialog = BatchCatalogDialog(parent, connection, session, authorization)
     try: dialog.ShowModal()
     finally: dialog.Destroy()

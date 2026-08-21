@@ -33,6 +33,12 @@ class GivingBatchDialogTests(unittest.TestCase):
         self.assertIn("Difference", source)
         self.assertIn("CalculatedTotal", inspect.getsource(batch_dialog.DraftBatchService))
 
+    def test_review_action_is_permission_gated_and_explains_failures(self):
+        source = inspect.getsource(batch_dialog.BatchEditorDialog)
+        self.assertIn("Review / Mark Ready", source)
+        self.assertIn("review.Enable(can_review)", source)
+        self.assertIn("This batch is not ready", source)
+
 
 if __name__ == "__main__":
     unittest.main()

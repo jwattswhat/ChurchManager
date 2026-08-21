@@ -541,7 +541,9 @@ def _buttonclick(event):
             show_giving_purposes(cmfrm.FRAME, context.connection)
             return
         case "lblContributionBatches":
-            show_contribution_batches(cmfrm.FRAME, context.connection, context.session)
+            show_contribution_batches(
+                cmfrm.FRAME, context.connection, context.session, context.authorization
+            )
             return
         case "lblPropers":
             show_local_lectionaries(
