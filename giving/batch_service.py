@@ -31,18 +31,28 @@ class DraftBatchService:
         return rows[0][0]
 
     def draft_batches(self):
-        """Return current draft batches without exposing contributor detail."""
+        """Return batches that still require Giving-side action."""
         return self.all(
             "SELECT b.ID,b.BatchDate,b.Description,o.LegalName,b.ControlTotal,"
-            "b.CalculatedTotal,b.Version FROM tblContributionBatch b "
+            "b.CalculatedTotal,b.Version,b.Status,b.AccountingTransactionID FROM tblContributionBatch b "
             "JOIN tblAccountingOrganization o ON o.ID=b.OrganizationID "
-            "WHERE b.ChurchID=? AND b.Status='DRAFT' "
+            "WHERE b.ChurchID=? AND (b.Status='DRAFT' OR "
+            "(b.Status='READY' AND b.AccountingTransactionID IS NULL)) "
             "ORDER BY b.BatchDate DESC,b.ID DESC", (self.church_id(),),
         )
 
     def organizations(self):
         """Return active accounting organizations available to new batches."""
         return self.all("SELECT ID,LegalName FROM tblAccountingOrganization WHERE Active=1 ORDER BY LegalName")
+
+    def bank_accounts(self, organization_id):
+        """Return active deposit accounts for one accounting organization."""
+        return self.all(
+            "SELECT b.ID,CONCAT(b.Name,' - ',a.Code,' ',a.Name) FROM tblAccountingBankAccount b "
+            "JOIN tblAccountingAccount a ON a.ID=b.AccountID "
+            "WHERE b.OrganizationID=? AND b.Active=1 AND a.Active=1 ORDER BY b.Name,b.ID",
+            (organization_id,),
+        )
 
     def contributors(self):
         """Return active contributor identities for confidential entry."""
@@ -52,7 +62,7 @@ class DraftBatchService:
     def purposes(self, organization_id, received_date):
         """Return approved purposes and their accounting mappings for a gift date."""
         return self.all(
-            "SELECT ID,Name,OrganizationID,FundID,RevenueAccountID,StatementTreatment "
+            "SELECT ID,Name,OrganizationID,FundID,RevenueAccountID,FunctionID,StatementTreatment "
             "FROM tblContributionPurpose WHERE ChurchID=? AND OrganizationID=? AND IsActive=1 "
             "AND EffectiveFrom<=? AND (EffectiveThrough IS NULL OR EffectiveThrough>=?) "
             "ORDER BY Name,ID", (self.church_id(), organization_id, received_date, received_date),
@@ -61,7 +71,7 @@ class DraftBatchService:
     def batch(self, batch_id):
         """Return one batch header scoped to this church."""
         rows = self.all("SELECT ID,BatchDate,Description,OrganizationID,ControlTotal,CalculatedTotal,"
-                        "Status,Version FROM tblContributionBatch WHERE ID=? AND ChurchID=?",
+                        "Status,Version,DepositDate,BankAccountID FROM tblContributionBatch WHERE ID=? AND ChurchID=?",
                         (batch_id, self.church_id()))
         return rows[0] if rows else None
 
@@ -86,7 +96,7 @@ class DraftBatchService:
             (contribution_id, batch_id, self.church_id()))
         if not rows: return None
         allocations = self.all(
-            "SELECT a.PurposeID,a.OrganizationID,a.FundID,a.RevenueAccountID,a.Amount,"
+            "SELECT a.PurposeID,a.OrganizationID,a.FundID,a.RevenueAccountID,a.FunctionID,a.Amount,"
             "COALESCE(a.DonorRestrictionNote,''),p.Name FROM tblContributionAllocation a "
             "LEFT JOIN tblContributionPurpose p ON p.ID=a.PurposeID WHERE a.ContributionID=? ORDER BY a.ID",
             (contribution_id,))
@@ -152,7 +162,7 @@ class DraftBatchService:
                            reference=None, statement_eligibility="ELIGIBLE", note=None):
         """Add one monetary gift and balanced allocations to an editable batch."""
         allocations = list(allocations)
-        gift_amount = validate_allocations(amount, [item[4] for item in allocations])
+        gift_amount = validate_allocations(amount, [item[5] for item in allocations])
         method = str(method or "").upper()
         if method not in {"CASH", "CHECK", "ELECTRONIC", "OTHER"}:
             raise GivingValidationError("Select a valid monetary contribution method.")
@@ -183,12 +193,12 @@ class DraftBatchService:
                  received_date, gift_amount, eligibility, note or None),
             )
             contribution_id = cursor.lastrowid
-            for purpose_id, allocation_org, fund_id, account_id, allocation_amount, restriction in allocations:
+            for purpose_id, allocation_org, fund_id, account_id, function_id, allocation_amount, restriction in allocations:
                 cursor.execute(
                     "INSERT INTO tblContributionAllocation "
-                    "(ContributionID,PurposeID,OrganizationID,FundID,RevenueAccountID,Amount,DonorRestrictionNote) "
-                    "VALUES (?,?,?,?,?,?,?)",
-                    (contribution_id, purpose_id, allocation_org, fund_id, account_id,
+                    "(ContributionID,PurposeID,OrganizationID,FundID,RevenueAccountID,FunctionID,Amount,DonorRestrictionNote) "
+                    "VALUES (?,?,?,?,?,?,?,?)",
+                    (contribution_id, purpose_id, allocation_org, fund_id, account_id, function_id,
                      Decimal(str(allocation_amount)).quantize(Decimal("0.01")), restriction or None),
                 )
             cursor.execute("UPDATE tblContributionBatch SET CalculatedTotal=(SELECT COALESCE(SUM(Amount),0) "
@@ -208,7 +218,7 @@ class DraftBatchService:
         """Replace an editable gift and its allocations while retaining its identity."""
         batch_id = values["batch_id"]; received_date = values["received_date"]
         allocations = list(values["allocations"])
-        amount = validate_allocations(values["amount"], [item[4] for item in allocations])
+        amount = validate_allocations(values["amount"], [item[5] for item in allocations])
         method = str(values.get("method") or "").upper()
         if method not in {"CASH", "CHECK", "ELECTRONIC", "OTHER"}:
             raise GivingValidationError("Select a valid monetary contribution method.")
@@ -293,13 +303,15 @@ class DraftBatchService:
             cursor.close()
 
     def _review_issues(self, cursor, batch_id, church_id):
-        cursor.execute("SELECT ControlTotal,CalculatedTotal FROM tblContributionBatch "
+        cursor.execute("SELECT ControlTotal,CalculatedTotal,DepositDate,BankAccountID FROM tblContributionBatch "
                        "WHERE ID=? AND ChurchID=?", (batch_id, church_id))
         batch = cursor.fetchone()
         if not batch: return ["The batch is unavailable."]
         issues = []
         if batch[1] <= 0: issues.append("Enter at least one monetary contribution.")
         if batch[0] is not None and batch[0] != batch[1]: issues.append("The entered total does not equal the control total.")
+        if batch[2] is None: issues.append("Enter the bank deposit date.")
+        if batch[3] is None: issues.append("Select the bank account receiving the deposit.")
         checks = (
             ("SELECT COUNT(*) FROM tblContribution WHERE BatchID=? AND EnteredEnvelopeNumber IS NOT NULL "
              "AND EnteredEnvelopeNumber<>'' AND ContributorID IS NULL",
@@ -313,10 +325,18 @@ class DraftBatchService:
             ("SELECT COUNT(*) FROM tblContributionAllocation a JOIN tblContribution g ON g.ID=a.ContributionID "
              "LEFT JOIN tblContributionPurpose p ON p.ID=a.PurposeID "
              "LEFT JOIN tblAccountingFund f ON f.ID=a.FundID LEFT JOIN tblAccountingAccount ac ON ac.ID=a.RevenueAccountID "
+             "LEFT JOIN tblAccountingFunction fn ON fn.ID=a.FunctionID "
              "WHERE g.BatchID=? AND (p.ID IS NULL OR p.IsActive=0 OR p.ControlAndDiscretionConfirmed=0 "
              "OR p.EffectiveFrom>g.ReceivedDate OR (p.EffectiveThrough IS NOT NULL AND p.EffectiveThrough<g.ReceivedDate) "
-             "OR f.Active=0 OR ac.Active=0 OR ac.PostingAllowed=0 OR ac.AccountType<>'REVENUE')",
+             "OR f.Active=0 OR f.OrganizationID<>a.OrganizationID "
+             "OR ac.Active=0 OR ac.OrganizationID<>a.OrganizationID OR ac.PostingAllowed=0 OR ac.AccountType<>'REVENUE' "
+             "OR (ac.FunctionRequirement='REQUIRED' AND a.FunctionID IS NULL) "
+             "OR (ac.FunctionRequirement='PROHIBITED' AND a.FunctionID IS NOT NULL) "
+             "OR (a.FunctionID IS NOT NULL AND (fn.ID IS NULL OR fn.Active=0 OR fn.OrganizationID<>a.OrganizationID)))",
              "Every allocation must use an effective approved purpose and active accounting destination."),
+            ("SELECT COUNT(*) FROM tblContributionBatch b LEFT JOIN tblAccountingBankAccount ba ON ba.ID=b.BankAccountID "
+             "WHERE b.ID=? AND (ba.ID IS NULL OR ba.Active=0 OR ba.OrganizationID<>b.OrganizationID)",
+             "Select an active bank account belonging to the batch organization."),
             ("SELECT COUNT(*) FROM (SELECT ContributionMethod,ReferenceValue,COUNT(*) Uses FROM tblContribution "
              "WHERE BatchID=? AND ReferenceValue IS NOT NULL AND ReferenceValue<>'' "
              "GROUP BY ContributionMethod,ReferenceValue HAVING Uses>1) duplicate_reference",
@@ -346,11 +366,11 @@ class DraftBatchService:
 
     @staticmethod
     def _insert_allocations(cursor, contribution_id, allocations):
-        for purpose_id, organization_id, fund_id, account_id, amount, restriction in allocations:
+        for purpose_id, organization_id, fund_id, account_id, function_id, amount, restriction in allocations:
             cursor.execute("INSERT INTO tblContributionAllocation "
-                           "(ContributionID,PurposeID,OrganizationID,FundID,RevenueAccountID,Amount,DonorRestrictionNote) "
-                           "VALUES (?,?,?,?,?,?,?)",
-                           (contribution_id, purpose_id, organization_id, fund_id, account_id,
+                           "(ContributionID,PurposeID,OrganizationID,FundID,RevenueAccountID,FunctionID,Amount,DonorRestrictionNote) "
+                           "VALUES (?,?,?,?,?,?,?,?)",
+                           (contribution_id, purpose_id, organization_id, fund_id, account_id, function_id,
                             Decimal(str(amount)).quantize(Decimal("0.01")), restriction or None))
 
     @staticmethod

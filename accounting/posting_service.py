@@ -71,6 +71,12 @@ class AccountingPostingService:
                     "This transaction changed after you opened it. Reload before posting."
                 )
             self._execute(cursor,
+                "SELECT ID,ChurchID,Status FROM tblContributionBatch "
+                "WHERE AccountingTransactionID=? FOR UPDATE", (transaction_id,))
+            giving_batch = cursor.fetchone()
+            if giving_batch is not None and giving_batch[2] != "READY":
+                raise AccountingDraftError("The linked contribution batch is no longer Ready.")
+            self._execute(cursor,
                 "SELECT p.Status, y.Status FROM tblAccountingFiscalPeriod p "
                 "JOIN tblAccountingFiscalYear y ON y.ID=p.FiscalYearID "
                 "WHERE p.ID=? FOR UPDATE", (header[1],))
@@ -154,6 +160,20 @@ class AccountingPostingService:
                 "(OrganizationID, EntityType, EntityID, Action, AfterJSON, UserID) "
                 "VALUES (?, 'TRANSACTION', ?, 'TRANSACTION_POSTED', ?, ?)",
                 (header[0], str(transaction_id), after, self.acting_user_id))
+            if giving_batch is not None:
+                self._execute(cursor,
+                    "UPDATE tblContributionBatch SET Status='POSTED',PostedByUserID=?,"
+                    "PostedAt=CURRENT_TIMESTAMP(6),Version=Version+1 "
+                    "WHERE ID=? AND Status='READY' AND AccountingTransactionID=?",
+                    (self.acting_user_id, giving_batch[0], transaction_id))
+                if cursor.rowcount != 1:
+                    raise AccountingDraftError("The linked contribution batch changed before posting.")
+                self._execute(cursor,
+                    "INSERT INTO tblContributionAuditEvent "
+                    "(ChurchID,UserID,Action,EntityType,EntityID,SafeReference) "
+                    "VALUES (?,?,'BATCH_POSTED','BATCH',?,?)",
+                    (giving_batch[1], self.acting_user_id, giving_batch[0],
+                     f"Accounting transaction {transaction_id}"))
             self.connection.commit()
             return number
         except Exception:

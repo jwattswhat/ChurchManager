@@ -36,6 +36,18 @@ The command is restricted to local `ChurchDBTest`. Without `--apply` it only
 prints counts. With `--apply` it first creates and SHA-256-verifies a complete
 SQL dump under `BackupDB/ChurchDBTest.pre-activity-reset`.
 
+`reset_giving_test_data.py` replaces only the confidential Giving subsystem in
+local `ChurchDBTest`. It creates a verified pre-reset SQL dump, removes any
+user-entered Giving records and their linked summarized accounting transaction,
+then installs the maintained fictional Giving acceptance dataset. Preview and
+apply it with the commands below. Batch dates are derived from the latest open
+fiscal period so the Ready batch can exercise the accounting handoff.
+
+```powershell
+.\.runtime-venv\Scripts\python.exe reset_giving_test_data.py
+.\.runtime-venv\Scripts\python.exe reset_giving_test_data.py --apply
+```
+
 ```powershell
 .\.runtime-venv\Scripts\python.exe reset_test_activity.py
 .\.runtime-venv\Scripts\python.exe reset_test_activity.py --apply

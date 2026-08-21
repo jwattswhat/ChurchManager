@@ -18,6 +18,7 @@ open-source church-management systems.
 | 6 | Immediate | Release, installation, and recovery readiness | Stabilizes and packages the researched catalogs and existing application. |
 | 6A | Immediate | Open-source publication and distribution | Publishes reviewed source and signed release artifacts without exposing congregation data, credentials, or copyrighted content. |
 | 7 | In progress | [Confidential member giving, envelopes, and pledges](ChurchManager.MemberGiving.Specification.md) | User-selected first `0.3.0-dev` feature; approved confidential subledger design. |
+| 7A | Next | Richer application login | Add ChurchManager identity, local congregation name, version/release details, and concise copyright/license text after the giving accounting handoff. |
 | 8 | Next | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Approved ministry design; encryption foundation is complete and remaining implementation follows Giving. |
 | 9 | Next | Import, export, and duplicate management | Protects data quality and makes adoption and recovery practical. |
 | 10 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
@@ -572,7 +573,11 @@ future roadmap projects:
   mappings, donor directions, and duplicate references before marking a batch
   Ready. Draft contributions can now be opened by double-click, fully corrected,
   or deleted with confirmation; each operation recalculates totals and writes a
-  privacy-safe audit event. Accounting posting integration is next.
+  privacy-safe audit event. Migration 086 adds the optional or required
+  functional classification to approved purposes and saved allocations. Ready
+  batches can now create a single summarized Ready cash-receipt transaction;
+  no donor or envelope detail enters the ledger, and ordinary Accounting
+  Posting atomically marks the linked giving batch Posted.
 - Design this as a separate confidential subledger with its own permissions.
 - Support contributor accounts linked optionally to a person or family; outside
   donors must also be allowed without creating congregation-member records.

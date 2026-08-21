@@ -203,8 +203,10 @@ authorized that disclosure.
 `tblContributionAllocation` divides a contribution among accounting funds or
 approved contribution designations. Monetary allocations use `DECIMAL` and
 must total the contribution amount exactly. Each allocation identifies the
-accounting organization, fund, contribution-revenue account or controlled
-mapping, amount, and optional donor-restriction note.
+accounting organization, fund, contribution-revenue account, optional or
+required functional classification, amount, and optional donor-restriction
+note. The revenue account's functional-dimension rule is enforced before the
+batch may be marked ready.
 
 The first release should use existing active accounting funds and a controlled
 mapping to contribution-revenue accounts rather than create a second chart of
@@ -214,7 +216,7 @@ accounts.
 
 `tblContributionPurpose` controls the purposes donors may select. Required data
 includes church, name, description, approval date, approving authority,
-effective dates, active state, accounting fund/revenue mapping, congregation
+effective dates, active state, accounting fund/revenue/function mapping, congregation
 control-and-discretion confirmation, and congregation-controlled statement
 treatment. It never contains a required individual recipient.
 
@@ -264,7 +266,8 @@ flagged until corrected or deliberately recorded as anonymous.
 
 ### 6.3 Batch entry
 
-1. Create a draft batch and identify the collection or deposit.
+1. Create a draft batch and identify the collection, deposit date, accounting
+   organization, and receiving bank account.
 2. Enter the expected/control total when one is available.
 3. Enter each envelope, outside contribution, or loose offering.
 4. Allocate each contribution among funds/designations.
@@ -517,9 +520,10 @@ Rollout sequence:
    batch creation and monetary gift allocation.)*
 4. Implement contributor/envelope and batch-entry screens. *(Contributor,
    envelope, approved-purpose, and draft monetary batch entry are implemented.)*
-5. Implement posting integration and corrections. *(The Ready review gate is
-   implemented; draft corrections and deletion are implemented; accounting
-   posting remains.)*
+5. Implement posting integration and corrections. *(The Ready review gate,
+   draft corrections and deletion, receiving bank account, complete accounting
+   dimensions, privacy-safe summarized transaction creation, and atomic posting
+   synchronization are implemented; posted correction entry remains.)*
 6. Implement reports and statements.
 7. Add import preview and validation.
 8. Create isolated test data and complete automated regression tests.

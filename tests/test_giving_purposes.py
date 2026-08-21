@@ -17,6 +17,8 @@ class GivingPurposeTests(unittest.TestCase):
         self.assertIn("Approving authority is required", source)
         self.assertIn("retains control and discretion", source)
         self.assertIn("AccountType='REVENUE'", source)
+        self.assertIn("functional classification", source)
+        self.assertIn("FunctionRequirement", source)
         self.assertIn("StatementTreatment", source)
 
 

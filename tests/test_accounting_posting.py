@@ -8,10 +8,11 @@ from accounting.posting_service import AccountingPostingService
 class Cursor:
     def __init__(self, status="APPROVED", creator=7, reviewer=8, total=Decimal("500"),
                  original_id=None, override=False, transaction_type="JOURNAL",
-                 attachments=0):
+                 attachments=0, giving_batch=None):
         self.status, self.creator, self.reviewer, self.total = status, creator, reviewer, total
         self.original_id, self.override = original_id, override
         self.transaction_type, self.attachments = transaction_type, attachments
+        self.giving_batch = giving_batch
         self.statements, self.one, self.rows, self.rowcount = [], None, [], 0
     def execute(self, sql, values=()):
         self.statements.append((sql, values))
@@ -21,6 +22,8 @@ class Cursor:
                         self.transaction_type, Decimal("250"))
         elif sql.startswith("SELECT p.Status"):
             self.one = ("OPEN", "OPEN")
+        elif sql.startswith("SELECT ID,ChurchID,Status FROM tblContributionBatch"):
+            self.one = self.giving_batch
         elif sql.startswith("SELECT l.Debit"):
             self.rows = [(self.total, 0, 1, 1, 1, None, "OPTIONAL", None),
                          (0, self.total, 1, 1, 1, None, "OPTIONAL", None)]
@@ -58,6 +61,13 @@ class TestAccountingPosting(unittest.TestCase):
         self.assertIn("NextTransactionNumber", sql)
         self.assertIn("Status='POSTED'", sql)
         self.assertIn("TRANSACTION_POSTED", sql)
+
+    def test_posting_atomically_completes_linked_giving_batch(self):
+        connection = Connection(giving_batch=(81, 7, "READY"))
+        self.assertEqual(AccountingPostingService(connection, 9).post(41, 4), 27)
+        sql = "\n".join(item[0] for item in connection.cursor_value.statements)
+        self.assertIn("UPDATE tblContributionBatch SET Status='POSTED'", sql)
+        self.assertIn("BATCH_POSTED", sql)
 
     def test_ready_transaction_at_threshold_requires_independent_approval(self):
         connection = Connection(status="READY", reviewer=None)

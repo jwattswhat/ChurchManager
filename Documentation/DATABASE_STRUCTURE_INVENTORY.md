@@ -52,10 +52,10 @@ giving-register prototype.
 |---|---|
 | `tblContributionContributor` | Stable confidential giving identity, optionally linked to a person or family. |
 | `tblContributionEnvelopeAssignment` | Date-effective envelope assignments that preserve leading zeroes and history. |
-| `tblContributionPurpose` | Congregation-approved purposes and controlled accounting mappings. |
+| `tblContributionPurpose` | Congregation-approved purposes and controlled fund, revenue-account, and functional mappings. |
 | `tblContributionBatch` | Draft-through-posting control record and summarized accounting link. |
 | `tblContribution` | Individual confidential gifts, acknowledgment facts, and directed-gift review status. |
-| `tblContributionAllocation` | Exact monetary division of a gift among approved funds and revenue mappings. |
+| `tblContributionAllocation` | Exact monetary division of a gift among approved funds, revenue accounts, and required functional classifications. |
 | `tblContributionAuditEvent` | Privacy-safe Giving audit events without copied donor or gift detail. |
 
 Giving data is a confidential subledger. It is not exposed through ordinary
@@ -64,6 +64,11 @@ descriptions. Contributor link shape is enforced in the Giving service because
 MariaDB does not permit a `CHECK` constraint to inspect a foreign-key column
 that uses `ON DELETE SET NULL`; retaining the historical contributor identity
 when a directory record is removed takes precedence.
+
+Migration 086 completes the accounting dimensions used by the giving handoff.
+Each Ready batch produces one summarized cash-receipt transaction and retains
+that transaction ID. Posting the linked accounting transaction marks the batch
+Posted in the same database transaction.
 
 ## Retirement procedure
 

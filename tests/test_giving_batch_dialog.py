@@ -16,9 +16,17 @@ class GivingBatchDialogTests(unittest.TestCase):
 
     def test_catalog_exposes_new_and_open_batch_actions(self):
         source = inspect.getsource(batch_dialog.BatchCatalogDialog)
+        self.assertIn('label="Contribution Batches"', source)
+        self.assertNotIn('label="Draft Contribution Batches"', source)
         self.assertIn("New Batch", source)
         self.assertIn("Open Batch", source)
         self.assertIn("EVT_LIST_ITEM_ACTIVATED", source)
+
+    def test_ready_batch_handoff_is_permission_gated_and_privacy_explained(self):
+        source = inspect.getsource(batch_dialog.BatchCatalogDialog)
+        self.assertIn("giving.batches.post", source)
+        self.assertIn("Send Ready Batch to Accounting", source)
+        self.assertIn("No donor or envelope details", source)
 
     def test_gift_entry_supports_envelope_resolution_and_split_allocations(self):
         source = inspect.getsource(batch_dialog.GiftDialog)
@@ -26,6 +34,11 @@ class GivingBatchDialogTests(unittest.TestCase):
         self.assertIn("Add Allocation", source)
         self.assertIn("Remove Allocation", source)
         self.assertIn("Statement treatment", source)
+
+    def test_new_batch_refreshes_bank_accounts_with_organization(self):
+        self.assertTrue(hasattr(batch_dialog.NewBatchDialog, "on_organization"))
+        source = inspect.getsource(batch_dialog.NewBatchDialog.on_organization)
+        self.assertIn("bank_accounts", source)
 
     def test_batch_editor_keeps_control_difference_visible(self):
         source = inspect.getsource(batch_dialog.BatchEditorDialog.refresh)
