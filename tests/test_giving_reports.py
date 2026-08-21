@@ -5,7 +5,9 @@ import json
 import unittest
 from pathlib import Path
 
-from giving.report_dialog import GivingReportsDialog, quarter_bounds, show_giving_reports
+from giving.report_dialog import (
+    GivingReportsDialog, quarter_bounds, statement_period_bounds, show_giving_reports,
+)
 from giving.report_service import GivingReportService
 from giving.reporting import (
     BATCH_SUMMARY_CONTRACT, BATCH_SUMMARY_MANIFEST, DEFINITIONS,
@@ -64,6 +66,22 @@ class GivingReportTests(unittest.TestCase):
     def test_quarter_bounds_include_the_complete_calendar_quarter(self):
         self.assertEqual(quarter_bounds(2026, 1), (date(2026, 1, 1), date(2026, 3, 31)))
         self.assertEqual(quarter_bounds(2026, 4), (date(2026, 10, 1), date(2026, 12, 31)))
+
+    def test_statement_periods_support_quarter_annual_and_custom(self):
+        self.assertEqual(
+            statement_period_bounds("Calendar Year", 2027, 1)[:2],
+            (date(2027, 1, 1), date(2027, 12, 31)),
+        )
+        self.assertEqual(
+            statement_period_bounds(
+                "Custom Date Range", 2027, 1, date(2027, 2, 3), date(2027, 8, 9),
+            )[:2],
+            (date(2027, 2, 3), date(2027, 8, 9)),
+        )
+        with self.assertRaisesRegex(ValueError, "cannot be before"):
+            statement_period_bounds(
+                "Custom Date Range", 2027, 1, date(2027, 8, 9), date(2027, 2, 3),
+            )
 
     def test_all_contributors_tolerates_initial_choice_state(self):
         source = inspect.getsource(GivingReportsDialog._statement_selection)

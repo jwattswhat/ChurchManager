@@ -588,6 +588,8 @@ future roadmap projects:
   eligible allocations. Preview does not claim issuance or delivery. Official
   issuance records document hashes, revisions, covered periods, filenames, and
   safe audit references without storing duplicate PDF content.
+  The same workflow supports quarterly, calendar-year, and explicit custom-date
+  statement periods.
 - Keep the normal installation seed clean. Package a separate, clearly
   fictional and repeatable Beta Test Dataset that testers can reset safely;
   include Giving statement fixtures without making them production defaults.

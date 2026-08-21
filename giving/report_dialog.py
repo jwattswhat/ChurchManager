@@ -39,6 +39,23 @@ def quarter_bounds(year, quarter):
     return first, following - timedelta(days=1)
 
 
+def statement_period_bounds(mode, year, quarter, custom_first=None, custom_last=None):
+    """Return inclusive statement dates and a filename-safe period label."""
+    if mode == "Quarterly":
+        first, last = quarter_bounds(year, quarter)
+        return first, last, f"{year}-Q{quarter}", f"Quarter {quarter} of {year}"
+    if mode == "Calendar Year":
+        return date(int(year), 1, 1), date(int(year), 12, 31), str(year), f"calendar year {year}"
+    if mode == "Custom Date Range":
+        if custom_first is None or custom_last is None:
+            raise ValueError("Select both custom statement dates.")
+        if custom_last < custom_first:
+            raise ValueError("The custom Through date cannot be before the From date.")
+        suffix = f"{custom_first:%Y%m%d}-{custom_last:%Y%m%d}"
+        return custom_first, custom_last, suffix, f"{custom_first} through {custom_last}"
+    raise ValueError("Select Quarterly, Calendar Year, or Custom Date Range.")
+
+
 class GivingReportsDialog(wx.Dialog):
     """Show donor-free controls and separately authorized donor history."""
 
@@ -134,7 +151,7 @@ class GivingReportsDialog(wx.Dialog):
         panel = wx.Panel(self.notebook); root = wx.BoxSizer(wx.VERTICAL)
         guidance = wx.StaticText(
             panel,
-            label="Preview quarterly statements for one contributor or all statement-enabled contributors.",
+            label="Preview or issue statements for one contributor or all statement-enabled contributors.",
         )
         guidance.SetForegroundColour(wx.Colour(0, 75, 150))
         root.Add(guidance, 0, wx.ALL, 10)
@@ -145,10 +162,16 @@ class GivingReportsDialog(wx.Dialog):
         years = self.service.statement_years() or [date.today().year]
         self.statement_year = wx.Choice(panel, choices=[str(value) for value in years])
         self.statement_year.SetSelection(0)
+        self.statement_period = wx.Choice(
+            panel, choices=["Quarterly", "Calendar Year", "Custom Date Range"],
+        )
+        self.statement_period.SetSelection(0)
+        self.statement_period.Bind(wx.EVT_CHOICE, self.on_statement_period)
         self.statement_quarter = wx.Choice(panel, choices=["Quarter 1", "Quarter 2", "Quarter 3", "Quarter 4"])
         current_quarter = min(3, (date.today().month - 1) // 3)
         self.statement_quarter.SetSelection(current_quarter)
-        preview = wx.Button(panel, label="Preview Quarterly Statement(s)")
+        self.statement_start, self.statement_end = self._date_controls(panel)
+        preview = wx.Button(panel, label="Preview Statement(s)")
         preview.Bind(wx.EVT_BUTTON, self.on_statement_pdf)
         issue = wx.Button(panel, label="Issue and Record Statement(s)")
         issue.Bind(wx.EVT_BUTTON, self.on_statement_issue)
@@ -156,8 +179,11 @@ class GivingReportsDialog(wx.Dialog):
         filters.AddGrowableCol(1, 1)
         for label, control in (
             ("Contributor", self.statement_contributor),
+            ("Period", self.statement_period),
             ("Year", self.statement_year),
             ("Quarter", self.statement_quarter),
+            ("From", self.statement_start),
+            ("Through", self.statement_end),
         ):
             filters.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
             filters.Add(control, 1, wx.EXPAND)
@@ -173,6 +199,7 @@ class GivingReportsDialog(wx.Dialog):
         root.Add(note, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
         panel.SetSizer(root)
         self.notebook.AddPage(panel, "Contribution Statements")
+        self.on_statement_period()
 
     def _build_statement_history_tab(self):
         panel = wx.Panel(self.notebook); root = wx.BoxSizer(wx.VERTICAL)
@@ -267,11 +294,11 @@ class GivingReportsDialog(wx.Dialog):
             wx.MessageBox(str(error), "Giving Batch Summary", wx.OK | wx.ICON_ERROR, self)
 
     def on_statement_pdf(self, _event=None):
-        """Preview the selected quarter without recording statement issuance."""
+        """Preview the selected statement period without recording issuance."""
         try:
-            year, quarter, first, last, contributor_ids = self._statement_selection()
+            first, last, suffix, _display, contributor_ids = self._statement_selection()
             self.report_service.run_statements(
-                contributor_ids, first, last, output_name=f"GIVE-STMT-{year}-Q{quarter}",
+                contributor_ids, first, last, output_name=f"GIVE-STMT-{suffix}",
             )
         except Exception as error:
             wx.MessageBox(str(error), "Contribution Statements", wx.OK | wx.ICON_ERROR, self)
@@ -279,25 +306,38 @@ class GivingReportsDialog(wx.Dialog):
     def _statement_selection(self):
         year = int(self.statement_year.GetStringSelection())
         quarter = self.statement_quarter.GetSelection() + 1
-        first, last = quarter_bounds(year, quarter)
+        mode = self.statement_period.GetStringSelection()
+        custom_first = date.fromisoformat(_python_date(self.statement_start))
+        custom_last = date.fromisoformat(_python_date(self.statement_end))
+        first, last, suffix, display = statement_period_bounds(
+            mode, year, quarter, custom_first, custom_last,
+        )
         selected = self.statement_contributor.GetSelection()
         if selected <= 0:
             contributor_ids = [row[0] for row in self.service.statement_contributors_for_period(first, last)]
             if not contributor_ids:
                 raise ValueError(
                     f"No statement-enabled contributors have eligible Posted contributions "
-                    f"in Quarter {quarter} of {year}."
+                    f"in {display}."
                 )
         else:
             contributor_ids = [self.statement_contributors[selected - 1][0]]
-        return year, quarter, first, last, contributor_ids
+        return first, last, suffix, display, contributor_ids
+
+    def on_statement_period(self, _event=None):
+        """Enable only the controls used by the selected statement period."""
+        mode = self.statement_period.GetStringSelection()
+        self.statement_year.Enable(mode in {"Quarterly", "Calendar Year"})
+        self.statement_quarter.Enable(mode == "Quarterly")
+        self.statement_start.Enable(mode == "Custom Date Range")
+        self.statement_end.Enable(mode == "Custom Date Range")
 
     def on_statement_issue(self, _event=None):
         """Generate statements and record their hashes as officially issued."""
         try:
-            year, quarter, first, last, contributor_ids = self._statement_selection()
+            first, last, suffix, display, contributor_ids = self._statement_selection()
             answer = wx.MessageBox(
-                f"Issue and record {len(contributor_ids)} statement(s) for Quarter {quarter} of {year}?\n\n"
+                f"Issue and record {len(contributor_ids)} statement(s) for {display}?\n\n"
                 "This records issuance, but it does not record printing, mailing, or delivery.",
                 "Issue Contribution Statements", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self,
             )
@@ -305,7 +345,7 @@ class GivingReportsDialog(wx.Dialog):
                 return
             self.report_service.run_statements(
                 contributor_ids, first, last,
-                output_name=f"GIVE-STMT-ISSUED-{year}-Q{quarter}", issue=True,
+                output_name=f"GIVE-STMT-ISSUED-{suffix}", issue=True,
             )
             self.on_statement_history()
         except Exception as error:

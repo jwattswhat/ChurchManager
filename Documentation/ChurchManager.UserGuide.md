@@ -190,8 +190,9 @@ update the on-screen review and display the completion time beneath the grid;
 they do not create a PDF. **Preview PDF** on the Batch Control Summary creates
 the protected donor-free `GIVE-BATCH` report for the selected dates. Contributor
 statements are available only to users with the statement-generation permission.
-On **Contribution Statements**, select a year, quarter, and either one contributor
-or **All eligible contributors**, then choose **Preview Quarterly Statement(s)**.
+On **Contribution Statements**, select either **Quarterly**, **Calendar Year**,
+or **Custom Date Range**, then select one contributor or **All eligible
+contributors** and choose **Preview Statement(s)**.
 The preview includes only Posted gifts and only allocations marked statement
 eligible. Previewing does not record that a statement was issued or delivered.
 Choose **Issue and Record Statement(s)** only when the PDF is being treated as
