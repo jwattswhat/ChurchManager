@@ -178,6 +178,18 @@ treatment, note, or purpose allocations. **Delete Contribution** requires
 confirmation. Both operations immediately recalculate the batch total and add
 a privacy-safe audit event. Ready and posted gifts cannot be edited or deleted.
 
+### Giving reports
+
+Open **Giving Reports** for operational review. **Batch Control Summary** shows
+batch dates, statuses, controls, entered totals, differences, and accounting
+transaction links without displaying donor identity. Users with confidential
+history permission also receive **Contributor History**, which shows one
+contributor's Ready and Posted allocations for the selected dates. Draft gifts
+are deliberately excluded from contributor history. The **Refresh** buttons
+update the on-screen review and display the completion time beneath the grid;
+they do not create a PDF. Printable Giving reports and contribution statements
+are separate later steps in the Giving roadmap.
+
 ## 4. Worship planning
 
 ### Create a worship service

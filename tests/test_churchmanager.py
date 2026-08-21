@@ -1107,13 +1107,18 @@ class TestChurchManagerForms(unittest.TestCase):
             controls["lblGivingPurposes"]["security"]["invoke"],
             "giving.purposes.manage",
         )
-        self.assertEqual(controls["MemberBox"]["sizech"], [12, 12])
+        self.assertEqual(controls["MemberBox"]["sizech"], [12, 13])
         self.assertEqual(controls["lblContributionBatches"]["posch"], [15, 12])
         self.assertEqual(
             controls["lblContributionBatches"]["security"]["invoke"],
             "giving.batches.enter",
         )
-        self.assertEqual(controls["ReportBox"]["posch"], [14, 13])
+        self.assertEqual(controls["lblGivingReports"]["posch"], [15, 13])
+        self.assertEqual(
+            controls["lblGivingReports"]["security"]["invoke"],
+            "giving.reports.summary",
+        )
+        self.assertEqual(controls["ReportBox"]["posch"], [14, 14])
         resource_items = [
             "lblOS", "lblCheckList", "lblPropers", "lblSermon", "lblHymnal",
             "lblHymn", "lblParticipant", "lblSchedule", "lblPrayers",

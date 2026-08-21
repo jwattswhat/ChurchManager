@@ -578,6 +578,10 @@ future roadmap projects:
   batches can now create a single summarized Ready cash-receipt transaction;
   no donor or envelope detail enters the ledger, and ordinary Accounting
   Posting atomically marks the linked giving batch Posted.
+  Giving Reports now provides a donor-free batch control summary and a
+  separately permission-controlled contributor history for Ready and Posted
+  gifts. Quarterly, annual, and custom-range contribution statements follow
+  after these operational totals are accepted.
 - Design this as a separate confidential subledger with its own permissions.
 - Support contributor accounts linked optionally to a person or family; outside
   donors must also be allowed without creating congregation-member records.

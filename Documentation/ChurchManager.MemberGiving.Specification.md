@@ -411,6 +411,10 @@ Additional safeguards:
 
 ### 9.2 Contribution statements
 
+Statements support one contributor or all eligible contributors for a selected
+quarter, calendar year, or explicit custom date range. Quarter selection uses a
+year and Quarter 1 through Quarter 4 and prints the resulting covered dates.
+
 A statement includes church identity and contact information, contributor
 statement name/address, covered period, eligible monetary contributions by date
 and optionally fund, total eligible monetary contributions, separately labeled

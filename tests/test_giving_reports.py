@@ -1,0 +1,50 @@
+"""Contracts for permission-separated Giving report screens."""
+
+import inspect
+import json
+import unittest
+from pathlib import Path
+
+from giving.report_dialog import GivingReportsDialog, show_giving_reports
+from giving.report_service import GivingReportService
+
+
+class GivingReportTests(unittest.TestCase):
+    def test_summary_query_contains_no_contributor_identity(self):
+        source = inspect.getsource(GivingReportService.batch_summary)
+        self.assertIn("tblContributionBatch", source)
+        self.assertNotIn("tblContributionContributor", source)
+        self.assertNotIn("ContributorID", source)
+
+    def test_history_is_limited_to_reviewed_or_posted_giving(self):
+        source = inspect.getsource(GivingReportService.contributor_history)
+        self.assertIn("g.ContributorID=?", source)
+        self.assertIn("b.Status IN ('READY','POSTED')", source)
+
+    def test_tabs_are_permission_separated(self):
+        source = inspect.getsource(GivingReportsDialog)
+        self.assertIn('has_permission("giving.reports.summary")', source)
+        self.assertIn('has_permission("giving.history.view")', source)
+        entry = inspect.getsource(show_giving_reports)
+        self.assertIn('require("giving.reports.summary"', entry)
+
+    def test_run_actions_provide_visible_refresh_feedback(self):
+        source = inspect.getsource(GivingReportsDialog)
+        self.assertIn("Refreshed {_run_time()}", source)
+        self.assertIn('label="Refresh Batch Summary"', source)
+        self.assertIn('label="Refresh Contributor History"', source)
+        self.assertIn("GetParent().Layout()", source)
+        self.assertIn("No contribution batches match", source)
+        self.assertIn("No Ready or Posted contributions match", source)
+
+    def test_main_menu_routes_giving_reports(self):
+        menu = json.loads(Path("forms/frmMain.json").read_text(encoding="utf-8"))
+        control = menu["frmMainFORM"]["CONTROLS"]["lblGivingReports"]
+        self.assertEqual(control["label"], "Giving Reports")
+        self.assertEqual(control["security"]["invoke"], "giving.reports.summary")
+        self.assertIn('"lblGivingReports": "giving.reports.summary"',
+                      Path("permission_catalog.py").read_text(encoding="utf-8"))
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -72,6 +72,7 @@ from user_help import UserGuideError, open_user_guide
 from giving.contributor_dialog import show_contributors
 from giving.purpose_dialog import show_giving_purposes
 from giving.batch_dialog import show_contribution_batches
+from giving.report_dialog import show_giving_reports
 
 
 arguments = None
@@ -544,6 +545,9 @@ def _buttonclick(event):
             show_contribution_batches(
                 cmfrm.FRAME, context.connection, context.session, context.authorization
             )
+            return
+        case "lblGivingReports":
+            show_giving_reports(cmfrm.FRAME, context.connection, context.authorization)
             return
         case "lblPropers":
             show_local_lectionaries(

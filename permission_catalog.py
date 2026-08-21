@@ -68,4 +68,5 @@ MAIN_MENU_PERMISSIONS = {
     "lblGivingContributors": "giving.contributors.manage",
     "lblGivingPurposes": "giving.purposes.manage",
     "lblContributionBatches": "giving.batches.enter",
+    "lblGivingReports": "giving.reports.summary",
 }
