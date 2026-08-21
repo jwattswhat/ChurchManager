@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 
 import wx
@@ -29,6 +29,16 @@ def _run_time():
     return datetime.now().strftime("%I:%M:%S %p").lstrip("0")
 
 
+def quarter_bounds(year, quarter):
+    """Return inclusive dates for a calendar-year quarter."""
+    if quarter not in (1, 2, 3, 4):
+        raise ValueError("Select Quarter 1 through Quarter 4.")
+    first_month = ((quarter - 1) * 3) + 1
+    first = date(int(year), first_month, 1)
+    following = date(int(year) + (1 if quarter == 4 else 0), 1 if quarter == 4 else first_month + 3, 1)
+    return first, following - timedelta(days=1)
+
+
 class GivingReportsDialog(wx.Dialog):
     """Show donor-free controls and separately authorized donor history."""
 
@@ -50,6 +60,8 @@ class GivingReportsDialog(wx.Dialog):
             self._build_summary_tab()
         if authorization.has_permission("giving.history.view"):
             self._build_history_tab()
+        if authorization.has_permission("giving.statements.generate"):
+            self._build_statement_tab()
         if self.notebook.GetPageCount() == 0:
             raise PermissionError("You do not have permission to run Giving reports.")
         outer.Add(self.notebook, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
@@ -116,6 +128,46 @@ class GivingReportsDialog(wx.Dialog):
         self.history_total.SetFont(self.history_total.GetFont().Bold())
         root.Add(self.history_total, 0, wx.ALL, 10); panel.SetSizer(root)
         self.notebook.AddPage(panel, "Contributor History"); self.on_history()
+
+    def _build_statement_tab(self):
+        panel = wx.Panel(self.notebook); root = wx.BoxSizer(wx.VERTICAL)
+        guidance = wx.StaticText(
+            panel,
+            label="Preview quarterly statements for one contributor or all statement-enabled contributors.",
+        )
+        guidance.SetForegroundColour(wx.Colour(0, 75, 150))
+        root.Add(guidance, 0, wx.ALL, 10)
+        self.statement_contributors = self.service.statement_contributors()
+        names = ["All eligible contributors"] + [row[1] for row in self.statement_contributors]
+        self.statement_contributor = wx.Choice(panel, choices=names)
+        self.statement_contributor.SetSelection(0)
+        years = self.service.statement_years() or [date.today().year]
+        self.statement_year = wx.Choice(panel, choices=[str(value) for value in years])
+        self.statement_year.SetSelection(0)
+        self.statement_quarter = wx.Choice(panel, choices=["Quarter 1", "Quarter 2", "Quarter 3", "Quarter 4"])
+        current_quarter = min(3, (date.today().month - 1) // 3)
+        self.statement_quarter.SetSelection(current_quarter)
+        preview = wx.Button(panel, label="Preview Quarterly Statement(s)")
+        preview.Bind(wx.EVT_BUTTON, self.on_statement_pdf)
+        filters = wx.FlexGridSizer(cols=2, hgap=10, vgap=10)
+        filters.AddGrowableCol(1, 1)
+        for label, control in (
+            ("Contributor", self.statement_contributor),
+            ("Year", self.statement_year),
+            ("Quarter", self.statement_quarter),
+        ):
+            filters.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+            filters.Add(control, 1, wx.EXPAND)
+        root.Add(filters, 0, wx.ALL | wx.EXPAND, 10)
+        root.Add(preview, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        note = wx.StaticText(
+            panel,
+            label=("Preview does not record issuance or delivery. Only Posted, statement-eligible "
+                   "contributions are included."),
+        )
+        root.Add(note, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        panel.SetSizer(root)
+        self.notebook.AddPage(panel, "Contribution Statements")
 
     def _dates(self, start, end):
         first, last = _python_date(start), _python_date(end)
@@ -193,6 +245,33 @@ class GivingReportsDialog(wx.Dialog):
             )
         except Exception as error:
             wx.MessageBox(str(error), "Giving Batch Summary", wx.OK | wx.ICON_ERROR, self)
+
+    def on_statement_pdf(self, _event=None):
+        """Preview the selected quarter without recording statement issuance."""
+        try:
+            year = int(self.statement_year.GetStringSelection())
+            quarter = self.statement_quarter.GetSelection() + 1
+            first, last = quarter_bounds(year, quarter)
+            selected = self.statement_contributor.GetSelection()
+            # wx.Choice can briefly report wx.NOT_FOUND even though its first
+            # displayed entry is the default. Both states represent the
+            # explicit "All eligible contributors" option.
+            if selected <= 0:
+                contributor_ids = [
+                    row[0] for row in self.service.statement_contributors_for_period(first, last)
+                ]
+                if not contributor_ids:
+                    raise ValueError(
+                        f"No statement-enabled contributors have eligible Posted "
+                        f"contributions in Quarter {quarter} of {year}."
+                    )
+            else:
+                contributor_ids = [self.statement_contributors[selected - 1][0]]
+            self.report_service.run_statements(
+                contributor_ids, first, last, output_name=f"GIVE-STMT-{year}-Q{quarter}",
+            )
+        except Exception as error:
+            wx.MessageBox(str(error), "Contribution Statements", wx.OK | wx.ICON_ERROR, self)
 
 
 def show_giving_reports(parent, connection, authorization, session):

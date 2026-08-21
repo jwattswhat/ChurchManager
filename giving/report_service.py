@@ -70,3 +70,68 @@ class GivingReportService:
             "ORDER BY g.ReceivedDate,b.ID,g.ID,a.ID",
             (self.church_id(), contributor_id, start_date, end_date),
         )
+
+    def statement_contributors(self):
+        """Return contributors explicitly enabled for contribution statements."""
+        return self.all(
+            "SELECT ID,COALESCE(NULLIF(StatementName,''),DisplayName) "
+            "FROM tblContributionContributor WHERE ChurchID=? AND StatementEnabled=1 "
+            "ORDER BY COALESCE(NULLIF(StatementName,''),DisplayName),ID",
+            (self.church_id(),),
+        )
+
+    def statement_years(self):
+        """Return years containing posted contributions, newest first."""
+        rows = self.all(
+            "SELECT DISTINCT YEAR(g.ReceivedDate) FROM tblContribution g "
+            "JOIN tblContributionBatch b ON b.ID=g.BatchID "
+            "WHERE b.ChurchID=? AND b.Status='POSTED' ORDER BY 1 DESC",
+            (self.church_id(),),
+        )
+        return [int(row[0]) for row in rows]
+
+    def statement_identity(self, contributor_id):
+        """Return the confidential statement name and mailing address."""
+        rows = self.all(
+            "SELECT ID,COALESCE(NULLIF(StatementName,''),DisplayName),Address,Address2,"
+            "City,State,PostalCode FROM tblContributionContributor "
+            "WHERE ChurchID=? AND ID=? AND StatementEnabled=1",
+            (self.church_id(), contributor_id),
+        )
+        if not rows:
+            raise ValueError("The selected contributor is not enabled for statements.")
+        return rows[0]
+
+    def statement_contributors_for_period(self, start_date, end_date):
+        """Return enabled contributors having eligible posted gifts in a period."""
+        return self.all(
+            "SELECT DISTINCT c.ID,COALESCE(NULLIF(c.StatementName,''),c.DisplayName) "
+            "FROM tblContributionContributor c JOIN tblContribution g ON g.ContributorID=c.ID "
+            "JOIN tblContributionBatch b ON b.ID=g.BatchID "
+            "JOIN tblContributionAllocation a ON a.ContributionID=g.ID "
+            "LEFT JOIN tblContributionPurpose p ON p.ID=a.PurposeID "
+            "WHERE c.ChurchID=? AND c.StatementEnabled=1 AND b.Status='POSTED' "
+            "AND g.StatementEligibility='ELIGIBLE' "
+            "AND (p.ID IS NULL OR p.StatementTreatment='ELIGIBLE') "
+            "AND g.ReceivedDate BETWEEN ? AND ? "
+            "ORDER BY COALESCE(NULLIF(c.StatementName,''),c.DisplayName),c.ID",
+            (self.church_id(), start_date, end_date),
+        )
+
+    def statement_lines(self, contributor_id, start_date, end_date):
+        """Return posted, statement-eligible allocation lines for one contributor."""
+        return self.all(
+            "SELECT g.ReceivedDate,COALESCE(p.Name,'General contribution'),"
+            "g.ContributionMethod,a.Amount,g.NonCashDescription,"
+            "g.GoodsOrServicesProvided,g.GoodsOrServicesDescription,g.GoodsOrServicesValue,"
+            "g.IntangibleReligiousBenefitOnly "
+            "FROM tblContribution g JOIN tblContributionBatch b ON b.ID=g.BatchID "
+            "JOIN tblContributionAllocation a ON a.ContributionID=g.ID "
+            "LEFT JOIN tblContributionPurpose p ON p.ID=a.PurposeID "
+            "WHERE b.ChurchID=? AND g.ContributorID=? AND b.Status='POSTED' "
+            "AND g.StatementEligibility='ELIGIBLE' "
+            "AND (p.ID IS NULL OR p.StatementTreatment='ELIGIBLE') "
+            "AND g.ReceivedDate BETWEEN ? AND ? "
+            "ORDER BY g.ReceivedDate,g.ID,a.ID",
+            (self.church_id(), contributor_id, start_date, end_date),
+        )

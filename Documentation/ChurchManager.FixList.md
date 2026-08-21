@@ -582,8 +582,13 @@ future roadmap projects:
   separately permission-controlled contributor history for Ready and Posted
   gifts. The protected `GIVE-BATCH` PDF prints the donor-free batch controls for
   the selected dates without entering the unrestricted report catalog or
-  designer. Quarterly, annual, and custom-range contribution statements follow
-  next.
+  designer. Annual and custom-range contribution statements follow next.
+  Quarterly statement preview now supports one contributor or every
+  statement-enabled contributor in a combined PDF and includes only Posted,
+  eligible allocations. Preview does not claim issuance or delivery.
+- The approved remaining envelope-box work now includes a previewed annual
+  assignment tool with either complete renumbering or preservation plus gap
+  filling, and printable box labels plus an assignment register.
 - Design this as a separate confidential subledger with its own permissions.
 - Support contributor accounts linked optionally to a person or family; outside
   donors must also be allowed without creating congregation-member records.

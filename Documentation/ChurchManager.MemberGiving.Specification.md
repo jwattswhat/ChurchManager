@@ -260,6 +260,27 @@ It supports individual assignment and a guarded annual assignment/import tool.
 Validation occurs against the batch or contribution date, not merely today's
 date.
 
+The annual assignment tool offers two explicit strategies:
+
+- **Assign a new sequence** closes the applicable old assignments and assigns
+  consecutive box numbers for the new period in the selected contributor sort
+  order.
+- **Keep current numbers** carries forward nonconflicting current assignments;
+  newly eligible contributors receive the lowest available gaps before numbers
+  are appended to the end of the sequence.
+
+Both strategies show a complete preview with conflicts, additions, retained
+numbers, effective dates, and the resulting highest box number before changing
+the database. Applying the preview is one audited transaction. The tool never
+changes historical contribution ownership or entered envelope text.
+
+Envelope-box labels are a protected Giving report. The user selects the annual
+assignment period, label-sheet format, and whether inactive or outside
+contributors are included. Each label contains the box number and statement
+name, with optional congregation name; it contains no contribution amounts or
+giving history. A printable assignment register accompanies the labels for
+verification.
+
 Typing or importing an envelope number in contribution entry resolves the
 contributor for the contribution date. Unknown or ambiguous numbers remain
 flagged until corrected or deliberately recorded as anonymous.
@@ -397,6 +418,8 @@ Additional safeguards:
 
 - Envelope Assignment Register.
 - Unassigned and Conflicting Envelopes.
+- Envelope Box Labels for a selected assignment period and supported label
+  sheet format.
 - Contribution Batch Detail.
 - Contribution Batch Control Summary.
 - Giving by Fund and Period, without donor identity.
@@ -529,8 +552,9 @@ Rollout sequence:
    dimensions, privacy-safe summarized transaction creation, and atomic posting
    synchronization are implemented; posted correction entry remains.)*
 6. Implement reports and statements. *(The protected donor-free `GIVE-BATCH`
-   Batch Control Summary PDF and its on-screen review are implemented;
-   contributor statements and the remaining report inventory continue next.)*
+   Batch Control Summary PDF and quarterly single/all-contributor statement
+   previews are implemented. Issuance history, annual/custom ranges, and the
+   remaining report inventory continue next.)*
 7. Add import preview and validation.
 8. Create isolated test data and complete automated regression tests.
 9. Perform user acceptance with a sample collection, split gift, anonymous
