@@ -1,9 +1,9 @@
 {
   "artifact": "ChurchManager fresh-install starter-data baseline",
   "format_version": 1,
-  "release_version": "0.2.0-dev",
-  "seed_sha256": "dac0b9c3bcd162cbf2da3539750a518ed3177aa5830fc7ff046eb1a392df3859",
-  "statement_count": 67,
+  "release_version": "0.3.0-dev",
+  "seed_sha256": "82bfef40633606ef3000005fe564d02216e4e9792394a953367d4ab63bdb30de",
+  "statement_count": 71,
   "source_migrations": [
     {
       "version": "003_add_user_security.sql",
@@ -134,6 +134,11 @@
       "version": "075_add_favorite_hymns_report.sql",
       "checksum": "8e263e214281d077c114f85af318dac8b853ac367d09ac77e5e1094d5c3459e4",
       "statements": 1
+    },
+    {
+      "version": "085_add_confidential_member_giving.sql",
+      "checksum": "df6bf2234549eb8d122ad2ea01ef230a5d2df5fa659094ce1de24be792713464",
+      "statements": 4
     }
   ],
   "current_schema_statements": 1,

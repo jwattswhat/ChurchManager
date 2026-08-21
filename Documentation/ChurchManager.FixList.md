@@ -1,6 +1,6 @@
 # ChurchManager development roadmap
 
-Last reviewed: August 18, 2026
+Last reviewed: August 21, 2026
 
 This is the maintained ChurchManager development backlog. Priorities reflect
 the needs of a small congregation and a comparison with current paid and
@@ -549,6 +549,18 @@ future roadmap projects:
 
 - Approved design: [Member giving and envelope tracking specification](ChurchManager.MemberGiving.Specification.md).
 - Maintained treasurer guidance: [Congregation treasurer guide](ChurchManager.CongregationTreasurerGuide.md).
+- Migration 085 was accepted in ChurchDBTest and adds
+  the new confidential contributor, dated-envelope, approved-purpose, batch,
+  gift, allocation, and privacy-safe audit structures plus nine dedicated
+  Giving permissions and two Giving roles.
+- Service-level validation now enforces contributor link types, preserves
+  leading-zero envelope numbers, detects inclusive assignment overlap, requires
+  exact cent-balanced allocations, and validates acknowledgment facts.
+- Contributor maintenance now supports person, family, and outside identities,
+  confidential statement contact fields, active status, and dated envelope
+  history with overlap prevention. Selecting a directory record previews its
+  current name, address, and email as statement defaults; numeric envelope
+  values are canonicalized before conflict checks. Batch entry is next.
 - Design this as a separate confidential subledger with its own permissions.
 - Support contributor accounts linked optionally to a person or family; outside
   donors must also be allowed without creating congregation-member records.

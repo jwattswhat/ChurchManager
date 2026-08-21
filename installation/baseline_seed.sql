@@ -446,6 +446,44 @@ ON DUPLICATE KEY UPDATE
 Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),Available=1,
 RequiredPermissionID=VALUES(RequiredPermissionID);
 
+-- source: 085_add_confidential_member_giving.sql
+INSERT IGNORE INTO tblRole (Name, Description, SystemRole, Active) VALUES
+('Giving Entry Clerk', 'Enter confidential contribution batches and maintain contributor records.', 1, 1),
+('Giving Administrator', 'Administer confidential giving, posting, statements, and reports.', 1, 1);
+
+-- source: 085_add_confidential_member_giving.sql
+INSERT IGNORE INTO tblPermission (Name, Description, IsSensitive, Active) VALUES
+('giving.contributors.manage', 'Maintain confidential contributors and envelope assignments.', 1, 1),
+('giving.batches.enter', 'Create and edit confidential draft contribution batches.', 1, 1),
+('giving.batches.review', 'Review and mark contribution batches ready.', 1, 1),
+('giving.batches.post', 'Post and correct contribution batches.', 1, 1),
+('giving.history.view', 'View contributor-level giving history.', 1, 1),
+('giving.statements.generate', 'Generate confidential contribution statements.', 1, 1),
+('giving.reports.summary', 'Run giving summary reports without contributor identity.', 1, 1),
+('giving.reports.confidential', 'Run donor-identifying giving reports.', 1, 1),
+('giving.purposes.manage', 'Maintain approved congregational contribution purposes.', 1, 1);
+
+-- source: 085_add_confidential_member_giving.sql
+INSERT IGNORE INTO tblRolePermission (RoleID, PermissionID)
+SELECT r.ID, p.ID
+FROM tblRole r
+JOIN tblPermission p ON p.Name IN (
+    'giving.contributors.manage','giving.batches.enter','giving.batches.review',
+    'giving.batches.post','giving.history.view','giving.statements.generate',
+    'giving.reports.summary','giving.reports.confidential','giving.purposes.manage'
+)
+WHERE r.Name IN ('Master Administrator','Treasurer','Giving Administrator');
+
+-- source: 085_add_confidential_member_giving.sql
+INSERT IGNORE INTO tblRolePermission (RoleID, PermissionID)
+SELECT r.ID, p.ID
+FROM tblRole r
+JOIN tblPermission p ON p.Name IN (
+    'giving.contributors.manage','giving.batches.enter','giving.batches.review',
+    'giving.history.view','giving.reports.summary'
+)
+WHERE r.Name='Giving Entry Clerk';
+
 -- source: current-schema starter policy
 INSERT INTO tblWorshipRole (Name,Description,DisplayOrder,Active) VALUES
 ('Liturgist',NULL,10,1),('Crucifer','Carries the cross',20,1),

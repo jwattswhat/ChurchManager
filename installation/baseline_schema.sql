@@ -1225,6 +1225,237 @@ CREATE TABLE `tblconfig` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblcontribution` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `BatchID` bigint(20) NOT NULL,
+  `ContributorID` bigint(20) DEFAULT NULL,
+  `EnteredEnvelopeNumber` varchar(30) DEFAULT NULL,
+  `ContributionMethod` varchar(20) NOT NULL DEFAULT 'CASH',
+  `ReferenceValue` varchar(255) DEFAULT NULL,
+  `ReceivedDate` date NOT NULL,
+  `Amount` decimal(19,2) NOT NULL DEFAULT 0.00,
+  `NonCashDescription` varchar(1000) DEFAULT NULL,
+  `StatementEligibility` varchar(20) NOT NULL DEFAULT 'ELIGIBLE',
+  `GoodsOrServicesProvided` tinyint(1) NOT NULL DEFAULT 0,
+  `GoodsOrServicesDescription` varchar(1000) DEFAULT NULL,
+  `GoodsOrServicesValue` decimal(19,2) DEFAULT NULL,
+  `IntangibleReligiousBenefitOnly` tinyint(1) NOT NULL DEFAULT 0,
+  `EligibilityOverrideReason` varchar(1000) DEFAULT NULL,
+  `TributeType` varchar(20) DEFAULT NULL,
+  `HonoreeName` varchar(255) DEFAULT NULL,
+  `AcknowledgmentContact` varchar(1000) DEFAULT NULL,
+  `DonorDisclosureAuthorized` tinyint(1) NOT NULL DEFAULT 0,
+  `AmountDisclosureAuthorized` tinyint(1) NOT NULL DEFAULT 0,
+  `DonorDirection` varchar(1000) DEFAULT NULL,
+  `DirectionStatus` varchar(20) NOT NULL DEFAULT 'NONE',
+  `DirectionResolution` varchar(1000) DEFAULT NULL,
+  `Note` varchar(2000) DEFAULT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  KEY `ix_contribution_batch` (`BatchID`,`ID`),
+  KEY `ix_contribution_contributor_date` (`ContributorID`,`ReceivedDate`),
+  CONSTRAINT `fk_contribution_batch` FOREIGN KEY (`BatchID`) REFERENCES `tblcontributionbatch` (`ID`),
+  CONSTRAINT `fk_contribution_contributor` FOREIGN KEY (`ContributorID`) REFERENCES `tblcontributioncontributor` (`ID`),
+  CONSTRAINT `ck_contribution_method` CHECK (`ContributionMethod` in ('CASH','CHECK','ELECTRONIC','NON_CASH','OTHER')),
+  CONSTRAINT `ck_contribution_amount` CHECK (`Amount` >= 0),
+  CONSTRAINT `ck_contribution_statement` CHECK (`StatementEligibility` in ('ELIGIBLE','INELIGIBLE','REVIEW')),
+  CONSTRAINT `ck_contribution_goods_value` CHECK (`GoodsOrServicesValue` is null or `GoodsOrServicesValue` >= 0),
+  CONSTRAINT `ck_contribution_benefit` CHECK (`GoodsOrServicesProvided` <> 1 or `IntangibleReligiousBenefitOnly` <> 1),
+  CONSTRAINT `ck_contribution_tribute` CHECK (`TributeType` is null and `HonoreeName` is null or `TributeType` in ('IN_MEMORY_OF','IN_HONOR_OF') and `HonoreeName` is not null),
+  CONSTRAINT `ck_contribution_direction` CHECK (`DirectionStatus` in ('NONE','REVIEW','CLARIFIED','RETURNED','ACCEPTED'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblcontributionallocation` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ContributionID` bigint(20) NOT NULL,
+  `PurposeID` bigint(20) DEFAULT NULL,
+  `OrganizationID` int(11) NOT NULL,
+  `FundID` int(11) NOT NULL,
+  `RevenueAccountID` int(11) NOT NULL,
+  `Amount` decimal(19,2) NOT NULL,
+  `DonorRestrictionNote` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`ID`),
+  KEY `ix_contribution_allocation_contribution` (`ContributionID`,`ID`),
+  KEY `ix_contribution_allocation_fund` (`OrganizationID`,`FundID`),
+  KEY `fk_contribution_allocation_purpose` (`PurposeID`),
+  KEY `fk_contribution_allocation_fund` (`FundID`),
+  KEY `fk_contribution_allocation_revenue` (`RevenueAccountID`),
+  CONSTRAINT `fk_contribution_allocation_contribution` FOREIGN KEY (`ContributionID`) REFERENCES `tblcontribution` (`ID`),
+  CONSTRAINT `fk_contribution_allocation_fund` FOREIGN KEY (`FundID`) REFERENCES `tblaccountingfund` (`ID`),
+  CONSTRAINT `fk_contribution_allocation_org` FOREIGN KEY (`OrganizationID`) REFERENCES `tblaccountingorganization` (`ID`),
+  CONSTRAINT `fk_contribution_allocation_purpose` FOREIGN KEY (`PurposeID`) REFERENCES `tblcontributionpurpose` (`ID`),
+  CONSTRAINT `fk_contribution_allocation_revenue` FOREIGN KEY (`RevenueAccountID`) REFERENCES `tblaccountingaccount` (`ID`),
+  CONSTRAINT `ck_contribution_allocation_amount` CHECK (`Amount` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblcontributionauditevent` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `UserID` int(11) DEFAULT NULL,
+  `Action` varchar(100) NOT NULL,
+  `EntityType` varchar(100) NOT NULL,
+  `EntityID` bigint(20) DEFAULT NULL,
+  `SafeReference` varchar(255) DEFAULT NULL,
+  `Reason` varchar(1000) DEFAULT NULL,
+  `OccurredAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  KEY `ix_contribution_audit_church_time` (`ChurchID`,`OccurredAt`),
+  KEY `ix_contribution_audit_entity` (`EntityType`,`EntityID`,`OccurredAt`),
+  KEY `fk_contribution_audit_user` (`UserID`),
+  CONSTRAINT `fk_contribution_audit_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_contribution_audit_user` FOREIGN KEY (`UserID`) REFERENCES `tbluser` (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblcontributionbatch` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `BatchDate` date NOT NULL,
+  `Description` varchar(500) NOT NULL,
+  `ServiceID` int(11) DEFAULT NULL,
+  `AttendanceEventID` int(11) DEFAULT NULL,
+  `DepositDate` date DEFAULT NULL,
+  `OrganizationID` int(11) NOT NULL,
+  `BankAccountID` int(11) DEFAULT NULL,
+  `Status` varchar(12) NOT NULL DEFAULT 'DRAFT',
+  `ControlTotal` decimal(19,2) DEFAULT NULL,
+  `CalculatedTotal` decimal(19,2) NOT NULL DEFAULT 0.00,
+  `AccountingTransactionID` bigint(20) DEFAULT NULL,
+  `CorrectsBatchID` bigint(20) DEFAULT NULL,
+  `CorrectionBatchID` bigint(20) DEFAULT NULL,
+  `Version` int(11) NOT NULL DEFAULT 1,
+  `EnteredByUserID` int(11) NOT NULL,
+  `EnteredAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `ReviewedByUserID` int(11) DEFAULT NULL,
+  `ReviewedAt` datetime(6) DEFAULT NULL,
+  `PostedByUserID` int(11) DEFAULT NULL,
+  `PostedAt` datetime(6) DEFAULT NULL,
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_contribution_batch_transaction` (`AccountingTransactionID`),
+  KEY `ix_contribution_batch_status` (`ChurchID`,`Status`,`BatchDate`),
+  KEY `ix_contribution_batch_service` (`ServiceID`),
+  KEY `fk_contribution_batch_attendance` (`AttendanceEventID`),
+  KEY `fk_contribution_batch_org` (`OrganizationID`),
+  KEY `fk_contribution_batch_bank` (`BankAccountID`),
+  KEY `fk_contribution_batch_corrects` (`CorrectsBatchID`),
+  KEY `fk_contribution_batch_correction` (`CorrectionBatchID`),
+  KEY `fk_contribution_batch_entered_by` (`EnteredByUserID`),
+  KEY `fk_contribution_batch_reviewed_by` (`ReviewedByUserID`),
+  KEY `fk_contribution_batch_posted_by` (`PostedByUserID`),
+  CONSTRAINT `fk_contribution_batch_attendance` FOREIGN KEY (`AttendanceEventID`) REFERENCES `tblattendanceevent` (`ID`) ON DELETE SET NULL,
+  CONSTRAINT `fk_contribution_batch_bank` FOREIGN KEY (`BankAccountID`) REFERENCES `tblaccountingbankaccount` (`ID`),
+  CONSTRAINT `fk_contribution_batch_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_contribution_batch_correction` FOREIGN KEY (`CorrectionBatchID`) REFERENCES `tblcontributionbatch` (`ID`),
+  CONSTRAINT `fk_contribution_batch_corrects` FOREIGN KEY (`CorrectsBatchID`) REFERENCES `tblcontributionbatch` (`ID`),
+  CONSTRAINT `fk_contribution_batch_entered_by` FOREIGN KEY (`EnteredByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_contribution_batch_org` FOREIGN KEY (`OrganizationID`) REFERENCES `tblaccountingorganization` (`ID`),
+  CONSTRAINT `fk_contribution_batch_posted_by` FOREIGN KEY (`PostedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_contribution_batch_reviewed_by` FOREIGN KEY (`ReviewedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_contribution_batch_service` FOREIGN KEY (`ServiceID`) REFERENCES `tblservice` (`ID`) ON DELETE SET NULL,
+  CONSTRAINT `fk_contribution_batch_transaction` FOREIGN KEY (`AccountingTransactionID`) REFERENCES `tblaccountingtransaction` (`ID`),
+  CONSTRAINT `ck_contribution_batch_status` CHECK (`Status` in ('DRAFT','READY','POSTED','VOID')),
+  CONSTRAINT `ck_contribution_batch_totals` CHECK (`CalculatedTotal` >= 0 and (`ControlTotal` is null or `ControlTotal` >= 0)),
+  CONSTRAINT `ck_contribution_batch_version` CHECK (`Version` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblcontributioncontributor` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `ContributorType` varchar(12) NOT NULL,
+  `PersonID` int(11) DEFAULT NULL,
+  `FamilyID` int(11) DEFAULT NULL,
+  `DisplayName` varchar(255) NOT NULL,
+  `StatementName` varchar(255) DEFAULT NULL,
+  `Address` varchar(255) DEFAULT NULL,
+  `Address2` varchar(255) DEFAULT NULL,
+  `City` varchar(255) DEFAULT NULL,
+  `State` varchar(100) DEFAULT NULL,
+  `PostalCode` varchar(30) DEFAULT NULL,
+  `Email` varchar(255) DEFAULT NULL,
+  `IsActive` tinyint(1) NOT NULL DEFAULT 1,
+  `StatementEnabled` tinyint(1) NOT NULL DEFAULT 1,
+  `Note` varchar(2000) DEFAULT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_contribution_contributor_person` (`ChurchID`,`PersonID`),
+  UNIQUE KEY `uq_contribution_contributor_family` (`ChurchID`,`FamilyID`),
+  KEY `ix_contribution_contributor_name` (`ChurchID`,`IsActive`,`DisplayName`),
+  KEY `fk_contribution_contributor_person` (`PersonID`),
+  KEY `fk_contribution_contributor_family` (`FamilyID`),
+  CONSTRAINT `fk_contribution_contributor_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_contribution_contributor_family` FOREIGN KEY (`FamilyID`) REFERENCES `tblfamily` (`ID`) ON DELETE SET NULL,
+  CONSTRAINT `fk_contribution_contributor_person` FOREIGN KEY (`PersonID`) REFERENCES `tblperson` (`ID`) ON DELETE SET NULL,
+  CONSTRAINT `ck_contribution_contributor_type` CHECK (`ContributorType` in ('PERSON','FAMILY','EXTERNAL'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblcontributionenvelopeassignment` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `ContributorID` bigint(20) NOT NULL,
+  `EnvelopeNumber` varchar(30) NOT NULL,
+  `EffectiveFrom` date NOT NULL,
+  `EffectiveThrough` date DEFAULT NULL,
+  `Note` varchar(1000) DEFAULT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_contribution_envelope_start` (`ChurchID`,`EnvelopeNumber`,`EffectiveFrom`),
+  KEY `ix_contribution_envelope_lookup` (`ChurchID`,`EnvelopeNumber`,`EffectiveFrom`,`EffectiveThrough`),
+  KEY `ix_contribution_envelope_contributor` (`ContributorID`,`EffectiveFrom`),
+  CONSTRAINT `fk_contribution_envelope_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_contribution_envelope_contributor` FOREIGN KEY (`ContributorID`) REFERENCES `tblcontributioncontributor` (`ID`),
+  CONSTRAINT `ck_contribution_envelope_number` CHECK (char_length(trim(`EnvelopeNumber`)) > 0),
+  CONSTRAINT `ck_contribution_envelope_dates` CHECK (`EffectiveThrough` is null or `EffectiveFrom` <= `EffectiveThrough`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblcontributionpurpose` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Description` varchar(1000) DEFAULT NULL,
+  `ApprovalDate` date NOT NULL,
+  `ApprovingAuthority` varchar(255) NOT NULL,
+  `EffectiveFrom` date NOT NULL,
+  `EffectiveThrough` date DEFAULT NULL,
+  `IsActive` tinyint(1) NOT NULL DEFAULT 1,
+  `OrganizationID` int(11) NOT NULL,
+  `FundID` int(11) NOT NULL,
+  `RevenueAccountID` int(11) NOT NULL,
+  `ControlAndDiscretionConfirmed` tinyint(1) NOT NULL DEFAULT 0,
+  `StatementTreatment` varchar(20) NOT NULL DEFAULT 'ELIGIBLE',
+  `Note` varchar(2000) DEFAULT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_contribution_purpose_name` (`ChurchID`,`Name`),
+  KEY `ix_contribution_purpose_active` (`ChurchID`,`IsActive`,`EffectiveFrom`,`EffectiveThrough`),
+  KEY `fk_contribution_purpose_org` (`OrganizationID`),
+  KEY `fk_contribution_purpose_fund` (`FundID`),
+  KEY `fk_contribution_purpose_revenue` (`RevenueAccountID`),
+  CONSTRAINT `fk_contribution_purpose_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_contribution_purpose_fund` FOREIGN KEY (`FundID`) REFERENCES `tblaccountingfund` (`ID`),
+  CONSTRAINT `fk_contribution_purpose_org` FOREIGN KEY (`OrganizationID`) REFERENCES `tblaccountingorganization` (`ID`),
+  CONSTRAINT `fk_contribution_purpose_revenue` FOREIGN KEY (`RevenueAccountID`) REFERENCES `tblaccountingaccount` (`ID`),
+  CONSTRAINT `ck_contribution_purpose_dates` CHECK (`EffectiveFrom` <= `EffectiveThrough` or `EffectiveThrough` is null),
+  CONSTRAINT `ck_contribution_purpose_statement` CHECK (`StatementTreatment` in ('ELIGIBLE','INELIGIBLE','REVIEW'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbldocument` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `ChurchID` int(11) NOT NULL DEFAULT 0,

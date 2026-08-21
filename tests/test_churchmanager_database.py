@@ -48,6 +48,13 @@ REQUIRED_TABLES = {
     "tblAccountingBudget",
     "tblAccountingBudgetLine",
     "tblLectionarySystem",
+    "tblContributionContributor",
+    "tblContributionEnvelopeAssignment",
+    "tblContributionPurpose",
+    "tblContributionBatch",
+    "tblContribution",
+    "tblContributionAllocation",
+    "tblContributionAuditEvent",
 }
 def database_tests_enabled() -> bool:
     return os.environ.get("CHURCHMANAGER_RUN_DB_TESTS") == "1"

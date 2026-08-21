@@ -1,6 +1,6 @@
 # ChurchManager Database Structure Inventory
 
-Last reviewed: 2026-08-14
+Last reviewed: 2026-08-21
 
 This inventory tracks old JSForm-era database structures that remain in the
 development ChurchManager system. In this document, **legacy** means obsolete
@@ -41,6 +41,29 @@ their age or naming:
 | `tblLocalHymnIDAllocation` | Permanently reserves congregation-owned hymn IDs so retired IDs are never reused. |
 | `tblHymn` | Stores hymns belonging to installed hymnals. |
 | `tblHymnUsage` | Preserves hymn-selection and usage history. |
+
+## Confidential giving structures
+
+Migration 085 introduces the approved `0.3.0-dev` Giving foundation as new
+tables. It does not revive or convert any obsolete donor, envelope, ledger, or
+giving-register prototype.
+
+| Structure | Current purpose |
+|---|---|
+| `tblContributionContributor` | Stable confidential giving identity, optionally linked to a person or family. |
+| `tblContributionEnvelopeAssignment` | Date-effective envelope assignments that preserve leading zeroes and history. |
+| `tblContributionPurpose` | Congregation-approved purposes and controlled accounting mappings. |
+| `tblContributionBatch` | Draft-through-posting control record and summarized accounting link. |
+| `tblContribution` | Individual confidential gifts, acknowledgment facts, and directed-gift review status. |
+| `tblContributionAllocation` | Exact monetary division of a gift among approved funds and revenue mappings. |
+| `tblContributionAuditEvent` | Privacy-safe Giving audit events without copied donor or gift detail. |
+
+Giving data is a confidential subledger. It is not exposed through ordinary
+accounting screens, unrestricted report design, support logs, or general-ledger
+descriptions. Contributor link shape is enforced in the Giving service because
+MariaDB does not permit a `CHECK` constraint to inspect a foreign-key column
+that uses `ON DELETE SET NULL`; retaining the historical contributor identity
+when a directory record is removed takes precedence.
 
 ## Retirement procedure
 

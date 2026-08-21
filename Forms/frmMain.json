@@ -411,6 +411,14 @@
                     "invoke": "screens.design"
                 }
             },
+            "lblGivingContributors": {
+                "name": "lblGivingContributors",
+                "type": "StaticText",
+                "posch": [15, 10],
+                "label": "Contributors and Envelopes",
+                "tooltip": "Maintain confidential giving identities and dated envelope assignments.",
+                "security": {"invoke": "giving.contributors.manage"}
+            },
             "BulletinBox": {
                 "name": "BulletinBox",
                 "type": "StaticBox",

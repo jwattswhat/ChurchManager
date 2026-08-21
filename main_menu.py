@@ -46,6 +46,7 @@ SPECIAL_CONTROLS = {
     "lblAccountingBudgetActual",
     "lblAccountingFunctionalExpenses",
     "lblAccountingYearEnd",
+    "lblGivingContributors",
 }
 MENU_CONTROLS = frozenset(FORM_ROUTES) | SPECIAL_CONTROLS
 SESSION_CONTROLS = frozenset({"lblHelp", "lblChangePassword", "lblLogout"})

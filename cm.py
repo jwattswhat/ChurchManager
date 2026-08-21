@@ -69,6 +69,7 @@ from local_hymns import LocalHymnIDAllocator
 from lectionary_package_dialog import show_lectionary_packages
 from local_lectionary_dialog import show_local_lectionaries
 from user_help import UserGuideError, open_user_guide
+from giving.contributor_dialog import show_contributors
 
 
 arguments = None
@@ -530,6 +531,9 @@ def _buttonclick(event):
             show_lectionary_packages(
                 cmfrm.FRAME, context.connection, context.authorization,
             )
+            return
+        case "lblGivingContributors":
+            show_contributors(cmfrm.FRAME, context.connection)
             return
         case "lblPropers":
             show_local_lectionaries(

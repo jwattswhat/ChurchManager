@@ -281,6 +281,37 @@ class TestWorshipPlanningStructure(unittest.TestCase):
 
 
 class TestChurchManagerPython(unittest.TestCase):
+    def test_giving_foundation_is_new_confidential_schema(self):
+        migration = (
+            ROOT / "migrations" / "085_add_confidential_member_giving.sql"
+        ).read_text(encoding="utf-8-sig")
+        for table in (
+            "tblContributionContributor",
+            "tblContributionEnvelopeAssignment",
+            "tblContributionPurpose",
+            "tblContributionBatch",
+            "tblContribution",
+            "tblContributionAllocation",
+            "tblContributionAuditEvent",
+        ):
+            self.assertIn(f"CREATE TABLE IF NOT EXISTS {table}", migration)
+        for permission in (
+            "giving.contributors.manage",
+            "giving.batches.enter",
+            "giving.batches.review",
+            "giving.batches.post",
+            "giving.history.view",
+            "giving.statements.generate",
+            "giving.reports.summary",
+            "giving.reports.confidential",
+            "giving.purposes.manage",
+        ):
+            self.assertIn(permission, migration)
+        self.assertNotIn("tblEnvelope ", migration)
+        self.assertNotIn("tblGivingRegister", migration)
+        self.assertIn("ON DELETE SET NULL", migration)
+        self.assertIn("Link shape is enforced by giving.validation", migration)
+
     def test_worship_service_save_does_not_reference_removed_html_output(self):
         source = (ROOT / "unified_worship_service_dialog.py").read_text(encoding="utf-8")
         self.assertNotIn("GeneratedHtml", source)
@@ -1065,6 +1096,11 @@ class TestChurchManagerForms(unittest.TestCase):
         self.assertEqual(
             sorted(controls[name]["posch"][1] for name in planning_items),
             list(range(2, 9)),
+        )
+        self.assertEqual(controls["lblGivingContributors"]["posch"], [15, 10])
+        self.assertEqual(
+            controls["lblGivingContributors"]["security"]["invoke"],
+            "giving.contributors.manage",
         )
         resource_items = [
             "lblOS", "lblCheckList", "lblPropers", "lblSermon", "lblHymnal",

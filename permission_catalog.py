@@ -65,4 +65,5 @@ MAIN_MENU_PERMISSIONS = {
     "lblAccountingBudgetActual": "accounting.reports.run",
     "lblAccountingFunctionalExpenses": "accounting.reports.run",
     "lblAccountingYearEnd": "accounting.periods.override",
+    "lblGivingContributors": "giving.contributors.manage",
 }

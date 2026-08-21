@@ -20,7 +20,7 @@ class VersioningTests(unittest.TestCase):
         )
 
     def test_framework_has_independent_semantic_version(self):
-        self.assertEqual(JSForm.__version__, "0.1.0-dev")
+        self.assertEqual(JSForm.__version__, "0.1.0-beta.1")
 
 
 if __name__ == "__main__":

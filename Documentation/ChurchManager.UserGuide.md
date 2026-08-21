@@ -1,6 +1,6 @@
 # ChurchManager User Guide
 
-**Version 0.2.0-beta.1**
+**Version 0.3.0-dev**
 
 **For congregations using ChurchManager**
 
@@ -86,7 +86,8 @@ needed.
 ### People and Congregation
 
 This group contains church information, people, families, attendance, projects,
-tasks, documents, and the journal.
+tasks, documents, the journal, and confidential contributor and envelope
+maintenance for authorized giving users.
 
 ### Reports and Design
 
@@ -126,6 +127,17 @@ membership before generating a directory.
 A ChurchManager user may optionally be linked to a person record, but the two
 records serve different purposes. Not every member needs a user account, and a
 user does not have to be a congregation member.
+
+### Contributors and envelopes
+
+A giving contributor may be linked to one person, linked to one family, or
+maintained as an outside contributor. Statement identity and contact fields do
+not silently synchronize with the membership directory.
+
+Numeric envelope numbers are normalized, so `001`, `01`, and `1` are the same
+number. Each assignment has a starting date and may have an ending date. ChurchManager
+prevents the same number from being assigned to different contributors during
+overlapping dates. Double-click an envelope-history row to edit it.
 
 ## 4. Worship planning
 
@@ -287,5 +299,5 @@ version when requesting help.
 ---
 
 ChurchManager is open-source congregation software. This guide describes the
-0.2.0-beta.1 beta release and will be revised as beta testing identifies
+0.3.0-dev development line and will be revised as beta testing identifies
 additional instructions or screenshots that are needed.

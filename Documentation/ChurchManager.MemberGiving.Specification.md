@@ -150,7 +150,7 @@ authorized user may confirm two distinct accounts when necessary.
 | `ID` | Primary key. |
 | `ChurchID` | Required church boundary. |
 | `ContributorID` | Required contributor. |
-| `EnvelopeNumber` | Required normalized text, preserving leading zeroes. |
+| `EnvelopeNumber` | Required normalized text. Numeric values discard leading zeroes so equivalent numbers cannot overlap. |
 | `EffectiveFrom` | Required start date. |
 | `EffectiveThrough` | Nullable inclusive end date. |
 | `Note` | Optional restricted administrative note. |
@@ -565,7 +565,8 @@ The subsystem is ready for beta acceptance when all of the following pass:
 
 - Giving is a confidential ChurchManager subledger, not a JSForm feature and
   not part of the ordinary member record.
-- Envelope numbers are reusable dated identifiers, not permanent keys.
+- Envelope numbers are reusable dated identifiers, not permanent keys. Numeric
+  values have one canonical form (`001`, `01`, and `1` are equivalent).
 - Contributors may link to a person or family but are not required to do so.
 - Loose offerings do not require fabricated people.
 - Fund accounting receives summarized balanced deposits only.
