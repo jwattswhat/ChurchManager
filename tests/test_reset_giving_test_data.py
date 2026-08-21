@@ -47,5 +47,10 @@ class GivingTestDataResetTests(unittest.TestCase):
         self.assertIn("AccountingTransactionID=?,Status='POSTED'", self.source)
         self.assertNotIn("ContributorID,TransactionID", self.source)
 
+    def test_reset_removes_prior_statement_issues_before_contributors(self):
+        issue = self.source.index('"tblContributionStatementIssue", "tblContributionAuditEvent"')
+        contributor = self.source.index('"tblContributionPurpose", "tblContributionContributor"')
+        self.assertLess(issue, contributor)
+
 
 if __name__ == "__main__": unittest.main()

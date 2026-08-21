@@ -39,9 +39,11 @@ SQL dump under `BackupDB/ChurchDBTest.pre-activity-reset`.
 `reset_giving_test_data.py` replaces only the confidential Giving subsystem in
 local `ChurchDBTest`. It creates a verified pre-reset SQL dump, removes any
 user-entered Giving records and their linked summarized accounting transaction,
-then installs the maintained fictional Giving acceptance dataset. Preview and
-apply it with the commands below. Batch dates are derived from the latest open
-fiscal period so the Ready batch can exercise the accounting handoff.
+then installs the maintained fictional Giving acceptance dataset. Prior
+statement-issuance identifiers are removed before contributors so this remains
+a repeatable beta-test reset. Preview and apply it with the commands below.
+Batch dates are derived from open fiscal periods so all four quarterly
+statement paths and the Ready accounting handoff can be exercised.
 
 ```powershell
 .\.runtime-venv\Scripts\python.exe reset_giving_test_data.py

@@ -24,7 +24,8 @@ from credential_store import read_credential
 ROOT = Path(__file__).resolve().parent
 LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
 GIVING_TABLES = (
-    "tblContributionAuditEvent", "tblContributionAllocation", "tblContribution",
+    "tblContributionStatementIssue", "tblContributionAuditEvent",
+    "tblContributionAllocation", "tblContribution",
     "tblContributionBatch", "tblContributionEnvelopeAssignment",
     "tblContributionPurpose", "tblContributionContributor",
 )
@@ -76,7 +77,8 @@ def remove_existing(cursor):
     transaction_ids = [row[0] for row in cursor.fetchall()]
     cursor.execute("UPDATE tblContributionBatch SET CorrectsBatchID=NULL,CorrectionBatchID=NULL")
     cursor.execute("UPDATE tblContributionBatch SET AccountingTransactionID=NULL")
-    for table in ("tblContributionAuditEvent", "tblContributionAllocation", "tblContribution",
+    for table in ("tblContributionStatementIssue", "tblContributionAuditEvent",
+                  "tblContributionAllocation", "tblContribution",
                   "tblContributionEnvelopeAssignment", "tblContributionBatch",
                   "tblContributionPurpose", "tblContributionContributor"):
         cursor.execute(f"DELETE FROM {table}")
@@ -355,7 +357,8 @@ def main():
         remove_existing(cursor); statement_year = seed(cursor)
         after = counts(cursor)
         for table, count in after.items(): print(f"after_{table}={count}")
-        expected = {"tblContributionContributor": 5, "tblContributionEnvelopeAssignment": 4,
+        expected = {"tblContributionStatementIssue": 0,
+                    "tblContributionContributor": 5, "tblContributionEnvelopeAssignment": 4,
                     "tblContributionPurpose": 3, "tblContributionBatch": 6,
                     "tblContribution": 16, "tblContributionAllocation": 17,
                     "tblContributionAuditEvent": 6}
