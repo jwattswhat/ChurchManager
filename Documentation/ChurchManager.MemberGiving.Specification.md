@@ -553,8 +553,8 @@ Rollout sequence:
    synchronization are implemented; posted correction entry remains.)*
 6. Implement reports and statements. *(The protected donor-free `GIVE-BATCH`
    Batch Control Summary PDF and quarterly single/all-contributor statement
-   previews are implemented. Issuance history, annual/custom ranges, and the
-   remaining report inventory continue next.)*
+   previews and identifiable issuance history are implemented. Annual/custom
+   ranges and the remaining report inventory continue next.)*
 7. Add import preview and validation.
 8. Create isolated test data and complete automated regression tests.
 9. Perform user acceptance with a sample collection, split gift, anonymous

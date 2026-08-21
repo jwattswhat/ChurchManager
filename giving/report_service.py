@@ -135,3 +135,51 @@ class GivingReportService:
             "ORDER BY g.ReceivedDate,g.ID,a.ID",
             (self.church_id(), contributor_id, start_date, end_date),
         )
+
+    def statement_issuance_history(self):
+        """Return confidential issued-statement identifiers, newest first."""
+        return self.all(
+            "SELECT i.GeneratedAt,COALESCE(NULLIF(c.StatementName,''),c.DisplayName),"
+            "i.PeriodStart,i.PeriodEnd,i.RevisionNumber,i.OutputFileName,i.DocumentHash "
+            "FROM tblContributionStatementIssue i "
+            "JOIN tblContributionContributor c ON c.ID=i.ContributorID "
+            "WHERE i.ChurchID=? ORDER BY i.GeneratedAt DESC,i.ID DESC",
+            (self.church_id(),),
+        )
+
+    def record_statement_issuances(self, issues, user_id):
+        """Atomically record rendered statement hashes and revision relationships."""
+        cursor = self.connection.cursor()
+        church_id = self.church_id()
+        try:
+            for contributor_id, start_date, end_date, version, digest, filename in issues:
+                cursor.execute(
+                    "SELECT ID,RevisionNumber FROM tblContributionStatementIssue "
+                    "WHERE ChurchID=? AND ContributorID=? AND PeriodStart=? AND PeriodEnd=? "
+                    "ORDER BY RevisionNumber DESC,ID DESC LIMIT 1 FOR UPDATE",
+                    (church_id, contributor_id, start_date, end_date),
+                )
+                prior = cursor.fetchone()
+                revision = (int(prior[1]) + 1) if prior else 1
+                cursor.execute(
+                    "INSERT INTO tblContributionStatementIssue "
+                    "(ChurchID,ContributorID,PeriodStart,PeriodEnd,GeneratedByUserID,TemplateVersion,"
+                    "DocumentHash,OutputFileName,RevisionOfID,RevisionNumber) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    (church_id, contributor_id, start_date, end_date, int(user_id), version,
+                     digest, filename, prior[0] if prior else None, revision),
+                )
+                issue_id = cursor.lastrowid
+                cursor.execute(
+                    "INSERT INTO tblContributionAuditEvent "
+                    "(ChurchID,UserID,Action,EntityType,EntityID,SafeReference) "
+                    "VALUES (?,?,'STATEMENT_ISSUED','STATEMENT',?,?)",
+                    (church_id, int(user_id), issue_id,
+                     f"{start_date} through {end_date}; revision {revision}"),
+                )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()

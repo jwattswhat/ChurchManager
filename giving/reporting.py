@@ -6,6 +6,7 @@ from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 import tempfile
+import hashlib
 
 import JSForm
 from pypdf import PdfWriter
@@ -253,8 +254,8 @@ class GivingVisualReportService:
         self.processes.open_file(rendered)
         return rendered
 
-    def run_statements(self, contributor_ids, start_date, end_date, output_name="GIVE-STMT"):
-        """Preview one statement or merge several statements into one PDF."""
+    def run_statements(self, contributor_ids, start_date, end_date, output_name="GIVE-STMT", *, issue=False):
+        """Render statements and optionally record their immutable identifiers."""
         self.authorization.require("giving.statements.generate", "preview contribution statements")
         contributor_ids = tuple(contributor_ids)
         if not contributor_ids:
@@ -272,12 +273,18 @@ class GivingVisualReportService:
                 output = self.output_directory / f"{output_name}-{datetime.now():%Y%m%d-%H%M%S}.pdf"
         with tempfile.TemporaryDirectory(prefix="churchmanager-statements-") as temporary:
             rendered = []
+            issue_records = []
             for contributor_id in contributor_ids:
                 dataset = provider.build(contributor_id, start_date, end_date)
                 target = Path(temporary) / f"statement-{contributor_id}.pdf"
-                rendered.append(JSForm.PDFReportRenderer().render(
+                rendered_path = JSForm.PDFReportRenderer().render(
                     definition, dataset, target,
                     context={"run_user": self.session.display_name},
+                )
+                rendered.append(rendered_path)
+                issue_records.append((
+                    contributor_id, start_date, end_date, str(STATEMENT_CONTRACT.version),
+                    hashlib.sha256(Path(rendered_path).read_bytes()).hexdigest(), output.name,
                 ))
             if len(rendered) == 1:
                 Path(rendered[0]).replace(output)
@@ -288,5 +295,9 @@ class GivingVisualReportService:
                 with output.open("wb") as stream:
                     writer.write(stream)
                 writer.close()
+            if issue:
+                GivingReportService(self.connection).record_statement_issuances(
+                    issue_records, self.session.user_id,
+                )
         self.processes.open_file(output)
         return output

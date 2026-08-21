@@ -62,6 +62,7 @@ class GivingReportsDialog(wx.Dialog):
             self._build_history_tab()
         if authorization.has_permission("giving.statements.generate"):
             self._build_statement_tab()
+            self._build_statement_history_tab()
         if self.notebook.GetPageCount() == 0:
             raise PermissionError("You do not have permission to run Giving reports.")
         outer.Add(self.notebook, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
@@ -149,6 +150,8 @@ class GivingReportsDialog(wx.Dialog):
         self.statement_quarter.SetSelection(current_quarter)
         preview = wx.Button(panel, label="Preview Quarterly Statement(s)")
         preview.Bind(wx.EVT_BUTTON, self.on_statement_pdf)
+        issue = wx.Button(panel, label="Issue and Record Statement(s)")
+        issue.Bind(wx.EVT_BUTTON, self.on_statement_issue)
         filters = wx.FlexGridSizer(cols=2, hgap=10, vgap=10)
         filters.AddGrowableCol(1, 1)
         for label, control in (
@@ -159,7 +162,9 @@ class GivingReportsDialog(wx.Dialog):
             filters.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
             filters.Add(control, 1, wx.EXPAND)
         root.Add(filters, 0, wx.ALL | wx.EXPAND, 10)
-        root.Add(preview, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        actions = wx.BoxSizer(wx.HORIZONTAL)
+        actions.Add(preview, 0, wx.RIGHT, 8); actions.Add(issue)
+        root.Add(actions, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
         note = wx.StaticText(
             panel,
             label=("Preview does not record issuance or delivery. Only Posted, statement-eligible "
@@ -168,6 +173,21 @@ class GivingReportsDialog(wx.Dialog):
         root.Add(note, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
         panel.SetSizer(root)
         self.notebook.AddPage(panel, "Contribution Statements")
+
+    def _build_statement_history_tab(self):
+        panel = wx.Panel(self.notebook); root = wx.BoxSizer(wx.VERTICAL)
+        refresh = wx.Button(panel, label="Refresh Issuance History")
+        refresh.Bind(wx.EVT_BUTTON, self.on_statement_history)
+        root.Add(refresh, 0, wx.ALL, 10)
+        self.statement_history = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        for index, (label, width) in enumerate((
+            ("Generated",145),("Contributor",210),("From",95),("Through",95),
+            ("Revision",70),("File",185),("SHA-256",180),
+        )):
+            self.statement_history.InsertColumn(index, label, width=width)
+        root.Add(self.statement_history, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        panel.SetSizer(root); self.notebook.AddPage(panel, "Statement Issuance History")
+        self.on_statement_history()
 
     def _dates(self, start, end):
         first, last = _python_date(start), _python_date(end)
@@ -249,29 +269,57 @@ class GivingReportsDialog(wx.Dialog):
     def on_statement_pdf(self, _event=None):
         """Preview the selected quarter without recording statement issuance."""
         try:
-            year = int(self.statement_year.GetStringSelection())
-            quarter = self.statement_quarter.GetSelection() + 1
-            first, last = quarter_bounds(year, quarter)
-            selected = self.statement_contributor.GetSelection()
-            # wx.Choice can briefly report wx.NOT_FOUND even though its first
-            # displayed entry is the default. Both states represent the
-            # explicit "All eligible contributors" option.
-            if selected <= 0:
-                contributor_ids = [
-                    row[0] for row in self.service.statement_contributors_for_period(first, last)
-                ]
-                if not contributor_ids:
-                    raise ValueError(
-                        f"No statement-enabled contributors have eligible Posted "
-                        f"contributions in Quarter {quarter} of {year}."
-                    )
-            else:
-                contributor_ids = [self.statement_contributors[selected - 1][0]]
+            year, quarter, first, last, contributor_ids = self._statement_selection()
             self.report_service.run_statements(
                 contributor_ids, first, last, output_name=f"GIVE-STMT-{year}-Q{quarter}",
             )
         except Exception as error:
             wx.MessageBox(str(error), "Contribution Statements", wx.OK | wx.ICON_ERROR, self)
+
+    def _statement_selection(self):
+        year = int(self.statement_year.GetStringSelection())
+        quarter = self.statement_quarter.GetSelection() + 1
+        first, last = quarter_bounds(year, quarter)
+        selected = self.statement_contributor.GetSelection()
+        if selected <= 0:
+            contributor_ids = [row[0] for row in self.service.statement_contributors_for_period(first, last)]
+            if not contributor_ids:
+                raise ValueError(
+                    f"No statement-enabled contributors have eligible Posted contributions "
+                    f"in Quarter {quarter} of {year}."
+                )
+        else:
+            contributor_ids = [self.statement_contributors[selected - 1][0]]
+        return year, quarter, first, last, contributor_ids
+
+    def on_statement_issue(self, _event=None):
+        """Generate statements and record their hashes as officially issued."""
+        try:
+            year, quarter, first, last, contributor_ids = self._statement_selection()
+            answer = wx.MessageBox(
+                f"Issue and record {len(contributor_ids)} statement(s) for Quarter {quarter} of {year}?\n\n"
+                "This records issuance, but it does not record printing, mailing, or delivery.",
+                "Issue Contribution Statements", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self,
+            )
+            if answer != wx.YES:
+                return
+            self.report_service.run_statements(
+                contributor_ids, first, last,
+                output_name=f"GIVE-STMT-ISSUED-{year}-Q{quarter}", issue=True,
+            )
+            self.on_statement_history()
+        except Exception as error:
+            wx.MessageBox(str(error), "Contribution Statements", wx.OK | wx.ICON_ERROR, self)
+
+    def on_statement_history(self, _event=None):
+        """Refresh confidential statement issuance identifiers."""
+        rows = self.service.statement_issuance_history()
+        self.statement_history.DeleteAllItems()
+        for index, row in enumerate(rows):
+            self.statement_history.InsertItem(index, str(row[0]))
+            values = (row[1], str(row[2]), str(row[3]), str(row[4]), row[5], str(row[6])[:16] + "...")
+            for column, value in enumerate(values, 1):
+                self.statement_history.SetItem(index, column, value)
 
 
 def show_giving_reports(parent, connection, authorization, session):

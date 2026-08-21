@@ -66,7 +66,7 @@ class GivingReportTests(unittest.TestCase):
         self.assertEqual(quarter_bounds(2026, 4), (date(2026, 10, 1), date(2026, 12, 31)))
 
     def test_all_contributors_tolerates_initial_choice_state(self):
-        source = inspect.getsource(GivingReportsDialog.on_statement_pdf)
+        source = inspect.getsource(GivingReportsDialog._statement_selection)
         self.assertIn("if selected <= 0:", source)
         self.assertIn("No statement-enabled contributors have eligible Posted", source)
 
@@ -79,6 +79,18 @@ class GivingReportTests(unittest.TestCase):
         self.assertIn("g.StatementEligibility='ELIGIBLE'", query)
         self.assertIn("p.StatementTreatment='ELIGIBLE'", query)
         self.assertIn('require("giving.statements.generate"', inspect.getsource(ContributionStatementProvider))
+
+    def test_statement_issuance_records_hash_revision_and_safe_audit(self):
+        migration = Path("migrations/087_add_contribution_statement_issuance.sql").read_text(encoding="utf-8")
+        self.assertIn("tblContributionStatementIssue", migration)
+        self.assertIn("DocumentHash char(64)", migration)
+        source = inspect.getsource(GivingReportService.record_statement_issuances)
+        self.assertIn("RevisionNumber DESC", source)
+        self.assertIn("STATEMENT_ISSUED", source)
+        reporting = __import__("giving.reporting", fromlist=["GivingVisualReportService"])
+        renderer = inspect.getsource(reporting.GivingVisualReportService.run_statements)
+        self.assertIn("hashlib.sha256", renderer)
+        self.assertIn("issue=False", renderer)
 
 
 if __name__ == "__main__":

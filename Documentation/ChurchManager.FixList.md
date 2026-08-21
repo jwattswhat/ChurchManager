@@ -585,7 +585,12 @@ future roadmap projects:
   designer. Annual and custom-range contribution statements follow next.
   Quarterly statement preview now supports one contributor or every
   statement-enabled contributor in a combined PDF and includes only Posted,
-  eligible allocations. Preview does not claim issuance or delivery.
+  eligible allocations. Preview does not claim issuance or delivery. Official
+  issuance records document hashes, revisions, covered periods, filenames, and
+  safe audit references without storing duplicate PDF content.
+- Keep the normal installation seed clean. Package a separate, clearly
+  fictional and repeatable Beta Test Dataset that testers can reset safely;
+  include Giving statement fixtures without making them production defaults.
 - The approved remaining envelope-box work now includes a previewed annual
   assignment tool with either complete renumbering or preservation plus gap
   filling, and printable box labels plus an assignment register.

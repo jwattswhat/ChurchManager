@@ -194,6 +194,11 @@ On **Contribution Statements**, select a year, quarter, and either one contribut
 or **All eligible contributors**, then choose **Preview Quarterly Statement(s)**.
 The preview includes only Posted gifts and only allocations marked statement
 eligible. Previewing does not record that a statement was issued or delivered.
+Choose **Issue and Record Statement(s)** only when the PDF is being treated as
+an official statement. ChurchManager records its covered period, generation
+time, revision, filename, and SHA-256 identifier. This does not claim the
+statement was printed, mailed, emailed, or received. **Statement Issuance
+History** identifies prior issues and reissues.
 
 ## 4. Worship planning
 
