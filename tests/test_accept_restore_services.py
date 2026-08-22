@@ -8,6 +8,7 @@ from accept_restore_services import (
     GIVING_CONTRIBUTOR, GIVING_ENVELOPE, acceptance_names,
     create_giving_fixture, giving_fixture_exists, migration_count,
 )
+from run_churchdb_migrations import migration_files
 
 
 class RestoreAcceptanceTests(unittest.TestCase):
@@ -32,6 +33,11 @@ class RestoreAcceptanceTests(unittest.TestCase):
         self.assertIn("tblContributionEnvelopeAssignment", verify)
         self.assertEqual(GIVING_CONTRIBUTOR, "Restore Acceptance Contributor")
         self.assertEqual(GIVING_ENVELOPE, "99001")
+
+    def test_migration_discovery_returns_the_release_ledger(self):
+        files = migration_files()
+        self.assertTrue(files)
+        self.assertTrue(all(path.suffix == ".sql" for path in files))
 
 
 if __name__ == "__main__":

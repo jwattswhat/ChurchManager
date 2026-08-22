@@ -14,7 +14,7 @@ from accept_setup_services import plan_for, remove_disposable
 from backup_service import BackupService
 from installation_executor import FreshInstallationExecutor
 from installation_readiness import find_mariadb_tool, inspect_readiness
-from run_churchdb_migrations import MIGRATIONS
+from run_churchdb_migrations import migration_files
 
 
 ROOT = Path(__file__).resolve().parent
@@ -182,7 +182,7 @@ def accept(admin_password, *, keep=False, notify=print):
         if not giving_fixture_exists(application):
             raise RuntimeError("The restored confidential Giving fixture did not verify.")
         represented = migration_count(application)
-        expected_migrations = len(MIGRATIONS)
+        expected_migrations = len(migration_files())
         if represented != expected_migrations:
             raise RuntimeError(
                 f"The restored migration ledger has {represented} records instead of "
