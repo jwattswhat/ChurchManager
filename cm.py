@@ -674,9 +674,20 @@ def main(argv=None):
         authorization_policy=context.authorization,
     )
     processes = ProcessService()
+    from pastoral_note_crypto import PastoralKeyManager, PastoralRecoveryBackup
+    recovery_root = Path(os.environ.get("LOCALAPPDATA", Path.cwd())) / "ChurchManager"
+    recovery = PastoralRecoveryBackup(
+        PastoralKeyManager(
+            JSForm.WindowsCredentialStore(),
+            "ChurchManager/{}/PastoralNotes".format(context.settings["database"]),
+        ),
+        recovery_root / "pastoral-recovery.{}.json".format(
+            context.settings["database"]
+        ),
+    )
     context.services = SimpleNamespace(
         processes=processes,
-        backups=BackupService(),
+        backups=BackupService(recovery=recovery),
         reports=ChurchManagerReportService(
             JSForm, processes,
             ReportAccessService(context.connection, context.authorization),

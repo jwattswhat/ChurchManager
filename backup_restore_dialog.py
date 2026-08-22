@@ -105,6 +105,21 @@ class BackupRestoreDialog(wx.Dialog):
         except Exception as error:
             wx.MessageBox(str(error),"Invalid Backup",wx.OK|wx.ICON_ERROR,self); return
         finally: picker.Destroy()
+        recovery_password = None
+        recovery = getattr(self.context.services.backups, "recovery", None)
+        if recovery is not None and recovery.sidecar_path(path).is_file():
+            recovery_prompt = wx.PasswordEntryDialog(
+                self,
+                "This backup contains protected pastoral-note recovery data.\n\n"
+                "Enter its recovery password before continuing:",
+                "Pastoral Note Recovery",
+            )
+            try:
+                if recovery_prompt.ShowModal() != wx.ID_OK:
+                    return
+                recovery_password = recovery_prompt.GetValue()
+            finally:
+                recovery_prompt.Destroy()
         prompt=wx.TextEntryDialog(self,
             "This will replace the active database and first create a safety backup.\n\n"
             f"Backup database: {source}\nActive database: {self.context.settings['database']}\n\n"
@@ -128,6 +143,7 @@ class BackupRestoreDialog(wx.Dialog):
         try:
             safety=self.context.services.backups.restore(
                 self.context.settings,tools_directory,path,backup_folder,
+                recovery_password=recovery_password,
             )
             log=Path(os.environ.get("LOCALAPPDATA",Path.cwd()))/"ChurchManager"/"restore.log"
             log.parent.mkdir(parents=True,exist_ok=True)
@@ -149,6 +165,7 @@ class BackupRestoreDialog(wx.Dialog):
             self.EndModal(wx.ID_CANCEL)
             wx.CallAfter(self.GetParent().Close)
         finally:
+            recovery_password = None
             if busy is not None:
                 del busy
 

@@ -2,13 +2,16 @@
 
 import base64
 import json
+import tempfile
 import unittest
 from dataclasses import replace
+from pathlib import Path
 
 from pastoral_note_crypto import (
     PastoralKeyManager,
     PastoralNoteCipher,
     PastoralNoteCryptoError,
+    PastoralRecoveryBackup,
     encrypted_note_values,
     pastoral_note_binding,
 )
@@ -117,6 +120,45 @@ class PastoralNoteCryptoTests(unittest.TestCase):
     def test_short_recovery_password_is_rejected(self):
         with self.assertRaises(ValueError):
             self.keys.create_recovery_package("too short")
+
+    def test_backup_sidecar_round_trip_validates_before_install(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            sql = root / "Manual.ChurchDBTest.Backup.SQL"
+            sql.write_text("backup", encoding="utf-8")
+            protected = root / "protected" / "pastoral-recovery.json"
+            recovery = PastoralRecoveryBackup(self.keys, protected)
+            recovery.create_protected_package("correct horse battery staple")
+            sidecar = recovery.attach_to_backup(sql)
+            self.assertEqual(sidecar, PastoralRecoveryBackup.sidecar_path(sql))
+
+            restored_store = MemoryCredentialStore()
+            restored = PastoralRecoveryBackup(
+                PastoralKeyManager(restored_store, "ChurchManager/Test/PastoralNotes"),
+                root / "replacement.json",
+            )
+            validated = restored.validate_restore(
+                sql, "correct horse battery staple"
+            )
+            self.assertEqual(restored_store.values, {})
+            restored.complete_restore(validated)
+            self.assertEqual(
+                PastoralNoteCipher(restored.key_manager).decrypt(
+                    self.cipher.encrypt("Recovered", self.binding), self.binding
+                ),
+                "Recovered",
+            )
+
+    def test_missing_backup_sidecar_fails_before_restore(self):
+        with tempfile.TemporaryDirectory() as folder:
+            sql = Path(folder) / "backup.sql"
+            sql.write_text("backup", encoding="utf-8")
+            recovery = PastoralRecoveryBackup(
+                self.keys, Path(folder) / "missing.json"
+            )
+            self.assertIsNone(
+                recovery.validate_restore(sql, "correct horse battery staple")
+            )
 
 
 if __name__ == "__main__":

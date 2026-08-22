@@ -8,9 +8,11 @@
 
 **Approved by:** Rev. Jonathan C. Watt
 
-**Implementation:** encryption/key-recovery service and migration 096 database,
-permission, and controlled-choice foundation implemented; backup integration
-and user workflows remain gated.
+**Implementation:** encryption/key-recovery service, migration 096 database,
+permission and controlled-choice foundation, and protected backup sidecar
+plumbing implemented. Restricted-note entry, administrator recovery-package
+setup, service authorization, auditing, workflows, and restore acceptance remain
+gated.
 
 **Target:** ChurchManager
 

@@ -32,6 +32,15 @@ class TestProcessService(unittest.TestCase):
 
 
 class TestBackupService(unittest.TestCase):
+    class RecoveryStub:
+        @staticmethod
+        def sidecar_path(path):
+            return Path(str(path) + ".PastoralRecovery.json")
+
+        @staticmethod
+        def attach_to_backup(_path):
+            return None
+
     def test_password_is_kept_out_of_process_arguments(self):
         calls = []
         class FixedClock:
@@ -139,6 +148,37 @@ class TestBackupService(unittest.TestCase):
                 (root / f"ChurchDBTest.Automatic.ChurchDBTest.Backup.{number}.SQL").write_text("backup")
             BackupService.prune_automatic(root, "ChurchDBTest", keep=1)
             self.assertEqual(len(list(root.glob("ChurchDBTest.Automatic.*.SQL"))), 1)
+
+    def test_restricted_notes_require_the_matching_recovery_sidecar(self):
+        with tempfile.TemporaryDirectory() as folder:
+            dump = Path(folder) / "backup.sql"
+            dump.write_text(
+                "-- ChurchManager database backup\n-- Database: ChurchDBTest\n"
+                "INSERT INTO `tblPastoralRestrictedNote` VALUES (...);\n",
+                encoding="utf-8",
+            )
+            service = BackupService(recovery=self.RecoveryStub())
+            with self.assertRaisesRegex(BackupError, "recovery package is missing"):
+                service.restore(
+                    {"server": "db", "database": "ChurchDBTest", "user": "church",
+                     "password": "secret"},
+                    folder, dump, folder,
+                )
+
+    def test_pruning_an_automatic_backup_prunes_its_recovery_sidecar(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            keep = root / "Automatic.ChurchDBTest.Backup.2.SQL"
+            obsolete = root / "Automatic.ChurchDBTest.Backup.1.SQL"
+            for path in (keep, obsolete):
+                path.write_text("backup", encoding="utf-8")
+                Path(str(path) + ".PastoralRecovery.json").write_text(
+                    "protected", encoding="utf-8"
+                )
+            keep.touch()
+            BackupService.prune_automatic(root, "ChurchDBTest", keep=1)
+            self.assertTrue(Path(str(keep) + ".PastoralRecovery.json").exists())
+            self.assertFalse(Path(str(obsolete) + ".PastoralRecovery.json").exists())
 
 
 class TestReportService(unittest.TestCase):

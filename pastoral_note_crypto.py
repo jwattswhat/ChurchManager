@@ -10,7 +10,10 @@ from __future__ import annotations
 import base64
 import json
 import secrets
-from dataclasses import asdict, dataclass
+import shutil
+import tempfile
+from dataclasses import asdict, dataclass, field
+from pathlib import Path
 
 from argon2.low_level import Type, hash_secret_raw
 from cryptography.exceptions import InvalidTag
@@ -31,6 +34,22 @@ MINIMUM_RECOVERY_PASSWORD_LENGTH = 12
 
 class PastoralNoteCryptoError(RuntimeError):
     """Raised when pastoral-note encryption or recovery cannot be completed."""
+
+
+class _MemoryCredentialStore:
+    """Hold a validated recovery key only for the current restore operation."""
+
+    def __init__(self):
+        self.values = {}
+
+    def exists(self, target):
+        return target in self.values
+
+    def read(self, target):
+        return self.values[target]
+
+    def write(self, target, username, password):
+        self.values[target] = (username, password)
 
 
 @dataclass(frozen=True)
@@ -128,6 +147,38 @@ class PastoralKeyManager:
         self._store_key(key_version, key)
         return key_version
 
+    def has_key(self, key_version=1):
+        """Return whether protected storage contains the requested key version."""
+
+        return self.credential_store.exists(
+            self._version_target(_positive(key_version, "key version"))
+        )
+
+    def _store_key(self, key_version, key):
+        self.credential_store.write(
+            self._version_target(key_version), self._key_label(key_version), _encode(key)
+        )
+
+    def _version_target(self, key_version):
+        return "{}/Key/v{}".format(self.target.rstrip("/"), int(key_version))
+
+    @staticmethod
+    def _key_label(key_version):
+        return "{}:v{}".format(ALGORITHM, int(key_version))
+
+    @staticmethod
+    def _validate_header(header):
+        expected = {
+            "format": RECOVERY_FORMAT,
+            "format_version": RECOVERY_FORMAT_VERSION,
+            "kdf": "Argon2id",
+            "memory_cost_kib": ARGON2_MEMORY_COST_KIB,
+            "parallelism": ARGON2_PARALLELISM,
+            "time_cost": ARGON2_TIME_COST,
+        }
+        if any(header.get(name) != value for name, value in expected.items()):
+            raise PastoralNoteCryptoError("The pastoral-note recovery package is unsupported.")
+
     def load_key(self, key_version=1):
         """Return one validated key or fail closed when it is unavailable."""
 
@@ -217,31 +268,88 @@ class PastoralKeyManager:
         self._store_key(key_version, key)
         return key_version
 
-    def _store_key(self, key_version, key):
-        self.credential_store.write(
-            self._version_target(key_version), self._key_label(key_version), _encode(key)
+
+@dataclass(frozen=True)
+class ValidatedPastoralRecovery:
+    """Opaque validated package retained only until database restore completes."""
+
+    package: bytes
+    password: str = field(repr=False)
+    key_version: int
+
+
+class PastoralRecoveryBackup:
+    """Maintain the protected recovery sidecar paired with SQL backups."""
+
+    SUFFIX = ".PastoralRecovery.json"
+
+    def __init__(self, key_manager, protected_package_path):
+        self.key_manager = key_manager
+        self.protected_package_path = Path(protected_package_path)
+
+    @classmethod
+    def sidecar_path(cls, database_backup):
+        """Return the recovery sidecar name belonging to one SQL backup."""
+
+        database_backup = Path(database_backup)
+        return database_backup.with_name(database_backup.name + cls.SUFFIX)
+
+    def create_protected_package(self, recovery_password, key_version=1):
+        """Create or refresh the reusable encrypted package atomically."""
+
+        package = self.key_manager.create_recovery_package(
+            recovery_password, key_version
         )
+        self._write_protected_package(package)
+        return self.protected_package_path
 
-    def _version_target(self, key_version):
-        return "{}/Key/v{}".format(self.target.rstrip("/"), int(key_version))
+    def _write_protected_package(self, package):
+        self.protected_package_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="wb", suffix=".tmp", dir=self.protected_package_path.parent,
+                delete=False,
+            ) as stream:
+                stream.write(package)
+                temporary = Path(stream.name)
+            temporary.replace(self.protected_package_path)
+        finally:
+            if temporary:
+                temporary.unlink(missing_ok=True)
 
-    @staticmethod
-    def _key_label(key_version):
-        return "{}:v{}".format(ALGORITHM, int(key_version))
+    def attach_to_backup(self, database_backup):
+        """Copy the encrypted package beside a completed SQL backup."""
 
-    @staticmethod
-    def _validate_header(header):
-        expected = {
-            "format": RECOVERY_FORMAT,
-            "format_version": RECOVERY_FORMAT_VERSION,
-            "kdf": "Argon2id",
-            "memory_cost_kib": ARGON2_MEMORY_COST_KIB,
-            "parallelism": ARGON2_PARALLELISM,
-            "time_cost": ARGON2_TIME_COST,
-        }
-        if any(header.get(name) != value for name, value in expected.items()):
-            raise PastoralNoteCryptoError("The pastoral-note recovery package is unsupported.")
+        if not self.protected_package_path.is_file():
+            return None
+        destination = self.sidecar_path(database_backup)
+        shutil.copyfile(self.protected_package_path, destination)
+        return destination
 
+    def validate_restore(self, database_backup, recovery_password):
+        """Authenticate a backup sidecar without changing the active key."""
+
+        sidecar = self.sidecar_path(database_backup)
+        if not sidecar.is_file():
+            return None
+        package = sidecar.read_bytes()
+        temporary = PastoralKeyManager(
+            _MemoryCredentialStore(), self.key_manager.target
+        )
+        key_version = temporary.restore_recovery_package(package, recovery_password)
+        return ValidatedPastoralRecovery(package, recovery_password, key_version)
+
+    def complete_restore(self, validated):
+        """Install the already validated key after SQL restore succeeds."""
+
+        if not isinstance(validated, ValidatedPastoralRecovery):
+            raise PastoralNoteCryptoError("Pastoral-note recovery was not validated.")
+        key_version = self.key_manager.restore_recovery_package(
+            validated.package, validated.password, replace=True
+        )
+        self._write_protected_package(validated.package)
+        return key_version
 
 def encrypted_note_values(encrypted):
     """Return the serializable fields of an encrypted note dataclass."""

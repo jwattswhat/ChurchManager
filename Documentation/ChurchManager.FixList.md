@@ -666,9 +666,11 @@ future roadmap projects:
 
 - **Status: implementation started.** The independently tested AES-256-GCM
   note/key-recovery service and migration 096 normalized care foundation are
-  implemented. Restricted-note entry remains disabled until complete-backup
-  recovery integration, service authorization, audit, and restore acceptance
-  pass.
+  implemented. Database backups now pair with an available password-protected
+  pastoral recovery sidecar; restore validates it before closing database
+  connections and installs its key only after SQL restore succeeds. Restricted-
+  note entry remains disabled until administrator recovery setup, service
+  authorization, audit, and restore acceptance pass.
 
 - Research completed: [Pastoral care systems research and ChurchManager recommendations](ChurchManager.PastoralCare.Research.md).
 - Proposed implementation specification: [ChurchManager pastoral care specification](ChurchManager.PastoralCare.Specification.md).

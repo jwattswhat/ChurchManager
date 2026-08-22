@@ -28,9 +28,10 @@ class BackupResult:
 class BackupService:
     """Create and restore labeled MariaDB dumps with safety backups."""
 
-    def __init__(self, runner=subprocess.run, clock=datetime.now):
+    def __init__(self, runner=subprocess.run, clock=datetime.now, recovery=None):
         self.runner = runner
         self.clock = clock
+        self.recovery = recovery
 
     def create(self, settings, mysqldump_directory, backup_prefix):
         stamp = self.clock().strftime("%Y-%m-%d.%H%M%S")
@@ -73,6 +74,12 @@ class BackupService:
                 option_path.unlink(missing_ok=True)
             if dump_path:
                 dump_path.unlink(missing_ok=True)
+        if self.recovery is not None:
+            try:
+                self.recovery.attach_to_backup(output)
+            except Exception:
+                output.unlink(missing_ok=True)
+                raise
         return BackupResult(output, stamp)
 
     def create_in_folder(self, settings, mysqldump_directory, folder, automatic=False):
@@ -104,6 +111,7 @@ class BackupService:
             reverse=True,
         )
         for obsolete in files[max(1, int(keep)):]:
+            Path(str(obsolete) + ".PastoralRecovery.json").unlink(missing_ok=True)
             obsolete.unlink()
         return len(files[:max(1, int(keep))])
 
@@ -120,7 +128,8 @@ class BackupService:
             raise BackupError("The selected file is not a recognized ChurchManager backup.")
         return database_line.split(":", 1)[1].strip()
 
-    def restore(self, settings, mariadb_directory, dump_path, pre_restore_folder):
+    def restore(self, settings, mariadb_directory, dump_path, pre_restore_folder,
+                recovery_password=None):
         source_database = self.inspect_dump(dump_path)
         if source_database.casefold() != str(settings["database"]).casefold():
             raise BackupError(
@@ -128,6 +137,18 @@ class BackupService:
                     source_database, settings["database"]
                 )
             )
+        validated_recovery = None
+        if self.recovery is not None:
+            sidecar = self.recovery.sidecar_path(dump_path)
+            if sidecar.is_file():
+                validated_recovery = self.recovery.validate_restore(
+                    dump_path, recovery_password
+                )
+            elif self._contains_restricted_pastoral_notes(dump_path):
+                raise BackupError(
+                    "This backup contains restricted pastoral notes but its "
+                    "pastoral-note recovery package is missing."
+                )
         safety = self.create_in_folder(
             settings, mariadb_directory, pre_restore_folder, automatic=False,
         )
@@ -145,11 +166,24 @@ class BackupService:
             command.append(settings["database"])
             with Path(dump_path).open("rb") as source:
                 self.runner(command, stdin=source, check=True)
+            if validated_recovery is not None:
+                self.recovery.complete_restore(validated_recovery)
         except (OSError, subprocess.SubprocessError) as error:
             raise BackupError("The database could not be restored. The pre-restore backup was preserved.") from error
         finally:
             if option_path: option_path.unlink(missing_ok=True)
         return safety
+
+    @staticmethod
+    def _contains_restricted_pastoral_notes(dump_path):
+        """Detect row data without parsing or exposing encrypted field values."""
+
+        marker = b"INSERT INTO `tblPastoralRestrictedNote`"
+        with Path(dump_path).open("rb") as source:
+            for line in source:
+                if marker in line:
+                    return True
+        return False
 
 
 class BackupPreferences:

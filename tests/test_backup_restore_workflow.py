@@ -52,6 +52,15 @@ class BackupRestoreWorkflowTests(unittest.TestCase):
         self.assertIn('("DBConnection", "JSConnection")', source)
         self.assertIn("must restart because its database connections were closed", source)
 
+    def test_pastoral_recovery_password_is_requested_before_database_close(self):
+        source = (ROOT / "backup_restore_dialog.py").read_text()
+        prompt = source.index("wx.PasswordEntryDialog")
+        close = source.index("close_database_connections(self.context)")
+        restore = source.index("self.context.services.backups.restore(")
+        self.assertLess(prompt, close)
+        self.assertLess(close, restore)
+        self.assertIn("recovery_password=recovery_password", source)
+
 
 if __name__ == "__main__":
     unittest.main()
