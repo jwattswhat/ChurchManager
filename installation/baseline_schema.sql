@@ -1251,6 +1251,8 @@ CREATE TABLE `tblcontribution` (
   `DonorDirection` varchar(1000) DEFAULT NULL,
   `DirectionStatus` varchar(20) NOT NULL DEFAULT 'NONE',
   `DirectionResolution` varchar(1000) DEFAULT NULL,
+  `DirectionResolvedByUserID` int(11) DEFAULT NULL,
+  `DirectionResolvedAt` datetime(6) DEFAULT NULL,
   `Note` varchar(2000) DEFAULT NULL,
   `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
   `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
@@ -1258,9 +1260,11 @@ CREATE TABLE `tblcontribution` (
   KEY `ix_contribution_batch` (`BatchID`,`ID`),
   KEY `ix_contribution_contributor_date` (`ContributorID`,`ReceivedDate`),
   KEY `ix_contribution_correction_source` (`CorrectionOfContributionID`),
+  KEY `fk_contribution_direction_resolved_by` (`DirectionResolvedByUserID`),
   CONSTRAINT `fk_contribution_batch` FOREIGN KEY (`BatchID`) REFERENCES `tblcontributionbatch` (`ID`),
   CONSTRAINT `fk_contribution_contributor` FOREIGN KEY (`ContributorID`) REFERENCES `tblcontributioncontributor` (`ID`),
   CONSTRAINT `fk_contribution_correction_source` FOREIGN KEY (`CorrectionOfContributionID`) REFERENCES `tblcontribution` (`ID`),
+  CONSTRAINT `fk_contribution_direction_resolved_by` FOREIGN KEY (`DirectionResolvedByUserID`) REFERENCES `tbluser` (`ID`),
   CONSTRAINT `ck_contribution_method` CHECK (`ContributionMethod` in ('CASH','CHECK','ELECTRONIC','NON_CASH','OTHER')),
   CONSTRAINT `ck_contribution_amount` CHECK (`Amount` >= 0),
   CONSTRAINT `ck_contribution_statement` CHECK (`StatementEligibility` in ('ELIGIBLE','INELIGIBLE','REVIEW')),
@@ -1396,6 +1400,10 @@ CREATE TABLE `tblcontributioncontributor` (
   `IsActive` tinyint(1) NOT NULL DEFAULT 1,
   `StatementEnabled` tinyint(1) NOT NULL DEFAULT 1,
   `Note` varchar(2000) DEFAULT NULL,
+  `MergedIntoContributorID` bigint(20) DEFAULT NULL,
+  `MergedAt` datetime(6) DEFAULT NULL,
+  `MergedByUserID` int(11) DEFAULT NULL,
+  `MergeReason` varchar(1000) DEFAULT NULL,
   `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
   `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
   PRIMARY KEY (`ID`),
@@ -1404,8 +1412,12 @@ CREATE TABLE `tblcontributioncontributor` (
   KEY `ix_contribution_contributor_name` (`ChurchID`,`IsActive`,`DisplayName`),
   KEY `fk_contribution_contributor_person` (`PersonID`),
   KEY `fk_contribution_contributor_family` (`FamilyID`),
+  KEY `fk_contribution_contributor_merged_into` (`MergedIntoContributorID`),
+  KEY `fk_contribution_contributor_merged_by` (`MergedByUserID`),
   CONSTRAINT `fk_contribution_contributor_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
   CONSTRAINT `fk_contribution_contributor_family` FOREIGN KEY (`FamilyID`) REFERENCES `tblfamily` (`ID`) ON DELETE SET NULL,
+  CONSTRAINT `fk_contribution_contributor_merged_by` FOREIGN KEY (`MergedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_contribution_contributor_merged_into` FOREIGN KEY (`MergedIntoContributorID`) REFERENCES `tblcontributioncontributor` (`ID`),
   CONSTRAINT `fk_contribution_contributor_person` FOREIGN KEY (`PersonID`) REFERENCES `tblperson` (`ID`) ON DELETE SET NULL,
   CONSTRAINT `ck_contribution_contributor_type` CHECK (`ContributorType` in ('PERSON','FAMILY','EXTERNAL'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
@@ -1493,6 +1505,34 @@ CREATE TABLE `tblcontributionpurpose` (
   CONSTRAINT `fk_contribution_purpose_revenue` FOREIGN KEY (`RevenueAccountID`) REFERENCES `tblaccountingaccount` (`ID`),
   CONSTRAINT `ck_contribution_purpose_dates` CHECK (`EffectiveFrom` <= `EffectiveThrough` or `EffectiveThrough` is null),
   CONSTRAINT `ck_contribution_purpose_statement` CHECK (`StatementTreatment` in ('ELIGIBLE','INELIGIBLE','REVIEW'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblcontributionreturn` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `OriginalContributionID` bigint(20) NOT NULL,
+  `OriginalBatchID` bigint(20) NOT NULL,
+  `ReplacementBatchID` bigint(20) NOT NULL,
+  `ReversalAccountingTransactionID` bigint(20) NOT NULL,
+  `ReturnDate` date NOT NULL,
+  `Reason` varchar(1000) NOT NULL,
+  `RecordedByUserID` int(11) NOT NULL,
+  `RecordedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_contribution_return_original` (`OriginalContributionID`),
+  KEY `ix_contribution_return_batch` (`OriginalBatchID`,`ReplacementBatchID`),
+  KEY `fk_contribution_return_church` (`ChurchID`),
+  KEY `fk_contribution_return_replacement_batch` (`ReplacementBatchID`),
+  KEY `fk_contribution_return_reversal` (`ReversalAccountingTransactionID`),
+  KEY `fk_contribution_return_user` (`RecordedByUserID`),
+  CONSTRAINT `fk_contribution_return_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_contribution_return_gift` FOREIGN KEY (`OriginalContributionID`) REFERENCES `tblcontribution` (`ID`),
+  CONSTRAINT `fk_contribution_return_original_batch` FOREIGN KEY (`OriginalBatchID`) REFERENCES `tblcontributionbatch` (`ID`),
+  CONSTRAINT `fk_contribution_return_replacement_batch` FOREIGN KEY (`ReplacementBatchID`) REFERENCES `tblcontributionbatch` (`ID`),
+  CONSTRAINT `fk_contribution_return_reversal` FOREIGN KEY (`ReversalAccountingTransactionID`) REFERENCES `tblaccountingtransaction` (`ID`),
+  CONSTRAINT `fk_contribution_return_user` FOREIGN KEY (`RecordedByUserID`) REFERENCES `tbluser` (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
