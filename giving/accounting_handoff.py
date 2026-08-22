@@ -23,7 +23,7 @@ class GivingAccountingHandoff:
         try:
             cursor.execute(
                 "SELECT b.ChurchID,b.OrganizationID,b.DepositDate,b.Status,b.CalculatedTotal,"
-                "b.AccountingTransactionID,b.Description,ba.AccountID,a.FunctionRequirement "
+                "b.AccountingTransactionID,b.Description,ba.AccountID,a.FunctionRequirement,b.CorrectsBatchID "
                 "FROM tblContributionBatch b LEFT JOIN tblAccountingBankAccount ba ON ba.ID=b.BankAccountID "
                 "LEFT JOIN tblAccountingAccount a ON a.ID=ba.AccountID "
                 "WHERE b.ID=? FOR UPDATE", (batch_id,),
@@ -37,6 +37,13 @@ class GivingAccountingHandoff:
                 raise GivingValidationError("The deposit date and receiving bank account are required.")
             if batch[8] == "REQUIRED":
                 raise GivingValidationError("The receiving bank account cannot require a functional classification.")
+            if batch[9] is not None:
+                cursor.execute("SELECT Status FROM tblContributionBatch WHERE ID=? FOR UPDATE", (batch[9],))
+                corrected = cursor.fetchone()
+                if not corrected or corrected[0] != "VOID":
+                    raise GivingValidationError(
+                        "Post the linked accounting reversal before sending the replacement batch."
+                    )
 
             cursor.execute(
                 "SELECT p.ID FROM tblAccountingFiscalPeriod p JOIN tblAccountingFiscalYear y ON y.ID=p.FiscalYearID "

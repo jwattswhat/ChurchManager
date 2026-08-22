@@ -178,6 +178,15 @@ treatment, note, or purpose allocations. **Delete Contribution** requires
 confirmation. Both operations immediately recalculate the batch total and add
 a privacy-safe audit event. Ready and posted gifts cannot be edited or deleted.
 
+To correct a posted batch, select it in **Contribution Batches** and choose
+**Correct Posted Batch**. Enter an open-period correction date and a required
+reason. ChurchManager creates a Ready accounting reversal and an editable Draft
+copy of the original gifts. Approve and post the reversal through normal
+Accounting Posting before reviewing and sending the replacement batch. The
+original batch remains in the audit history with Void status.
+Once a Ready batch has created its summarized accounting transaction, the batch
+list displays **Sent to Accounting** until that transaction is posted.
+
 ### Giving reports
 
 Open **Giving Reports** for operational review. **Batch Control Summary** shows

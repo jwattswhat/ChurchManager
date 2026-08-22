@@ -41,6 +41,15 @@ class DraftBatchService:
             "ORDER BY b.BatchDate DESC,b.ID DESC", (self.church_id(),),
         )
 
+    def catalog_batches(self):
+        """Return all recent batches for entry, handoff, and correction review."""
+        return self.all(
+            "SELECT b.ID,b.BatchDate,b.Description,o.LegalName,b.ControlTotal,"
+            "b.CalculatedTotal,b.Version,b.Status,b.AccountingTransactionID FROM tblContributionBatch b "
+            "JOIN tblAccountingOrganization o ON o.ID=b.OrganizationID "
+            "WHERE b.ChurchID=? ORDER BY b.BatchDate DESC,b.ID DESC", (self.church_id(),),
+        )
+
     def organizations(self):
         """Return active accounting organizations available to new batches."""
         return self.all("SELECT ID,LegalName FROM tblAccountingOrganization WHERE Active=1 ORDER BY LegalName")

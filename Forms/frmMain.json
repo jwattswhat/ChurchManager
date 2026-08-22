@@ -15,6 +15,12 @@
             "stylelist": [
                 "CAPTION"
             ],
+            "layout": {
+                "type": "columns",
+                "gap": 2,
+                "border": 2,
+                "item_padding": 1
+            },
             "theme": "churchmanager"
         },
         "CONTROLS": {

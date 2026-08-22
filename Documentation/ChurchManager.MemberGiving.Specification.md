@@ -286,6 +286,11 @@ name, with optional congregation name; it contains no contribution amounts or
 giving history. A printable assignment register accompanies the labels for
 verification.
 
+The first supported sheet is Avery 5160 or compatible: 30 labels on US Letter
+paper in three columns and ten rows. The PDF must be printed at Actual Size /
+100 percent. The protected Giving Reports screen produces both the label sheet
+and a dated assignment register from the same selection.
+
 Typing or importing an envelope number in contribution entry resolves the
 contributor for the contribution date. Unknown or ambiguous numbers remain
 flagged until corrected or deliberately recorded as anonymous.
@@ -312,6 +317,10 @@ Double-clicking a draft line opens it for editing.
 - Posted entries are never edited or deleted.
 - A posted error is corrected with a linked reversing entry or correcting batch
   and, when necessary, a linked accounting reversal/replacement.
+- ChurchManager creates the accounting reversal in Ready status and copies the
+  original gifts into an editable Draft replacement batch. The original Giving
+  batch becomes Void only after the reversal is approved and posted. The
+  replacement cannot be sent to accounting before that posting is complete.
 - A returned check is recorded as a linked correction; the original receipt is
   retained.
 - The contributor's statement shows the corrected result while retaining an
@@ -552,10 +561,11 @@ Rollout sequence:
    batch creation and monetary gift allocation.)*
 4. Implement contributor/envelope and batch-entry screens. *(Contributor,
    envelope, approved-purpose, and draft monetary batch entry are implemented.)*
-5. Implement posting integration and corrections. *(The Ready review gate,
-   draft corrections and deletion, receiving bank account, complete accounting
-   dimensions, privacy-safe summarized transaction creation, and atomic posting
-   synchronization are implemented; posted correction entry remains.)*
+5. Implement posting integration and corrections. *(Implemented: the Ready
+   review gate, draft corrections and deletion, receiving bank account,
+   complete accounting dimensions, privacy-safe summarized transaction
+   creation, atomic posting synchronization, and linked posted-batch
+   reversal/replacement workflow.)*
 6. Implement reports and statements. *(The protected donor-free `GIVE-BATCH`
    Batch Control Summary PDF and quarterly single/all-contributor statement
    previews, calendar-year and custom ranges, and identifiable issuance history

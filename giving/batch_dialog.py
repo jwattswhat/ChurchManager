@@ -7,6 +7,7 @@ import wx.adv
 
 from giving.batch_service import DraftBatchService
 from giving.accounting_handoff import GivingAccountingHandoff
+from giving.correction_service import PostedBatchCorrectionService
 from giving.validation import GivingValidationError
 
 
@@ -288,14 +289,17 @@ class BatchCatalogDialog(wx.Dialog):
             button=wx.Button(panel,label=label);button.Bind(wx.EVT_BUTTON,handler);buttons.Add(button,0,wx.RIGHT,6)
         send=wx.Button(panel,label="Send Ready Batch to Accounting")
         send.Bind(wx.EVT_BUTTON,self.on_send);send.Enable(self.can_post);buttons.Add(send,0,wx.RIGHT,6)
+        correct=wx.Button(panel,label="Correct Posted Batch...")
+        correct.Bind(wx.EVT_BUTTON,self.on_correct);correct.Enable(self.can_post);buttons.Add(correct,0,wx.RIGHT,6)
         buttons.AddStretchSpacer();close=wx.Button(panel,wx.ID_CLOSE);close.Bind(wx.EVT_BUTTON,lambda _e:self.EndModal(wx.ID_CLOSE));buttons.Add(close)
         outer.Add(buttons,0,wx.EXPAND|wx.ALL,12);panel.SetSizer(outer);self.refresh()
 
     def refresh(self):
-        self.rows=self.service.draft_batches();self.list.DeleteAllItems()
+        self.rows=self.service.catalog_batches();self.list.DeleteAllItems()
         for index,row in enumerate(self.rows):
             self.list.InsertItem(index,str(row[1]));self.list.SetItem(index,1,row[2]);self.list.SetItem(index,2,row[3])
-            self.list.SetItem(index,3,row[7].title());self.list.SetItem(index,4,"" if row[4] is None else f"${row[4]:,.2f}");self.list.SetItem(index,5,f"${row[5]:,.2f}")
+            display_status = "Sent to Accounting" if row[7] == "READY" and row[8] is not None else row[7].title()
+            self.list.SetItem(index,3,display_status);self.list.SetItem(index,4,"" if row[4] is None else f"${row[4]:,.2f}");self.list.SetItem(index,5,f"${row[5]:,.2f}")
 
     def on_new(self,_event=None):
         dialog=NewBatchDialog(self,self.service,self.service.organizations())
@@ -316,7 +320,8 @@ class BatchCatalogDialog(wx.Dialog):
         if row[7]!="READY":
             wx.MessageBox("Select a Ready contribution batch.","Accounting Handoff",wx.OK|wx.ICON_INFORMATION,self);return
         if row[8] is not None:
-            wx.MessageBox("That batch has already been sent to Accounting Posting.","Accounting Handoff",wx.OK|wx.ICON_INFORMATION,self);return
+            wx.MessageBox("That batch is already waiting in Accounting Review or Transaction Posting.",
+                          "Accounting Handoff",wx.OK|wx.ICON_INFORMATION,self);return
         if wx.MessageBox("Create one summarized accounting transaction for this batch?\n\nNo donor or envelope details will enter the ledger.",
                          "Send to Accounting",wx.YES_NO|wx.NO_DEFAULT|wx.ICON_QUESTION,self)!=wx.YES:return
         try:
@@ -325,10 +330,53 @@ class BatchCatalogDialog(wx.Dialog):
                           "Accounting Handoff",wx.OK|wx.ICON_INFORMATION,self);self.refresh()
         except Exception as error:wx.MessageBox(str(error),"Unable to Send Batch",wx.OK|wx.ICON_ERROR,self)
 
+    def on_correct(self, _event=None):
+        selected = self.list.GetFirstSelected()
+        if selected < 0 or self.rows[selected][7] != "POSTED":
+            wx.MessageBox("Select a Posted contribution batch.", "Correct Posted Batch",
+                          wx.OK | wx.ICON_INFORMATION, self); return
+        dialog = PostedBatchCorrectionDialog(self)
+        try:
+            if dialog.ShowModal() != wx.ID_OK: return
+            if wx.MessageBox(
+                    "Create an accounting reversal and an editable replacement batch?\n\n"
+                    "The reversal must be approved and posted before the replacement can be sent to accounting.",
+                    "Correct Posted Batch", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES: return
+            replacement, reversal = PostedBatchCorrectionService(
+                self.service.connection, self.service.user_id).create(
+                    self.rows[selected][0], dialog.correction_date(), dialog.reason.GetValue())
+            wx.MessageBox(
+                f"Replacement batch {replacement} was created. Accounting reversal {reversal} is Ready.",
+                "Correction Created", wx.OK | wx.ICON_INFORMATION, self)
+            self.refresh(); self._open(replacement)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Correct Posted Batch", wx.OK | wx.ICON_ERROR, self)
+        finally:
+            dialog.Destroy()
+
     def _open(self,batch_id):
         dialog=BatchEditorDialog(self,self.service,batch_id,self.can_review)
         try:dialog.ShowModal()
         finally:dialog.Destroy();self.refresh()
+
+
+class PostedBatchCorrectionDialog(wx.Dialog):
+    """Collect the open-period correction date and required audit reason."""
+
+    def __init__(self, parent):
+        super().__init__(parent, title="Correct Posted Contribution Batch")
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        outer.Add(wx.StaticText(panel, label="Correction date"), 0, wx.LEFT | wx.RIGHT | wx.TOP, 12)
+        self.date = wx.adv.DatePickerCtrl(panel); outer.Add(self.date, 0, wx.EXPAND | wx.ALL, 12)
+        outer.Add(wx.StaticText(panel, label="Reason for correction"), 0, wx.LEFT | wx.RIGHT, 12)
+        self.reason = wx.TextCtrl(panel, style=wx.TE_MULTILINE, size=(460, 100))
+        outer.Add(self.reason, 1, wx.EXPAND | wx.ALL, 12)
+        outer.Add(_dialog_buttons(panel), 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        panel.SetSizer(outer); outer.Fit(self)
+
+    def correction_date(self):
+        """Return the selected correction date as a Python date."""
+        return _date(self.date)
 
 
 def show_contribution_batches(parent, connection, session, authorization):

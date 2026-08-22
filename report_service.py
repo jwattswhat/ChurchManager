@@ -46,7 +46,7 @@ class ChurchManagerReportService:
                 parameters[name] = controls[name].GetValue()
             except (TypeError, ValueError):
                 parameters[name] = controls[name].GetValue(format="%Y-%m-%d")
-        if code == "CMMD01":
+        if definition.dataset_name == "membership.directory":
             from visual_reports.directory_dataset import DirectoryDatasetProvider
             dataset = DirectoryDatasetProvider(connection, self.access.authorization).build(church_id)
         elif code == "CMWP01":

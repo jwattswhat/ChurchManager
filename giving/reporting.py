@@ -125,6 +125,61 @@ STATEMENT_MANIFEST = JSForm.ReportProtectionManifest(
 )
 
 
+ENVELOPE_LABEL_CONTRACT = JSForm.ReportDatasetContract(
+    "giving.envelopelabels", 1, "giving.reports.confidential", (
+        JSForm.ReportCollection("labelrows", "Envelope Label Rows", tuple(
+            field(f"{name}{column}", f"Label {column} {name}")
+            for column in range(1, 4) for name in ("Box", "Name", "Church")
+        )),
+    ),
+)
+
+
+ENVELOPE_LABEL_MANIFEST = JSForm.ReportProtectionManifest(
+    required_settings={
+        "name": "GIVE-ENVELOPE-LABELS", "dataset": "giving.envelopelabels",
+        "datasetversion": 1, "classification": "confidential",
+    },
+    required_bands=("Detail",),
+    required_controls={"Labels": {"repeatcollection": "labelrows"}},
+)
+
+
+ENVELOPE_REGISTER_CONTRACT = JSForm.ReportDatasetContract(
+    "giving.enveloperegister", 1, "giving.reports.confidential", (
+        JSForm.ReportCollection("church", "Church", (
+            field("Church", "Church Name"), field("Logo", "Church Logo", "image"),
+        )),
+        JSForm.ReportCollection("parameters", "Parameters", (
+            field("Year", "Assignment Year", "integer"), field("Display", "Selection"),
+        )),
+        JSForm.ReportCollection("records", "Envelope Assignments", (
+            field("Box", "Box Number"), field("Name", "Contributor"),
+            field("Type", "Contributor Type"), field("Active", "Active"),
+            field("From", "Effective From", "date"), field("Through", "Effective Through", "date"),
+        )),
+    ),
+)
+
+
+ENVELOPE_REGISTER_MANIFEST = JSForm.ReportProtectionManifest(
+    required_settings={
+        "name": "GIVE-ENVELOPE-REGISTER", "dataset": "giving.enveloperegister",
+        "datasetversion": 1, "classification": "confidential",
+    },
+    required_bands=("ReportHeader", "Detail", "PageFooter"),
+    required_controls={
+        "ChurchLogo": {"collection": "church", "field": "Logo"},
+        "ChurchName": {"collection": "church", "field": "Church"},
+        "Records": {"repeatcollection": "records"},
+        "RunUser": {"systemvalue": "run_user"},
+        "ReportCode": {"systemvalue": "report_code"},
+        "Classification": {"systemvalue": "classification"},
+        "PageNumber": {"systemvalue": "page_number"},
+    },
+)
+
+
 class GivingBatchSummaryProvider:
     """Build a donor-free report dataset from Giving batch controls."""
 
@@ -225,6 +280,61 @@ class ContributionStatementProvider:
         })
 
 
+class EnvelopeBoxReportProvider:
+    """Build protected label-sheet and assignment-register datasets."""
+
+    def __init__(self, connection, authorization):
+        self.service = GivingReportService(connection)
+        self.authorization = authorization
+
+    def _rows(self, year, include_inactive, include_outside):
+        self.authorization.require("giving.reports.confidential", "create envelope-box reports")
+        rows = self.service.envelope_assignments(
+            year, include_inactive=include_inactive, include_outside=include_outside,
+        )
+        if not rows:
+            raise ValueError("No envelope assignments match the selected year and options.")
+        return rows
+
+    def labels(self, year, include_inactive, include_outside, include_church):
+        """Arrange assignments into three labels per physical sheet row."""
+        assignments = self._rows(year, include_inactive, include_outside)
+        church = self.service.all("SELECT Church FROM tblChurch ORDER BY ID LIMIT 1")
+        church_name = church[0][0] if include_church and church else ""
+        rows = []
+        for start in range(0, len(assignments), 3):
+            record = {}
+            for column, assignment in enumerate(assignments[start:start + 3], 1):
+                record[f"Box{column}"] = f"Envelope Box {assignment[0]}"
+                record[f"Name{column}"] = assignment[1]
+                record[f"Church{column}"] = church_name
+            for column in range(1, 4):
+                for name in ("Box", "Name", "Church"):
+                    record.setdefault(f"{name}{column}", "")
+            rows.append(record)
+        return JSForm.ReportDataset.create(ENVELOPE_LABEL_CONTRACT, {"labelrows": rows})
+
+    def register(self, year, include_inactive, include_outside):
+        """Build the human-verifiable assignment register for the same selection."""
+        assignments = self._rows(year, include_inactive, include_outside)
+        church = self.service.all("SELECT Church,Logo FROM tblChurch ORDER BY ID LIMIT 1")
+        if not church:
+            raise ValueError("Church information must be created first.")
+        selection = [f"Envelope assignments overlapping {year}"]
+        if include_inactive:
+            selection.append("including inactive contributors")
+        if not include_outside:
+            selection.append("excluding outside contributors")
+        return JSForm.ReportDataset.create(ENVELOPE_REGISTER_CONTRACT, {
+            "church": [{"Church": church[0][0], "Logo": church[0][1]}],
+            "parameters": [{"Year": int(year), "Display": "; ".join(selection)}],
+            "records": [{
+                "Box": row[0], "Name": row[1], "Type": str(row[2]).title(),
+                "Active": "Yes" if row[3] else "No", "From": row[4], "Through": row[5],
+            } for row in assignments],
+        })
+
+
 class GivingVisualReportService:
     """Render protected Giving PDFs outside the unrestricted report catalog."""
 
@@ -301,3 +411,47 @@ class GivingVisualReportService:
                 )
         self.processes.open_file(output)
         return output
+
+    def _available_output(self, name):
+        self.output_directory.mkdir(parents=True, exist_ok=True)
+        output = self.output_directory / name
+        if output.exists():
+            try:
+                with output.open("ab"):
+                    pass
+            except PermissionError:
+                output = self.output_directory / f"{output.stem}-{datetime.now():%Y%m%d-%H%M%S}.pdf"
+        return output
+
+    def run_envelope_labels(self, year, include_inactive=False, include_outside=True,
+                            include_church=True):
+        """Render three-column, 30-up envelope-box labels on US Letter paper."""
+        self.authorization.require("giving.reports.confidential", "print envelope-box labels")
+        definition = JSForm.ReportDefinitionLoader().load(
+            DEFINITIONS / "GIVE-ENVELOPE-LABELS.json"
+        )
+        ENVELOPE_LABEL_MANIFEST.validate(definition)
+        dataset = EnvelopeBoxReportProvider(self.connection, self.authorization).labels(
+            year, include_inactive, include_outside, include_church,
+        )
+        output = self._available_output(f"GIVE-ENVELOPE-LABELS-{year}.pdf")
+        rendered = JSForm.PDFReportRenderer().render(definition, dataset, output)
+        self.processes.open_file(rendered)
+        return rendered
+
+    def run_envelope_register(self, year, include_inactive=False, include_outside=True):
+        """Render the protected annual envelope assignment register."""
+        self.authorization.require("giving.reports.confidential", "print the envelope register")
+        definition = JSForm.ReportDefinitionLoader().load(
+            DEFINITIONS / "GIVE-ENVELOPE-REGISTER.json"
+        )
+        ENVELOPE_REGISTER_MANIFEST.validate(definition)
+        dataset = EnvelopeBoxReportProvider(self.connection, self.authorization).register(
+            year, include_inactive, include_outside,
+        )
+        output = self._available_output(f"GIVE-ENVELOPE-REGISTER-{year}.pdf")
+        rendered = JSForm.PDFReportRenderer().render(
+            definition, dataset, output, context={"run_user": self.session.display_name},
+        )
+        self.processes.open_file(rendered)
+        return rendered

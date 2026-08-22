@@ -484,6 +484,24 @@ JOIN tblPermission p ON p.Name IN (
 )
 WHERE r.Name='Giving Entry Clerk';
 
+-- source: 088_add_member_and_family_mailing_labels.sql
+INSERT INTO tblReports (Report,Title,Params,Batch,Note,Available,RequiredPermissionID)
+SELECT 'CMML03','Mailing Labels - Families','[ChurchID]',NULL,
+       'Three-column family mailing labels using listed family addresses.',1,p.ID
+FROM tblPermission p WHERE p.Name='reports.membership.contact'
+ON DUPLICATE KEY UPDATE
+Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),Available=1,
+RequiredPermissionID=VALUES(RequiredPermissionID);
+
+-- source: 088_add_member_and_family_mailing_labels.sql
+INSERT INTO tblReports (Report,Title,Params,Batch,Note,Available,RequiredPermissionID)
+SELECT 'CMML04','Mailing Labels - Members','[ChurchID]',NULL,
+       'Three-column individual mailing labels using listed family addresses.',1,p.ID
+FROM tblPermission p WHERE p.Name='reports.membership.contact'
+ON DUPLICATE KEY UPDATE
+Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),Available=1,
+RequiredPermissionID=VALUES(RequiredPermissionID);
+
 -- source: current-schema starter policy
 INSERT INTO tblWorshipRole (Name,Description,DisplayOrder,Active) VALUES
 ('Liturgist',NULL,10,1),('Crucifer','Carries the cross',20,1),

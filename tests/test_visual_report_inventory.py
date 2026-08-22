@@ -15,8 +15,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class TestVisualReportInventory(unittest.TestCase):
-    def test_inventory_has_30_official_reports_and_declared_exceptions(self):
-        self.assertEqual(len(OFFICIAL_CODES), 30)
+    def test_inventory_includes_every_starter_and_declared_exceptions(self):
+        starter_codes = {
+            path.stem for path in (ROOT / "visual_reports" / "definitions").glob("*.json")
+        }
+        self.assertTrue(starter_codes.issubset(OFFICIAL_CODES))
         self.assertEqual(CONSOLIDATED_CODES, {"CMAD01", "CMPH01"})
         self.assertEqual(DISABLED_CODES, {"CMSM01"})
         self.assertEqual(LAUNCHER_CODES, {"CMBATCH00"})
@@ -30,8 +33,23 @@ class TestVisualReportInventory(unittest.TestCase):
                 self.assertEqual(definition.report_id, code)
                 if code == "CMWP01":
                     WORSHIP_PLANNING_CONTRACT.validate_definition(definition)
-                elif code != "CMMD01":
+                elif definition.dataset_name == "membership.directory":
+                    from visual_reports.directory_dataset import DIRECTORY_CONTRACT
+                    DIRECTORY_CONTRACT.validate_definition(definition)
+                else:
                     contract_for(code).validate_definition(definition)
+
+    def test_mailing_labels_are_json_only_directory_reports(self):
+        loader = JSForm.ReportDefinitionLoader()
+        for code, collection in (("CMML03", "directory_entries"), ("CMML04", "directory_people")):
+            definition = loader.load(ROOT / "visual_reports" / "definitions" / f"{code}.json")
+            repeater = next(
+                control for control in definition.controls.values()
+                if control["type"] == "repeater"
+            )
+            self.assertEqual(definition.dataset_name, "membership.directory")
+            self.assertEqual(repeater["repeatcollection"], collection)
+            self.assertEqual(repeater["repeatcolumns"], 3)
 
     def test_tabular_definitions_use_standard_metadata_and_empty_message(self):
         loader = JSForm.ReportDefinitionLoader()

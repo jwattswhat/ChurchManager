@@ -1,0 +1,38 @@
+{
+  "CMML04REPORT": {
+    "REPORT": {
+      "schema_version": 1,
+      "name": "CMML04",
+      "title": "Mailing Labels - Members",
+      "dataset": "membership.directory",
+      "datasetversion": 1,
+      "pagesize": "letter",
+      "orientation": "portrait",
+      "margins": {"top": 36, "right": 13.5, "bottom": 28, "left": 13.5},
+      "theme": "churchmanager.standard",
+      "classification": "confidential",
+      "showdefaultpagenumber": false,
+      "emptytext": "No member mailing addresses are available.",
+      "bands": {"Detail": {"type": "detail", "height": 72}},
+      "filters": [
+        {"collection": "directory_people", "field": "Relationship", "operator": "not_equals", "value": "Non-Member"},
+        {"collection": "directory_people", "field": "PersonName", "operator": "not_equals", "value": "No individuals listed"}
+      ],
+      "sort": [
+        {"collection": "directory_people", "field": "FamilyName", "direction": "ascending"},
+        {"collection": "directory_people", "field": "PersonName", "direction": "ascending"}
+      ]
+    },
+    "CONTROLS": {
+      "MemberLabels": {
+        "type": "repeater", "band": "Detail", "position": [0, 0], "size": [189, 72],
+        "repeatcollection": "directory_people", "itemheight": 72,
+        "repeatcolumns": 3, "columngap": 9, "separator": false,
+        "items": [
+          {"name": "PersonName", "field": "PersonName", "position": [8, 7], "size": [173, 14], "fontsize": 9, "bold": true},
+          {"name": "Address", "field": "FamilyAddressLines", "position": [8, 23], "size": [173, 42], "fontsize": 9, "format": "address"}
+        ]
+      }
+    }
+  }
+}

@@ -18,6 +18,12 @@ open-source church-management systems.
 | 6 | Immediate | Release, installation, and recovery readiness | Stabilizes and packages the researched catalogs and existing application. |
 | 6A | Immediate | Open-source publication and distribution | Publishes reviewed source and signed release artifacts without exposing congregation data, credentials, or copyrighted content. |
 | 7 | In progress | [Confidential member giving, envelopes, and pledges](ChurchManager.MemberGiving.Specification.md) | User-selected first `0.3.0-dev` feature; approved confidential subledger design. |
+
+Posted-batch correction is implemented and accepted end to end: it creates a
+linked Ready accounting reversal, copies the original gifts into an editable
+Draft replacement, voids the original only when the reversal posts, prevents
+early accounting handoff of the replacement, and clearly distinguishes Ready
+from Sent to Accounting in the batch list.
 | 7A | Complete | Richer application login | Login now presents the ChurchManager icon and identity, local congregation name, version/release, copyright, and GPL notice without changing authentication behavior. |
 | 8 | Next | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Approved ministry design; encryption foundation is complete and remaining implementation follows Giving. |
 | 9 | Next | Import, export, and duplicate management | Protects data quality and makes adoption and recovery practical. |
@@ -599,8 +605,11 @@ future roadmap projects:
   installer is produced.
 - Annual envelope-box assignment is implemented with a complete preview,
   either complete renumbering or preservation plus gap filling, guarded
-  year-conflict handling, and one audited transaction. Printable box labels
-  plus an assignment register remain next.
+  year-conflict handling, and one audited transaction. Protected Avery 5160
+  box labels and a matching assignment register are implemented in Giving
+  Reports and accepted visually. Generic Avery-compatible family and member
+  mailing-label starters are also implemented in the ordinary secured report
+  catalog and accepted visually.
 - Design this as a separate confidential subledger with its own permissions.
 - Support contributor accounts linked optionally to a person or family; outside
   donors must also be allowed without creating congregation-member records.

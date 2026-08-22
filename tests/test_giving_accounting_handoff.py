@@ -16,7 +16,7 @@ class Cursor:
         self.connection.calls.append((sql, values)); self.rowcount = 0
         if sql.startswith("SELECT b.ChurchID"):
             self.one = (7, 4, date(2026, 8, 21), "READY", Decimal("25.00"),
-                        None, "Sunday offering", 11, "PROHIBITED")
+                        None, "Sunday offering", 11, "PROHIBITED", None)
         elif sql.startswith("SELECT p.ID FROM tblAccountingFiscalPeriod"):
             self.rows = [(31,)]
         elif sql.startswith("SELECT a.FundID"):

@@ -16,6 +16,20 @@ class TestProcessService(unittest.TestCase):
         service.start_python("report.py", ["--test"])
         self.assertEqual(calls, [["python.exe", "report.py", "--test"]])
 
+    def test_open_file_requests_a_visible_windows_application(self):
+        calls = []
+
+        def opener(*args, **kwargs):
+            calls.append((args, kwargs))
+
+        ProcessService(opener=opener).open_file("report.pdf")
+        self.assertEqual(calls, [(("report.pdf", "open"), {"show_cmd": 5})])
+
+    def test_open_file_supports_simple_injected_openers(self):
+        calls = []
+        ProcessService(opener=lambda path: calls.append(path)).open_file("report.pdf")
+        self.assertEqual(calls, ["report.pdf"])
+
 
 class TestBackupService(unittest.TestCase):
     def test_password_is_kept_out_of_process_arguments(self):

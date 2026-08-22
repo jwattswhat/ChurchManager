@@ -80,6 +80,8 @@ class GivingReportsDialog(wx.Dialog):
         if authorization.has_permission("giving.statements.generate"):
             self._build_statement_tab()
             self._build_statement_history_tab()
+        if authorization.has_permission("giving.reports.confidential"):
+            self._build_envelope_boxes_tab()
         if self.notebook.GetPageCount() == 0:
             raise PermissionError("You do not have permission to run Giving reports.")
         outer.Add(self.notebook, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
@@ -215,6 +217,58 @@ class GivingReportsDialog(wx.Dialog):
         root.Add(self.statement_history, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
         panel.SetSizer(root); self.notebook.AddPage(panel, "Statement Issuance History")
         self.on_statement_history()
+
+    def _build_envelope_boxes_tab(self):
+        """Build protected annual label and assignment-register controls."""
+        panel = wx.Panel(self.notebook); root = wx.BoxSizer(wx.VERTICAL)
+        guidance = wx.StaticText(
+            panel,
+            label=("Print 30-up envelope-box labels or a verification register. "
+                   "No contribution amounts are included."),
+        )
+        guidance.SetForegroundColour(wx.Colour(0, 75, 150))
+        root.Add(guidance, 0, wx.ALL, 10)
+        years = self.service.envelope_assignment_years()
+        self.envelope_year = wx.Choice(panel, choices=[str(value) for value in years])
+        if years:
+            self.envelope_year.SetSelection(0)
+        self.envelope_format = wx.Choice(
+            panel, choices=["Avery 5160 or compatible (30 labels, US Letter)"],
+        )
+        self.envelope_format.SetSelection(0)
+        self.envelope_inactive = wx.CheckBox(panel, label="Include inactive contributors")
+        self.envelope_outside = wx.CheckBox(panel, label="Include outside contributors")
+        self.envelope_outside.SetValue(True)
+        self.envelope_church = wx.CheckBox(panel, label="Include congregation name on labels")
+        self.envelope_church.SetValue(True)
+        form = wx.FlexGridSizer(cols=2, hgap=10, vgap=10)
+        form.AddGrowableCol(1, 1)
+        for label, control in (("Assignment year", self.envelope_year),
+                               ("Label sheet", self.envelope_format),
+                               ("", self.envelope_inactive), ("", self.envelope_outside),
+                               ("", self.envelope_church)):
+            form.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+            form.Add(control, 1, wx.EXPAND)
+        root.Add(form, 0, wx.EXPAND | wx.ALL, 10)
+        actions = wx.BoxSizer(wx.HORIZONTAL)
+        self.envelope_labels_button = wx.Button(panel, label="Preview Box Labels")
+        self.envelope_labels_button.Bind(wx.EVT_BUTTON, self.on_envelope_labels)
+        self.envelope_register_button = wx.Button(panel, label="Preview Assignment Register")
+        self.envelope_register_button.Bind(wx.EVT_BUTTON, self.on_envelope_register)
+        actions.Add(self.envelope_labels_button, 0, wx.RIGHT, 8)
+        actions.Add(self.envelope_register_button)
+        root.Add(actions, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        self.envelope_status = wx.StaticText(panel, label="")
+        self.envelope_status.SetForegroundColour(wx.Colour(0, 75, 150))
+        root.Add(self.envelope_status, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        note = wx.StaticText(
+            panel,
+            label=("Print label PDFs at Actual Size / 100%. The assignment register should be "
+                   "retained for box-distribution verification."),
+        )
+        root.Add(note, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        panel.SetSizer(root)
+        self.notebook.AddPage(panel, "Envelope Boxes")
 
     def _dates(self, start, end):
         first, last = _python_date(start), _python_date(end)
@@ -360,6 +414,57 @@ class GivingReportsDialog(wx.Dialog):
             values = (row[1], str(row[2]), str(row[3]), str(row[4]), row[5], str(row[6])[:16] + "...")
             for column, value in enumerate(values, 1):
                 self.statement_history.SetItem(index, column, value)
+
+    def _envelope_selection(self):
+        selected = self.envelope_year.GetStringSelection()
+        if not selected:
+            raise ValueError("Select an envelope assignment year.")
+        return int(selected), self.envelope_inactive.GetValue(), self.envelope_outside.GetValue()
+
+    def on_envelope_labels(self, _event=None):
+        """Render the selected 30-up envelope-box label sheet."""
+        self._begin_envelope_preview(self.envelope_labels_button, "Creating box labels...")
+        try:
+            year, inactive, outside = self._envelope_selection()
+            output = self.report_service.run_envelope_labels(
+                year, inactive, outside, self.envelope_church.GetValue(),
+            )
+            self._finish_envelope_preview(output)
+        except Exception as error:
+            self.envelope_status.SetLabel("Box labels were not created.")
+            wx.MessageBox(str(error), "Envelope Box Labels", wx.OK | wx.ICON_ERROR, self)
+        finally:
+            self.envelope_labels_button.Enable()
+
+    def on_envelope_register(self, _event=None):
+        """Render the selected confidential envelope assignment register."""
+        self._begin_envelope_preview(
+            self.envelope_register_button, "Creating assignment register...",
+        )
+        try:
+            year, inactive, outside = self._envelope_selection()
+            output = self.report_service.run_envelope_register(year, inactive, outside)
+            self._finish_envelope_preview(output)
+        except Exception as error:
+            self.envelope_status.SetLabel("Assignment register was not created.")
+            wx.MessageBox(str(error), "Envelope Assignment Register", wx.OK | wx.ICON_ERROR, self)
+        finally:
+            self.envelope_register_button.Enable()
+
+    def _begin_envelope_preview(self, button, message):
+        """Make PDF generation progress visible even when the viewer stays behind the app."""
+        button.Disable()
+        self.envelope_status.SetLabel(message)
+        self.envelope_status.GetParent().Layout()
+        self.envelope_status.Update()
+        wx.YieldIfNeeded()
+
+    def _finish_envelope_preview(self, output):
+        """Show where a completed PDF was saved after requesting viewer launch."""
+        self.envelope_status.SetLabel(
+            f"Created {output}. If the PDF viewer did not come forward, open this file directly."
+        )
+        self.envelope_status.GetParent().Layout()
 
 
 def show_giving_reports(parent, connection, authorization, session):

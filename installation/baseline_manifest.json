@@ -2,7 +2,7 @@
   "artifact": "ChurchManager fresh-install schema baseline",
   "format_version": 1,
   "release_version": "0.3.0-dev",
-  "schema_sha256": "6d24338b7805161d37489468df11ec75206e1c6f5a797cd698ec0d6a8c257c45",
+  "schema_sha256": "b9eb05faaf44474dfd28163d443c6ecde7afe34d6d8b405e54dc303ca05f4e9f",
   "represented_migrations": [
     {
       "version": "001_normalize_and_convert_innodb.sql",
@@ -343,6 +343,22 @@
     {
       "version": "085_add_confidential_member_giving.sql",
       "checksum": "df6bf2234549eb8d122ad2ea01ef230a5d2df5fa659094ce1de24be792713464"
+    },
+    {
+      "version": "086_add_giving_accounting_dimensions.sql",
+      "checksum": "5900f5d7b5b2c5011f778a4a502ea53112fedce9461c272b217682801348dfba"
+    },
+    {
+      "version": "087_add_contribution_statement_issuance.sql",
+      "checksum": "91dfdd23718e729c577fc5cc9fc14d22320468b630803ef9e6b5f64e7a02027d"
+    },
+    {
+      "version": "088_add_member_and_family_mailing_labels.sql",
+      "checksum": "084615f235af1bef0e9e1cb9360af1ad914c52c282ce7aa03dd3b1b27fad378c"
+    },
+    {
+      "version": "089_add_posted_giving_corrections.sql",
+      "checksum": "9b21f1c3b81ec5543d93e3f8566b39cc9ab0c40dae2f814a1a3c178910c10038"
     }
   ]
 }

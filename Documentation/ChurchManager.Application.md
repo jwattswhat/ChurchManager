@@ -677,6 +677,8 @@ The installed SQL report data includes the following reports. The database curre
 | `CMHU03` | Hymn Usage for a selected hymn |
 | `CMML01` | Member Status List |
 | `CMML02` | Member Date Listing |
+| `CMML03` | Mailing Labels - Families (three-column label stock) |
+| `CMML04` | Mailing Labels - Members (three-column label stock) |
 | `CMCL01` | Family Listing; its template appears to have been renamed to `CMMD01`. Verify the database code before use. |
 | `CMPJ03` | Project Sign-up Sheet |
 | `CMMI01` | One Member Information report |

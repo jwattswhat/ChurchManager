@@ -2,8 +2,8 @@
   "artifact": "ChurchManager fresh-install starter-data baseline",
   "format_version": 1,
   "release_version": "0.3.0-dev",
-  "seed_sha256": "82bfef40633606ef3000005fe564d02216e4e9792394a953367d4ab63bdb30de",
-  "statement_count": 71,
+  "seed_sha256": "f551760bc150d50ba8d0c73850f6cf95c2325c1a2db37c655c0e145dad715795",
+  "statement_count": 73,
   "source_migrations": [
     {
       "version": "003_add_user_security.sql",
@@ -139,6 +139,11 @@
       "version": "085_add_confidential_member_giving.sql",
       "checksum": "df6bf2234549eb8d122ad2ea01ef230a5d2df5fa659094ce1de24be792713464",
       "statements": 4
+    },
+    {
+      "version": "088_add_member_and_family_mailing_labels.sql",
+      "checksum": "084615f235af1bef0e9e1cb9360af1ad914c52c282ce7aa03dd3b1b27fad378c",
+      "statements": 2
     }
   ],
   "current_schema_statements": 1,

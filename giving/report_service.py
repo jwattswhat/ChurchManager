@@ -45,6 +45,43 @@ class GivingReportService:
             "WHERE ChurchID=? ORDER BY DisplayName,ID", (self.church_id(),),
         )
 
+    def envelope_assignment_years(self):
+        """Return practical calendar years represented by envelope assignments."""
+        rows = self.all(
+            "SELECT MIN(YEAR(EffectiveFrom)),MAX(YEAR(COALESCE(EffectiveThrough,EffectiveFrom))) "
+            "FROM tblContributionEnvelopeAssignment WHERE ChurchID=?", (self.church_id(),),
+        )
+        today = date.today().year
+        if not rows or rows[0][0] is None:
+            return [today, today + 1]
+        first, last = int(rows[0][0]), int(rows[0][1])
+        last = min(max(last, today + 1), first + 25)
+        return list(range(last, first - 1, -1))
+
+    def envelope_assignments(self, year, *, include_inactive=False, include_outside=True):
+        """Return confidential envelope assignments overlapping one calendar year."""
+        first, last = date(int(year), 1, 1), date(int(year), 12, 31)
+        sql = (
+            "SELECT e.EnvelopeNumber,COALESCE(NULLIF(c.StatementName,''),c.DisplayName),"
+            "c.ContributorType,c.IsActive,e.EffectiveFrom,e.EffectiveThrough "
+            "FROM tblContributionEnvelopeAssignment e "
+            "JOIN tblContributionContributor c ON c.ID=e.ContributorID "
+            "WHERE e.ChurchID=? AND e.EffectiveFrom<=? "
+            "AND COALESCE(e.EffectiveThrough,'9999-12-31')>=?"
+        )
+        values = [self.church_id(), last, first]
+        if not include_inactive:
+            sql += " AND c.IsActive=1"
+        if not include_outside:
+            sql += " AND c.ContributorType<>'EXTERNAL'"
+        rows = self.all(sql, tuple(values))
+
+        def key(row):
+            value = str(row[0])
+            return (0, int(value), "") if value.isdecimal() else (1, 0, value.casefold())
+
+        return sorted(rows, key=key)
+
     def batch_summary(self, start_date, end_date):
         """Return donor-free batch controls for the requested period."""
         return self.all(

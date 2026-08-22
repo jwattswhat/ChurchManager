@@ -153,6 +153,25 @@ class AccountingPostingService:
             if header[8] is not None:
                 self._execute(cursor, "UPDATE tblAccountingTransaction SET Status='REVERSED', ReversalTransactionID=?, Version=Version+1 WHERE ID=? AND Status='POSTED' AND ReversalTransactionID IS NULL", (transaction_id, header[8]))
                 if cursor.rowcount != 1: raise AccountingDraftError("The original transaction can no longer be reversed.")
+                self._execute(cursor,
+                    "SELECT ID,ChurchID,Status FROM tblContributionBatch "
+                    "WHERE ReversalAccountingTransactionID=? FOR UPDATE", (transaction_id,))
+                corrected_giving_batch = cursor.fetchone()
+                if corrected_giving_batch is not None:
+                    if corrected_giving_batch[2] != "POSTED":
+                        raise AccountingDraftError("The linked posted contribution batch cannot be voided.")
+                    self._execute(cursor,
+                        "UPDATE tblContributionBatch SET Status='VOID',Version=Version+1 "
+                        "WHERE ID=? AND Status='POSTED' AND ReversalAccountingTransactionID=?",
+                        (corrected_giving_batch[0], transaction_id))
+                    if cursor.rowcount != 1:
+                        raise AccountingDraftError("The linked contribution batch changed before reversal posting.")
+                    self._execute(cursor,
+                        "INSERT INTO tblContributionAuditEvent "
+                        "(ChurchID,UserID,Action,EntityType,EntityID,SafeReference) "
+                        "VALUES (?,?,'BATCH_VOIDED_BY_REVERSAL','BATCH',?,?)",
+                        (corrected_giving_batch[1], self.acting_user_id, corrected_giving_batch[0],
+                         f"Accounting reversal {transaction_id}"))
             after = json.dumps({"status":"POSTED", "transaction_number":number,
                                 "total":str(debit)}, separators=(",", ":"))
             self._execute(cursor,

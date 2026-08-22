@@ -1,6 +1,7 @@
 """Official non-accounting visual-report inventory and secure tabular contracts."""
 
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -160,7 +161,10 @@ SPECS = (
 
 
 REPORTS_BY_CODE = {spec.code: spec for spec in SPECS}
-OFFICIAL_CODES = frozenset(REPORTS_BY_CODE) | {"CMMD01"}
+_DEFINITION_CODES = frozenset(
+    path.stem for path in (Path(__file__).resolve().parent / "definitions").glob("*.json")
+)
+OFFICIAL_CODES = frozenset(REPORTS_BY_CODE) | _DEFINITION_CODES
 CONSOLIDATED_CODES = frozenset({"CMAD01", "CMPH01"})
 DISABLED_CODES = frozenset({"CMSM01"})
 LAUNCHER_CODES = frozenset({"CMBATCH00"})

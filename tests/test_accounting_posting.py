@@ -8,11 +8,12 @@ from accounting.posting_service import AccountingPostingService
 class Cursor:
     def __init__(self, status="APPROVED", creator=7, reviewer=8, total=Decimal("500"),
                  original_id=None, override=False, transaction_type="JOURNAL",
-                 attachments=0, giving_batch=None):
+                 attachments=0, giving_batch=None, corrected_giving_batch=None):
         self.status, self.creator, self.reviewer, self.total = status, creator, reviewer, total
         self.original_id, self.override = original_id, override
         self.transaction_type, self.attachments = transaction_type, attachments
         self.giving_batch = giving_batch
+        self.corrected_giving_batch = corrected_giving_batch
         self.statements, self.one, self.rows, self.rowcount = [], None, [], 0
     def execute(self, sql, values=()):
         self.statements.append((sql, values))
@@ -22,6 +23,9 @@ class Cursor:
                         self.transaction_type, Decimal("250"))
         elif sql.startswith("SELECT p.Status"):
             self.one = ("OPEN", "OPEN")
+        elif (sql.startswith("SELECT ID,ChurchID,Status FROM tblContributionBatch")
+              and "ReversalAccountingTransactionID" in sql):
+            self.one = self.corrected_giving_batch
         elif sql.startswith("SELECT ID,ChurchID,Status FROM tblContributionBatch"):
             self.one = self.giving_batch
         elif sql.startswith("SELECT l.Debit"):
@@ -86,6 +90,15 @@ class TestAccountingPosting(unittest.TestCase):
         header_query = connection.cursor_value.statements[0][0]
         self.assertIn("CAST(ae.EntityID AS UNSIGNED)=t.ID", header_query)
         self.assertNotIn("CAST(t.ID AS CHAR)", header_query)
+
+    def test_giving_reversal_voids_original_batch_atomically(self):
+        connection = Connection(status="APPROVED", creator=7, reviewer=8,
+                                total=Decimal("25"), original_id=41,
+                                corrected_giving_batch=(81, 7, "POSTED"))
+        self.assertEqual(AccountingPostingService(connection, 9).post(52, 4), 27)
+        sql = "\n".join(item[0] for item in connection.cursor_value.statements)
+        self.assertIn("SET Status='VOID'", sql)
+        self.assertIn("BATCH_VOIDED_BY_REVERSAL", sql)
 
     def test_reversal_rejects_same_user_without_override_audit(self):
         connection = Connection(status="APPROVED", creator=7, reviewer=7,

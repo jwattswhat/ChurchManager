@@ -18,5 +18,10 @@ class ProcessService:
         return self.start([self.python_executable, script, *arguments])
 
     def open_file(self, path):
-        self.opener(str(path))
-
+        """Open a document through Windows and request a visible application window."""
+        try:
+            self.opener(str(path), "open", show_cmd=5)
+        except TypeError:
+            # Test doubles and non-Windows-compatible openers may expose only
+            # the traditional one-argument contract.
+            self.opener(str(path))
