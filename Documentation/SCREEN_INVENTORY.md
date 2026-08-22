@@ -32,6 +32,12 @@ Active entries are ChurchManager definitions rendered by JSForm. Removed rows ar
 | `frmAttendance` | ChurchManager + JSForm | Compatibility only | Direct row maintenance bypasses attendance synchronization rules. |
 | `frmRecordAttendance` | ChurchManager + JSForm | Retired | Insert-only entry was replaced by the combined Attendance screen. |
 | Attendance | ChurchManager only | Active | Transactionally coordinates event metadata, hand counts, known-person attendance, Communion validation, searching, and service-derived locking. |
+| Contributors and Envelopes | ChurchManager only | Active; visually accepted | Confidential contributor identity, dated envelope history, annual assignment previews, and restricted contact information require one guarded workflow. |
+| Approved Giving Purposes | ChurchManager only | Active; visually accepted | Congregational approval facts and accounting-dimension mappings must be validated together. |
+| Contribution Batches | ChurchManager only | Active; visually accepted | Coordinates confidential gift entry, split allocations, controls, CSV import, accounting handoff, and posted corrections. |
+| Contribution CSV Import | ChurchManager only | Supporting; visually accepted | Performs non-writing mapping and validation before an atomic Draft-batch import and protected evidence capture. |
+| Giving Reports | ChurchManager only | Active; visually accepted for implemented reports | Keeps donor-identifying datasets outside the unrestricted report catalog and enforces separate report permissions. |
+| Annual Envelope Assignment | ChurchManager only | Supporting; visually accepted | Previews and atomically applies dated box-number assignments without rewriting contribution history. |
 | `frmDocument` | ChurchManager + JSForm | Active | Not CM-only. |
 | `frmJournal` | ChurchManager + JSForm | Active | Not CM-only. |
 | `frmProject` | ChurchManager + JSForm | Active | Not CM-only. |

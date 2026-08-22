@@ -8,6 +8,8 @@
 
 **Approved by:** Rev. Jonathan C. Watt
 
+**Implementation audit:** [Member Giving acceptance audit](ChurchManager.MemberGiving.AcceptanceAudit.md), August 22, 2026
+
 **Target application:** Development ChurchManager
 
 **Treasurer guidance:** [ChurchManager congregation treasurer guide](ChurchManager.CongregationTreasurerGuide.md)
@@ -574,11 +576,18 @@ Rollout sequence:
    duplicate-file prevention, and confirmed import into a new Draft batch.
    *(Implemented and accepted in ChurchDBTest.)*
 8. Create isolated test data and complete automated regression tests.
+   *(Implemented for the current operational surface; the reset includes CSV
+   import evidence and the full suite passes. Extend the dataset and tests as
+   the remaining first-release workflows are implemented.)*
 9. Perform user acceptance with a sample collection, split gift, anonymous
    gift, reassigned envelope, correction, accounting reconciliation, and annual
-   statement.
+   statement. *(The implemented batch, posting, correction, import, report,
+   statement, and envelope workflows have received iterative visual acceptance.
+   The formal full-specification acceptance remains open.)*
 10. Update installation, user guide, database inventory, screen inventory,
-    report inventory, and privacy documentation before release.
+    report inventory, and privacy documentation before release. *(Current
+    surfaces are documented; final release documentation remains open until the
+    outstanding report and special-gift workflows are complete.)*
 
 ## 15. Acceptance criteria
 

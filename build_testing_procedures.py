@@ -93,7 +93,7 @@ table(doc,['Document control','Value'],[
     ('Test level','ChurchManager module checks, application smoke tests, workflow acceptance tests, integrations, and release sign-off.'),
     ('Primary rule','Use a separate test database and disposable output folders. Never experiment against the only live copy.'),
 ], [1.65,4.85])
-callout(doc,'Scope boundary','Financial, giving, donor, budget, ledger, envelope, check-posting, and donor-acknowledgment features were removed from ChurchManager. Confirm that ordinary releases do not expose their former menus, forms, scripts, or reports. Historical database tables and records are outside the application test scope and remain preserved.')
+callout(doc,'Scope boundary','Accounting and Giving are active ChurchManager subsystems and must be tested only with fictitious data in the guarded test database. Giving screens, statements, imports, evidence files, backups, and reports are confidential even during testing. Never use production contributor data for development or acceptance testing.')
 callout(doc,'Framework boundary','This procedure does not test JSForm modules, controls, SQL builders, navigation engine, or framework internals. JSForm is referenced only where ChurchManager calls it as a dependency. A separate JSForm test procedure will be prepared later.')
 
 doc.add_heading('1. How to use this procedure',level=1)
