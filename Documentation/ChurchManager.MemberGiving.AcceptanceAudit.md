@@ -56,7 +56,7 @@ rendered inspection of the newest reports remain release gates.
 | 13 | Named-person directed gifts are held and clarified | Pass structurally; visual acceptance pending | Entry records instruction, disposition and resolution; completed reviews capture user/time; returned directions are excluded from deposit, ledger and statements; the protected review PDF is implemented. |
 | 14 | Backup/restore preserves Giving | Pass structurally | Giving is in the complete database baseline and backup. A dedicated post-migration Giving restore rehearsal should be retained as release evidence. |
 | 15 | Support logs exclude confidential detail | Pass (automated) | Forced Giving errors verify that contributor, check/reference, envelope, address, and imported-row values are removed from both the local error log and generated support ZIP. |
-| 16 | Automated and rendered acceptance | Partial | Current suite and visually exercised surfaces pass; missing workflows and reports prevent full-specification sign-off. |
+| 16 | Automated and rendered acceptance | Partial | Focused checks pass and previously exercised surfaces are accepted; the newest administration actions and operational PDFs still require visual acceptance, followed by the full post-baseline suite. |
 
 ## Required report inventory audit
 

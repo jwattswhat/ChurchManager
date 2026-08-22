@@ -1,6 +1,6 @@
 # ChurchManager development roadmap
 
-Last reviewed: August 21, 2026
+Last reviewed: August 22, 2026
 
 This is the maintained ChurchManager development backlog. Priorities reflect
 the needs of a small congregation and a comparison with current paid and
@@ -12,12 +12,12 @@ open-source church-management systems.
 |---:|---|---|---|
 | 1 | Completed | User contact information | Foundational contact fields and administration are implemented. |
 | 2 | Completed | Email and participant notification review | The weekly participant-notification workflow has been modernized. |
-| 3 | In acceptance | Optional user-to-person relationship | Source, migration, administration UI, safe auditing, and welcome email are implemented; database and visual acceptance remain. |
-| 4 | Immediate | Secure SMTP connection and email settings | Welcome and participant email require deliberate, testable, credential-safe configuration. |
-| 5 | In progress | Hymnal, lectionary, and Order of Service catalogs | Order of Service packaging is implemented; permanent hymn IDs and hymnal packaging are in database acceptance, followed by lectionary packaging. |
-| 6 | Immediate | Release, installation, and recovery readiness | Stabilizes and packages the researched catalogs and existing application. |
-| 6A | Immediate | Open-source publication and distribution | Publishes reviewed source and signed release artifacts without exposing congregation data, credentials, or copyrighted content. |
-| 7 | In progress | [Confidential member giving, envelopes, and pledges](ChurchManager.MemberGiving.Specification.md) | User-selected first `0.3.0-dev` feature; approved confidential subledger design. |
+| 3 | Completed | Optional user-to-person relationship | Nullable links, administration, safe auditing, welcome email, migration, and acceptance are complete. |
+| 4 | Implemented; deployment check | Secure SMTP connection and email settings | Credential-safe settings and shared mail delivery are implemented; each installed congregation must enter and test its own provider credential. |
+| 5 | In acceptance | Hymnal, lectionary, and Order of Service catalogs | Order of Service and lectionary packaging are implemented and exercised; final human stanza verification blocks publication of the curated LSB hymnal package. |
+| 6 | In beta | Release, installation, and recovery readiness | Setup, upgrade, restore, backup, MSI, documentation, and beta installer foundations exist; repair/signing, current-beta packaging, and clean-machine exit acceptance remain. |
+| 6A | In progress | Open-source publication and distribution | Identity and website prototype are approved; ChurchManager history/privacy audit, public destinations, signed artifacts, and live links remain. |
+| 7 | In final acceptance | [Confidential member giving and envelopes](ChurchManager.MemberGiving.Specification.md) | First-release code and focused tests are complete; final migrations, baseline/restore, full suite, and rendered acceptance remain. Pledges are explicitly deferred. |
 
 Posted-batch correction is implemented and accepted end to end: it creates a
 linked Ready accounting reversal, copies the original gifts into an editable
@@ -33,9 +33,9 @@ from Sent to Accounting in the batch list.
 | 13 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
 | Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
 
-Items 1 through 6A should be completed before beginning a new major subsystem.
-Items 7 through 11 form the next ministry-development phase. Items 12 through 13
-should not delay a stable ChurchManager release.
+Finish the acceptance gates for items 5 through 7 before beginning item 8.
+Items 8 through 11 form the next ministry-development phase. Items 12 through
+13 should not delay a stable ChurchManager release.
 
 ## Completed foundations retained for regression protection
 
@@ -116,9 +116,8 @@ future roadmap projects:
   with automated tests.
 - Preserve the already completed participant design: `tblParticipant.PersonID`
   remains optional so worship participants may be members or outside people.
-- Source implementation and focused automated tests are complete. Remaining
-  acceptance work is applying migration 070 to `ChurchDBTest` and visually
-  checking create, edit, unlink, and welcome-email actions.
+- Source implementation, migration, focused automated tests, and visual
+  acceptance are complete.
 
 ### 4. Secure SMTP connection and email settings
 
@@ -552,9 +551,15 @@ future roadmap projects:
   retain a private complete backup before any history-rewriting cleanup needed
   for the initial public release.
 
-### 7. Confidential member giving, envelopes, and pledges
+### 7. Confidential member giving and envelopes
 
 - Approved design: [Member giving and envelope tracking specification](ChurchManager.MemberGiving.Specification.md).
+- **Status: First-release implementation complete; final acceptance pending.**
+  Pledges, online-giving provider integration, and statement email delivery are
+  deferred capabilities rather than incomplete first-release work.
+- The completed first-release inventory and its remaining migration, baseline,
+  restore, full-suite, and rendered checks are maintained in
+  [Member Giving Acceptance Audit](ChurchManager.MemberGiving.AcceptanceAudit.md).
 - CSV contribution intake now provides explicit column mapping, a non-writing
   validation preview, red issue rows, protected source-file evidence, duplicate
   file prevention, and confirmed creation of a new Draft batch. Migration 090
@@ -590,11 +595,12 @@ future roadmap projects:
   batches can now create a single summarized Ready cash-receipt transaction;
   no donor or envelope detail enters the ledger, and ordinary Accounting
   Posting atomically marks the linked giving batch Posted.
-  Giving Reports now provides a donor-free batch control summary and a
-  separately permission-controlled contributor history for Ready and Posted
-  gifts. The protected `GIVE-BATCH` PDF prints the donor-free batch controls for
-  the selected dates without entering the unrestricted report catalog or
-  designer. Annual and custom-range contribution statements follow next.
+  Giving Reports provides donor-free batch controls, fund/period totals and
+  accounting reconciliation plus protected batch detail, contributor history,
+  statement and envelope exceptions, directed-gift review, memorial/honor
+  acknowledgments, envelope registers and labels, and contribution statements.
+  The protected reports remain outside the unrestricted report catalog and
+  designer.
   Quarterly statement preview now supports one contributor or every
   statement-enabled contributor in a combined PDF and includes only Posted,
   eligible allocations. Preview does not claim issuance or delivery. Official
