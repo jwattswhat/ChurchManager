@@ -13,9 +13,11 @@ permission and controlled-choice foundation, protected backup sidecar plumbing,
 and Master Administrator recovery-package setup with safe creation/password-
 change audit are implemented. The framework-independent operational service now
 enforces assigned/all viewing and distinct create, assign, update, and close
-permissions before repository access. Restricted-note entry, the MariaDB
-repository and remaining audit events, workflows, and restore acceptance remain
-gated.
+permissions before repository access. The MariaDB operational repository now
+uses parameterized safe-field reads, active-assignee validation, optimistic
+record versions, and atomic non-narrative audit events for care creation,
+assignment, actions, and status changes. Restricted-note entry and persistence,
+workflows, handoffs, reports, and remaining recovery acceptance remain gated.
 
 The interactive `ChurchDBTest` restore path has been accepted with its protected
 recovery sidecar and required ChurchManager restart. Cross-machine recovery with

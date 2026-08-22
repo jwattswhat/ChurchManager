@@ -672,9 +672,12 @@ future roadmap projects:
   Administrator can configure or replace the separate recovery password from
   Database Backup, and those successful actions are safely audited. The
   operational service contract now independently enforces assigned/all viewing
-  and separate create, assign, update, and close permissions. Restricted-note
-  entry remains disabled until the MariaDB repository, remaining audit events,
-  workflows, and restore acceptance pass.
+  and separate create, assign, update, and close permissions. The MariaDB
+  operational repository now provides parameterized safe-field reads,
+  optimistic locking, active-assignee checks, and atomic safe audits for care
+  creation, assignment, actions, and status changes. Restricted-note entry
+  remains disabled until its encrypted repository and authorization path,
+  workflows, handoffs, reports, and remaining recovery acceptance pass.
   - Interactive protected backup/restore and application restart passed in
     `ChurchDBTest`; ciphertext and isolated cross-machine recovery acceptance
     remain.

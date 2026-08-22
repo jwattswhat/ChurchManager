@@ -82,7 +82,7 @@ class PastoralCareServiceTests(unittest.TestCase):
     def test_create_requires_exactly_one_subject_and_safe_fields(self):
         service, repository = self.service({"pastoral.care.create"})
         result = service.create_need({
-            "person_id": 4, "category": "Hospital", "opened_date": date(2026, 8, 22),
+            "church_id": 1, "person_id": 4, "category": "Hospital", "opened_date": date(2026, 8, 22),
             "safe_summary": "Follow up next week.",
         })
         self.assertEqual(result, 11)
@@ -90,7 +90,7 @@ class PastoralCareServiceTests(unittest.TestCase):
         self.assertEqual(values["source"], "MANUAL")
         self.assertEqual(values["created_by_user_id"], 7)
         with self.assertRaises(PastoralCareValidationError):
-            service.create_need({"person_id": 4, "family_id": 3, "category": "Other"})
+            service.create_need({"church_id": 1, "person_id": 4, "family_id": 3, "category": "Other"})
 
     def test_assigning_another_user_requires_assign_permission(self):
         service, repository = self.service(
@@ -98,7 +98,7 @@ class PastoralCareServiceTests(unittest.TestCase):
         )
         with self.assertRaises(PermissionError):
             service.create_need({
-                "person_id": 4, "assigned_user_id": 8, "category": "Other"
+                "church_id": 1, "person_id": 4, "assigned_user_id": 8, "category": "Other"
             })
         self.assertEqual(repository.calls, [])
 
