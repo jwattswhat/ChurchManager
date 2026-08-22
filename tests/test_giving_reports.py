@@ -15,6 +15,7 @@ from giving.reporting import (
     ContributionStatementProvider, TRIBUTE_CONTRACT, TRIBUTE_MANIFEST,
     TributeAcknowledgmentProvider, DIRECTED_GIFT_CONTRACT, DIRECTED_GIFT_MANIFEST,
     DirectedGiftReviewProvider,
+    OPERATIONAL_CONTRACT, OperationalGivingReportProvider, operational_manifest,
 )
 import JSForm
 from datetime import date
@@ -146,6 +147,37 @@ class GivingReportTests(unittest.TestCase):
         self.assertTrue(callable(getattr(GivingReportService, "all", None)))
         source = inspect.getsource(GivingReportService.all)
         self.assertIn("return self._all(sql, values)", source)
+
+    def test_required_operational_reports_have_protected_definitions(self):
+        codes = (
+            "GIVE-FUND-PERIOD", "GIVE-RECONCILE", "GIVE-BATCH-DETAIL",
+            "GIVE-HISTORY", "GIVE-STMT-EXCEPTIONS", "GIVE-ENVELOPE-EXCEPTIONS",
+        )
+        self.assertEqual(OPERATIONAL_CONTRACT.required_permission, "giving.reports.confidential")
+        for code in codes:
+            definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / f"{code}.json")
+            operational_manifest(code).validate(definition)
+
+    def test_donor_free_reports_do_not_query_contributor_identity(self):
+        for method in (GivingReportService.giving_by_fund,
+                       GivingReportService.accounting_reconciliation):
+            source = inspect.getsource(method)
+            self.assertNotIn("tblContributionContributor", source)
+            self.assertNotIn("ContributorID", source)
+
+    def test_statement_exception_treats_missing_purpose_as_eligible(self):
+        source = inspect.getsource(GivingReportService.statement_exceptions)
+        self.assertIn("COALESCE(p.StatementTreatment,'ELIGIBLE')", source)
+
+    def test_operational_provider_routes_all_required_reports(self):
+        source = inspect.getsource(OperationalGivingReportProvider.build)
+        for kind in ("envelope-exceptions", "batch-detail", "fund-period",
+                     "statement-exceptions", "accounting-reconciliation",
+                     "contributor-history"):
+            self.assertIn(kind, source)
+        dialog = inspect.getsource(GivingReportsDialog)
+        self.assertIn('"Operational Reports"', dialog)
+        self.assertIn("Preview Selected Report", dialog)
 
 
 if __name__ == "__main__":

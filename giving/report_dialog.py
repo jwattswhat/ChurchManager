@@ -83,6 +83,7 @@ class GivingReportsDialog(wx.Dialog):
         if authorization.has_permission("giving.reports.confidential"):
             self._build_tribute_tab()
             self._build_directed_gifts_tab()
+            self._build_operational_reports_tab()
             self._build_envelope_boxes_tab()
         if self.notebook.GetPageCount() == 0:
             raise PermissionError("You do not have permission to run Giving reports.")
@@ -319,6 +320,49 @@ class GivingReportsDialog(wx.Dialog):
         filters.Add(preview); root.Add(filters, 0, wx.ALL, 10)
         panel.SetSizer(root); self.notebook.AddPage(panel, "Directed Gift Review")
 
+    def _build_operational_reports_tab(self):
+        """Build the remaining protected Giving operations report launcher."""
+        panel = wx.Panel(self.notebook); root = wx.BoxSizer(wx.VERTICAL)
+        guidance = wx.StaticText(panel, label=(
+            "These protected reports support batch review, envelope administration, statements, "
+            "and reconciliation. Giving by Fund and Reconciliation contain no donor identity."
+        ))
+        guidance.SetForegroundColour(wx.Colour(0, 75, 150)); guidance.Wrap(920)
+        root.Add(guidance, 0, wx.ALL, 10)
+        reports = [
+            ("Giving by Fund and Period", "GIVE-FUND-PERIOD", "fund-period", False),
+            ("Accounting Posting Reconciliation", "GIVE-RECONCILE", "accounting-reconciliation", False),
+            ("Contribution Batch Detail", "GIVE-BATCH-DETAIL", "batch-detail", False),
+            ("Statement Exception List", "GIVE-STMT-EXCEPTIONS", "statement-exceptions", False),
+            ("Unassigned and Conflicting Envelopes", "GIVE-ENVELOPE-EXCEPTIONS", "envelope-exceptions", False),
+        ]
+        if self.authorization.has_permission("giving.history.view"):
+            reports.insert(3, ("Contributor History (Printable)", "GIVE-HISTORY", "contributor-history", True))
+        self.operational_reports = tuple(reports)
+        self.operational_report = wx.Choice(panel, choices=[row[0] for row in self.operational_reports])
+        self.operational_report.SetSelection(0); self.operational_report.Bind(wx.EVT_CHOICE, self.on_operational_choice)
+        self.operational_contributors = (
+            self.service.contributors()
+            if self.authorization.has_permission("giving.history.view") else []
+        )
+        self.operational_contributor = wx.Choice(
+            panel, choices=[row[1] for row in self.operational_contributors],
+        )
+        if self.operational_contributors: self.operational_contributor.SetSelection(0)
+        self.operational_start, self.operational_end = self._date_controls(panel)
+        form = wx.FlexGridSizer(cols=2, hgap=10, vgap=10); form.AddGrowableCol(1, 1)
+        for label, control in (("Report", self.operational_report),
+                               ("Contributor", self.operational_contributor),
+                               ("From", self.operational_start), ("Through", self.operational_end)):
+            form.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+            form.Add(control, 1, wx.EXPAND)
+        root.Add(form, 0, wx.EXPAND | wx.ALL, 10)
+        preview = wx.Button(panel, label="Preview Selected Report")
+        preview.Bind(wx.EVT_BUTTON, self.on_operational_pdf)
+        root.Add(preview, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        panel.SetSizer(root); self.notebook.AddPage(panel, "Operational Reports")
+        self.on_operational_choice()
+
     def _dates(self, start, end):
         first, last = _python_date(start), _python_date(end)
         if first > last:
@@ -506,6 +550,32 @@ class GivingReportsDialog(wx.Dialog):
             )
         except Exception as error:
             wx.MessageBox(str(error), "Directed Gift Review", wx.OK | wx.ICON_ERROR, self)
+
+    def on_operational_choice(self, _event=None):
+        """Require a contributor only for the printable history report."""
+        selected = self.operational_report.GetSelection()
+        needs_contributor = selected >= 0 and self.operational_reports[selected][3]
+        self.operational_contributor.Enable(needs_contributor)
+
+    def on_operational_pdf(self, _event=None):
+        """Render the selected protected operational report."""
+        try:
+            selected = self.operational_report.GetSelection()
+            if selected < 0:
+                raise ValueError("Select a Giving report.")
+            _label, code, kind, needs_contributor = self.operational_reports[selected]
+            contributor_id = None
+            if needs_contributor:
+                person = self.operational_contributor.GetSelection()
+                if person < 0:
+                    raise ValueError("Select a contributor for printable history.")
+                contributor_id = self.operational_contributors[person][0]
+            first, last = self._dates(self.operational_start, self.operational_end)
+            self.report_service.run_operational(
+                code, kind, date.fromisoformat(first), date.fromisoformat(last), contributor_id,
+            )
+        except Exception as error:
+            wx.MessageBox(str(error), "Giving Operational Report", wx.OK | wx.ICON_ERROR, self)
 
     def on_envelope_register(self, _event=None):
         """Render the selected confidential envelope assignment register."""

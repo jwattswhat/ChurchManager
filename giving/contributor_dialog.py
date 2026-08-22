@@ -206,6 +206,106 @@ class ContributorRepository:
         finally:
             cursor.close()
 
+    def refresh_preview(self, contributor_id):
+        """Return stored and current directory contact values for a linked contributor."""
+        row = self.contributor(contributor_id)
+        if not row or row[1] == "EXTERNAL":
+            raise GivingValidationError("Only a contributor linked to a person or family can be refreshed.")
+        record_id = row[2] if row[1] == "PERSON" else row[3]
+        current = self.link_details(row[1], record_id)
+        if not current:
+            raise GivingValidationError("The linked directory record is no longer available.")
+        labels = ("Address", "Address 2", "City", "State", "Postal code", "Email")
+        stored = row[6:12]
+        return [(label, old or "", new or "") for label, old, new in zip(labels, stored, current[1:])]
+
+    def apply_directory_refresh(self, contributor_id, preview):
+        """Apply exactly the directory contact values shown by ``refresh_preview``."""
+        cursor = self.connection.cursor()
+        try:
+            values = tuple(item[2] or None for item in preview)
+            cursor.execute(
+                "UPDATE tblContributionContributor SET Address=?,Address2=?,City=?,State=?,"
+                "PostalCode=?,Email=? WHERE ID=? AND ChurchID=?",
+                values + (contributor_id, self.church_id()),
+            )
+            if cursor.rowcount != 1:
+                raise GivingValidationError("The contributor changed before the refresh was applied.")
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback(); raise
+        finally:
+            cursor.close()
+
+    def merge_preview(self, survivor_id, duplicate_id):
+        """Return merge counts after rejecting identity-history collisions."""
+        if survivor_id == duplicate_id:
+            raise GivingValidationError("Select two different contributors.")
+        survivor = self.contributor(survivor_id); duplicate = self.contributor(duplicate_id)
+        if not survivor or not duplicate:
+            raise GivingValidationError("Both contributors must belong to this congregation.")
+        envelope_conflicts = self.all(
+            "SELECT COUNT(*) FROM tblContributionEnvelopeAssignment a "
+            "JOIN tblContributionEnvelopeAssignment b ON b.ContributorID=? "
+            "AND b.EnvelopeNumber=a.EnvelopeNumber "
+            "AND a.EffectiveFrom<=COALESCE(b.EffectiveThrough,'9999-12-31') "
+            "AND b.EffectiveFrom<=COALESCE(a.EffectiveThrough,'9999-12-31') "
+            "WHERE a.ContributorID=?", (duplicate_id, survivor_id),
+        )[0][0]
+        statement_conflicts = self.all(
+            "SELECT COUNT(*) FROM tblContributionStatementIssue a "
+            "JOIN tblContributionStatementIssue b ON b.ContributorID=? "
+            "AND b.PeriodStart=a.PeriodStart AND b.PeriodEnd=a.PeriodEnd "
+            "AND b.RevisionNumber=a.RevisionNumber WHERE a.ContributorID=?",
+            (duplicate_id, survivor_id),
+        )[0][0]
+        if envelope_conflicts or statement_conflicts:
+            raise GivingValidationError(
+                "These contributors have overlapping envelope or statement history. "
+                "Resolve that history before merging them."
+            )
+        counts = {}
+        for label, table in (("contributions", "tblContribution"),
+                             ("envelopes", "tblContributionEnvelopeAssignment"),
+                             ("statements", "tblContributionStatementIssue")):
+            counts[label] = int(self.all(
+                f"SELECT COUNT(*) FROM {table} WHERE ContributorID=?", (duplicate_id,),
+            )[0][0])
+        return survivor, duplicate, counts
+
+    def merge_contributors(self, survivor_id, duplicate_id, reason, user_id):
+        """Move Giving history to one survivor and retain an inactive merge marker."""
+        reason = str(reason or "").strip()
+        if not reason:
+            raise GivingValidationError("Enter the reason for merging these contributor records.")
+        self.merge_preview(survivor_id, duplicate_id)
+        cursor = self.connection.cursor()
+        try:
+            for table in ("tblContribution", "tblContributionEnvelopeAssignment",
+                          "tblContributionStatementIssue"):
+                cursor.execute(f"UPDATE {table} SET ContributorID=? WHERE ContributorID=?",
+                               (survivor_id, duplicate_id))
+            cursor.execute(
+                "UPDATE tblContributionContributor SET IsActive=0,StatementEnabled=0,"
+                "MergedIntoContributorID=?,MergedAt=CURRENT_TIMESTAMP(6),MergedByUserID=?,"
+                "MergeReason=? WHERE ID=? AND MergedIntoContributorID IS NULL",
+                (survivor_id, user_id, reason, duplicate_id),
+            )
+            if cursor.rowcount != 1:
+                raise GivingValidationError("The duplicate contributor was already merged.")
+            cursor.execute(
+                "INSERT INTO tblContributionAuditEvent "
+                "(ChurchID,UserID,Action,EntityType,EntityID,SafeReference,Reason) "
+                "VALUES (?,?,'CONTRIBUTOR_MERGED','CONTRIBUTOR',?,?,?)",
+                (self.church_id(), user_id, duplicate_id,
+                 f"Merged into contributor {survivor_id}", reason),
+            )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback(); raise
+        finally:
+            cursor.close()
+
 
 class EnvelopeDialog(wx.Dialog):
     """Edit one time-bounded envelope assignment."""
@@ -244,6 +344,34 @@ class EnvelopeDialog(wx.Dialog):
                 self.note.GetValue().strip())
 
 
+class ContributorMergeDialog(wx.Dialog):
+    """Select a duplicate contributor and require a merge reason."""
+
+    def __init__(self, parent, choices):
+        super().__init__(parent, title="Merge Duplicate Contributor")
+        self.choices = choices
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        outer.Add(wx.StaticText(panel, label=(
+            "The currently selected contributor will remain. Select the duplicate record whose "
+            "Giving history should move to it."
+        )), 0, wx.EXPAND | wx.ALL, 12)
+        form = wx.FlexGridSizer(0, 2, 8, 10); form.AddGrowableCol(1, 1)
+        self.duplicate = wx.Choice(panel, choices=[row[1] for row in choices]); self.duplicate.SetSelection(0)
+        self.reason = wx.TextCtrl(panel, style=wx.TE_MULTILINE, size=(480, 90))
+        for label, control in (("Duplicate contributor", self.duplicate), ("Merge reason", self.reason)):
+            form.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+            form.Add(control, 1, wx.EXPAND)
+        outer.Add(form, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        buttons = wx.StdDialogButtonSizer()
+        buttons.AddButton(wx.Button(panel, wx.ID_OK)); buttons.AddButton(wx.Button(panel, wx.ID_CANCEL))
+        buttons.Realize(); outer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        panel.SetSizer(outer); outer.Fit(self)
+
+    def values(self):
+        """Return the chosen duplicate ID and audit reason."""
+        return self.choices[self.duplicate.GetSelection()][0], self.reason.GetValue()
+
+
 class ContributorDialog(wx.Dialog):
     """Maintain confidential giving identities and their envelope history."""
 
@@ -269,7 +397,9 @@ class ContributorDialog(wx.Dialog):
         self.list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_select)
         left.Add(self.list, 1, wx.EXPAND)
         left_buttons = wx.BoxSizer(wx.HORIZONTAL)
-        for label, handler in (("New", self.on_new), ("Save", self.on_save)):
+        for label, handler in (("New", self.on_new), ("Save", self.on_save),
+                               ("Refresh from Directory...", self.on_refresh_directory),
+                               ("Merge Duplicate...", self.on_merge)):
             button = wx.Button(panel, label=label); button.Bind(wx.EVT_BUTTON, handler); left_buttons.Add(button, 0, wx.RIGHT, 6)
         left.Add(left_buttons, 0, wx.TOP, 8); body.Add(left, 0, wx.EXPAND | wx.RIGHT, 14)
         right = wx.BoxSizer(wx.VERTICAL); form = wx.FlexGridSizer(0, 2, 7, 10); form.AddGrowableCol(1, 1)
@@ -333,6 +463,12 @@ class ContributorDialog(wx.Dialog):
         for index, row in enumerate(self.rows):
             self.list.InsertItem(index, row[1]); self.list.SetItem(index, 1, row[2].title()); self.list.SetItem(index, 2, "Yes" if row[3] else "No")
 
+    def select_current(self):
+        """Restore list selection after a refresh and reload the current contributor."""
+        for index, row in enumerate(self.rows):
+            if row[0] == self.current_id:
+                self.list.Select(index); self.list.Focus(index); self.on_select(); return
+
     def on_select(self, _event=None):
         selected = self.list.GetFirstSelected()
         if selected < 0: return
@@ -364,6 +500,52 @@ class ContributorDialog(wx.Dialog):
             if not values[3]: raise GivingValidationError("Display name is required.")
             self.current_id = self.repository.save_contributor(self.current_id, values); self.refresh()
         except Exception as error: wx.MessageBox(str(error), "Unable to Save Contributor", wx.OK | wx.ICON_ERROR, self)
+
+    def on_refresh_directory(self, _event=None):
+        if not self.current_id:
+            wx.MessageBox("Select a linked contributor first.", "Refresh Contributor",
+                          wx.OK | wx.ICON_INFORMATION, self); return
+        try:
+            preview = self.repository.refresh_preview(self.current_id)
+            changed = [item for item in preview if item[1] != item[2]]
+            if not changed:
+                wx.MessageBox("The stored contact information already matches the directory.",
+                              "Refresh Contributor", wx.OK | wx.ICON_INFORMATION, self); return
+            message = "\n".join(f"{label}:\n  Stored: {old or '(blank)'}\n  Directory: {new or '(blank)'}"
+                                for label, old, new in changed)
+            if wx.MessageBox("Apply these directory changes?\n\n" + message,
+                             "Preview Directory Refresh", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION,
+                             self) != wx.YES: return
+            self.repository.apply_directory_refresh(self.current_id, preview)
+            self.refresh(); self.select_current()
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Refresh Contributor", wx.OK | wx.ICON_ERROR, self)
+
+    def on_merge(self, _event=None):
+        if not self.current_id:
+            wx.MessageBox("Select the contributor record that should remain.", "Merge Contributor",
+                          wx.OK | wx.ICON_INFORMATION, self); return
+        choices = [row for row in self.rows if row[0] != self.current_id and row[3]]
+        if not choices:
+            wx.MessageBox("There are no other active contributors to merge.", "Merge Contributor",
+                          wx.OK | wx.ICON_INFORMATION, self); return
+        dialog = ContributorMergeDialog(self, choices)
+        try:
+            if dialog.ShowModal() != wx.ID_OK: return
+            duplicate_id, reason = dialog.values()
+            survivor, duplicate, counts = self.repository.merge_preview(self.current_id, duplicate_id)
+            summary = (f"Keep: {survivor[4]}\nMerge and deactivate: {duplicate[4]}\n\n"
+                       f"Move {counts['contributions']} contribution(s), {counts['envelopes']} envelope "
+                       f"assignment(s), and {counts['statements']} statement record(s)?")
+            if wx.MessageBox(summary, "Confirm Contributor Merge",
+                             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES: return
+            self.repository.merge_contributors(
+                self.current_id, duplicate_id, reason, self.user_id)
+            self.refresh(); self.select_current()
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Merge Contributor", wx.OK | wx.ICON_ERROR, self)
+        finally:
+            dialog.Destroy()
 
     def refresh_envelopes(self):
         self.envelope_rows = self.repository.envelopes(self.current_id) if self.current_id else []

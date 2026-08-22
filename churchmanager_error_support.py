@@ -20,6 +20,11 @@ _SAFE_CONTEXT = {
 }
 _EMAIL = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.I)
 _PHONE = re.compile(r"(?<!\w)(?:\+?\d[\d(). -]{5,}\d)(?!\w)")
+_CONFIDENTIAL_GIVING_VALUE = re.compile(
+    r"(?i)(?P<label>\b(?:contributor|donor|check(?:\s+(?:number|reference))?|"
+    r"reference|envelope(?:\s+number)?|address|import(?:ed)?\s+row)\b"
+    r"\s*(?:=|:|#|is)\s*[\"']?)(?P<value>[^\r\n,;\"'}]+)"
+)
 
 
 def _churchmanager_redactor(text: str) -> str:
@@ -29,7 +34,11 @@ def _churchmanager_redactor(text: str) -> str:
         result = result.replace(profile, "[USERPROFILE]")
         result = result.replace(profile.replace("\\", "/"), "[USERPROFILE]")
     result = _EMAIL.sub("[EMAIL]", result)
-    return _PHONE.sub("[PHONE]", result)
+    result = _PHONE.sub("[PHONE]", result)
+    return _CONFIDENTIAL_GIVING_VALUE.sub(
+        lambda match: match.group("label") + "[CONFIDENTIAL]",
+        result,
+    )
 
 
 def configure_churchmanager_error_reporting():

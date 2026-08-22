@@ -140,6 +140,14 @@ user does not have to be a congregation member.
 
 ### Contributors and envelopes
 
+For a contributor linked to a person or family, **Refresh from Directory...**
+shows each stored contact field beside the current directory value. Nothing is
+changed until the preview is confirmed. **Merge Duplicate...** keeps the
+currently selected contributor, moves the duplicate's Giving, envelope, and
+statement history, and deactivates the duplicate. ChurchManager blocks a merge
+when overlapping envelope or statement history must be resolved first, and it
+requires a permanent audit reason.
+
 A giving contributor may be linked to one person, linked to one family, or
 maintained as an outside contributor. Statement identity and contact fields do
 not silently synchronize with the membership directory.
@@ -246,6 +254,13 @@ update the on-screen review and display the completion time beneath the grid;
 they do not create a PDF. **Preview PDF** on the Batch Control Summary creates
 the protected donor-free `GIVE-BATCH` report for the selected dates. Contributor
 statements are available only to users with the statement-generation permission.
+
+The **Operational Reports** tab provides protected printable batch detail,
+contributor history, statement exceptions, and envelope exceptions. It also
+provides donor-free **Giving by Fund and Period** and **Accounting Posting
+Reconciliation** reports. Select the dates, choose the report, select a
+contributor only when printable Contributor History requires one, and choose
+**Preview Selected Report**.
 On **Contribution Statements**, select either **Quarterly**, **Calendar Year**,
 or **Custom Date Range**, then select one contributor or **All eligible
 contributors** and choose **Preview Statement(s)**.

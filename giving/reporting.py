@@ -183,6 +183,40 @@ DIRECTED_GIFT_MANIFEST = JSForm.ReportProtectionManifest(
     },
 )
 
+OPERATIONAL_CONTRACT = JSForm.ReportDatasetContract(
+    "giving.operationalreview", 1, "giving.reports.confidential", (
+        JSForm.ReportCollection("church", "Church", (
+            field("Church", "Church Name"), field("Logo", "Church Logo", "image"),
+        )),
+        JSForm.ReportCollection("parameters", "Parameters", (field("Display", "Selection"),)),
+        JSForm.ReportCollection("records", "Review Records", (
+            field("Date", "Date", "date"), field("Group", "Group"),
+            field("Description", "Description"), field("Status", "Status"),
+            field("Amount", "Amount", "currency"), field("Detail", "Detail"),
+            field("Reference", "Reference"), field("Note", "Note"),
+        )),
+    ),
+)
+
+
+def operational_manifest(code):
+    """Return the shared protection requirements for a named operational report."""
+    return JSForm.ReportProtectionManifest(
+        required_settings={"name": code, "dataset": "giving.operationalreview",
+                           "datasetversion": 1, "classification": "confidential"},
+        required_bands=("ReportHeader", "Detail", "PageFooter"),
+        required_controls={
+            "ChurchLogo": {"collection": "church", "field": "Logo"},
+            "ChurchName": {"collection": "church", "field": "Church"},
+            "ReportTitle": {"systemvalue": "report_title"},
+            "Period": {"collection": "parameters", "field": "Display"},
+            "Records": {"repeatcollection": "records"},
+            "RunUser": {"systemvalue": "run_user"}, "ReportCode": {"systemvalue": "report_code"},
+            "Classification": {"systemvalue": "classification"},
+            "PageNumber": {"systemvalue": "page_number"},
+        },
+    )
+
 
 ENVELOPE_LABEL_CONTRACT = JSForm.ReportDatasetContract(
     "giving.envelopelabels", 1, "giving.reports.confidential", (
@@ -389,6 +423,47 @@ class DirectedGiftReviewProvider:
         })
 
 
+class OperationalGivingReportProvider:
+    """Build one of the protected operational Giving review datasets."""
+
+    def __init__(self, connection, authorization):
+        self.service = GivingReportService(connection, authorization)
+
+    def build(self, report_kind, start_date, end_date, contributor_id=None):
+        church = self.service.all("SELECT Church,Logo FROM tblChurch ORDER BY ID LIMIT 1")
+        if not church:
+            raise ValueError("Church information must be created first.")
+        if report_kind == "envelope-exceptions":
+            rows = self.service.envelope_exceptions(start_date, end_date)
+        elif report_kind == "batch-detail":
+            rows = self.service.batch_detail(start_date, end_date)
+        elif report_kind == "fund-period":
+            rows = self.service.giving_by_fund(start_date, end_date)
+        elif report_kind == "statement-exceptions":
+            rows = self.service.statement_exceptions(start_date, end_date)
+        elif report_kind == "accounting-reconciliation":
+            rows = self.service.accounting_reconciliation(start_date, end_date)
+        elif report_kind == "contributor-history":
+            if contributor_id is None:
+                raise ValueError("Select a contributor for printable history.")
+            rows = [
+                (row[0], row[1], row[4], str(row[6]).title(), row[5],
+                 str(row[2]).replace("_", " ").title(), row[3] or "", str(row[7]).title())
+                for row in self.service.contributor_history(contributor_id, start_date, end_date)
+            ]
+        else:
+            raise ValueError("Unknown Giving operational report.")
+        return JSForm.ReportDataset.create(OPERATIONAL_CONTRACT, {
+            "church": [{"Church": church[0][0], "Logo": church[0][1]}],
+            "parameters": [{"Display": f"{start_date:%B %d, %Y} through {end_date:%B %d, %Y}"}],
+            "records": [{
+                "Date": row[0], "Group": row[1] or "", "Description": row[2] or "",
+                "Status": row[3] or "", "Amount": row[4], "Detail": row[5] or "",
+                "Reference": row[6] or "", "Note": row[7] or "",
+            } for row in rows],
+        })
+
+
 class EnvelopeBoxReportProvider:
     """Build protected label-sheet and assignment-register datasets."""
 
@@ -587,6 +662,21 @@ class GivingVisualReportService:
             start_date, end_date
         )
         output = self._available_output("GIVE-DIRECTED.pdf")
+        rendered = JSForm.PDFReportRenderer().render(
+            definition, dataset, output, context={"run_user": self.session.display_name},
+        )
+        self.processes.open_file(rendered)
+        return rendered
+
+    def run_operational(self, code, report_kind, start_date, end_date, contributor_id=None):
+        """Render one protected operational Giving report through shared plumbing."""
+        self.authorization.require("giving.reports.confidential", "print a protected Giving report")
+        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / f"{code}.json")
+        operational_manifest(code).validate(definition)
+        dataset = OperationalGivingReportProvider(self.connection, self.authorization).build(
+            report_kind, start_date, end_date, contributor_id,
+        )
+        output = self._available_output(f"{code}.pdf")
         rendered = JSForm.PDFReportRenderer().render(
             definition, dataset, output, context={"run_user": self.session.display_name},
         )
