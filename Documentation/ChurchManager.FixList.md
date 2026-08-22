@@ -668,9 +668,11 @@ future roadmap projects:
   note/key-recovery service and migration 096 normalized care foundation are
   implemented. Database backups now pair with an available password-protected
   pastoral recovery sidecar; restore validates it before closing database
-  connections and installs its key only after SQL restore succeeds. Restricted-
-  note entry remains disabled until administrator recovery setup, service
-  authorization, audit, and restore acceptance pass.
+  connections and installs its key only after SQL restore succeeds. The Master
+  Administrator can configure or replace the separate recovery password from
+  Database Backup, and those successful actions are safely audited. Restricted-
+  note entry remains disabled until service authorization, remaining audit
+  events, workflows, and restore acceptance pass.
 
 - Research completed: [Pastoral care systems research and ChurchManager recommendations](ChurchManager.PastoralCare.Research.md).
 - Proposed implementation specification: [ChurchManager pastoral care specification](ChurchManager.PastoralCare.Specification.md).

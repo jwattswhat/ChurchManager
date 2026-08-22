@@ -61,6 +61,14 @@ class BackupRestoreWorkflowTests(unittest.TestCase):
         self.assertLess(close, restore)
         self.assertIn("recovery_password=recovery_password", source)
 
+    def test_pastoral_recovery_setup_is_admin_only_and_confirms_password(self):
+        source = (ROOT / "backup_restore_dialog.py").read_text()
+        self.assertIn('has_permission("pastoral.care.admin")', source)
+        self.assertIn('"pastoral.care.admin", "administer pastoral-note recovery"', source)
+        self.assertGreaterEqual(source.count("wx.PasswordEntryDialog"), 3)
+        self.assertIn("The recovery passwords did not match", source)
+        self.assertIn("ChurchManager cannot recover this password", source)
+
 
 if __name__ == "__main__":
     unittest.main()

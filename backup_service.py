@@ -107,7 +107,7 @@ class BackupService:
         files = sorted(
             set(root.glob("Automatic.{}.Backup.*.SQL".format(database)))
             | set(root.glob("{}.Automatic.{}.Backup.*.SQL".format(database, database))),
-            key=lambda path: path.stat().st_mtime,
+            key=lambda path: (path.stat().st_mtime_ns, path.name.casefold()),
             reverse=True,
         )
         for obsolete in files[max(1, int(keep)):]:

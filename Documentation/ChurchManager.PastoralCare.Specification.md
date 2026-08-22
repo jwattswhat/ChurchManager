@@ -9,10 +9,10 @@
 **Approved by:** Rev. Jonathan C. Watt
 
 **Implementation:** encryption/key-recovery service, migration 096 database,
-permission and controlled-choice foundation, and protected backup sidecar
-plumbing implemented. Restricted-note entry, administrator recovery-package
-setup, service authorization, auditing, workflows, and restore acceptance remain
-gated.
+permission and controlled-choice foundation, protected backup sidecar plumbing,
+and Master Administrator recovery-package setup with safe creation/password-
+change audit are implemented. Restricted-note entry, service authorization,
+remaining audit events, workflows, and restore acceptance remain gated.
 
 **Target:** ChurchManager
 
@@ -191,6 +191,12 @@ The recovery package requires a recovery password supplied by an authorized
 administrator. It uses a recognized password-based key derivation function and
 authenticated encryption. The recovery password is never stored by
 ChurchManager and cannot be recovered by the project.
+
+An authorized Master Administrator configures recovery from **Database Backup**.
+The password is entered twice and is used only while creating the protected
+package. Replacing the recovery password rewraps the same data-encryption key;
+it does not rewrite notes. Setup and password replacement record audit events
+that contain no password or key material.
 
 Backup completion must fail visibly when encrypted notes exist but no usable
 recovery-key package was created. Restore must verify the package before

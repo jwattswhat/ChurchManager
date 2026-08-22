@@ -7,6 +7,7 @@ import os
 import wx
 
 from backup_service import BackupError, BackupPreferences
+from pastoral_recovery_admin import PastoralRecoveryAdministration
 
 
 def mariadb_tools_directory(jsform):
@@ -43,10 +44,17 @@ def close_database_connections(context):
 
 class BackupRestoreDialog(wx.Dialog):
     def __init__(self, parent, context, jsform):
-        super().__init__(parent, title="ChurchManager Backup and Restore", size=(720, 430),
+        super().__init__(parent, title="ChurchManager Backup and Restore", size=(720, 540),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.context=context; self.jsform=jsform; self.preferences=BackupPreferences()
         self.values=self.preferences.load(); self.can_restore=context.authorization.has_permission("application.database.restore")
+        recovery = getattr(context.services.backups, "recovery", None)
+        self.pastoral_recovery = (
+            PastoralRecoveryAdministration(
+                context.connection, context.session, context.authorization, recovery
+            )
+            if recovery is not None else None
+        )
         panel=wx.Panel(self); outer=wx.BoxSizer(wx.VERTICAL)
         title=wx.StaticText(panel,label="Database Backup")
         title.SetFont(title.GetFont().Bold()); outer.Add(title,0,wx.ALL,10)
@@ -60,6 +68,14 @@ class BackupRestoreDialog(wx.Dialog):
         self.last_backup=wx.StaticText(panel,label=self._last_backup_text())
         outer.Add(self.last_backup,0,wx.LEFT|wx.RIGHT|wx.BOTTOM,10)
         backup=wx.Button(panel,label="Backup Now"); backup.Bind(wx.EVT_BUTTON,self.on_backup); outer.Add(backup,0,wx.LEFT|wx.RIGHT|wx.BOTTOM,10)
+        if context.authorization.has_permission("pastoral.care.admin") and self.pastoral_recovery:
+            recovery_box = wx.StaticBoxSizer(wx.VERTICAL, panel, "Pastoral Note Recovery")
+            self.recovery_status = wx.StaticText(panel, label=self._recovery_status_text())
+            recovery_box.Add(self.recovery_status, 0, wx.ALL, 8)
+            self.recovery_button = wx.Button(panel, label=self._recovery_button_label())
+            self.recovery_button.Bind(wx.EVT_BUTTON, self.on_configure_recovery)
+            recovery_box.Add(self.recovery_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+            outer.Add(recovery_box, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
         line=wx.StaticLine(panel); outer.Add(line,0,wx.EXPAND|wx.ALL,10)
         restore_title=wx.StaticText(panel,label="Restore Database")
         restore_title.SetFont(restore_title.GetFont().Bold()); outer.Add(restore_title,0,wx.LEFT|wx.RIGHT|wx.BOTTOM,10)
@@ -79,6 +95,62 @@ class BackupRestoreDialog(wx.Dialog):
         when=self.values.get("last_successful_at") or "Not yet recorded"
         path=self.values.get("last_successful_backup") or ""
         return "Last successful backup: {}{}".format(when, "\n"+path if path else "")
+
+    def _recovery_status_text(self):
+        if self.pastoral_recovery.configured:
+            return "Ready. New backups include protected pastoral-note recovery data."
+        return "Not configured. Restricted pastoral-note entry remains unavailable."
+
+    def _recovery_button_label(self):
+        return (
+            "Replace Recovery Password..."
+            if self.pastoral_recovery.configured
+            else "Set Up Recovery..."
+        )
+
+    def on_configure_recovery(self, _event):
+        self.context.authorization.require(
+            "pastoral.care.admin", "administer pastoral-note recovery"
+        )
+        first = wx.PasswordEntryDialog(
+            self,
+            "Create a separate pastoral-note recovery password.\n\n"
+            "ChurchManager cannot recover this password. Store it securely outside "
+            "this computer.",
+            "Pastoral Note Recovery",
+        )
+        try:
+            if first.ShowModal() != wx.ID_OK:
+                return
+            password = first.GetValue()
+        finally:
+            first.Destroy()
+        confirm = wx.PasswordEntryDialog(
+            self, "Enter the same recovery password again:",
+            "Confirm Pastoral Note Recovery Password",
+        )
+        try:
+            if confirm.ShowModal() != wx.ID_OK:
+                return
+            confirmation = confirm.GetValue()
+        finally:
+            confirm.Destroy()
+        try:
+            if password != confirmation:
+                raise ValueError("The recovery passwords did not match.")
+            self.pastoral_recovery.configure(password)
+            self.recovery_status.SetLabel(self._recovery_status_text())
+            self.recovery_button.SetLabel(self._recovery_button_label())
+            wx.MessageBox(
+                "Pastoral-note recovery is ready. Future ChurchManager backups will "
+                "include a protected recovery file beside the SQL backup.",
+                "Recovery Ready", wx.OK | wx.ICON_INFORMATION, self,
+            )
+        except Exception as error:
+            wx.MessageBox(str(error), "Recovery Setup Failed", wx.OK | wx.ICON_ERROR, self)
+        finally:
+            password = None
+            confirmation = None
 
     def record_success(self,result):
         self.values["last_successful_backup"]=str(result.path)
