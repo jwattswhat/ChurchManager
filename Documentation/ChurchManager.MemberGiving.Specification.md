@@ -203,8 +203,10 @@ authorized that disclosure.
 Implementation status (August 22, 2026): the contribution editor exposes these
 goods/services, intangible-benefit, statement-review, memorial/honor, contact,
 and separate donor/amount disclosure facts in a compact protected dialog. The
-same fields survive draft edits and posted-batch correction copies. Printable
-memorial/honor acknowledgment output remains a later protected-report step.
+same fields survive draft edits and posted-batch correction copies. A protected
+Posted-gift acknowledgment list now suppresses donor identity and amount
+independently unless their corresponding consent flags explicitly authorize
+disclosure.
 
 ### 5.5 Contribution allocation
 

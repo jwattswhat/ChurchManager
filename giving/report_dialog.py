@@ -81,6 +81,7 @@ class GivingReportsDialog(wx.Dialog):
             self._build_statement_tab()
             self._build_statement_history_tab()
         if authorization.has_permission("giving.reports.confidential"):
+            self._build_tribute_tab()
             self._build_envelope_boxes_tab()
         if self.notebook.GetPageCount() == 0:
             raise PermissionError("You do not have permission to run Giving reports.")
@@ -270,6 +271,34 @@ class GivingReportsDialog(wx.Dialog):
         panel.SetSizer(root)
         self.notebook.AddPage(panel, "Envelope Boxes")
 
+    def _build_tribute_tab(self):
+        """Build the consent-limited memorial and honor report controls."""
+        panel = wx.Panel(self.notebook); root = wx.BoxSizer(wx.VERTICAL)
+        guidance = wx.StaticText(
+            panel,
+            label=("Create a protected acknowledgment list for Posted memorial and honor gifts. "
+                   "Donor names and gift amounts appear only when each disclosure was separately authorized."),
+        )
+        guidance.SetForegroundColour(wx.Colour(0, 75, 150))
+        guidance.Wrap(920)
+        root.Add(guidance, 0, wx.ALL, 10)
+        self.tribute_start, self.tribute_end = self._date_controls(panel)
+        preview = wx.Button(panel, label="Preview Memorial / Honor List")
+        preview.Bind(wx.EVT_BUTTON, self.on_tribute_pdf)
+        filters = wx.BoxSizer(wx.HORIZONTAL)
+        for label, control in (("From", self.tribute_start), ("Through", self.tribute_end)):
+            filters.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
+            filters.Add(control, 0, wx.RIGHT, 12)
+        filters.Add(preview)
+        root.Add(filters, 0, wx.ALL, 10)
+        note = wx.StaticText(
+            panel,
+            label=("This list is for acknowledgment work. It is confidential and includes no Draft or Ready gifts."),
+        )
+        root.Add(note, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        panel.SetSizer(root)
+        self.notebook.AddPage(panel, "Memorial / Honor Gifts")
+
     def _dates(self, start, end):
         first, last = _python_date(start), _python_date(end)
         if first > last:
@@ -435,6 +464,18 @@ class GivingReportsDialog(wx.Dialog):
             wx.MessageBox(str(error), "Envelope Box Labels", wx.OK | wx.ICON_ERROR, self)
         finally:
             self.envelope_labels_button.Enable()
+
+    def on_tribute_pdf(self, _event=None):
+        """Render the protected memorial and honor acknowledgment list."""
+        try:
+            first, last = self._dates(self.tribute_start, self.tribute_end)
+            self.report_service.run_tribute_acknowledgments(
+                date.fromisoformat(first), date.fromisoformat(last),
+            )
+        except Exception as error:
+            wx.MessageBox(
+                str(error), "Memorial and Honor Gifts", wx.OK | wx.ICON_ERROR, self,
+            )
 
     def on_envelope_register(self, _event=None):
         """Render the selected confidential envelope assignment register."""

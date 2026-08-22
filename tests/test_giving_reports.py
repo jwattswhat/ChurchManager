@@ -12,7 +12,8 @@ from giving.report_service import GivingReportService
 from giving.reporting import (
     BATCH_SUMMARY_CONTRACT, BATCH_SUMMARY_MANIFEST, DEFINITIONS,
     GivingBatchSummaryProvider, STATEMENT_CONTRACT, STATEMENT_MANIFEST,
-    ContributionStatementProvider,
+    ContributionStatementProvider, TRIBUTE_CONTRACT, TRIBUTE_MANIFEST,
+    TributeAcknowledgmentProvider,
 )
 import JSForm
 from datetime import date
@@ -109,6 +110,25 @@ class GivingReportTests(unittest.TestCase):
         renderer = inspect.getsource(reporting.GivingVisualReportService.run_statements)
         self.assertIn("hashlib.sha256", renderer)
         self.assertIn("issue=False", renderer)
+
+    def test_tribute_report_honors_separate_disclosure_consent(self):
+        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "GIVE-TRIBUTE.json")
+        TRIBUTE_MANIFEST.validate(definition)
+        self.assertEqual(TRIBUTE_CONTRACT.required_permission, "giving.reports.confidential")
+        query = inspect.getsource(GivingReportService.tribute_acknowledgments)
+        self.assertIn("b.Status='POSTED'", query)
+        self.assertIn("CASE WHEN g.DonorDisclosureAuthorized=1", query)
+        self.assertIn("CASE WHEN g.AmountDisclosureAuthorized=1", query)
+        provider = inspect.getsource(TributeAcknowledgmentProvider)
+        self.assertIn('"Amount": "" if row[4] is None', provider)
+        dialog = inspect.getsource(GivingReportsDialog)
+        self.assertIn('"Memorial / Honor Gifts"', dialog)
+        self.assertIn("run_tribute_acknowledgments", dialog)
+
+    def test_report_providers_have_a_public_read_boundary(self):
+        self.assertTrue(callable(getattr(GivingReportService, "all", None)))
+        source = inspect.getsource(GivingReportService.all)
+        self.assertIn("return self._all(sql, values)", source)
 
 
 if __name__ == "__main__":

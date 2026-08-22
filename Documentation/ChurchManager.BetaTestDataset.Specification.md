@@ -86,6 +86,8 @@ dataset version, record counts, verification results, and backup location.
 - Posted contributions in all four quarters
 - At least two statement-eligible contributors per quarter
 - One intentionally ineligible gift that must be excluded from statements
+- Four Posted memorial/honor gifts covering every independent donor-name and
+  amount-disclosure consent combination
 - Privacy-safe summarized accounting transactions linked to Posted batches
 - No pre-issued statement history; testers create issuance and revision records
   during acceptance
@@ -119,4 +121,3 @@ The dataset is source-controlled but excluded from ordinary baseline seed SQL.
 The next beta installer may bundle it as an optional component. Updating the
 dataset does not require changing normal installation defaults. A dataset
 version change and its verification manifest are committed together.
-

@@ -75,16 +75,50 @@ def remove_existing(cursor):
     """Remove giving rows and only accounting transactions linked from them."""
     cursor.execute("SELECT StoredPath FROM tblContributionImportEvidence")
     stored_imports = [row[0] for row in cursor.fetchall()]
-    cursor.execute("SELECT AccountingTransactionID FROM tblContributionBatch "
-                   "WHERE AccountingTransactionID IS NOT NULL")
-    transaction_ids = [row[0] for row in cursor.fetchall()]
+    cursor.execute(
+        "SELECT AccountingTransactionID,ReversalAccountingTransactionID "
+        "FROM tblContributionBatch WHERE AccountingTransactionID IS NOT NULL "
+        "OR ReversalAccountingTransactionID IS NOT NULL"
+    )
+    transaction_ids = {
+        value for row in cursor.fetchall() for value in row if value is not None
+    }
+    # Include every transaction in a reversal chain. A correction batch links
+    # its replacement transaction, while the accounting reversal can be linked
+    # only from the original transaction.
+    pending = list(transaction_ids)
+    while pending:
+        transaction_id = pending.pop()
+        cursor.execute(
+            "SELECT ID,OriginalTransactionID,ReversalTransactionID "
+            "FROM tblAccountingTransaction WHERE ID=? OR OriginalTransactionID=? "
+            "OR ReversalTransactionID=?",
+            (transaction_id, transaction_id, transaction_id),
+        )
+        for row in cursor.fetchall():
+            for related_id in row:
+                if related_id is not None and related_id not in transaction_ids:
+                    transaction_ids.add(related_id)
+                    pending.append(related_id)
     cursor.execute("UPDATE tblContributionBatch SET CorrectsBatchID=NULL,CorrectionBatchID=NULL")
-    cursor.execute("UPDATE tblContributionBatch SET AccountingTransactionID=NULL")
+    cursor.execute(
+        "UPDATE tblContributionBatch SET AccountingTransactionID=NULL,"
+        "ReversalAccountingTransactionID=NULL"
+    )
+    # Posted correction gifts point back to their source gift in this same
+    # table. Break that correction chain before deleting either side.
+    cursor.execute("UPDATE tblContribution SET CorrectionOfContributionID=NULL")
     for table in ("tblContributionImportEvidence", "tblContributionStatementIssue", "tblContributionAuditEvent",
                   "tblContributionAllocation", "tblContribution",
                   "tblContributionEnvelopeAssignment", "tblContributionBatch",
                   "tblContributionPurpose", "tblContributionContributor"):
         cursor.execute(f"DELETE FROM {table}")
+    for transaction_id in transaction_ids:
+        cursor.execute(
+            "UPDATE tblAccountingTransaction SET OriginalTransactionID=NULL,"
+            "ReversalTransactionID=NULL WHERE ID=?",
+            (transaction_id,),
+        )
     for transaction_id in transaction_ids:
         cursor.execute("DELETE FROM tblAccountingAuditEvent WHERE EntityType='TRANSACTION' AND EntityID=?",
                        (str(transaction_id),))
@@ -267,12 +301,16 @@ def seed(cursor):
         for gift in gifts:
             contributor_id, envelope, method, amount, reference, splits = gift[:6]
             eligibility = gift[6] if len(gift) > 6 else "ELIGIBLE"
+            tribute = gift[7] if len(gift) > 7 else {}
             cursor.execute("INSERT INTO tblContribution "
                            "(BatchID,ContributorID,EnteredEnvelopeNumber,ContributionMethod,ReferenceValue,"
-                           "ReceivedDate,Amount,StatementEligibility,Note) VALUES (?,?,?,?,?,?,?,? ,"
-                           "'Fictional giving acceptance data')",
+                           "ReceivedDate,Amount,StatementEligibility,Note,TributeType,HonoreeName,"
+                           "AcknowledgmentContact,DonorDisclosureAuthorized,AmountDisclosureAuthorized) "
+                           "VALUES (?,?,?,?,?,?,?,?,'Fictional giving acceptance data',?,?,?,?,?)",
                            (batch_id, contributor_id, envelope, method, reference, batch_date, amount,
-                            eligibility))
+                            eligibility, tribute.get("type"), tribute.get("honoree"),
+                            tribute.get("contact"), bool(tribute.get("donor")),
+                            bool(tribute.get("amount"))))
             contribution_id = cursor.lastrowid
             for purpose_index, split_amount in splits:
                 purpose_id, fund_id, account_id, allocation_function = purposes[purpose_index]
@@ -317,19 +355,31 @@ def seed(cursor):
         raise RuntimeError("Four open fiscal quarters are required for contribution statement test data.")
     posted_specs = (
         (1, "TEST - First Quarter Posted", (
-            (contributors[0], "101", "CHECK", Decimal("120.00"), "TEST-Q1-101", ((0, Decimal("120.00")),)),
+            (contributors[0], "101", "CHECK", Decimal("120.00"), "TEST-Q1-101",
+             ((0, Decimal("120.00")),), "ELIGIBLE",
+             {"type": "IN_MEMORY_OF", "honoree": "Grace Example",
+              "contact": "The Example Family", "donor": False, "amount": False}),
             (contributors[1], "102", "CHECK", Decimal("75.00"), "TEST-Q1-102", ((1, Decimal("75.00")),)),
         )),
         (2, "TEST - Second Quarter Posted", (
-            (contributors[0], "101", "ELECTRONIC", Decimal("140.00"), "TEST-Q2-101", ((0, Decimal("140.00")),)),
+            (contributors[0], "101", "ELECTRONIC", Decimal("140.00"), "TEST-Q2-101",
+             ((0, Decimal("140.00")),), "ELIGIBLE",
+             {"type": "IN_HONOR_OF", "honoree": "Jordan Example",
+              "contact": "Jordan Example", "donor": True, "amount": False}),
             (contributors[2], "103", "CHECK", Decimal("90.00"), "TEST-Q2-103", ((2, Decimal("90.00")),)),
         )),
         (3, "TEST - Third Quarter Posted", (
-            (contributors[1], "102", "CHECK", Decimal("160.00"), "TEST-Q3-102", ((0, Decimal("160.00")),)),
+            (contributors[1], "102", "CHECK", Decimal("160.00"), "TEST-Q3-102",
+             ((0, Decimal("160.00")),), "ELIGIBLE",
+             {"type": "IN_MEMORY_OF", "honoree": "Martin Example",
+              "contact": "The Example Household", "donor": False, "amount": True}),
             (contributors[3], "201", "CHECK", Decimal("110.00"), "TEST-Q3-201", ((1, Decimal("110.00")),)),
         )),
         (4, "TEST - Fourth Quarter Posted", (
-            (contributors[0], "101", "CHECK", Decimal("180.00"), "TEST-Q4-101", ((0, Decimal("180.00")),)),
+            (contributors[0], "101", "CHECK", Decimal("180.00"), "TEST-Q4-101",
+             ((0, Decimal("180.00")),), "ELIGIBLE",
+             {"type": "IN_HONOR_OF", "honoree": "Ruth Example",
+              "contact": "Ruth Example", "donor": True, "amount": True}),
             (contributors[4], None, "ELECTRONIC", Decimal("130.00"), "TEST-Q4-EXT", ((2, Decimal("130.00")),)),
             (contributors[2], "103", "OTHER", Decimal("50.00"), "TEST-Q4-INELIGIBLE",
              ((0, Decimal("50.00")),), "INELIGIBLE"),
@@ -385,6 +435,19 @@ def main():
             print(f"statement_q{quarter}_contributors={quarterly_statement_counts.get(quarter, 0)}")
         if quarterly_statement_counts != {1: 2, 2: 2, 3: 2, 4: 2}:
             raise RuntimeError("Quarterly contribution statement test data verification failed.")
+        cursor.execute(
+            "SELECT DonorDisclosureAuthorized,AmountDisclosureAuthorized,COUNT(*) "
+            "FROM tblContribution WHERE TributeType IS NOT NULL "
+            "GROUP BY DonorDisclosureAuthorized,AmountDisclosureAuthorized"
+        )
+        tribute_consent_counts = {
+            (bool(row[0]), bool(row[1])): int(row[2]) for row in cursor.fetchall()
+        }
+        print(f"tribute_consent_combinations={len(tribute_consent_counts)}")
+        if tribute_consent_counts != {
+            (False, False): 1, (True, False): 1, (False, True): 1, (True, True): 1,
+        }:
+            raise RuntimeError("Memorial and honor disclosure test data verification failed.")
         connection.commit()
         store = AttachmentStore(load_attachment_policy(config, test_mode=True))
         for stored_path in stored_imports:

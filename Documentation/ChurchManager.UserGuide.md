@@ -249,6 +249,14 @@ time, revision, filename, and SHA-256 identifier. This does not claim the
 statement was printed, mailed, emailed, or received. **Statement Issuance
 History** identifies prior issues and reissues.
 
+Users with confidential Giving-report permission also receive **Memorial / Honor
+Gifts**. Select the covered dates and choose **Preview Memorial / Honor List**
+to create a protected acknowledgment-work PDF containing Posted gifts only.
+The donor name appears only when donor disclosure was explicitly authorized;
+otherwise it says **Not disclosed**. The amount appears only when amount
+disclosure was separately authorized. These two permissions are never inferred
+from one another.
+
 ## 4. Worship planning
 
 ### Create a worship service

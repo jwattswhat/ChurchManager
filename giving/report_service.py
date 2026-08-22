@@ -22,6 +22,10 @@ class GivingReportService:
         finally:
             cursor.close()
 
+    def all(self, sql, values=()):
+        """Return report-provider rows while preserving portable query handling."""
+        return self._all(sql, values)
+
     def church_id(self):
         rows = self._all("SELECT ID FROM tblChurch ORDER BY ID LIMIT 1")
         if not rows:
@@ -195,6 +199,26 @@ class GivingReportService:
             "JOIN tblContributionContributor c ON c.ID=i.ContributorID "
             "WHERE i.ChurchID=? ORDER BY i.GeneratedAt DESC,i.ID DESC",
             (self.church_id(),),
+        )
+
+    def tribute_acknowledgments(self, start_date, end_date):
+        """Return posted memorial/honor gifts with consent-controlled disclosure."""
+        self.authorization.require("giving.reports.confidential", "view memorial and honor gifts")
+        return self._all(
+            "SELECT g.ReceivedDate,g.TributeType,g.HonoreeName,"
+            "CASE WHEN g.DonorDisclosureAuthorized=1 THEN COALESCE(c.DisplayName,'Anonymous') "
+            "ELSE 'Not disclosed' END,"
+            "CASE WHEN g.AmountDisclosureAuthorized=1 THEN g.Amount ELSE NULL END,"
+            "COALESCE(g.AcknowledgmentContact,''),COALESCE(p.Purposes,'General contribution') "
+            "FROM tblContribution g JOIN tblContributionBatch b ON b.ID=g.BatchID "
+            "LEFT JOIN tblContributionContributor c ON c.ID=g.ContributorID "
+            "LEFT JOIN (SELECT a.ContributionID,GROUP_CONCAT(DISTINCT purpose.Name "
+            "ORDER BY purpose.Name SEPARATOR ', ') AS Purposes "
+            "FROM tblContributionAllocation a JOIN tblContributionPurpose purpose "
+            "ON purpose.ID=a.PurposeID GROUP BY a.ContributionID) p ON p.ContributionID=g.ID "
+            "WHERE b.ChurchID=? AND b.Status='POSTED' AND g.TributeType IS NOT NULL "
+            "AND g.ReceivedDate BETWEEN ? AND ? ORDER BY g.ReceivedDate,g.ID",
+            (self.church_id(), start_date, end_date),
         )
 
     def record_statement_issuances(self, issues, user_id):

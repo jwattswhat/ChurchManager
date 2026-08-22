@@ -628,7 +628,7 @@ future roadmap projects:
   implemented without ChurchManager-assigned value. An optional donor estimate
   is explicitly unverified and excluded from accounting and statements;
   non-cash-only batches finish without a zero-dollar ledger transaction. The protected memorial/honor
-  acknowledgment output remains open.
+  acknowledgment list is implemented and independently honors donor-name and amount-disclosure consent.
 - Support contributor accounts linked optionally to a person or family; outside
   donors must also be allowed without creating congregation-member records.
 - Assign and maintain envelope numbers with effective dates so numbers can be

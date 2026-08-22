@@ -24,6 +24,15 @@ class GivingTestDataResetTests(unittest.TestCase):
         self.assertIn("statement_test_year=", self.source)
         self.assertIn("statement_q{quarter}_contributors=", self.source)
         self.assertIn("Quarterly contribution statement test data verification failed.", self.source)
+        self.assertIn("tribute_consent_combinations=", self.source)
+        self.assertIn("Memorial and honor disclosure test data verification failed.", self.source)
+        for tribute_type in ('"IN_MEMORY_OF"', '"IN_HONOR_OF"'):
+            self.assertIn(tribute_type, self.source)
+        for consent in (
+            '"donor": False, "amount": False', '"donor": True, "amount": False',
+            '"donor": False, "amount": True', '"donor": True, "amount": True',
+        ):
+            self.assertIn(consent, self.source)
         self.assertIn('"INELIGIBLE"', self.source)
         self.assertIn("giving_test_dataset_verified=true", self.source)
 
@@ -51,6 +60,26 @@ class GivingTestDataResetTests(unittest.TestCase):
         issue = self.source.index('"tblContributionStatementIssue", "tblContributionAuditEvent"')
         contributor = self.source.index('"tblContributionPurpose", "tblContributionContributor"')
         self.assertLess(issue, contributor)
+
+    def test_reset_breaks_self_referencing_correction_links_before_deletion(self):
+        clear_link = self.source.index(
+            'UPDATE tblContribution SET CorrectionOfContributionID=NULL'
+        )
+        deletion_loop = self.source.index("for table in (", clear_link)
+        self.assertLess(clear_link, deletion_loop)
+
+    def test_reset_removes_complete_accounting_reversal_chains(self):
+        self.assertIn("ReversalAccountingTransactionID", self.source)
+        self.assertIn("while pending:", self.source)
+        self.assertIn("OR OriginalTransactionID=?", self.source)
+        self.assertIn("OR ReversalTransactionID=?", self.source)
+        clear_links = self.source.index(
+            'UPDATE tblAccountingTransaction SET OriginalTransactionID=NULL,'
+        )
+        delete_transaction = self.source.index(
+            'DELETE FROM tblAccountingTransaction WHERE ID=?'
+        )
+        self.assertLess(clear_links, delete_transaction)
 
     def test_reset_removes_import_evidence_before_batches_and_protected_files_after_commit(self):
         evidence = self.source.index('"tblContributionImportEvidence", "tblContributionStatementIssue"')

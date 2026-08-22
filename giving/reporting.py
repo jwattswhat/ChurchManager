@@ -124,6 +124,35 @@ STATEMENT_MANIFEST = JSForm.ReportProtectionManifest(
     },
 )
 
+TRIBUTE_CONTRACT = JSForm.ReportDatasetContract(
+    "giving.tributeacknowledgments", 1, "giving.reports.confidential", (
+        JSForm.ReportCollection("church", "Church", (
+            field("Church", "Church Name"), field("Logo", "Church Logo", "image"),
+        )),
+        JSForm.ReportCollection("parameters", "Parameters", (field("Display", "Covered Period"),)),
+        JSForm.ReportCollection("records", "Memorial and Honor Gifts", (
+            field("Date", "Date", "date"), field("Type", "Type"), field("Honoree", "Honoree"),
+            field("Donor", "Donor"), field("Amount", "Amount"), field("Contact", "Acknowledgment Contact"),
+            field("Purpose", "Purpose"),
+        )),
+    ),
+)
+
+TRIBUTE_MANIFEST = JSForm.ReportProtectionManifest(
+    required_settings={"name": "GIVE-TRIBUTE", "dataset": "giving.tributeacknowledgments",
+                       "datasetversion": 1, "classification": "confidential"},
+    required_bands=("ReportHeader", "Detail", "PageFooter"),
+    required_controls={
+        "ChurchLogo": {"collection": "church", "field": "Logo"},
+        "ChurchName": {"collection": "church", "field": "Church"},
+        "ReportTitle": {"systemvalue": "report_title"},
+        "Period": {"collection": "parameters", "field": "Display"},
+        "Records": {"repeatcollection": "records"},
+        "RunUser": {"systemvalue": "run_user"}, "ReportCode": {"systemvalue": "report_code"},
+        "Classification": {"systemvalue": "classification"}, "PageNumber": {"systemvalue": "page_number"},
+    },
+)
+
 
 ENVELOPE_LABEL_CONTRACT = JSForm.ReportDatasetContract(
     "giving.envelopelabels", 1, "giving.reports.confidential", (
@@ -277,6 +306,29 @@ class ContributionStatementProvider:
             }],
             "records": records,
             "totals": [{"EligibleAmount": total}],
+        })
+
+
+class TributeAcknowledgmentProvider:
+    """Build a consent-limited memorial and honor acknowledgment dataset."""
+
+    def __init__(self, connection, authorization):
+        self.service = GivingReportService(connection, authorization)
+
+    def build(self, start_date, end_date):
+        church = self.service.all("SELECT Church,Logo FROM tblChurch ORDER BY ID LIMIT 1")
+        if not church:
+            raise ValueError("Church information must be created first.")
+        rows = self.service.tribute_acknowledgments(start_date, end_date)
+        return JSForm.ReportDataset.create(TRIBUTE_CONTRACT, {
+            "church": [{"Church": church[0][0], "Logo": church[0][1]}],
+            "parameters": [{"Display": f"{start_date:%B %d, %Y} through {end_date:%B %d, %Y}"}],
+            "records": [{
+                "Date": row[0], "Type": "In memory of" if row[1] == "IN_MEMORY_OF" else "In honor of",
+                "Honoree": row[2], "Donor": row[3],
+                "Amount": "" if row[4] is None else f"${Decimal(row[4]):,.2f}",
+                "Contact": row[5], "Purpose": row[6],
+            } for row in rows],
         })
 
 
@@ -450,6 +502,19 @@ class GivingVisualReportService:
             year, include_inactive, include_outside,
         )
         output = self._available_output(f"GIVE-ENVELOPE-REGISTER-{year}.pdf")
+        rendered = JSForm.PDFReportRenderer().render(
+            definition, dataset, output, context={"run_user": self.session.display_name},
+        )
+        self.processes.open_file(rendered)
+        return rendered
+
+    def run_tribute_acknowledgments(self, start_date, end_date):
+        """Render the protected memorial and honor acknowledgment list."""
+        self.authorization.require("giving.reports.confidential", "print memorial and honor gifts")
+        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "GIVE-TRIBUTE.json")
+        TRIBUTE_MANIFEST.validate(definition)
+        dataset = TributeAcknowledgmentProvider(self.connection, self.authorization).build(start_date, end_date)
+        output = self._available_output("GIVE-TRIBUTE.pdf")
         rendered = JSForm.PDFReportRenderer().render(
             definition, dataset, output, context={"run_user": self.session.display_name},
         )
