@@ -51,6 +51,22 @@ class PastoralCareService:
         self._require_record_access(record)
         return record
 
+    def history(self, care_need_id):
+        """Return safe action history after authorizing its care record."""
+
+        record = self.need(care_need_id)
+        return record, self.repository.history(record["id"])
+
+    def choices(self):
+        """Return maintained editor choices after pastoral access is confirmed."""
+
+        if not (
+            self.authorization.has_permission("pastoral.care.create")
+            or self.authorization.has_permission("pastoral.care.assign")
+        ):
+            self.authorization.require("pastoral.care.view.all", "load pastoral care choices")
+        return self.repository.choices()
+
     def create_need(self, values):
         """Validate and create a minimum-necessary care need."""
 

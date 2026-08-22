@@ -457,6 +457,22 @@
                 "tooltip": "Run permission-controlled Giving summaries and contributor history.",
                 "security": {"invoke": "giving.reports.summary"}
             },
+            "PastoralCareBox": {
+                "name": "PastoralCareBox",
+                "type": "StaticBox",
+                "label": "Pastoral Care",
+                "posch": [27, 20],
+                "sizech": [12, 3],
+                "layout": {"row": 2, "column": 2}
+            },
+            "lblPastoralCare": {
+                "name": "lblPastoralCare",
+                "type": "StaticText",
+                "posch": [28, 21],
+                "label": "Pastoral Follow-ups",
+                "tooltip": "Review assigned pastoral follow-ups and record care actions.",
+                "security": {"invoke": "pastoral.care.view.assigned"}
+            },
             "BulletinBox": {
                 "name": "BulletinBox",
                 "type": "StaticBox",

@@ -73,6 +73,7 @@ from giving.contributor_dialog import show_contributors
 from giving.purpose_dialog import show_giving_purposes
 from giving.batch_dialog import show_contribution_batches
 from giving.report_dialog import show_giving_reports
+from pastoral_care_dialog import show_pastoral_care
 
 
 arguments = None
@@ -552,6 +553,11 @@ def _buttonclick(event):
         case "lblGivingReports":
             show_giving_reports(
                 cmfrm.FRAME, context.connection, context.authorization, context.session
+            )
+            return
+        case "lblPastoralCare":
+            show_pastoral_care(
+                cmfrm.FRAME, context.connection, context.session, context.authorization
             )
             return
         case "lblPropers":

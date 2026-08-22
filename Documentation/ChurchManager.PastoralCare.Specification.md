@@ -19,9 +19,11 @@ record versions, and atomic non-narrative audit events for care creation,
 assignment, actions, and status changes. The restricted-note service and MariaDB
 repository now authorize care-record access before ciphertext reads, bind every
 AES-256-GCM payload to its allocated database identity, use optimistic updates,
-and atomically audit note views and changes without narrative. User-interface
-entry remains disabled while workflows, handoffs, reports, and remaining
-recovery acceptance are gated.
+and atomically audit note views and changes without narrative. The first native
+dashboard and safe care-history workflow now support Assigned to Me, authorized
+All Open, new follow-ups, assignment, action recording, and explicit status
+changes. Restricted-note entry remains disabled while handoffs, reports, and
+remaining recovery acceptance are gated.
 
 The interactive `ChurchDBTest` restore path has been accepted with its protected
 recovery sidecar and required ChurchManager restart. Cross-machine recovery with

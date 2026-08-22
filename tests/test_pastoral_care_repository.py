@@ -3,6 +3,8 @@
 import unittest
 from pathlib import Path
 
+from pastoral_care_repository import _choice_values
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -43,6 +45,12 @@ class PastoralCareRepositoryTests(unittest.TestCase):
         assign = self.source.split("def assign", 1)[1].split("def record_action", 1)[0]
         self.assertIn("SELECT Active FROM tblUser", assign)
         self.assertIn("selected caregiver is unavailable", assign)
+
+    def test_maintained_category_formats_are_parsed(self):
+        self.assertEqual(_choice_values([(1, '["Hospital", "Homebound"]')]),
+                         ["Hospital", "Homebound"])
+        self.assertEqual(_choice_values([(1, "[Hospital\nHomebound]")]),
+                         ["Hospital", "Homebound"])
 
 
 if __name__ == "__main__":

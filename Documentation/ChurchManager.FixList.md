@@ -678,9 +678,11 @@ future roadmap projects:
   creation, assignment, actions, and status changes. The restricted-note service
   and repository now authorize the underlying care record before ciphertext
   access, bind encryption to the allocated note identity, reject stale updates,
-  and atomically audit views and changes without narrative. User-interface note
-  entry remains disabled until workflows, handoffs, reports, and remaining
-  recovery acceptance pass.
+  and atomically audit views and changes without narrative. The native Pastoral
+  Care dashboard and safe history workflow now support assigned/all-open views,
+  deliberate follow-up creation, assignment, safe action recording, and status
+  changes. Restricted-note entry remains disabled until handoffs, reports, and
+  remaining recovery acceptance pass.
   - Interactive protected backup/restore and application restart passed in
     `ChurchDBTest`; ciphertext and isolated cross-machine recovery acceptance
     remain.

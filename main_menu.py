@@ -50,6 +50,7 @@ SPECIAL_CONTROLS = {
     "lblGivingPurposes",
     "lblContributionBatches",
     "lblGivingReports",
+    "lblPastoralCare",
 }
 MENU_CONTROLS = frozenset(FORM_ROUTES) | SPECIAL_CONTROLS
 SESSION_CONTROLS = frozenset({"lblHelp", "lblChangePassword", "lblLogout"})

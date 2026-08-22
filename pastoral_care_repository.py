@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 
 class PastoralCareConflictError(RuntimeError):
     """Raised when a record changed since the user loaded it."""
@@ -60,19 +61,69 @@ class MariaDBPastoralCareRepository:
         try:
             self._execute(
                 cursor,
-                "SELECT ID AS id,ChurchID AS church_id,PersonID AS person_id,"
-                "FamilyID AS family_id,DisplaySubject AS display_subject,Category AS category,"
-                "Source AS source,AssignedUserID AS assigned_user_id,Priority AS priority,"
-                "Status AS status,OpenedDate AS opened_date,DueDate AS due_date,"
-                "NextFollowUpDate AS next_follow_up_date,ScheduleText AS schedule_text,"
-                "ScheduleRule AS schedule_rule,ScheduleStatus AS schedule_status,"
-                "CompletedDate AS completed_date,ClosedDate AS closed_date,"
-                "SafeSummary AS safe_summary,Version AS version "
-                "FROM tblPastoralCareNeed WHERE ID=?",
+                "SELECT n.ID AS id,n.ChurchID AS church_id,n.PersonID AS person_id,"
+                "n.FamilyID AS family_id,n.DisplaySubject AS display_subject,n.Category AS category,"
+                "n.Source AS source,n.AssignedUserID AS assigned_user_id,u.DisplayName AS assignee,"
+                "n.Priority AS priority,"
+                "n.Status AS status,n.OpenedDate AS opened_date,n.DueDate AS due_date,"
+                "n.NextFollowUpDate AS next_follow_up_date,n.ScheduleText AS schedule_text,"
+                "n.ScheduleRule AS schedule_rule,n.ScheduleStatus AS schedule_status,"
+                "n.CompletedDate AS completed_date,n.ClosedDate AS closed_date,"
+                "n.SafeSummary AS safe_summary,n.Version AS version "
+                "FROM tblPastoralCareNeed n LEFT JOIN tblUser u ON u.ID=n.AssignedUserID "
+                "WHERE n.ID=?",
                 (care_need_id,),
             )
             rows = self._rows(cursor)
             return rows[0] if rows else None
+        finally:
+            cursor.close()
+
+    def history(self, care_need_id):
+        """Return non-restricted action history for one care need."""
+
+        cursor = self.connection.cursor()
+        try:
+            self._execute(
+                cursor,
+                "SELECT a.ID AS id,a.ActionDateTime AS action_datetime,"
+                "u.DisplayName AS caregiver,a.ActionType AS action_type,"
+                "a.Result AS result,a.SafeOutcome AS safe_outcome,"
+                "a.NextFollowUpDate AS next_follow_up_date "
+                "FROM tblPastoralCareAction a JOIN tblUser u ON u.ID=a.CaregiverUserID "
+                "WHERE a.CareNeedID=? ORDER BY a.ActionDateTime DESC,a.ID DESC",
+                (care_need_id,),
+            )
+            return self._rows(cursor)
+        finally:
+            cursor.close()
+
+    def choices(self):
+        """Return safe maintained choices needed by the care editors."""
+
+        return {
+            "churches": self._choice_rows("SELECT ID,Church FROM tblChurch ORDER BY Church"),
+            "people": self._choice_rows(
+                "SELECT ID,TRIM(CONCAT_WS(' ',FirstName,LastName)) FROM tblPerson "
+                "ORDER BY LastName,FirstName"
+            ),
+            "families": self._choice_rows(
+                "SELECT ID,FamilyName FROM tblFamily ORDER BY FamilyName"
+            ),
+            "users": self._choice_rows(
+                "SELECT ID,DisplayName FROM tblUser WHERE Active=1 ORDER BY DisplayName"
+            ),
+            "categories": _choice_values(self._choice_rows(
+                "SELECT ID,Choices FROM tblChoices WHERE Field='PastoralCareCategory' "
+                "ORDER BY Choices"
+            )),
+        }
+
+    def _choice_rows(self, sql):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(sql)
+            return cursor.fetchall()
         finally:
             cursor.close()
 
@@ -200,3 +251,20 @@ class MariaDBPastoralCareRepository:
             raise PastoralCareConflictError(
                 "This pastoral care record changed. Reopen it and try again."
             )
+
+
+def _choice_values(rows):
+    """Parse the maintained JSON or historical bracketed-line choice format."""
+
+    if not rows:
+        return []
+    text = str(rows[0][1] or "").strip()
+    try:
+        values = json.loads(text)
+    except (TypeError, ValueError):
+        values = None
+    if not isinstance(values, list):
+        if text.startswith("[") and text.endswith("]"):
+            text = text[1:-1]
+        values = text.splitlines()
+    return [str(value).strip() for value in values if str(value).strip()]
