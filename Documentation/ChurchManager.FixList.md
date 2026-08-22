@@ -675,9 +675,12 @@ future roadmap projects:
   and separate create, assign, update, and close permissions. The MariaDB
   operational repository now provides parameterized safe-field reads,
   optimistic locking, active-assignee checks, and atomic safe audits for care
-  creation, assignment, actions, and status changes. Restricted-note entry
-  remains disabled until its encrypted repository and authorization path,
-  workflows, handoffs, reports, and remaining recovery acceptance pass.
+  creation, assignment, actions, and status changes. The restricted-note service
+  and repository now authorize the underlying care record before ciphertext
+  access, bind encryption to the allocated note identity, reject stale updates,
+  and atomically audit views and changes without narrative. User-interface note
+  entry remains disabled until workflows, handoffs, reports, and remaining
+  recovery acceptance pass.
   - Interactive protected backup/restore and application restart passed in
     `ChurchDBTest`; ciphertext and isolated cross-machine recovery acceptance
     remain.
