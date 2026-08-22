@@ -3,7 +3,7 @@
 **Audit date:** August 22, 2026  
 **Application version:** 0.3.0-dev  
 **Specification:** [Member giving and envelope tracking specification](ChurchManager.MemberGiving.Specification.md)  
-**Audit result:** First-release implementation complete; final acceptance pending
+**Audit result:** First-release implementation complete; final visual acceptance pending
 
 ## Executive result
 
@@ -54,9 +54,9 @@ rendered inspection of the newest reports remain release gates.
 | 11 | Privacy-safe memorial/honor acknowledgments | Pass | The protected Posted-gift acknowledgment list includes the donor and amount only when their separate disclosure flags explicitly authorize each value. |
 | 12 | Imports detect mappings and duplicates before writes | Pass | Preview is non-writing; confirmed import creates a new Draft batch and records evidence. |
 | 13 | Named-person directed gifts are held and clarified | Pass structurally; visual acceptance pending | Entry records instruction, disposition and resolution; completed reviews capture user/time; returned directions are excluded from deposit, ledger and statements; the protected review PDF is implemented. |
-| 14 | Backup/restore preserves Giving | Pass structurally; live rehearsal pending | The isolated restore rehearsal now creates, backs up, deletes, restores, and verifies a fictitious confidential contributor and envelope alongside the canonical migration ledger. |
+| 14 | Backup/restore preserves Giving | Pass | The isolated restore rehearsal created, backed up, deleted, restored, and verified a fictitious confidential contributor and envelope alongside the canonical 95-migration ledger on August 22, 2026. |
 | 15 | Support logs exclude confidential detail | Pass (automated) | Forced Giving errors verify that contributor, check/reference, envelope, address, and imported-row values are removed from both the local error log and generated support ZIP. |
-| 16 | Automated and rendered acceptance | Partial | Focused checks pass and previously exercised surfaces are accepted; the newest administration actions and operational PDFs still require visual acceptance, followed by the full post-baseline suite. |
+| 16 | Automated and rendered acceptance | Partial | The 794-test post-baseline suite passed with 25 intentional skips and no failures. Previously exercised surfaces are accepted; the newest administration actions and operational PDFs still require visual acceptance. |
 
 ## Required report inventory audit
 
@@ -77,9 +77,7 @@ rendered inspection of the newest reports remain release gates.
 
 ## Prioritized remaining work
 
-1. **Rehearse backup and restore.** Run the isolated post-migration rehearsal
-   and retain its evidence that confidential Giving records survive restore.
-2. **Run final rendered and user acceptance.** Exercise every criterion with the
+1. **Run final rendered and user acceptance.** Exercise every criterion with the
    fictitious dataset, inspect each protected PDF, update the inventories, and
    record release sign-off.
 

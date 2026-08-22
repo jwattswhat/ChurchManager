@@ -17,7 +17,7 @@ open-source church-management systems.
 | 5 | In acceptance | Hymnal, lectionary, and Order of Service catalogs | Order of Service and lectionary packaging are implemented and exercised; final human stanza verification blocks publication of the curated LSB hymnal package. |
 | 6 | In beta | Release, installation, and recovery readiness | Setup, upgrade, restore, backup, MSI, documentation, and beta installer foundations exist; repair/signing, current-beta packaging, and clean-machine exit acceptance remain. |
 | 6A | In progress | Open-source publication and distribution | Identity and website prototype are approved; ChurchManager history/privacy audit, public destinations, signed artifacts, and live links remain. |
-| 7 | In final acceptance | [Confidential member giving and envelopes](ChurchManager.MemberGiving.Specification.md) | First-release code and focused tests are complete; final migrations, baseline/restore, full suite, and rendered acceptance remain. Pledges are explicitly deferred. |
+| 7 | In final visual acceptance | [Confidential member giving and envelopes](ChurchManager.MemberGiving.Specification.md) | First-release code, migrations, installation baseline, full automated suite, and confidential-data restore rehearsal are complete; only final visual acceptance of the newest administration screens and protected reports remains. Pledges are explicitly deferred. |
 
 Posted-batch correction is implemented and accepted end to end: it creates a
 linked Ready accounting reversal, copies the original gifts into an editable
@@ -554,11 +554,10 @@ future roadmap projects:
 ### 7. Confidential member giving and envelopes
 
 - Approved design: [Member giving and envelope tracking specification](ChurchManager.MemberGiving.Specification.md).
-- **Status: First-release implementation complete; final acceptance pending.**
+- **Status: First-release implementation complete; final visual acceptance pending.**
   Pledges, online-giving provider integration, and statement email delivery are
   deferred capabilities rather than incomplete first-release work.
-- The completed first-release inventory and its remaining migration, baseline,
-  restore, full-suite, and rendered checks are maintained in
+- The completed first-release inventory and its remaining rendered checks are maintained in
   [Member Giving Acceptance Audit](ChurchManager.MemberGiving.AcceptanceAudit.md).
 - CSV contribution intake now provides explicit column mapping, a non-writing
   validation preview, red issue rows, protected source-file evidence, duplicate
