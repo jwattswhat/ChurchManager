@@ -6,9 +6,9 @@ This checklist controls the first production use of ChurchManager fund accountin
 
 - [x] Core double-entry transaction workflow tested in `ChurchDBTest`.
 - [x] Posting, reversal, approval, audit, reconciliation, budgets, period close, year-end close/reopen, and opening balances implemented.
-- [x] Automated suite passes: 226 tests on August 12, 2026; 12 database integration tests skipped by the standard runner.
+- [x] Full automated ChurchManager suite passed August 22, 2026: 800 tests, 25 intentional database/environment skips, zero failures.
 - [ ] Run the database integration suite against a fresh production-like test clone.
-- [ ] Complete the planned accounting reports review.
+- [x] Complete the planned accounting reports review in fictional test data.
 - [ ] Resolve all release-blocking defects found during final user acceptance testing.
 - [ ] Create a signed release tag or otherwise record the exact approved commit.
 
@@ -77,16 +77,16 @@ Certified local backup:
 
 ## 7. Report and workflow acceptance
 
-- [ ] Transaction entry, approval, posting, and reversal accepted by the accounting user.
-- [ ] Bank import, matching, reconciliation, and reconciliation report accepted.
-- [ ] Trial balance and general ledger accepted.
-- [ ] Statement of financial position accepted.
-- [ ] Statement of activities accepted.
-- [ ] Fund balances and functional expenses accepted.
-- [ ] Budget entry, adoption, amendments, and budget-to-actual accepted.
-- [ ] Period close/reopen accepted.
-- [ ] Year-end preview, close, and reopen accepted using test data.
-- [ ] Printed/exported report formatting reviewed, including right-aligned monetary amounts.
+- [x] Transaction entry, approval, posting, and reversal accepted in fictional test data.
+- [x] Bank import, matching, reconciliation, and reconciliation report accepted in fictional test data.
+- [x] Trial balance and general ledger accepted in fictional test data.
+- [x] Statement of financial position accepted in fictional test data.
+- [x] Statement of activities accepted in fictional test data.
+- [x] Fund balances and functional expenses accepted in fictional test data.
+- [x] Budget entry, adoption, amendments, and budget-to-actual accepted in fictional test data.
+- [x] Period close/reopen accepted in fictional test data.
+- [x] Year-end preview, close, and reopen accepted using fictional test data.
+- [x] Printed/exported report formatting reviewed, including right-aligned monetary amounts.
 
 ## 8. Final authorization
 

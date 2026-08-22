@@ -434,7 +434,10 @@ logs, or database backups. TEST MODE suppresses delivery.
 
 Use **Database Backup** regularly and before migrations, restore operations,
 year-end close, or major catalog changes. The default backup folder may be
-changed. An optional automatic backup can run when ChurchManager exits.
+changed. An optional automatic backup can run when ChurchManager exits. Keep
+the permanent backup folder outside MariaDB's data folder; preferably use a
+separate physical device or independently protected network location so one
+disk failure does not destroy both the database and its backups.
 
 ### Restore
 

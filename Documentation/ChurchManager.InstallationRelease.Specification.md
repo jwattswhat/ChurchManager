@@ -1,5 +1,10 @@
 # ChurchManager Installation, Upgrade, and Beta Release Specification
 
+Current implementation evidence is summarized in
+[ChurchManager Current Release Readiness](ChurchManager.ReleaseReadiness.Current.md).
+The dated 0.2.0 and 84-migration figures below are retained as historical beta
+acceptance evidence; they are not the current 0.3.0-dev baseline.
+
 **Status:** Approved
 
 **Date:** August 17, 2026

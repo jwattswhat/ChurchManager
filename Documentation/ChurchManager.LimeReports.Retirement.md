@@ -41,6 +41,10 @@ tracker were retired separately by migration 066.
 
 ## Acceptance checks
 
+Status: completed through the maintained report catalog and repeated user visual
+acceptance during development. Continue to sample these families in beta
+regression testing; do not reintroduce LimeReports.
+
 1. Apply migration 065 to `ChurchDBTest` with ChurchManager closed.
 2. Open the Reports screen and confirm no retired code is listed.
 3. Run at least one report from each permission family: general, attendance,

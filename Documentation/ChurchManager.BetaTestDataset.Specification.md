@@ -1,6 +1,6 @@
 # ChurchManager Beta Test Dataset Specification
 
-Status: Approved development requirement; implementation pending  
+Status: Versioned dataset manifest and guarded component reset services implemented; isolated end-to-end acceptance pending
 Dataset identifier: `churchmanager-beta-test-data`  
 Initial dataset version: `1.0.0`
 
@@ -122,3 +122,8 @@ The dataset is source-controlled but excluded from ordinary baseline seed SQL.
 The next beta installer may bundle it as an optional component. Updating the
 dataset does not require changing normal installation defaults. A dataset
 version change and its verification manifest are committed together.
+
+The canonical manifest is `TestData/BetaDataset/manifest.json`. Its ordered
+stages use the existing guarded reset/seed services, each of which refuses
+non-local production targets. The optional installer integration remains
+deferred until the next beta installer is intentionally rebuilt.

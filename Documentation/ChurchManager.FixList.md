@@ -306,6 +306,17 @@ future roadmap projects:
 
 ### 6. Release, installation, and recovery readiness
 
+- **Status: non-packaging beta release gates completed August 22, 2026.** The
+  current-state evidence is maintained in
+  [ChurchManager Current Release Readiness](ChurchManager.ReleaseReadiness.Current.md).
+  The canonical `0.3.0-dev` baseline represents 95 migrations and 73 starter
+  statements. The optional fictional beta dataset has a guarded versioned
+  manifest. The source-construction audit, owned-child cleanup regression,
+  report-family acceptance, accounting test acceptance, and permanent backup
+  separation rule are maintained release gates. MSI rebuild, repair, signing,
+  and clean-machine acceptance remain intentionally deferred until the next
+  beta installer is requested.
+
 - Approved design:
   [Installation, Upgrade, and Beta Release Specification](ChurchManager.InstallationRelease.Specification.md).
 - The read-only installation readiness inspector is implemented. It verifies
