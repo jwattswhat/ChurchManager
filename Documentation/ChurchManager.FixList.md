@@ -14,7 +14,7 @@ open-source church-management systems.
 | 2 | Completed | Email and participant notification review | The weekly participant-notification workflow has been modernized. |
 | 3 | Completed | Optional user-to-person relationship | Nullable links, administration, safe auditing, welcome email, migration, and acceptance are complete. |
 | 4 | Implemented; deployment check | Secure SMTP connection and email settings | Credential-safe settings and shared mail delivery are implemented; each installed congregation must enter and test its own provider credential. |
-| 5 | In acceptance | Hymnal, lectionary, and Order of Service catalogs | Order of Service and lectionary packaging are implemented and exercised; final human stanza verification blocks publication of the curated LSB hymnal package. |
+| 5 | Completed | Hymnal, lectionary, and Order of Service catalogs | The permanent-ID and metadata-only catalog frameworks, local maintenance, included Historic One-Year Lectionary, and LSB Order of Service outlines are implemented and accepted. The unverified curated LSB hymnal package is intentionally withheld and is not a release requirement. |
 | 6 | In beta | Release, installation, and recovery readiness | Setup, upgrade, restore, backup, MSI, documentation, and beta installer foundations exist; repair/signing, current-beta packaging, and clean-machine exit acceptance remain. |
 | 6A | In progress | Open-source publication and distribution | Identity and website prototype are approved; ChurchManager history/privacy audit, public destinations, signed artifacts, and live links remain. |
 | 7 | Completed | [Confidential member giving and envelopes](ChurchManager.MemberGiving.Specification.md) | The approved first-release scope passed migrations, installation baseline, full automated suite, confidential-data restore rehearsal, and final visual acceptance. Pledges are explicitly deferred. |
@@ -33,7 +33,7 @@ from Sent to Accounting in the batch list.
 | 13 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
 | Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
 
-Finish the acceptance gates for items 5 and 6 before beginning item 8.
+Finish the acceptance gate for item 6 before beginning item 8.
 Items 8 through 11 form the next ministry-development phase. Items 12 through
 13 should not delay a stable ChurchManager release.
 
@@ -156,9 +156,11 @@ future roadmap projects:
   intentional uppercase abbreviations remain uppercase.
 - Migration 074 is accepted on `ChurchDBTest`, and local hymn creation and
   retirement have passed visual acceptance. The deterministic LSB package
-  builder and 636-row stanza-review ledger are implemented. Remaining catalog
-  work is human verification of every printed stanza count; the builder refuses
-  to publish the final package while any row remains pending or lacks evidence.
+  builder and 636-row stanza-review ledger are retained as optional future
+  curation tools. All 636 rows remain explicitly unverified, so the builder
+  correctly refuses to publish an LSB hymnal package. That package is
+  intentionally withheld and is not part of the completed catalog release
+  scope.
 
 - Use [Hymnal Research and Recommendations](ChurchManager.HymnalResearchAndRecommendations.md)
   as the starting point for the multi-hymnal catalog design.
@@ -184,15 +186,12 @@ future roadmap projects:
 - Use [Revised Common Lectionary Research](ChurchManager.RevisedCommonLectionary.Research.md)
   as the starting point for denomination-neutral lectionary support.
 - The package loader, fail-closed metadata-only validator, reference exporter,
-  additive versioned-catalog migration, and transactional package importer are
-  implemented. Service-owned reading snapshots are implemented for newly saved
-  services and used by the Worship Planning report. Installer integration,
-  clean cutover, and candidate package provenance remain in progress. The
-  bounded calendar resolver, explicit Worship Service candidate-selection UI,
-  and protected package installation screen are implemented; approved package
-  calendar data remains to be supplied. The provenance-gated reproducible
-  package builder and authoring guide are implemented; no candidate package is
-  approved merely by this tooling.
+  additive versioned-catalog migration, transactional package importer,
+  service-owned reading snapshots, bounded calendar resolver, explicit Worship
+  Service candidate selection, protected package screen, provenance-gated
+  builder, and authoring guide are implemented. Optional selection during a
+  fresh installation remains part of release-readiness item 6 rather than this
+  completed catalog-design item.
 - The official CCT and CPH policies were reviewed August 17, 2026. Public LSB
   and RCL packages are blocked pending written electronic-redistribution
   permission. Narrow permission-request drafts and the local-only fallback are
@@ -202,10 +201,10 @@ future roadmap projects:
   Epistle and Gospel appointments derived from the public-domain 1919 Common
   Service Book. The package manager opens in the included-package directory so
   an administrator can install it without locating an internal source folder.
-- Remaining acceptance for the included package is installation through the
-  protected package screen, selection as the church default edition, creation
-  of a new Worship Service, and verification of its Proper, readings,
-  liturgical date, color, and Worship Planning report.
+- The included package passed installation through the protected package
+  screen, selection as the church default edition, Worship Service use, and
+  verification of its Proper, readings, liturgical date, color, and Worship
+  Planning report.
 - Migration 083 removes the obsolete required `tblLectionarySystem.OldID`
   column found on databases upgraded from the original application. Package
   installation now creates systems solely through their stable package keys.
