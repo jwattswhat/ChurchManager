@@ -226,6 +226,14 @@ original batch remains in the audit history with Void status.
 Once a Ready batch has created its summarized accounting transaction, the batch
 list displays **Sent to Accounting** until that transaction is posted.
 
+For a returned check, select its Posted batch and choose **Returned Check...**.
+Select the check, enter the bank return date and an audit reason, and confirm the
+correction. ChurchManager creates the full summarized accounting reversal and a
+Draft replacement batch that omits only the returned check. Post the reversal
+before reviewing and sending the replacement batch. The original gift remains
+unchanged in the protected audit history, and donor identity never enters the
+accounting reversal.
+
 ### Giving reports
 
 Open **Giving Reports** for operational review. **Batch Control Summary** shows

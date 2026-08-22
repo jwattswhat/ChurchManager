@@ -522,7 +522,7 @@ class BatchCatalogDialog(wx.Dialog):
     """List Giving batches that still require entry or accounting handoff."""
 
     def __init__(self, parent, connection, session, authorization, test_mode=False):
-        super().__init__(parent, title="Contribution Batches", size=(920, 570),
+        super().__init__(parent, title="Contribution Batches", size=(1120, 570),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.service = DraftBatchService(connection, session.user_id, authorization)
         self.authorization = authorization
@@ -546,6 +546,8 @@ class BatchCatalogDialog(wx.Dialog):
         return_draft.Enable(self.can_review);buttons.Add(return_draft,0,wx.RIGHT,6)
         correct=wx.Button(panel,label="Correct Posted Batch...")
         correct.Bind(wx.EVT_BUTTON,self.on_correct);correct.Enable(self.can_post);buttons.Add(correct,0,wx.RIGHT,6)
+        returned=wx.Button(panel,label="Returned Check...")
+        returned.Bind(wx.EVT_BUTTON,self.on_returned_check);returned.Enable(self.can_post);buttons.Add(returned,0,wx.RIGHT,6)
         buttons.AddStretchSpacer();close=wx.Button(panel,wx.ID_CLOSE);close.Bind(wx.EVT_BUTTON,lambda _e:self.EndModal(wx.ID_CLOSE));buttons.Add(close)
         outer.Add(buttons,0,wx.EXPAND|wx.ALL,12);panel.SetSizer(outer);self.refresh()
 
@@ -631,6 +633,40 @@ class BatchCatalogDialog(wx.Dialog):
         finally:
             dialog.Destroy()
 
+    def on_returned_check(self, _event=None):
+        """Create a linked correction that removes one returned check."""
+        selected = self.list.GetFirstSelected()
+        if selected < 0 or self.rows[selected][7] != "POSTED":
+            wx.MessageBox("Select a Posted contribution batch.", "Returned Check",
+                          wx.OK | wx.ICON_INFORMATION, self); return
+        service = PostedBatchCorrectionService(
+            self.service.connection, self.service.user_id, self.authorization)
+        try:
+            checks = service.posted_checks(self.rows[selected][0])
+            if not checks:
+                wx.MessageBox("This posted batch has no checks available to mark returned.",
+                              "Returned Check", wx.OK | wx.ICON_INFORMATION, self); return
+            dialog = ReturnedCheckDialog(self, checks)
+            try:
+                if dialog.ShowModal() != wx.ID_OK: return
+                contribution_id, return_date, reason = dialog.values()
+            finally:
+                dialog.Destroy()
+            if wx.MessageBox(
+                    "Create a full accounting reversal and a replacement batch without this check?\n\n"
+                    "The reversal must be posted before the replacement can be sent to Accounting.",
+                    "Record Returned Check", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES:
+                return
+            replacement, reversal = service.create_returned_check(
+                self.rows[selected][0], contribution_id, return_date, reason)
+            wx.MessageBox(
+                f"Replacement batch {replacement} was created without the returned check. "
+                f"Accounting reversal {reversal} is Ready.",
+                "Returned Check Recorded", wx.OK | wx.ICON_INFORMATION, self)
+            self.refresh(); self._open(replacement)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Record Returned Check", wx.OK | wx.ICON_ERROR, self)
+
     def _open(self,batch_id):
         dialog=BatchEditorDialog(self,self.service,batch_id,self.can_review)
         try:dialog.ShowModal()
@@ -654,6 +690,35 @@ class PostedBatchCorrectionDialog(wx.Dialog):
     def correction_date(self):
         """Return the selected correction date as a Python date."""
         return _date(self.date)
+
+
+class ReturnedCheckDialog(wx.Dialog):
+    """Select one posted check and collect its return date and reason."""
+
+    def __init__(self, parent, checks):
+        super().__init__(parent, title="Record Returned Contribution Check")
+        self.checks = checks
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        outer.Add(wx.StaticText(panel, label=(
+            "The original posted batch remains unchanged. ChurchManager will create an accounting "
+            "reversal and a replacement batch without the selected check."
+        )), 0, wx.EXPAND | wx.ALL, 12)
+        form = wx.FlexGridSizer(0, 2, 8, 10); form.AddGrowableCol(1, 1)
+        labels = [f"{row[1]} — check {row[2] or '(no reference)'} — ${row[3]:,.2f}" for row in checks]
+        self.check = wx.Choice(panel, choices=labels); self.check.SetSelection(0)
+        self.date = wx.adv.DatePickerCtrl(panel)
+        self.reason = wx.TextCtrl(panel, style=wx.TE_MULTILINE, size=(520, 100))
+        for label, control in (("Returned check", self.check), ("Return date", self.date),
+                               ("Reason / bank notice", self.reason)):
+            form.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+            form.Add(control, 1, wx.EXPAND)
+        outer.Add(form, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        outer.Add(_dialog_buttons(panel), 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        panel.SetSizer(outer); outer.Fit(self)
+
+    def values(self):
+        """Return the selected contribution, date, and required audit reason."""
+        return self.checks[self.check.GetSelection()][0], _date(self.date), self.reason.GetValue()
 
 
 def show_contribution_batches(parent, connection, session, authorization, test_mode=False):

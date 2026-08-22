@@ -31,6 +31,27 @@ class GivingCorrectionContractTests(unittest.TestCase):
         self.assertIn("reason for correction", source.lower())
         self.assertIn("Sent to Accounting", source)
 
+    def test_returned_check_uses_reversal_and_omits_only_selected_check(self):
+        source = (ROOT / "giving" / "correction_service.py").read_text(encoding="utf-8")
+        self.assertIn("create_returned_check", source)
+        self.assertIn("gift[0] == returned[0]", source)
+        self.assertIn("INSERT INTO tblContributionReturn", source)
+        self.assertIn("CONTRIBUTION_CHECK_RETURNED", source)
+
+    def test_returned_check_is_an_explicit_catalog_action(self):
+        source = (ROOT / "giving" / "batch_dialog.py").read_text(encoding="utf-8")
+        self.assertIn("Returned Check...", source)
+        self.assertIn("Record Returned Contribution Check", source)
+        self.assertIn("replacement batch without the selected check", source)
+
+    def test_returned_check_schema_links_giving_and_accounting(self):
+        source = (ROOT / "migrations" / "094_add_returned_contribution_checks.sql").read_text(
+            encoding="utf-8"
+        )
+        for field in ("OriginalContributionID", "OriginalBatchID", "ReplacementBatchID",
+                      "ReversalAccountingTransactionID", "ReturnDate", "Reason"):
+            self.assertIn(field, source)
+
 
 if __name__ == "__main__":
     unittest.main()

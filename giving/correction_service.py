@@ -16,7 +16,25 @@ class PostedBatchCorrectionService:
         self.user_id = int(user_id)
         self.authorization = authorization
 
-    def create(self, original_batch_id: int, reversal_date, reason: str) -> tuple[int, int]:
+    def posted_checks(self, original_batch_id: int):
+        """Return checks eligible for the explicit returned-check workflow."""
+        self.authorization.require("giving.batches.post", "record a returned contribution check")
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT g.ID,COALESCE(c.DisplayName,'Unidentified contributor'),g.ReferenceValue,g.Amount "
+                "FROM tblContribution g LEFT JOIN tblContributionContributor c ON c.ID=g.ContributorID "
+                "JOIN tblContributionBatch b ON b.ID=g.BatchID "
+                "LEFT JOIN tblContributionReturn r ON r.OriginalContributionID=g.ID "
+                "WHERE g.BatchID=? AND b.Status='POSTED' AND g.ContributionMethod='CHECK' AND r.ID IS NULL "
+                "ORDER BY c.DisplayName,g.ID", (original_batch_id,),
+            )
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def create(self, original_batch_id: int, reversal_date, reason: str,
+               returned_contribution_id: int | None = None) -> tuple[int, int]:
         """Return ``(replacement_batch_id, reversal_transaction_id)`` atomically."""
         self.authorization.require("giving.batches.post", "correct a posted Giving batch")
         reason = str(reason or "").strip()
@@ -37,6 +55,18 @@ class PostedBatchCorrectionService:
                 raise GivingValidationError("A correction already exists for this contribution batch.")
             if batch[10] is None:
                 raise GivingValidationError("The posted batch has no linked accounting transaction.")
+
+            returned = None
+            if returned_contribution_id is not None:
+                cursor.execute(
+                    "SELECT g.ID,g.ContributionMethod,g.Amount FROM tblContribution g "
+                    "LEFT JOIN tblContributionReturn r ON r.OriginalContributionID=g.ID "
+                    "WHERE g.ID=? AND g.BatchID=? AND r.ID IS NULL FOR UPDATE",
+                    (returned_contribution_id, original_batch_id),
+                )
+                returned = cursor.fetchone()
+                if not returned or returned[1] != "CHECK":
+                    raise GivingValidationError("Select an unreturned check from this posted batch.")
 
             cursor.execute(
                 "SELECT OrganizationID,TransactionNumber,Status,OriginalTransactionID,ReversalTransactionID "
@@ -80,7 +110,9 @@ class PostedBatchCorrectionService:
                 "BankAccountID,Status,ControlTotal,CalculatedTotal,EnteredByUserID,CorrectsBatchID,CorrectionReason) "
                 "VALUES (?,?,?,?,?,?,?,?, 'DRAFT',?,?, ?,?,?)",
                 (batch[0], reversal_date, f"Correction - {batch[2]}"[:255], batch[3], batch[4],
-                 reversal_date, batch[6], batch[7], batch[8], batch[9], self.user_id,
+                 reversal_date, batch[6], batch[7],
+                 (batch[8] - returned[2]) if returned and batch[8] is not None else batch[8],
+                 batch[9] - returned[2] if returned else batch[9], self.user_id,
                  original_batch_id, reason),
             )
             replacement_id = cursor.lastrowid
@@ -94,6 +126,8 @@ class PostedBatchCorrectionService:
                 (original_batch_id,),
             )
             for gift in cursor.fetchall():
+                if returned and gift[0] == returned[0]:
+                    continue
                 cursor.execute(
                     "INSERT INTO tblContribution "
                     "(BatchID,CorrectionOfContributionID,ContributorID,EnteredEnvelopeNumber,ContributionMethod,"
@@ -133,6 +167,22 @@ class PostedBatchCorrectionService:
                 (batch[0], self.user_id, original_batch_id,
                  f"Replacement batch {replacement_id}; reversal transaction {reversal_id}"),
             )
+            if returned:
+                cursor.execute(
+                    "INSERT INTO tblContributionReturn "
+                    "(ChurchID,OriginalContributionID,OriginalBatchID,ReplacementBatchID,"
+                    "ReversalAccountingTransactionID,ReturnDate,Reason,RecordedByUserID) "
+                    "VALUES (?,?,?,?,?,?,?,?)",
+                    (batch[0], returned[0], original_batch_id, replacement_id, reversal_id,
+                     reversal_date, reason, self.user_id),
+                )
+                cursor.execute(
+                    "INSERT INTO tblContributionAuditEvent "
+                    "(ChurchID,UserID,Action,EntityType,EntityID,SafeReference,Reason) "
+                    "VALUES (?,?,'CONTRIBUTION_CHECK_RETURNED','CONTRIBUTION',?,?,?)",
+                    (batch[0], self.user_id, returned[0],
+                     f"Replacement batch {replacement_id}; reversal transaction {reversal_id}", reason),
+                )
             self.connection.commit()
             return replacement_id, reversal_id
         except Exception:
@@ -140,3 +190,8 @@ class PostedBatchCorrectionService:
             raise
         finally:
             cursor.close()
+
+    def create_returned_check(self, original_batch_id: int, contribution_id: int,
+                              return_date, reason: str) -> tuple[int, int]:
+        """Correct a posted batch while omitting one returned check from its replacement."""
+        return self.create(original_batch_id, return_date, reason, contribution_id)
