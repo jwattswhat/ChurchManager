@@ -159,6 +159,26 @@ offering, special collection, or other deposit. Enter the batch date,
 description, accounting organization, and—when known—the expected control
 total. Open the batch and add each monetary contribution.
 
+Choose **Import CSV** to map the columns in an electronic-giving or spreadsheet
+export. The preview reads the file without changing the database and marks
+unknown envelopes, contributors, purposes, conflicting identities, and possible
+duplicates in red. Import is not available until every row is resolved. After
+all rows are Ready, select the accounting organization, receiving bank account,
+deposit date, and batch description, then choose **Import Ready Rows to Draft
+Batch**. ChurchManager creates a new Draft batch; it does not post the gifts.
+The exact source CSV is retained in protected ChurchManager storage with its
+file hash and mapping, and the same file cannot be imported twice.
+The development test dataset includes `GivingImport.Valid.Sample.csv` and
+`GivingImport.Issues.Sample.csv` in the `TestData` folder for exercising both
+successful and flagged previews.
+
+A Draft cannot be marked Ready unless its deposit date belongs to exactly one
+open fiscal period for its accounting organization. If an unsent Ready batch
+needs correction, select it in Contribution Batches and choose **Return Ready
+to Draft**. Use **Edit Batch Details** to correct its deposit date; the screen
+shows the accounting organization's currently open fiscal-period range. Batches
+already sent to Accounting cannot be returned this way.
+
 Choose a contributor directly or enter an envelope number and leave the
 contributor at **Anonymous / resolve from envelope**. ChurchManager resolves
 the envelope assignment that was effective on the gift's received date. A gift

@@ -57,6 +57,7 @@ giving-register prototype.
 | `tblContribution` | Individual confidential gifts, acknowledgment facts, and directed-gift review status. |
 | `tblContributionAllocation` | Exact monetary division of a gift among approved funds, revenue accounts, and required functional classifications. |
 | `tblContributionAuditEvent` | Privacy-safe Giving audit events without copied donor or gift detail. |
+| `tblContributionImportEvidence` | Protected source-file identity, mapping, totals, and audit linkage for one confirmed CSV-to-Draft import. |
 
 Giving data is a confidential subledger. It is not exposed through ordinary
 accounting screens, unrestricted report design, support logs, or general-ledger

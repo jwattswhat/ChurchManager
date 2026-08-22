@@ -48,8 +48,8 @@ class Connection:
     def __init__(self):
         self.calls, self.commits, self.rollbacks = [], 0, 0
         self.batch, self.envelopes = (4, "DRAFT"), []
-        self.totals = (Decimal("25.00"), Decimal("25.00"), date(2026, 8, 21), 2)
-        self.review_counts = [0, 0, 0, 0, 0, 0]
+        self.totals = (Decimal("25.00"), Decimal("25.00"), date(2026, 8, 21), 2, 4)
+        self.review_counts = [1, 0, 0, 0, 0, 0, 0]
     def cursor(self): return Cursor(self)
     def commit(self): self.commits += 1
     def rollback(self): self.rollbacks += 1
@@ -104,8 +104,8 @@ class DraftBatchServiceTests(unittest.TestCase):
 
     def test_review_reports_control_difference_and_unresolved_items(self):
         connection = Connection()
-        connection.totals = (Decimal("30.00"), Decimal("25.00"), date(2026, 8, 21), 2)
-        connection.review_counts = [1, 0, 0, 0, 0, 0]
+        connection.totals = (Decimal("30.00"), Decimal("25.00"), date(2026, 8, 21), 2, 4)
+        connection.review_counts = [1, 1, 0, 0, 0, 0, 0]
         issues = DraftBatchService(connection, 3).review_issues(21)
         self.assertIn("control total", " ".join(issues))
         self.assertIn("envelope", " ".join(issues))
@@ -116,6 +116,46 @@ class DraftBatchServiceTests(unittest.TestCase):
         self.assertEqual(connection.commits, 1)
         self.assertTrue(any("Status='READY'" in sql for sql, _ in connection.calls))
         self.assertTrue(any("BATCH_MARKED_READY" in str(values) for _, values in connection.calls))
+
+    def test_invalid_deposit_period_prevents_ready_status(self):
+        connection = Connection(); connection.review_counts[0] = 0
+        issues = DraftBatchService(connection, 3).review_issues(21)
+        self.assertIn("open fiscal period", " ".join(issues))
+
+    def test_unsent_ready_batch_can_return_to_draft(self):
+        connection = Connection()
+        original_execute = Cursor.execute
+        def execute(cursor, sql, values=()):
+            original_execute(cursor, sql, values)
+            if sql.startswith("UPDATE tblContributionBatch SET Status='DRAFT'"):
+                cursor.rowcount = 1
+        Cursor.execute = execute
+        try:
+            DraftBatchService(connection, 3).return_to_draft(21)
+        finally:
+            Cursor.execute = original_execute
+        self.assertEqual(connection.commits, 1)
+        self.assertIn("BATCH_RETURNED_TO_DRAFT", str(connection.calls))
+
+    def test_draft_batch_header_update_is_audited(self):
+        connection = Connection()
+        original_execute = Cursor.execute
+        def execute(cursor, sql, values=()):
+            original_execute(cursor, sql, values)
+            if sql.startswith("SELECT OrganizationID FROM tblContributionBatch"):
+                cursor.rows = [(4,)]
+            elif sql.startswith("UPDATE tblContributionBatch SET BatchDate"):
+                cursor.rowcount = 1
+        Cursor.execute = execute
+        try:
+            DraftBatchService(connection, 3).update_batch_header(
+                21, batch_date=date(2027, 1, 7), description="Imported gifts",
+                organization_id=4, control_total="65", deposit_date=date(2027, 1, 15),
+                bank_account_id=2)
+        finally:
+            Cursor.execute = original_execute
+        self.assertEqual(connection.commits, 1)
+        self.assertIn("BATCH_HEADER_UPDATED", str(connection.calls))
 
     def test_update_replaces_allocations_and_recalculates_total(self):
         connection = Connection()

@@ -543,7 +543,8 @@ def _buttonclick(event):
             return
         case "lblContributionBatches":
             show_contribution_batches(
-                cmfrm.FRAME, context.connection, context.session, context.authorization
+                cmfrm.FRAME, context.connection, context.session, context.authorization,
+                context.test_mode,
             )
             return
         case "lblGivingReports":

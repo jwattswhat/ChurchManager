@@ -1432,6 +1432,32 @@ CREATE TABLE `tblcontributionenvelopeassignment` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblcontributionimportevidence` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `BatchID` bigint(20) NOT NULL,
+  `StoredPath` varchar(255) NOT NULL,
+  `OriginalName` varchar(255) NOT NULL,
+  `FileHash` char(64) NOT NULL,
+  `FileSize` bigint(20) NOT NULL,
+  `MappingJSON` longtext NOT NULL,
+  `RowCount` int(11) NOT NULL,
+  `ImportedTotal` decimal(19,2) NOT NULL,
+  `ImportedByUserID` int(11) NOT NULL,
+  `ImportedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_contribution_import_file` (`ChurchID`,`FileHash`),
+  UNIQUE KEY `uq_contribution_import_batch` (`BatchID`),
+  KEY `fk_contribution_import_user` (`ImportedByUserID`),
+  CONSTRAINT `fk_contribution_import_batch` FOREIGN KEY (`BatchID`) REFERENCES `tblcontributionbatch` (`ID`),
+  CONSTRAINT `fk_contribution_import_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_contribution_import_user` FOREIGN KEY (`ImportedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_contribution_import_rows` CHECK (`RowCount` > 0),
+  CONSTRAINT `ck_contribution_import_total` CHECK (`ImportedTotal` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblcontributionpurpose` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
   `ChurchID` int(11) NOT NULL,

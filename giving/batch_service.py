@@ -63,6 +63,15 @@ class DraftBatchService:
             (organization_id,),
         )
 
+    def open_fiscal_periods(self, organization_id):
+        """Return open fiscal periods so deposit dates never require guesswork."""
+        return self.all(
+            "SELECT p.Name,p.StartDate,p.EndDate FROM tblAccountingFiscalPeriod p "
+            "JOIN tblAccountingFiscalYear y ON y.ID=p.FiscalYearID "
+            "WHERE y.OrganizationID=? AND y.Status='OPEN' AND p.Status='OPEN' "
+            "ORDER BY p.StartDate,p.ID", (organization_id,),
+        )
+
     def contributors(self):
         """Return active contributor identities for confidential entry."""
         return self.all("SELECT ID,DisplayName FROM tblContributionContributor "
@@ -140,6 +149,47 @@ class DraftBatchService:
         except Exception:
             self.connection.rollback()
             raise
+        finally:
+            cursor.close()
+
+    def update_batch_header(self, batch_id, *, batch_date, description, organization_id,
+                            control_total=None, deposit_date=None, bank_account_id=None):
+        """Update the control header of an existing Draft batch."""
+        description = str(description or "").strip()
+        if not description:
+            raise GivingValidationError("Batch description is required.")
+        control = self._optional_money(control_total, "Control total")
+        if control is not None and control < 0:
+            raise GivingValidationError("Control total cannot be negative.")
+        church_id = self.church_id(); cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT OrganizationID FROM tblContributionBatch WHERE ID=? AND ChurchID=? "
+                "AND Status='DRAFT' FOR UPDATE", (batch_id, church_id),
+            )
+            row = cursor.fetchone()
+            if not row:
+                raise GivingValidationError("Only a Draft batch can be changed.")
+            if row[0] != organization_id:
+                raise GivingValidationError("The accounting organization cannot be changed after batch creation.")
+            cursor.execute(
+                "SELECT COUNT(*) FROM tblAccountingBankAccount WHERE ID=? AND OrganizationID=? AND Active=1",
+                (bank_account_id, organization_id),
+            )
+            if bank_account_id is not None and cursor.fetchone()[0] != 1:
+                raise GivingValidationError("Select an active bank account for this organization.")
+            cursor.execute(
+                "UPDATE tblContributionBatch SET BatchDate=?,Description=?,DepositDate=?,BankAccountID=?,"
+                "ControlTotal=?,Version=Version+1 WHERE ID=? AND ChurchID=? AND Status='DRAFT'",
+                (batch_date, description, deposit_date, bank_account_id, control, batch_id, church_id),
+            )
+            if cursor.rowcount != 1:
+                raise GivingValidationError("The Draft batch could not be updated.")
+            self._audit(cursor, church_id, "BATCH_HEADER_UPDATED", "BATCH", batch_id,
+                        f"Draft batch {batch_id}")
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback(); raise
         finally:
             cursor.close()
 
@@ -312,7 +362,7 @@ class DraftBatchService:
             cursor.close()
 
     def _review_issues(self, cursor, batch_id, church_id):
-        cursor.execute("SELECT ControlTotal,CalculatedTotal,DepositDate,BankAccountID FROM tblContributionBatch "
+        cursor.execute("SELECT ControlTotal,CalculatedTotal,DepositDate,BankAccountID,OrganizationID FROM tblContributionBatch "
                        "WHERE ID=? AND ChurchID=?", (batch_id, church_id))
         batch = cursor.fetchone()
         if not batch: return ["The batch is unavailable."]
@@ -321,6 +371,16 @@ class DraftBatchService:
         if batch[0] is not None and batch[0] != batch[1]: issues.append("The entered total does not equal the control total.")
         if batch[2] is None: issues.append("Enter the bank deposit date.")
         if batch[3] is None: issues.append("Select the bank account receiving the deposit.")
+        if batch[2] is not None:
+            cursor.execute(
+                "SELECT COUNT(*) FROM tblAccountingFiscalPeriod p "
+                "JOIN tblAccountingFiscalYear y ON y.ID=p.FiscalYearID "
+                "WHERE y.OrganizationID=? AND ? BETWEEN p.StartDate AND p.EndDate "
+                "AND y.Status='OPEN' AND p.Status='OPEN'",
+                (batch[4], batch[2]),
+            )
+            if cursor.fetchone()[0] != 1:
+                issues.append("The deposit date must belong to exactly one open fiscal period.")
         checks = (
             ("SELECT COUNT(*) FROM tblContribution WHERE BatchID=? AND EnteredEnvelopeNumber IS NOT NULL "
              "AND EnteredEnvelopeNumber<>'' AND ContributorID IS NULL",
@@ -355,6 +415,26 @@ class DraftBatchService:
             cursor.execute(sql, (batch_id,))
             if cursor.fetchone()[0]: issues.append(message)
         return issues
+
+    def return_to_draft(self, batch_id):
+        """Return an unsent Ready batch to Draft for a controlled correction."""
+        church_id = self.church_id(); cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "UPDATE tblContributionBatch SET Status='DRAFT',ReviewedByUserID=NULL,ReviewedAt=NULL,"
+                "Version=Version+1 WHERE ID=? AND ChurchID=? AND Status='READY' "
+                "AND AccountingTransactionID IS NULL",
+                (batch_id, church_id),
+            )
+            if cursor.rowcount != 1:
+                raise GivingValidationError("Only an unsent Ready batch can be returned to Draft.")
+            self._audit(cursor, church_id, "BATCH_RETURNED_TO_DRAFT", "BATCH", batch_id,
+                        f"Draft batch {batch_id}")
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback(); raise
+        finally:
+            cursor.close()
 
     @staticmethod
     def _optional_money(value, label):

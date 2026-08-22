@@ -570,7 +570,9 @@ Rollout sequence:
    Batch Control Summary PDF and quarterly single/all-contributor statement
    previews, calendar-year and custom ranges, and identifiable issuance history
    are implemented. The remaining report inventory continues next.)*
-7. Add import preview and validation.
+7. Add CSV mapping, non-writing preview, validation, protected source evidence,
+   duplicate-file prevention, and confirmed import into a new Draft batch.
+   *(Implemented and accepted in ChurchDBTest.)*
 8. Create isolated test data and complete automated regression tests.
 9. Perform user acceptance with a sample collection, split gift, anonymous
    gift, reassigned envelope, correction, accounting reconciliation, and annual

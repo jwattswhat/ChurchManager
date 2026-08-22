@@ -28,8 +28,9 @@ def _dialog_buttons(panel):
 class NewBatchDialog(wx.Dialog):
     """Collect the small header required to begin a draft batch."""
 
-    def __init__(self, parent, service, organizations):
-        super().__init__(parent, title="New Contribution Batch", size=(560, 330))
+    def __init__(self, parent, service, organizations, batch=None):
+        super().__init__(parent, title=("Edit Contribution Batch" if batch else "New Contribution Batch"),
+                         size=(620, 390))
         self.service = service; self.organizations = organizations; self.bank_accounts = []
         panel = wx.Panel(self); form = wx.FlexGridSizer(0, 2, 9, 10); form.AddGrowableCol(1, 1)
         self.batch_date = wx.adv.DatePickerCtrl(panel)
@@ -39,11 +40,12 @@ class NewBatchDialog(wx.Dialog):
         self.control = wx.TextCtrl(panel)
         self.deposit = wx.adv.DatePickerCtrl(panel)
         self.has_deposit = wx.CheckBox(panel, label="Deposit date is known")
+        self.open_periods = wx.StaticText(panel)
         for label, control in (("Batch date", self.batch_date), ("Description", self.description),
                                ("Accounting organization", self.organization),
                                ("Deposit bank account", self.bank_account),
                                ("Expected/control total", self.control), ("", self.has_deposit),
-                               ("Deposit date", self.deposit)):
+                               ("Deposit date", self.deposit), ("Open fiscal periods", self.open_periods)):
             form.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
             form.Add(control, 1, wx.EXPAND)
         self.organization.SetSelection(0 if organizations else wx.NOT_FOUND)
@@ -53,6 +55,8 @@ class NewBatchDialog(wx.Dialog):
         buttons = _dialog_buttons(panel)
         outer = wx.BoxSizer(wx.VERTICAL); outer.Add(form, 1, wx.EXPAND | wx.ALL, 14)
         outer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14); panel.SetSizer(outer)
+        if batch:
+            self._load_batch(batch)
 
     def on_organization(self, _event=None):
         """Refresh eligible deposit accounts for the selected organization."""
@@ -63,6 +67,27 @@ class NewBatchDialog(wx.Dialog):
         )
         self.bank_account.Set([row[1] for row in self.bank_accounts])
         self.bank_account.SetSelection(0 if self.bank_accounts else wx.NOT_FOUND)
+        periods = self.service.open_fiscal_periods(
+            self.organizations[selected][0]) if selected >= 0 else []
+        if periods:
+            first, last = periods[0], periods[-1]
+            text = f"{first[1]:%m/%d/%Y} through {last[2]:%m/%d/%Y}"
+        else:
+            text = "None"
+        self.open_periods.SetLabel(text)
+
+    def _load_batch(self, batch):
+        """Populate a Draft header and keep its accounting organization fixed."""
+        self.batch_date.SetValue(wx.DateTime.FromDMY(batch[1].day, batch[1].month - 1, batch[1].year))
+        self.description.SetValue(batch[2]); self.organization.SetSelection(next(
+            (index for index, row in enumerate(self.organizations) if row[0] == batch[3]), wx.NOT_FOUND))
+        self.organization.Enable(False); self.on_organization()
+        bank_index = next((index for index, row in enumerate(self.bank_accounts) if row[0] == batch[9]), wx.NOT_FOUND)
+        self.bank_account.SetSelection(bank_index)
+        self.control.SetValue("" if batch[4] is None else f"{batch[4]:.2f}")
+        self.has_deposit.SetValue(batch[8] is not None); self.deposit.Enable(batch[8] is not None)
+        if batch[8] is not None:
+            self.deposit.SetValue(wx.DateTime.FromDMY(batch[8].day, batch[8].month - 1, batch[8].year))
 
     def values(self):
         selected = self.organization.GetSelection()
@@ -207,7 +232,9 @@ class BatchEditorDialog(wx.Dialog):
         buttons = wx.BoxSizer(wx.HORIZONTAL); add = wx.Button(panel, label="Add Contribution")
         edit = wx.Button(panel, label="Edit Contribution"); delete = wx.Button(panel, label="Delete Contribution")
         add.Bind(wx.EVT_BUTTON, self.on_add); edit.Bind(wx.EVT_BUTTON, self.on_edit); delete.Bind(wx.EVT_BUTTON, self.on_delete)
-        buttons.Add(add,0,wx.RIGHT,6); buttons.Add(edit,0,wx.RIGHT,6); buttons.Add(delete); buttons.AddStretchSpacer()
+        details = wx.Button(panel, label="Edit Batch Details")
+        details.Bind(wx.EVT_BUTTON, self.on_details)
+        buttons.Add(details,0,wx.RIGHT,6); buttons.Add(add,0,wx.RIGHT,6); buttons.Add(edit,0,wx.RIGHT,6); buttons.Add(delete); buttons.AddStretchSpacer()
         review = wx.Button(panel, label="Review / Mark Ready")
         review.Bind(wx.EVT_BUTTON, self.on_review); review.Enable(can_review); buttons.Add(review, 0, wx.RIGHT, 8)
         close = wx.Button(panel, wx.ID_CLOSE); close.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_CLOSE)); buttons.Add(close)
@@ -233,6 +260,16 @@ class BatchEditorDialog(wx.Dialog):
                 self.service.save_monetary_gift(**dialog.values()); self.refresh()
         except Exception as error: wx.MessageBox(str(error), "Unable to Save Contribution", wx.OK | wx.ICON_ERROR, self)
         finally: dialog.Destroy()
+
+    def on_details(self, _event=None):
+        dialog = NewBatchDialog(self, self.service, self.service.organizations(), self.batch)
+        try:
+            if dialog.ShowModal() == wx.ID_OK:
+                self.service.update_batch_header(self.batch_id, **dialog.values()); self.refresh()
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Update Batch", wx.OK | wx.ICON_ERROR, self)
+        finally:
+            dialog.Destroy()
 
     def on_edit(self, _event=None):
         selected = self.list.GetFirstSelected()
@@ -272,11 +309,12 @@ class BatchEditorDialog(wx.Dialog):
 class BatchCatalogDialog(wx.Dialog):
     """List Giving batches that still require entry or accounting handoff."""
 
-    def __init__(self, parent, connection, session, authorization):
+    def __init__(self, parent, connection, session, authorization, test_mode=False):
         super().__init__(parent, title="Contribution Batches", size=(920, 570),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.service = DraftBatchService(connection, session.user_id)
         self.authorization = authorization
+        self.test_mode = bool(test_mode)
         self.can_review = authorization.has_permission("giving.batches.review")
         self.can_post = authorization.has_permission("giving.batches.post"); panel = wx.Panel(self)
         outer = wx.BoxSizer(wx.VERTICAL); heading = wx.StaticText(panel, label="Contribution Batches")
@@ -287,8 +325,13 @@ class BatchCatalogDialog(wx.Dialog):
         buttons=wx.BoxSizer(wx.HORIZONTAL)
         for label,handler in (("New Batch",self.on_new),("Open Batch",self.on_open)):
             button=wx.Button(panel,label=label);button.Bind(wx.EVT_BUTTON,handler);buttons.Add(button,0,wx.RIGHT,6)
+        import_csv=wx.Button(panel,label="Import CSV...")
+        import_csv.Bind(wx.EVT_BUTTON,self.on_import);buttons.Add(import_csv,0,wx.RIGHT,6)
         send=wx.Button(panel,label="Send Ready Batch to Accounting")
         send.Bind(wx.EVT_BUTTON,self.on_send);send.Enable(self.can_post);buttons.Add(send,0,wx.RIGHT,6)
+        return_draft=wx.Button(panel,label="Return Ready to Draft")
+        return_draft.Bind(wx.EVT_BUTTON,self.on_return_to_draft)
+        return_draft.Enable(self.can_review);buttons.Add(return_draft,0,wx.RIGHT,6)
         correct=wx.Button(panel,label="Correct Posted Batch...")
         correct.Bind(wx.EVT_BUTTON,self.on_correct);correct.Enable(self.can_post);buttons.Add(correct,0,wx.RIGHT,6)
         buttons.AddStretchSpacer();close=wx.Button(panel,wx.ID_CLOSE);close.Bind(wx.EVT_BUTTON,lambda _e:self.EndModal(wx.ID_CLOSE));buttons.Add(close)
@@ -308,6 +351,11 @@ class BatchCatalogDialog(wx.Dialog):
                 batch_id=self.service.create_batch(**dialog.values());self.refresh();self._open(batch_id)
         except Exception as error:wx.MessageBox(str(error),"Unable to Create Batch",wx.OK|wx.ICON_ERROR,self)
         finally:dialog.Destroy()
+
+    def on_import(self, _event=None):
+        from giving.import_dialog import show_contribution_import_preview
+        batch_id = show_contribution_import_preview(self, self.service, self.test_mode)
+        if batch_id is not None: self.refresh(); self._open(batch_id)
 
     def on_open(self,_event=None):
         selected=self.list.GetFirstSelected()
@@ -329,6 +377,21 @@ class BatchCatalogDialog(wx.Dialog):
             wx.MessageBox(f"Accounting transaction {transaction_id} is Ready in Transaction Posting.",
                           "Accounting Handoff",wx.OK|wx.ICON_INFORMATION,self);self.refresh()
         except Exception as error:wx.MessageBox(str(error),"Unable to Send Batch",wx.OK|wx.ICON_ERROR,self)
+
+    def on_return_to_draft(self, _event=None):
+        selected = self.list.GetFirstSelected()
+        if selected < 0 or self.rows[selected][7] != "READY" or self.rows[selected][8] is not None:
+            wx.MessageBox("Select an unsent Ready contribution batch.", "Return Batch to Draft",
+                          wx.OK | wx.ICON_INFORMATION, self); return
+        if wx.MessageBox(
+                "Return this Ready batch to Draft so it can be corrected?",
+                "Return Batch to Draft", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self) != wx.YES:
+            return
+        try:
+            batch_id = self.rows[selected][0]
+            self.service.return_to_draft(batch_id); self.refresh(); self._open(batch_id)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Return Batch", wx.OK | wx.ICON_ERROR, self)
 
     def on_correct(self, _event=None):
         selected = self.list.GetFirstSelected()
@@ -379,9 +442,9 @@ class PostedBatchCorrectionDialog(wx.Dialog):
         return _date(self.date)
 
 
-def show_contribution_batches(parent, connection, session, authorization):
+def show_contribution_batches(parent, connection, session, authorization, test_mode=False):
     """Open confidential contribution-batch entry and accounting handoff."""
     authorization.require("giving.batches.enter", "enter contribution batches")
-    dialog = BatchCatalogDialog(parent, connection, session, authorization)
+    dialog = BatchCatalogDialog(parent, connection, session, authorization, test_mode)
     try: dialog.ShowModal()
     finally: dialog.Destroy()

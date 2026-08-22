@@ -555,6 +555,12 @@ future roadmap projects:
 ### 7. Confidential member giving, envelopes, and pledges
 
 - Approved design: [Member giving and envelope tracking specification](ChurchManager.MemberGiving.Specification.md).
+- CSV contribution intake now provides explicit column mapping, a non-writing
+  validation preview, red issue rows, protected source-file evidence, duplicate
+  file prevention, and confirmed creation of a new Draft batch. Migration 090
+  adds the evidence ledger. Valid import, duplicate protection, Draft creation,
+  fiscal-period validation, Ready-to-Draft recovery, and accounting handoff were
+  accepted in ChurchDBTest on August 22, 2026.
 - Maintained treasurer guidance: [Congregation treasurer guide](ChurchManager.CongregationTreasurerGuide.md).
 - Migration 085 was accepted in ChurchDBTest and adds
   the new confidential contributor, dated-envelope, approved-purpose, batch,

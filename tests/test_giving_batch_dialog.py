@@ -27,6 +27,8 @@ class GivingBatchDialogTests(unittest.TestCase):
         self.assertIn("giving.batches.post", source)
         self.assertIn("Send Ready Batch to Accounting", source)
         self.assertIn("No donor or envelope details", source)
+        self.assertIn("Return Ready to Draft", source)
+        self.assertIn("self.service.return_to_draft", source)
 
     def test_gift_entry_supports_envelope_resolution_and_split_allocations(self):
         source = inspect.getsource(batch_dialog.GiftDialog)
@@ -39,6 +41,12 @@ class GivingBatchDialogTests(unittest.TestCase):
         self.assertTrue(hasattr(batch_dialog.NewBatchDialog, "on_organization"))
         source = inspect.getsource(batch_dialog.NewBatchDialog.on_organization)
         self.assertIn("bank_accounts", source)
+        self.assertIn("open_fiscal_periods", source)
+
+    def test_draft_batch_header_can_be_corrected(self):
+        source = inspect.getsource(batch_dialog.BatchEditorDialog)
+        self.assertIn("Edit Batch Details", source)
+        self.assertIn("update_batch_header", source)
 
     def test_batch_editor_keeps_control_difference_visible(self):
         source = inspect.getsource(batch_dialog.BatchEditorDialog.refresh)
