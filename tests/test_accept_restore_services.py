@@ -4,7 +4,10 @@ import inspect
 import unittest
 from datetime import datetime
 
-from accept_restore_services import acceptance_names, migration_count
+from accept_restore_services import (
+    GIVING_CONTRIBUTOR, GIVING_ENVELOPE, acceptance_names,
+    create_giving_fixture, giving_fixture_exists, migration_count,
+)
 
 
 class RestoreAcceptanceTests(unittest.TestCase):
@@ -19,6 +22,16 @@ class RestoreAcceptanceTests(unittest.TestCase):
         source = inspect.getsource(migration_count)
         self.assertIn("FROM schema_migrations", source)
         self.assertNotIn("tblSchemaMigration", source)
+
+    def test_restore_rehearsal_proves_confidential_giving_survives(self):
+        seed = inspect.getsource(create_giving_fixture)
+        verify = inspect.getsource(giving_fixture_exists)
+        self.assertIn("tblContributionContributor", seed)
+        self.assertIn("tblContributionEnvelopeAssignment", seed)
+        self.assertIn("tblContributionContributor", verify)
+        self.assertIn("tblContributionEnvelopeAssignment", verify)
+        self.assertEqual(GIVING_CONTRIBUTOR, "Restore Acceptance Contributor")
+        self.assertEqual(GIVING_ENVELOPE, "99001")
 
 
 if __name__ == "__main__":

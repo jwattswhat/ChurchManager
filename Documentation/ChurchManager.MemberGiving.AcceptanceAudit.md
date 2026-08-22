@@ -54,7 +54,7 @@ rendered inspection of the newest reports remain release gates.
 | 11 | Privacy-safe memorial/honor acknowledgments | Pass | The protected Posted-gift acknowledgment list includes the donor and amount only when their separate disclosure flags explicitly authorize each value. |
 | 12 | Imports detect mappings and duplicates before writes | Pass | Preview is non-writing; confirmed import creates a new Draft batch and records evidence. |
 | 13 | Named-person directed gifts are held and clarified | Pass structurally; visual acceptance pending | Entry records instruction, disposition and resolution; completed reviews capture user/time; returned directions are excluded from deposit, ledger and statements; the protected review PDF is implemented. |
-| 14 | Backup/restore preserves Giving | Pass structurally | Giving is in the complete database baseline and backup. A dedicated post-migration Giving restore rehearsal should be retained as release evidence. |
+| 14 | Backup/restore preserves Giving | Pass structurally; live rehearsal pending | The isolated restore rehearsal now creates, backs up, deletes, restores, and verifies a fictitious confidential contributor and envelope alongside the canonical migration ledger. |
 | 15 | Support logs exclude confidential detail | Pass (automated) | Forced Giving errors verify that contributor, check/reference, envelope, address, and imported-row values are removed from both the local error log and generated support ZIP. |
 | 16 | Automated and rendered acceptance | Partial | Focused checks pass and previously exercised surfaces are accepted; the newest administration actions and operational PDFs still require visual acceptance, followed by the full post-baseline suite. |
 
@@ -77,8 +77,8 @@ rendered inspection of the newest reports remain release gates.
 
 ## Prioritized remaining work
 
-1. **Rehearse backup and restore.** Preserve post-migration evidence that the
-   full Giving schema and its confidential records survive a verified restore.
+1. **Rehearse backup and restore.** Run the isolated post-migration rehearsal
+   and retain its evidence that confidential Giving records survive restore.
 2. **Run final rendered and user acceptance.** Exercise every criterion with the
    fictitious dataset, inspect each protected PDF, update the inventories, and
    record release sign-off.

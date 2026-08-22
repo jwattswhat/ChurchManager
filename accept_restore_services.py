@@ -14,11 +14,14 @@ from accept_setup_services import plan_for, remove_disposable
 from backup_service import BackupService
 from installation_executor import FreshInstallationExecutor
 from installation_readiness import find_mariadb_tool, inspect_readiness
+from run_churchdb_migrations import MIGRATIONS
 
 
 ROOT = Path(__file__).resolve().parent
 ORIGINAL_CHURCH_NAME = "ChurchManager Installation Acceptance"
 DAMAGED_CHURCH_NAME = "Restore Acceptance - Replace Me"
+GIVING_CONTRIBUTOR = "Restore Acceptance Contributor"
+GIVING_ENVELOPE = "99001"
 
 
 def acceptance_names(now=None):
@@ -51,6 +54,50 @@ def migration_count(connection):
         cursor.close()
 
 
+def create_giving_fixture(connection):
+    """Create one fictitious confidential contributor and envelope for restore proof."""
+
+    cursor = connection.cursor()
+    try:
+        cursor.execute("SELECT ID FROM tblChurch ORDER BY ID LIMIT 1")
+        church_id = int(cursor.fetchone()[0])
+        cursor.execute(
+            "INSERT INTO tblContributionContributor "
+            "(ChurchID,ContributorType,DisplayName,StatementName,Address,City,State,PostalCode) "
+            "VALUES (?,'EXTERNAL',?,?,?,'Wittenberg','MN','00000')",
+            (church_id, GIVING_CONTRIBUTOR, GIVING_CONTRIBUTOR, "95 Restore Lane"),
+        )
+        contributor_id = int(cursor.lastrowid)
+        cursor.execute(
+            "INSERT INTO tblContributionEnvelopeAssignment "
+            "(ChurchID,ContributorID,EnvelopeNumber,EffectiveFrom) VALUES (?,?,?,'2027-01-01')",
+            (church_id, contributor_id, GIVING_ENVELOPE),
+        )
+        connection.commit()
+        return contributor_id
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        cursor.close()
+
+
+def giving_fixture_exists(connection):
+    """Return whether the isolated confidential Giving fixture is intact."""
+
+    cursor = connection.cursor()
+    try:
+        cursor.execute(
+            "SELECT COUNT(*) FROM tblContributionContributor c "
+            "JOIN tblContributionEnvelopeAssignment e ON e.ContributorID=c.ID "
+            "WHERE c.DisplayName=? AND e.EnvelopeNumber=?",
+            (GIVING_CONTRIBUTOR, GIVING_ENVELOPE),
+        )
+        return int(cursor.fetchone()[0]) == 1
+    finally:
+        cursor.close()
+
+
 def accept(admin_password, *, keep=False, notify=print):
     """Install, alter, restore, verify, and remove an isolated database."""
 
@@ -61,10 +108,13 @@ def accept(admin_password, *, keep=False, notify=print):
     master_password = secrets.token_urlsafe(24)
     work = ROOT / "tmp" / "restore-acceptance"
     backup_folder = work / "backups"
+    source_folder = work / "giving-source"
+    safety_folder = work / "safety"
     tools = find_mariadb_tool("mariadb-dump.exe").parent
     admin = None
     application = None
     installation = None
+    restore_source = None
     safety = None
     succeeded = False
     try:
@@ -90,6 +140,12 @@ def accept(admin_password, *, keep=False, notify=print):
             "database": database_name, "user": account_name,
             "password": application_password,
         })
+        contributor_id = create_giving_fixture(application)
+        if not giving_fixture_exists(application):
+            raise RuntimeError("The pre-backup Giving fixture did not verify.")
+        restore_source = BackupService().create_in_folder(
+            settings, tools, source_folder, automatic=False,
+        )
         cursor = application.cursor()
         try:
             cursor.execute(
@@ -98,16 +154,24 @@ def accept(admin_password, *, keep=False, notify=print):
             )
             if cursor.rowcount != 1:
                 raise RuntimeError("The restore acceptance congregation was not found.")
+            cursor.execute(
+                "DELETE FROM tblContributionEnvelopeAssignment WHERE ContributorID=?",
+                (contributor_id,),
+            )
+            cursor.execute(
+                "DELETE FROM tblContributionContributor WHERE ID=?",
+                (contributor_id,),
+            )
             application.commit()
         finally:
             cursor.close()
-        if church_name(application) != DAMAGED_CHURCH_NAME:
+        if church_name(application) != DAMAGED_CHURCH_NAME or giving_fixture_exists(application):
             raise RuntimeError("The pre-restore change did not verify.")
-        notify("verified disposable post-backup change")
+        notify("verified disposable post-backup congregation and Giving changes")
         application.close()
         application = None
         safety = BackupService().restore(
-            settings, tools, installation.backup_path, backup_folder,
+            settings, tools, restore_source.path, safety_folder,
         )
         application = mariadb.connect(
             host="127.0.0.1", port=3306, database=database_name,
@@ -115,15 +179,20 @@ def accept(admin_password, *, keep=False, notify=print):
         )
         if church_name(application) != ORIGINAL_CHURCH_NAME:
             raise RuntimeError("The restored congregation record did not verify.")
+        if not giving_fixture_exists(application):
+            raise RuntimeError("The restored confidential Giving fixture did not verify.")
         represented = migration_count(application)
-        if represented != 84:
+        expected_migrations = len(MIGRATIONS)
+        if represented != expected_migrations:
             raise RuntimeError(
-                f"The restored migration ledger has {represented} records instead of 84."
+                f"The restored migration ledger has {represented} records instead of "
+                f"{expected_migrations}."
             )
         if BackupService.inspect_dump(safety.path).casefold() != database_name.casefold():
             raise RuntimeError("The pre-restore safety backup did not verify.")
         succeeded = True
         notify(f"verified restored congregation {ORIGINAL_CHURCH_NAME}")
+        notify("verified restored confidential Giving contributor and envelope")
         notify(f"verified {represented} represented migrations")
         notify(f"verified pre-restore safety backup {safety.path}")
         notify("isolated_restore_services_accepted=true")
@@ -139,6 +208,8 @@ def accept(admin_password, *, keep=False, notify=print):
                 notify(f"removed isolated database {database_name}")
                 if installation is not None:
                     installation.backup_path.unlink(missing_ok=True)
+                if restore_source is not None:
+                    restore_source.path.unlink(missing_ok=True)
                 if safety is not None:
                     safety.path.unlink(missing_ok=True)
                 notify("removed isolated acceptance backups")
