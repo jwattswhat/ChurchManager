@@ -8,6 +8,10 @@
 
 **Approved by:** Rev. Jonathan C. Watt
 
+**Implementation:** encryption/key-recovery service and migration 096 database,
+permission, and controlled-choice foundation implemented; backup integration
+and user workflows remain gated.
+
 **Target:** ChurchManager
 
 ## 1. Purpose

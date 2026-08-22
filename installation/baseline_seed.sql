@@ -502,6 +502,32 @@ ON DUPLICATE KEY UPDATE
 Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),Available=1,
 RequiredPermissionID=VALUES(RequiredPermissionID);
 
+-- source: 096_add_pastoral_care_foundation.sql
+INSERT IGNORE INTO tblPermission (Name, Description, IsSensitive, Active) VALUES
+('pastoral.care.view.assigned','View pastoral care assigned to the current user.',1,1),
+('pastoral.care.view.all','View all pastoral care operational records.',1,1),
+('pastoral.care.create','Create pastoral care needs.',1,1),
+('pastoral.care.assign','Assign and reassign pastoral care.',1,1),
+('pastoral.care.update','Update pastoral care needs and actions.',1,1),
+('pastoral.care.close','Complete or close pastoral care needs.',1,1),
+('pastoral.notes.view','Decrypt and view restricted pastoral notes.',1,1),
+('pastoral.notes.edit','Create and update encrypted restricted pastoral notes.',1,1),
+('pastoral.care.report','Run protected pastoral care reports.',1,1),
+('pastoral.care.admin','Administer pastoral care policy and encryption recovery.',1,1);
+
+-- source: 096_add_pastoral_care_foundation.sql
+INSERT IGNORE INTO tblRolePermission (RoleID, PermissionID)
+SELECT r.ID,p.ID FROM tblRole r JOIN tblPermission p ON p.Name LIKE 'pastoral.%'
+WHERE r.Name='Master Administrator';
+
+-- source: 096_add_pastoral_care_foundation.sql
+DELETE FROM tblChoices WHERE Field IN ('PastoralCareCategory','PastoralCareActionType');
+
+-- source: 096_add_pastoral_care_foundation.sql
+INSERT INTO tblChoices (Field,Choices,Note) VALUES
+('PastoralCareCategory','[Hospital\nHomebound\nBereavement\nNew Visitor\nAttendance Concern\nPrayer Follow-up\nFamily Need\nMilestone\nOther]','Broad minimum-necessary pastoral care categories.'),
+('PastoralCareActionType','[Call\nVisit\nCard\nMeal\nEmail\nPrayer\nReferral\nOther]','Pastoral care action types.');
+
 -- source: current-schema starter policy
 INSERT INTO tblWorshipRole (Name,Description,DisplayOrder,Active) VALUES
 ('Liturgist',NULL,10,1),('Crucifer','Carries the cross',20,1),

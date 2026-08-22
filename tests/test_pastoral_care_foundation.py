@@ -1,0 +1,48 @@
+"""Contract tests for the protected pastoral-care database foundation."""
+
+import unittest
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+MIGRATION = ROOT / "migrations" / "096_add_pastoral_care_foundation.sql"
+
+
+class PastoralCareFoundationTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.source = MIGRATION.read_text(encoding="utf-8")
+
+    def test_separates_need_action_and_restricted_note(self):
+        self.assertIn("CREATE TABLE IF NOT EXISTS tblPastoralCareNeed", self.source)
+        self.assertIn("CREATE TABLE IF NOT EXISTS tblPastoralCareAction", self.source)
+        self.assertIn("CREATE TABLE IF NOT EXISTS tblPastoralRestrictedNote", self.source)
+
+    def test_restricted_note_has_ciphertext_only(self):
+        note = self.source.split("CREATE TABLE IF NOT EXISTS tblPastoralRestrictedNote", 1)[1]
+        note = note.split("CREATE TABLE", 1)[0]
+        for field in ("Ciphertext", "Nonce", "AuthenticationTag", "Algorithm", "KeyVersion"):
+            self.assertIn(field, note)
+        self.assertNotIn("Plaintext", note)
+        self.assertNotIn("Narrative", note)
+
+    def test_all_permissions_are_sensitive_and_master_only_by_default(self):
+        expected = {
+            "pastoral.care.view.assigned", "pastoral.care.view.all", "pastoral.care.create",
+            "pastoral.care.assign", "pastoral.care.update", "pastoral.care.close",
+            "pastoral.notes.view", "pastoral.notes.edit", "pastoral.care.report",
+            "pastoral.care.admin",
+        }
+        for permission in expected:
+            self.assertIn(f"('{permission}'", self.source)
+        self.assertIn("WHERE r.Name='Master Administrator'", self.source)
+
+    def test_recurrence_and_minimum_necessary_fields_are_bounded(self):
+        self.assertIn("ScheduleText varchar(255)", self.source)
+        self.assertIn("ScheduleRule varchar(255)", self.source)
+        self.assertIn("SafeSummary varchar(500)", self.source)
+        self.assertIn("SafeOutcome varchar(500)", self.source)
+
+
+if __name__ == "__main__":
+    unittest.main()

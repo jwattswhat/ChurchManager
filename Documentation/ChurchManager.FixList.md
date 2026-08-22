@@ -664,6 +664,12 @@ future roadmap projects:
 
 ### 8. Pastoral follow-up
 
+- **Status: implementation started.** The independently tested AES-256-GCM
+  note/key-recovery service and migration 096 normalized care foundation are
+  implemented. Restricted-note entry remains disabled until complete-backup
+  recovery integration, service authorization, audit, and restore acceptance
+  pass.
+
 - Research completed: [Pastoral care systems research and ChurchManager recommendations](ChurchManager.PastoralCare.Research.md).
 - Proposed implementation specification: [ChurchManager pastoral care specification](ChurchManager.PastoralCare.Specification.md).
 - Recommended first release: a protected Pastoral Care subsystem with separate

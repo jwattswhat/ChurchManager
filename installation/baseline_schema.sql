@@ -2105,6 +2105,118 @@ CREATE TABLE `tblpastor` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblpastoralcareaction` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `CareNeedID` bigint(20) NOT NULL,
+  `ActionDateTime` datetime(6) NOT NULL,
+  `CaregiverUserID` int(11) NOT NULL,
+  `ActionType` varchar(20) NOT NULL,
+  `Result` varchar(20) NOT NULL,
+  `SafeOutcome` varchar(500) DEFAULT NULL,
+  `NextFollowUpDate` date DEFAULT NULL,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  `Version` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`ID`),
+  KEY `ix_pastoral_action_need_time` (`CareNeedID`,`ActionDateTime`),
+  KEY `ix_pastoral_action_caregiver` (`CaregiverUserID`,`ActionDateTime`),
+  KEY `fk_pastoral_action_creator` (`CreatedByUserID`),
+  KEY `fk_pastoral_action_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_pastoral_action_caregiver` FOREIGN KEY (`CaregiverUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_pastoral_action_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_pastoral_action_need` FOREIGN KEY (`CareNeedID`) REFERENCES `tblpastoralcareneed` (`ID`),
+  CONSTRAINT `fk_pastoral_action_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_pastoral_action_type` CHECK (`ActionType` in ('CALL','VISIT','CARD','MEAL','EMAIL','PRAYER','REFERRAL','OTHER')),
+  CONSTRAINT `ck_pastoral_action_result` CHECK (`Result` in ('COMPLETED','ATTEMPTED','DEFERRED','NOT_NEEDED')),
+  CONSTRAINT `ck_pastoral_action_version` CHECK (`Version` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblpastoralcareneed` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `PersonID` int(11) DEFAULT NULL,
+  `FamilyID` int(11) DEFAULT NULL,
+  `DisplaySubject` varchar(255) DEFAULT NULL,
+  `Category` varchar(100) NOT NULL,
+  `Source` varchar(40) NOT NULL DEFAULT 'MANUAL',
+  `AssignedUserID` int(11) DEFAULT NULL,
+  `Priority` varchar(10) NOT NULL DEFAULT 'NORMAL',
+  `Status` varchar(24) NOT NULL DEFAULT 'OPEN',
+  `OpenedDate` date NOT NULL,
+  `DueDate` date DEFAULT NULL,
+  `NextFollowUpDate` date DEFAULT NULL,
+  `ScheduleText` varchar(255) DEFAULT NULL,
+  `ScheduleRule` varchar(255) DEFAULT NULL,
+  `ScheduleStatus` varchar(10) DEFAULT NULL,
+  `CompletedDate` date DEFAULT NULL,
+  `ClosedDate` date DEFAULT NULL,
+  `SafeSummary` varchar(500) DEFAULT NULL,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  `Version` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`ID`),
+  KEY `ix_pastoral_need_queue` (`ChurchID`,`Status`,`AssignedUserID`,`NextFollowUpDate`,`DueDate`),
+  KEY `ix_pastoral_need_person` (`ChurchID`,`PersonID`,`Status`),
+  KEY `ix_pastoral_need_family` (`ChurchID`,`FamilyID`,`Status`),
+  KEY `fk_pastoral_need_person` (`PersonID`),
+  KEY `fk_pastoral_need_family` (`FamilyID`),
+  KEY `fk_pastoral_need_assignee` (`AssignedUserID`),
+  KEY `fk_pastoral_need_creator` (`CreatedByUserID`),
+  KEY `fk_pastoral_need_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_pastoral_need_assignee` FOREIGN KEY (`AssignedUserID`) REFERENCES `tbluser` (`ID`) ON DELETE SET NULL,
+  CONSTRAINT `fk_pastoral_need_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_pastoral_need_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_pastoral_need_family` FOREIGN KEY (`FamilyID`) REFERENCES `tblfamily` (`ID`) ON DELETE SET NULL,
+  CONSTRAINT `fk_pastoral_need_person` FOREIGN KEY (`PersonID`) REFERENCES `tblperson` (`ID`) ON DELETE SET NULL,
+  CONSTRAINT `fk_pastoral_need_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_pastoral_need_source` CHECK (`Source` in ('MANUAL','ATTENDANCE_FOLLOWUP','PRAYER_REQUEST','HOSPITAL_NOTICE','LIFE_EVENT','OTHER')),
+  CONSTRAINT `ck_pastoral_need_priority` CHECK (`Priority` in ('NORMAL','URGENT')),
+  CONSTRAINT `ck_pastoral_need_status` CHECK (`Status` in ('OPEN','WAITING','COMPLETED','CLOSED_NOT_NEEDED')),
+  CONSTRAINT `ck_pastoral_need_schedule_status` CHECK (`ScheduleStatus` is null or `ScheduleStatus` in ('ACTIVE','PAUSED','ENDED')),
+  CONSTRAINT `ck_pastoral_need_version` CHECK (`Version` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblpastoralrestrictednote` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `CareNeedID` bigint(20) NOT NULL,
+  `CareActionID` bigint(20) DEFAULT NULL,
+  `Ciphertext` longblob NOT NULL,
+  `Nonce` varbinary(32) NOT NULL,
+  `AuthenticationTag` varbinary(32) NOT NULL,
+  `Algorithm` varchar(40) NOT NULL,
+  `KeyVersion` int(11) NOT NULL,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  `Version` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`ID`),
+  KEY `ix_pastoral_note_need` (`CareNeedID`,`CreatedAt`),
+  KEY `fk_pastoral_note_church` (`ChurchID`),
+  KEY `fk_pastoral_note_action` (`CareActionID`),
+  KEY `fk_pastoral_note_creator` (`CreatedByUserID`),
+  KEY `fk_pastoral_note_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_pastoral_note_action` FOREIGN KEY (`CareActionID`) REFERENCES `tblpastoralcareaction` (`ID`),
+  CONSTRAINT `fk_pastoral_note_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_pastoral_note_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_pastoral_note_need` FOREIGN KEY (`CareNeedID`) REFERENCES `tblpastoralcareneed` (`ID`),
+  CONSTRAINT `fk_pastoral_note_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_pastoral_note_algorithm` CHECK (`Algorithm` = 'AES-256-GCM'),
+  CONSTRAINT `ck_pastoral_note_key_version` CHECK (`KeyVersion` > 0),
+  CONSTRAINT `ck_pastoral_note_version` CHECK (`Version` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblpermission` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `Name` varchar(150) NOT NULL,
