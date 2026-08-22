@@ -249,6 +249,11 @@ time, revision, filename, and SHA-256 identifier. This does not claim the
 statement was printed, mailed, emailed, or received. **Statement Issuance
 History** identifies prior issues and reissues.
 
+Statements list non-cash gifts by their stored description with a blank Amount
+cell. They are not included in **Eligible monetary contributions**. Any
+donor-provided estimate remains internal, unverified information and is not
+printed as the congregation's valuation.
+
 Users with confidential Giving-report permission also receive **Memorial / Honor
 Gifts**. Select the covered dates and choose **Preview Memorial / Honor List**
 to create a protected acknowledgment-work PDF containing Posted gifts only.

@@ -98,6 +98,9 @@ class GivingReportTests(unittest.TestCase):
         self.assertIn("g.StatementEligibility='ELIGIBLE'", query)
         self.assertIn("p.StatementTreatment='ELIGIBLE'", query)
         self.assertIn('require("giving.statements.generate"', inspect.getsource(ContributionStatementProvider))
+        provider = inspect.getsource(ContributionStatementProvider)
+        self.assertIn('statement_amount = None if method == "NON_CASH"', provider)
+        self.assertIn("Non-cash gifts are described without a value", provider)
 
     def test_statement_issuance_records_hash_revision_and_safe_audit(self):
         migration = Path("migrations/087_add_contribution_statement_issuance.sql").read_text(encoding="utf-8")

@@ -248,7 +248,9 @@ class ContributionStatementProvider:
 
     ACKNOWLEDGMENT = (
         "Thank you for supporting the congregation's ministry. This statement "
-        "summarizes ChurchManager records and does not determine tax deductibility."
+        "summarizes ChurchManager records and does not determine tax deductibility. "
+        "Non-cash gifts are described without a value; donors are responsible for "
+        "determining any value used for their own records."
     )
 
     def __init__(self, connection, authorization):
@@ -285,10 +287,13 @@ class ContributionStatementProvider:
         total = Decimal("0.00")
         for row in source:
             amount = Decimal(row[3])
-            total += amount
+            method = str(row[2]).upper()
+            statement_amount = None if method == "NON_CASH" else amount
+            if statement_amount is not None:
+                total += statement_amount
             records.append({
-                "Date": row[0], "Purpose": row[1], "Method": str(row[2]).title(),
-                "Description": row[4] or "", "Amount": amount,
+                "Date": row[0], "Purpose": row[1], "Method": method.replace("_", " ").title(),
+                "Description": row[4] or "", "Amount": statement_amount,
                 "Benefit": self._benefit(row),
             })
         church_locality = " ".join(value for value in (church[0][4], church[0][5], church[0][6]) if value)

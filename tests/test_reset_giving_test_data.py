@@ -20,7 +20,8 @@ class GivingTestDataResetTests(unittest.TestCase):
                       "General Ministry", "Building and Property", "Student Support"):
             self.assertIn(value, self.source)
         self.assertIn('(None, None, "CASH"', self.source)
-        self.assertIn('"tblContributionAllocation": 17', self.source)
+        self.assertIn('"tblContributionAllocation": 18', self.source)
+        self.assertIn("Two handcrafted wooden offering plates", self.source)
         self.assertIn("statement_test_year=", self.source)
         self.assertIn("statement_q{quarter}_contributors=", self.source)
         self.assertIn("Quarterly contribution statement test data verification failed.", self.source)

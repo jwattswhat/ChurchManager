@@ -32,7 +32,7 @@ reports, and privacy acceptance remain release gates.
 | Accounting handoff | Pass | A privacy-safe summarized transaction is created, posting state is synchronized, and donor/envelope identity is excluded from the ledger handoff. |
 | Posted corrections | Pass for general reversal/replacement | The original batch becomes Void only after the linked reversal posts, and the replacement remains linked. A dedicated returned-check workflow is still absent. |
 | CSV import | Pass | Mapping, non-writing preview, row validation, duplicate-file prevention, protected evidence, Draft creation, and reset cleanup are implemented and accepted. |
-| Statements | Partial | One/all contributor quarterly, annual, and custom-period PDFs plus issuance hash and revision history are implemented. Goods/services, intangible-benefit, statement-review, memorial/honor, and non-cash facts are entered and retained. Refined non-cash statement presentation remains incomplete. |
+| Statements | Pass for current scope | One/all contributor quarterly, annual, and custom-period PDFs plus issuance hash and revision history are implemented. Non-cash property is described without a printed value and excluded from monetary totals. Goods/services, intangible-benefit, statement-review, and memorial/honor facts are retained. |
 | Reports | Partial | Batch Control Summary, Contribution Statement, Envelope Box Labels, Envelope Assignment Register, and protected Memorial and Honor Gift Acknowledgment List are implemented. The complete required inventory is not. |
 | Backup and reset | Pass for current scope | Whole-database backup/restore includes Giving. The fictitious Giving reset covers current tables and removes protected test import evidence only after database commit. |
 | Documentation and inventories | Partial, corrected by this audit | User, treasurer, database, and screen documentation cover current workflows. Final report/privacy documentation remains open with the missing functionality. An obsolete testing-procedure statement that said Giving was removed was corrected during this audit. |
@@ -50,7 +50,7 @@ reports, and privacy acceptance remain release gates.
 | 7 | Posted history immutable with correction chain | Pass for current correction workflow | Reversal/replacement linkage and status synchronization are implemented. |
 | 8 | Returned check reconciles Giving and accounting | Not complete | General correction exists; no explicit returned-check operation and acceptance case exists. |
 | 9 | Unauthorized users cannot invoke services or reports | Pass | Menus, dialogs, report providers, repositories, and services independently require the applicable Giving permission. Direct-invocation denial tests fail closed before database or storage access. |
-| 10 | Complete statement content and selection behavior | Partial | Contributor/date selection, eligible posted gifts, benefit wording, issuance hashes, revisions, acknowledgment facts, and description-only non-cash entry exist. Refined non-cash statement presentation remains incomplete. |
+| 10 | Complete statement content and selection behavior | Pass for current scope | Contributor/date selection, eligible posted gifts, benefit wording, issuance hashes, revisions, acknowledgment facts, and description-only non-cash presentation are implemented. Non-cash values remain blank and outside monetary totals. |
 | 11 | Privacy-safe memorial/honor acknowledgments | Pass | The protected Posted-gift acknowledgment list includes the donor and amount only when their separate disclosure flags explicitly authorize each value. |
 | 12 | Imports detect mappings and duplicates before writes | Pass | Preview is non-writing; confirmed import creates a new Draft batch and records evidence. |
 | 13 | Named-person directed gifts are held and clarified | Not complete | Direction status exists and Ready validation notices review rows, but there is no complete user workflow for proposed purposes, clarification facts, return, or restricted review reporting. |
@@ -77,24 +77,20 @@ reports, and privacy acceptance remain release gates.
 
 ## Prioritized remaining work
 
-1. **Finish non-cash statement presentation.** Gift entry and validation now
-   preserve description-only donated-property facts and optional unverified donor
-   estimates without treating them as contribution amounts. Complete the intended
-   statement wording and review behavior.
-2. **Finish directed-gift review.** Provide explicit review, clarification,
+1. **Finish directed-gift review.** Provide explicit review, clarification,
    redesignation/return disposition, reason, user, and date without deciding tax
    deductibility.
-3. **Add the missing protected reports.** Start with donor-free Giving by Fund
+2. **Add the missing protected reports.** Start with donor-free Giving by Fund
    and Period and Accounting Posting Reconciliation, followed by exceptions,
    directed gifts and printable confidential histories.
-4. **Add an explicit returned-check workflow.** Link the gift correction,
+3. **Add an explicit returned-check workflow.** Link the gift correction,
    Giving batch, accounting reversal, reason, and statement result.
-5. **Complete contributor administration.** Add guarded duplicate merge and an
+4. **Complete contributor administration.** Add guarded duplicate merge and an
    explicit previewed refresh from linked person/family contact data.
-6. **Perform privacy-focused acceptance.** Force errors containing check,
+5. **Perform privacy-focused acceptance.** Force errors containing check,
    contributor, address, and imported-row values and verify support logs and
    bundles redact them. Rehearse backup/restore with the full Giving schema.
-7. **Run final rendered and user acceptance.** Exercise every criterion with the
+6. **Run final rendered and user acceptance.** Exercise every criterion with the
    fictitious dataset, inspect each protected PDF, update the inventories, and
    record release sign-off.
 

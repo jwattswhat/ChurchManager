@@ -305,12 +305,13 @@ def seed(cursor):
             cursor.execute("INSERT INTO tblContribution "
                            "(BatchID,ContributorID,EnteredEnvelopeNumber,ContributionMethod,ReferenceValue,"
                            "ReceivedDate,Amount,StatementEligibility,Note,TributeType,HonoreeName,"
-                           "AcknowledgmentContact,DonorDisclosureAuthorized,AmountDisclosureAuthorized) "
-                           "VALUES (?,?,?,?,?,?,?,?,'Fictional giving acceptance data',?,?,?,?,?)",
+                           "AcknowledgmentContact,DonorDisclosureAuthorized,AmountDisclosureAuthorized,"
+                           "NonCashDescription) "
+                           "VALUES (?,?,?,?,?,?,?,?,'Fictional giving acceptance data',?,?,?,?,?,?)",
                            (batch_id, contributor_id, envelope, method, reference, batch_date, amount,
                             eligibility, tribute.get("type"), tribute.get("honoree"),
                             tribute.get("contact"), bool(tribute.get("donor")),
-                            bool(tribute.get("amount"))))
+                            bool(tribute.get("amount")), tribute.get("non_cash")))
             contribution_id = cursor.lastrowid
             for purpose_index, split_amount in splits:
                 purpose_id, fund_id, account_id, allocation_function = purposes[purpose_index]
@@ -381,6 +382,9 @@ def seed(cursor):
              {"type": "IN_HONOR_OF", "honoree": "Ruth Example",
               "contact": "Ruth Example", "donor": True, "amount": True}),
             (contributors[4], None, "ELECTRONIC", Decimal("130.00"), "TEST-Q4-EXT", ((2, Decimal("130.00")),)),
+            (contributors[0], "101", "NON_CASH", Decimal("0.00"), None,
+             ((0, Decimal("0.00")),), "ELIGIBLE",
+             {"non_cash": "Two handcrafted wooden offering plates"}),
             (contributors[2], "103", "OTHER", Decimal("50.00"), "TEST-Q4-INELIGIBLE",
              ((0, Decimal("50.00")),), "INELIGIBLE"),
         )),
@@ -414,7 +418,7 @@ def main():
         expected = {"tblContributionImportEvidence": 0, "tblContributionStatementIssue": 0,
                     "tblContributionContributor": 5, "tblContributionEnvelopeAssignment": 4,
                     "tblContributionPurpose": 3, "tblContributionBatch": 6,
-                    "tblContribution": 16, "tblContributionAllocation": 17,
+                    "tblContribution": 17, "tblContributionAllocation": 18,
                     "tblContributionAuditEvent": 6}
         if any(after[name] != count for name, count in expected.items()):
             raise RuntimeError("Giving test dataset verification failed.")

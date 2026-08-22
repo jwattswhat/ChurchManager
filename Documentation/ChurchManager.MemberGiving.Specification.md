@@ -399,7 +399,9 @@ Non-cash contributions store a description and approved purpose classification
 but no ChurchManager-assigned monetary value. An optional donor-provided
 estimate may be retained as explicitly unverified internal information; it is
 excluded from deposits, accounting handoff, contribution totals, and statement
-valuation. Non-cash gifts do not enter a cash deposit.
+valuation. Statements show the property description with no amount and explain
+that the donor is responsible for determining any value used in the donor's own
+records. Non-cash gifts do not enter a cash deposit.
 A non-cash-only batch completes in the Giving subledger after review without
 creating a zero-dollar accounting transaction. A mixed batch sends only its
 positive monetary allocations to accounting.

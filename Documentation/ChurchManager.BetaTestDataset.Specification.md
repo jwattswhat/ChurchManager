@@ -86,6 +86,7 @@ dataset version, record counts, verification results, and backup location.
 - Posted contributions in all four quarters
 - At least two statement-eligible contributors per quarter
 - One intentionally ineligible gift that must be excluded from statements
+- One description-only non-cash gift that appears without value on a statement
 - Four Posted memorial/honor gifts covering every independent donor-name and
   amount-disclosure consent combination
 - Privacy-safe summarized accounting transactions linked to Posted batches
