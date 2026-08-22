@@ -7,6 +7,11 @@ from decimal import Decimal
 from giving.accounting_handoff import GivingAccountingHandoff
 
 
+class Authorization:
+    def require(self, _permission, _operation=None):
+        return None
+
+
 class Cursor:
     def __init__(self, connection):
         self.connection = connection; self.rows = []; self.one = None
@@ -42,7 +47,7 @@ class Connection:
 class GivingAccountingHandoffTests(unittest.TestCase):
     def test_creates_balanced_fund_summary_without_donor_identity(self):
         connection = Connection()
-        transaction_id = GivingAccountingHandoff(connection, 3).send(21)
+        transaction_id = GivingAccountingHandoff(connection, 3, Authorization()).send(21)
         self.assertEqual((transaction_id, connection.commits), (77, 1))
         sql = "\n".join(item[0] for item in connection.calls)
         self.assertIn("'CASH_RECEIPT','READY'", sql)

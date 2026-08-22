@@ -12,11 +12,13 @@ from giving.validation import GivingValidationError, validate_allocations
 class DraftBatchService:
     """Create and edit giving batches while they remain in draft status."""
 
-    def __init__(self, connection, user_id: int):
+    def __init__(self, connection, user_id: int, authorization):
         self.connection = portable_connection(connection)
         self.user_id = int(user_id)
+        self.authorization = authorization
 
     def all(self, sql, values=()):
+        self.authorization.require("giving.batches.enter", "access contribution batches")
         cursor = self.connection.cursor()
         try:
             cursor.execute(sql, values)
@@ -333,6 +335,7 @@ class DraftBatchService:
 
     def review_issues(self, batch_id):
         """Return privacy-safe reasons a draft batch cannot yet be marked ready."""
+        self.authorization.require("giving.batches.review", "review a contribution batch")
         cursor = self.connection.cursor()
         try:
             return self._review_issues(cursor, batch_id, self.church_id())
@@ -341,6 +344,7 @@ class DraftBatchService:
 
     def mark_ready(self, batch_id):
         """Atomically validate and move a complete draft batch to Ready."""
+        self.authorization.require("giving.batches.review", "mark a contribution batch ready")
         church_id = self.church_id(); cursor = self.connection.cursor()
         try:
             cursor.execute("SELECT Status FROM tblContributionBatch WHERE ID=? AND ChurchID=? FOR UPDATE",
@@ -418,6 +422,7 @@ class DraftBatchService:
 
     def return_to_draft(self, batch_id):
         """Return an unsent Ready batch to Draft for a controlled correction."""
+        self.authorization.require("giving.batches.review", "return a contribution batch to draft")
         church_id = self.church_id(); cursor = self.connection.cursor()
         try:
             cursor.execute(

@@ -71,11 +71,15 @@ def assign_annual_numbers(contributors, current_numbers, strategy, first_number=
 class AnnualEnvelopeAssignmentService:
     """Build and atomically apply one calendar year's envelope assignments."""
 
-    def __init__(self, connection, user_id):
+    def __init__(self, connection, user_id, authorization):
         self.connection = portable_connection(connection)
         self.user_id = user_id
+        self.authorization = authorization
 
     def _all(self, sql, values=()):
+        self.authorization.require(
+            "giving.contributors.manage", "manage annual envelope assignments"
+        )
         cursor = self.connection.cursor()
         try:
             cursor.execute(sql, values)
@@ -181,10 +185,10 @@ class AnnualEnvelopeAssignmentDialog(wx.Dialog):
         ("Keep current numbers and fill gaps", KEEP_CURRENT_NUMBERS),
     )
 
-    def __init__(self, parent, connection, user_id):
+    def __init__(self, parent, connection, user_id, authorization):
         super().__init__(parent, title="Annual Envelope Assignment", size=(850, 650),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
-        self.service = AnnualEnvelopeAssignmentService(connection, user_id)
+        self.service = AnnualEnvelopeAssignmentService(connection, user_id, authorization)
         self.preview_rows = []
         panel = wx.Panel(self)
         outer = wx.BoxSizer(wx.VERTICAL)
@@ -287,9 +291,10 @@ class AnnualEnvelopeAssignmentDialog(wx.Dialog):
             wx.MessageBox(str(error), "Unable to Apply Assignments", wx.OK | wx.ICON_ERROR, self)
 
 
-def show_annual_envelope_assignment(parent, connection, user_id):
+def show_annual_envelope_assignment(parent, connection, user_id, authorization):
     """Open the guarded annual envelope assignment workflow."""
-    dialog = AnnualEnvelopeAssignmentDialog(parent, connection, user_id)
+    authorization.require("giving.contributors.manage", "manage annual envelope assignments")
+    dialog = AnnualEnvelopeAssignmentDialog(parent, connection, user_id, authorization)
     try:
         return dialog.ShowModal()
     finally:

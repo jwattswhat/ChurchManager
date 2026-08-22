@@ -17,10 +17,14 @@ def _date_value(control):
 class PurposeRepository:
     """Persist congregation-approved purposes without donor information."""
 
-    def __init__(self, connection):
+    def __init__(self, connection, authorization):
         self.connection = portable_connection(connection)
+        self.authorization = authorization
 
     def all(self, sql, values=()):
+        self.authorization.require(
+            "giving.purposes.manage", "access approved Giving purposes"
+        )
         cursor = self.connection.cursor()
         try:
             cursor.execute(sql, values)
@@ -131,10 +135,10 @@ class PurposeDialog(wx.Dialog):
     TREATMENTS = (("Eligible", "ELIGIBLE"), ("Needs review", "REVIEW"),
                   ("Not eligible", "INELIGIBLE"))
 
-    def __init__(self, parent, connection):
+    def __init__(self, parent, connection, authorization):
         super().__init__(parent, title="Approved Giving Purposes", size=(1050, 680),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
-        self.repository = PurposeRepository(connection); self.rows = []; self.current_id = None
+        self.repository = PurposeRepository(connection, authorization); self.rows = []; self.current_id = None
         self.organizations = self.repository.organizations(); self.funds = []; self.accounts = []; self.functions = []
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
         heading = wx.StaticText(panel, label="Approved Giving Purposes")
@@ -235,8 +239,9 @@ class PurposeDialog(wx.Dialog):
         self.treatment.SetSelection([item[1] for item in self.TREATMENTS].index(row[13]))
 
 
-def show_giving_purposes(parent,connection):
+def show_giving_purposes(parent, connection, authorization):
     """Open approved-purpose maintenance."""
-    dialog=PurposeDialog(parent,connection)
+    authorization.require("giving.purposes.manage", "maintain approved Giving purposes")
+    dialog=PurposeDialog(parent,connection,authorization)
     try:dialog.ShowModal()
     finally:dialog.Destroy()

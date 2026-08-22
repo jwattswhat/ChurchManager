@@ -165,7 +165,9 @@ class ContributionImportPreviewDialog(wx.Dialog):
             parsed = parse_csv(self.content, self.mapping())
             organization_id = self.organizations[self.organization.GetSelection()][0]
             self.preview_rows = ContributionImportPreviewService(
-                self.connection, self.church_id, organization_id).preview(parsed)
+                self.connection, self.church_id, organization_id,
+                self.batch_service.authorization,
+            ).preview(parsed)
             self._display_preview()
         except Exception as error:
             wx.MessageBox(str(error), "Unable to Preview Contributions", wx.OK | wx.ICON_ERROR, self)
@@ -202,7 +204,9 @@ class ContributionImportPreviewDialog(wx.Dialog):
             deposit_date = date(
                 selected_date.GetYear(), selected_date.GetMonth() + 1, selected_date.GetDay())
             self.batch_id = ContributionImportService(
-                self.connection, self.batch_service.user_id, self.test_mode).import_draft(
+                self.connection, self.batch_service.user_id,
+                self.batch_service.authorization, self.test_mode,
+            ).import_draft(
                     source_path=self.source_path, content=self.content, mapping=self.mapping(),
                     preview_rows=self.preview_rows, church_id=self.church_id,
                     organization_id=organization_id, bank_account_id=bank_id,

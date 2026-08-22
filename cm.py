@@ -536,10 +536,12 @@ def _buttonclick(event):
             )
             return
         case "lblGivingContributors":
-            show_contributors(cmfrm.FRAME, context.connection, context.session)
+            show_contributors(
+                cmfrm.FRAME, context.connection, context.session, context.authorization
+            )
             return
         case "lblGivingPurposes":
-            show_giving_purposes(cmfrm.FRAME, context.connection)
+            show_giving_purposes(cmfrm.FRAME, context.connection, context.authorization)
             return
         case "lblContributionBatches":
             show_contribution_batches(

@@ -11,14 +11,14 @@ The implemented Giving subsystem is suitable for continued guarded beta
 development. Its contributor, envelope, approved-purpose, batch-entry,
 accounting-handoff, posted-correction, CSV-import, statement, and envelope-box
 workflows are real rather than prototypes. The current automated suite passes
-763 tests with 25 intentional skips, and the user has visually accepted the
+767 tests with 25 intentional skips, and the user has visually accepted the
 implemented Giving screens and reports exercised during development.
 
 It is not yet accurate to call the entire approved Member Giving specification
 complete. Several first-release workflows and reports remain unimplemented,
-and authorization is enforced at screen entry and report-provider boundaries
-but not consistently inside every Giving service or repository. Those items
-remain release gates.
+but authorization is now enforced independently at screen, report-provider,
+service, and repository boundaries. The remaining incomplete workflows,
+reports, and privacy acceptance remain release gates.
 
 ## Audited implementation inventory
 
@@ -49,7 +49,7 @@ remain release gates.
 | 6 | No donor identity in accounting | Pass for implemented handoff | The summarized transaction carries batch/accounting dimensions, not donor or envelope data. |
 | 7 | Posted history immutable with correction chain | Pass for current correction workflow | Reversal/replacement linkage and status synchronization are implemented. |
 | 8 | Returned check reconciles Giving and accounting | Not complete | General correction exists; no explicit returned-check operation and acceptance case exists. |
-| 9 | Unauthorized users cannot invoke services or reports | Partial; release gate | Menus, dialogs, and report providers check permissions. Core Giving repositories/services do not all independently require authorization, contrary to the approved service-boundary rule. |
+| 9 | Unauthorized users cannot invoke services or reports | Pass | Menus, dialogs, report providers, repositories, and services independently require the applicable Giving permission. Direct-invocation denial tests fail closed before database or storage access. |
 | 10 | Complete statement content and selection behavior | Partial | Contributor/date selection, eligible posted gifts, benefit wording, issuance hashes, and revisions exist. Entry and reporting for the full non-cash/acknowledgment surface remain incomplete. |
 | 11 | Privacy-safe memorial/honor acknowledgments | Not complete | Schema fields exist, but the entry and acknowledgment-list workflow is absent. |
 | 12 | Imports detect mappings and duplicates before writes | Pass | Preview is non-writing; confirmed import creates a new Draft batch and records evidence. |
@@ -77,33 +77,28 @@ remain release gates.
 
 ## Prioritized remaining work
 
-1. **Enforce authorization at the service boundary.** Pass an authorization
-   context into contributor, purpose, batch, import, correction, annual-envelope,
-   and accounting-handoff services and require the relevant operation for every
-   public read or write. Add direct-invocation denial tests.
-2. **Finish first-release gift facts.** Add restrained entry and validation for
+1. **Finish first-release gift facts.** Add restrained entry and validation for
    non-cash descriptions, statement treatment, goods/services facts, intangible
    religious benefits, memorial/honor facts, and acknowledgment privacy.
-3. **Finish directed-gift review.** Provide explicit review, clarification,
+2. **Finish directed-gift review.** Provide explicit review, clarification,
    redesignation/return disposition, reason, user, and date without deciding tax
    deductibility.
-4. **Add the missing protected reports.** Start with donor-free Giving by Fund
+3. **Add the missing protected reports.** Start with donor-free Giving by Fund
    and Period and Accounting Posting Reconciliation, followed by exceptions,
    directed gifts, acknowledgments, and printable confidential histories.
-5. **Add an explicit returned-check workflow.** Link the gift correction,
+4. **Add an explicit returned-check workflow.** Link the gift correction,
    Giving batch, accounting reversal, reason, and statement result.
-6. **Complete contributor administration.** Add guarded duplicate merge and an
+5. **Complete contributor administration.** Add guarded duplicate merge and an
    explicit previewed refresh from linked person/family contact data.
-7. **Perform privacy-focused acceptance.** Force errors containing check,
+6. **Perform privacy-focused acceptance.** Force errors containing check,
    contributor, address, and imported-row values and verify support logs and
    bundles redact them. Rehearse backup/restore with the full Giving schema.
-8. **Run final rendered and user acceptance.** Exercise every criterion with the
+7. **Run final rendered and user acceptance.** Exercise every criterion with the
    fictitious dataset, inspect each protected PDF, update the inventories, and
    record release sign-off.
 
 ## Release decision
 
 Continue beta development. Do not represent Member Giving as fully complete or
-remove its beta qualification until the service-authorization gate, required
-special-gift workflows, required reports, privacy tests, and final acceptance
-run are complete.
+remove its beta qualification until the required special-gift workflows,
+required reports, privacy tests, and final acceptance run are complete.

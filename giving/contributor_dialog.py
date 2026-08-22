@@ -22,10 +22,14 @@ def _date_value(control):
 class ContributorRepository:
     """Store contributor identities and envelope assignments transactionally."""
 
-    def __init__(self, connection):
+    def __init__(self, connection, authorization):
         self.connection = portable_connection(connection)
+        self.authorization = authorization
 
     def all(self, sql, values=()):
+        self.authorization.require(
+            "giving.contributors.manage", "access confidential Giving contributors"
+        )
         cursor = self.connection.cursor()
         try:
             cursor.execute(sql, values)
@@ -245,10 +249,10 @@ class ContributorDialog(wx.Dialog):
 
     TYPES = (("Person", "PERSON"), ("Family", "FAMILY"), ("Outside contributor", "EXTERNAL"))
 
-    def __init__(self, parent, connection, user_id=None):
+    def __init__(self, parent, connection, authorization, user_id=None):
         super().__init__(parent, title="Contributors and Envelopes", size=(1120, 720),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
-        self.repository = ContributorRepository(connection)
+        self.repository = ContributorRepository(connection, authorization)
         self.connection = connection
         self.user_id = user_id
         self.rows = []; self.envelope_rows = []; self.current_id = None
@@ -392,13 +396,17 @@ class ContributorDialog(wx.Dialog):
 
     def on_annual_assignment(self, _event=None):
         """Create a previewed annual assignment sequence for active contributors."""
-        if show_annual_envelope_assignment(self, self.connection, self.user_id) == wx.ID_OK:
+        if show_annual_envelope_assignment(
+                self, self.connection, self.user_id, self.repository.authorization) == wx.ID_OK:
             self.refresh_envelopes()
 
 
-def show_contributors(parent, connection, session=None):
+def show_contributors(parent, connection, session, authorization):
     """Open confidential contributor and envelope maintenance."""
-    dialog = ContributorDialog(parent, connection, getattr(session, "user_id", None))
+    authorization.require("giving.contributors.manage", "maintain Giving contributors")
+    dialog = ContributorDialog(
+        parent, connection, authorization, getattr(session, "user_id", None)
+    )
     try:
         dialog.ShowModal()
     finally:

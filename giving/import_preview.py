@@ -26,12 +26,14 @@ class ContributionPreviewRow:
 class ContributionImportPreviewService:
     """Validate identities, purposes, and duplicates without changing data."""
 
-    def __init__(self, connection, church_id: int, organization_id: int):
+    def __init__(self, connection, church_id: int, organization_id: int, authorization):
         self.connection = portable_connection(connection)
         self.church_id = int(church_id)
         self.organization_id = int(organization_id)
+        self.authorization = authorization
 
     def all(self, sql, values=()):
+        self.authorization.require("giving.batches.enter", "preview a contribution import")
         cursor = self.connection.cursor()
         try:
             cursor.execute(sql, values)

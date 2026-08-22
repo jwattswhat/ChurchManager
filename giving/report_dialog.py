@@ -62,7 +62,7 @@ class GivingReportsDialog(wx.Dialog):
     def __init__(self, parent, connection, authorization, session):
         super().__init__(parent, title="Giving Reports", size=(1120, 700),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
-        self.service = GivingReportService(connection)
+        self.service = GivingReportService(connection, authorization)
         self.authorization = authorization
         self.report_service = GivingVisualReportService(connection, authorization, session)
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)

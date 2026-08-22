@@ -13,12 +13,14 @@ from giving.validation import GivingValidationError
 class GivingAccountingHandoff:
     """Create one summarized accounting receipt for a reviewed giving batch."""
 
-    def __init__(self, connection, user_id: int):
+    def __init__(self, connection, user_id: int, authorization):
         self.connection = portable_connection(connection)
         self.user_id = int(user_id)
+        self.authorization = authorization
 
     def send(self, batch_id: int) -> int:
         """Link a Ready batch to a new Ready transaction, without donor detail."""
+        self.authorization.require("giving.batches.post", "send a Giving batch to accounting")
         cursor = self.connection.cursor()
         try:
             cursor.execute(

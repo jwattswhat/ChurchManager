@@ -11,12 +11,14 @@ from giving.validation import GivingValidationError
 class PostedBatchCorrectionService:
     """Create a linked accounting reversal and editable replacement batch."""
 
-    def __init__(self, connection, user_id: int):
+    def __init__(self, connection, user_id: int, authorization):
         self.connection = portable_connection(connection)
         self.user_id = int(user_id)
+        self.authorization = authorization
 
     def create(self, original_batch_id: int, reversal_date, reason: str) -> tuple[int, int]:
         """Return ``(replacement_batch_id, reversal_transaction_id)`` atomically."""
+        self.authorization.require("giving.batches.post", "correct a posted Giving batch")
         reason = str(reason or "").strip()
         if not reason:
             raise GivingValidationError("Enter the reason for correcting this posted batch.")

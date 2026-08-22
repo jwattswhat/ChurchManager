@@ -184,7 +184,7 @@ class GivingBatchSummaryProvider:
     """Build a donor-free report dataset from Giving batch controls."""
 
     def __init__(self, connection, authorization):
-        self.service = GivingReportService(connection)
+        self.service = GivingReportService(connection, authorization)
         self.authorization = authorization
 
     def build(self, start_date, end_date):
@@ -223,7 +223,7 @@ class ContributionStatementProvider:
     )
 
     def __init__(self, connection, authorization):
-        self.service = GivingReportService(connection)
+        self.service = GivingReportService(connection, authorization)
         self.authorization = authorization
 
     @staticmethod
@@ -284,7 +284,7 @@ class EnvelopeBoxReportProvider:
     """Build protected label-sheet and assignment-register datasets."""
 
     def __init__(self, connection, authorization):
-        self.service = GivingReportService(connection)
+        self.service = GivingReportService(connection, authorization)
         self.authorization = authorization
 
     def _rows(self, year, include_inactive, include_outside):
@@ -406,7 +406,7 @@ class GivingVisualReportService:
                     writer.write(stream)
                 writer.close()
             if issue:
-                GivingReportService(self.connection).record_statement_issuances(
+                GivingReportService(self.connection, self.authorization).record_statement_issuances(
                     issue_records, self.session.user_id,
                 )
         self.processes.open_file(output)

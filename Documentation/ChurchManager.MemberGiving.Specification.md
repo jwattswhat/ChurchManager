@@ -413,6 +413,11 @@ The subsystem introduces separate operation-boundary permissions:
 Menu visibility is not authorization. Services and report datasets recheck the
 permission and church scope for every operation.
 
+Implementation status (August 22, 2026): contributor, purpose, batch, import,
+correction, annual-envelope, accounting-handoff, and protected-report services
+now enforce these permissions at their own public operation boundaries.
+Direct-invocation tests verify denial before database or file access.
+
 Additional safeguards:
 
 - No giving detail is included in routine error logs, telemetry, email, or the

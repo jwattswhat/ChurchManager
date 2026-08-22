@@ -16,13 +16,15 @@ from giving.validation import GivingValidationError
 class ContributionImportService:
     """Preserve source evidence and import accepted rows into one Draft batch."""
 
-    def __init__(self, connection, user_id: int, test_mode=False, store=None):
+    def __init__(self, connection, user_id: int, authorization, test_mode=False, store=None):
         self.connection = portable_connection(connection); self.user_id = int(user_id)
+        self.authorization = authorization
         self.store = store or AttachmentStore(load_attachment_policy(load_config(), test_mode))
 
     def import_draft(self, *, source_path, content, mapping, preview_rows, church_id,
                      organization_id, bank_account_id, deposit_date, description):
         """Create an evidence record, Draft batch, gifts, and allocations atomically."""
+        self.authorization.require("giving.batches.enter", "import contribution batches")
         preview_rows = tuple(preview_rows)
         if not preview_rows or any(not item.ready for item in preview_rows):
             raise GivingValidationError("Every contribution row must be Ready before import.")

@@ -8,6 +8,11 @@ from giving.batch_service import DraftBatchService
 from giving.validation import GivingValidationError
 
 
+class Authorization:
+    def require(self, _permission, _operation=None):
+        return None
+
+
 class Cursor:
     def __init__(self, connection):
         self.connection = connection
@@ -56,9 +61,12 @@ class Connection:
 
 
 class DraftBatchServiceTests(unittest.TestCase):
+    def service(self, connection):
+        return DraftBatchService(connection, 3, Authorization())
+
     def test_catalog_excludes_ready_batches_already_sent_to_accounting(self):
         connection = Connection()
-        DraftBatchService(connection, 3).draft_batches()
+        self.service(connection).draft_batches()
         sql = next(sql for sql, _values in connection.calls
                    if "FROM tblContributionBatch b" in sql)
         self.assertIn("b.Status='DRAFT'", sql)
@@ -66,7 +74,7 @@ class DraftBatchServiceTests(unittest.TestCase):
 
     def test_creates_draft_batch_with_safe_audit(self):
         connection = Connection()
-        batch_id = DraftBatchService(connection, 3).create_batch(
+        batch_id = self.service(connection).create_batch(
             batch_date=date(2026, 8, 21), description="Sunday offering",
             organization_id=4, control_total="125.00")
         self.assertEqual((batch_id, connection.commits), (21, 1))
@@ -74,14 +82,14 @@ class DraftBatchServiceTests(unittest.TestCase):
 
     def test_resolves_numeric_envelope_without_leading_zero_distinction(self):
         connection = Connection(); connection.envelopes = [(45,)]
-        contributor = DraftBatchService(connection, 3).resolve_envelope("0012", date(2026, 8, 21))
+        contributor = self.service(connection).resolve_envelope("0012", date(2026, 8, 21))
         self.assertEqual(contributor, 45)
         call = next(item for item in connection.calls if "EnvelopeAssignment" in item[0])
         self.assertEqual(call[1][1], 12)
 
     def test_saves_balanced_gift_and_updates_batch_total(self):
         connection = Connection()
-        contribution_id = DraftBatchService(connection, 3).save_monetary_gift(
+        contribution_id = self.service(connection).save_monetary_gift(
             batch_id=21, received_date=date(2026, 8, 21), amount="25.00",
             contributor_id=45, method="CHECK", reference="1001",
             allocations=[(8, 4, 5, 6, None, "20.00", None), (9, 4, 7, 6, 12, "5.00", None)])
@@ -92,12 +100,12 @@ class DraftBatchServiceTests(unittest.TestCase):
 
     def test_rejects_unbalanced_or_non_draft_gift(self):
         with self.assertRaises(GivingValidationError):
-            DraftBatchService(Connection(), 3).save_monetary_gift(
+            self.service(Connection()).save_monetary_gift(
                 batch_id=21, received_date=date.today(), amount="25.00",
                 allocations=[(8, 4, 5, 6, None, "24.99", None)])
         connection = Connection(); connection.batch = (4, "READY")
         with self.assertRaises(GivingValidationError):
-            DraftBatchService(connection, 3).save_monetary_gift(
+            self.service(connection).save_monetary_gift(
                 batch_id=21, received_date=date.today(), amount="25.00",
                 allocations=[(8, 4, 5, 6, None, "25.00", None)])
         self.assertEqual(connection.rollbacks, 1)
@@ -106,20 +114,20 @@ class DraftBatchServiceTests(unittest.TestCase):
         connection = Connection()
         connection.totals = (Decimal("30.00"), Decimal("25.00"), date(2026, 8, 21), 2, 4)
         connection.review_counts = [1, 1, 0, 0, 0, 0, 0]
-        issues = DraftBatchService(connection, 3).review_issues(21)
+        issues = self.service(connection).review_issues(21)
         self.assertIn("control total", " ".join(issues))
         self.assertIn("envelope", " ".join(issues))
 
     def test_complete_draft_is_marked_ready_and_audited(self):
         connection = Connection()
-        DraftBatchService(connection, 3).mark_ready(21)
+        self.service(connection).mark_ready(21)
         self.assertEqual(connection.commits, 1)
         self.assertTrue(any("Status='READY'" in sql for sql, _ in connection.calls))
         self.assertTrue(any("BATCH_MARKED_READY" in str(values) for _, values in connection.calls))
 
     def test_invalid_deposit_period_prevents_ready_status(self):
         connection = Connection(); connection.review_counts[0] = 0
-        issues = DraftBatchService(connection, 3).review_issues(21)
+        issues = self.service(connection).review_issues(21)
         self.assertIn("open fiscal period", " ".join(issues))
 
     def test_unsent_ready_batch_can_return_to_draft(self):
@@ -131,7 +139,7 @@ class DraftBatchServiceTests(unittest.TestCase):
                 cursor.rowcount = 1
         Cursor.execute = execute
         try:
-            DraftBatchService(connection, 3).return_to_draft(21)
+            self.service(connection).return_to_draft(21)
         finally:
             Cursor.execute = original_execute
         self.assertEqual(connection.commits, 1)
@@ -148,7 +156,7 @@ class DraftBatchServiceTests(unittest.TestCase):
                 cursor.rowcount = 1
         Cursor.execute = execute
         try:
-            DraftBatchService(connection, 3).update_batch_header(
+            self.service(connection).update_batch_header(
                 21, batch_date=date(2027, 1, 7), description="Imported gifts",
                 organization_id=4, control_total="65", deposit_date=date(2027, 1, 15),
                 bank_account_id=2)
@@ -159,7 +167,7 @@ class DraftBatchServiceTests(unittest.TestCase):
 
     def test_update_replaces_allocations_and_recalculates_total(self):
         connection = Connection()
-        DraftBatchService(connection, 3).update_monetary_gift(
+        self.service(connection).update_monetary_gift(
             31, batch_id=21, received_date=date.today(), amount="30.00",
             allocations=[(8, 4, 5, 6, None, "30.00", None)], contributor_id=45,
             envelope_number="12", method="CHECK", reference="1002",
@@ -172,7 +180,7 @@ class DraftBatchServiceTests(unittest.TestCase):
 
     def test_delete_removes_allocations_then_gift_and_recalculates(self):
         connection = Connection()
-        DraftBatchService(connection, 3).delete_gift(21, 31)
+        self.service(connection).delete_gift(21, 31)
         calls = [item[0] for item in connection.calls]
         allocation = next(i for i, sql in enumerate(calls) if sql.startswith("DELETE FROM tblContributionAllocation"))
         gift = next(i for i, sql in enumerate(calls) if sql.startswith("DELETE FROM tblContribution WHERE"))

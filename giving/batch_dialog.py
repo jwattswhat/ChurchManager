@@ -312,7 +312,7 @@ class BatchCatalogDialog(wx.Dialog):
     def __init__(self, parent, connection, session, authorization, test_mode=False):
         super().__init__(parent, title="Contribution Batches", size=(920, 570),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
-        self.service = DraftBatchService(connection, session.user_id)
+        self.service = DraftBatchService(connection, session.user_id, authorization)
         self.authorization = authorization
         self.test_mode = bool(test_mode)
         self.can_review = authorization.has_permission("giving.batches.review")
@@ -373,7 +373,9 @@ class BatchCatalogDialog(wx.Dialog):
         if wx.MessageBox("Create one summarized accounting transaction for this batch?\n\nNo donor or envelope details will enter the ledger.",
                          "Send to Accounting",wx.YES_NO|wx.NO_DEFAULT|wx.ICON_QUESTION,self)!=wx.YES:return
         try:
-            transaction_id=GivingAccountingHandoff(self.service.connection,self.service.user_id).send(row[0])
+            transaction_id=GivingAccountingHandoff(
+                self.service.connection, self.service.user_id, self.authorization
+            ).send(row[0])
             wx.MessageBox(f"Accounting transaction {transaction_id} is Ready in Transaction Posting.",
                           "Accounting Handoff",wx.OK|wx.ICON_INFORMATION,self);self.refresh()
         except Exception as error:wx.MessageBox(str(error),"Unable to Send Batch",wx.OK|wx.ICON_ERROR,self)
@@ -406,7 +408,7 @@ class BatchCatalogDialog(wx.Dialog):
                     "The reversal must be approved and posted before the replacement can be sent to accounting.",
                     "Correct Posted Batch", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES: return
             replacement, reversal = PostedBatchCorrectionService(
-                self.service.connection, self.service.user_id).create(
+                self.service.connection, self.service.user_id, self.authorization).create(
                     self.rows[selected][0], dialog.correction_date(), dialog.reason.GetValue())
             wx.MessageBox(
                 f"Replacement batch {replacement} was created. Accounting reversal {reversal} is Ready.",

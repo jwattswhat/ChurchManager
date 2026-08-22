@@ -617,6 +617,10 @@ future roadmap projects:
   mailing-label starters are also implemented in the ordinary secured report
   catalog and accepted visually.
 - Design this as a separate confidential subledger with its own permissions.
+- Giving authorization is now enforced inside contributor, purpose, batch,
+  import, correction, annual-envelope, accounting-handoff, and protected-report
+  services in addition to menu and dialog checks. Direct-invocation denial tests
+  confirm fail-closed behavior before database or file access.
 - Support contributor accounts linked optionally to a person or family; outside
   donors must also be allowed without creating congregation-member records.
 - Assign and maintain envelope numbers with effective dates so numbers can be

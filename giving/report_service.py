@@ -1,4 +1,4 @@
-"""Permission-neutral read models for confidential Giving reports."""
+"""Permission-enforcing read models for confidential Giving reports."""
 
 from __future__ import annotations
 
@@ -10,10 +10,11 @@ from bulletin_orders import portable_connection
 class GivingReportService:
     """Read summary and contributor history without exposing data accidentally."""
 
-    def __init__(self, connection):
+    def __init__(self, connection, authorization):
         self.connection = portable_connection(connection)
+        self.authorization = authorization
 
-    def all(self, sql, values=()):
+    def _all(self, sql, values=()):
         cursor = self.connection.cursor()
         try:
             cursor.execute(sql, values)
@@ -22,14 +23,15 @@ class GivingReportService:
             cursor.close()
 
     def church_id(self):
-        rows = self.all("SELECT ID FROM tblChurch ORDER BY ID LIMIT 1")
+        rows = self._all("SELECT ID FROM tblChurch ORDER BY ID LIMIT 1")
         if not rows:
             raise ValueError("Church information must be created first.")
         return rows[0][0]
 
     def date_bounds(self):
         """Return the available Giving date range, or the current year."""
-        rows = self.all(
+        self.authorization.require("giving.reports.summary", "view Giving report dates")
+        rows = self._all(
             "SELECT MIN(BatchDate),MAX(BatchDate) FROM tblContributionBatch "
             "WHERE ChurchID=?", (self.church_id(),),
         )
@@ -40,14 +42,16 @@ class GivingReportService:
 
     def contributors(self):
         """Return active and historical contributors for a confidential filter."""
-        return self.all(
+        self.authorization.require("giving.history.view", "view Giving contributors")
+        return self._all(
             "SELECT ID,DisplayName FROM tblContributionContributor "
             "WHERE ChurchID=? ORDER BY DisplayName,ID", (self.church_id(),),
         )
 
     def envelope_assignment_years(self):
         """Return practical calendar years represented by envelope assignments."""
-        rows = self.all(
+        self.authorization.require("giving.reports.confidential", "view envelope assignments")
+        rows = self._all(
             "SELECT MIN(YEAR(EffectiveFrom)),MAX(YEAR(COALESCE(EffectiveThrough,EffectiveFrom))) "
             "FROM tblContributionEnvelopeAssignment WHERE ChurchID=?", (self.church_id(),),
         )
@@ -60,6 +64,7 @@ class GivingReportService:
 
     def envelope_assignments(self, year, *, include_inactive=False, include_outside=True):
         """Return confidential envelope assignments overlapping one calendar year."""
+        self.authorization.require("giving.reports.confidential", "view envelope assignments")
         first, last = date(int(year), 1, 1), date(int(year), 12, 31)
         sql = (
             "SELECT e.EnvelopeNumber,COALESCE(NULLIF(c.StatementName,''),c.DisplayName),"
@@ -74,7 +79,7 @@ class GivingReportService:
             sql += " AND c.IsActive=1"
         if not include_outside:
             sql += " AND c.ContributorType<>'EXTERNAL'"
-        rows = self.all(sql, tuple(values))
+        rows = self._all(sql, tuple(values))
 
         def key(row):
             value = str(row[0])
@@ -84,7 +89,8 @@ class GivingReportService:
 
     def batch_summary(self, start_date, end_date):
         """Return donor-free batch controls for the requested period."""
-        return self.all(
+        self.authorization.require("giving.reports.summary", "view the Giving batch summary")
+        return self._all(
             "SELECT b.BatchDate,b.Description,o.LegalName,b.Status,b.ControlTotal,"
             "b.CalculatedTotal,(COALESCE(b.ControlTotal,b.CalculatedTotal)-b.CalculatedTotal),"
             "b.AccountingTransactionID FROM tblContributionBatch b "
@@ -96,7 +102,8 @@ class GivingReportService:
 
     def contributor_history(self, contributor_id, start_date, end_date):
         """Return reviewed or posted allocations for one contributor."""
-        return self.all(
+        self.authorization.require("giving.history.view", "view contributor Giving history")
+        return self._all(
             "SELECT g.ReceivedDate,b.Description,g.ContributionMethod,g.ReferenceValue,"
             "COALESCE(p.Name,'Unspecified'),a.Amount,b.Status,g.StatementEligibility "
             "FROM tblContribution g JOIN tblContributionBatch b ON b.ID=g.BatchID "
@@ -110,7 +117,8 @@ class GivingReportService:
 
     def statement_contributors(self):
         """Return contributors explicitly enabled for contribution statements."""
-        return self.all(
+        self.authorization.require("giving.statements.generate", "select statement contributors")
+        return self._all(
             "SELECT ID,COALESCE(NULLIF(StatementName,''),DisplayName) "
             "FROM tblContributionContributor WHERE ChurchID=? AND StatementEnabled=1 "
             "ORDER BY COALESCE(NULLIF(StatementName,''),DisplayName),ID",
@@ -119,7 +127,8 @@ class GivingReportService:
 
     def statement_years(self):
         """Return years containing posted contributions, newest first."""
-        rows = self.all(
+        self.authorization.require("giving.statements.generate", "select contribution statement years")
+        rows = self._all(
             "SELECT DISTINCT YEAR(g.ReceivedDate) FROM tblContribution g "
             "JOIN tblContributionBatch b ON b.ID=g.BatchID "
             "WHERE b.ChurchID=? AND b.Status='POSTED' ORDER BY 1 DESC",
@@ -129,7 +138,8 @@ class GivingReportService:
 
     def statement_identity(self, contributor_id):
         """Return the confidential statement name and mailing address."""
-        rows = self.all(
+        self.authorization.require("giving.statements.generate", "view a contribution statement identity")
+        rows = self._all(
             "SELECT ID,COALESCE(NULLIF(StatementName,''),DisplayName),Address,Address2,"
             "City,State,PostalCode FROM tblContributionContributor "
             "WHERE ChurchID=? AND ID=? AND StatementEnabled=1",
@@ -141,7 +151,8 @@ class GivingReportService:
 
     def statement_contributors_for_period(self, start_date, end_date):
         """Return enabled contributors having eligible posted gifts in a period."""
-        return self.all(
+        self.authorization.require("giving.statements.generate", "select contribution statement recipients")
+        return self._all(
             "SELECT DISTINCT c.ID,COALESCE(NULLIF(c.StatementName,''),c.DisplayName) "
             "FROM tblContributionContributor c JOIN tblContribution g ON g.ContributorID=c.ID "
             "JOIN tblContributionBatch b ON b.ID=g.BatchID "
@@ -157,7 +168,8 @@ class GivingReportService:
 
     def statement_lines(self, contributor_id, start_date, end_date):
         """Return posted, statement-eligible allocation lines for one contributor."""
-        return self.all(
+        self.authorization.require("giving.statements.generate", "build a contribution statement")
+        return self._all(
             "SELECT g.ReceivedDate,COALESCE(p.Name,'General contribution'),"
             "g.ContributionMethod,a.Amount,g.NonCashDescription,"
             "g.GoodsOrServicesProvided,g.GoodsOrServicesDescription,g.GoodsOrServicesValue,"
@@ -175,7 +187,8 @@ class GivingReportService:
 
     def statement_issuance_history(self):
         """Return confidential issued-statement identifiers, newest first."""
-        return self.all(
+        self.authorization.require("giving.statements.generate", "view contribution statement history")
+        return self._all(
             "SELECT i.GeneratedAt,COALESCE(NULLIF(c.StatementName,''),c.DisplayName),"
             "i.PeriodStart,i.PeriodEnd,i.RevisionNumber,i.OutputFileName,i.DocumentHash "
             "FROM tblContributionStatementIssue i "
@@ -186,6 +199,7 @@ class GivingReportService:
 
     def record_statement_issuances(self, issues, user_id):
         """Atomically record rendered statement hashes and revision relationships."""
+        self.authorization.require("giving.statements.generate", "record contribution statements")
         cursor = self.connection.cursor()
         church_id = self.church_id()
         try:
