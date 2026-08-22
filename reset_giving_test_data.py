@@ -17,6 +17,7 @@ from pathlib import Path
 
 import mariadb
 
+from accounting.attachment_service import AttachmentStore, load_attachment_policy
 from backup_service import BackupService
 from credential_store import read_credential
 
@@ -24,7 +25,7 @@ from credential_store import read_credential
 ROOT = Path(__file__).resolve().parent
 LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
 GIVING_TABLES = (
-    "tblContributionStatementIssue", "tblContributionAuditEvent",
+    "tblContributionImportEvidence", "tblContributionStatementIssue", "tblContributionAuditEvent",
     "tblContributionAllocation", "tblContribution",
     "tblContributionBatch", "tblContributionEnvelopeAssignment",
     "tblContributionPurpose", "tblContributionContributor",
@@ -72,12 +73,14 @@ def create_backup(testing, username, password):
 
 def remove_existing(cursor):
     """Remove giving rows and only accounting transactions linked from them."""
+    cursor.execute("SELECT StoredPath FROM tblContributionImportEvidence")
+    stored_imports = [row[0] for row in cursor.fetchall()]
     cursor.execute("SELECT AccountingTransactionID FROM tblContributionBatch "
                    "WHERE AccountingTransactionID IS NOT NULL")
     transaction_ids = [row[0] for row in cursor.fetchall()]
     cursor.execute("UPDATE tblContributionBatch SET CorrectsBatchID=NULL,CorrectionBatchID=NULL")
     cursor.execute("UPDATE tblContributionBatch SET AccountingTransactionID=NULL")
-    for table in ("tblContributionStatementIssue", "tblContributionAuditEvent",
+    for table in ("tblContributionImportEvidence", "tblContributionStatementIssue", "tblContributionAuditEvent",
                   "tblContributionAllocation", "tblContribution",
                   "tblContributionEnvelopeAssignment", "tblContributionBatch",
                   "tblContributionPurpose", "tblContributionContributor"):
@@ -88,6 +91,7 @@ def remove_existing(cursor):
         cursor.execute("DELETE FROM tblAccountingAttachment WHERE TransactionID=?", (transaction_id,))
         cursor.execute("DELETE FROM tblAccountingTransactionLine WHERE TransactionID=?", (transaction_id,))
         cursor.execute("DELETE FROM tblAccountingTransaction WHERE ID=?", (transaction_id,))
+    return stored_imports
 
 
 def accounting_setup(cursor):
@@ -354,10 +358,10 @@ def main():
             return 2
         path, size, digest = create_backup(testing, username, password)
         print(f"backup={path}"); print(f"backup_bytes={size}"); print(f"backup_sha256={digest}")
-        remove_existing(cursor); statement_year = seed(cursor)
+        stored_imports = remove_existing(cursor); statement_year = seed(cursor)
         after = counts(cursor)
         for table, count in after.items(): print(f"after_{table}={count}")
-        expected = {"tblContributionStatementIssue": 0,
+        expected = {"tblContributionImportEvidence": 0, "tblContributionStatementIssue": 0,
                     "tblContributionContributor": 5, "tblContributionEnvelopeAssignment": 4,
                     "tblContributionPurpose": 3, "tblContributionBatch": 6,
                     "tblContribution": 16, "tblContributionAllocation": 17,
@@ -382,6 +386,10 @@ def main():
         if quarterly_statement_counts != {1: 2, 2: 2, 3: 2, 4: 2}:
             raise RuntimeError("Quarterly contribution statement test data verification failed.")
         connection.commit()
+        store = AttachmentStore(load_attachment_policy(config, test_mode=True))
+        for stored_path in stored_imports:
+            store.remove(stored_path)
+        print(f"removed_import_evidence_files={len(stored_imports)}")
         print("giving_test_dataset_verified=true")
         return 0
     except Exception:

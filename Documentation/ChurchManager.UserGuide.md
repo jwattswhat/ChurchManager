@@ -170,7 +170,9 @@ The exact source CSV is retained in protected ChurchManager storage with its
 file hash and mapping, and the same file cannot be imported twice.
 The development test dataset includes `GivingImport.Valid.Sample.csv` and
 `GivingImport.Issues.Sample.csv` in the `TestData` folder for exercising both
-successful and flagged previews.
+successful and flagged previews. Resetting the Giving test dataset also removes
+test import-evidence rows and their protected test copies after the replacement
+dataset commits successfully.
 
 A Draft cannot be marked Ready unless its deposit date belongs to exactly one
 open fiscal period for its accounting organization. If an unsent Ready batch

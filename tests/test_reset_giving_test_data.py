@@ -52,5 +52,13 @@ class GivingTestDataResetTests(unittest.TestCase):
         contributor = self.source.index('"tblContributionPurpose", "tblContributionContributor"')
         self.assertLess(issue, contributor)
 
+    def test_reset_removes_import_evidence_before_batches_and_protected_files_after_commit(self):
+        evidence = self.source.index('"tblContributionImportEvidence", "tblContributionStatementIssue"')
+        batches = self.source.index('"tblContributionEnvelopeAssignment", "tblContributionBatch"')
+        self.assertLess(evidence, batches)
+        self.assertLess(self.source.index("connection.commit()"),
+                        self.source.index("store.remove(stored_path)"))
+        self.assertIn("removed_import_evidence_files=", self.source)
+
 
 if __name__ == "__main__": unittest.main()
