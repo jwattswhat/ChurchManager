@@ -11,8 +11,11 @@
 **Implementation:** encryption/key-recovery service, migration 096 database,
 permission and controlled-choice foundation, protected backup sidecar plumbing,
 and Master Administrator recovery-package setup with safe creation/password-
-change audit are implemented. Restricted-note entry, service authorization,
-remaining audit events, workflows, and restore acceptance remain gated.
+change audit are implemented. The framework-independent operational service now
+enforces assigned/all viewing and distinct create, assign, update, and close
+permissions before repository access. Restricted-note entry, the MariaDB
+repository and remaining audit events, workflows, and restore acceptance remain
+gated.
 
 **Target:** ChurchManager
 
