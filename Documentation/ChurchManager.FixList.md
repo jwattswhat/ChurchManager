@@ -675,6 +675,9 @@ future roadmap projects:
   and separate create, assign, update, and close permissions. Restricted-note
   entry remains disabled until the MariaDB repository, remaining audit events,
   workflows, and restore acceptance pass.
+  - Interactive protected backup/restore and application restart passed in
+    `ChurchDBTest`; ciphertext and isolated cross-machine recovery acceptance
+    remain.
 
 - Research completed: [Pastoral care systems research and ChurchManager recommendations](ChurchManager.PastoralCare.Research.md).
 - Proposed implementation specification: [ChurchManager pastoral care specification](ChurchManager.PastoralCare.Specification.md).

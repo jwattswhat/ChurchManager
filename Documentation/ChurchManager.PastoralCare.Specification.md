@@ -17,6 +17,11 @@ permissions before repository access. Restricted-note entry, the MariaDB
 repository and remaining audit events, workflows, and restore acceptance remain
 gated.
 
+The interactive `ChurchDBTest` restore path has been accepted with its protected
+recovery sidecar and required ChurchManager restart. Cross-machine recovery with
+actual restricted-note ciphertext and the isolated release rehearsal remain to
+be accepted before restricted-note entry is enabled.
+
 **Target:** ChurchManager
 
 ## 1. Purpose

@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 import time
 import json
+import re
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -165,14 +166,39 @@ class BackupService:
                 command.extend(["--port", str(settings["port"])])
             command.append(settings["database"])
             with Path(dump_path).open("rb") as source:
-                self.runner(command, stdin=source, check=True)
+                self.runner(
+                    command, stdin=source, check=True,
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                )
             if validated_recovery is not None:
                 self.recovery.complete_restore(validated_recovery)
         except (OSError, subprocess.SubprocessError) as error:
-            raise BackupError("The database could not be restored. The pre-restore backup was preserved.") from error
+            detail = self._restore_failure_detail(error)
+            raise BackupError(
+                "The database could not be restored. The pre-restore backup was preserved.{}"
+                .format("\n\n" + detail if detail else "")
+            ) from error
         finally:
             if option_path: option_path.unlink(missing_ok=True)
         return safety
+
+    @staticmethod
+    def _restore_failure_detail(error):
+        """Return bounded, redacted MariaDB diagnostics without exposing row data."""
+
+        raw = getattr(error, "stderr", None)
+        if isinstance(raw, bytes):
+            raw = raw.decode("utf-8", errors="replace")
+        if not raw:
+            return "MariaDB did not provide an error code."
+        lines = [line.strip() for line in str(raw).splitlines() if line.strip()]
+        error_line = next((line for line in reversed(lines) if "ERROR " in line.upper()), None)
+        if not error_line:
+            return "MariaDB reported an import error without an error code."
+        # Quoted values can contain congregation data; retain only structural detail.
+        redacted = re.sub(r"(['\"]).*?\1", "[value]", error_line)
+        redacted = "".join(character for character in redacted if character.isprintable())
+        return "MariaDB: {}".format(redacted[:500])
 
     @staticmethod
     def _contains_restricted_pastoral_notes(dump_path):

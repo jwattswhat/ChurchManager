@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
 from unittest import mock
@@ -179,6 +180,17 @@ class TestBackupService(unittest.TestCase):
             BackupService.prune_automatic(root, "ChurchDBTest", keep=1)
             self.assertTrue(Path(str(keep) + ".PastoralRecovery.json").exists())
             self.assertFalse(Path(str(obsolete) + ".PastoralRecovery.json").exists())
+
+    def test_restore_failure_detail_reports_code_and_redacts_quoted_data(self):
+        error = subprocess.CalledProcessError(
+            1, ["mariadb"],
+            stderr=b"ERROR 1062 (23000) at line 44: Duplicate entry 'Private Name' for key 'uq_name'\n",
+        )
+        detail = BackupService._restore_failure_detail(error)
+        self.assertIn("ERROR 1062", detail)
+        self.assertIn("line 44", detail)
+        self.assertNotIn("Private Name", detail)
+        self.assertNotIn("uq_name", detail)
 
 
 class TestReportService(unittest.TestCase):
