@@ -82,6 +82,7 @@ class GivingReportsDialog(wx.Dialog):
             self._build_statement_history_tab()
         if authorization.has_permission("giving.reports.confidential"):
             self._build_tribute_tab()
+            self._build_directed_gifts_tab()
             self._build_envelope_boxes_tab()
         if self.notebook.GetPageCount() == 0:
             raise PermissionError("You do not have permission to run Giving reports.")
@@ -299,6 +300,25 @@ class GivingReportsDialog(wx.Dialog):
         panel.SetSizer(root)
         self.notebook.AddPage(panel, "Memorial / Honor Gifts")
 
+    def _build_directed_gifts_tab(self):
+        """Build the restricted donor-direction review controls."""
+        panel = wx.Panel(self.notebook); root = wx.BoxSizer(wx.VERTICAL)
+        guidance = wx.StaticText(panel, label=(
+            "Review pending and completed donor directions. This report documents the congregation's "
+            "disposition and does not determine deductibility."
+        ))
+        guidance.SetForegroundColour(wx.Colour(0, 75, 150)); guidance.Wrap(920)
+        root.Add(guidance, 0, wx.ALL, 10)
+        self.directed_start, self.directed_end = self._date_controls(panel)
+        preview = wx.Button(panel, label="Preview Directed Gift Review List")
+        preview.Bind(wx.EVT_BUTTON, self.on_directed_gifts_pdf)
+        filters = wx.BoxSizer(wx.HORIZONTAL)
+        for label, control in (("From", self.directed_start), ("Through", self.directed_end)):
+            filters.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 5)
+            filters.Add(control, 0, wx.RIGHT, 12)
+        filters.Add(preview); root.Add(filters, 0, wx.ALL, 10)
+        panel.SetSizer(root); self.notebook.AddPage(panel, "Directed Gift Review")
+
     def _dates(self, start, end):
         first, last = _python_date(start), _python_date(end)
         if first > last:
@@ -476,6 +496,16 @@ class GivingReportsDialog(wx.Dialog):
             wx.MessageBox(
                 str(error), "Memorial and Honor Gifts", wx.OK | wx.ICON_ERROR, self,
             )
+
+    def on_directed_gifts_pdf(self, _event=None):
+        """Render the restricted directed-gift review and disposition list."""
+        try:
+            first, last = self._dates(self.directed_start, self.directed_end)
+            self.report_service.run_directed_gift_reviews(
+                date.fromisoformat(first), date.fromisoformat(last),
+            )
+        except Exception as error:
+            wx.MessageBox(str(error), "Directed Gift Review", wx.OK | wx.ICON_ERROR, self)
 
     def on_envelope_register(self, _event=None):
         """Render the selected confidential envelope assignment register."""

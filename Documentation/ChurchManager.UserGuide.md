@@ -262,6 +262,17 @@ otherwise it says **Not disclosed**. The amount appears only when amount
 disclosure was separately authorized. These two permissions are never inferred
 from one another.
 
+Use **Acknowledgment / Tribute...** while entering a contribution to record a
+special donor instruction. Select **Needs review** until the congregation has
+decided how it will respond. A completed disposition requires a resolution note;
+ChurchManager records the resolving user and time automatically. **Returned to
+donor** retains the review record but excludes the amount from the deposit,
+ledger handoff, and contribution statement. **Accepted under congregation
+control** documents that the congregation retains control and discretion over
+an approved purpose. ChurchManager documents the action; it does not decide tax
+deductibility. Use **Giving Reports > Directed Gift Review** for the confidential
+review and disposition list.
+
 ## 4. Worship planning
 
 ### Create a worship service

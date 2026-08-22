@@ -153,6 +153,36 @@ TRIBUTE_MANIFEST = JSForm.ReportProtectionManifest(
     },
 )
 
+DIRECTED_GIFT_CONTRACT = JSForm.ReportDatasetContract(
+    "giving.directedgiftreviews", 1, "giving.reports.confidential", (
+        JSForm.ReportCollection("church", "Church", (
+            field("Church", "Church Name"), field("Logo", "Church Logo", "image"),
+        )),
+        JSForm.ReportCollection("parameters", "Parameters", (field("Display", "Covered Period"),)),
+        JSForm.ReportCollection("records", "Directed Gift Reviews", (
+            field("Date", "Date", "date"), field("Contributor", "Contributor"),
+            field("Direction", "Donor Direction"), field("Status", "Disposition"),
+            field("Resolution", "Resolution"), field("ResolvedBy", "Resolved By"),
+            field("ResolvedAt", "Resolved At", "datetime"), field("Batch", "Batch"),
+        )),
+    ),
+)
+
+DIRECTED_GIFT_MANIFEST = JSForm.ReportProtectionManifest(
+    required_settings={"name": "GIVE-DIRECTED", "dataset": "giving.directedgiftreviews",
+                       "datasetversion": 1, "classification": "confidential"},
+    required_bands=("ReportHeader", "Detail", "PageFooter"),
+    required_controls={
+        "ChurchLogo": {"collection": "church", "field": "Logo"},
+        "ChurchName": {"collection": "church", "field": "Church"},
+        "ReportTitle": {"systemvalue": "report_title"},
+        "Period": {"collection": "parameters", "field": "Display"},
+        "Records": {"repeatcollection": "records"},
+        "RunUser": {"systemvalue": "run_user"}, "ReportCode": {"systemvalue": "report_code"},
+        "Classification": {"systemvalue": "classification"}, "PageNumber": {"systemvalue": "page_number"},
+    },
+)
+
 
 ENVELOPE_LABEL_CONTRACT = JSForm.ReportDatasetContract(
     "giving.envelopelabels", 1, "giving.reports.confidential", (
@@ -333,6 +363,28 @@ class TributeAcknowledgmentProvider:
                 "Honoree": row[2], "Donor": row[3],
                 "Amount": "" if row[4] is None else f"${Decimal(row[4]):,.2f}",
                 "Contact": row[5], "Purpose": row[6],
+            } for row in rows],
+        })
+
+
+class DirectedGiftReviewProvider:
+    """Build the restricted donor-direction review and disposition dataset."""
+
+    def __init__(self, connection, authorization):
+        self.service = GivingReportService(connection, authorization)
+
+    def build(self, start_date, end_date):
+        church = self.service.all("SELECT Church,Logo FROM tblChurch ORDER BY ID LIMIT 1")
+        if not church:
+            raise ValueError("Church information must be created first.")
+        rows = self.service.directed_gift_reviews(start_date, end_date)
+        return JSForm.ReportDataset.create(DIRECTED_GIFT_CONTRACT, {
+            "church": [{"Church": church[0][0], "Logo": church[0][1]}],
+            "parameters": [{"Display": f"{start_date:%B %d, %Y} through {end_date:%B %d, %Y}"}],
+            "records": [{
+                "Date": row[0], "Contributor": row[1], "Direction": row[2],
+                "Status": str(row[3]).replace("_", " ").title(), "Resolution": row[4],
+                "ResolvedBy": row[5], "ResolvedAt": row[6], "Batch": row[7],
             } for row in rows],
         })
 
@@ -520,6 +572,21 @@ class GivingVisualReportService:
         TRIBUTE_MANIFEST.validate(definition)
         dataset = TributeAcknowledgmentProvider(self.connection, self.authorization).build(start_date, end_date)
         output = self._available_output("GIVE-TRIBUTE.pdf")
+        rendered = JSForm.PDFReportRenderer().render(
+            definition, dataset, output, context={"run_user": self.session.display_name},
+        )
+        self.processes.open_file(rendered)
+        return rendered
+
+    def run_directed_gift_reviews(self, start_date, end_date):
+        """Render the restricted directed-gift review and disposition list."""
+        self.authorization.require("giving.reports.confidential", "print directed gift reviews")
+        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "GIVE-DIRECTED.json")
+        DIRECTED_GIFT_MANIFEST.validate(definition)
+        dataset = DirectedGiftReviewProvider(self.connection, self.authorization).build(
+            start_date, end_date
+        )
+        output = self._available_output("GIVE-DIRECTED.pdf")
         rendered = JSForm.PDFReportRenderer().render(
             definition, dataset, output, context={"run_user": self.session.display_name},
         )

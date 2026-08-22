@@ -59,7 +59,8 @@ class GivingAccountingHandoff:
             cursor.execute(
                 "SELECT a.FundID,a.RevenueAccountID,a.FunctionID,SUM(a.Amount) "
                 "FROM tblContributionAllocation a JOIN tblContribution g ON g.ID=a.ContributionID "
-                "WHERE g.BatchID=? GROUP BY a.FundID,a.RevenueAccountID,a.FunctionID "
+                "WHERE g.BatchID=? AND g.DirectionStatus<>'RETURNED' "
+                "GROUP BY a.FundID,a.RevenueAccountID,a.FunctionID "
                 "HAVING SUM(a.Amount)>0 "
                 "ORDER BY a.FundID,a.RevenueAccountID,a.FunctionID", (batch_id,),
             )

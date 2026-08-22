@@ -13,7 +13,8 @@ from giving.reporting import (
     BATCH_SUMMARY_CONTRACT, BATCH_SUMMARY_MANIFEST, DEFINITIONS,
     GivingBatchSummaryProvider, STATEMENT_CONTRACT, STATEMENT_MANIFEST,
     ContributionStatementProvider, TRIBUTE_CONTRACT, TRIBUTE_MANIFEST,
-    TributeAcknowledgmentProvider,
+    TributeAcknowledgmentProvider, DIRECTED_GIFT_CONTRACT, DIRECTED_GIFT_MANIFEST,
+    DirectedGiftReviewProvider,
 )
 import JSForm
 from datetime import date
@@ -127,6 +128,19 @@ class GivingReportTests(unittest.TestCase):
         dialog = inspect.getsource(GivingReportsDialog)
         self.assertIn('"Memorial / Honor Gifts"', dialog)
         self.assertIn("run_tribute_acknowledgments", dialog)
+
+    def test_directed_gift_report_includes_resolution_audit(self):
+        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "GIVE-DIRECTED.json")
+        DIRECTED_GIFT_MANIFEST.validate(definition)
+        self.assertEqual(DIRECTED_GIFT_CONTRACT.required_permission, "giving.reports.confidential")
+        query = inspect.getsource(GivingReportService.directed_gift_reviews)
+        self.assertIn("DirectionStatus<>'NONE'", query)
+        self.assertIn("DirectionResolvedByUserID", query)
+        provider = inspect.getsource(DirectedGiftReviewProvider)
+        self.assertIn('"ResolvedBy"', provider)
+        dialog = inspect.getsource(GivingReportsDialog)
+        self.assertIn('"Directed Gift Review"', dialog)
+        self.assertIn("run_directed_gift_reviews", dialog)
 
     def test_report_providers_have_a_public_read_boundary(self):
         self.assertTrue(callable(getattr(GivingReportService, "all", None)))

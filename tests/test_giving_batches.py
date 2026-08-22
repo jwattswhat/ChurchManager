@@ -137,6 +137,36 @@ class DraftBatchServiceTests(unittest.TestCase):
         self.assertIn("Two altar chairs", insert[1])
         self.assertIn(Decimal("275.00"), insert[1])
 
+    def test_directed_gift_requires_instruction_and_resolution(self):
+        service = self.service(Connection())
+        with self.assertRaisesRegex(GivingValidationError, "donor's direction"):
+            service.save_monetary_gift(
+                batch_id=21, received_date=date.today(), amount="25.00",
+                allocations=[(8, 4, 5, 6, None, "25.00", None)],
+                direction_status="REVIEW",
+            )
+        with self.assertRaisesRegex(GivingValidationError, "resolved"):
+            service.save_monetary_gift(
+                batch_id=21, received_date=date.today(), amount="25.00",
+                allocations=[(8, 4, 5, 6, None, "25.00", None)],
+                donor_direction="For a named student", direction_status="CLARIFIED",
+            )
+
+    def test_returned_direction_is_audited_and_excluded_from_batch_total(self):
+        connection = Connection()
+        self.service(connection).save_monetary_gift(
+            batch_id=21, received_date=date.today(), amount="25.00",
+            allocations=[(8, 4, 5, 6, None, "25.00", None)],
+            donor_direction="For a named person", direction_status="RETURNED",
+            direction_resolution="Returned after speaking with donor.",
+        )
+        insert = next(item for item in connection.calls if item[0].startswith("INSERT INTO tblContribution "))
+        self.assertIn("DirectionResolvedByUserID", insert[0])
+        self.assertIn("RETURNED", insert[1])
+        self.assertIn("INELIGIBLE", insert[1])
+        total_sql = next(sql for sql, _ in connection.calls if "CalculatedTotal" in sql)
+        self.assertIn("DirectionStatus<>'RETURNED'", total_sql)
+
     def test_rejects_incomplete_acknowledgment_facts(self):
         with self.assertRaisesRegex(GivingValidationError, "Describe"):
             self.service(Connection()).save_monetary_gift(

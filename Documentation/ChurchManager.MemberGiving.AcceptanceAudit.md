@@ -53,7 +53,7 @@ reports, and privacy acceptance remain release gates.
 | 10 | Complete statement content and selection behavior | Pass for current scope | Contributor/date selection, eligible posted gifts, benefit wording, issuance hashes, revisions, acknowledgment facts, and description-only non-cash presentation are implemented. Non-cash values remain blank and outside monetary totals. |
 | 11 | Privacy-safe memorial/honor acknowledgments | Pass | The protected Posted-gift acknowledgment list includes the donor and amount only when their separate disclosure flags explicitly authorize each value. |
 | 12 | Imports detect mappings and duplicates before writes | Pass | Preview is non-writing; confirmed import creates a new Draft batch and records evidence. |
-| 13 | Named-person directed gifts are held and clarified | Not complete | Direction status exists and Ready validation notices review rows, but there is no complete user workflow for proposed purposes, clarification facts, return, or restricted review reporting. |
+| 13 | Named-person directed gifts are held and clarified | Pass structurally; visual acceptance pending | Entry records instruction, disposition and resolution; completed reviews capture user/time; returned directions are excluded from deposit, ledger and statements; the protected review PDF is implemented. |
 | 14 | Backup/restore preserves Giving | Pass structurally | Giving is in the complete database baseline and backup. A dedicated post-migration Giving restore rehearsal should be retained as release evidence. |
 | 15 | Support logs exclude confidential detail | Partial; manual security review required | Giving audits are intentionally minimal. A focused redaction test for exception paths and support bundles is still needed. |
 | 16 | Automated and rendered acceptance | Partial | Current suite and visually exercised surfaces pass; missing workflows and reports prevent full-specification sign-off. |
@@ -73,24 +73,21 @@ reports, and privacy acceptance remain release gates.
 | Statement Exception List | Missing |
 | Accounting Posting Reconciliation | Missing |
 | Memorial and Honor Gift Acknowledgment List | Implemented |
-| Directed Gift Review List | Missing |
+| Directed Gift Review List | Implemented; visual acceptance pending |
 
 ## Prioritized remaining work
 
-1. **Finish directed-gift review.** Provide explicit review, clarification,
-   redesignation/return disposition, reason, user, and date without deciding tax
-   deductibility.
-2. **Add the missing protected reports.** Start with donor-free Giving by Fund
+1. **Add the missing protected reports.** Start with donor-free Giving by Fund
    and Period and Accounting Posting Reconciliation, followed by exceptions,
    directed gifts and printable confidential histories.
-3. **Add an explicit returned-check workflow.** Link the gift correction,
+2. **Add an explicit returned-check workflow.** Link the gift correction,
    Giving batch, accounting reversal, reason, and statement result.
-4. **Complete contributor administration.** Add guarded duplicate merge and an
+3. **Complete contributor administration.** Add guarded duplicate merge and an
    explicit previewed refresh from linked person/family contact data.
-5. **Perform privacy-focused acceptance.** Force errors containing check,
+4. **Perform privacy-focused acceptance.** Force errors containing check,
    contributor, address, and imported-row values and verify support logs and
    bundles redact them. Rehearse backup/restore with the full Giving schema.
-6. **Run final rendered and user acceptance.** Exercise every criterion with the
+5. **Run final rendered and user acceptance.** Exercise every criterion with the
    fictitious dataset, inspect each protected PDF, update the inventories, and
    record release sign-off.
 

@@ -122,7 +122,8 @@ class DraftBatchService:
             "COALESCE(g.HonoreeName,''),COALESCE(g.AcknowledgmentContact,''),"
             "g.DonorDisclosureAuthorized,g.AmountDisclosureAuthorized,"
             "COALESCE(g.EligibilityOverrideReason,''),COALESCE(g.NonCashDescription,''),"
-            "g.DonorEstimatedValue "
+            "g.DonorEstimatedValue,COALESCE(g.DonorDirection,''),g.DirectionStatus,"
+            "COALESCE(g.DirectionResolution,'') "
             "FROM tblContribution g JOIN tblContributionBatch b ON b.ID=g.BatchID "
             "WHERE g.ID=? AND g.BatchID=? AND b.ChurchID=? AND b.Status='DRAFT'",
             (contribution_id, batch_id, self.church_id()))
@@ -242,7 +243,9 @@ class DraftBatchService:
                            donor_disclosure_authorized=False,
                            amount_disclosure_authorized=False,
                            eligibility_override_reason=None,
-                           non_cash_description=None, donor_estimated_value=None):
+                           non_cash_description=None, donor_estimated_value=None,
+                           donor_direction=None, direction_status="NONE",
+                           direction_resolution=None):
         """Add one monetary or description-only non-cash gift to a draft batch."""
         allocations = list(allocations)
         method = str(method or "").upper()
@@ -274,6 +277,11 @@ class DraftBatchService:
         override_reason = str(eligibility_override_reason or "").strip() or None
         if eligibility == "REVIEW" and not override_reason:
             raise GivingValidationError("Explain why statement treatment needs review.")
+        donor_direction, direction_status, direction_resolution = self._direction_values(
+            donor_direction, direction_status, direction_resolution
+        )
+        if direction_status == "RETURNED":
+            eligibility = "INELIGIBLE"
         entered_envelope = str(envelope_number or "").strip() or None
         if contributor_id is None and entered_envelope:
             contributor_id = self.resolve_envelope(entered_envelope, received_date)
@@ -296,15 +304,20 @@ class DraftBatchService:
                 "ReceivedDate,Amount,NonCashDescription,DonorEstimatedValue,StatementEligibility,Note,GoodsOrServicesProvided,"
                 "GoodsOrServicesDescription,GoodsOrServicesValue,IntangibleReligiousBenefitOnly,"
                 "TributeType,HonoreeName,AcknowledgmentContact,DonorDisclosureAuthorized,"
-                "AmountDisclosureAuthorized,EligibilityOverrideReason) "
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "AmountDisclosureAuthorized,EligibilityOverrideReason,DonorDirection,DirectionStatus,"
+                "DirectionResolution,DirectionResolvedByUserID,DirectionResolvedAt) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"
+                "CASE WHEN ? IN ('CLARIFIED','RETURNED','ACCEPTED') THEN CURRENT_TIMESTAMP(6) ELSE NULL END)",
                 (batch_id, contributor_id, entered_envelope, method, reference or None,
                  received_date, gift_amount, non_cash_description, donor_estimated_value,
                  eligibility, note or None,
                  bool(goods_or_services_provided), benefit_description, benefit_value,
                  bool(intangible_religious_benefit_only), tribute_type, honoree_name,
                  acknowledgment_contact, bool(donor_disclosure_authorized),
-                 bool(amount_disclosure_authorized), override_reason),
+                 bool(amount_disclosure_authorized), override_reason, donor_direction,
+                 direction_status, direction_resolution,
+                 self.user_id if direction_status in {"CLARIFIED", "RETURNED", "ACCEPTED"} else None,
+                 direction_status),
             )
             contribution_id = cursor.lastrowid
             for purpose_id, allocation_org, fund_id, account_id, function_id, allocation_amount, restriction in allocations:
@@ -316,7 +329,8 @@ class DraftBatchService:
                      Decimal(str(allocation_amount)).quantize(Decimal("0.01")), restriction or None),
                 )
             cursor.execute("UPDATE tblContributionBatch SET CalculatedTotal=(SELECT COALESCE(SUM(Amount),0) "
-                           "FROM tblContribution WHERE BatchID=?),Version=Version+1 WHERE ID=?",
+                           "FROM tblContribution WHERE BatchID=? AND DirectionStatus<>'RETURNED'),"
+                           "Version=Version+1 WHERE ID=?",
                            (batch_id, batch_id))
             self._audit(cursor, church_id, "CONTRIBUTION_ADDED", "BATCH", batch_id,
                         f"Draft batch {batch_id}")
@@ -364,6 +378,12 @@ class DraftBatchService:
         override_reason = str(values.get("eligibility_override_reason") or "").strip() or None
         if eligibility == "REVIEW" and not override_reason:
             raise GivingValidationError("Explain why statement treatment needs review.")
+        donor_direction, direction_status, direction_resolution = self._direction_values(
+            values.get("donor_direction"), values.get("direction_status"),
+            values.get("direction_resolution")
+        )
+        if direction_status == "RETURNED":
+            eligibility = "INELIGIBLE"
         envelope = str(values.get("envelope_number") or "").strip() or None
         contributor_id = values.get("contributor_id")
         if contributor_id is None and envelope: contributor_id = self.resolve_envelope(envelope, received_date)
@@ -380,7 +400,10 @@ class DraftBatchService:
                            "ContributionMethod=?,ReferenceValue=?,ReceivedDate=?,Amount=?,NonCashDescription=?,DonorEstimatedValue=?,StatementEligibility=?,Note=?,"
                            "GoodsOrServicesProvided=?,GoodsOrServicesDescription=?,GoodsOrServicesValue=?,"
                            "IntangibleReligiousBenefitOnly=?,TributeType=?,HonoreeName=?,AcknowledgmentContact=?,"
-                           "DonorDisclosureAuthorized=?,AmountDisclosureAuthorized=?,EligibilityOverrideReason=? "
+                           "DonorDisclosureAuthorized=?,AmountDisclosureAuthorized=?,EligibilityOverrideReason=?,"
+                           "DonorDirection=?,DirectionStatus=?,DirectionResolution=?,"
+                           "DirectionResolvedByUserID=?,DirectionResolvedAt="
+                           "CASE WHEN ? IN ('CLARIFIED','RETURNED','ACCEPTED') THEN CURRENT_TIMESTAMP(6) ELSE NULL END "
                            "WHERE ID=? AND BatchID=?",
                            (contributor_id, envelope, method, values.get("reference") or None,
                             received_date, amount, non_cash_description, donor_estimated_value,
@@ -389,6 +412,9 @@ class DraftBatchService:
                             bool(values.get("intangible_religious_benefit_only")), tribute_type, honoree_name,
                             acknowledgment_contact, bool(values.get("donor_disclosure_authorized")),
                             bool(values.get("amount_disclosure_authorized")), override_reason,
+                            donor_direction, direction_status, direction_resolution,
+                            self.user_id if direction_status in {"CLARIFIED", "RETURNED", "ACCEPTED"} else None,
+                            direction_status,
                             contribution_id, batch_id))
             if cursor.rowcount != 1: raise GivingValidationError("The selected contribution is unavailable.")
             cursor.execute("DELETE FROM tblContributionAllocation WHERE ContributionID=?", (contribution_id,))
@@ -497,7 +523,8 @@ class DraftBatchService:
              "Resolve every donor-direction review."),
             ("SELECT COUNT(*) FROM (SELECT g.ID,g.Amount,COALESCE(SUM(a.Amount),0) Allocated "
              "FROM tblContribution g LEFT JOIN tblContributionAllocation a ON a.ContributionID=g.ID "
-             "WHERE g.BatchID=? GROUP BY g.ID,g.Amount HAVING Allocated<>g.Amount) invalid",
+             "WHERE g.BatchID=? AND g.DirectionStatus<>'RETURNED' "
+             "GROUP BY g.ID,g.Amount HAVING Allocated<>g.Amount) invalid",
              "Every contribution must be allocated exactly."),
             ("SELECT COUNT(*) FROM tblContributionAllocation a JOIN tblContribution g ON g.ID=a.ContributionID "
              "LEFT JOIN tblContributionPurpose p ON p.ID=a.PurposeID "
@@ -557,6 +584,28 @@ class DraftBatchService:
             raise GivingValidationError(f"{label} must be a finite monetary amount.")
         return amount
 
+    @staticmethod
+    def _direction_values(instruction, status, resolution):
+        """Normalize one donor-direction review without making a tax judgment."""
+        instruction = str(instruction or "").strip() or None
+        status = str(status or "NONE").strip().upper()
+        resolution = str(resolution or "").strip() or None
+        if status not in {"NONE", "REVIEW", "CLARIFIED", "RETURNED", "ACCEPTED"}:
+            raise GivingValidationError("Select a valid donor-direction disposition.")
+        if status == "NONE":
+            if instruction or resolution:
+                raise GivingValidationError(
+                    "Select a donor-direction disposition when an instruction or resolution is recorded."
+                )
+            return None, status, None
+        if not instruction:
+            raise GivingValidationError("Enter the donor's direction before selecting its disposition.")
+        if status in {"CLARIFIED", "RETURNED", "ACCEPTED"} and not resolution:
+            raise GivingValidationError("Document how the donor direction was resolved.")
+        if status == "REVIEW" and resolution:
+            raise GivingValidationError("Leave the resolution blank while review is still pending.")
+        return instruction, status, resolution
+
     def _audit(self, cursor, church_id, action, entity_type, entity_id, safe_reference):
         cursor.execute("INSERT INTO tblContributionAuditEvent "
                        "(ChurchID,UserID,Action,EntityType,EntityID,SafeReference) VALUES (?,?,?,?,?,?)",
@@ -574,4 +623,5 @@ class DraftBatchService:
     @staticmethod
     def _refresh_total(cursor, batch_id):
         cursor.execute("UPDATE tblContributionBatch SET CalculatedTotal=(SELECT COALESCE(SUM(Amount),0) "
-                       "FROM tblContribution WHERE BatchID=?),Version=Version+1 WHERE ID=?", (batch_id, batch_id))
+                       "FROM tblContribution WHERE BatchID=? AND DirectionStatus<>'RETURNED'),"
+                       "Version=Version+1 WHERE ID=?", (batch_id, batch_id))

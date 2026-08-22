@@ -467,7 +467,9 @@ Additional safeguards:
 - Accounting Posting Reconciliation by batch and transaction.
 - Memorial and Honor Gift Acknowledgment List, permission restricted.
 - Directed Gift Review List showing unresolved person-specific instructions and
-  their disposition, permission restricted.
+  their disposition, resolving user, and resolution date, permission restricted.
+  Returned directions remain documented but do not enter the deposit,
+  accounting handoff, or contribution statement.
 
 ### 9.2 Contribution statements
 

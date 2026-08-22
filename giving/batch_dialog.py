@@ -167,6 +167,9 @@ class GiftDialog(wx.Dialog):
             "donor_disclosure_authorized": False,
             "amount_disclosure_authorized": False,
             "eligibility_override_reason": None,
+            "donor_direction": None,
+            "direction_status": "NONE",
+            "direction_resolution": None,
         }
         for label, control in (("Received date", self.received), ("Envelope number", self.envelope),
                                ("Contributor", self.contributor), ("Method", self.method),
@@ -221,6 +224,9 @@ class GiftDialog(wx.Dialog):
             "donor_disclosure_authorized": bool(header[16]),
             "amount_disclosure_authorized": bool(header[17]),
             "eligibility_override_reason": header[18] or None,
+            "donor_direction": header[21] or None,
+            "direction_status": header[22] or "NONE",
+            "direction_resolution": header[23] or None,
         })
         self.non_cash_description.SetValue(header[19] or "")
         self.donor_estimated_value.SetValue("" if header[20] is None else f"{header[20]:.2f}")
@@ -259,6 +265,10 @@ class GiftDialog(wx.Dialog):
             labels.append("memorial/honor gift")
         if self.facts["eligibility_override_reason"]:
             labels.append("statement review noted")
+        if self.facts["direction_status"] == "REVIEW":
+            labels.append("donor direction needs review")
+        elif self.facts["direction_status"] != "NONE":
+            labels.append("donor direction resolved")
         self.facts_summary.SetLabel(", ".join(labels).capitalize() if labels else "No special acknowledgment facts")
 
     def on_add(self, _event=None):
@@ -302,9 +312,13 @@ class GiftFactsDialog(wx.Dialog):
 
     TRIBUTES = (("Not a memorial or honor gift", None),
                 ("In memory of", "IN_MEMORY_OF"), ("In honor of", "IN_HONOR_OF"))
+    DIRECTIONS = (("No special direction", "NONE"), ("Needs review", "REVIEW"),
+                  ("Clarified or redesignated", "CLARIFIED"),
+                  ("Returned to donor", "RETURNED"),
+                  ("Accepted under congregation control", "ACCEPTED"))
 
     def __init__(self, parent, values):
-        super().__init__(parent, title="Acknowledgment and Tribute Facts", size=(680, 570),
+        super().__init__(parent, title="Acknowledgment and Gift Facts", size=(720, 760),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
         notice = wx.StaticText(panel, label=(
@@ -341,6 +355,26 @@ class GiftFactsDialog(wx.Dialog):
         tribute_box.Add(self.disclose_amount, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
         outer.Add(tribute_box, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
 
+        direction_box = wx.StaticBoxSizer(wx.VERTICAL, panel, "Donor direction review")
+        direction_note = wx.StaticText(panel, label=(
+            "Record the donor's instruction and the congregation's disposition. "
+            "ChurchManager does not decide deductibility."
+        ))
+        direction_note.SetForegroundColour(wx.Colour(0, 82, 170))
+        direction_form = wx.FlexGridSizer(0, 2, 8, 10); direction_form.AddGrowableCol(1, 1)
+        self.direction = wx.TextCtrl(panel)
+        self.direction_status = wx.Choice(panel, choices=[item[0] for item in self.DIRECTIONS])
+        self.direction_status.SetSelection(0)
+        self.direction_resolution = wx.TextCtrl(panel)
+        for label, control in (("Donor instruction", self.direction),
+                               ("Disposition", self.direction_status),
+                               ("Resolution note", self.direction_resolution)):
+            direction_form.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+            direction_form.Add(control, 1, wx.EXPAND)
+        direction_box.Add(direction_note, 0, wx.ALL, 8)
+        direction_box.Add(direction_form, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+        outer.Add(direction_box, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+
         review = wx.BoxSizer(wx.HORIZONTAL)
         review.Add(wx.StaticText(panel, label="Statement-treatment review reason"), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 10)
         self.override_reason = wx.TextCtrl(panel); review.Add(self.override_reason, 1, wx.EXPAND)
@@ -359,6 +393,12 @@ class GiftFactsDialog(wx.Dialog):
         self.disclose_donor.SetValue(bool(values.get("donor_disclosure_authorized")))
         self.disclose_amount.SetValue(bool(values.get("amount_disclosure_authorized")))
         self.override_reason.SetValue(values.get("eligibility_override_reason") or "")
+        self.direction.SetValue(values.get("donor_direction") or "")
+        direction_status = values.get("direction_status") or "NONE"
+        self.direction_status.SetSelection(next(
+            (i for i, item in enumerate(self.DIRECTIONS) if item[1] == direction_status), 0
+        ))
+        self.direction_resolution.SetValue(values.get("direction_resolution") or "")
 
     def values(self):
         return {
@@ -372,6 +412,9 @@ class GiftFactsDialog(wx.Dialog):
             "donor_disclosure_authorized": self.disclose_donor.GetValue(),
             "amount_disclosure_authorized": self.disclose_amount.GetValue(),
             "eligibility_override_reason": self.override_reason.GetValue().strip() or None,
+            "donor_direction": self.direction.GetValue().strip() or None,
+            "direction_status": self.DIRECTIONS[self.direction_status.GetSelection()][1],
+            "direction_resolution": self.direction_resolution.GetValue().strip() or None,
         }
 
 

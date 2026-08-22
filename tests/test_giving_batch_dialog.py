@@ -37,6 +37,13 @@ class GivingBatchDialogTests(unittest.TestCase):
         self.assertIn("Remove Allocation", source)
         self.assertIn("Statement treatment", source)
 
+    def test_gift_facts_collect_auditable_donor_direction_disposition(self):
+        source = inspect.getsource(batch_dialog.GiftFactsDialog)
+        self.assertIn("Donor direction review", source)
+        self.assertIn("Clarified or redesignated", source)
+        self.assertIn("Returned to donor", source)
+        self.assertIn("ChurchManager does not decide deductibility", source)
+
     def test_new_batch_refreshes_bank_accounts_with_organization(self):
         self.assertTrue(hasattr(batch_dialog.NewBatchDialog, "on_organization"))
         source = inspect.getsource(batch_dialog.NewBatchDialog.on_organization)

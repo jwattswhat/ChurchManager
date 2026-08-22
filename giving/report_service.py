@@ -221,6 +221,22 @@ class GivingReportService:
             (self.church_id(), start_date, end_date),
         )
 
+    def directed_gift_reviews(self, start_date, end_date):
+        """Return restricted donor-direction reviews and completed dispositions."""
+        self.authorization.require("giving.reports.confidential", "view directed gift reviews")
+        return self._all(
+            "SELECT g.ReceivedDate,COALESCE(c.DisplayName,'Anonymous'),g.DonorDirection,"
+            "g.DirectionStatus,COALESCE(g.DirectionResolution,''),"
+            "COALESCE(u.DisplayName,''),g.DirectionResolvedAt,b.Description "
+            "FROM tblContribution g JOIN tblContributionBatch b ON b.ID=g.BatchID "
+            "LEFT JOIN tblContributionContributor c ON c.ID=g.ContributorID "
+            "LEFT JOIN tblUser u ON u.ID=g.DirectionResolvedByUserID "
+            "WHERE b.ChurchID=? AND g.DirectionStatus<>'NONE' "
+            "AND g.ReceivedDate BETWEEN ? AND ? "
+            "ORDER BY (g.DirectionStatus='REVIEW') DESC,g.ReceivedDate,g.ID",
+            (self.church_id(), start_date, end_date),
+        )
+
     def record_statement_issuances(self, issues, user_id):
         """Atomically record rendered statement hashes and revision relationships."""
         self.authorization.require("giving.statements.generate", "record contribution statements")
