@@ -86,15 +86,23 @@ class PostedBatchCorrectionService:
             replacement_id = cursor.lastrowid
             cursor.execute(
                 "SELECT ID,ContributorID,EnteredEnvelopeNumber,ContributionMethod,ReferenceValue,ReceivedDate,"
-                "Amount,StatementEligibility,Note,DirectionStatus FROM tblContribution WHERE BatchID=? ORDER BY ID",
+                "Amount,NonCashDescription,StatementEligibility,GoodsOrServicesProvided,"
+                "GoodsOrServicesDescription,GoodsOrServicesValue,IntangibleReligiousBenefitOnly,"
+                "EligibilityOverrideReason,TributeType,HonoreeName,AcknowledgmentContact,"
+                "DonorDisclosureAuthorized,AmountDisclosureAuthorized,DonorDirection,DirectionStatus,"
+                "DirectionResolution,Note FROM tblContribution WHERE BatchID=? ORDER BY ID",
                 (original_batch_id,),
             )
             for gift in cursor.fetchall():
                 cursor.execute(
                     "INSERT INTO tblContribution "
                     "(BatchID,CorrectionOfContributionID,ContributorID,EnteredEnvelopeNumber,ContributionMethod,"
-                    "ReferenceValue,ReceivedDate,Amount,StatementEligibility,Note,DirectionStatus) "
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?)", (replacement_id, gift[0], *gift[1:]),
+                    "ReferenceValue,ReceivedDate,Amount,NonCashDescription,StatementEligibility,"
+                    "GoodsOrServicesProvided,GoodsOrServicesDescription,GoodsOrServicesValue,"
+                    "IntangibleReligiousBenefitOnly,EligibilityOverrideReason,TributeType,HonoreeName,"
+                    "AcknowledgmentContact,DonorDisclosureAuthorized,AmountDisclosureAuthorized,"
+                    "DonorDirection,DirectionStatus,DirectionResolution,Note) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (replacement_id, gift[0], *gift[1:]),
                 )
                 new_gift_id = cursor.lastrowid
                 cursor.execute(

@@ -200,6 +200,12 @@ honoree name, and a separate acknowledgment contact. A tribute acknowledgment
 must not disclose the donor or amount unless the contributor explicitly
 authorized that disclosure.
 
+Implementation status (August 22, 2026): the contribution editor exposes these
+goods/services, intangible-benefit, statement-review, memorial/honor, contact,
+and separate donor/amount disclosure facts in a compact protected dialog. The
+same fields survive draft edits and posted-batch correction copies. Printable
+memorial/honor acknowledgment output remains a later protected-report step.
+
 ### 5.5 Contribution allocation
 
 `tblContributionAllocation` divides a contribution among accounting funds or

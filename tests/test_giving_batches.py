@@ -98,6 +98,33 @@ class DraftBatchServiceTests(unittest.TestCase):
         self.assertEqual([item[1][6] for item in inserts], [Decimal("20.00"), Decimal("5.00")])
         self.assertTrue(any("CalculatedTotal" in sql for sql, _ in connection.calls))
 
+    def test_saves_acknowledgment_and_memorial_facts(self):
+        connection = Connection()
+        self.service(connection).save_monetary_gift(
+            batch_id=21, received_date=date(2026, 8, 21), amount="25.00",
+            contributor_id=45, method="CHECK", reference="1001",
+            allocations=[(8, 4, 5, 6, None, "25.00", None)],
+            goods_or_services_provided=True,
+            goods_or_services_description="Dinner ticket",
+            goods_or_services_value="8.00",
+            tribute_type="IN_MEMORY_OF", honoree_name="Grace Example",
+            acknowledgment_contact="Example family",
+            donor_disclosure_authorized=True,
+        )
+        insert = next(item for item in connection.calls if item[0].startswith("INSERT INTO tblContribution "))
+        self.assertIn("GoodsOrServicesProvided", insert[0])
+        self.assertIn("AcknowledgmentContact", insert[0])
+        self.assertIn("Dinner ticket", insert[1])
+        self.assertIn("Grace Example", insert[1])
+
+    def test_rejects_incomplete_acknowledgment_facts(self):
+        with self.assertRaisesRegex(GivingValidationError, "Describe"):
+            self.service(Connection()).save_monetary_gift(
+                batch_id=21, received_date=date.today(), amount="25.00",
+                allocations=[(8, 4, 5, 6, None, "25.00", None)],
+                goods_or_services_provided=True, goods_or_services_value="5.00",
+            )
+
     def test_rejects_unbalanced_or_non_draft_gift(self):
         with self.assertRaises(GivingValidationError):
             self.service(Connection()).save_monetary_gift(

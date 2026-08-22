@@ -11,7 +11,7 @@ The implemented Giving subsystem is suitable for continued guarded beta
 development. Its contributor, envelope, approved-purpose, batch-entry,
 accounting-handoff, posted-correction, CSV-import, statement, and envelope-box
 workflows are real rather than prototypes. The current automated suite passes
-767 tests with 25 intentional skips, and the user has visually accepted the
+770 tests with 25 intentional skips, and the user has visually accepted the
 implemented Giving screens and reports exercised during development.
 
 It is not yet accurate to call the entire approved Member Giving specification
@@ -32,7 +32,7 @@ reports, and privacy acceptance remain release gates.
 | Accounting handoff | Pass | A privacy-safe summarized transaction is created, posting state is synchronized, and donor/envelope identity is excluded from the ledger handoff. |
 | Posted corrections | Pass for general reversal/replacement | The original batch becomes Void only after the linked reversal posts, and the replacement remains linked. A dedicated returned-check workflow is still absent. |
 | CSV import | Pass | Mapping, non-writing preview, row validation, duplicate-file prevention, protected evidence, Draft creation, and reset cleanup are implemented and accepted. |
-| Statements | Partial | One/all contributor quarterly, annual, and custom-period PDFs plus issuance hash and revision history are implemented. Special non-cash and acknowledgment entry workflows are not yet exposed sufficiently to complete all statement requirements. |
+| Statements | Partial | One/all contributor quarterly, annual, and custom-period PDFs plus issuance hash and revision history are implemented. Goods/services, intangible-benefit, statement-review, and memorial/honor facts are now entered and retained. Dedicated non-cash entry and acknowledgment outputs remain incomplete. |
 | Reports | Partial | Batch Control Summary, Contribution Statement, Envelope Box Labels, and Envelope Assignment Register are implemented. The complete required inventory is not. |
 | Backup and reset | Pass for current scope | Whole-database backup/restore includes Giving. The fictitious Giving reset covers current tables and removes protected test import evidence only after database commit. |
 | Documentation and inventories | Partial, corrected by this audit | User, treasurer, database, and screen documentation cover current workflows. Final report/privacy documentation remains open with the missing functionality. An obsolete testing-procedure statement that said Giving was removed was corrected during this audit. |
@@ -50,8 +50,8 @@ reports, and privacy acceptance remain release gates.
 | 7 | Posted history immutable with correction chain | Pass for current correction workflow | Reversal/replacement linkage and status synchronization are implemented. |
 | 8 | Returned check reconciles Giving and accounting | Not complete | General correction exists; no explicit returned-check operation and acceptance case exists. |
 | 9 | Unauthorized users cannot invoke services or reports | Pass | Menus, dialogs, report providers, repositories, and services independently require the applicable Giving permission. Direct-invocation denial tests fail closed before database or storage access. |
-| 10 | Complete statement content and selection behavior | Partial | Contributor/date selection, eligible posted gifts, benefit wording, issuance hashes, and revisions exist. Entry and reporting for the full non-cash/acknowledgment surface remain incomplete. |
-| 11 | Privacy-safe memorial/honor acknowledgments | Not complete | Schema fields exist, but the entry and acknowledgment-list workflow is absent. |
+| 10 | Complete statement content and selection behavior | Partial | Contributor/date selection, eligible posted gifts, benefit wording, issuance hashes, revisions, and acknowledgment-fact entry exist. Dedicated non-cash gift entry remains incomplete. |
+| 11 | Privacy-safe memorial/honor acknowledgments | Partial | Memorial/honor facts, contact, and separate donor/amount disclosure consent are entered and preserved. The protected acknowledgment-list output is not yet implemented. |
 | 12 | Imports detect mappings and duplicates before writes | Pass | Preview is non-writing; confirmed import creates a new Draft batch and records evidence. |
 | 13 | Named-person directed gifts are held and clarified | Not complete | Direction status exists and Ready validation notices review rows, but there is no complete user workflow for proposed purposes, clarification facts, return, or restricted review reporting. |
 | 14 | Backup/restore preserves Giving | Pass structurally | Giving is in the complete database baseline and backup. A dedicated post-migration Giving restore rehearsal should be retained as release evidence. |

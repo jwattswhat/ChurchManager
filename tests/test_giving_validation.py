@@ -13,6 +13,7 @@ from giving.validation import (
     validate_contributor_links,
     validate_envelope_assignment,
     validate_gift_acknowledgment,
+    validate_tribute,
 )
 
 
@@ -72,6 +73,28 @@ class GivingValidationTests(unittest.TestCase):
                 goods_or_services_provided=True,
                 goods_or_services_value="12.50",
                 intangible_religious_benefit_only=True,
+            )
+
+    def test_tribute_requires_type_and_honoree_without_assuming_disclosure(self):
+        self.assertEqual(
+            validate_tribute(
+                tribute_type="IN_MEMORY_OF", honoree_name="Grace Example",
+                acknowledgment_contact="Family contact", donor_disclosure_authorized=False,
+                amount_disclosure_authorized=False,
+            ),
+            ("IN_MEMORY_OF", "Grace Example", "Family contact"),
+        )
+        with self.assertRaises(GivingValidationError):
+            validate_tribute(
+                tribute_type="IN_HONOR_OF", honoree_name="",
+                acknowledgment_contact=None, donor_disclosure_authorized=False,
+                amount_disclosure_authorized=False,
+            )
+        with self.assertRaises(GivingValidationError):
+            validate_tribute(
+                tribute_type=None, honoree_name="Grace Example",
+                acknowledgment_contact=None, donor_disclosure_authorized=False,
+                amount_disclosure_authorized=False,
             )
 
 

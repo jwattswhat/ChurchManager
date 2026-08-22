@@ -9,8 +9,8 @@
                 -1
             ],
             "sizech": [
-                54,
-                29
+                    54,
+                    31
             ],
             "stylelist": [
                 "CAPTION"
@@ -254,7 +254,7 @@
                 },
                 "sizech": [
                     12,
-                    13
+                    10
                 ]
             },
             "lblPerson": {
@@ -366,7 +366,7 @@
                 "name": "ReportBox",
                 "posch": [
                     14,
-                    14
+                    18
                 ],
                 "sizech": [
                     12,
@@ -374,7 +374,7 @@
                 ],
                 "label": "Reports and Design",
                 "layout": {
-                    "row": 1,
+                    "row": 2,
                     "column": 1
                 }
             },
@@ -383,7 +383,7 @@
                 "type": "StaticText",
                 "posch": [
                     15,
-                    15
+                    19
                 ],
                 "label": "Reports",
                 "tooltip": "Open the reports form.",
@@ -396,7 +396,7 @@
                 "type": "StaticText",
                 "posch": [
                     15,
-                    16
+                    20
                 ],
                 "label": "Report Designer",
                 "tooltip": "Customize approved ChurchManager report layouts.",
@@ -409,7 +409,7 @@
                 "type": "StaticText",
                 "posch": [
                     15,
-                    17
+                    21
                 ],
                 "label": "Screen Designer",
                 "tooltip": "Customize approved ChurchManager screen layouts.",
@@ -417,10 +417,18 @@
                     "invoke": "screens.design"
                 }
             },
+            "GivingBox": {
+                "name": "GivingBox",
+                "type": "StaticBox",
+                "label": "Member Giving",
+                "posch": [14, 11],
+                "sizech": [12, 6],
+                "layout": {"row": 1, "column": 1}
+            },
             "lblGivingContributors": {
                 "name": "lblGivingContributors",
                 "type": "StaticText",
-                "posch": [15, 10],
+                "posch": [15, 12],
                 "label": "Contributors and Envelopes",
                 "tooltip": "Maintain confidential giving identities and dated envelope assignments.",
                 "security": {"invoke": "giving.contributors.manage"}
@@ -428,7 +436,7 @@
             "lblGivingPurposes": {
                 "name": "lblGivingPurposes",
                 "type": "StaticText",
-                "posch": [15, 11],
+                "posch": [15, 13],
                 "label": "Approved Giving Purposes",
                 "tooltip": "Maintain congregation-approved purposes and their accounting destinations.",
                 "security": {"invoke": "giving.purposes.manage"}
@@ -436,7 +444,7 @@
             "lblContributionBatches": {
                 "name": "lblContributionBatches",
                 "type": "StaticText",
-                "posch": [15, 12],
+                "posch": [15, 14],
                 "label": "Contribution Batches",
                 "tooltip": "Enter confidential draft contribution batches and split gifts.",
                 "security": {"invoke": "giving.batches.enter"}
@@ -444,7 +452,7 @@
             "lblGivingReports": {
                 "name": "lblGivingReports",
                 "type": "StaticText",
-                "posch": [15, 13],
+                "posch": [15, 15],
                 "label": "Giving Reports",
                 "tooltip": "Run permission-controlled Giving summaries and contributor history.",
                 "security": {"invoke": "giving.reports.summary"}
@@ -665,14 +673,14 @@
                 "label": "Current User",
                 "posch": [
                     14,
-                    20
+                    23
                 ],
                 "sizech": [
                     12,
                     7
                 ],
                 "layout": {
-                    "row": 2,
+                    "row": 3,
                     "column": 1
                 }
             },
@@ -682,7 +690,7 @@
                 "label": "Signed in",
                 "posch": [
                     15,
-                    21
+                    24
                 ]
             },
             "lblChangePassword": {
@@ -691,7 +699,7 @@
                 "label": "Change Password",
                 "posch": [
                     15,
-                    24
+                    27
                 ],
                 "tooltip": "Change your ChurchManager password."
             },
@@ -701,7 +709,7 @@
                 "label": "Help - User Guide",
                 "posch": [
                     15,
-                    23
+                    26
                 ],
                 "tooltip": "Open the ChurchManager User Guide."
             },
@@ -711,7 +719,7 @@
                 "label": "Log Out",
                 "posch": [
                     15,
-                    25
+                    28
                 ],
                 "tooltip": "End the current ChurchManager session."
             },

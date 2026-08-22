@@ -621,6 +621,11 @@ future roadmap projects:
   import, correction, annual-envelope, accounting-handoff, and protected-report
   services in addition to menu and dialog checks. Direct-invocation denial tests
   confirm fail-closed behavior before database or file access.
+- Contribution entry now records congregation-determined goods/services facts,
+  intangible religious benefits, statement-review reasons, and memorial/honor
+  facts with separate donor and amount disclosure consent. These facts survive
+  draft edits and posted-batch corrections. Dedicated non-cash entry and the
+  protected memorial/honor acknowledgment output remain open.
 - Support contributor accounts linked optionally to a person or family; outside
   donors must also be allowed without creating congregation-member records.
 - Assign and maintain envelope numbers with effective dates so numbers can be

@@ -90,8 +90,14 @@ needed.
 ### People and Congregation
 
 This group contains church information, people, families, attendance, projects,
-tasks, documents, the journal, and confidential contributor and envelope
-maintenance for authorized giving users.
+tasks, documents, and the journal.
+
+### Member Giving
+
+This confidential group contains contributors and envelopes, approved giving
+purposes, contribution batches, and protected Giving reports. Its separate
+placement does not replace permission checks; users see and invoke only the
+operations their Giving roles permit.
 
 ### Reports and Design
 

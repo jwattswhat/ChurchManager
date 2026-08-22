@@ -6,7 +6,12 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from bulletin_orders import portable_connection
-from giving.validation import GivingValidationError, validate_allocations
+from giving.validation import (
+    GivingValidationError,
+    validate_allocations,
+    validate_gift_acknowledgment,
+    validate_tribute,
+)
 
 
 class DraftBatchService:
@@ -110,7 +115,12 @@ class DraftBatchService:
         """Return one editable draft gift and its allocations."""
         rows = self.all(
             "SELECT g.ID,g.ContributorID,COALESCE(g.EnteredEnvelopeNumber,''),g.ContributionMethod,"
-            "COALESCE(g.ReferenceValue,''),g.ReceivedDate,g.Amount,g.StatementEligibility,COALESCE(g.Note,'') "
+            "COALESCE(g.ReferenceValue,''),g.ReceivedDate,g.Amount,g.StatementEligibility,COALESCE(g.Note,''),"
+            "g.GoodsOrServicesProvided,COALESCE(g.GoodsOrServicesDescription,''),"
+            "g.GoodsOrServicesValue,g.IntangibleReligiousBenefitOnly,g.TributeType,"
+            "COALESCE(g.HonoreeName,''),COALESCE(g.AcknowledgmentContact,''),"
+            "g.DonorDisclosureAuthorized,g.AmountDisclosureAuthorized,"
+            "COALESCE(g.EligibilityOverrideReason,'') "
             "FROM tblContribution g JOIN tblContributionBatch b ON b.ID=g.BatchID "
             "WHERE g.ID=? AND g.BatchID=? AND b.ChurchID=? AND b.Status='DRAFT'",
             (contribution_id, batch_id, self.church_id()))
@@ -220,7 +230,16 @@ class DraftBatchService:
 
     def save_monetary_gift(self, *, batch_id: int, received_date: date, amount, allocations,
                            contributor_id=None, envelope_number=None, method="CASH",
-                           reference=None, statement_eligibility="ELIGIBLE", note=None):
+                           reference=None, statement_eligibility="ELIGIBLE", note=None,
+                           goods_or_services_provided=False,
+                           goods_or_services_description=None,
+                           goods_or_services_value=None,
+                           intangible_religious_benefit_only=False,
+                           tribute_type=None, honoree_name=None,
+                           acknowledgment_contact=None,
+                           donor_disclosure_authorized=False,
+                           amount_disclosure_authorized=False,
+                           eligibility_override_reason=None):
         """Add one monetary gift and balanced allocations to an editable batch."""
         allocations = list(allocations)
         gift_amount = validate_allocations(amount, [item[5] for item in allocations])
@@ -230,6 +249,25 @@ class DraftBatchService:
         eligibility = str(statement_eligibility or "").upper()
         if eligibility not in {"ELIGIBLE", "INELIGIBLE", "REVIEW"}:
             raise GivingValidationError("Select a valid statement treatment.")
+        benefit_value = validate_gift_acknowledgment(
+            goods_or_services_provided=bool(goods_or_services_provided),
+            goods_or_services_value=goods_or_services_value,
+            intangible_religious_benefit_only=bool(intangible_religious_benefit_only),
+        )
+        benefit_description = str(goods_or_services_description or "").strip() or None
+        if goods_or_services_provided and not benefit_description:
+            raise GivingValidationError("Describe the goods or services that were provided.")
+        if not goods_or_services_provided and benefit_description:
+            raise GivingValidationError("Remove the goods or services description when none were provided.")
+        tribute_type, honoree_name, acknowledgment_contact = validate_tribute(
+            tribute_type=tribute_type, honoree_name=honoree_name,
+            acknowledgment_contact=acknowledgment_contact,
+            donor_disclosure_authorized=bool(donor_disclosure_authorized),
+            amount_disclosure_authorized=bool(amount_disclosure_authorized),
+        )
+        override_reason = str(eligibility_override_reason or "").strip() or None
+        if eligibility == "REVIEW" and not override_reason:
+            raise GivingValidationError("Explain why statement treatment needs review.")
         entered_envelope = str(envelope_number or "").strip() or None
         if contributor_id is None and entered_envelope:
             contributor_id = self.resolve_envelope(entered_envelope, received_date)
@@ -249,9 +287,17 @@ class DraftBatchService:
             cursor.execute(
                 "INSERT INTO tblContribution "
                 "(BatchID,ContributorID,EnteredEnvelopeNumber,ContributionMethod,ReferenceValue,"
-                "ReceivedDate,Amount,StatementEligibility,Note) VALUES (?,?,?,?,?,?,?,?,?)",
+                "ReceivedDate,Amount,StatementEligibility,Note,GoodsOrServicesProvided,"
+                "GoodsOrServicesDescription,GoodsOrServicesValue,IntangibleReligiousBenefitOnly,"
+                "TributeType,HonoreeName,AcknowledgmentContact,DonorDisclosureAuthorized,"
+                "AmountDisclosureAuthorized,EligibilityOverrideReason) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (batch_id, contributor_id, entered_envelope, method, reference or None,
-                 received_date, gift_amount, eligibility, note or None),
+                 received_date, gift_amount, eligibility, note or None,
+                 bool(goods_or_services_provided), benefit_description, benefit_value,
+                 bool(intangible_religious_benefit_only), tribute_type, honoree_name,
+                 acknowledgment_contact, bool(donor_disclosure_authorized),
+                 bool(amount_disclosure_authorized), override_reason),
             )
             contribution_id = cursor.lastrowid
             for purpose_id, allocation_org, fund_id, account_id, function_id, allocation_amount, restriction in allocations:
@@ -286,6 +332,25 @@ class DraftBatchService:
         eligibility = str(values.get("statement_eligibility") or "").upper()
         if eligibility not in {"ELIGIBLE", "INELIGIBLE", "REVIEW"}:
             raise GivingValidationError("Select a valid statement treatment.")
+        benefit_value = validate_gift_acknowledgment(
+            goods_or_services_provided=bool(values.get("goods_or_services_provided")),
+            goods_or_services_value=values.get("goods_or_services_value"),
+            intangible_religious_benefit_only=bool(values.get("intangible_religious_benefit_only")),
+        )
+        benefit_description = str(values.get("goods_or_services_description") or "").strip() or None
+        if values.get("goods_or_services_provided") and not benefit_description:
+            raise GivingValidationError("Describe the goods or services that were provided.")
+        if not values.get("goods_or_services_provided") and benefit_description:
+            raise GivingValidationError("Remove the goods or services description when none were provided.")
+        tribute_type, honoree_name, acknowledgment_contact = validate_tribute(
+            tribute_type=values.get("tribute_type"), honoree_name=values.get("honoree_name"),
+            acknowledgment_contact=values.get("acknowledgment_contact"),
+            donor_disclosure_authorized=bool(values.get("donor_disclosure_authorized")),
+            amount_disclosure_authorized=bool(values.get("amount_disclosure_authorized")),
+        )
+        override_reason = str(values.get("eligibility_override_reason") or "").strip() or None
+        if eligibility == "REVIEW" and not override_reason:
+            raise GivingValidationError("Explain why statement treatment needs review.")
         envelope = str(values.get("envelope_number") or "").strip() or None
         contributor_id = values.get("contributor_id")
         if contributor_id is None and envelope: contributor_id = self.resolve_envelope(envelope, received_date)
@@ -299,10 +364,17 @@ class DraftBatchService:
             if any(item[1] != batch[0] for item in allocations):
                 raise GivingValidationError("Every allocation must use the batch organization.")
             cursor.execute("UPDATE tblContribution SET ContributorID=?,EnteredEnvelopeNumber=?,"
-                           "ContributionMethod=?,ReferenceValue=?,ReceivedDate=?,Amount=?,StatementEligibility=?,Note=? "
+                           "ContributionMethod=?,ReferenceValue=?,ReceivedDate=?,Amount=?,StatementEligibility=?,Note=?,"
+                           "GoodsOrServicesProvided=?,GoodsOrServicesDescription=?,GoodsOrServicesValue=?,"
+                           "IntangibleReligiousBenefitOnly=?,TributeType=?,HonoreeName=?,AcknowledgmentContact=?,"
+                           "DonorDisclosureAuthorized=?,AmountDisclosureAuthorized=?,EligibilityOverrideReason=? "
                            "WHERE ID=? AND BatchID=?",
                            (contributor_id, envelope, method, values.get("reference") or None,
                             received_date, amount, eligibility, values.get("note") or None,
+                            bool(values.get("goods_or_services_provided")), benefit_description, benefit_value,
+                            bool(values.get("intangible_religious_benefit_only")), tribute_type, honoree_name,
+                            acknowledgment_contact, bool(values.get("donor_disclosure_authorized")),
+                            bool(values.get("amount_disclosure_authorized")), override_reason,
                             contribution_id, batch_id))
             if cursor.rowcount != 1: raise GivingValidationError("The selected contribution is unavailable.")
             cursor.execute("DELETE FROM tblContributionAllocation WHERE ContributionID=?", (contribution_id,))

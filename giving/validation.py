@@ -106,3 +106,32 @@ def validate_gift_acknowledgment(
             "Remove the goods or services value when none were provided."
         )
     return None
+
+
+def validate_tribute(
+    *,
+    tribute_type: str | None,
+    honoree_name: str | None,
+    acknowledgment_contact: str | None,
+    donor_disclosure_authorized: bool,
+    amount_disclosure_authorized: bool,
+) -> tuple[str | None, str | None, str | None]:
+    """Validate optional memorial or honor facts without inferring consent."""
+    normalized = str(tribute_type or "").strip().upper() or None
+    honoree = str(honoree_name or "").strip() or None
+    contact = str(acknowledgment_contact or "").strip() or None
+    if normalized not in {None, "IN_MEMORY_OF", "IN_HONOR_OF"}:
+        raise GivingValidationError("Select a valid memorial or honor type.")
+    if normalized is None:
+        if honoree or contact or donor_disclosure_authorized or amount_disclosure_authorized:
+            raise GivingValidationError(
+                "Select In Memory Of or In Honor Of before entering tribute details."
+            )
+        return None, None, None
+    if not honoree:
+        raise GivingValidationError("Enter the person being remembered or honored.")
+    if len(honoree) > 255:
+        raise GivingValidationError("The memorial or honor name cannot exceed 255 characters.")
+    if contact and len(contact) > 1000:
+        raise GivingValidationError("The acknowledgment contact cannot exceed 1000 characters.")
+    return normalized, honoree, contact

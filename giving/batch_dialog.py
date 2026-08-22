@@ -151,12 +151,31 @@ class GiftDialog(wx.Dialog):
         self.reference = wx.TextCtrl(panel); self.amount = wx.TextCtrl(panel)
         self.treatment = wx.Choice(panel, choices=[item[0] for item in self.TREATMENTS]); self.treatment.SetSelection(0)
         self.note = wx.TextCtrl(panel)
+        self.facts = {
+            "goods_or_services_provided": False,
+            "goods_or_services_description": None,
+            "goods_or_services_value": None,
+            "intangible_religious_benefit_only": False,
+            "tribute_type": None,
+            "honoree_name": None,
+            "acknowledgment_contact": None,
+            "donor_disclosure_authorized": False,
+            "amount_disclosure_authorized": False,
+            "eligibility_override_reason": None,
+        }
         for label, control in (("Received date", self.received), ("Envelope number", self.envelope),
                                ("Contributor", self.contributor), ("Method", self.method),
                                ("Check/reference", self.reference), ("Gift amount", self.amount),
                                ("Statement treatment", self.treatment), ("Note", self.note)):
             form.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL); form.Add(control, 1, wx.EXPAND)
         outer.Add(form, 0, wx.EXPAND | wx.ALL, 12)
+        facts_row = wx.BoxSizer(wx.HORIZONTAL)
+        facts_button = wx.Button(panel, label="Acknowledgment / Tribute...")
+        facts_button.Bind(wx.EVT_BUTTON, self.on_facts)
+        self.facts_summary = wx.StaticText(panel, label="No special acknowledgment facts")
+        facts_row.Add(facts_button, 0, wx.RIGHT, 10)
+        facts_row.Add(self.facts_summary, 1, wx.ALIGN_CENTER_VERTICAL)
+        outer.Add(facts_row, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
         outer.Add(wx.StaticText(panel, label="Allocations must equal the gift amount exactly."), 0, wx.LEFT | wx.BOTTOM, 12)
         self.list = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         self.list.InsertColumn(0, "Approved purpose", width=360); self.list.InsertColumn(1, "Amount", width=120)
@@ -180,8 +199,41 @@ class GiftDialog(wx.Dialog):
         self.received.SetValue(wx.DateTime.FromDMY(value.day, value.month - 1, value.year))
         self.amount.SetValue(f"{header[6]:.2f}")
         self.treatment.SetSelection([item[1] for item in self.TREATMENTS].index(header[7]))
-        self.note.SetValue(header[8]); self.allocations = [((row[0],row[1],row[2],row[3],row[4],f"{row[5]:.2f}",row[6] or ""),row[7] or "Unavailable purpose") for row in allocations]
+        self.note.SetValue(header[8])
+        self.facts.update({
+            "goods_or_services_provided": bool(header[9]),
+            "goods_or_services_description": header[10] or None,
+            "goods_or_services_value": None if header[11] is None else f"{header[11]:.2f}",
+            "intangible_religious_benefit_only": bool(header[12]),
+            "tribute_type": header[13], "honoree_name": header[14] or None,
+            "acknowledgment_contact": header[15] or None,
+            "donor_disclosure_authorized": bool(header[16]),
+            "amount_disclosure_authorized": bool(header[17]),
+            "eligibility_override_reason": header[18] or None,
+        })
+        self.allocations = [((row[0],row[1],row[2],row[3],row[4],f"{row[5]:.2f}",row[6] or ""),row[7] or "Unavailable purpose") for row in allocations]
         self.refresh()
+
+    def on_facts(self, _event=None):
+        dialog = GiftFactsDialog(self, self.facts)
+        try:
+            if dialog.ShowModal() == wx.ID_OK:
+                self.facts = dialog.values()
+                self.refresh_facts_summary()
+        finally:
+            dialog.Destroy()
+
+    def refresh_facts_summary(self):
+        labels = []
+        if self.facts["goods_or_services_provided"]:
+            labels.append("goods/services provided")
+        elif self.facts["intangible_religious_benefit_only"]:
+            labels.append("intangible religious benefit")
+        if self.facts["tribute_type"]:
+            labels.append("memorial/honor gift")
+        if self.facts["eligibility_override_reason"]:
+            labels.append("statement review noted")
+        self.facts_summary.SetLabel(", ".join(labels).capitalize() if labels else "No special acknowledgment facts")
 
     def on_add(self, _event=None):
         if not self.purposes:
@@ -205,13 +257,93 @@ class GiftDialog(wx.Dialog):
     def values(self):
         selected = self.contributor.GetSelection()
         contributor_id = self.contributors[selected - 1][0] if selected > 0 else None
-        return dict(batch_id=self.batch[0], received_date=_date(self.received),
+        values = dict(batch_id=self.batch[0], received_date=_date(self.received),
                     amount=self.amount.GetValue().strip(),
                     allocations=[item[0] for item in self.allocations], contributor_id=contributor_id,
                     envelope_number=self.envelope.GetValue(), method=self.METHODS[self.method.GetSelection()],
                     reference=self.reference.GetValue().strip() or None,
                     statement_eligibility=self.TREATMENTS[self.treatment.GetSelection()][1],
                     note=self.note.GetValue().strip() or None)
+        values.update(self.facts)
+        return values
+
+
+class GiftFactsDialog(wx.Dialog):
+    """Collect restricted acknowledgment and memorial facts for one gift."""
+
+    TRIBUTES = (("Not a memorial or honor gift", None),
+                ("In memory of", "IN_MEMORY_OF"), ("In honor of", "IN_HONOR_OF"))
+
+    def __init__(self, parent, values):
+        super().__init__(parent, title="Acknowledgment and Tribute Facts", size=(680, 570),
+                         style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        notice = wx.StaticText(panel, label=(
+            "Record congregation-determined facts only. ChurchManager does not decide tax deductibility."
+        ))
+        notice.SetForegroundColour(wx.Colour(0, 82, 170)); outer.Add(notice, 0, wx.ALL, 12)
+
+        benefit_box = wx.StaticBoxSizer(wx.VERTICAL, panel, "Goods or services")
+        self.goods = wx.CheckBox(panel, label="Goods or services were provided")
+        self.intangible = wx.CheckBox(panel, label="Only intangible religious benefits were provided")
+        self.goods_description = wx.TextCtrl(panel)
+        self.goods_value = wx.TextCtrl(panel)
+        benefit_form = wx.FlexGridSizer(0, 2, 8, 10); benefit_form.AddGrowableCol(1, 1)
+        benefit_form.Add(wx.StaticText(panel, label="Description"), 0, wx.ALIGN_CENTER_VERTICAL)
+        benefit_form.Add(self.goods_description, 1, wx.EXPAND)
+        benefit_form.Add(wx.StaticText(panel, label="Good-faith value"), 0, wx.ALIGN_CENTER_VERTICAL)
+        benefit_form.Add(self.goods_value, 1, wx.EXPAND)
+        benefit_box.Add(self.goods, 0, wx.ALL, 8); benefit_box.Add(self.intangible, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+        benefit_box.Add(benefit_form, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+        outer.Add(benefit_box, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+
+        tribute_box = wx.StaticBoxSizer(wx.VERTICAL, panel, "Memorial or honor gift")
+        tribute_form = wx.FlexGridSizer(0, 2, 8, 10); tribute_form.AddGrowableCol(1, 1)
+        self.tribute = wx.Choice(panel, choices=[item[0] for item in self.TRIBUTES]); self.tribute.SetSelection(0)
+        self.honoree = wx.TextCtrl(panel); self.contact = wx.TextCtrl(panel, style=wx.TE_MULTILINE)
+        for label, control in (("Type", self.tribute), ("Person remembered or honored", self.honoree),
+                               ("Acknowledgment contact", self.contact)):
+            tribute_form.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+            tribute_form.Add(control, 1, wx.EXPAND)
+        self.disclose_donor = wx.CheckBox(panel, label="Contributor explicitly authorized disclosure of donor identity")
+        self.disclose_amount = wx.CheckBox(panel, label="Contributor explicitly authorized disclosure of gift amount")
+        tribute_box.Add(tribute_form, 1, wx.EXPAND | wx.ALL, 8)
+        tribute_box.Add(self.disclose_donor, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+        tribute_box.Add(self.disclose_amount, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+        outer.Add(tribute_box, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+
+        review = wx.BoxSizer(wx.HORIZONTAL)
+        review.Add(wx.StaticText(panel, label="Statement-treatment review reason"), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 10)
+        self.override_reason = wx.TextCtrl(panel); review.Add(self.override_reason, 1, wx.EXPAND)
+        outer.Add(review, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        outer.Add(_dialog_buttons(panel), 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        panel.SetSizer(outer)
+
+        self.goods.SetValue(bool(values.get("goods_or_services_provided")))
+        self.goods_description.SetValue(values.get("goods_or_services_description") or "")
+        self.goods_value.SetValue(values.get("goods_or_services_value") or "")
+        self.intangible.SetValue(bool(values.get("intangible_religious_benefit_only")))
+        tribute_type = values.get("tribute_type")
+        self.tribute.SetSelection(next((i for i, item in enumerate(self.TRIBUTES) if item[1] == tribute_type), 0))
+        self.honoree.SetValue(values.get("honoree_name") or "")
+        self.contact.SetValue(values.get("acknowledgment_contact") or "")
+        self.disclose_donor.SetValue(bool(values.get("donor_disclosure_authorized")))
+        self.disclose_amount.SetValue(bool(values.get("amount_disclosure_authorized")))
+        self.override_reason.SetValue(values.get("eligibility_override_reason") or "")
+
+    def values(self):
+        return {
+            "goods_or_services_provided": self.goods.GetValue(),
+            "goods_or_services_description": self.goods_description.GetValue().strip() or None,
+            "goods_or_services_value": self.goods_value.GetValue().strip() or None,
+            "intangible_religious_benefit_only": self.intangible.GetValue(),
+            "tribute_type": self.TRIBUTES[self.tribute.GetSelection()][1],
+            "honoree_name": self.honoree.GetValue().strip() or None,
+            "acknowledgment_contact": self.contact.GetValue().strip() or None,
+            "donor_disclosure_authorized": self.disclose_donor.GetValue(),
+            "amount_disclosure_authorized": self.disclose_amount.GetValue(),
+            "eligibility_override_reason": self.override_reason.GetValue().strip() or None,
+        }
 
 
 class BatchEditorDialog(wx.Dialog):

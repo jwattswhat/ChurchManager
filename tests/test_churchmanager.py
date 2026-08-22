@@ -1071,6 +1071,7 @@ class TestChurchManagerForms(unittest.TestCase):
         expected = {
             "ChurchBox": "Service Planning",
             "MemberBox": "People and Congregation",
+            "GivingBox": "Member Giving",
             "ServiceBox": "Worship Resources",
             "ReportBox": "Reports and Design",
             "UtilitiesBox": "ChurchManager Settings",
@@ -1083,6 +1084,13 @@ class TestChurchManagerForms(unittest.TestCase):
             {name: controls[name]["label"] for name in expected}, expected,
         )
         self.assertEqual({controls[name]["posch"][0] for name in expected}, {1, 14, 27, 40})
+
+        occupied = []
+        for name in expected:
+            layout = controls[name]["layout"]
+            cell = (layout["row"], layout["column"])
+            self.assertNotIn(cell, occupied, f"{name} duplicates main-menu layout cell {cell}")
+            occupied.append(cell)
 
     def test_main_menu_groups_work_by_usage(self):
         controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
@@ -1097,28 +1105,36 @@ class TestChurchManagerForms(unittest.TestCase):
             sorted(controls[name]["posch"][1] for name in planning_items),
             list(range(2, 9)),
         )
-        self.assertEqual(controls["lblGivingContributors"]["posch"], [15, 10])
+        self.assertEqual(controls["lblGivingContributors"]["posch"], [15, 12])
+        self.assertEqual(
+            sorted(controls[name]["posch"][1] for name in (
+                "lblGivingContributors", "lblGivingPurposes",
+                "lblContributionBatches", "lblGivingReports",
+            )),
+            list(range(12, 16)),
+        )
         self.assertEqual(
             controls["lblGivingContributors"]["security"]["invoke"],
             "giving.contributors.manage",
         )
-        self.assertEqual(controls["lblGivingPurposes"]["posch"], [15, 11])
+        self.assertEqual(controls["lblGivingPurposes"]["posch"], [15, 13])
         self.assertEqual(
             controls["lblGivingPurposes"]["security"]["invoke"],
             "giving.purposes.manage",
         )
-        self.assertEqual(controls["MemberBox"]["sizech"], [12, 13])
-        self.assertEqual(controls["lblContributionBatches"]["posch"], [15, 12])
+        self.assertEqual(controls["MemberBox"]["sizech"], [12, 10])
+        self.assertEqual(controls["GivingBox"]["sizech"], [12, 6])
+        self.assertEqual(controls["lblContributionBatches"]["posch"], [15, 14])
         self.assertEqual(
             controls["lblContributionBatches"]["security"]["invoke"],
             "giving.batches.enter",
         )
-        self.assertEqual(controls["lblGivingReports"]["posch"], [15, 13])
+        self.assertEqual(controls["lblGivingReports"]["posch"], [15, 15])
         self.assertEqual(
             controls["lblGivingReports"]["security"]["invoke"],
             "giving.reports.summary",
         )
-        self.assertEqual(controls["ReportBox"]["posch"], [14, 14])
+        self.assertEqual(controls["ReportBox"]["posch"], [14, 18])
         resource_items = [
             "lblOS", "lblCheckList", "lblPropers", "lblSermon", "lblHymnal",
             "lblHymn", "lblParticipant", "lblSchedule", "lblPrayers",
@@ -1128,6 +1144,12 @@ class TestChurchManagerForms(unittest.TestCase):
             sorted(controls[name]["posch"][1] for name in resource_items),
             list(range(12, 24)),
         )
+        service_top = controls["ServiceBox"]["posch"][1]
+        service_bottom = service_top + controls["ServiceBox"]["sizech"][1]
+        self.assertTrue(all(
+            service_top < controls[name]["posch"][1] < service_bottom
+            for name in resource_items
+        ), "Every Worship Resources link must remain inside its box")
         self.assertTrue(all(controls[name]["label"] == controls[name]["label"].strip()
                             for name in resource_items))
         from main_menu import FORM_ROUTES
