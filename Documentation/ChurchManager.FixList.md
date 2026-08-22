@@ -17,7 +17,7 @@ open-source church-management systems.
 | 5 | In acceptance | Hymnal, lectionary, and Order of Service catalogs | Order of Service and lectionary packaging are implemented and exercised; final human stanza verification blocks publication of the curated LSB hymnal package. |
 | 6 | In beta | Release, installation, and recovery readiness | Setup, upgrade, restore, backup, MSI, documentation, and beta installer foundations exist; repair/signing, current-beta packaging, and clean-machine exit acceptance remain. |
 | 6A | In progress | Open-source publication and distribution | Identity and website prototype are approved; ChurchManager history/privacy audit, public destinations, signed artifacts, and live links remain. |
-| 7 | In final visual acceptance | [Confidential member giving and envelopes](ChurchManager.MemberGiving.Specification.md) | First-release code, migrations, installation baseline, full automated suite, and confidential-data restore rehearsal are complete; only final visual acceptance of the newest administration screens and protected reports remains. Pledges are explicitly deferred. |
+| 7 | Completed | [Confidential member giving and envelopes](ChurchManager.MemberGiving.Specification.md) | The approved first-release scope passed migrations, installation baseline, full automated suite, confidential-data restore rehearsal, and final visual acceptance. Pledges are explicitly deferred. |
 
 Posted-batch correction is implemented and accepted end to end: it creates a
 linked Ready accounting reversal, copies the original gifts into an editable
@@ -33,7 +33,7 @@ from Sent to Accounting in the batch list.
 | 13 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
 | Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
 
-Finish the acceptance gates for items 5 through 7 before beginning item 8.
+Finish the acceptance gates for items 5 and 6 before beginning item 8.
 Items 8 through 11 form the next ministry-development phase. Items 12 through
 13 should not delay a stable ChurchManager release.
 
@@ -554,7 +554,7 @@ future roadmap projects:
 ### 7. Confidential member giving and envelopes
 
 - Approved design: [Member giving and envelope tracking specification](ChurchManager.MemberGiving.Specification.md).
-- **Status: First-release implementation complete; final visual acceptance pending.**
+- **Status: First-release scope completed and accepted for beta.**
   Pledges, online-giving provider integration, and statement email delivery are
   deferred capabilities rather than incomplete first-release work.
 - The completed first-release inventory and its remaining rendered checks are maintained in
