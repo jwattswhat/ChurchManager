@@ -106,11 +106,14 @@ class NewBatchDialog(wx.Dialog):
 class AllocationDialog(wx.Dialog):
     """Select one approved purpose and amount for a split gift."""
 
-    def __init__(self, parent, purposes):
+    def __init__(self, parent, purposes, non_cash=False):
         super().__init__(parent, title="Gift Allocation", size=(520, 250))
         self.purposes = purposes; panel = wx.Panel(self)
         self.purpose = wx.Choice(panel, choices=[row[1] for row in purposes])
         self.amount = wx.TextCtrl(panel); self.restriction = wx.TextCtrl(panel)
+        if non_cash:
+            self.amount.SetValue("0.00")
+            self.amount.Enable(False)
         if purposes: self.purpose.SetSelection(0)
         form = wx.FlexGridSizer(0, 2, 9, 10); form.AddGrowableCol(1, 1)
         for label, control in (("Approved purpose", self.purpose), ("Amount", self.amount),
@@ -129,9 +132,9 @@ class AllocationDialog(wx.Dialog):
 
 
 class GiftDialog(wx.Dialog):
-    """Enter a monetary gift and one or more exact allocations."""
+    """Enter a monetary gift or a description-only non-cash contribution."""
 
-    METHODS = ("CASH", "CHECK", "ELECTRONIC", "OTHER")
+    METHODS = ("CASH", "CHECK", "ELECTRONIC", "NON_CASH", "OTHER")
     TREATMENTS = (("Eligible", "ELIGIBLE"), ("Needs review", "REVIEW"),
                   ("Not eligible", "INELIGIBLE"))
 
@@ -149,6 +152,8 @@ class GiftDialog(wx.Dialog):
         self.contributor.SetSelection(0)
         self.method = wx.Choice(panel, choices=[item.title() for item in self.METHODS]); self.method.SetSelection(0)
         self.reference = wx.TextCtrl(panel); self.amount = wx.TextCtrl(panel)
+        self.non_cash_description = wx.TextCtrl(panel)
+        self.donor_estimated_value = wx.TextCtrl(panel)
         self.treatment = wx.Choice(panel, choices=[item[0] for item in self.TREATMENTS]); self.treatment.SetSelection(0)
         self.note = wx.TextCtrl(panel)
         self.facts = {
@@ -166,6 +171,8 @@ class GiftDialog(wx.Dialog):
         for label, control in (("Received date", self.received), ("Envelope number", self.envelope),
                                ("Contributor", self.contributor), ("Method", self.method),
                                ("Check/reference", self.reference), ("Gift amount", self.amount),
+                               ("Donated property", self.non_cash_description),
+                               ("Donor-provided estimate (unverified)", self.donor_estimated_value),
                                ("Statement treatment", self.treatment), ("Note", self.note)):
             form.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL); form.Add(control, 1, wx.EXPAND)
         outer.Add(form, 0, wx.EXPAND | wx.ALL, 12)
@@ -186,8 +193,12 @@ class GiftDialog(wx.Dialog):
         row.Add(add, 0, wx.RIGHT, 6); row.Add(remove); outer.Add(row, 0, wx.ALL, 12)
         outer.Add(_dialog_buttons(panel), 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
         panel.SetSizer(outer)
+        self.method.Bind(wx.EVT_CHOICE, self.on_method)
         self.contribution_id = None
-        if gift: self.load_gift(*gift)
+        if gift:
+            self.load_gift(*gift)
+        else:
+            self.on_method()
 
     def load_gift(self, header, allocations):
         """Populate the dialog from one existing draft contribution."""
@@ -211,8 +222,23 @@ class GiftDialog(wx.Dialog):
             "amount_disclosure_authorized": bool(header[17]),
             "eligibility_override_reason": header[18] or None,
         })
+        self.non_cash_description.SetValue(header[19] or "")
+        self.donor_estimated_value.SetValue("" if header[20] is None else f"{header[20]:.2f}")
         self.allocations = [((row[0],row[1],row[2],row[3],row[4],f"{row[5]:.2f}",row[6] or ""),row[7] or "Unavailable purpose") for row in allocations]
+        self.on_method()
         self.refresh()
+
+    def on_method(self, _event=None):
+        """Switch between valued gifts and description-only donated property."""
+        non_cash = self.METHODS[self.method.GetSelection()] == "NON_CASH"
+        if non_cash:
+            self.amount.SetValue("0.00")
+        self.amount.Enable(not non_cash)
+        self.non_cash_description.Enable(non_cash)
+        self.donor_estimated_value.Enable(non_cash)
+        if not non_cash:
+            self.non_cash_description.SetValue("")
+            self.donor_estimated_value.SetValue("")
 
     def on_facts(self, _event=None):
         dialog = GiftFactsDialog(self, self.facts)
@@ -238,7 +264,8 @@ class GiftDialog(wx.Dialog):
     def on_add(self, _event=None):
         if not self.purposes:
             wx.MessageBox("Create an active approved giving purpose first.", "Gift Allocation", wx.OK | wx.ICON_INFORMATION, self); return
-        dialog = AllocationDialog(self, self.purposes)
+        non_cash = self.METHODS[self.method.GetSelection()] == "NON_CASH"
+        dialog = AllocationDialog(self, self.purposes, non_cash=non_cash)
         try:
             if dialog.ShowModal() == wx.ID_OK:
                 allocation, name = dialog.value(); self.allocations.append((allocation, name)); self.refresh()
@@ -263,6 +290,8 @@ class GiftDialog(wx.Dialog):
                     envelope_number=self.envelope.GetValue(), method=self.METHODS[self.method.GetSelection()],
                     reference=self.reference.GetValue().strip() or None,
                     statement_eligibility=self.TREATMENTS[self.treatment.GetSelection()][1],
+                    non_cash_description=self.non_cash_description.GetValue().strip() or None,
+                    donor_estimated_value=self.donor_estimated_value.GetValue().strip() or None,
                     note=self.note.GetValue().strip() or None)
         values.update(self.facts)
         return values
@@ -383,7 +412,9 @@ class BatchEditorDialog(wx.Dialog):
         self.summary.SetLabel(text); self.rows = self.service.contributions(self.batch_id); self.list.DeleteAllItems()
         for index, row in enumerate(self.rows):
             self.list.InsertItem(index, str(row[1])); self.list.SetItem(index, 1, row[2]); self.list.SetItem(index, 2, row[3])
-            self.list.SetItem(index, 3, row[4].title()); self.list.SetItem(index, 4, f"${row[5]:,.2f}"); self.list.SetItem(index, 5, row[6].title())
+            self.list.SetItem(index, 3, row[4].replace("_", " ").title())
+            amount = "Non-cash" if row[4] == "NON_CASH" else f"${row[5]:,.2f}"
+            self.list.SetItem(index, 4, amount); self.list.SetItem(index, 5, row[6].title())
 
     def on_add(self, _event=None):
         dialog = GiftDialog(self, self.service, self.batch)
@@ -429,11 +460,17 @@ class BatchEditorDialog(wx.Dialog):
         if issues:
             wx.MessageBox("This batch is not ready:\n\n- " + "\n- ".join(issues),
                           "Batch Review", wx.OK | wx.ICON_WARNING, self); return
-        if wx.MessageBox("All review checks passed. Mark this batch Ready?",
+        if wx.MessageBox("All review checks passed. Complete this batch review?",
                          "Batch Review", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION, self) != wx.YES:
             return
         try:
-            self.service.mark_ready(self.batch_id); self.EndModal(wx.ID_OK)
+            status = self.service.mark_ready(self.batch_id)
+            if status == "POSTED":
+                wx.MessageBox(
+                    "The non-cash batch is complete. No accounting transaction was created.",
+                    "Non-cash Contributions", wx.OK | wx.ICON_INFORMATION, self,
+                )
+            self.EndModal(wx.ID_OK)
         except Exception as error:
             wx.MessageBox(str(error), "Unable to Mark Batch Ready", wx.OK | wx.ICON_ERROR, self)
 

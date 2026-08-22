@@ -9,6 +9,8 @@ from .validation import (
     validate_contributor_links,
     validate_envelope_assignment,
     validate_gift_acknowledgment,
+    validate_contribution_amounts,
+    validate_donor_estimated_value,
     validate_tribute,
 )
 
@@ -20,5 +22,7 @@ __all__ = [
     "validate_contributor_links",
     "validate_envelope_assignment",
     "validate_gift_acknowledgment",
+    "validate_contribution_amounts",
+    "validate_donor_estimated_value",
     "validate_tribute",
 ]

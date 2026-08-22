@@ -31,6 +31,10 @@ class Cursor:
             self.rows = [(self.connection.batch[1],)]
         elif "SELECT ControlTotal,CalculatedTotal" in sql:
             self.rows = [self.connection.totals]
+        elif "SUM(ContributionMethod='NON_CASH')" in sql:
+            self.rows = [self.connection.completion_gift_counts]
+        elif "SUM(ContributionMethod<>'NON_CASH')" in sql:
+            self.rows = [self.connection.review_gift_counts]
         elif sql.startswith("SELECT COUNT(*)"):
             self.rows = [(self.connection.review_counts.pop(0),)]
         elif "FROM tblContributionEnvelopeAssignment" in sql:
@@ -55,6 +59,8 @@ class Connection:
         self.batch, self.envelopes = (4, "DRAFT"), []
         self.totals = (Decimal("25.00"), Decimal("25.00"), date(2026, 8, 21), 2, 4)
         self.review_counts = [1, 0, 0, 0, 0, 0, 0]
+        self.review_gift_counts = (1, 1)
+        self.completion_gift_counts = (1, 0)
     def cursor(self): return Cursor(self)
     def commit(self): self.commits += 1
     def rollback(self): self.rollbacks += 1
@@ -117,6 +123,20 @@ class DraftBatchServiceTests(unittest.TestCase):
         self.assertIn("Dinner ticket", insert[1])
         self.assertIn("Grace Example", insert[1])
 
+    def test_saves_description_only_non_cash_contribution(self):
+        connection = Connection()
+        self.service(connection).save_monetary_gift(
+            batch_id=21, received_date=date(2026, 8, 21), amount="0.00",
+            contributor_id=45, method="NON_CASH", non_cash_description="Two altar chairs",
+            donor_estimated_value="275.00",
+            allocations=[(8, 4, 5, 6, None, "0.00", None)],
+        )
+        insert = next(item for item in connection.calls if item[0].startswith("INSERT INTO tblContribution "))
+        self.assertIn("NonCashDescription", insert[0])
+        self.assertIn("DonorEstimatedValue", insert[0])
+        self.assertIn("Two altar chairs", insert[1])
+        self.assertIn(Decimal("275.00"), insert[1])
+
     def test_rejects_incomplete_acknowledgment_facts(self):
         with self.assertRaisesRegex(GivingValidationError, "Describe"):
             self.service(Connection()).save_monetary_gift(
@@ -151,6 +171,16 @@ class DraftBatchServiceTests(unittest.TestCase):
         self.assertEqual(connection.commits, 1)
         self.assertTrue(any("Status='READY'" in sql for sql, _ in connection.calls))
         self.assertTrue(any("BATCH_MARKED_READY" in str(values) for _, values in connection.calls))
+
+    def test_non_cash_only_batch_completes_without_accounting_handoff(self):
+        connection = Connection()
+        connection.review_gift_counts = (1, 0)
+        connection.completion_gift_counts = (1, 1)
+        connection.review_counts = [0, 0, 0, 0, 0, 0]
+        status = self.service(connection).mark_ready(21)
+        self.assertEqual(status, "POSTED")
+        self.assertTrue(any("Status='POSTED'" in sql for sql, _ in connection.calls))
+        self.assertIn("NON_CASH_BATCH_COMPLETED", str(connection.calls))
 
     def test_invalid_deposit_period_prevents_ready_status(self):
         connection = Connection(); connection.review_counts[0] = 0

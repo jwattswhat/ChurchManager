@@ -86,7 +86,7 @@ class PostedBatchCorrectionService:
             replacement_id = cursor.lastrowid
             cursor.execute(
                 "SELECT ID,ContributorID,EnteredEnvelopeNumber,ContributionMethod,ReferenceValue,ReceivedDate,"
-                "Amount,NonCashDescription,StatementEligibility,GoodsOrServicesProvided,"
+                "Amount,NonCashDescription,DonorEstimatedValue,StatementEligibility,GoodsOrServicesProvided,"
                 "GoodsOrServicesDescription,GoodsOrServicesValue,IntangibleReligiousBenefitOnly,"
                 "EligibilityOverrideReason,TributeType,HonoreeName,AcknowledgmentContact,"
                 "DonorDisclosureAuthorized,AmountDisclosureAuthorized,DonorDirection,DirectionStatus,"
@@ -97,12 +97,12 @@ class PostedBatchCorrectionService:
                 cursor.execute(
                     "INSERT INTO tblContribution "
                     "(BatchID,CorrectionOfContributionID,ContributorID,EnteredEnvelopeNumber,ContributionMethod,"
-                    "ReferenceValue,ReceivedDate,Amount,NonCashDescription,StatementEligibility,"
+                    "ReferenceValue,ReceivedDate,Amount,NonCashDescription,DonorEstimatedValue,StatementEligibility,"
                     "GoodsOrServicesProvided,GoodsOrServicesDescription,GoodsOrServicesValue,"
                     "IntangibleReligiousBenefitOnly,EligibilityOverrideReason,TributeType,HonoreeName,"
                     "AcknowledgmentContact,DonorDisclosureAuthorized,AmountDisclosureAuthorized,"
                     "DonorDirection,DirectionStatus,DirectionResolution,Note) "
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (replacement_id, gift[0], *gift[1:]),
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (replacement_id, gift[0], *gift[1:]),
                 )
                 new_gift_id = cursor.lastrowid
                 cursor.execute(

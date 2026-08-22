@@ -83,6 +83,54 @@ def validate_allocations(gift_amount: object, allocations: Iterable[object]) -> 
     return gift
 
 
+def validate_contribution_amounts(
+    method: str,
+    gift_amount: object,
+    allocations: Iterable[object],
+    non_cash_description: str | None = None,
+) -> tuple[Decimal, str | None]:
+    """Validate monetary or description-only non-cash contribution amounts."""
+    normalized_method = str(method or "").strip().upper()
+    values = list(allocations)
+    if normalized_method != "NON_CASH":
+        if non_cash_description not in (None, ""):
+            raise GivingValidationError(
+                "Remove the non-cash property description for a monetary contribution."
+            )
+        return validate_allocations(gift_amount, values), None
+
+    description = str(non_cash_description or "").strip()
+    if not description:
+        raise GivingValidationError("Describe the donated property.")
+    if len(description) > 1000:
+        raise GivingValidationError("The donated-property description cannot exceed 1000 characters.")
+    amount = _money(gift_amount, "Gift amount")
+    if amount != Decimal("0.00"):
+        raise GivingValidationError(
+            "A non-cash gift must not contain a ChurchManager-assigned monetary value."
+        )
+    allocation_values = [_money(value, "Allocation amount") for value in values]
+    if not allocation_values:
+        raise GivingValidationError("A non-cash gift requires an approved purpose.")
+    if any(value != Decimal("0.00") for value in allocation_values):
+        raise GivingValidationError("Non-cash purpose allocations must remain zero dollars.")
+    return amount, description
+
+
+def validate_donor_estimated_value(method: str, value: object | None) -> Decimal | None:
+    """Accept an optional donor estimate only for a non-cash contribution."""
+    if value in (None, ""):
+        return None
+    if str(method or "").strip().upper() != "NON_CASH":
+        raise GivingValidationError(
+            "A donor-provided estimated value may be recorded only for donated property."
+        )
+    amount = _money(value, "Donor-provided estimated value")
+    if amount <= 0:
+        raise GivingValidationError("A donor-provided estimated value must be greater than zero.")
+    return amount
+
+
 def validate_gift_acknowledgment(
     *,
     goods_or_services_provided: bool,

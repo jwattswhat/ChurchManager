@@ -624,8 +624,11 @@ future roadmap projects:
 - Contribution entry now records congregation-determined goods/services facts,
   intangible religious benefits, statement-review reasons, and memorial/honor
   facts with separate donor and amount disclosure consent. These facts survive
-  draft edits and posted-batch corrections. Dedicated non-cash entry and the
-  protected memorial/honor acknowledgment output remain open.
+  draft edits and posted-batch corrections. Description-only non-cash entry is
+  implemented without ChurchManager-assigned value. An optional donor estimate
+  is explicitly unverified and excluded from accounting and statements;
+  non-cash-only batches finish without a zero-dollar ledger transaction. The protected memorial/honor
+  acknowledgment output remains open.
 - Support contributor accounts linked optionally to a person or family; outside
   donors must also be allowed without creating congregation-member records.
 - Assign and maintain envelope numbers with effective dates so numbers can be
@@ -675,6 +678,9 @@ future roadmap projects:
 
 ### 10. Groups, committees, classes, and ministry teams
 
+- **Status: Approved design; implementation pending.** Follow
+  [ChurchManager.GroupsMembership.Specification.md](ChurchManager.GroupsMembership.Specification.md),
+  approved August 22, 2026.
 - Add general groups independent of worship-participant roles.
 - Support leaders, members, group roles, active dates, notes, and categories.
 - Accommodate boards, committees, Bible studies, Sunday school, choir,
@@ -703,12 +709,17 @@ future roadmap projects:
 
 ### 13. Custom profile fields and controlled tags
 
-- Allow authorized administrators to define optional person and family fields
-  or tags.
-- Keep common values controlled and searchable.
-- Include privacy and report-export behavior in each field definition.
-- Avoid using arbitrary custom fields where a normalized ChurchManager
-  relationship is more appropriate.
+- **Status: Approved design; implementation pending.** Follow
+  [ChurchManager.CustomProfileFields.Specification.md](ChurchManager.CustomProfileFields.Specification.md),
+  approved August 22, 2026.
+- Allow authorized administrators to define typed optional fields for Person
+  and Family profiles through ChurchManager and have JSForm render and validate
+  them without a schema change for each local field.
+- Keep choices and tags controlled and searchable.
+- Enforce privacy, permissions, auditing, directory, report, import, and export
+  policy for every definition.
+- Avoid arbitrary custom fields where a normalized ChurchManager relationship
+  or protected subsystem is more appropriate.
 
 ### Conditional: secure remote access and two-factor authentication
 

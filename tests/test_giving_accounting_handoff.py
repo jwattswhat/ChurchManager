@@ -54,6 +54,7 @@ class GivingAccountingHandoffTests(unittest.TestCase):
         self.assertIn("BATCH_SENT_TO_ACCOUNTING", sql)
         self.assertNotIn("ContributorID", sql)
         self.assertNotIn("EnvelopeNumber", sql)
+        self.assertIn("HAVING SUM(a.Amount)>0", sql)
         lines = [values for statement, values in connection.calls
                  if statement.startswith("INSERT INTO tblAccountingTransactionLine")]
         self.assertEqual(len(lines), 4)

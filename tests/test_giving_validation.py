@@ -10,6 +10,8 @@ from giving.validation import (
     GivingValidationError,
     envelope_periods_overlap,
     validate_allocations,
+    validate_contribution_amounts,
+    validate_donor_estimated_value,
     validate_contributor_links,
     validate_envelope_assignment,
     validate_gift_acknowledgment,
@@ -58,6 +60,31 @@ class GivingValidationTests(unittest.TestCase):
         for allocations in ([], ["24.99"], ["25", "-1", "1"]):
             with self.subTest(allocations=allocations), self.assertRaises(GivingValidationError):
                 validate_allocations("25.00", allocations)
+
+    def test_non_cash_contribution_records_description_without_value(self):
+        amount, description = validate_contribution_amounts(
+            "NON_CASH", "0", ["0"], "Two wooden altar chairs"
+        )
+        self.assertEqual(amount, Decimal("0.00"))
+        self.assertEqual(description, "Two wooden altar chairs")
+        for amount, allocations, description in (
+            ("1", ["0"], "Property"),
+            ("0", ["1"], "Property"),
+            ("0", ["0"], ""),
+            ("0", [], "Property"),
+        ):
+            with self.subTest(amount=amount, allocations=allocations, description=description):
+                with self.assertRaises(GivingValidationError):
+                    validate_contribution_amounts("NON_CASH", amount, allocations, description)
+
+    def test_donor_estimate_is_optional_unverified_non_cash_information(self):
+        self.assertIsNone(validate_donor_estimated_value("NON_CASH", None))
+        self.assertEqual(
+            validate_donor_estimated_value("NON_CASH", "275.00"), Decimal("275.00")
+        )
+        for method, value in (("CASH", "275"), ("NON_CASH", "0"), ("NON_CASH", "-1")):
+            with self.subTest(method=method, value=value), self.assertRaises(GivingValidationError):
+                validate_donor_estimated_value(method, value)
 
     def test_acknowledgment_facts_are_mutually_consistent(self):
         self.assertEqual(

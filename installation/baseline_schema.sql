@@ -1236,6 +1236,7 @@ CREATE TABLE `tblcontribution` (
   `ReceivedDate` date NOT NULL,
   `Amount` decimal(19,2) NOT NULL DEFAULT 0.00,
   `NonCashDescription` varchar(1000) DEFAULT NULL,
+  `DonorEstimatedValue` decimal(14,2) DEFAULT NULL,
   `StatementEligibility` varchar(20) NOT NULL DEFAULT 'ELIGIBLE',
   `GoodsOrServicesProvided` tinyint(1) NOT NULL DEFAULT 0,
   `GoodsOrServicesDescription` varchar(1000) DEFAULT NULL,
@@ -1266,7 +1267,8 @@ CREATE TABLE `tblcontribution` (
   CONSTRAINT `ck_contribution_goods_value` CHECK (`GoodsOrServicesValue` is null or `GoodsOrServicesValue` >= 0),
   CONSTRAINT `ck_contribution_benefit` CHECK (`GoodsOrServicesProvided` <> 1 or `IntangibleReligiousBenefitOnly` <> 1),
   CONSTRAINT `ck_contribution_tribute` CHECK (`TributeType` is null and `HonoreeName` is null or `TributeType` in ('IN_MEMORY_OF','IN_HONOR_OF') and `HonoreeName` is not null),
-  CONSTRAINT `ck_contribution_direction` CHECK (`DirectionStatus` in ('NONE','REVIEW','CLARIFIED','RETURNED','ACCEPTED'))
+  CONSTRAINT `ck_contribution_direction` CHECK (`DirectionStatus` in ('NONE','REVIEW','CLARIFIED','RETURNED','ACCEPTED')),
+  CONSTRAINT `ck_contribution_donor_estimated_value` CHECK (`DonorEstimatedValue` is null or `DonorEstimatedValue` > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -1294,7 +1296,7 @@ CREATE TABLE `tblcontributionallocation` (
   CONSTRAINT `fk_contribution_allocation_org` FOREIGN KEY (`OrganizationID`) REFERENCES `tblaccountingorganization` (`ID`),
   CONSTRAINT `fk_contribution_allocation_purpose` FOREIGN KEY (`PurposeID`) REFERENCES `tblcontributionpurpose` (`ID`),
   CONSTRAINT `fk_contribution_allocation_revenue` FOREIGN KEY (`RevenueAccountID`) REFERENCES `tblaccountingaccount` (`ID`),
-  CONSTRAINT `ck_contribution_allocation_amount` CHECK (`Amount` > 0)
+  CONSTRAINT `ck_contribution_allocation_amount` CHECK (`Amount` >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

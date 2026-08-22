@@ -8,7 +8,8 @@ from decimal import Decimal, InvalidOperation
 from bulletin_orders import portable_connection
 from giving.validation import (
     GivingValidationError,
-    validate_allocations,
+    validate_contribution_amounts,
+    validate_donor_estimated_value,
     validate_gift_acknowledgment,
     validate_tribute,
 )
@@ -105,7 +106,7 @@ class DraftBatchService:
         return self.all(
             "SELECT g.ID,g.ReceivedDate,COALESCE(c.DisplayName,'Anonymous'),"
             "COALESCE(g.EnteredEnvelopeNumber,''),g.ContributionMethod,g.Amount,"
-            "g.StatementEligibility FROM tblContribution g LEFT JOIN tblContributionContributor c "
+            "g.StatementEligibility,COALESCE(g.NonCashDescription,'') FROM tblContribution g LEFT JOIN tblContributionContributor c "
             "ON c.ID=g.ContributorID JOIN tblContributionBatch b ON b.ID=g.BatchID "
             "WHERE g.BatchID=? AND b.ChurchID=? ORDER BY g.ID",
             (batch_id, self.church_id()),
@@ -120,7 +121,8 @@ class DraftBatchService:
             "g.GoodsOrServicesValue,g.IntangibleReligiousBenefitOnly,g.TributeType,"
             "COALESCE(g.HonoreeName,''),COALESCE(g.AcknowledgmentContact,''),"
             "g.DonorDisclosureAuthorized,g.AmountDisclosureAuthorized,"
-            "COALESCE(g.EligibilityOverrideReason,'') "
+            "COALESCE(g.EligibilityOverrideReason,''),COALESCE(g.NonCashDescription,''),"
+            "g.DonorEstimatedValue "
             "FROM tblContribution g JOIN tblContributionBatch b ON b.ID=g.BatchID "
             "WHERE g.ID=? AND g.BatchID=? AND b.ChurchID=? AND b.Status='DRAFT'",
             (contribution_id, batch_id, self.church_id()))
@@ -239,13 +241,17 @@ class DraftBatchService:
                            acknowledgment_contact=None,
                            donor_disclosure_authorized=False,
                            amount_disclosure_authorized=False,
-                           eligibility_override_reason=None):
-        """Add one monetary gift and balanced allocations to an editable batch."""
+                           eligibility_override_reason=None,
+                           non_cash_description=None, donor_estimated_value=None):
+        """Add one monetary or description-only non-cash gift to a draft batch."""
         allocations = list(allocations)
-        gift_amount = validate_allocations(amount, [item[5] for item in allocations])
         method = str(method or "").upper()
-        if method not in {"CASH", "CHECK", "ELECTRONIC", "OTHER"}:
-            raise GivingValidationError("Select a valid monetary contribution method.")
+        if method not in {"CASH", "CHECK", "ELECTRONIC", "NON_CASH", "OTHER"}:
+            raise GivingValidationError("Select a valid contribution method.")
+        gift_amount, non_cash_description = validate_contribution_amounts(
+            method, amount, [item[5] for item in allocations], non_cash_description
+        )
+        donor_estimated_value = validate_donor_estimated_value(method, donor_estimated_value)
         eligibility = str(statement_eligibility or "").upper()
         if eligibility not in {"ELIGIBLE", "INELIGIBLE", "REVIEW"}:
             raise GivingValidationError("Select a valid statement treatment.")
@@ -287,13 +293,14 @@ class DraftBatchService:
             cursor.execute(
                 "INSERT INTO tblContribution "
                 "(BatchID,ContributorID,EnteredEnvelopeNumber,ContributionMethod,ReferenceValue,"
-                "ReceivedDate,Amount,StatementEligibility,Note,GoodsOrServicesProvided,"
+                "ReceivedDate,Amount,NonCashDescription,DonorEstimatedValue,StatementEligibility,Note,GoodsOrServicesProvided,"
                 "GoodsOrServicesDescription,GoodsOrServicesValue,IntangibleReligiousBenefitOnly,"
                 "TributeType,HonoreeName,AcknowledgmentContact,DonorDisclosureAuthorized,"
                 "AmountDisclosureAuthorized,EligibilityOverrideReason) "
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (batch_id, contributor_id, entered_envelope, method, reference or None,
-                 received_date, gift_amount, eligibility, note or None,
+                 received_date, gift_amount, non_cash_description, donor_estimated_value,
+                 eligibility, note or None,
                  bool(goods_or_services_provided), benefit_description, benefit_value,
                  bool(intangible_religious_benefit_only), tribute_type, honoree_name,
                  acknowledgment_contact, bool(donor_disclosure_authorized),
@@ -325,10 +332,16 @@ class DraftBatchService:
         """Replace an editable gift and its allocations while retaining its identity."""
         batch_id = values["batch_id"]; received_date = values["received_date"]
         allocations = list(values["allocations"])
-        amount = validate_allocations(values["amount"], [item[5] for item in allocations])
         method = str(values.get("method") or "").upper()
-        if method not in {"CASH", "CHECK", "ELECTRONIC", "OTHER"}:
-            raise GivingValidationError("Select a valid monetary contribution method.")
+        if method not in {"CASH", "CHECK", "ELECTRONIC", "NON_CASH", "OTHER"}:
+            raise GivingValidationError("Select a valid contribution method.")
+        amount, non_cash_description = validate_contribution_amounts(
+            method, values["amount"], [item[5] for item in allocations],
+            values.get("non_cash_description"),
+        )
+        donor_estimated_value = validate_donor_estimated_value(
+            method, values.get("donor_estimated_value")
+        )
         eligibility = str(values.get("statement_eligibility") or "").upper()
         if eligibility not in {"ELIGIBLE", "INELIGIBLE", "REVIEW"}:
             raise GivingValidationError("Select a valid statement treatment.")
@@ -364,13 +377,14 @@ class DraftBatchService:
             if any(item[1] != batch[0] for item in allocations):
                 raise GivingValidationError("Every allocation must use the batch organization.")
             cursor.execute("UPDATE tblContribution SET ContributorID=?,EnteredEnvelopeNumber=?,"
-                           "ContributionMethod=?,ReferenceValue=?,ReceivedDate=?,Amount=?,StatementEligibility=?,Note=?,"
+                           "ContributionMethod=?,ReferenceValue=?,ReceivedDate=?,Amount=?,NonCashDescription=?,DonorEstimatedValue=?,StatementEligibility=?,Note=?,"
                            "GoodsOrServicesProvided=?,GoodsOrServicesDescription=?,GoodsOrServicesValue=?,"
                            "IntangibleReligiousBenefitOnly=?,TributeType=?,HonoreeName=?,AcknowledgmentContact=?,"
                            "DonorDisclosureAuthorized=?,AmountDisclosureAuthorized=?,EligibilityOverrideReason=? "
                            "WHERE ID=? AND BatchID=?",
                            (contributor_id, envelope, method, values.get("reference") or None,
-                            received_date, amount, eligibility, values.get("note") or None,
+                            received_date, amount, non_cash_description, donor_estimated_value,
+                            eligibility, values.get("note") or None,
                             bool(values.get("goods_or_services_provided")), benefit_description, benefit_value,
                             bool(values.get("intangible_religious_benefit_only")), tribute_type, honoree_name,
                             acknowledgment_contact, bool(values.get("donor_disclosure_authorized")),
@@ -426,12 +440,27 @@ class DraftBatchService:
             if row[0] != "DRAFT": raise GivingValidationError("Only a draft batch can be marked ready.")
             issues = self._review_issues(cursor, batch_id, church_id)
             if issues: raise GivingValidationError("The batch is not ready:\n- " + "\n- ".join(issues))
-            cursor.execute("UPDATE tblContributionBatch SET Status='READY',ReviewedByUserID=?,"
-                           "ReviewedAt=CURRENT_TIMESTAMP(6),Version=Version+1 WHERE ID=? AND Status='DRAFT'",
-                           (self.user_id, batch_id))
-            self._audit(cursor, church_id, "BATCH_MARKED_READY", "BATCH", batch_id,
-                        f"Ready batch {batch_id}")
+            cursor.execute(
+                "SELECT COUNT(*),SUM(ContributionMethod='NON_CASH') FROM tblContribution WHERE BatchID=?",
+                (batch_id,),
+            )
+            count, non_cash = cursor.fetchone()
+            non_cash_only = count > 0 and count == non_cash
+            if non_cash_only:
+                cursor.execute("UPDATE tblContributionBatch SET Status='POSTED',ReviewedByUserID=?,"
+                               "ReviewedAt=CURRENT_TIMESTAMP(6),PostedByUserID=?,PostedAt=CURRENT_TIMESTAMP(6),"
+                               "Version=Version+1 WHERE ID=? AND Status='DRAFT'",
+                               (self.user_id, self.user_id, batch_id))
+                self._audit(cursor, church_id, "NON_CASH_BATCH_COMPLETED", "BATCH", batch_id,
+                            f"Non-cash batch {batch_id}")
+            else:
+                cursor.execute("UPDATE tblContributionBatch SET Status='READY',ReviewedByUserID=?,"
+                               "ReviewedAt=CURRENT_TIMESTAMP(6),Version=Version+1 WHERE ID=? AND Status='DRAFT'",
+                               (self.user_id, batch_id))
+                self._audit(cursor, church_id, "BATCH_MARKED_READY", "BATCH", batch_id,
+                            f"Ready batch {batch_id}")
             self.connection.commit()
+            return "POSTED" if non_cash_only else "READY"
         except Exception:
             self.connection.rollback(); raise
         finally:
@@ -443,11 +472,14 @@ class DraftBatchService:
         batch = cursor.fetchone()
         if not batch: return ["The batch is unavailable."]
         issues = []
-        if batch[1] <= 0: issues.append("Enter at least one monetary contribution.")
+        cursor.execute("SELECT COUNT(*),SUM(ContributionMethod<>'NON_CASH') FROM tblContribution WHERE BatchID=?",
+                       (batch_id,))
+        gift_count, monetary_count = cursor.fetchone()
+        if gift_count <= 0: issues.append("Enter at least one contribution.")
         if batch[0] is not None and batch[0] != batch[1]: issues.append("The entered total does not equal the control total.")
-        if batch[2] is None: issues.append("Enter the bank deposit date.")
-        if batch[3] is None: issues.append("Select the bank account receiving the deposit.")
-        if batch[2] is not None:
+        if monetary_count and batch[2] is None: issues.append("Enter the bank deposit date.")
+        if monetary_count and batch[3] is None: issues.append("Select the bank account receiving the deposit.")
+        if monetary_count and batch[2] is not None:
             cursor.execute(
                 "SELECT COUNT(*) FROM tblAccountingFiscalPeriod p "
                 "JOIN tblAccountingFiscalYear y ON y.ID=p.FiscalYearID "

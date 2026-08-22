@@ -163,7 +163,16 @@ congregation—not an individual donor—controls use of the gift.
 Open **Contribution Batches** to begin a confidential draft for a Sunday
 offering, special collection, or other deposit. Enter the batch date,
 description, accounting organization, and—when known—the expected control
-total. Open the batch and add each monetary contribution.
+total. Open the batch and add each contribution.
+
+For donated property, choose **Non Cash** as the method. Describe the property
+and then assign its approved giving purpose with a zero-dollar allocation. You
+may record an optional **Donor-provided estimate (unverified)** for internal
+reference. ChurchManager does not verify that estimate, use it in accounting,
+or print it as the congregation's valuation on a contribution statement. A
+batch containing only non-cash gifts completes
+inside Giving after review and does not create a zero-dollar accounting
+transaction. Mixed batches send only their monetary amounts to accounting.
 
 Choose **Import CSV** to map the columns in an electronic-giving or spreadsheet
 export. The preview reads the file without changing the database and marks
@@ -198,7 +207,9 @@ Users with **Review contribution batches** permission can select **Review / Mark
 Ready**. ChurchManager first lists anything that still needs attention,
 including an unresolved envelope, control-total difference, incomplete split,
 expired purpose or accounting destination, donor-direction review, or duplicate
-check/reference value. A batch changes to **Ready** only when every check passes.
+check/reference value. A monetary or mixed batch changes to **Ready** only when
+every check passes. A non-cash-only batch changes directly to **Posted** because
+it has no bank deposit or accounting handoff.
 
 While a batch remains Draft, double-click a contribution—or select **Edit
 Contribution**—to correct its contributor, envelope, amount, method, statement

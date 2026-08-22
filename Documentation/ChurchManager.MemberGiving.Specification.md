@@ -393,8 +393,14 @@ Posting a batch is one controlled operation:
 6. Commit all changes atomically or roll back all changes.
 
 The accounting deposit total must equal the contribution batch monetary total.
-Non-cash contributions do not enter a cash deposit and require an explicit
-approved accounting treatment before they can be posted.
+Non-cash contributions store a description and approved purpose classification
+but no ChurchManager-assigned monetary value. An optional donor-provided
+estimate may be retained as explicitly unverified internal information; it is
+excluded from deposits, accounting handoff, contribution totals, and statement
+valuation. Non-cash gifts do not enter a cash deposit.
+A non-cash-only batch completes in the Giving subledger after review without
+creating a zero-dollar accounting transaction. A mixed batch sends only its
+positive monetary allocations to accounting.
 
 Whether a giving user may post directly or must hand the ready batch to an
 accounting user follows the congregation's existing accounting approval policy.
