@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 import csv
+import hashlib
 from pathlib import Path
 import re
 import unicodedata
@@ -63,7 +64,7 @@ CSV_FIELDS = {
         ("First name", "FirstName", True),
         ("Middle name", "MiddleName", False),
         ("Last name", "LastName", True),
-        ("Suffix", "Suffix", False),
+        ("Title", "Title", False),
         ("Email", "Email", False),
         ("Phone", "Phone", False),
     ),
@@ -102,7 +103,7 @@ def suggested_csv_mapping(headers, entity):
         "FirstName": ("first name", "firstname", "given name"),
         "MiddleName": ("middle name", "middlename"),
         "LastName": ("last name", "lastname", "surname", "family name"),
-        "Suffix": ("suffix",), "FamilyName": ("family name", "familyname", "household"),
+        "Title": ("title", "prefix"), "FamilyName": ("family name", "familyname", "household"),
         "Address": ("address", "address 1", "street"),
         "Address2": ("address 2", "address line 2"), "City": ("city",),
         "State": ("state", "province"), "Zip": ("zip", "zipcode", "postal code"),
@@ -195,13 +196,222 @@ class DataManagementRepository:
             item.entity, item.first_name.casefold(), item.second_name.casefold(), item.reason,
         ))
 
+    def churches(self):
+        """Return positive-ID churches available as import destinations."""
+        return self._all("SELECT ID,Church FROM tblChurch WHERE ID>0 ORDER BY Church,ID")
+
+
+class MembershipImportService:
+    """Validate and atomically import reviewed membership preview rows."""
+
+    def __init__(self, connection, user_id):
+        self.connection = portable_connection(connection)
+        self.user_id = int(user_id)
+
+    def _existing_keys(self, entity, church_id):
+        cursor = self.connection.cursor()
+        try:
+            if entity == "People":
+                cursor.execute(
+                    "SELECT FirstName,LastName FROM tblPerson WHERE ChurchID=?", (church_id,)
+                )
+                names = {(normalized_text(row[0]), normalized_text(row[1])) for row in cursor.fetchall()}
+                cursor.execute(
+                    "SELECT pc.Contact FROM tblPersonContact pc JOIN tblPerson p ON p.ID=pc.PersonID "
+                    "WHERE p.ChurchID=? AND COALESCE(pc.Contact,'')<>''", (church_id,)
+                )
+                contacts = {normalized_contact(row[0]) for row in cursor.fetchall()}
+                return names, contacts
+            cursor.execute("SELECT FamilyName FROM tblFamily WHERE ChurchID=?", (church_id,))
+            names = {normalized_text(row[0]) for row in cursor.fetchall()}
+            cursor.execute(
+                "SELECT fc.Contact FROM tblFamilyContact fc JOIN tblFamily f ON f.ID=fc.FamilyID "
+                "WHERE f.ChurchID=? AND COALESCE(fc.Contact,'')<>''", (church_id,)
+            )
+            contacts = {normalized_contact(row[0]) for row in cursor.fetchall()}
+            return names, contacts
+        finally:
+            cursor.close()
+
+    def validate(self, entity, church_id, rows):
+        """Return row-numbered blocking errors without modifying the database."""
+        if int(church_id) <= 0:
+            return ["Select a valid church."]
+        existing_names, existing_contacts = self._existing_keys(entity, int(church_id))
+        seen_names, seen_contacts, errors = set(), set(), []
+        for number, row in enumerate(rows, 2):
+            for _label, field, _required in CSV_FIELDS[entity]:
+                if len(str(row.get(field) or "")) > 255:
+                    errors.append("Row {}: {} exceeds 255 characters.".format(number, field))
+            if entity == "People":
+                name = (normalized_text(row.get("FirstName")), normalized_text(row.get("LastName")))
+            else:
+                name = normalized_text(row.get("FamilyName"))
+            if name in existing_names:
+                errors.append("Row {}: the name already exists in the selected church.".format(number))
+            if name in seen_names:
+                errors.append("Row {}: the name is duplicated within this CSV.".format(number))
+            seen_names.add(name)
+            for field in ("Email", "Phone"):
+                contact = normalized_contact(row.get(field))
+                if contact and contact in existing_contacts:
+                    errors.append("Row {}: {} already belongs to a record in this church.".format(number, field))
+                if contact and contact in seen_contacts:
+                    errors.append("Row {}: {} is duplicated within this CSV.".format(number, field))
+                if contact:
+                    seen_contacts.add(contact)
+        return errors
+
+    def import_rows(self, entity, church_id, rows, source_path):
+        """Import fully reviewed rows in one transaction and record safe history."""
+        errors = self.validate(entity, church_id, rows)
+        if errors:
+            raise ValueError("\n".join(errors[:12]))
+        cursor = self.connection.cursor()
+        try:
+            for row in rows:
+                if entity == "People":
+                    cursor.execute(
+                        "INSERT INTO tblPerson "
+                        "(ChurchID,FirstName,MiddleName,LastName,Title,Status) VALUES (?,?,?,?,?,'Active')",
+                        (church_id, row["FirstName"], row["MiddleName"] or None,
+                         row["LastName"], row["Title"] or None),
+                    )
+                    record_id = cursor.lastrowid
+                    self._insert_contacts(cursor, "Person", record_id, row)
+                else:
+                    cursor.execute(
+                        "INSERT INTO tblFamily (ChurchID,FamilyName,Directory) VALUES (?,?,0)",
+                        (church_id, row["FamilyName"]),
+                    )
+                    record_id = cursor.lastrowid
+                    if any(row[field] for field in ("Address", "Address2", "City", "State", "Zip")):
+                        cursor.execute(
+                            "INSERT INTO tblFamilyAddress "
+                            "(FamilyID,AddressLabel,Address,Address2,City,State,Zip,Unlisted) "
+                            "VALUES (?,'Main',?,?,?,?,?,0)",
+                            (record_id, row["Address"] or None, row["Address2"] or None,
+                             row["City"] or None, row["State"] or None, row["Zip"] or None),
+                        )
+                    self._insert_contacts(cursor, "Family", record_id, row)
+            source = Path(source_path)
+            digest = hashlib.sha256(source.read_bytes()).hexdigest()
+            cursor.execute(
+                "INSERT INTO tblMembershipImportHistory "
+                "(ChurchID,ImportedByUserID,EntityType,SourceFileName,SourceSHA256,"
+                "RowCount,ImportedCount,RejectedCount) VALUES (?,?,?,?,?,?,?,0)",
+                (church_id, self.user_id, entity, source.name, digest, len(rows), len(rows)),
+            )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+        return len(rows)
+
+    @staticmethod
+    def _insert_contacts(cursor, entity, record_id, row):
+        """Insert optional email and phone records using established contact tables."""
+        parent = entity + "ID"
+        table = "tbl{}Contact".format(entity)
+        for kind in ("Email", "Phone"):
+            value = row.get(kind)
+            if value:
+                cursor.execute(
+                    "INSERT INTO {} ({},ContactLabel,Type,Contact,Unlisted) "
+                    "VALUES (?,'Primary',?,?,0)".format(table, parent),
+                    (record_id, kind, value),
+                )
+
+
+class MembershipExportService:
+    """Create privacy-safe membership CSV exports and retain safe history."""
+
+    def __init__(self, connection, user_id):
+        self.connection = portable_connection(connection)
+        self.user_id = int(user_id)
+
+    def rows(self, entity, church_id):
+        """Return approved export fields with every unlisted contact excluded."""
+        cursor = self.connection.cursor()
+        try:
+            if entity == "People":
+                cursor.execute(
+                    "SELECT p.FirstName,COALESCE(p.MiddleName,''),p.LastName,COALESCE(p.Title,''),"
+                    "COALESCE((SELECT pc.Contact FROM tblPersonContact pc "
+                    "WHERE pc.PersonID=p.ID AND COALESCE(pc.Unlisted,0)=0 "
+                    "AND LOWER(pc.Type)='email' ORDER BY pc.ID LIMIT 1),''),"
+                    "COALESCE((SELECT pc.Contact FROM tblPersonContact pc "
+                    "WHERE pc.PersonID=p.ID AND COALESCE(pc.Unlisted,0)=0 "
+                    "AND LOWER(pc.Type)='phone' ORDER BY pc.ID LIMIT 1),'') "
+                    "FROM tblPerson p WHERE p.ChurchID=? ORDER BY p.LastName,p.FirstName,p.ID",
+                    (church_id,),
+                )
+                headers = ["First Name", "Middle Name", "Last Name", "Title", "Email", "Phone"]
+            else:
+                cursor.execute(
+                    "SELECT f.FamilyName,COALESCE(fa.Address,''),COALESCE(fa.Address2,''),"
+                    "COALESCE(fa.City,''),COALESCE(fa.State,''),COALESCE(fa.Zip,''),"
+                    "COALESCE((SELECT fc.Contact FROM tblFamilyContact fc "
+                    "WHERE fc.FamilyID=f.ID AND COALESCE(fc.Unlisted,0)=0 "
+                    "AND LOWER(fc.Type)='email' ORDER BY fc.ID LIMIT 1),''),"
+                    "COALESCE((SELECT fc.Contact FROM tblFamilyContact fc "
+                    "WHERE fc.FamilyID=f.ID AND COALESCE(fc.Unlisted,0)=0 "
+                    "AND LOWER(fc.Type)='phone' ORDER BY fc.ID LIMIT 1),'') "
+                    "FROM tblFamily f LEFT JOIN tblFamilyAddress fa ON fa.ID=("
+                    "SELECT MIN(candidate.ID) FROM tblFamilyAddress candidate "
+                    "WHERE candidate.FamilyID=f.ID AND COALESCE(candidate.Unlisted,0)=0) "
+                    "WHERE f.ChurchID=? ORDER BY f.FamilyName,f.ID",
+                    (church_id,),
+                )
+                headers = [
+                    "Family Name", "Address", "Address 2", "City", "State", "ZIP", "Email", "Phone",
+                ]
+            return headers, cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def export(self, entity, church_id, destination):
+        """Write an approved CSV and record attribution without source content."""
+        headers, rows = self.rows(entity, church_id)
+        target = Path(destination)
+        temporary = target.with_name(target.name + ".tmp")
+        try:
+            with temporary.open("w", encoding="utf-8-sig", newline="") as stream:
+                writer = csv.writer(stream)
+                writer.writerow(headers)
+                writer.writerows(rows)
+            digest = hashlib.sha256(temporary.read_bytes()).hexdigest()
+            temporary.replace(target)
+            cursor = self.connection.cursor()
+            try:
+                cursor.execute(
+                    "INSERT INTO tblMembershipExportHistory "
+                    "(ChurchID,ExportedByUserID,EntityType,DestinationFileName,ExportSHA256,"
+                    "RowCount,IncludedUnlistedContacts) VALUES (?,?,?,?,?,?,0)",
+                    (church_id, self.user_id, entity, target.name, digest, len(rows)),
+                )
+                self.connection.commit()
+            except Exception:
+                self.connection.rollback()
+                target.unlink(missing_ok=True)
+                raise
+            finally:
+                cursor.close()
+        finally:
+            temporary.unlink(missing_ok=True)
+        return len(rows)
+
 
 class DataManagementDialog(wx.Dialog):
     """Central read-only duplicate review screen; imports follow in later phases."""
 
-    def __init__(self, parent, connection):
+    def __init__(self, parent, connection, session):
         super().__init__(parent, title="Data Management", size=(980, 620))
         self.repository = DataManagementRepository(connection)
+        self.connection = connection
+        self.session = session
         panel = wx.Panel(self)
         outer = wx.BoxSizer(wx.VERTICAL)
         title = wx.StaticText(panel, label="Duplicate Review")
@@ -223,12 +433,15 @@ class DataManagementDialog(wx.Dialog):
         buttons = wx.BoxSizer(wx.HORIZONTAL)
         refresh = wx.Button(panel, label="Refresh Review")
         preview_csv = wx.Button(panel, label="Preview Membership CSV...")
+        export_csv = wx.Button(panel, label="Export Membership CSV...")
         close = wx.Button(panel, label="Close")
         refresh.Bind(wx.EVT_BUTTON, lambda _event: self.refresh())
         preview_csv.Bind(wx.EVT_BUTTON, self.on_preview_csv)
+        export_csv.Bind(wx.EVT_BUTTON, self.on_export_csv)
         close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_OK))
         buttons.Add(refresh, 0, wx.RIGHT, 8)
         buttons.Add(preview_csv, 0, wx.RIGHT, 8)
+        buttons.Add(export_csv, 0, wx.RIGHT, 8)
         buttons.AddStretchSpacer()
         buttons.Add(close, 0)
         outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 12)
@@ -258,21 +471,108 @@ class DataManagementDialog(wx.Dialog):
 
     def on_preview_csv(self, _event):
         """Open the non-writing CSV mapping and preview workflow."""
-        dialog = CsvImportPreviewDialog(self)
+        dialog = CsvImportPreviewDialog(self, self.connection, self.session)
+        try:
+            dialog.ShowModal()
+        finally:
+            dialog.Destroy()
+
+    def on_export_csv(self, _event):
+        """Open the privacy-safe membership export workflow."""
+        dialog = MembershipExportDialog(self, self.connection, self.session)
         try:
             dialog.ShowModal()
         finally:
             dialog.Destroy()
 
 
+class MembershipExportDialog(wx.Dialog):
+    """Collect a bounded membership export destination and show its privacy rule."""
+
+    def __init__(self, parent, connection, session):
+        super().__init__(parent, title="Export Membership CSV", size=(600, 310))
+        self.service = MembershipExportService(connection, session.user_id)
+        self.church_rows = DataManagementRepository(connection).churches()
+        panel = wx.Panel(self)
+        outer = wx.BoxSizer(wx.VERTICAL)
+        notice = wx.StaticText(
+            panel,
+            label=("Exports contain only membership directory fields. Unlisted addresses, email "
+                   "addresses, and telephone numbers are always omitted."),
+        )
+        notice.Wrap(550)
+        notice.SetForegroundColour(wx.Colour(0, 76, 153))
+        outer.Add(notice, 0, wx.ALL, 14)
+        grid = wx.FlexGridSizer(cols=2, hgap=10, vgap=10)
+        grid.Add(wx.StaticText(panel, label="Record type"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self.entity = wx.Choice(panel, choices=list(CSV_FIELDS))
+        self.entity.SetSelection(0)
+        grid.Add(self.entity, 1, wx.EXPAND)
+        grid.Add(wx.StaticText(panel, label="Church"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self.church = wx.Choice(panel, choices=[row[1] for row in self.church_rows])
+        if self.church_rows:
+            self.church.SetSelection(0)
+        grid.Add(self.church, 1, wx.EXPAND)
+        grid.AddGrowableCol(1, 1)
+        outer.Add(grid, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 14)
+        outer.AddStretchSpacer()
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        export = wx.Button(panel, label="Choose File and Export...")
+        export.Bind(wx.EVT_BUTTON, self.on_export)
+        close = wx.Button(panel, label="Close")
+        close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_OK))
+        buttons.Add(export, 0)
+        buttons.AddStretchSpacer()
+        buttons.Add(close, 0)
+        outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 14)
+        panel.SetSizer(outer)
+
+    def on_export(self, _event):
+        """Choose the target, confirm disclosure, and write the safe export."""
+        if self.church.GetSelection() < 0:
+            wx.MessageBox("Select a church.", "Export Membership CSV", wx.OK | wx.ICON_WARNING, self)
+            return
+        entity = self.entity.GetStringSelection()
+        church_id, church_name = self.church_rows[self.church.GetSelection()]
+        dialog = wx.FileDialog(
+            self, "Save privacy-safe membership export",
+            defaultFile="{}-{}.csv".format(church_name, entity).replace(" ", "-"),
+            wildcard="CSV files (*.csv)|*.csv", style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
+        )
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            destination = dialog.GetPath()
+        finally:
+            dialog.Destroy()
+        confirmation = (
+            "Export {} directory fields for {}?\n\n"
+            "Unlisted contact information and confidential subsystems are excluded."
+        ).format(entity.lower(), church_name)
+        if wx.MessageBox(confirmation, "Confirm Membership Export", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES:
+            return
+        try:
+            count = self.service.export(entity, church_id, destination)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Export Membership CSV", wx.OK | wx.ICON_ERROR, self)
+            return
+        wx.MessageBox(
+            "Exported {} {} row(s).".format(count, entity.lower()),
+            "Membership Export Complete", wx.OK | wx.ICON_INFORMATION, self,
+        )
+
+
 class CsvImportPreviewDialog(wx.Dialog):
     """Preview an explicitly mapped membership CSV without database writes."""
 
-    def __init__(self, parent):
+    def __init__(self, parent, connection, session):
         super().__init__(parent, title="Preview Membership CSV", size=(960, 680))
         self.headers = []
         self.rows = []
         self.mapping_choices = {}
+        self.import_service = MembershipImportService(connection, session.user_id)
+        self.church_rows = DataManagementRepository(connection).churches()
+        self.preview_rows = []
         panel = wx.Panel(self)
         outer = wx.BoxSizer(wx.VERTICAL)
         instruction = wx.StaticText(
@@ -288,6 +588,13 @@ class CsvImportPreviewDialog(wx.Dialog):
         self.entity.SetSelection(0)
         self.entity.Bind(wx.EVT_CHOICE, self.on_entity)
         source.Add(self.entity, 0)
+        source.Add((1, 1))
+        source.Add(wx.StaticText(panel, label="Church"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self.church = wx.Choice(panel, choices=[row[1] for row in self.church_rows])
+        if self.church_rows:
+            self.church.SetSelection(0)
+        self.church.Bind(wx.EVT_CHOICE, self.on_mapping_changed)
+        source.Add(self.church, 1, wx.EXPAND)
         source.Add((1, 1))
         source.Add(wx.StaticText(panel, label="CSV file"), 0, wx.ALIGN_CENTER_VERTICAL)
         self.path = wx.TextCtrl(panel, style=wx.TE_READONLY)
@@ -312,9 +619,13 @@ class CsvImportPreviewDialog(wx.Dialog):
         buttons = wx.BoxSizer(wx.HORIZONTAL)
         run = wx.Button(panel, label="Preview Mapped Rows")
         run.Bind(wx.EVT_BUTTON, self.on_preview)
+        self.import_button = wx.Button(panel, label="Import Reviewed Rows")
+        self.import_button.Disable()
+        self.import_button.Bind(wx.EVT_BUTTON, self.on_import)
         close = wx.Button(panel, label="Close")
         close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_OK))
         buttons.Add(run, 0)
+        buttons.Add(self.import_button, 0, wx.LEFT, 8)
         buttons.AddStretchSpacer()
         buttons.Add(close, 0)
         outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 12)
@@ -328,9 +639,14 @@ class CsvImportPreviewDialog(wx.Dialog):
 
     def rebuild_mapping(self, suggestions=None):
         """Rebuild destination mappings for the selected record type."""
-        self.mapping_panel.DestroyChildren()
+        grid = self.mapping_panel.GetSizer()
+        if grid is None:
+            grid = wx.FlexGridSizer(cols=2, hgap=12, vgap=6)
+            grid.AddGrowableCol(1, 1)
+            self.mapping_panel.SetSizer(grid)
+        else:
+            grid.Clear(delete_windows=True)
         self.mapping_choices = {}
-        grid = wx.FlexGridSizer(cols=2, hgap=12, vgap=6)
         choices = ["Not mapped"] + self.headers
         for label, field, required in CSV_FIELDS[self.entity_name]:
             grid.Add(wx.StaticText(
@@ -340,17 +656,24 @@ class CsvImportPreviewDialog(wx.Dialog):
             selected = (suggestions or {}).get(field, "")
             choice.SetSelection(choices.index(selected) if selected in choices else 0)
             self.mapping_choices[field] = choice
+            choice.Bind(wx.EVT_CHOICE, self.on_mapping_changed)
             grid.Add(choice, 0, wx.EXPAND)
-        grid.AddGrowableCol(1, 1)
-        self.mapping_panel.SetSizer(grid)
         self.mapping_panel.Layout()
         self.Layout()
+
+    def on_mapping_changed(self, _event):
+        """Require a fresh preview after any destination or mapping change."""
+        self.preview_rows = []
+        self.import_button.Disable()
+        self.status.SetLabel("Mapping or destination changed. Preview the rows again before import.")
 
     def on_entity(self, _event):
         """Reset mappings when the record type changes."""
         suggestions = suggested_csv_mapping(self.headers, self.entity_name) if self.headers else None
         self.rebuild_mapping(suggestions)
         self.list.DeleteAllItems()
+        self.preview_rows = []
+        self.import_button.Disable()
         self.status.SetLabel("Review the mappings, then preview the CSV rows.")
 
     def on_browse(self, _event):
@@ -369,6 +692,8 @@ class CsvImportPreviewDialog(wx.Dialog):
             return
         self.path.SetValue(path)
         self.rebuild_mapping(suggested_csv_mapping(self.headers, self.entity_name))
+        self.preview_rows = []
+        self.import_button.Disable()
         self.status.SetLabel("{} source row(s). Review every mapping before preview.".format(len(self.rows)))
 
     def on_preview(self, _event):
@@ -385,6 +710,12 @@ class CsvImportPreviewDialog(wx.Dialog):
         except ValueError as error:
             wx.MessageBox(str(error), "Mapping Needs Attention", wx.OK | wx.ICON_WARNING, self)
             return
+        if self.church.GetSelection() < 0:
+            wx.MessageBox("Select a church.", "Mapping Needs Attention", wx.OK | wx.ICON_WARNING, self)
+            return
+        errors = self.import_service.validate(
+            self.entity_name, self.church_rows[self.church.GetSelection()][0], rows
+        )
         self.list.ClearAll()
         fields = [(label, field) for label, field, _required in CSV_FIELDS[self.entity_name]]
         for index, (label, _field) in enumerate(fields):
@@ -394,15 +725,43 @@ class CsvImportPreviewDialog(wx.Dialog):
             for column, (_label, field) in enumerate(fields[1:], 1):
                 self.list.SetItem(index, column, row[field])
         self.status.SetLabel(
+            ("Preview needs attention: " + errors[0]) if errors else
             "Previewed {} {} row(s). No database records were created or changed.".format(
-                len(rows), self.entity_name.lower()
-            )
+                len(rows), self.entity_name.lower())
         )
+        self.preview_rows = rows if not errors else []
+        self.import_button.Enable(not errors)
+
+    def on_import(self, _event):
+        """Require explicit confirmation before the atomic reviewed import."""
+        if not self.preview_rows or self.church.GetSelection() < 0:
+            return
+        church_id, church_name = self.church_rows[self.church.GetSelection()]
+        message = (
+            "Import {} reviewed {} row(s) into {}?\n\n"
+            "This creates new records. It does not merge or replace existing records."
+        ).format(len(self.preview_rows), self.entity_name.lower(), church_name)
+        if wx.MessageBox(message, "Confirm Membership Import", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES:
+            return
+        try:
+            count = self.import_service.import_rows(
+                self.entity_name, church_id, self.preview_rows, self.path.GetValue()
+            )
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Import Membership CSV", wx.OK | wx.ICON_ERROR, self)
+            return
+        wx.MessageBox(
+            "Imported {} new {} record(s).".format(count, self.entity_name.lower()),
+            "Membership Import Complete", wx.OK | wx.ICON_INFORMATION, self,
+        )
+        self.preview_rows = []
+        self.import_button.Disable()
+        self.status.SetLabel("Import complete. Choose another file or close this window.")
 
 
-def show_data_management(parent, connection):
+def show_data_management(parent, connection, session):
     """Open the central ChurchManager Data Management dialog."""
-    dialog = DataManagementDialog(parent, connection)
+    dialog = DataManagementDialog(parent, connection, session)
     try:
         dialog.ShowModal()
     finally:

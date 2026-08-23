@@ -444,6 +444,14 @@ Its CSV preview accepts People or Families files with a header row, requires
 explicit destination-field mappings, and displays the interpreted records
 without opening a database transaction. Preview and import are intentionally
 separate operations.
+After a clean preview, reviewed import requires an explicit confirmation and
+creates all rows in one database transaction. Import history retains attribution,
+counts, the source file name, and its SHA-256 checksum without retaining the CSV
+contents. Existing-name or contact conflicts block the operation for review.
+Privacy-safe export produces one People or Families CSV for a selected church.
+Its queries exclude every address or contact marked unlisted and expose only
+the approved directory columns. The system records attribution, row count,
+destination file name, and checksum without retaining exported content.
 
 ### 8.3 Worship services
 

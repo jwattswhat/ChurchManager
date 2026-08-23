@@ -46,6 +46,34 @@ class DataManagementTests(unittest.TestCase):
         self.assertEqual(preview[0]["LastName"], "Johnson")
         self.assertEqual(preview[0]["Email"], "sarah@example.com")
 
+    def test_reviewed_import_has_history_and_atomic_safety_boundaries(self):
+        migration = (ROOT / "migrations" / "099_add_membership_import_history.sql").read_text(
+            encoding="utf-8"
+        )
+        source = (ROOT / "data_management.py").read_text(encoding="utf-8")
+        self.assertIn("CREATE TABLE tblMembershipImportHistory", migration)
+        self.assertIn("SourceSHA256", migration)
+        self.assertNotIn("SourceContent", migration)
+        self.assertIn("self.connection.rollback()", source)
+        self.assertIn("This creates new records", source)
+        self.assertIn("does not merge or replace", source)
+        self.assertIn("SELECT ID,Church FROM tblChurch", source)
+        self.assertNotIn("SELECT ID,ChurchName FROM tblChurch", source)
+
+    def test_export_is_privacy_safe_and_records_history(self):
+        migration = (ROOT / "migrations" / "100_add_membership_export_history.sql").read_text(
+            encoding="utf-8"
+        )
+        source = (ROOT / "data_management.py").read_text(encoding="utf-8")
+        self.assertIn("CREATE TABLE tblMembershipExportHistory", migration)
+        self.assertIn("IncludedUnlistedContacts", migration)
+        self.assertIn("COALESCE(pc.Unlisted,0)=0", source)
+        self.assertIn("COALESCE(fc.Unlisted,0)=0", source)
+        self.assertIn("COALESCE(candidate.Unlisted,0)=0", source)
+        self.assertNotIn("PasswordHash", source)
+        self.assertNotIn("tblContribution", source)
+        self.assertNotIn("tblPastoral", source)
+
     def test_csv_preview_requires_explicit_required_and_unique_mappings(self):
         rows = [{"Name": "Johnson", "Other": "Sarah"}]
         with self.assertRaisesRegex(ValueError, "First name"):

@@ -1934,6 +1934,49 @@ CREATE TABLE `tblmailsettings` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblmembershipexporthistory` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `ExportedByUserID` int(11) NOT NULL,
+  `EntityType` varchar(20) NOT NULL,
+  `DestinationFileName` varchar(255) NOT NULL,
+  `ExportSHA256` char(64) NOT NULL,
+  `RowCount` int(11) NOT NULL,
+  `IncludedUnlistedContacts` tinyint(1) NOT NULL DEFAULT 0,
+  `ExportedAt` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`ID`),
+  KEY `ix_membership_export_church_time` (`ChurchID`,`ExportedAt`),
+  KEY `fk_membership_export_user` (`ExportedByUserID`),
+  CONSTRAINT `fk_membership_export_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_membership_export_user` FOREIGN KEY (`ExportedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_membership_export_entity` CHECK (`EntityType` in ('People','Families')),
+  CONSTRAINT `ck_membership_export_count` CHECK (`RowCount` >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblmembershipimporthistory` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `ImportedByUserID` int(11) NOT NULL,
+  `EntityType` varchar(20) NOT NULL,
+  `SourceFileName` varchar(255) NOT NULL,
+  `SourceSHA256` char(64) NOT NULL,
+  `RowCount` int(11) NOT NULL,
+  `ImportedCount` int(11) NOT NULL,
+  `RejectedCount` int(11) NOT NULL DEFAULT 0,
+  `ImportedAt` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`ID`),
+  KEY `ix_membership_import_church_time` (`ChurchID`,`ImportedAt`),
+  KEY `fk_membership_import_user` (`ImportedByUserID`),
+  CONSTRAINT `fk_membership_import_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_membership_import_user` FOREIGN KEY (`ImportedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_membership_import_entity` CHECK (`EntityType` in ('People','Families')),
+  CONSTRAINT `ck_membership_import_counts` CHECK (`RowCount` >= 0 and `ImportedCount` >= 0 and `RejectedCount` >= 0 and `RowCount` = `ImportedCount` + `RejectedCount`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbloptions` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `OptionFor` varchar(255) NOT NULL,

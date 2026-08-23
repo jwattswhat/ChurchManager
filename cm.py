@@ -562,7 +562,7 @@ def _buttonclick(event):
             )
             return
         case "lblDataManagement":
-            show_data_management(cmfrm.FRAME, context.connection)
+            show_data_management(cmfrm.FRAME, context.connection, context.session)
             return
         case "lblPropers":
             show_local_lectionaries(

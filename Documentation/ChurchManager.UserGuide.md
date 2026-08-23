@@ -99,9 +99,20 @@ instructions. Review the underlying records before making any correction.
 Select **Preview Membership CSV** to inspect a People or Families CSV file. The
 first row must contain column names. Review every suggested mapping, map the
 required fields marked with an asterisk, and then select **Preview Mapped Rows**.
-Preview does not create or update records; importing remains unavailable until
-the reviewed-import phase is complete.
+Preview does not create or update records. When every row passes validation,
+**Import Reviewed Rows** becomes available. Confirming it creates all displayed
+records in one transaction; any failure rolls back the whole import. It never
+merges or replaces existing records. ChurchManager records the church, user,
+file name and checksum, counts, and time, but does not retain the source rows.
 Safe sample files are available in `TestData` for both People and Families.
+
+Select **Export Membership CSV** to create an authorized People or Families
+directory extract. Choose the church and destination file, then confirm the
+export. ChurchManager always excludes unlisted addresses, email addresses, and
+telephone numbers. The export contains no passwords, giving identity,
+accounting detail, pastoral records, or internal audit content. Export history
+stores attribution, counts, file name, and checksum rather than a copy of the
+exported rows.
 
 ### Member Giving
 
