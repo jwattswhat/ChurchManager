@@ -7,6 +7,7 @@ import unittest
 
 from data_management import (
     MembershipArchiveService,
+    MembershipImportService,
     duplicate_pairs,
     mapped_csv_preview,
     normalized_contact,
@@ -20,6 +21,21 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class DataManagementTests(unittest.TestCase):
+    def test_import_validation_keeps_valid_rows_and_excludes_duplicates(self):
+        service = MembershipImportService.__new__(MembershipImportService)
+        service._existing_keys = lambda _entity, _church_id: (
+            {("paul", "example")}, {"paul@example.com"},
+        )
+        rows = [
+            {"FirstName": "Anna", "MiddleName": "", "LastName": "Testperson",
+             "Title": "", "Email": "anna@example.com", "Phone": "2185550191"},
+            {"FirstName": "Paul", "MiddleName": "", "LastName": "Example",
+             "Title": "Mr.", "Email": "paul@example.com", "Phone": "2185550192"},
+        ]
+        results = service.validate_rows("People", 1, rows)
+        self.assertEqual(results[0], [])
+        self.assertTrue(any("already exists" in error for error in results[1]))
+
     def test_comparison_normalization_is_exact_but_presentation_neutral(self):
         self.assertEqual(normalized_text("  Sarah  O'Neil "), "sarah o neil")
         self.assertEqual(normalized_contact("(218) 555-0100"), "2185550100")
@@ -87,6 +103,8 @@ class DataManagementTests(unittest.TestCase):
         self.assertIn("Decisions never delete, merge", source)
         self.assertNotIn("DELETE FROM tblPerson", source)
         self.assertNotIn("DELETE FROM tblFamily", source)
+        self.assertIn("information_schema.KEY_COLUMN_USAGE", source)
+        self.assertIn("Read-only preflight", source)
 
     def test_duplicate_fixture_is_explicitly_guarded_and_idempotent(self):
         source = (ROOT / "seed_duplicate_review_test_data.py").read_text(encoding="utf-8")

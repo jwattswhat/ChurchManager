@@ -99,6 +99,11 @@ or **Review Later** to remove the pair from the active queue. These decisions do
 not delete, merge, or alter either membership record. Select **Include matches
 marked Review Later** whenever those deferred pairs should be reconsidered.
 
+Select **Review Merge Impact** to see how many attendance, contact, family,
+giving, user, participant, group, pastoral-care, and other linked records belong
+to each side. This preflight is generated from the current database relationships
+and makes no changes.
+
 The beta test dataset includes two fictional records named **Pat Duplicate** so
 this review can be exercised without weakening the normal import protections.
 
@@ -112,10 +117,11 @@ instructions. Review the underlying records before making any correction.
 Select **Preview Membership CSV** to inspect a People or Families CSV file. The
 first row must contain column names. Review every suggested mapping, map the
 required fields marked with an asterisk, and then select **Preview Mapped Rows**.
-Preview does not create or update records. When every row passes validation,
-**Import Reviewed Rows** becomes available. Confirming it creates all displayed
-records in one transaction; any failure rolls back the whole import. It never
-merges or replaces existing records. ChurchManager records the church, user,
+Preview does not create or update records. Rows marked **Ready** may be imported;
+duplicate or invalid rows appear in red as **Excluded** and remain unchanged.
+**Import Reviewed Rows** creates only the Ready records in one transaction; any
+failure rolls back the whole import. It never merges or replaces existing
+records. ChurchManager records the church, user,
 file name and checksum, counts, and time, but does not retain the source rows.
 Safe sample files are available in `TestData` for both People and Families.
 

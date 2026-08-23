@@ -46,6 +46,16 @@ class DuplicateCandidate:
     reason: str
 
 
+@dataclass(frozen=True)
+class MergeImpact:
+    """Counts of records linked to each side of a proposed duplicate merge."""
+
+    table: str
+    column: str
+    first_count: int
+    second_count: int
+
+
 def duplicate_pairs(records, key, entity, reason):
     """Return unique record pairs sharing a nonblank normalized key."""
     grouped = defaultdict(list)
@@ -240,6 +250,34 @@ class DataManagementRepository:
         finally:
             cursor.close()
 
+    def merge_impact(self, candidate):
+        """Discover and count every current foreign-key dependency for both records."""
+        referenced = "tblperson" if candidate.entity == "Person" else "tblfamily"
+        relationships = self._all(
+            "SELECT TABLE_NAME,COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE "
+            "WHERE TABLE_SCHEMA=DATABASE() AND LOWER(REFERENCED_TABLE_NAME)=? "
+            "AND REFERENCED_COLUMN_NAME='ID' ORDER BY TABLE_NAME,COLUMN_NAME",
+            (referenced,),
+        )
+        impacts = []
+        cursor = self.connection.cursor()
+        try:
+            for table, column in relationships:
+                safe_table = str(table).replace("`", "``")
+                safe_column = str(column).replace("`", "``")
+                cursor.execute(
+                    "SELECT COALESCE(SUM(`{}`=?),0),COALESCE(SUM(`{}`=?),0) "
+                    "FROM `{}`".format(safe_column, safe_column, safe_table),
+                    (candidate.first_id, candidate.second_id),
+                )
+                counts = cursor.fetchone()
+                impacts.append(MergeImpact(
+                    str(table), str(column), int(counts[0]), int(counts[1]),
+                ))
+        finally:
+            cursor.close()
+        return impacts
+
     def churches(self):
         """Return positive-ID churches available as import destinations."""
         return self._all("SELECT ID,Church FROM tblChurch WHERE ID>0 ORDER BY Church,ID")
@@ -277,13 +315,14 @@ class MembershipImportService:
         finally:
             cursor.close()
 
-    def validate(self, entity, church_id, rows):
-        """Return row-numbered blocking errors without modifying the database."""
+    def validate_rows(self, entity, church_id, rows):
+        """Return one list of validation messages per source row without writing data."""
         if int(church_id) <= 0:
-            return ["Select a valid church."]
+            return [["Select a valid church."] for _row in rows]
         existing_names, existing_contacts = self._existing_keys(entity, int(church_id))
-        seen_names, seen_contacts, errors = set(), set(), []
+        seen_names, seen_contacts, results = set(), set(), []
         for number, row in enumerate(rows, 2):
+            errors = []
             for _label, field, _required in CSV_FIELDS[entity]:
                 if len(str(row.get(field) or "")) > 255:
                     errors.append("Row {}: {} exceeds 255 characters.".format(number, field))
@@ -304,7 +343,13 @@ class MembershipImportService:
                     errors.append("Row {}: {} is duplicated within this CSV.".format(number, field))
                 if contact:
                     seen_contacts.add(contact)
-        return errors
+            results.append(errors)
+        return results
+
+    def validate(self, entity, church_id, rows):
+        """Return flattened row-numbered blocking errors without modifying the database."""
+        return [error for row_errors in self.validate_rows(entity, church_id, rows)
+                for error in row_errors]
 
     def import_rows(self, entity, church_id, rows, source_path):
         """Import fully reviewed rows in one transaction and record safe history."""
@@ -575,10 +620,12 @@ class DataManagementDialog(wx.Dialog):
         self.show_deferred = wx.CheckBox(panel, label="Include matches marked Review Later")
         self.show_deferred.Bind(wx.EVT_CHECKBOX, lambda _event: self.refresh())
         outer.Add(self.show_deferred, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
-        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        review_buttons = wx.BoxSizer(wx.HORIZONTAL)
+        transfer_buttons = wx.BoxSizer(wx.HORIZONTAL)
         refresh = wx.Button(panel, label="Refresh Review")
         not_duplicate = wx.Button(panel, label="Not Duplicates")
         defer = wx.Button(panel, label="Review Later")
+        merge_impact = wx.Button(panel, label="Review Merge Impact...")
         preview_csv = wx.Button(panel, label="Preview Membership CSV...")
         export_csv = wx.Button(panel, label="Export Membership CSV...")
         archive = wx.Button(panel, label="Create Portable Archive...")
@@ -586,19 +633,22 @@ class DataManagementDialog(wx.Dialog):
         refresh.Bind(wx.EVT_BUTTON, lambda _event: self.refresh())
         not_duplicate.Bind(wx.EVT_BUTTON, self.on_not_duplicate)
         defer.Bind(wx.EVT_BUTTON, self.on_defer)
+        merge_impact.Bind(wx.EVT_BUTTON, self.on_merge_impact)
         preview_csv.Bind(wx.EVT_BUTTON, self.on_preview_csv)
         export_csv.Bind(wx.EVT_BUTTON, self.on_export_csv)
         archive.Bind(wx.EVT_BUTTON, self.on_archive)
         close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_OK))
-        buttons.Add(refresh, 0, wx.RIGHT, 8)
-        buttons.Add(not_duplicate, 0, wx.RIGHT, 8)
-        buttons.Add(defer, 0, wx.RIGHT, 8)
-        buttons.Add(preview_csv, 0, wx.RIGHT, 8)
-        buttons.Add(export_csv, 0, wx.RIGHT, 8)
-        buttons.Add(archive, 0, wx.RIGHT, 8)
-        buttons.AddStretchSpacer()
-        buttons.Add(close, 0)
-        outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 12)
+        review_buttons.Add(refresh, 0, wx.RIGHT, 8)
+        review_buttons.Add(not_duplicate, 0, wx.RIGHT, 8)
+        review_buttons.Add(defer, 0, wx.RIGHT, 8)
+        review_buttons.Add(merge_impact, 0)
+        outer.Add(review_buttons, 0, wx.LEFT | wx.RIGHT | wx.TOP, 12)
+        transfer_buttons.Add(preview_csv, 0, wx.RIGHT, 8)
+        transfer_buttons.Add(export_csv, 0, wx.RIGHT, 8)
+        transfer_buttons.Add(archive, 0, wx.RIGHT, 8)
+        transfer_buttons.AddStretchSpacer()
+        transfer_buttons.Add(close, 0)
+        outer.Add(transfer_buttons, 0, wx.EXPAND | wx.ALL, 12)
         panel.SetSizer(outer)
         self.refresh()
 
@@ -660,6 +710,24 @@ class DataManagementDialog(wx.Dialog):
         """Remove the selected match from the active queue for later review."""
         self._resolve("DEFERRED", "Defer this possible match for later review?")
 
+    def on_merge_impact(self, _event):
+        """Show every current database area affected by a possible merge."""
+        candidate = self._selected_candidate()
+        if candidate is None:
+            return
+        try:
+            impacts = self.repository.merge_impact(candidate)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Review Merge Impact",
+                          wx.OK | wx.ICON_ERROR, self)
+            return
+        dialog = MergeImpactDialog(self, candidate, impacts)
+        try:
+            dialog.ShowModal()
+        finally:
+            dialog.Destroy()
+
+
     def on_preview_csv(self, _event):
         """Open the non-writing CSV mapping and preview workflow."""
         dialog = CsvImportPreviewDialog(self, self.connection, self.session)
@@ -683,6 +751,58 @@ class DataManagementDialog(wx.Dialog):
             dialog.ShowModal()
         finally:
             dialog.Destroy()
+
+
+class MergeImpactDialog(wx.Dialog):
+    """Display a read-only, schema-derived duplicate merge impact review."""
+
+    def __init__(self, parent, candidate, impacts):
+        super().__init__(parent, title="Duplicate Merge Impact", size=(760, 560))
+        panel = wx.Panel(self)
+        outer = wx.BoxSizer(wx.VERTICAL)
+        title = wx.StaticText(
+            panel,
+            label="{} (ID {})  and  {} (ID {})".format(
+                candidate.first_name, candidate.first_id,
+                candidate.second_name, candidate.second_id,
+            ),
+        )
+        title.SetFont(title.GetFont().Bold())
+        outer.Add(title, 0, wx.ALL, 12)
+        notice = wx.StaticText(
+            panel,
+            label=("Read-only preflight: these counts come from every current MariaDB foreign "
+                   "key. No records will be changed from this screen."),
+        )
+        notice.Wrap(710)
+        notice.SetForegroundColour(wx.Colour(0, 76, 153))
+        outer.Add(notice, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        listing = wx.ListCtrl(panel, style=wx.LC_REPORT)
+        for index, (label, width) in enumerate((
+            ("Related area", 300), ("Link field", 160),
+            ("First record", 110), ("Second record", 110),
+        )):
+            listing.InsertColumn(index, label, width=width)
+        for impact in impacts:
+            row = listing.InsertItem(listing.GetItemCount(), impact.table)
+            listing.SetItem(row, 1, impact.column)
+            listing.SetItem(row, 2, str(impact.first_count))
+            listing.SetItem(row, 3, str(impact.second_count))
+        outer.Add(listing, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
+        affected = sum(item.first_count + item.second_count for item in impacts)
+        outer.Add(wx.StaticText(
+            panel,
+            label="{} relationship(s) across {} database area(s).".format(
+                affected, len(impacts),
+            ),
+        ), 0, wx.ALL, 12)
+        close = wx.Button(panel, label="Close")
+        close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_OK))
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        buttons.AddStretchSpacer()
+        buttons.Add(close, 0)
+        outer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        panel.SetSizer(outer)
 
 
 class MembershipArchiveDialog(wx.Dialog):
@@ -991,24 +1111,38 @@ class CsvImportPreviewDialog(wx.Dialog):
         if self.church.GetSelection() < 0:
             wx.MessageBox("Select a church.", "Mapping Needs Attention", wx.OK | wx.ICON_WARNING, self)
             return
-        errors = self.import_service.validate(
+        row_errors = self.import_service.validate_rows(
             self.entity_name, self.church_rows[self.church.GetSelection()][0], rows
         )
         self.list.ClearAll()
         fields = [(label, field) for label, field, _required in CSV_FIELDS[self.entity_name]]
-        for index, (label, _field) in enumerate(fields):
-            self.list.InsertColumn(index, label, width=140)
-        for row in rows:
+        preview_widths = {
+            "FirstName": 105, "MiddleName": 90, "LastName": 110,
+            "FamilyName": 180, "Title": 65, "Email": 185, "Phone": 115,
+            "Address1": 180, "Address2": 140, "City": 120, "State": 65,
+            "ZIP": 80,
+        }
+        for index, (label, field) in enumerate(fields):
+            self.list.InsertColumn(index, label, width=preview_widths.get(field, 120))
+        self.list.InsertColumn(len(fields), "Import status", width=260)
+        accepted = []
+        for row, errors in zip(rows, row_errors):
             index = self.list.InsertItem(self.list.GetItemCount(), row[fields[0][1]])
             for column, (_label, field) in enumerate(fields[1:], 1):
                 self.list.SetItem(index, column, row[field])
+            if errors:
+                self.list.SetItem(index, len(fields), "Excluded: " + errors[0].split(": ", 1)[-1])
+                self.list.SetItemTextColour(index, wx.Colour(180, 0, 0))
+            else:
+                self.list.SetItem(index, len(fields), "Ready")
+                accepted.append(row)
+        rejected_count = len(rows) - len(accepted)
         self.status.SetLabel(
-            ("Preview needs attention: " + errors[0]) if errors else
-            "Previewed {} {} row(s). No database records were created or changed.".format(
-                len(rows), self.entity_name.lower())
+            "Previewed {} {} row(s): {} ready, {} excluded. No database records were changed."
+            .format(len(rows), self.entity_name.lower(), len(accepted), rejected_count)
         )
-        self.preview_rows = rows if not errors else []
-        self.import_button.Enable(not errors)
+        self.preview_rows = accepted
+        self.import_button.Enable(bool(accepted))
 
     def on_import(self, _event):
         """Require explicit confirmation before the atomic reviewed import."""

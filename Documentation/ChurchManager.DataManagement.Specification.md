@@ -30,7 +30,8 @@ authorization.
    addresses. Results are advisory and link the two record identifiers.
 2. **CSV preview.** Choose a people/family CSV, map its columns, validate values,
    and display accepted and rejected rows without database changes.
-3. **Reviewed import.** Require confirmation, import valid rows atomically, retain
+3. **Reviewed import.** Clearly mark valid rows Ready and duplicate or invalid
+   rows Excluded. Require confirmation, import the Ready rows atomically, retain
    rejected-row reasons, and audit the outcome without storing unnecessary source
    content.
 4. **Privacy-safe export.** Export approved people/family datasets, enforce
@@ -45,4 +46,3 @@ Normalization is conservative: surrounding whitespace and presentation
 punctuation are ignored for comparison, but partial names and approximate
 spellings are not automatically treated as duplicates. Every result states its
 reason and both database record IDs. Duplicate review changes no records.
-
