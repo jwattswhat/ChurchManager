@@ -87,7 +87,8 @@ class TabularDatasetProvider:
             "rpt_individual_attendance", "rpt_pastors_attendance_comparison",
             "rpt_member_attendance_followup", "rpt_service",
             "rpt_membership_person", "rpt_directory_family",
-            "rpt_journal", "rpt_pastor_report",
+            "rpt_journal", "rpt_pastor_report", "rpt_pastoral_care_work_list",
+            "rpt_pastoral_care_activity_summary",
         }
         if view in direct:
             return view, [f"ChurchID={marker}"], [church_id]

@@ -465,7 +465,7 @@ def _buttonclick(event):
             show_worship_roles(cmfrm.FRAME, context.connection)
             return
         case "lblPrayers":
-            show_prayers(cmfrm.FRAME, context.connection)
+            show_prayers(cmfrm.FRAME, context.connection, context.session, context.authorization)
             return
         case "lblAnnouncement":
             show_announcements(cmfrm.FRAME, context.connection)
@@ -500,7 +500,7 @@ def _buttonclick(event):
             show_service_participants(cmfrm.FRAME, context.connection)
             return
         case "lblAttendanceEvent" | "lblRecordAttendance":
-            show_attendance(cmfrm.FRAME, context.connection, context.authorization)
+            show_attendance(cmfrm.FRAME, context.connection, context.authorization, context.session)
             return
         case "lblReports":
             frm = context.form_factory.create("frmReports", ["Close"])

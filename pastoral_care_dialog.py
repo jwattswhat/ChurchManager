@@ -55,9 +55,10 @@ def _selected_row_id(control):
 class NewCareNeedDialog(wx.Dialog):
     """Collect minimum-necessary safe fields for one new care need."""
 
-    def __init__(self, parent, choices):
+    def __init__(self, parent, choices, initial=None):
         super().__init__(parent, title="New Pastoral Follow-up", size=(620, 525))
         self.choices = choices
+        self.initial = dict(initial or {})
         panel = wx.Panel(self)
         outer = wx.BoxSizer(wx.VERTICAL)
         guidance = wx.StaticText(
@@ -103,6 +104,7 @@ class NewCareNeedDialog(wx.Dialog):
         self.subject_type.Bind(wx.EVT_CHOICE, self._load_subjects)
         self.use_due.Bind(wx.EVT_CHECKBOX, lambda _event: self.due.Enable(self.use_due.GetValue()))
         self._load_subjects()
+        self._apply_initial_values()
 
     @staticmethod
     def _choice(parent, rows):
@@ -119,6 +121,22 @@ class NewCareNeedDialog(wx.Dialog):
         self.subject.SetItems([row[1] for row in self.subject.rows])
         self.subject.SetValue(self.subject.rows[0][1] if self.subject.rows else "")
 
+    def _apply_initial_values(self):
+        """Apply safe handoff defaults without copying source narrative."""
+
+        church_id = self.initial.get("church_id")
+        if church_id is not None:
+            for index, row in enumerate(self.choices["churches"]):
+                if row[0] == church_id:
+                    self.church.SetSelection(index)
+                    break
+        category = str(self.initial.get("category") or "")
+        if category:
+            self.category.SetValue(category)
+        summary = str(self.initial.get("safe_summary") or "")
+        if summary:
+            self.summary.SetValue(summary)
+
     def values(self):
         kind = self.subject_type.GetStringSelection()
         selected = self.subject.GetSelection()
@@ -131,6 +149,7 @@ class NewCareNeedDialog(wx.Dialog):
             "opened_date": _python_date(self.opened),
             "due_date": _python_date(self.due) if self.use_due.GetValue() else None,
             "safe_summary": self.summary.GetValue(),
+            "source": self.initial.get("source", "MANUAL"),
         }
         if kind == "Person" and selected >= 0:
             values["person_id"] = self.subject.rows[selected][0]
@@ -370,3 +389,24 @@ def show_pastoral_care(parent, connection, session, authorization):
         return dialog.ShowModal()
     finally:
         dialog.Destroy()
+
+
+def show_new_pastoral_follow_up(parent, connection, session, authorization, initial=None):
+    """Open a deliberate, permission-controlled follow-up handoff editor."""
+
+    repository = MariaDBPastoralCareRepository(connection)
+    service = PastoralCareService(repository, session, authorization)
+    authorization.require("pastoral.care.create", "create pastoral care follow-up")
+    dialog = NewCareNeedDialog(parent, service.choices(), initial=initial)
+    try:
+        if dialog.ShowModal() != wx.ID_OK:
+            return None
+        care_need_id = service.create_need(dialog.values())
+    finally:
+        dialog.Destroy()
+    history = CareHistoryDialog(parent, service, care_need_id)
+    try:
+        history.ShowModal()
+    finally:
+        history.Destroy()
+    return care_need_id

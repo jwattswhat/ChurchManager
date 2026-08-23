@@ -9,6 +9,7 @@ import wx.adv
 import wx.grid
 
 from bulletin_orders import portable_connection
+from pastoral_care_dialog import show_new_pastoral_follow_up
 from ui_dimensions import DATE_PICKER_SIZE, TIME_PICKER_SIZE
 
 
@@ -349,11 +350,12 @@ class AttendanceEditorDialog(wx.Dialog):
 
 
 class AttendanceCatalogDialog(wx.Dialog):
-    def __init__(self, parent, connection, authorization=None):
+    def __init__(self, parent, connection, authorization=None, session=None):
         super().__init__(parent, title="Attendance", size=(880, 560),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.repository = AttendanceRepository(connection)
         self.authorization = authorization
+        self.session = session
         self.rows = []
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
         help_text = wx.StaticText(panel, label="Double-click an event to record or review its attendance.")
@@ -367,6 +369,10 @@ class AttendanceCatalogDialog(wx.Dialog):
         new_event = wx.Button(panel, label="New Other Event..."); new_event.Bind(wx.EVT_BUTTON, self.on_new); buttons.Add(new_event, 0, wx.RIGHT, 8)
         open_event = wx.Button(panel, label="Open Attendance"); open_event.Bind(wx.EVT_BUTTON, self.on_open); buttons.Add(open_event)
         ytd = wx.Button(panel, label="YTD Summary..."); ytd.Bind(wx.EVT_BUTTON, self.on_ytd); buttons.Add(ytd, 0, wx.LEFT, 8)
+        if session is not None and authorization is not None and authorization.has_permission("pastoral.care.create"):
+            follow_up = wx.Button(panel, label="Create Care Follow-up...")
+            follow_up.Bind(wx.EVT_BUTTON, self.on_care_follow_up)
+            buttons.Add(follow_up, 0, wx.LEFT, 8)
         buttons.AddStretchSpacer(); close = wx.Button(panel, wx.ID_CLOSE, "Close"); close.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_CLOSE)); buttons.Add(close)
         outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 10); panel.SetSizer(outer)
         self.refresh(); self.CentreOnParent()
@@ -392,6 +398,22 @@ class AttendanceCatalogDialog(wx.Dialog):
         dialog = AttendanceYTDSummaryDialog(self, self.repository)
         try: dialog.ShowModal()
         finally: dialog.Destroy()
+
+    def on_care_follow_up(self, _event):
+        selected = self.grid.GetFirstSelected()
+        if selected < 0:
+            wx.MessageBox("Select an Attendance Event first.", "Attendance", wx.OK | wx.ICON_INFORMATION, self)
+            return
+        event = self.repository.event(self.rows[selected][0])
+        show_new_pastoral_follow_up(
+            self, self.repository.connection, self.session, self.authorization,
+            {
+                "church_id": event[1],
+                "category": "Attendance Concern",
+                "source": "ATTENDANCE_FOLLOWUP",
+                "safe_summary": "Follow up from attendance review.",
+            },
+        )
 
     def on_new(self, _event):
         if self.authorization is not None:
@@ -467,8 +489,8 @@ class AttendanceYTDSummaryDialog(wx.Dialog):
         )
 
 
-def show_attendance(parent, connection, authorization=None):
-    dialog = AttendanceCatalogDialog(parent, connection, authorization)
+def show_attendance(parent, connection, authorization=None, session=None):
+    dialog = AttendanceCatalogDialog(parent, connection, authorization, session)
     try:
         return dialog.ShowModal()
     finally:

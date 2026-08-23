@@ -6,6 +6,7 @@ import wx
 import wx.adv
 
 from bulletin_orders import portable_connection
+from pastoral_care_dialog import show_new_pastoral_follow_up
 from sunday_content_rules import (
     EVERY_SUNDAY, describe_rule, next_occurrences, occurs_in_service_week,
     parse_schedule, service_week,
@@ -232,10 +233,11 @@ class SundayContentEditDialog(wx.Dialog):
 
 
 class SundayContentManagerDialog(wx.Dialog):
-    def __init__(self, parent, connection, kind):
+    def __init__(self, parent, connection, kind, session=None, authorization=None):
         title = "Prayers" if kind == "prayer" else "Announcements"
         super().__init__(parent, title=title, size=(920, 600), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.repository, self.kind, self.rows = SundayContentRepository(connection), kind, []
+        self.session, self.authorization = session, authorization
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
         note = wx.StaticText(panel, label="Schedules are shown in plain language. Double-click an item to edit it.")
         note.SetForegroundColour(wx.Colour(0, 90, 190)); outer.Add(note, 0, wx.ALL, 10)
@@ -246,6 +248,10 @@ class SundayContentManagerDialog(wx.Dialog):
         actions = wx.BoxSizer(wx.HORIZONTAL)
         for label, handler in (("Add...", self.on_add), ("Edit...", self.on_edit), ("Delete", self.on_delete)):
             button = wx.Button(panel, label=label); button.Bind(wx.EVT_BUTTON, handler); actions.Add(button, 0, wx.RIGHT, 8)
+        if kind == "prayer" and session is not None and authorization is not None and authorization.has_permission("pastoral.care.create"):
+            follow_up = wx.Button(panel, label="Create Care Follow-up...")
+            follow_up.Bind(wx.EVT_BUTTON, self.on_care_follow_up)
+            actions.Add(follow_up, 0, wx.RIGHT, 8)
         actions.AddStretchSpacer(); actions.Add(wx.Button(panel, wx.ID_CANCEL, "Close")); outer.Add(actions, 0, wx.EXPAND | wx.ALL, 10)
         panel.SetSizer(outer); self.refresh()
 
@@ -277,6 +283,21 @@ class SundayContentManagerDialog(wx.Dialog):
         row = self.selected()
         if row and wx.MessageBox("Delete the selected item?", "Delete", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) == wx.YES:
             self.repository.delete(self.kind, row[0]); self.refresh()
+
+    def on_care_follow_up(self, _event):
+        row = self.selected()
+        if row is None:
+            wx.MessageBox("Select a prayer request first.", "Prayers", wx.OK | wx.ICON_INFORMATION, self)
+            return
+        show_new_pastoral_follow_up(
+            self, self.repository.connection, self.session, self.authorization,
+            {
+                "church_id": row[1],
+                "category": "Prayer Follow-up",
+                "source": "PRAYER_REQUEST",
+                "safe_summary": "Follow up from prayer-request review.",
+            },
+        )
 
 
 class SundayContentPreviewDialog(wx.Dialog):
@@ -345,8 +366,8 @@ def show_sunday_preview(parent, connection, kind, initial_date, generate_handler
     finally: dialog.Destroy()
 
 
-def show_prayers(parent, connection):
-    dialog = SundayContentManagerDialog(parent, connection, "prayer")
+def show_prayers(parent, connection, session=None, authorization=None):
+    dialog = SundayContentManagerDialog(parent, connection, "prayer", session, authorization)
     try: return dialog.ShowModal()
     finally: dialog.Destroy()
 

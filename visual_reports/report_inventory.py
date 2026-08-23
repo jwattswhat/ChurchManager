@@ -141,6 +141,17 @@ SPECS = (
         c("StartDate", "Date", 80, "date"), c("Event", "Request", 190),
         c("Complete", "Complete", 65, "boolean"), c("EndDate", "Ended", 80, "date"),
         c("Note", "Pastoral Notes", 225)), "Complete, StartDate DESC", 5, "landscape"),
+    ReportSpec("CMPC01", "Pastoral Care - Work List", "pastoral.care.report", "rpt_pastoral_care_work_list", (
+        c("Subject", "Subject", 150), c("Category", "Category", 105),
+        c("Assignee", "Assigned To", 120), c("Priority", "Priority", 65),
+        c("Status", "Status", 70), c("DueDate", "Due", 75, "date"),
+        c("NextFollowUpDate", "Next Follow-up", 90, "date"),
+        c("ScheduleText", "Schedule", 145)), "DueDate, Priority DESC, Subject", 6, "landscape"),
+    ReportSpec("CMPC02", "Pastoral Care - Activity Summary", "pastoral.care.report", "rpt_pastoral_care_activity_summary", (
+        c("ActionDate", "Date", 85, "date"), c("Category", "Category", 150),
+        c("ActionType", "Action", 110), c("Result", "Result", 110),
+        c("ActionCount", "Count", 75, "integer", "right")),
+        "ActionDate DESC, Category, ActionType, Result", 6),
 )
 
 
