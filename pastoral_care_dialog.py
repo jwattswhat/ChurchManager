@@ -6,6 +6,7 @@ from datetime import date, datetime, timedelta
 
 import wx
 import wx.adv
+import JSForm
 
 from pastoral_care_repository import MariaDBPastoralCareRepository
 from pastoral_care_service import PastoralCareService
@@ -335,16 +336,27 @@ class PastoralCareDashboard(wx.Dialog):
         dialog.ShowModal(); dialog.Destroy(); self.refresh()
 
     def on_new(self, _event):
+        submitted = {}
         try:
             dialog = NewCareNeedDialog(self, self.service.choices())
             if dialog.ShowModal() == wx.ID_OK:
-                care_need_id = self.service.create_need(dialog.values())
+                submitted = dialog.values()
+                care_need_id = self.service.create_need(submitted)
                 dialog.Destroy(); self.refresh()
                 history = CareHistoryDialog(self, self.service, care_need_id)
                 history.ShowModal(); history.Destroy()
                 return
             dialog.Destroy()
         except Exception as error:
+            JSForm.report_exception(
+                error,
+                operation="pastoral.create_follow_up",
+                safe_context={
+                    "church_id_type": type(submitted.get("church_id")).__name__,
+                    "church_id_value": repr(submitted.get("church_id")),
+                    "church_name": str(submitted.get("church_name") or ""),
+                },
+            )
             wx.MessageBox(str(error), "Unable to Create Follow-up", wx.OK | wx.ICON_ERROR, self)
 
 

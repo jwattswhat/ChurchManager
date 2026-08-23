@@ -51,6 +51,12 @@ class PastoralCareDialogTests(unittest.TestCase):
     def test_native_dialog_buttons_belong_to_their_panel(self):
         self.assertNotIn("CreateStdDialogButtonSizer", self.source)
 
+    def test_create_failure_logs_only_safe_church_diagnostics(self):
+        self.assertIn('operation="pastoral.create_follow_up"', self.source)
+        self.assertIn('"church_id_type"', self.source)
+        self.assertIn('"church_name"', self.source)
+        self.assertNotIn('"safe_summary":', self.source.split("JSForm.report_exception", 1)[1])
+
     def test_selected_row_is_returned(self):
         self.assertEqual(_selected_row_id(ChoiceStub([(4, "A"), (7, "B")], 1)), 7)
 
