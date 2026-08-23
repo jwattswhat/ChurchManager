@@ -40,6 +40,7 @@ Active entries are ChurchManager definitions rendered by JSForm. Removed rows ar
 | Annual Envelope Assignment | ChurchManager only | Supporting; visually accepted | Previews and atomically applies dated box-number assignments without rewriting contribution history. |
 | `frmDocument` | ChurchManager + JSForm | Active | Not CM-only. |
 | `frmJournal` | ChurchManager + JSForm | Active | Not CM-only. |
+| Data Management | None | Active | ChurchManager-only because duplicate review and guarded import/export coordinate several membership tables and privacy rules. |
 | `frmOptions` | ChurchManager + JSForm | Active | Not CM-only. |
 | `frmHymnal` | ChurchManager + JSForm | Active | Not CM-only. |
 | `frmHymn` | ChurchManager + JSForm | Active | Not CM-only; CM adds hymn refresh behavior. |

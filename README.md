@@ -18,7 +18,7 @@ documented application and JSForm boundaries.
 
 ## Capabilities
 
-- Congregations, families, people, contacts, and private-directory controls
+- Congregations, families, people, contacts, private-directory controls, and duplicate review
 - Worship services, orders of service, propers, hymns, sermons, and checklists
 - Participant roles, scheduling, required positions, and notifications
 - Attendance events, members, Communion, visitors, and follow-up reports

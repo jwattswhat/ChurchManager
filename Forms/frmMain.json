@@ -335,6 +335,14 @@
                     "invoke": "ministry.manage"
                 }
             },
+            "lblDataManagement": {
+                "name": "lblDataManagement",
+                "type": "StaticText",
+                "posch": [15, 8],
+                "label": "Data Management",
+                "tooltip": "Review duplicate membership records and manage guarded data exchange.",
+                "security": {"invoke": "membership.manage"}
+            },
             "ReportBox": {
                 "type": "StaticBox",
                 "name": "ReportBox",

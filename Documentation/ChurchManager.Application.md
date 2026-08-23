@@ -435,6 +435,12 @@ Key tables include:
 
 The directory and contact reports normally honor fields such as directory inclusion and unlisted address/contact settings. Verify those flags before distributing a directory.
 
+The **Data Management** screen provides a read-only duplicate review for people
+and families. It identifies conservative candidate matches within the same
+church, such as identical names, contact values, or mailing addresses. A match
+is advisory: ChurchManager does not automatically combine, delete, or alter
+records. Later import and merge work must preserve that review-first boundary.
+
 ### 8.3 Worship services
 
 The Service screen records scheduled worship services. A service record connects the date and time with the congregation, propers, order of service, hymns, readings, sermon, attendance, and serving participants.

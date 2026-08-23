@@ -74,6 +74,7 @@ from giving.purpose_dialog import show_giving_purposes
 from giving.batch_dialog import show_contribution_batches
 from giving.report_dialog import show_giving_reports
 from pastoral_care_dialog import show_pastoral_care
+from data_management import show_data_management
 
 
 arguments = None
@@ -559,6 +560,9 @@ def _buttonclick(event):
             show_pastoral_care(
                 cmfrm.FRAME, context.connection, context.session, context.authorization
             )
+            return
+        case "lblDataManagement":
+            show_data_management(cmfrm.FRAME, context.connection)
             return
         case "lblPropers":
             show_local_lectionaries(

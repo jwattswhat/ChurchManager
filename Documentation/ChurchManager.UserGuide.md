@@ -92,6 +92,10 @@ needed.
 This group contains church information, people, families, attendance, documents,
 and the journal.
 
+Data Management provides a read-only duplicate review. Matching names, contact
+information, or mailing addresses are possible duplicates, not automatic merge
+instructions. Review the underlying records before making any correction.
+
 ### Member Giving
 
 This confidential group contains contributors and envelopes, approved giving
