@@ -234,6 +234,41 @@ Acceptance testing must prove that:
 - backup, restore, diagnostics, and error logs contain no plaintext; and
 - key rotation preserves existing notes and older verified backups.
 
+### 4.4 Key rotation contract
+
+Rotation replaces the key used by the active database; it must never overwrite
+an existing key version in place. ChurchManager maintains one authoritative
+positive **active key version**. New and changed restricted notes always use
+that version, while reads continue to honor the version stored on each row.
+
+Only an authorized Master Administrator may rotate the key. Rotation requires
+the recovery password and proceeds in this order:
+
+1. verify that recovery protection is configured and every restricted-note row
+   uses a supported algorithm and an available key;
+2. create and verify a complete pre-rotation SQL backup and its matching
+   recovery sidecar;
+3. provision the next unused key version without replacing any prior version;
+4. decrypt and re-encrypt every current restricted note inside one database
+   transaction, preserving its authenticated church, care, action, and note
+   binding;
+5. atomically change the active version only after every row was rewritten;
+6. commit the database transaction, create a protected package for the new
+   active key, attach it to a new verification backup, and prove that the new
+   ciphertext can be restored and decrypted; and
+7. record non-narrative audit events for start, completion, or failure.
+
+If any database-row conversion fails, ChurchManager rolls back all note and
+active-version changes. An unused newly provisioned key may remain in protected
+operating-system storage; it must not become active implicitly. If recovery-
+package creation or post-commit verification fails, restricted-note editing is
+disabled until an administrator repairs and verifies recovery protection.
+
+Older key versions and their matched verified backup sidecars are not deleted
+automatically. Restoring an older backup uses the sidecar paired with that
+backup. A later, separately approved retention operation may retire obsolete
+keys only after no retained database backup or row requires them.
+
 ## 5. Authorization and audit
 
 Use distinct permissions:

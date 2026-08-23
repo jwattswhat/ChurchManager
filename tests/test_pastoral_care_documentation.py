@@ -35,6 +35,17 @@ class PastoralCareDocumentationTests(unittest.TestCase):
         self.assertIn("safe scheduling release complete; restricted notes gated", roadmap)
         self.assertIn("actual-ciphertext\n  replacement-machine recovery", roadmap)
 
+    def test_approved_spec_defines_fail_closed_key_rotation(self):
+        specification = (
+            ROOT / "Documentation" / "ChurchManager.PastoralCare.Specification.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("### 4.4 Key rotation contract", specification)
+        self.assertIn("active key version", specification)
+        self.assertIn("complete pre-rotation SQL backup", specification)
+        self.assertIn("inside one database\n   transaction", specification)
+        self.assertIn("are not deleted\nautomatically", specification)
+        self.assertIn("must not become active implicitly", specification)
+
 
 if __name__ == "__main__":
     unittest.main()
