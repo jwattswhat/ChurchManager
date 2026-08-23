@@ -278,6 +278,68 @@ class DataManagementRepository:
             cursor.close()
         return impacts
 
+    def merge_duplicate(self, candidate, survivor_id, reason, user_id):
+        """Move all foreign-key relationships and remove one duplicate atomically."""
+        survivor_id = int(survivor_id)
+        first_id, second_id = int(candidate.first_id), int(candidate.second_id)
+        if survivor_id not in (first_id, second_id):
+            raise ValueError("Choose one of the reviewed records as the survivor.")
+        removed_id = second_id if survivor_id == first_id else first_id
+        reason = str(reason or "").strip()
+        if not reason:
+            raise ValueError("Enter a reason for this merge.")
+        table = "tblPerson" if candidate.entity == "Person" else "tblFamily"
+        name_expression = (
+            "TRIM(CONCAT_WS(' ',NULLIF(FirstName,''),NULLIF(MiddleName,''),NULLIF(LastName,'')))"
+            if candidate.entity == "Person" else "COALESCE(FamilyName,'')"
+        )
+        records = self._all(
+            "SELECT ID,ChurchID,{} FROM {} WHERE ID IN (?,?) ORDER BY ID".format(
+                name_expression, table,
+            ),
+            (first_id, second_id),
+        )
+        if len(records) != 2 or int(records[0][1]) != int(records[1][1]):
+            raise ValueError("Both records must still exist in the same church.")
+        record_by_id = {int(row[0]): row for row in records}
+        impacts = self.merge_impact(candidate)
+        cursor = self.connection.cursor()
+        moved = 0
+        try:
+            for impact in impacts:
+                safe_table = impact.table.replace("`", "``")
+                safe_column = impact.column.replace("`", "``")
+                cursor.execute(
+                    "UPDATE `{}` SET `{}`=? WHERE `{}`=?".format(
+                        safe_table, safe_column, safe_column,
+                    ),
+                    (survivor_id, removed_id),
+                )
+                moved += max(0, int(cursor.rowcount or 0))
+            cursor.execute("DELETE FROM {} WHERE ID=?".format(table), (removed_id,))
+            if cursor.rowcount != 1:
+                raise ValueError("The duplicate record no longer exists.")
+            cursor.execute(
+                "INSERT INTO tblMembershipMergeHistory "
+                "(ChurchID,EntityType,SurvivorRecordID,RemovedRecordID,SurvivorName,"
+                "RemovedName,MatchReason,MergeReason,RelationshipsMoved,MergedByUserID) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?)",
+                (record_by_id[survivor_id][1], candidate.entity, survivor_id, removed_id,
+                 record_by_id[survivor_id][2], record_by_id[removed_id][2],
+                 candidate.reason, reason, moved, int(user_id)),
+            )
+            self.connection.commit()
+        except Exception as error:
+            self.connection.rollback()
+            raise ValueError(
+                "The merge could not be completed, and no records were changed. "
+                "The two records may own conflicting unique history. Review the merge "
+                "impact and resolve that conflict first.\n\n{}".format(error)
+            ) from error
+        finally:
+            cursor.close()
+        return moved
+
     def churches(self):
         """Return positive-ID churches available as import destinations."""
         return self._all("SELECT ID,Church FROM tblChurch WHERE ID>0 ORDER BY Church,ID")
@@ -626,6 +688,7 @@ class DataManagementDialog(wx.Dialog):
         not_duplicate = wx.Button(panel, label="Not Duplicates")
         defer = wx.Button(panel, label="Review Later")
         merge_impact = wx.Button(panel, label="Review Merge Impact...")
+        merge = wx.Button(panel, label="Merge Records...")
         preview_csv = wx.Button(panel, label="Preview Membership CSV...")
         export_csv = wx.Button(panel, label="Export Membership CSV...")
         archive = wx.Button(panel, label="Create Portable Archive...")
@@ -634,6 +697,7 @@ class DataManagementDialog(wx.Dialog):
         not_duplicate.Bind(wx.EVT_BUTTON, self.on_not_duplicate)
         defer.Bind(wx.EVT_BUTTON, self.on_defer)
         merge_impact.Bind(wx.EVT_BUTTON, self.on_merge_impact)
+        merge.Bind(wx.EVT_BUTTON, self.on_merge)
         preview_csv.Bind(wx.EVT_BUTTON, self.on_preview_csv)
         export_csv.Bind(wx.EVT_BUTTON, self.on_export_csv)
         archive.Bind(wx.EVT_BUTTON, self.on_archive)
@@ -642,6 +706,7 @@ class DataManagementDialog(wx.Dialog):
         review_buttons.Add(not_duplicate, 0, wx.RIGHT, 8)
         review_buttons.Add(defer, 0, wx.RIGHT, 8)
         review_buttons.Add(merge_impact, 0)
+        review_buttons.Add(merge, 0, wx.LEFT, 8)
         outer.Add(review_buttons, 0, wx.LEFT | wx.RIGHT | wx.TOP, 12)
         transfer_buttons.Add(preview_csv, 0, wx.RIGHT, 8)
         transfer_buttons.Add(export_csv, 0, wx.RIGHT, 8)
@@ -727,6 +792,25 @@ class DataManagementDialog(wx.Dialog):
         finally:
             dialog.Destroy()
 
+    def on_merge(self, _event):
+        """Open the deliberate survivor-selection and merge confirmation workflow."""
+        candidate = self._selected_candidate()
+        if candidate is None:
+            return
+        try:
+            impacts = self.repository.merge_impact(candidate)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Prepare Merge", wx.OK | wx.ICON_ERROR, self)
+            return
+        dialog = DuplicateMergeDialog(
+            self, self.repository, self.session, candidate, impacts,
+        )
+        try:
+            if dialog.ShowModal() == wx.ID_OK:
+                self.refresh()
+        finally:
+            dialog.Destroy()
+
 
     def on_preview_csv(self, _event):
         """Open the non-writing CSV mapping and preview workflow."""
@@ -803,6 +887,103 @@ class MergeImpactDialog(wx.Dialog):
         buttons.Add(close, 0)
         outer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
         panel.SetSizer(outer)
+
+
+class DuplicateMergeDialog(wx.Dialog):
+    """Require survivor choice, reason, and final confirmation for a merge."""
+
+    def __init__(self, parent, repository, session, candidate, impacts):
+        super().__init__(parent, title="Merge Duplicate Records", size=(720, 570))
+        self.repository = repository
+        self.session = session
+        self.candidate = candidate
+        self.impacts = impacts
+        panel = wx.Panel(self)
+        outer = wx.BoxSizer(wx.VERTICAL)
+        notice = wx.StaticText(
+            panel,
+            label=("Choose the record to keep. All linked history will move to that record; "
+                   "the other duplicate will then be removed."),
+        )
+        notice.Wrap(670)
+        notice.SetForegroundColour(wx.Colour(0, 76, 153))
+        outer.Add(notice, 0, wx.ALL, 14)
+        self.keep_first = wx.RadioButton(
+            panel,
+            label="Keep {} (ID {})".format(candidate.first_name, candidate.first_id),
+            style=wx.RB_GROUP,
+        )
+        self.keep_second = wx.RadioButton(
+            panel,
+            label="Keep {} (ID {})".format(candidate.second_name, candidate.second_id),
+        )
+        outer.Add(self.keep_first, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        outer.Add(self.keep_second, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        listing = wx.ListCtrl(panel, style=wx.LC_REPORT)
+        for index, (label, width) in enumerate((
+            ("Related area", 290), ("Link field", 150),
+            ("First", 90), ("Second", 90),
+        )):
+            listing.InsertColumn(index, label, width=width)
+        for impact in impacts:
+            row = listing.InsertItem(listing.GetItemCount(), impact.table)
+            listing.SetItem(row, 1, impact.column)
+            listing.SetItem(row, 2, str(impact.first_count))
+            listing.SetItem(row, 3, str(impact.second_count))
+        outer.Add(listing, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 14)
+        outer.Add(wx.StaticText(panel, label="Reason for merging *"), 0, wx.ALL, 14)
+        self.reason = wx.TextCtrl(panel)
+        outer.Add(self.reason, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        merge = wx.Button(panel, label="Merge Records")
+        cancel = wx.Button(panel, label="Cancel")
+        merge.Bind(wx.EVT_BUTTON, self.on_merge)
+        cancel.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CANCEL))
+        buttons.AddStretchSpacer()
+        buttons.Add(merge, 0, wx.RIGHT, 8)
+        buttons.Add(cancel, 0)
+        outer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        panel.SetSizer(outer)
+
+    def on_merge(self, _event):
+        """Perform the merge only after a second explicit confirmation."""
+        reason = self.reason.GetValue().strip()
+        if not reason:
+            wx.MessageBox("Enter the reason for this merge.", "Merge Records",
+                          wx.OK | wx.ICON_INFORMATION, self)
+            return
+        survivor_id = (
+            self.candidate.first_id if self.keep_first.GetValue()
+            else self.candidate.second_id
+        )
+        survivor_name = (
+            self.candidate.first_name if self.keep_first.GetValue()
+            else self.candidate.second_name
+        )
+        removed_name = (
+            self.candidate.second_name if self.keep_first.GetValue()
+            else self.candidate.first_name
+        )
+        message = (
+            "Keep '{}', move all linked history to it, and remove '{}'?\n\n"
+            "This cannot be undone from this screen."
+        ).format(survivor_name, removed_name)
+        if wx.MessageBox(message, "Confirm Record Merge",
+                         wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES:
+            return
+        try:
+            moved = self.repository.merge_duplicate(
+                self.candidate, survivor_id, reason, self.session.user_id,
+            )
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Merge Records",
+                          wx.OK | wx.ICON_ERROR, self)
+            return
+        wx.MessageBox(
+            "The records were merged. {} linked relationship(s) moved.".format(moved),
+            "Merge Complete", wx.OK | wx.ICON_INFORMATION, self,
+        )
+        self.EndModal(wx.ID_OK)
 
 
 class MembershipArchiveDialog(wx.Dialog):

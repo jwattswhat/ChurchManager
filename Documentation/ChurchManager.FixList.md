@@ -721,7 +721,8 @@ future roadmap projects:
 ### 10. Import, export, and duplicate management
 
 - **Status: in progress.** The central Data Management screen, conservative
-  duplicate review decisions, confirmed atomic CSV import, and privacy-safe People/Families export are implemented. Follow
+  duplicate review decisions, read-only merge impact, guarded transactional
+  merge, confirmed atomic CSV import, and privacy-safe People/Families export are implemented. Follow
   [ChurchManager.DataManagement.Specification.md](ChurchManager.DataManagement.Specification.md).
 - Add a central Data Management screen.
 - Import people and families from CSV with a preview and explicit field mapping.

@@ -106,11 +106,25 @@ class DataManagementTests(unittest.TestCase):
         self.assertIn("information_schema.KEY_COLUMN_USAGE", source)
         self.assertIn("Read-only preflight", source)
 
+    def test_duplicate_merge_is_transactional_and_retains_provenance(self):
+        migration = (ROOT / "migrations" / "103_add_membership_merge_history.sql").read_text(
+            encoding="utf-8"
+        )
+        source = (ROOT / "data_management.py").read_text(encoding="utf-8")
+        self.assertIn("CREATE TABLE tblMembershipMergeHistory", migration)
+        self.assertIn("MergeReason", migration)
+        self.assertIn("MergedByUserID", migration)
+        self.assertIn("UPDATE `{}` SET `{}`=?", source)
+        self.assertIn("self.connection.rollback()", source)
+        self.assertIn("Choose the record to keep", source)
+        self.assertIn("This cannot be undone from this screen", source)
+
     def test_duplicate_fixture_is_explicitly_guarded_and_idempotent(self):
         source = (ROOT / "seed_duplicate_review_test_data.py").read_text(encoding="utf-8")
         self.assertIn('!= "churchdbtest"', source)
         self.assertIn("if not args.apply", source)
         self.assertIn("while existing < 2", source)
+        self.assertIn("DELETE FROM tblDuplicateReviewResolution", source)
         self.assertIn("CMTEST: duplicate review fixture", source)
 
     def test_membership_archive_validation_detects_tampering(self):

@@ -2022,6 +2022,32 @@ CREATE TABLE `tblmembershipimporthistory` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblmembershipmergehistory` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `EntityType` varchar(20) NOT NULL,
+  `SurvivorRecordID` int(11) NOT NULL,
+  `RemovedRecordID` int(11) NOT NULL,
+  `SurvivorName` varchar(255) NOT NULL,
+  `RemovedName` varchar(255) NOT NULL,
+  `MatchReason` varchar(100) NOT NULL,
+  `MergeReason` varchar(500) NOT NULL,
+  `RelationshipsMoved` int(11) NOT NULL DEFAULT 0,
+  `MergedByUserID` int(11) NOT NULL,
+  `MergedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_membership_merge_removed` (`EntityType`,`RemovedRecordID`),
+  KEY `ix_membership_merge_church` (`ChurchID`,`EntityType`,`MergedAt`),
+  KEY `fk_membership_merge_user` (`MergedByUserID`),
+  CONSTRAINT `fk_membership_merge_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_membership_merge_user` FOREIGN KEY (`MergedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_membership_merge_entity` CHECK (`EntityType` in ('Person','Family')),
+  CONSTRAINT `ck_membership_merge_distinct` CHECK (`SurvivorRecordID` > 0 and `RemovedRecordID` > 0 and `SurvivorRecordID` <> `RemovedRecordID`),
+  CONSTRAINT `ck_membership_merge_relationships` CHECK (`RelationshipsMoved` >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbloptions` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `OptionFor` varchar(255) NOT NULL,

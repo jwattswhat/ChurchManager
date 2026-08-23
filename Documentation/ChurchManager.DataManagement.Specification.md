@@ -22,6 +22,10 @@ authorization.
   general membership export.
 - Portable archives identify their format and ChurchManager version and are
   validated before restoration or import.
+- A duplicate merge requires an explicit survivor, a reason, and final
+  confirmation. All foreign-key relationships move in one transaction; any
+  uniqueness conflict rolls back the entire merge. A safe provenance record
+  remains after the duplicate is removed.
 
 ## Delivery phases
 

@@ -66,6 +66,15 @@ def main():
                 (church[0], MARKER),
             )
             existing += 1
+        cursor.execute("SELECT ID FROM tblPerson WHERE Note=? ORDER BY ID", (MARKER,))
+        fixture_ids = [int(row[0]) for row in cursor.fetchall()]
+        if len(fixture_ids) >= 2:
+            first_id, second_id = fixture_ids[-2:]
+            cursor.execute(
+                "DELETE FROM tblDuplicateReviewResolution WHERE EntityType='Person' "
+                "AND FirstRecordID=? AND SecondRecordID=?",
+                (min(first_id, second_id), max(first_id, second_id)),
+            )
         connection.commit()
         print("fixture_records={}".format(existing))
         print("duplicate_name=Pat Duplicate")

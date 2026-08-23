@@ -104,6 +104,12 @@ giving, user, participant, group, pastoral-care, and other linked records belong
 to each side. This preflight is generated from the current database relationships
 and makes no changes.
 
+Select **Merge Records** only after reviewing that impact. Choose which record
+to keep, enter the reason, and confirm the operation. ChurchManager moves all
+linked history and removes the duplicate in one transaction. If the records own
+conflicting unique history, the whole merge is rolled back and neither record is
+changed. The merge reason and record identities remain in protected history.
+
 The beta test dataset includes two fictional records named **Pat Duplicate** so
 this review can be exercised without weakening the normal import protections.
 
