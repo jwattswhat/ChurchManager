@@ -72,7 +72,10 @@ class PastoralCareService:
 
         self.authorization.require("pastoral.care.create", "create pastoral care")
         values = dict(values or {})
-        values["church_id"] = _identifier(values.get("church_id"), "church")
+        church_id = values.get("church_id")
+        if church_id in (None, ""):
+            church_id = self.repository.default_church_id()
+        values["church_id"] = _identifier(church_id, "church")
         subjects = [
             bool(values.get("person_id")), bool(values.get("family_id")),
             bool(str(values.get("display_subject") or "").strip()),

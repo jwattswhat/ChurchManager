@@ -20,9 +20,14 @@ class AuthorizationStub:
 
 
 class RepositoryStub:
-    def __init__(self, record=None):
+    def __init__(self, record=None, default_church_id=1):
         self.record = record
+        self._default_church_id = default_church_id
         self.calls = []
+
+    def default_church_id(self):
+        self.calls.append(("default_church_id",))
+        return self._default_church_id
 
     def work_list(self, assigned_user_id):
         self.calls.append(("work_list", assigned_user_id))
@@ -91,6 +96,21 @@ class PastoralCareServiceTests(unittest.TestCase):
         self.assertEqual(values["created_by_user_id"], 7)
         with self.assertRaises(PastoralCareValidationError):
             service.create_need({"church_id": 1, "person_id": 4, "family_id": 3, "category": "Other"})
+
+    def test_create_uses_the_only_congregation_when_dialog_omits_church_id(self):
+        service, repository = self.service({"pastoral.care.create"})
+        self.assertEqual(service.create_need({"person_id": 4, "category": "Hospital"}), 11)
+        self.assertEqual(repository.calls[0], ("default_church_id",))
+        self.assertEqual(repository.calls[1][1]["church_id"], 1)
+
+    def test_create_refuses_to_guess_when_no_single_congregation_exists(self):
+        repository = RepositoryStub(default_church_id=None)
+        service = PastoralCareService(
+            repository, SimpleNamespace(user_id=7),
+            AuthorizationStub({"pastoral.care.create"}),
+        )
+        with self.assertRaisesRegex(PastoralCareValidationError, "valid church ID"):
+            service.create_need({"person_id": 4, "category": "Hospital"})
 
     def test_assigning_another_user_requires_assign_permission(self):
         service, repository = self.service(

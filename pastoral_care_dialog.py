@@ -111,8 +111,11 @@ class NewCareNeedDialog(wx.Dialog):
     def values(self):
         kind = self.subject_type.GetStringSelection()
         selected = self.subject.GetSelection()
+        church_selection = self.church.GetSelection()
         values = {
-            "church_id": self.church.rows[self.church.GetSelection()][0],
+            "church_id": (
+                self.church.rows[church_selection][0] if church_selection >= 0 else None
+            ),
             "category": self.category.GetValue(),
             "assigned_user_id": self.assignee.rows[self.assignee.GetSelection()][0],
             "priority": self.priority.GetStringSelection(),

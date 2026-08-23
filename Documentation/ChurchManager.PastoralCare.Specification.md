@@ -76,7 +76,7 @@ A care need contains operational information only:
 | Field | Rule |
 | --- | --- |
 | `ID` | Permanent database identifier |
-| `ChurchID` | Required congregation boundary |
+| `ChurchID` | Required congregation boundary; a single installed congregation is selected automatically |
 | `PersonID` | Optional link to a person |
 | `FamilyID` | Optional link to a family |
 | `DisplaySubject` | Required only when neither person nor family is linked |

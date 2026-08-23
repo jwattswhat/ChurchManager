@@ -119,6 +119,12 @@ class MariaDBPastoralCareRepository:
             )),
         }
 
+    def default_church_id(self):
+        """Return the sole congregation ID, or ``None`` when it is ambiguous."""
+
+        rows = self._choice_rows("SELECT ID,Church FROM tblChurch ORDER BY Church")
+        return rows[0][0] if len(rows) == 1 else None
+
     def _choice_rows(self, sql):
         cursor = self.connection.cursor()
         try:
