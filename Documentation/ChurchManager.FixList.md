@@ -1,6 +1,6 @@
 # ChurchManager development roadmap
 
-Last reviewed: August 22, 2026
+Last reviewed: August 23, 2026
 
 This is the maintained ChurchManager development backlog. Priorities reflect
 the needs of a small congregation and a comparison with current paid and
@@ -26,16 +26,17 @@ early accounting handoff of the replacement, and clearly distinguishes Ready
 from Sent to Accounting in the batch list.
 | 7A | Complete | Richer application login | Login now presents the ChurchManager icon and identity, local congregation name, version/release, copyright, and GPL notice without changing authentication behavior. |
 | 8 | Next | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Approved ministry design; encryption foundation is complete and remaining implementation follows Giving. |
-| 9 | Next | Import, export, and duplicate management | Protects data quality and makes adoption and recovery practical. |
-| 10 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
-| 11 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
-| 12 | Later | General events and calendar integration | Useful, but Google Calendar should remain the primary calendar platform. |
-| 13 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
+| 9 | Next after Pastoral Care | Remove Projects and Tasks | These generic facilities are redundant with the focused ministry workflows and should not remain in the new system. |
+| 10 | Next | Import, export, and duplicate management | Protects data quality and makes adoption and recovery practical. |
+| 11 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
+| 12 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
+| 13 | Later | General events and calendar integration | Useful, but Google Calendar should remain the primary calendar platform. |
+| 14 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
 | Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
 
 Finish the acceptance gate for item 6 before beginning item 8.
-Items 8 through 11 form the next ministry-development phase. Items 12 through
-13 should not delay a stable ChurchManager release.
+Items 8 through 12 form the next ministry-development phase. Items 13 through
+14 should not delay a stable ChurchManager release.
 
 ## Completed foundations retained for regression protection
 
@@ -703,7 +704,22 @@ future roadmap projects:
   the main menu.
 - Provide a printable or exportable authorized follow-up list.
 
-### 9. Import, export, and duplicate management
+### 9. Remove Projects and Tasks
+
+- **Status: planned immediately after Pastoral Care.** Remove the generic
+  Projects and Tasks facilities from the current ChurchManager system.
+- Remove their main-menu entries, form routes, JSON screen definitions,
+  permissions, reports, documentation, tests, and ChurchManager-only Python
+  logic.
+- Add a guarded migration that removes the obsolete development database
+  tables, views, foreign keys, choices, and permissions after confirming no
+  surviving current subsystem depends on them.
+- Do not add a compatibility layer or preserve obsolete structures in the new
+  system. This work has no relationship to the separate frozen application.
+- Update the maintained screen and database inventories and run the complete
+  installation, upgrade, restore, and source-audit gates after removal.
+
+### 10. Import, export, and duplicate management
 
 - Add a central Data Management screen.
 - Import people and families from CSV with a preview and explicit field mapping.
@@ -714,7 +730,7 @@ future roadmap projects:
 - Record import results, rejected rows, and export history.
 - Provide a complete portable archive format where appropriate.
 
-### 10. Groups, committees, classes, and ministry teams
+### 11. Groups, committees, classes, and ministry teams
 
 - **Status: Approved design; implementation pending.** Follow
   [ChurchManager.GroupsMembership.Specification.md](ChurchManager.GroupsMembership.Specification.md),
@@ -726,7 +742,7 @@ future roadmap projects:
 - Permit group attendance and authorized group communication.
 - Add group rosters and participation reports.
 
-### 11. Volunteer availability and responses
+### 12. Volunteer availability and responses
 
 - Add participant availability and blockout dates.
 - Send explicit serve requests and reminders.
@@ -736,7 +752,7 @@ future roadmap projects:
 - Consider optional scheduling suggestions, but never silently replace existing
   assignments.
 
-### 12. General events and calendar integration
+### 13. General events and calendar integration
 
 - Add non-worship events with one-time or recurring dates.
 - Support simple invitations, RSVP/registration lists, attendance, and notes.
@@ -745,7 +761,7 @@ future roadmap projects:
 - Consider simple room or resource reservations only when a demonstrated need
   exists.
 
-### 13. Custom profile fields and controlled tags
+### 14. Custom profile fields and controlled tags
 
 - **Status: Approved design; implementation pending.** Follow
   [ChurchManager.CustomProfileFields.Specification.md](ChurchManager.CustomProfileFields.Specification.md),
