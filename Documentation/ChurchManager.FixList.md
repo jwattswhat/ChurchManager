@@ -25,7 +25,7 @@ Draft replacement, voids the original only when the reversal posts, prevents
 early accounting handoff of the replacement, and clearly distinguishes Ready
 from Sent to Accounting in the batch list.
 | 7A | Complete | Richer application login | Login now presents the ChurchManager icon and identity, local congregation name, version/release, copyright, and GPL notice without changing authentication behavior. |
-| 8 | Next | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Approved ministry design; encryption foundation is complete and remaining implementation follows Giving. |
+| 8 | In progress | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Safe scheduling, handoffs, and protected reports are complete; restricted notes remain gated by key rotation and replacement-machine recovery acceptance. |
 | 9 | Complete | Remove Projects and Tasks | The generic subsystem, screens, reports, permissions, views, and tables are retired by migration 098; worship preparation checklists remain. |
 | 10 | Completed | [Import, export, and duplicate management](ChurchManager.DataManagement.Specification.md) | Reviewed partial-row import, privacy-safe export, verified portable archives, duplicate decisions, merge-impact preflight, and guarded transactional merges are implemented and accepted. |
 | 11 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
@@ -665,7 +665,7 @@ future roadmap projects:
 
 ### 8. Pastoral follow-up
 
-- **Status: implementation started.** The independently tested AES-256-GCM
+- **Status: safe scheduling release complete; restricted notes gated.** The independently tested AES-256-GCM
   note/key-recovery service and migration 096 normalized care foundation are
   implemented. Database backups now pair with an available password-protected
   pastoral recovery sidecar; restore validates it before closing database
@@ -682,8 +682,11 @@ future roadmap projects:
   and atomically audit views and changes without narrative. The native Pastoral
   Care dashboard and safe history workflow now support assigned/all-open views,
   deliberate follow-up creation, assignment, safe action recording, and status
-  changes. Restricted-note entry remains disabled until handoffs, reports, and
-  remaining recovery acceptance pass.
+  changes. Attendance and Prayer Requests now provide deliberate follow-up
+  handoffs without copying event notes or prayer wording. Protected Work List
+  and aggregate Activity Summary reports exclude restricted notes and narrative.
+  Restricted-note entry remains disabled until key rotation, actual-ciphertext
+  replacement-machine recovery, and the isolated release rehearsal pass.
   - Interactive protected backup/restore and application restart passed in
     `ChurchDBTest`; ciphertext and isolated cross-machine recovery acceptance
     remain.

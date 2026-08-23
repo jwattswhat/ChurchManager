@@ -19,10 +19,11 @@ installation and development procedures are maintained separately.
 4. Worship planning
 5. Attendance
 6. Prayers, announcements, and participant notices
-7. Reports and layout customization
-8. Fund accounting
-9. Users, email, backup, and recovery
-10. Getting help
+7. Pastoral Care
+8. Reports and layout customization
+9. Fund accounting
+10. Users, email, backup, and recovery
+11. Getting help
 
 ## 1. Getting started
 
@@ -419,7 +420,50 @@ Use the weekly preview before preparing bulletin material. Participant notices
 use the congregation's configured email service. TEST MODE never sends external
 email.
 
-## 7. Reports and layout customization
+## 7. Pastoral Care
+
+Pastoral Care is a protected ministry work list for follow-ups, completed care
+actions, and future reminders. It is not a counseling transcript, medical
+record, safeguarding case file, or place to record everything a caregiver
+knows.
+
+### Follow-ups and actions
+
+Open **Pastoral Care** from the main menu. **Assigned to Me** shows your open
+work; authorized users may select **All Open**. Create a follow-up with the
+correct church, person or family when applicable, category, assignee, priority,
+opened date, and optional due date. Keep the safe summary brief and
+minimum-necessary.
+
+Double-click a follow-up to review its safe history, record a completed action,
+set the next follow-up, assign it, or change its status. Regular shut-in and
+homebound visits may use the natural-language scheduling pattern provided by
+the screen.
+
+Attendance and Prayer Requests can deliberately create a Pastoral Care
+follow-up. ChurchManager does not copy an attendance-event note or the wording
+of a prayer request into the follow-up. Review the new record and add only the
+safe operational detail that is actually needed.
+
+### Pastoral Care reports and confidentiality
+
+**Pastoral Care - Work List** contains authorized operational fields. **Pastoral
+Care - Activity Summary** contains aggregate counts. Neither report includes
+restricted notes or confidential narrative. Report access is protected by
+Pastoral Care permissions.
+
+Restricted narrative entry is not enabled in the current development release.
+It will remain unavailable until replacement-computer recovery, key rotation,
+and failure-handling acceptance have all passed. Do not place confidential
+narrative in an ordinary summary, action, report, document, prayer request, or
+other unprotected field as a substitute.
+
+ChurchManager is a reminder and recordkeeping aid, not an emergency-response or
+mandated-reporting system. Follow the congregation's safeguarding procedures
+and applicable law whenever immediate action or a report to civil authorities
+may be required.
+
+## 8. Reports and layout customization
 
 Select a report, supply its enabled parameters, and choose **Run Report**.
 ChurchManager creates a PDF using a protected report dataset. A customized
@@ -431,7 +475,7 @@ starter, move and resize controls, preview the PDF, validate the definition,
 and restore the starter. Report definitions control presentation only; they do
 not bypass report permissions or expose unapproved database fields.
 
-## 8. Fund accounting
+## 9. Fund accounting
 
 ### Initial setup
 
@@ -462,7 +506,7 @@ Budgets may use general accounts alone or include detailed line items. Review
 Budget to Actual and the Close Checklist before period or year-end processing.
 Year-End Close is controlled and auditable; make a verified backup first.
 
-## 9. Users, email, backup, and recovery
+## 10. Users, email, backup, and recovery
 
 ### Users and roles
 
@@ -486,6 +530,19 @@ the permanent backup folder outside MariaDB's data folder; preferably use a
 separate physical device or independently protected network location so one
 disk failure does not destroy both the database and its backups.
 
+### Pastoral Care recovery protection
+
+Before restricted pastoral notes can ever be enabled, a Master Administrator
+must configure a separate Pastoral Care recovery password in **Database
+Backup**. ChurchManager does not store that password and cannot recover it.
+
+A complete backup of encrypted pastoral notes consists of two matched files:
+the SQL backup, which contains ciphertext only, and its protected pastoral
+recovery sidecar. Preserve both files together in protected storage. The SQL
+file alone cannot make restricted notes readable on a replacement computer.
+Restore must reject a missing, altered, mismatched, or incorrectly protected
+sidecar without silently clearing a note.
+
 ### Restore
 
 Restore replaces the active database with the selected backup. Read every
@@ -493,7 +550,7 @@ warning, verify the database name shown, and allow the operation to finish.
 ChurchManager must restart after a successful restore because its previous
 database connections were closed.
 
-## 10. Getting help
+## 11. Getting help
 
 Select **Help - User Guide** on the main menu to open this document. If an
 unexpected error occurs, note what you were doing and open **Support and

@@ -8,10 +8,11 @@
 
 **Approved by:** Rev. Jonathan C. Watt
 
-**Implementation:** encryption/key-recovery service, migration 096 database,
-permission and controlled-choice foundation, protected backup sidecar plumbing,
-and Master Administrator recovery-package setup with safe creation/password-
-change audit are implemented. The framework-independent operational service now
+**Implementation status:** the safe scheduling release is implemented. It
+includes the migration 096 database, permission and controlled-choice
+foundation, protected backup sidecar plumbing, and Master Administrator
+recovery-package setup with safe creation/password-change audit. The
+framework-independent operational service now
 enforces assigned/all viewing and distinct create, assign, update, and close
 permissions before repository access. The MariaDB operational repository now
 uses parameterized safe-field reads, active-assignee validation, optimistic
@@ -31,7 +32,9 @@ handoffs that copy no event note or prayer wording.
 The interactive `ChurchDBTest` restore path has been accepted with its protected
 recovery sidecar and required ChurchManager restart. Cross-machine recovery with
 actual restricted-note ciphertext and the isolated release rehearsal remain to
-be accepted before restricted-note entry is enabled.
+be accepted before restricted-note entry is enabled. Key rotation also remains
+an acceptance requirement. Until all three protections pass, the scheduling
+workflow is usable but the restricted-note editor must remain unavailable.
 
 **Target:** ChurchManager
 
