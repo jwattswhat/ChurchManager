@@ -5,14 +5,19 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 import csv
+from datetime import datetime, timezone
 import hashlib
+import io
+import json
 from pathlib import Path
 import re
 import unicodedata
+import zipfile
 
 import wx
 
 from bulletin_orders import portable_connection
+from churchmanager_version import __version__
 
 
 def normalized_text(value):
@@ -443,6 +448,102 @@ class MembershipExportService:
         return len(rows)
 
 
+class MembershipArchiveService:
+    """Create and verify a privacy-safe, versioned membership archive."""
+
+    FORMAT = "churchmanager-membership-archive"
+    FORMAT_VERSION = 1
+
+    def __init__(self, connection, user_id):
+        self.connection = portable_connection(connection)
+        self.user_id = int(user_id)
+        self.exports = MembershipExportService(connection, user_id)
+
+    @staticmethod
+    def _csv_bytes(headers, rows):
+        """Return deterministic UTF-8 CSV bytes for an approved dataset."""
+        stream = io.StringIO(newline="")
+        writer = csv.writer(stream, lineterminator="\n")
+        writer.writerow(headers)
+        writer.writerows(rows)
+        return ("\ufeff" + stream.getvalue()).encode("utf-8")
+
+    @classmethod
+    def validate(cls, archive_path):
+        """Validate format, manifest, member names, and every payload checksum."""
+        with zipfile.ZipFile(archive_path, "r") as archive:
+            names = set(archive.namelist())
+            if names != {"manifest.json", "People.csv", "Families.csv"}:
+                raise ValueError("The membership archive contains unexpected or missing files.")
+            manifest = json.loads(archive.read("manifest.json").decode("utf-8"))
+            if manifest.get("format") != cls.FORMAT or manifest.get("format_version") != cls.FORMAT_VERSION:
+                raise ValueError("This is not a supported ChurchManager membership archive.")
+            if manifest.get("includes_unlisted_contacts") is not False:
+                raise ValueError("The archive privacy declaration is invalid.")
+            for name in ("People.csv", "Families.csv"):
+                payload = archive.read(name)
+                expected = manifest.get("files", {}).get(name, {}).get("sha256")
+                if not expected or hashlib.sha256(payload).hexdigest() != expected:
+                    raise ValueError("The archive checksum failed for {}.".format(name))
+        return manifest
+
+    def create(self, church_id, church_name, destination):
+        """Write, verify, and audit one privacy-safe portable archive atomically."""
+        datasets = {}
+        for entity in ("People", "Families"):
+            headers, rows = self.exports.rows(entity, int(church_id))
+            payload = self._csv_bytes(headers, rows)
+            datasets[entity] = (payload, len(rows))
+        manifest = {
+            "format": self.FORMAT,
+            "format_version": self.FORMAT_VERSION,
+            "churchmanager_version": __version__,
+            "created_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+            "church": {"id": int(church_id), "name": str(church_name)},
+            "includes_unlisted_contacts": False,
+            "privacy": ("Membership directory fields only. Passwords, giving, accounting, "
+                        "audit internals, and pastoral care are excluded."),
+            "files": {
+                "{}.csv".format(entity): {
+                    "rows": count, "sha256": hashlib.sha256(payload).hexdigest(),
+                } for entity, (payload, count) in datasets.items()
+            },
+        }
+        target = Path(destination)
+        temporary = target.with_name(target.name + ".tmp")
+        try:
+            with zipfile.ZipFile(temporary, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                for entity, (payload, _count) in datasets.items():
+                    archive.writestr("{}.csv".format(entity), payload)
+                archive.writestr(
+                    "manifest.json",
+                    json.dumps(manifest, indent=2, sort_keys=True).encode("utf-8"),
+                )
+            self.validate(temporary)
+            digest = hashlib.sha256(temporary.read_bytes()).hexdigest()
+            temporary.replace(target)
+            cursor = self.connection.cursor()
+            try:
+                cursor.execute(
+                    "INSERT INTO tblMembershipArchiveHistory "
+                    "(ChurchID,CreatedByUserID,ArchiveFileName,ArchiveSHA256,"
+                    "PersonRowCount,FamilyRowCount,IncludedUnlistedContacts) "
+                    "VALUES (?,?,?,?,?,?,0)",
+                    (church_id, self.user_id, target.name, digest,
+                     datasets["People"][1], datasets["Families"][1]),
+                )
+                self.connection.commit()
+            except Exception:
+                self.connection.rollback()
+                target.unlink(missing_ok=True)
+                raise
+            finally:
+                cursor.close()
+        finally:
+            temporary.unlink(missing_ok=True)
+        return manifest
+
+
 class DataManagementDialog(wx.Dialog):
     """Central guarded duplicate review, membership import, and export screen."""
 
@@ -480,18 +581,21 @@ class DataManagementDialog(wx.Dialog):
         defer = wx.Button(panel, label="Review Later")
         preview_csv = wx.Button(panel, label="Preview Membership CSV...")
         export_csv = wx.Button(panel, label="Export Membership CSV...")
+        archive = wx.Button(panel, label="Create Portable Archive...")
         close = wx.Button(panel, label="Close")
         refresh.Bind(wx.EVT_BUTTON, lambda _event: self.refresh())
         not_duplicate.Bind(wx.EVT_BUTTON, self.on_not_duplicate)
         defer.Bind(wx.EVT_BUTTON, self.on_defer)
         preview_csv.Bind(wx.EVT_BUTTON, self.on_preview_csv)
         export_csv.Bind(wx.EVT_BUTTON, self.on_export_csv)
+        archive.Bind(wx.EVT_BUTTON, self.on_archive)
         close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_OK))
         buttons.Add(refresh, 0, wx.RIGHT, 8)
         buttons.Add(not_duplicate, 0, wx.RIGHT, 8)
         buttons.Add(defer, 0, wx.RIGHT, 8)
         buttons.Add(preview_csv, 0, wx.RIGHT, 8)
         buttons.Add(export_csv, 0, wx.RIGHT, 8)
+        buttons.Add(archive, 0, wx.RIGHT, 8)
         buttons.AddStretchSpacer()
         buttons.Add(close, 0)
         outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 12)
@@ -571,6 +675,93 @@ class DataManagementDialog(wx.Dialog):
             dialog.ShowModal()
         finally:
             dialog.Destroy()
+
+    def on_archive(self, _event):
+        """Choose a church and destination for a privacy-safe portable archive."""
+        dialog = MembershipArchiveDialog(self, self.connection, self.session)
+        try:
+            dialog.ShowModal()
+        finally:
+            dialog.Destroy()
+
+
+class MembershipArchiveDialog(wx.Dialog):
+    """Collect and confirm creation of a membership portable archive."""
+
+    def __init__(self, parent, connection, session):
+        super().__init__(parent, title="Create Membership Portable Archive", size=(640, 300))
+        self.service = MembershipArchiveService(connection, session.user_id)
+        self.church_rows = DataManagementRepository(connection).churches()
+        panel = wx.Panel(self)
+        outer = wx.BoxSizer(wx.VERTICAL)
+        notice = wx.StaticText(
+            panel,
+            label=("This is a portable membership archive, not a database backup. It contains "
+                   "privacy-safe People and Families CSV files plus a verified manifest."),
+        )
+        notice.Wrap(590)
+        notice.SetForegroundColour(wx.Colour(0, 76, 153))
+        outer.Add(notice, 0, wx.ALL, 14)
+        outer.Add(wx.StaticText(
+            panel,
+            label=("Unlisted contacts, passwords, giving, accounting, audit internals, and "
+                   "pastoral-care information are excluded."),
+        ), 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        row.Add(wx.StaticText(panel, label="Church"), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 10)
+        self.church = wx.Choice(panel, choices=[item[1] for item in self.church_rows])
+        if self.church_rows:
+            self.church.SetSelection(0)
+        row.Add(self.church, 1)
+        outer.Add(row, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 14)
+        outer.AddStretchSpacer()
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        create = wx.Button(panel, label="Choose File and Create...")
+        create.Bind(wx.EVT_BUTTON, self.on_create)
+        close = wx.Button(panel, label="Close")
+        close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_OK))
+        buttons.Add(create, 0)
+        buttons.AddStretchSpacer()
+        buttons.Add(close, 0)
+        outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 14)
+        panel.SetSizer(outer)
+
+    def on_create(self, _event):
+        """Confirm, create, verify, and report a portable membership archive."""
+        selected = self.church.GetSelection()
+        if selected < 0:
+            wx.MessageBox("Select a church.", "Portable Archive", wx.OK | wx.ICON_WARNING, self)
+            return
+        church_id, church_name = self.church_rows[selected]
+        dialog = wx.FileDialog(
+            self, "Save membership portable archive",
+            defaultFile="{}-Membership-Archive.zip".format(church_name).replace(" ", "-"),
+            wildcard="ZIP archives (*.zip)|*.zip", style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
+        )
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            destination = dialog.GetPath()
+        finally:
+            dialog.Destroy()
+        if wx.MessageBox(
+            "Create a privacy-safe membership archive for {}?".format(church_name),
+            "Confirm Portable Archive", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self,
+        ) != wx.YES:
+            return
+        try:
+            manifest = self.service.create(church_id, church_name, destination)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Create Portable Archive",
+                          wx.OK | wx.ICON_ERROR, self)
+            return
+        wx.MessageBox(
+            "Archive verified: {} people and {} families.".format(
+                manifest["files"]["People.csv"]["rows"],
+                manifest["files"]["Families.csv"]["rows"],
+            ),
+            "Portable Archive Complete", wx.OK | wx.ICON_INFORMATION, self,
+        )
 
 
 class MembershipExportDialog(wx.Dialog):

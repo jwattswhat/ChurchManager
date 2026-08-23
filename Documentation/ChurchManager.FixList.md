@@ -27,7 +27,7 @@ from Sent to Accounting in the batch list.
 | 7A | Complete | Richer application login | Login now presents the ChurchManager icon and identity, local congregation name, version/release, copyright, and GPL notice without changing authentication behavior. |
 | 8 | Next | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Approved ministry design; encryption foundation is complete and remaining implementation follows Giving. |
 | 9 | Complete | Remove Projects and Tasks | The generic subsystem, screens, reports, permissions, views, and tables are retired by migration 098; worship preparation checklists remain. |
-| 10 | In progress | [Import, export, and duplicate management](ChurchManager.DataManagement.Specification.md) | Duplicate review decisions, atomic CSV import, and privacy-safe CSV export are implemented; merge and portable archive work follow. |
+| 10 | In progress | [Import, export, and duplicate management](ChurchManager.DataManagement.Specification.md) | Duplicate review decisions, atomic CSV import/export, and verified portable membership archives are implemented; deliberate merge work remains. |
 | 11 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
 | 12 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
 | 13 | Later | General events and calendar integration | Useful, but Google Calendar should remain the primary calendar platform. |

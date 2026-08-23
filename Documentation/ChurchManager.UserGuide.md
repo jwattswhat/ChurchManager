@@ -101,6 +101,12 @@ marked Review Later** whenever those deferred pairs should be reconsidered.
 
 The beta test dataset includes two fictional records named **Pat Duplicate** so
 this review can be exercised without weakening the normal import protections.
+
+**Create Portable Archive** produces a ZIP containing privacy-safe People and
+Families CSV files and a versioned checksum manifest. ChurchManager verifies the
+archive before reporting success. This is not a database backup: unlisted contact
+information, passwords, giving, accounting, audit internals, and pastoral-care
+information are excluded.
 instructions. Review the underlying records before making any correction.
 
 Select **Preview Membership CSV** to inspect a People or Families CSV file. The

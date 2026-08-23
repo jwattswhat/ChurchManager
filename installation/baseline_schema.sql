@@ -1958,6 +1958,27 @@ CREATE TABLE `tblmailsettings` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblmembershiparchivehistory` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `CreatedByUserID` int(11) NOT NULL,
+  `ArchiveFileName` varchar(255) NOT NULL,
+  `ArchiveSHA256` char(64) NOT NULL,
+  `PersonRowCount` int(11) NOT NULL,
+  `FamilyRowCount` int(11) NOT NULL,
+  `IncludedUnlistedContacts` tinyint(1) NOT NULL DEFAULT 0,
+  `CreatedAt` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`ID`),
+  KEY `ix_membership_archive_church_time` (`ChurchID`,`CreatedAt`),
+  KEY `fk_membership_archive_user` (`CreatedByUserID`),
+  CONSTRAINT `fk_membership_archive_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_membership_archive_user` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_membership_archive_counts` CHECK (`PersonRowCount` >= 0 and `FamilyRowCount` >= 0),
+  CONSTRAINT `ck_membership_archive_unlisted` CHECK (`IncludedUnlistedContacts` = 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblmembershipexporthistory` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
   `ChurchID` int(11) NOT NULL,

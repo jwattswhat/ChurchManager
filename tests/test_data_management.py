@@ -6,6 +6,7 @@ import tempfile
 import unittest
 
 from data_management import (
+    MembershipArchiveService,
     duplicate_pairs,
     mapped_csv_preview,
     normalized_contact,
@@ -93,6 +94,44 @@ class DataManagementTests(unittest.TestCase):
         self.assertIn("if not args.apply", source)
         self.assertIn("while existing < 2", source)
         self.assertIn("CMTEST: duplicate review fixture", source)
+
+    def test_membership_archive_validation_detects_tampering(self):
+        import zipfile
+
+        people = b"\xef\xbb\xbfFirst Name,Last Name\nPat,Example\n"
+        families = b"\xef\xbb\xbfFamily Name\nExample\n"
+        manifest = {
+            "format": MembershipArchiveService.FORMAT,
+            "format_version": MembershipArchiveService.FORMAT_VERSION,
+            "includes_unlisted_contacts": False,
+            "files": {
+                "People.csv": {"rows": 1, "sha256": __import__("hashlib").sha256(people).hexdigest()},
+                "Families.csv": {"rows": 1, "sha256": __import__("hashlib").sha256(families).hexdigest()},
+            },
+        }
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "membership.zip"
+            with zipfile.ZipFile(path, "w") as archive:
+                archive.writestr("People.csv", people)
+                archive.writestr("Families.csv", families)
+                archive.writestr("manifest.json", json.dumps(manifest))
+            self.assertEqual(MembershipArchiveService.validate(path)["format_version"], 1)
+            with zipfile.ZipFile(path, "w") as archive:
+                archive.writestr("People.csv", b"changed")
+                archive.writestr("Families.csv", families)
+                archive.writestr("manifest.json", json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, "checksum"):
+                MembershipArchiveService.validate(path)
+
+    def test_archive_history_and_privacy_boundary_are_explicit(self):
+        migration = (ROOT / "migrations" / "102_add_membership_archive_history.sql").read_text(
+            encoding="utf-8"
+        )
+        source = (ROOT / "data_management.py").read_text(encoding="utf-8")
+        self.assertIn("CREATE TABLE tblMembershipArchiveHistory", migration)
+        self.assertIn("IncludedUnlistedContacts = 0", migration)
+        self.assertIn("not a database backup", source)
+        self.assertIn("pastoral care are excluded", source)
 
     def test_csv_preview_requires_explicit_required_and_unique_mappings(self):
         rows = [{"Name": "Johnson", "Other": "Sarah"}]
