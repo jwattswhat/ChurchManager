@@ -1,11 +1,22 @@
-"""Structural tests for the safe pastoral-care workflow."""
+"""Structural and behavior tests for the safe pastoral-care workflow."""
 
 import json
 import unittest
 from pathlib import Path
 
+from pastoral_care_dialog import _selected_row_id
+
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+class ChoiceStub:
+    def __init__(self, rows, selection):
+        self.rows = rows
+        self.selection = selection
+
+    def GetSelection(self):
+        return self.selection
 
 
 class PastoralCareDialogTests(unittest.TestCase):
@@ -39,6 +50,15 @@ class PastoralCareDialogTests(unittest.TestCase):
 
     def test_native_dialog_buttons_belong_to_their_panel(self):
         self.assertNotIn("CreateStdDialogButtonSizer", self.source)
+
+    def test_selected_row_is_returned(self):
+        self.assertEqual(_selected_row_id(ChoiceStub([(4, "A"), (7, "B")], 1)), 7)
+
+    def test_visible_first_row_is_used_when_wx_loses_selection(self):
+        self.assertEqual(_selected_row_id(ChoiceStub([(4, "A"), (7, "B")], -1)), 4)
+
+    def test_empty_choice_has_no_identifier(self):
+        self.assertIsNone(_selected_row_id(ChoiceStub([], -1)))
 
 
 if __name__ == "__main__":

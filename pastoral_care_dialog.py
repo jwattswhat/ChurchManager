@@ -41,6 +41,16 @@ def _due_group(record):
     return "Later"
 
 
+def _selected_row_id(control):
+    """Return the selected row ID, defaulting to the first visible row."""
+
+    rows = getattr(control, "rows", ())
+    if not rows:
+        return None
+    selection = control.GetSelection()
+    return rows[selection if 0 <= selection < len(rows) else 0][0]
+
+
 class NewCareNeedDialog(wx.Dialog):
     """Collect minimum-necessary safe fields for one new care need."""
 
@@ -111,13 +121,10 @@ class NewCareNeedDialog(wx.Dialog):
     def values(self):
         kind = self.subject_type.GetStringSelection()
         selected = self.subject.GetSelection()
-        church_selection = self.church.GetSelection()
         values = {
-            "church_id": (
-                self.church.rows[church_selection][0] if church_selection >= 0 else None
-            ),
+            "church_id": _selected_row_id(self.church),
             "category": self.category.GetValue(),
-            "assigned_user_id": self.assignee.rows[self.assignee.GetSelection()][0],
+            "assigned_user_id": _selected_row_id(self.assignee),
             "priority": self.priority.GetStringSelection(),
             "opened_date": _python_date(self.opened),
             "due_date": _python_date(self.due) if self.use_due.GetValue() else None,
