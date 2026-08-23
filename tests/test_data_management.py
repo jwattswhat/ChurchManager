@@ -2,9 +2,17 @@
 
 import json
 from pathlib import Path
+import tempfile
 import unittest
 
-from data_management import duplicate_pairs, normalized_contact, normalized_text
+from data_management import (
+    duplicate_pairs,
+    mapped_csv_preview,
+    normalized_contact,
+    normalized_text,
+    read_csv_rows,
+    suggested_csv_mapping,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,6 +31,36 @@ class DataManagementTests(unittest.TestCase):
         )
         self.assertEqual(len(found), 1)
         self.assertEqual((found[0].first_id, found[0].second_id), (1, 2))
+
+    def test_csv_preview_maps_people_without_database_access(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "people.csv"
+            path.write_text(
+                "First Name,Last Name,Email\nSarah,Johnson,sarah@example.com\n",
+                encoding="utf-8",
+            )
+            headers, rows = read_csv_rows(path)
+        mapping = suggested_csv_mapping(headers, "People")
+        preview = mapped_csv_preview(rows, "People", mapping)
+        self.assertEqual(preview[0]["FirstName"], "Sarah")
+        self.assertEqual(preview[0]["LastName"], "Johnson")
+        self.assertEqual(preview[0]["Email"], "sarah@example.com")
+
+    def test_csv_preview_requires_explicit_required_and_unique_mappings(self):
+        rows = [{"Name": "Johnson", "Other": "Sarah"}]
+        with self.assertRaisesRegex(ValueError, "First name"):
+            mapped_csv_preview(rows, "People", {"LastName": "Name"})
+        with self.assertRaisesRegex(ValueError, "only one"):
+            mapped_csv_preview(
+                rows, "People", {"FirstName": "Name", "LastName": "Name"}
+            )
+
+    def test_csv_reader_rejects_blank_data_files(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "empty.csv"
+            path.write_text("First Name,Last Name\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "no data rows"):
+                read_csv_rows(path)
 
     def test_main_menu_opens_data_management_with_membership_permission(self):
         controls = json.loads((ROOT / "Forms" / "frmMain.json").read_text(encoding="utf-8"))[
@@ -46,6 +84,7 @@ class DataManagementTests(unittest.TestCase):
         self.assertIn("never silently merges", specification)
         self.assertIn("unlisted contact", specification)
         self.assertIn("Portable archives", specification)
+        self.assertIn("explicit column mapping", specification)
 
 
 if __name__ == "__main__":

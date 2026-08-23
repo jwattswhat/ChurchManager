@@ -96,6 +96,13 @@ Data Management provides a read-only duplicate review. Matching names, contact
 information, or mailing addresses are possible duplicates, not automatic merge
 instructions. Review the underlying records before making any correction.
 
+Select **Preview Membership CSV** to inspect a People or Families CSV file. The
+first row must contain column names. Review every suggested mapping, map the
+required fields marked with an asterisk, and then select **Preview Mapped Rows**.
+Preview does not create or update records; importing remains unavailable until
+the reviewed-import phase is complete.
+Safe sample files are available in `TestData` for both People and Families.
+
 ### Member Giving
 
 This confidential group contains contributors and envelopes, approved giving

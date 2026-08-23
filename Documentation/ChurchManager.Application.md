@@ -440,6 +440,10 @@ and families. It identifies conservative candidate matches within the same
 church, such as identical names, contact values, or mailing addresses. A match
 is advisory: ChurchManager does not automatically combine, delete, or alter
 records. Later import and merge work must preserve that review-first boundary.
+Its CSV preview accepts People or Families files with a header row, requires
+explicit destination-field mappings, and displays the interpreted records
+without opening a database transaction. Preview and import are intentionally
+separate operations.
 
 ### 8.3 Worship services
 
