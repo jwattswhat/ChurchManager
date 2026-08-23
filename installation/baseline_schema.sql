@@ -1555,6 +1555,30 @@ CREATE TABLE `tbldocuments` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblduplicatereviewresolution` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `EntityType` varchar(20) NOT NULL,
+  `FirstRecordID` int(11) NOT NULL,
+  `SecondRecordID` int(11) NOT NULL,
+  `MatchReason` varchar(100) NOT NULL,
+  `Resolution` varchar(20) NOT NULL,
+  `ResolutionNote` varchar(500) DEFAULT NULL,
+  `ResolvedByUserID` int(11) NOT NULL,
+  `ResolvedAt` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_duplicate_resolution_pair` (`ChurchID`,`EntityType`,`FirstRecordID`,`SecondRecordID`,`MatchReason`),
+  KEY `ix_duplicate_resolution_church` (`ChurchID`,`EntityType`,`Resolution`),
+  KEY `fk_duplicate_resolution_user` (`ResolvedByUserID`),
+  CONSTRAINT `fk_duplicate_resolution_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_duplicate_resolution_user` FOREIGN KEY (`ResolvedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_duplicate_resolution_entity` CHECK (`EntityType` in ('Person','Family')),
+  CONSTRAINT `ck_duplicate_resolution_value` CHECK (`Resolution` in ('NOT_DUPLICATE','DEFERRED')),
+  CONSTRAINT `ck_duplicate_resolution_order` CHECK (`FirstRecordID` > 0 and `SecondRecordID` > `FirstRecordID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblfamily` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `ChurchID` int(11) DEFAULT NULL,

@@ -8,6 +8,7 @@
   "stages": [
     "reset_test_activity",
     "seed_nonaccounting_test_data",
+    "seed_duplicate_review_test_data",
     "seed_accounting_test_scenario",
     "reset_giving_test_data"
   ],

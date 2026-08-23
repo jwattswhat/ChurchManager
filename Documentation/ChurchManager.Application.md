@@ -435,7 +435,7 @@ Key tables include:
 
 The directory and contact reports normally honor fields such as directory inclusion and unlisted address/contact settings. Verify those flags before distributing a directory.
 
-The **Data Management** screen provides a read-only duplicate review for people
+The **Data Management** screen provides a guarded duplicate review for people
 and families. It identifies conservative candidate matches within the same
 church, such as identical names, contact values, or mailing addresses. A match
 is advisory: ChurchManager does not automatically combine, delete, or alter

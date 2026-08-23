@@ -74,6 +74,26 @@ class DataManagementTests(unittest.TestCase):
         self.assertNotIn("tblContribution", source)
         self.assertNotIn("tblPastoral", source)
 
+    def test_duplicate_resolution_is_audited_and_non_destructive(self):
+        migration = (ROOT / "migrations" / "101_add_duplicate_review_resolution.sql").read_text(
+            encoding="utf-8"
+        )
+        source = (ROOT / "data_management.py").read_text(encoding="utf-8")
+        self.assertIn("CREATE TABLE tblDuplicateReviewResolution", migration)
+        self.assertIn("NOT_DUPLICATE", migration)
+        self.assertIn("DEFERRED", migration)
+        self.assertIn("ResolvedByUserID", migration)
+        self.assertIn("Decisions never delete, merge", source)
+        self.assertNotIn("DELETE FROM tblPerson", source)
+        self.assertNotIn("DELETE FROM tblFamily", source)
+
+    def test_duplicate_fixture_is_explicitly_guarded_and_idempotent(self):
+        source = (ROOT / "seed_duplicate_review_test_data.py").read_text(encoding="utf-8")
+        self.assertIn('!= "churchdbtest"', source)
+        self.assertIn("if not args.apply", source)
+        self.assertIn("while existing < 2", source)
+        self.assertIn("CMTEST: duplicate review fixture", source)
+
     def test_csv_preview_requires_explicit_required_and_unique_mappings(self):
         rows = [{"Name": "Johnson", "Other": "Sarah"}]
         with self.assertRaisesRegex(ValueError, "First name"):

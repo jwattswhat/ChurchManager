@@ -92,8 +92,15 @@ needed.
 This group contains church information, people, families, attendance, documents,
 and the journal.
 
-Data Management provides a read-only duplicate review. Matching names, contact
-information, or mailing addresses are possible duplicates, not automatic merge
+Data Management provides a guarded duplicate review. Matching names, contact
+information, or mailing addresses are possible duplicates, not an automatic merge.
+Select a pair and choose **Not Duplicates** to record that both records are valid,
+or **Review Later** to remove the pair from the active queue. These decisions do
+not delete, merge, or alter either membership record. Select **Include matches
+marked Review Later** whenever those deferred pairs should be reconsidered.
+
+The beta test dataset includes two fictional records named **Pat Duplicate** so
+this review can be exercised without weakening the normal import protections.
 instructions. Review the underlying records before making any correction.
 
 Select **Preview Membership CSV** to inspect a People or Families CSV file. The

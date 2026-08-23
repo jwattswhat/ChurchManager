@@ -134,7 +134,7 @@ def mapped_csv_preview(rows, entity, mapping):
 
 
 class DataManagementRepository:
-    """Read approved membership fields for duplicate review."""
+    """Read approved membership fields and retain explicit review decisions."""
 
     def __init__(self, connection):
         self.connection = portable_connection(connection)
@@ -147,8 +147,8 @@ class DataManagementRepository:
         finally:
             cursor.close()
 
-    def duplicate_candidates(self):
-        """Return deterministic possible person and family duplicate pairs."""
+    def duplicate_candidates(self, include_deferred=False):
+        """Return unresolved possible duplicates, optionally including deferred pairs."""
         people = self._all(
             "SELECT p.ID,TRIM(CONCAT_WS(' ',NULLIF(p.FirstName,''),"
             "NULLIF(p.MiddleName,''),NULLIF(p.LastName,''))),p.ChurchID "
@@ -192,9 +192,48 @@ class DataManagementRepository:
             "Family", "Same mailing address",
         ))
         unique = {(item.entity, item.first_id, item.second_id, item.reason): item for item in candidates}
-        return sorted(unique.values(), key=lambda item: (
+        resolutions = self._all(
+            "SELECT EntityType,FirstRecordID,SecondRecordID,MatchReason,Resolution "
+            "FROM tblDuplicateReviewResolution"
+        )
+        hidden = {
+            (row[0], int(row[1]), int(row[2]), row[3])
+            for row in resolutions if row[4] == "NOT_DUPLICATE" or not include_deferred
+        }
+        return sorted((item for key, item in unique.items() if key not in hidden), key=lambda item: (
             item.entity, item.first_name.casefold(), item.second_name.casefold(), item.reason,
         ))
+
+    def resolve_duplicate(self, candidate, resolution, user_id, note=""):
+        """Persist a non-destructive human decision for one advisory match."""
+        if resolution not in ("NOT_DUPLICATE", "DEFERRED"):
+            raise ValueError("Unsupported duplicate resolution.")
+        first_id, second_id = sorted((int(candidate.first_id), int(candidate.second_id)))
+        church_table = "tblPerson" if candidate.entity == "Person" else "tblFamily"
+        rows = self._all(
+            "SELECT ID,ChurchID FROM {} WHERE ID IN (?,?) ORDER BY ID".format(church_table),
+            (first_id, second_id),
+        )
+        if len(rows) != 2 or int(rows[0][1]) != int(rows[1][1]):
+            raise ValueError("Both records must still exist in the same church.")
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "INSERT INTO tblDuplicateReviewResolution "
+                "(ChurchID,EntityType,FirstRecordID,SecondRecordID,MatchReason,Resolution,"
+                "ResolutionNote,ResolvedByUserID) VALUES (?,?,?,?,?,?,?,?) "
+                "ON DUPLICATE KEY UPDATE Resolution=VALUES(Resolution),"
+                "ResolutionNote=VALUES(ResolutionNote),ResolvedByUserID=VALUES(ResolvedByUserID),"
+                "ResolvedAt=CURRENT_TIMESTAMP",
+                (rows[0][1], candidate.entity, first_id, second_id, candidate.reason,
+                 resolution, str(note or "").strip() or None, int(user_id)),
+            )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
 
     def churches(self):
         """Return positive-ID churches available as import destinations."""
@@ -405,13 +444,14 @@ class MembershipExportService:
 
 
 class DataManagementDialog(wx.Dialog):
-    """Central read-only duplicate review screen; imports follow in later phases."""
+    """Central guarded duplicate review, membership import, and export screen."""
 
     def __init__(self, parent, connection, session):
         super().__init__(parent, title="Data Management", size=(980, 620))
         self.repository = DataManagementRepository(connection)
         self.connection = connection
         self.session = session
+        self.rows = []
         panel = wx.Panel(self)
         outer = wx.BoxSizer(wx.VERTICAL)
         title = wx.StaticText(panel, label="Duplicate Review")
@@ -419,7 +459,8 @@ class DataManagementDialog(wx.Dialog):
         outer.Add(title, 0, wx.LEFT | wx.RIGHT | wx.TOP, 12)
         outer.Add(wx.StaticText(
             panel,
-            label="Possible matches are shown for review only. No records are changed.",
+            label=("Possible matches require human review. Decisions never delete, merge, "
+                   "or alter membership records."),
         ), 0, wx.ALL, 12)
         self.list = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         for index, (label, width) in enumerate((
@@ -430,16 +471,25 @@ class DataManagementDialog(wx.Dialog):
         outer.Add(self.list, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
         self.status = wx.StaticText(panel, label="")
         outer.Add(self.status, 0, wx.ALL, 12)
+        self.show_deferred = wx.CheckBox(panel, label="Include matches marked Review Later")
+        self.show_deferred.Bind(wx.EVT_CHECKBOX, lambda _event: self.refresh())
+        outer.Add(self.show_deferred, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
         buttons = wx.BoxSizer(wx.HORIZONTAL)
         refresh = wx.Button(panel, label="Refresh Review")
+        not_duplicate = wx.Button(panel, label="Not Duplicates")
+        defer = wx.Button(panel, label="Review Later")
         preview_csv = wx.Button(panel, label="Preview Membership CSV...")
         export_csv = wx.Button(panel, label="Export Membership CSV...")
         close = wx.Button(panel, label="Close")
         refresh.Bind(wx.EVT_BUTTON, lambda _event: self.refresh())
+        not_duplicate.Bind(wx.EVT_BUTTON, self.on_not_duplicate)
+        defer.Bind(wx.EVT_BUTTON, self.on_defer)
         preview_csv.Bind(wx.EVT_BUTTON, self.on_preview_csv)
         export_csv.Bind(wx.EVT_BUTTON, self.on_export_csv)
         close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_OK))
         buttons.Add(refresh, 0, wx.RIGHT, 8)
+        buttons.Add(not_duplicate, 0, wx.RIGHT, 8)
+        buttons.Add(defer, 0, wx.RIGHT, 8)
         buttons.Add(preview_csv, 0, wx.RIGHT, 8)
         buttons.Add(export_csv, 0, wx.RIGHT, 8)
         buttons.AddStretchSpacer()
@@ -452,10 +502,11 @@ class DataManagementDialog(wx.Dialog):
         """Reload possible matches without changing database state."""
         self.list.DeleteAllItems()
         try:
-            rows = self.repository.duplicate_candidates()
+            rows = self.repository.duplicate_candidates(self.show_deferred.GetValue())
         except Exception as error:
             wx.MessageBox(str(error), "Unable to Review Duplicates", wx.OK | wx.ICON_ERROR, self)
             return
+        self.rows = rows
         for candidate in rows:
             index = self.list.InsertItem(self.list.GetItemCount(), candidate.entity)
             values = (
@@ -468,6 +519,42 @@ class DataManagementDialog(wx.Dialog):
             "{} possible duplicate pair(s).".format(len(rows)) if rows
             else "No likely duplicates were found by the current exact-match rules."
         )
+
+    def _selected_candidate(self):
+        """Return the selected advisory match or explain that selection is required."""
+        selected = self.list.GetFirstSelected()
+        if selected < 0 or selected >= len(self.rows):
+            wx.MessageBox("Select a possible duplicate pair first.", "Duplicate Review",
+                          wx.OK | wx.ICON_INFORMATION, self)
+            return None
+        return self.rows[selected]
+
+    def _resolve(self, resolution, prompt):
+        """Confirm and store a non-destructive duplicate-review decision."""
+        candidate = self._selected_candidate()
+        if candidate is None:
+            return
+        message = "{}\n\n{} (ID {})\n{} (ID {})".format(
+            prompt, candidate.first_name, candidate.first_id,
+            candidate.second_name, candidate.second_id,
+        )
+        if wx.MessageBox(message, "Confirm Duplicate Review", wx.YES_NO | wx.NO_DEFAULT |
+                         wx.ICON_QUESTION, self) != wx.YES:
+            return
+        try:
+            self.repository.resolve_duplicate(candidate, resolution, self.session.user_id)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Save Review", wx.OK | wx.ICON_ERROR, self)
+            return
+        self.refresh()
+
+    def on_not_duplicate(self, _event):
+        """Record that the selected records are distinct without changing either one."""
+        self._resolve("NOT_DUPLICATE", "Mark these as separate records, not duplicates?")
+
+    def on_defer(self, _event):
+        """Remove the selected match from the active queue for later review."""
+        self._resolve("DEFERRED", "Defer this possible match for later review?")
 
     def on_preview_csv(self, _event):
         """Open the non-writing CSV mapping and preview workflow."""
