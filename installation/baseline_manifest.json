@@ -2,7 +2,7 @@
   "artifact": "ChurchManager fresh-install schema baseline",
   "format_version": 1,
   "release_version": "0.3.0-dev",
-  "schema_sha256": "1c93e58fb9bfc030266892929824f7221292eec753ea7d7ed88b995ffd487415",
+  "schema_sha256": "eee2b7f3d4b383c6edf55b7690cbe45dd009126749bb6949c0fd6e135c7915a2",
   "represented_migrations": [
     {
       "version": "001_normalize_and_convert_innodb.sql",
@@ -387,6 +387,10 @@
     {
       "version": "096_add_pastoral_care_foundation.sql",
       "checksum": "94ab854624e45dc386fa109683526e4b5021e88498ef563abb37083728d6db91"
+    },
+    {
+      "version": "097_normalize_positive_church_ids.sql",
+      "checksum": "12ff39df66d6f7cd8dc8c539c8e286b55f99d99ddba31f56308ba90d5cb00128"
     }
   ]
 }

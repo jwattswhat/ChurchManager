@@ -1040,7 +1040,7 @@ CREATE TABLE `tblaccountingtransactionline` (
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblannouncement` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `ChurchID` int(11) NOT NULL DEFAULT 0,
+  `ChurchID` int(11) NOT NULL,
   `Priority` int(11) NOT NULL DEFAULT 4,
   `Announcement` longtext DEFAULT NULL,
   `RequestBy` varchar(255) DEFAULT NULL,
@@ -1060,7 +1060,7 @@ CREATE TABLE `tblannouncement` (
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblasset` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `ChurchID` int(11) DEFAULT 0,
+  `ChurchID` int(11) DEFAULT NULL,
   `AssetID` varchar(255) NOT NULL,
   `Description` varchar(255) NOT NULL,
   `Reserve` tinyint(1) NOT NULL DEFAULT 0,
@@ -1567,7 +1567,7 @@ CREATE TABLE `tblcontributionstatementissue` (
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbldocument` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `ChurchID` int(11) NOT NULL DEFAULT 0,
+  `ChurchID` int(11) NOT NULL,
   `Title` varchar(255) NOT NULL,
   `Document` varchar(255) NOT NULL,
   `Date` date DEFAULT NULL,
@@ -1598,7 +1598,7 @@ CREATE TABLE `tbldocuments` (
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblfamily` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `ChurchID` int(11) DEFAULT 0,
+  `ChurchID` int(11) DEFAULT NULL,
   `FamilyName` varchar(255) NOT NULL,
   `MarriageStatus` varchar(255) DEFAULT NULL,
   `Directory` tinyint(1) DEFAULT 0,
@@ -1663,7 +1663,7 @@ CREATE TABLE `tblfamilydate` (
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblgroup` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `ChurchID` int(11) NOT NULL DEFAULT 0,
+  `ChurchID` int(11) NOT NULL,
   `Description` varchar(255) DEFAULT NULL,
   `Number` int(11) DEFAULT NULL,
   `GroupType` varchar(45) DEFAULT NULL,
@@ -1791,7 +1791,7 @@ CREATE TABLE `tblhymnidconversionlog` (
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblhymnusage` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `ChurchID` int(11) NOT NULL DEFAULT 0,
+  `ChurchID` int(11) NOT NULL,
   `ServiceID` int(11) NOT NULL,
   `ServiceBulletinOrderLineID` int(11) DEFAULT NULL,
   `HymnID` int(11) NOT NULL,
@@ -1823,7 +1823,7 @@ CREATE TABLE `tblimages` (
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbljournal` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `ChurchID` int(11) NOT NULL DEFAULT 0,
+  `ChurchID` int(11) NOT NULL,
   `Event` varchar(255) NOT NULL,
   `Complete` tinyint(1) NOT NULL DEFAULT 0,
   `StartDate` datetime DEFAULT NULL,
@@ -2094,7 +2094,7 @@ CREATE TABLE `tblparticipantrole` (
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblpastor` (
-  `ChurchID` int(11) NOT NULL DEFAULT 0,
+  `ChurchID` int(11) NOT NULL,
   `Date` date NOT NULL,
   `Pastor` varchar(255) NOT NULL,
   `Reported` int(1) NOT NULL DEFAULT 0,
@@ -2233,7 +2233,7 @@ CREATE TABLE `tblpermission` (
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblperson` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `ChurchID` int(11) DEFAULT 0,
+  `ChurchID` int(11) DEFAULT NULL,
   `FamilyID` int(11) DEFAULT NULL,
   `FirstName` varchar(255) NOT NULL,
   `MiddleName` varchar(255) DEFAULT NULL,
@@ -2308,7 +2308,7 @@ CREATE TABLE `tblpersondate` (
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblprayer` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `ChurchID` int(11) NOT NULL DEFAULT 0,
+  `ChurchID` int(11) NOT NULL,
   `Request` varchar(255) DEFAULT NULL,
   `PrayerCategory` varchar(255) DEFAULT NULL,
   `RequestFor` varchar(255) DEFAULT NULL,
@@ -2327,7 +2327,7 @@ CREATE TABLE `tblprayer` (
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblproject` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `ChurchID` int(11) NOT NULL DEFAULT 0,
+  `ChurchID` int(11) NOT NULL,
   `Project` varchar(255) NOT NULL,
   `Description` varchar(255) NOT NULL,
   `Complete` tinyint(1) NOT NULL DEFAULT 0,
@@ -2515,7 +2515,7 @@ CREATE TABLE `tblsermon` (
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblservice` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `ChurchID` int(11) DEFAULT 0,
+  `ChurchID` int(11) DEFAULT NULL,
   `DateTime` datetime NOT NULL,
   `Location` varchar(255) DEFAULT 'Grand Marais',
   `PropersID` int(11) DEFAULT NULL,

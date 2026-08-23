@@ -6,6 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATION = ROOT / "migrations" / "096_add_pastoral_care_foundation.sql"
+POSITIVE_CHURCH_IDS = ROOT / "migrations" / "097_normalize_positive_church_ids.sql"
 
 
 class PastoralCareFoundationTests(unittest.TestCase):
@@ -42,6 +43,13 @@ class PastoralCareFoundationTests(unittest.TestCase):
         self.assertIn("ScheduleRule varchar(255)", self.source)
         self.assertIn("SafeSummary varchar(500)", self.source)
         self.assertIn("SafeOutcome varchar(500)", self.source)
+
+    def test_church_identifiers_are_normalized_to_positive_keys(self):
+        source = POSITIVE_CHURCH_IDS.read_text(encoding="utf-8")
+        self.assertIn("WHERE ID=0", source)
+        self.assertIn("SET ChurchID=? WHERE ChurchID=0", source)
+        self.assertIn("ALTER COLUMN ChurchID DROP DEFAULT", source)
+        self.assertNotIn("CHECK (ID > 0)", source)
 
 
 if __name__ == "__main__":
