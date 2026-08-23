@@ -27,6 +27,23 @@ class PastoralRestrictedNoteTests(unittest.TestCase):
         self.assertLess(create.index("lastrowid"), create.index("cipher.encrypt"))
         self.assertIn("self._binding(metadata)", create)
 
+    def test_new_and_updated_notes_use_authoritative_active_key_version(self):
+        create = self.source.split("def create(self, need", 1)[1].split(
+            "def update", 1
+        )[0]
+        update = self.source.split("def update(self, metadata", 1)[1].split(
+            "def _active_key_version", 1
+        )[0]
+        active = self.source.split("def _active_key_version", 1)[1].split(
+            "def _write_ciphertext", 1
+        )[0]
+        self.assertIn("key_version = self._active_key_version(cursor)", create)
+        self.assertIn("key_version=key_version", create)
+        self.assertIn("key_version = self._active_key_version(cursor)", update)
+        self.assertIn("key_version=key_version", update)
+        self.assertIn("tblPastoralEncryptionState", active)
+        self.assertNotIn('"AES-256-GCM", 1, user_id', create)
+
     def test_writes_and_views_audit_without_narrative(self):
         for event in (
             "PASTORAL_NOTE_VIEWED", "PASTORAL_NOTE_CREATED", "PASTORAL_NOTE_UPDATED"

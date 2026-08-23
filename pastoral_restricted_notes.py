@@ -120,6 +120,7 @@ class MariaDBPastoralRestrictedNoteRepository:
 
         cursor = self.connection.cursor()
         try:
+            key_version = self._active_key_version(cursor)
             if care_action_id is not None:
                 self._execute(
                     cursor,
@@ -137,14 +138,16 @@ class MariaDBPastoralRestrictedNoteRepository:
                 "Algorithm,KeyVersion,CreatedByUserID,UpdatedByUserID) "
                 "VALUES (?,?,?,?,?,?,?,?,?,?)",
                 (need["church_id"], need["id"], care_action_id, b"\0", b"\0" * 12,
-                 b"\0" * 16, "AES-256-GCM", 1, user_id, user_id),
+                 b"\0" * 16, "AES-256-GCM", key_version, user_id, user_id),
             )
             note_id = cursor.lastrowid
             metadata = {
                 "id": note_id, "church_id": need["church_id"],
                 "care_need_id": need["id"], "care_action_id": care_action_id,
             }
-            encrypted = self.cipher.encrypt(plaintext, self._binding(metadata))
+            encrypted = self.cipher.encrypt(
+                plaintext, self._binding(metadata), key_version=key_version
+            )
             self._write_ciphertext(cursor, note_id, encrypted, user_id)
             self._audit(cursor, user_id, "PASTORAL_NOTE_CREATED", note_id)
             self.connection.commit()
@@ -160,7 +163,10 @@ class MariaDBPastoralRestrictedNoteRepository:
 
         cursor = self.connection.cursor()
         try:
-            encrypted = self.cipher.encrypt(plaintext, self._binding(metadata))
+            key_version = self._active_key_version(cursor)
+            encrypted = self.cipher.encrypt(
+                plaintext, self._binding(metadata), key_version=key_version
+            )
             values = _encrypted_values(encrypted)
             self._execute(
                 cursor,
@@ -181,6 +187,24 @@ class MariaDBPastoralRestrictedNoteRepository:
             raise
         finally:
             cursor.close()
+
+    def _active_key_version(self, cursor):
+        """Return the configured positive key version or fail closed."""
+
+        self._execute(
+            cursor,
+            "SELECT ActiveKeyVersion FROM tblPastoralEncryptionState WHERE ID=1",
+        )
+        row = cursor.fetchone()
+        try:
+            key_version = int(row[0]) if row else 0
+        except (TypeError, ValueError):
+            key_version = 0
+        if key_version <= 0:
+            raise PastoralCareValidationError(
+                "Pastoral-note encryption is not configured."
+            )
+        return key_version
 
     def _write_ciphertext(self, cursor, note_id, encrypted, user_id):
         values = _encrypted_values(encrypted)

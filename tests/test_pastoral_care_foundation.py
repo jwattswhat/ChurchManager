@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATION = ROOT / "migrations" / "096_add_pastoral_care_foundation.sql"
 POSITIVE_CHURCH_IDS = ROOT / "migrations" / "097_normalize_positive_church_ids.sql"
+ENCRYPTION_STATE = ROOT / "migrations" / "105_add_pastoral_encryption_state.sql"
 
 
 class PastoralCareFoundationTests(unittest.TestCase):
@@ -50,6 +51,14 @@ class PastoralCareFoundationTests(unittest.TestCase):
         self.assertIn("SET ChurchID=? WHERE ChurchID=0", source)
         self.assertIn("ALTER COLUMN ChurchID DROP DEFAULT", source)
         self.assertNotIn("CHECK (ID > 0)", source)
+
+    def test_encryption_state_has_one_positive_active_version(self):
+        source = ENCRYPTION_STATE.read_text(encoding="utf-8")
+        self.assertIn("CREATE TABLE IF NOT EXISTS tblPastoralEncryptionState", source)
+        self.assertIn("ActiveKeyVersion", source)
+        self.assertIn("CHECK (ID=1)", source)
+        self.assertIn("CHECK (ActiveKeyVersion > 0)", source)
+        self.assertIn("VALUES (1, 1, 0)", source)
 
 
 if __name__ == "__main__":

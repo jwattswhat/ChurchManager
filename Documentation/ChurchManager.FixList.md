@@ -687,6 +687,9 @@ future roadmap projects:
   and aggregate Activity Summary reports exclude restricted notes and narrative.
   Restricted-note entry remains disabled until key rotation, actual-ciphertext
   replacement-machine recovery, and the isolated release rehearsal pass.
+  Migration 105 now supplies the authoritative active key version, and all new
+  or changed restricted-note ciphertext honors it instead of hard-coding v1.
+  The transactional rotation operation and its recovery rehearsal remain.
   - Interactive protected backup/restore and application restart passed in
     `ChurchDBTest`; ciphertext and isolated cross-machine recovery acceptance
     remain.
