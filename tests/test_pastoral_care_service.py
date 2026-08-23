@@ -29,6 +29,10 @@ class RepositoryStub:
         self.calls.append(("default_church_id",))
         return self._default_church_id
 
+    def church_id_for_name(self, church_name):
+        self.calls.append(("church_id_for_name", church_name))
+        return 2 if church_name == "Test Church" else None
+
     def work_list(self, assigned_user_id):
         self.calls.append(("work_list", assigned_user_id))
         return []
@@ -102,6 +106,16 @@ class PastoralCareServiceTests(unittest.TestCase):
         self.assertEqual(service.create_need({"person_id": 4, "category": "Hospital"}), 11)
         self.assertEqual(repository.calls[0], ("default_church_id",))
         self.assertEqual(repository.calls[1][1]["church_id"], 1)
+
+    def test_create_resolves_the_visible_church_name(self):
+        service, repository = self.service({"pastoral.care.create"})
+        result = service.create_need({
+            "church_id": 999, "church_name": "Test Church",
+            "person_id": 4, "category": "Hospital",
+        })
+        self.assertEqual(result, 11)
+        self.assertEqual(repository.calls[0], ("church_id_for_name", "Test Church"))
+        self.assertEqual(repository.calls[1][1]["church_id"], 2)
 
     def test_create_refuses_to_guess_when_no_single_congregation_exists(self):
         repository = RepositoryStub(default_church_id=None)

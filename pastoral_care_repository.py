@@ -125,6 +125,21 @@ class MariaDBPastoralCareRepository:
         rows = self._choice_rows("SELECT ID,Church FROM tblChurch ORDER BY Church")
         return rows[0][0] if len(rows) == 1 else None
 
+    def church_id_for_name(self, church_name):
+        """Resolve one exact displayed congregation name to its identifier."""
+
+        cursor = self.connection.cursor()
+        try:
+            self._execute(
+                cursor,
+                "SELECT ID FROM tblChurch WHERE Church=? ORDER BY ID",
+                (str(church_name or "").strip(),),
+            )
+            rows = cursor.fetchall()
+            return rows[0][0] if len(rows) == 1 else None
+        finally:
+            cursor.close()
+
     def _choice_rows(self, sql):
         cursor = self.connection.cursor()
         try:

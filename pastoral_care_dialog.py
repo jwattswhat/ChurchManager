@@ -123,6 +123,7 @@ class NewCareNeedDialog(wx.Dialog):
         selected = self.subject.GetSelection()
         values = {
             "church_id": _selected_row_id(self.church),
+            "church_name": self.church.GetStringSelection(),
             "category": self.category.GetValue(),
             "assigned_user_id": _selected_row_id(self.assignee),
             "priority": self.priority.GetStringSelection(),
