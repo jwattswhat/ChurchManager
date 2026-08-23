@@ -19,8 +19,6 @@ MAIN_MENU_PERMISSIONS = {
     "lblPerson": "membership.manage",
     "lblFamily": "membership.manage",
     "lblRecordAttendance": "attendance.record",
-    "lblProject": "ministry.manage",
-    "lblTask": "ministry.manage",
     "lblDocument": "ministry.manage",
     "lblAnnouncement": "ministry.manage",
     "lblJournal": "ministry.manage",

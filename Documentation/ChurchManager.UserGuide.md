@@ -89,8 +89,8 @@ needed.
 
 ### People and Congregation
 
-This group contains church information, people, families, attendance, projects,
-tasks, documents, and the journal.
+This group contains church information, people, families, attendance, documents,
+and the journal.
 
 ### Member Giving
 

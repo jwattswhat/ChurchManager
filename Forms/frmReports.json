@@ -310,37 +310,6 @@
                 "value": 0,
                 "tooltip": "Include detailed information in reports that support it."
             },
-            "lblProjectID": {
-                "name": "lblProjectID",
-                "type": "StaticText",
-                "posch": [
-                    2,
-                    34
-                ],
-                "label": "Project:"
-            },
-            "ProjectID": {
-                "name": "ProjectID",
-                "type": "ComboBox",
-                "posch": [
-                    9,
-                    34
-                ],
-                "sizech": [
-                    25,
-                    2
-                ],
-                "lookupchoices": {
-                    "name": "tblProject",
-                    "fields": [
-                        "ID",
-                        "Description"
-                    ],
-                    "orderby": "Description"
-                },
-                "value": "All",
-                "tooltip": "Select the project."
-            },
             "lblMissedWeeks": {
                 "name": "lblMissedWeeks",
                 "type": "StaticText",

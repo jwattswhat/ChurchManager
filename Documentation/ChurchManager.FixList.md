@@ -26,7 +26,7 @@ early accounting handoff of the replacement, and clearly distinguishes Ready
 from Sent to Accounting in the batch list.
 | 7A | Complete | Richer application login | Login now presents the ChurchManager icon and identity, local congregation name, version/release, copyright, and GPL notice without changing authentication behavior. |
 | 8 | Next | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Approved ministry design; encryption foundation is complete and remaining implementation follows Giving. |
-| 9 | Next after Pastoral Care | Remove Projects and Tasks | These generic facilities are redundant with the focused ministry workflows and should not remain in the new system. |
+| 9 | Complete | Remove Projects and Tasks | The generic subsystem, screens, reports, permissions, views, and tables are retired by migration 098; worship preparation checklists remain. |
 | 10 | Next | Import, export, and duplicate management | Protects data quality and makes adoption and recovery practical. |
 | 11 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
 | 12 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
@@ -706,18 +706,17 @@ future roadmap projects:
 
 ### 9. Remove Projects and Tasks
 
-- **Status: planned immediately after Pastoral Care.** Remove the generic
-  Projects and Tasks facilities from the current ChurchManager system.
-- Remove their main-menu entries, form routes, JSON screen definitions,
-  permissions, reports, documentation, tests, and ChurchManager-only Python
-  logic.
-- Add a guarded migration that removes the obsolete development database
-  tables, views, foreign keys, choices, and permissions after confirming no
-  surviving current subsystem depends on them.
+- **Status: complete.** The generic Projects and Tasks facilities have been
+  removed from the current ChurchManager system.
+- Migration 098 removes their database tables, views, report catalog entries,
+  and obsolete report permission. Their main-menu entries, form routes, JSON
+  screens, visual reports, filters, documentation, and tests are also removed.
+- Worship preparation checklists remain active because they are a separate,
+  focused service-planning subsystem.
 - Do not add a compatibility layer or preserve obsolete structures in the new
   system. This work has no relationship to the separate frozen application.
-- Update the maintained screen and database inventories and run the complete
-  installation, upgrade, restore, and source-audit gates after removal.
+- The installation baseline must be regenerated after migration 098 is applied,
+  followed by the complete installation, upgrade, restore, and source-audit gates.
 
 ### 10. Import, export, and duplicate management
 

@@ -11,8 +11,6 @@ FORM_ROUTES = {
     "lblConfig": "frmConfig",
     "lblOptions": "frmOptions",
     "lblJournal": "frmJournal",
-    "lblProject": "frmProject",
-    "lblTask": "frmTask",
     "lblDocument": "frmDocument",
     "lblAccountingAccounts": "frmAccountingAccount",
     "lblAccountingFunds": "frmAccountingFund",

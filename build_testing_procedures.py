@@ -145,7 +145,7 @@ table(doc,['Area','Test procedure','Expected result'],[
 ('Validation','Leave a required field empty and try to save; enter representative dates and selections.','Invalid input is rejected clearly; valid data saves in the correct format.'),
 ('Linked forms','Open address/contact/date forms from a saved parent and add a row.','New child row receives the correct parent ID and appears after refresh.'),
 ('Files/documents','Attach or open a disposable document through the configured test path.','Correct file opens; cancel and missing-file cases do not corrupt the record.'),
-('Projects/tasks/checklists','Create a disposable project/task or checklist item, change status, and reopen.','State and relationships persist as expected.'),
+('Worship preparation checklists','Create a disposable checklist item, change status, and reopen.','State and relationships persist as expected.'),
 ],[1.2,3.4,1.9])
 
 doc.add_heading('7. Worship workflow test',level=1)

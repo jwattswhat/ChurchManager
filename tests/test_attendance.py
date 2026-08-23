@@ -159,7 +159,7 @@ class AttendanceTests(unittest.TestCase):
         self.assertLess(field["posch"][0], box["posch"][0] + box["sizech"][0])
         self.assertLess(box["posch"][1], field["posch"][1])
         self.assertLess(field["posch"][1], box["posch"][1] + box["sizech"][1])
-        self.assertEqual(field["posch"][0], report_form["ProjectID"]["posch"][0])
+        self.assertEqual(field["posch"][0], report_form["PersonID"]["posch"][0])
 
 
 if __name__ == "__main__":

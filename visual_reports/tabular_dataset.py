@@ -86,15 +86,13 @@ class TabularDatasetProvider:
             "rpt_asset", "rpt_document", "rpt_attendance_event", "rpt_attendance_weekly",
             "rpt_individual_attendance", "rpt_pastors_attendance_comparison",
             "rpt_member_attendance_followup", "rpt_service",
-            "rpt_membership_person", "rpt_directory_family", "rpt_project",
+            "rpt_membership_person", "rpt_directory_family",
             "rpt_journal", "rpt_pastor_report",
         }
         if view in direct:
             return view, [f"ChurchID={marker}"], [church_id]
         if view == "rpt_hymn_usage":
             return "rpt_hymn_usage r JOIN rpt_service s ON s.ID=r.ServiceID", [f"s.ChurchID={marker}"], [church_id]
-        if view == "rpt_task":
-            return "rpt_task r JOIN rpt_project p ON p.ID=r.ProjectID", [f"p.ChurchID={marker}"], [church_id]
         if view in {"rpt_person_date", "rpt_person_contact"}:
             return f"{view} r JOIN rpt_membership_person p ON p.ID=r.PersonID", [f"p.ChurchID={marker}"], [church_id]
         if view in {"rpt_report_catalog", "rpt_hymn", "rpt_favorite_hymn"}:
@@ -106,7 +104,7 @@ class TabularDatasetProvider:
         filters, values = [], []
         for parameter, field in (
             ("PersonID", "PersonID"), ("HymnID", "HymnID"),
-            ("HymnalID", "HymnalID"), ("ProjectID", "ProjectID"),
+            ("HymnalID", "HymnalID"),
             ("ServiceID", "ServiceID"),
         ):
             value = parameters.get(parameter)
@@ -123,8 +121,6 @@ class TabularDatasetProvider:
         if "AttendanceType" in field_names and parameters.get("AttendanceType") not in (None, "", "All"):
             filters.append(f"AttendanceType={self.marker}")
             values.append(parameters["AttendanceType"])
-        if spec.code == "CMPJ02":
-            filters.append("Complete=0")
         return filters, values
 
     @staticmethod

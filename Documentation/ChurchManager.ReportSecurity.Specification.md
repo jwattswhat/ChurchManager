@@ -31,7 +31,6 @@ service must repeat the permission check immediately before launching LimeReport
 | `reports.membership.run` | Membership lists and aggregate membership reports |
 | `reports.membership.contact` | Directories, addresses, telephone numbers, and email addresses |
 | `reports.worship.run` | Services, hymns, readings, schedules, and worship planning |
-| `reports.ministry.run` | Projects, tasks, workers, and ministry operations |
 | `reports.pastoral.confidential` | Visits, personal attendance histories, prayer/pastoral material, or similarly sensitive reports |
 
 `reports.run` remains only as the permission to open the report screen during
@@ -77,7 +76,6 @@ Initial view families:
 - `rpt_membership_person` and `rpt_membership_summary`
 - `rpt_directory_family`, `rpt_directory_person`, and approved contact/address views
 - `rpt_service`, `rpt_hymn_usage`, `rpt_reading`, and `rpt_service_role`
-- `rpt_project`, `rpt_task`, and `rpt_task_worker`
 - `rpt_pastoral_visit` and other confidential pastoral views
 - `rpt_sermon`, `rpt_pastor_report`, and `rpt_report_catalog`
 

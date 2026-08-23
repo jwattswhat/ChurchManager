@@ -23,7 +23,7 @@ documented application and JSForm boundaries.
 - Participant roles, scheduling, required positions, and notifications
 - Attendance events, members, Communion, visitors, and follow-up reports
 - Prayers and announcements with natural-language weekly schedules
-- Projects, tasks, documents, journal entries, and assets
+- Documents, journal entries, assets, and worship preparation checklists
 - User accounts, roles, permissions, auditing, and support diagnostics
 - Fund accounting, bank import and reconciliation, budgets, and year-end close
 - Visual screen and report customization built on JSForm

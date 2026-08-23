@@ -15,7 +15,7 @@ ChurchManager does not call it.
 
 | Classification | Codes | Disposition |
 | --- | --- | --- |
-| Supported visual reports | `CMAS01`, `CMAT01`-`CMAT05`, `CMDO01`, `CMHU01`-`CMHU04`, `CMJR01`, `CMMD01`, `CMMI01`-`CMMI03`, `CMML01`-`CMML02`, `CMPA01`, `CMPE01`, `CMPH02`, `CMPJ01`-`CMPJ04`, `CMPR01`, `CMRP01`, `CMWP01`, `CMWS01` | JSON starter exists and the JSForm PDF renderer is used. |
+| Supported visual reports | `CMAS01`, `CMAT01`-`CMAT05`, `CMDO01`, `CMHU01`-`CMHU04`, `CMJR01`, `CMMD01`, `CMMI01`-`CMMI03`, `CMML01`-`CMML02`, `CMPA01`, `CMPE01`, `CMPH02`, `CMPR01`, `CMRP01`, `CMWP01`, `CMWS01` | JSON starter exists and the JSForm PDF renderer is used. |
 | Consolidated old layouts | `CMAD01`, `CMPH01` | Their useful output is covered by supported visual reports. |
 | Disabled report | `CMSM01` | Remains retired. |
 | Former batch launcher | `CMBATCH00` | Retired; users run authorized reports individually. |

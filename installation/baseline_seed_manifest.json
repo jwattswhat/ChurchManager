@@ -2,8 +2,8 @@
   "artifact": "ChurchManager fresh-install starter-data baseline",
   "format_version": 1,
   "release_version": "0.3.0-dev",
-  "seed_sha256": "d00a48f38238b502d76044bbbb105b237672c3c1d73581c510417e13cf1c284d",
-  "statement_count": 77,
+  "seed_sha256": "598b0e077ae3accfb8a6b86cdce9f8a6f57c6a5445717da6767551efb905c583",
+  "statement_count": 81,
   "source_migrations": [
     {
       "version": "003_add_user_security.sql",
@@ -148,6 +148,11 @@
     {
       "version": "096_add_pastoral_care_foundation.sql",
       "checksum": "94ab854624e45dc386fa109683526e4b5021e88498ef563abb37083728d6db91",
+      "statements": 4
+    },
+    {
+      "version": "098_retire_projects_and_tasks.sql",
+      "checksum": "d2b273003a243d9b1aaac427fb893b63a5eee7f1a365d3f952ebb4b047054b74",
       "statements": 4
     }
   ],

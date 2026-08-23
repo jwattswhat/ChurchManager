@@ -37,7 +37,7 @@ class ChurchManagerReportService:
         church_id = controls["ChurchID"].GetValue()
         parameters = {}
         for name in (
-            "ServiceID", "PersonID", "HymnID", "HymnalID", "ProjectID", "StartDate", "EndDate",
+            "ServiceID", "PersonID", "HymnID", "HymnalID", "StartDate", "EndDate",
             "AttendanceType", "Detail", "MissedWeeks",
         ):
             if name not in controls:

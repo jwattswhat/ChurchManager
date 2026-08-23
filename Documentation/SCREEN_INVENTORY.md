@@ -1,6 +1,6 @@
 ﻿# ChurchManager Screen Inventory
 
-Last reviewed: August 14, 2026
+Last reviewed: August 23, 2026
 
 This is the maintained inventory of user-facing screens in ChurchManager and JSForm. Update this
 table whenever a screen is added, replaced, retired, or changes ownership.
@@ -40,9 +40,6 @@ Active entries are ChurchManager definitions rendered by JSForm. Removed rows ar
 | Annual Envelope Assignment | ChurchManager only | Supporting; visually accepted | Previews and atomically applies dated box-number assignments without rewriting contribution history. |
 | `frmDocument` | ChurchManager + JSForm | Active | Not CM-only. |
 | `frmJournal` | ChurchManager + JSForm | Active | Not CM-only. |
-| `frmProject` | ChurchManager + JSForm | Active | Not CM-only. |
-| `frmTask` | ChurchManager + JSForm | Active | Not CM-only. |
-| `frmTaskWorker` | ChurchManager + JSForm | Supporting | Not CM-only. |
 | `frmOptions` | ChurchManager + JSForm | Active | Not CM-only. |
 | `frmHymnal` | ChurchManager + JSForm | Active | Not CM-only. |
 | `frmHymn` | ChurchManager + JSForm | Active | Not CM-only; CM adds hymn refresh behavior. |

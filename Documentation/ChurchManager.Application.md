@@ -34,7 +34,7 @@ The application covers these broad functional areas:
 4. Attendance and Communion recording
 5. Participant scheduling and notification
 6. Prayers and announcements
-7. Projects, tasks, assets, journals, and documents
+7. Assets, journals, documents, and worship preparation checklists
 8. Reports and database backups
 
 ChurchManager is not a web application. It runs as a local Windows program and connects across the local network to the ChurchDB database server.
@@ -63,7 +63,7 @@ flowchart TB
     MENU --> ATTEND["Attendance<br/>events, attendance, Communion"]
     MENU --> SCHEDULE["Participant scheduling<br/>roles and notifications"]
     MENU --> COMMS["Congregational communications<br/>prayers and announcements"]
-    MENU --> WORK["Administration<br/>projects, tasks, assets, journal, documents"]
+    MENU --> WORK["Administration<br/>assets, journal, documents"]
     MENU --> REPORTS["Reports and output"]
     MENU --> BACKUP["Database backup"]
 
@@ -607,17 +607,12 @@ Historical financial and donor tables and records remain in existing databases
 for preservation. ChurchManager does not expose or use them. Removing those
 tables or their data requires a separate, explicitly approved database migration.
 
-### 8.15 Projects, tasks, assets, journals, and documents
+### 8.15 Assets, journals, and documents
 
-Project management includes projects, tasks, and assigned task workers. These records can support congregational initiatives and sign-up reports.
-
-The Asset screen records church assets. The Journal screen records dated narrative entries and supports date-range reporting. The Document screen catalogs files or document metadata.
+The Asset screen records church assets. The Journal screen records dated narrative entries and supports date-range reporting. The Document screen catalogs files or document metadata. The former generic Projects and Tasks subsystem was retired because focused ministry workflows now cover the active planning needs.
 
 Key tables include:
 
-- `tblProject`
-- `tblTask`
-- `tblTaskWorker`
 - `tblAsset`
 - `tblJournal`
 
@@ -650,7 +645,6 @@ Common parameters include:
 
 - `ChurchID`
 - `ServiceID`
-- `ProjectID`
 - `PersonID`
 - `HymnID`
 - `HymnalID`
@@ -671,7 +665,6 @@ The installed SQL report data includes the following reports. The database curre
 | `CMPH02` | Member Contact Listing |
 | `CMHU01` | Hymn Usage by Service |
 | `CMHU02` | Hymn Usage by Hymn |
-| `CMPJ01` | Projects |
 | `CMPE01` | Transfers |
 | `CMWS01` | Worship Services by Date |
 | `CMHU03` | Hymn Usage for a selected hymn |
@@ -680,7 +673,6 @@ The installed SQL report data includes the following reports. The database curre
 | `CMML03` | Mailing Labels - Families (three-column label stock) |
 | `CMML04` | Mailing Labels - Members (three-column label stock) |
 | `CMCL01` | Family Listing; its template appears to have been renamed to `CMMD01`. Verify the database code before use. |
-| `CMPJ03` | Project Sign-up Sheet |
 | `CMMI01` | One Member Information report |
 | `CMMI02` | All Member Information listing |
 | `CMMI03` | Member Update Forms |
@@ -747,7 +739,7 @@ The following table groups the principal ChurchManager tables by purpose. The li
 | Attendance | `tblAttendanceEvent`, `tblAttendance` |
 | Communications | `tblPrayer`, `tblAnnouncement` |
 | Preserved historical data not used by ChurchManager | Financial and donor tables retained pending a separately approved database migration |
-| Work management | `tblProject`, `tblTask`, `tblTaskWorker`, `tblChecklist`, `tblAsset`, `tblJournal` |
+| Administration | `tblChecklist`, `tblAsset`, `tblJournal`, `tblDocument` |
 
 ### Database conventions
 

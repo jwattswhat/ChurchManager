@@ -30,7 +30,7 @@ class TestChurchManagerScreenDesigner(unittest.TestCase):
         paths = sorted(Path("Forms").glob("*.json"))
         # Development intentionally contains only the active JSON screens;
         # obsolete definitions live solely in the frozen Legacy application.
-        self.assertGreaterEqual(len(paths), 34)
+        self.assertGreaterEqual(len(paths), 31)
         for path in paths:
             with self.subTest(form=path.name):
                 model = JSForm.ScreenDesignerModel(loader.load(path))

@@ -300,23 +300,6 @@ SET character_set_client = utf8mb4;
 SET character_set_client = @saved_cs_client;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8mb4;
-/*!50001 CREATE VIEW `rpt_project` AS SELECT
- 1 AS `ID`,
-  1 AS `ChurchID`,
-  1 AS `Project`,
-  1 AS `Description`,
-  1 AS `Complete`,
-  1 AS `CompletionDate`,
-  1 AS `ProjectCategory`,
-  1 AS `Priority`,
-  1 AS `StartDate`,
-  1 AS `EndDate`,
-  1 AS `AssignedTo`,
-  1 AS `AssignedToText`,
-  1 AS `Note` */;
-SET character_set_client = @saved_cs_client;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8mb4;
 /*!50001 CREATE VIEW `rpt_propers` AS SELECT
  1 AS `ID`,
   1 AS `LectionarySystemID`,
@@ -422,30 +405,6 @@ SET character_set_client = utf8mb4;
   1 AS `ScheduleRule`,
   1 AS `StartDate`,
   1 AS `EndDate`,
-  1 AS `Note` */;
-SET character_set_client = @saved_cs_client;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8mb4;
-/*!50001 CREATE VIEW `rpt_task` AS SELECT
- 1 AS `ID`,
-  1 AS `Task`,
-  1 AS `Description`,
-  1 AS `Complete`,
-  1 AS `CompletionDate`,
-  1 AS `Priority`,
-  1 AS `ProjectID`,
-  1 AS `DependencyID`,
-  1 AS `StartDate`,
-  1 AS `EndDate`,
-  1 AS `Note` */;
-SET character_set_client = @saved_cs_client;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8mb4;
-/*!50001 CREATE VIEW `rpt_task_worker` AS SELECT
- 1 AS `ID`,
-  1 AS `TaskID`,
-  1 AS `PersonID`,
-  1 AS `PersonText`,
   1 AS `Note` */;
 SET character_set_client = @saved_cs_client;
 SET @saved_cs_client     = @@character_set_client;
@@ -2325,27 +2284,6 @@ CREATE TABLE `tblprayer` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `tblproject` (
-  `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `ChurchID` int(11) NOT NULL,
-  `Project` varchar(255) NOT NULL,
-  `Description` varchar(255) NOT NULL,
-  `Complete` tinyint(1) NOT NULL DEFAULT 0,
-  `CompletionDate` date DEFAULT NULL,
-  `ProjectCategory` varchar(255) NOT NULL,
-  `Priority` int(11) NOT NULL DEFAULT 1,
-  `StartDate` date DEFAULT NULL,
-  `EndDate` date DEFAULT NULL,
-  `AssignedTo` int(11) DEFAULT NULL,
-  `AssignedToText` varchar(255) DEFAULT NULL,
-  `Note` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  PRIMARY KEY (`ID`),
-  KEY `fk_tblproject_tblchurch1_idx` (`ChurchID`),
-  CONSTRAINT `fk_project_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblproperhymnsuggestion` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `PropersID` int(11) NOT NULL,
@@ -2670,40 +2608,6 @@ CREATE TABLE `tblstates` (
   `StateCode` varchar(2) DEFAULT NULL,
   `State` varchar(255) DEFAULT 'MN',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `tbltask` (
-  `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `Task` varchar(255) NOT NULL,
-  `Description` varchar(255) DEFAULT NULL,
-  `Complete` tinyint(4) NOT NULL DEFAULT 0,
-  `CompletionDate` date DEFAULT NULL,
-  `Priority` int(11) NOT NULL DEFAULT 1,
-  `ProjectID` int(11) NOT NULL,
-  `DependencyID` varchar(255) DEFAULT NULL,
-  `StartDate` date DEFAULT NULL,
-  `EndDate` date DEFAULT NULL,
-  `Note` longtext DEFAULT NULL,
-  PRIMARY KEY (`ID`),
-  KEY `fk_tbltask_tblproject1_idx` (`ProjectID`),
-  CONSTRAINT `fk_task_project` FOREIGN KEY (`ProjectID`) REFERENCES `tblproject` (`ID`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `tbltaskworker` (
-  `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `TaskID` int(11) NOT NULL,
-  `PersonID` int(11) DEFAULT NULL,
-  `PersonText` varchar(255) DEFAULT NULL,
-  `Note` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  PRIMARY KEY (`ID`),
-  KEY `fk_tbltaskworker_tbltask1_idx` (`TaskID`),
-  KEY `fk_tbltaskworker_tblperson1_idx` (`PersonID`),
-  CONSTRAINT `fk_taskworker_person` FOREIGN KEY (`PersonID`) REFERENCES `tblperson` (`ID`) ON DELETE SET NULL,
-  CONSTRAINT `fk_taskworker_task` FOREIGN KEY (`TaskID`) REFERENCES `tbltask` (`ID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -3151,19 +3055,6 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
-/*!50001 DROP VIEW IF EXISTS `rpt_project`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
-/*!50001 VIEW `rpt_project` AS select `tblproject`.`ID` AS `ID`,`tblproject`.`ChurchID` AS `ChurchID`,`tblproject`.`Project` AS `Project`,`tblproject`.`Description` AS `Description`,`tblproject`.`Complete` AS `Complete`,`tblproject`.`CompletionDate` AS `CompletionDate`,`tblproject`.`ProjectCategory` AS `ProjectCategory`,`tblproject`.`Priority` AS `Priority`,`tblproject`.`StartDate` AS `StartDate`,`tblproject`.`EndDate` AS `EndDate`,`tblproject`.`AssignedTo` AS `AssignedTo`,`tblproject`.`AssignedToText` AS `AssignedToText`,`tblproject`.`Note` AS `Note` from `tblproject` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!50001 DROP VIEW IF EXISTS `rpt_propers`*/;
 /*!50001 SET @saved_cs_client          = @@character_set_client */;
 /*!50001 SET @saved_cs_results         = @@character_set_results */;
@@ -3265,32 +3156,6 @@ SET character_set_client = @saved_cs_client;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013  SQL SECURITY DEFINER */
 /*!50001 VIEW `rpt_sunday_prayer` AS select `tblprayer`.`ID` AS `ID`,`tblprayer`.`ChurchID` AS `ChurchID`,`tblprayer`.`PrayerCategory` AS `PrayerCategory`,`tblprayer`.`RequestFor` AS `RequestFor`,`tblprayer`.`RequestBy` AS `RequestBy`,`tblprayer`.`ScheduleText` AS `ScheduleText`,`tblprayer`.`ScheduleRule` AS `ScheduleRule`,`tblprayer`.`StartDate` AS `StartDate`,`tblprayer`.`EndDate` AS `EndDate`,`tblprayer`.`Note` AS `Note` from `tblprayer` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-/*!50001 DROP VIEW IF EXISTS `rpt_task`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
-/*!50001 VIEW `rpt_task` AS select `tbltask`.`ID` AS `ID`,`tbltask`.`Task` AS `Task`,`tbltask`.`Description` AS `Description`,`tbltask`.`Complete` AS `Complete`,`tbltask`.`CompletionDate` AS `CompletionDate`,`tbltask`.`Priority` AS `Priority`,`tbltask`.`ProjectID` AS `ProjectID`,`tbltask`.`DependencyID` AS `DependencyID`,`tbltask`.`StartDate` AS `StartDate`,`tbltask`.`EndDate` AS `EndDate`,`tbltask`.`Note` AS `Note` from `tbltask` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-/*!50001 DROP VIEW IF EXISTS `rpt_task_worker`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
-/*!50001 VIEW `rpt_task_worker` AS select `tbltaskworker`.`ID` AS `ID`,`tbltaskworker`.`TaskID` AS `TaskID`,`tbltaskworker`.`PersonID` AS `PersonID`,`tbltaskworker`.`PersonText` AS `PersonText`,`tbltaskworker`.`Note` AS `Note` from `tbltaskworker` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;

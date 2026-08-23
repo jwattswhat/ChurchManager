@@ -101,22 +101,6 @@ SPECS = (
         c("Location", "Location", 95), c("OrderofService", "Service", 110),
         c("Attendance", "Attendance", 65, "integer", "right")), "DateTime DESC", 2),
 
-    ReportSpec("CMPJ01", "Projects", "reports.ministry.run", "rpt_project", (
-        c("Priority", "Priority", 55), c("Project", "Project", 150), c("Description", "Description", 230),
-        c("StartDate", "Start", 70, "date"), c("EndDate", "End", 70, "date"),
-        c("Complete", "Done", 45, "boolean")), "Priority, Project", 3, "landscape"),
-    ReportSpec("CMPJ02", "Incomplete Projects", "reports.ministry.run", "rpt_project", (
-        c("Priority", "Priority", 55), c("Project", "Project", 160), c("Description", "Description", 250),
-        c("AssignedToText", "Assigned To", 105), c("EndDate", "Due", 70, "date")), "Priority, EndDate", 3, "landscape"),
-    ReportSpec("CMPJ03", "Project Sign Up Sheet", "reports.ministry.run", "rpt_project", (
-        c("Project", "Project", 150), c("Description", "Description", 250),
-        c("StartDate", "Starts", 75, "date"), c("EndDate", "Ends", 75, "date"),
-        c("AssignedToText", "Volunteer", 100)), "Project", 3, "landscape"),
-    ReportSpec("CMPJ04", "Project Task Listing", "reports.ministry.run", "rpt_task", (
-        c("Priority", "Priority", 55), c("ProjectID", "Project", 65, "integer"), c("Task", "Task", 150),
-        c("Description", "Description", 240), c("EndDate", "Due", 70, "date"),
-        c("Complete", "Done", 45, "boolean")), "ProjectID, Priority, Task", 3, "landscape"),
-
     ReportSpec("CMMI01", "Member Information", "reports.membership.contact", "rpt_membership_person", (
         c("LastName", "Last Name", 105), c("FirstName", "First Name", 95), c("Status", "Status", 85),
         c("MaritalStatus", "Marital Status", 90), c("Member", "Member", 60, "boolean"),

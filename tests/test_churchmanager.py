@@ -1291,7 +1291,7 @@ class TestNonAccountingTestDataset(unittest.TestCase):
         self.assertEqual(controls["ParameterBox"]["layout"]["column_span"], 2)
         self.assertGreater(
             controls["btnRun"]["layout"]["row"],
-            controls["ProjectID"]["posch"][1],
+            controls["MissedWeeks"]["posch"][1],
         )
 
 

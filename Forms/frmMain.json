@@ -296,32 +296,6 @@
                     "invoke": "attendance.record"
                 }
             },
-            "lblProject": {
-                "name": "lblProject",
-                "type": "StaticText",
-                "posch": [
-                    15,
-                    8
-                ],
-                "label": "Projects",
-                "tooltip": "Open the project form.",
-                "security": {
-                    "invoke": "ministry.manage"
-                }
-            },
-            "lblTask": {
-                "name": "lblTask",
-                "type": "StaticText",
-                "posch": [
-                    15,
-                    9
-                ],
-                "label": "Tasks",
-                "tooltip": "Open the task form.",
-                "security": {
-                    "invoke": "ministry.manage"
-                }
-            },
             "lblDocument": {
                 "name": "lblDocument",
                 "type": "StaticText",

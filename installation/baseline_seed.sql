@@ -528,6 +528,25 @@ INSERT INTO tblChoices (Field,Choices,Note) VALUES
 ('PastoralCareCategory','[Hospital\nHomebound\nBereavement\nNew Visitor\nAttendance Concern\nPrayer Follow-up\nFamily Need\nMilestone\nOther]','Broad minimum-necessary pastoral care categories.'),
 ('PastoralCareActionType','[Call\nVisit\nCard\nMeal\nEmail\nPrayer\nReferral\nOther]','Pastoral care action types.');
 
+-- source: 098_retire_projects_and_tasks.sql
+DELETE FROM tblReports
+WHERE Report IN ('CMPJ01','CMPJ02','CMPJ03','CMPJ04');
+
+-- source: 098_retire_projects_and_tasks.sql
+DELETE rp
+FROM tblRolePermission rp
+JOIN tblPermission p ON p.ID=rp.PermissionID
+WHERE p.Name='reports.ministry.run';
+
+-- source: 098_retire_projects_and_tasks.sql
+DELETE FROM tblPermission
+WHERE Name='reports.ministry.run';
+
+-- source: 098_retire_projects_and_tasks.sql
+UPDATE tblPermission
+SET Description='Manage documents, announcements, and journal entries.'
+WHERE Name='ministry.manage';
+
 -- source: current-schema starter policy
 INSERT INTO tblWorshipRole (Name,Description,DisplayOrder,Active) VALUES
 ('Liturgist',NULL,10,1),('Crucifer','Carries the cross',20,1),
