@@ -198,6 +198,13 @@
                 ],
                 "tooltip": "Open the family members form."
             },
+            "btnAdditionalInformation": {
+                "type": "Button",
+                "label": "Additional Information...",
+                "name": "btnAdditionalInformation",
+                "posch": [37, 9],
+                "tooltip": "Edit church-defined additional information for this family."
+            },
             "lblChurchID": {
                 "type": "StaticText",
                 "label": "Church:",
@@ -304,12 +311,12 @@
                 "type": "StaticText",
                 "label": "Family picture:",
                 "name": "lblImage",
-                "posch": [37, 9]
+                "posch": [37, 11]
             },
             "Image": {
                 "type": "ImagePickerCtrl",
                 "name": "Image",
-                "posch": [37, 11],
+                "posch": [37, 13],
                 "sizech": [16, 12],
                 "layout": {"row_span": 5, "expand": true},
                 "maxbytes": 5242880,

@@ -77,6 +77,7 @@ from pastoral_care_dialog import show_pastoral_care
 from group_dialog import show_groups
 from group_meeting_dialog import show_group_attendance
 from data_management import show_data_management
+from custom_profile_dialog import show_custom_profile
 
 
 arguments = None
@@ -217,7 +218,33 @@ class clsForm(JSForm.clsForm):
             self.FORM.Bind(
                 wx.EVT_BUTTON, self._addIDtofilename, self.CONTROLID["btnAddOutlineID"]
             )
+        if "btnAdditionalInformation" in self.CONTROLID:
+            self.CONTROLID["btnAdditionalInformation"].Bind(
+                wx.EVT_BUTTON, self._open_additional_information,
+            )
         super().bind_form_controls()
+
+    def _open_additional_information(self, _event):
+        """Open dynamic profile data for the current saved Person or Family."""
+        record = self.RECORDS.current() if self.RECORDS else None
+        entity_type = "PERSON" if self.FORMNAME == "frmPerson" else "FAMILY"
+        if not record or not record.get("ID") or not record.get("ChurchID"):
+            wx.MessageBox(
+                "Save this profile before adding church-defined information.",
+                "Additional Information", wx.OK | wx.ICON_INFORMATION, self.FORM,
+            )
+            return
+        label = (
+            " ".join(filter(None, (record.get("FirstName"), record.get("LastName"))))
+            if entity_type == "PERSON" else record.get("FamilyName")
+        ) or entity_type.title()
+        try:
+            show_custom_profile(
+                self.FORM, self.DBConnection, context.session, self.AUTHORIZATION_POLICY,
+                record["ChurchID"], entity_type, record["ID"], label,
+            )
+        except (PermissionError, ValueError) as error:
+            wx.MessageBox(str(error), "Additional Information Unavailable", wx.OK | wx.ICON_ERROR, self.FORM)
 
     def _addIDtofilename(self, event):
         global CONFIG

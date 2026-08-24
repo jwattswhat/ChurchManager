@@ -147,6 +147,13 @@
                 ],
                 "tooltip": "Open the person's significant dates form."
             },
+            "btnAdditionalInformation": {
+                "type": "Button",
+                "label": "Additional Information...",
+                "name": "btnAdditionalInformation",
+                "posch": [37, 7],
+                "tooltip": "Edit church-defined additional information for this person."
+            },
             "lblChurchID": {
                 "type": "StaticText",
                 "label": "Church:",
