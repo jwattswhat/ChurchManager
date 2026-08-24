@@ -27,6 +27,21 @@ class Runtime:
     authorization: object | None = None
 
 
+def style_main_menu_headers(main_form):
+    """Give every main-menu section a consistent, clearly visible heading."""
+    descriptions = getattr(main_form, "CONTROLDESCRIPTION", {})
+    controls = getattr(main_form, "CONTROLID", {})
+    for name, description in descriptions.items():
+        if description.get("type") != "StaticBox" or name not in controls:
+            continue
+        control = controls[name]
+        font = control.GetFont()
+        font.SetWeight(wx.FONTWEIGHT_BOLD)
+        font.SetPointSize(font.GetPointSize() + 2)
+        control.SetFont(font)
+        control.SetForegroundColour(wx.Colour(0, 72, 125))
+
+
 def security_enabled(arguments, config=None):
     config = config or load_config()
     security = config.get("security", {})
@@ -84,5 +99,6 @@ def build_runtime(form_class, argv=None, login_provider=authenticate_user):
         None, database.DBConnection, "frmMain", ["Close"],
         authorization_policy=authorization,
     )
+    style_main_menu_headers(main_form)
     main_form.FRAME.SetTitle(main_window_title(arguments))
     return Runtime(arguments, wx_app, database, main_form, session, authorization)
