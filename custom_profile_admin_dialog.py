@@ -46,7 +46,7 @@ class NewFieldDialog(wx.Dialog):
         self.controls["data_type"].SetSelection(0); self.controls["privacy_class"].SetSelection(0)
         outer.Add(grid, 0, wx.EXPAND | wx.ALL, 14)
         self.confirm = wx.CheckBox(panel, label="I confirm this field will not duplicate protected, prohibited, or existing core information.")
-        self.confirm.Wrap(450); outer.Add(self.confirm, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        outer.Add(self.confirm, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
         buttons = wx.StdDialogButtonSizer(); buttons.AddButton(wx.Button(panel, wx.ID_OK, "Create Draft")); buttons.AddButton(wx.Button(panel, wx.ID_CANCEL)); buttons.Realize()
         outer.Add(buttons, 0, wx.ALIGN_RIGHT | wx.ALL, 14); panel.SetSizer(outer); self.CentreOnParent()
 

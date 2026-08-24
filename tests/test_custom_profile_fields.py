@@ -43,6 +43,11 @@ class CustomProfileFieldMigrationTests(unittest.TestCase):
         ):
             self.assertIn(permission, self.sql)
 
+    def test_new_field_dialog_uses_supported_checkbox_api(self):
+        source = (ROOT / "custom_profile_admin_dialog.py").read_text(encoding="utf-8")
+        self.assertIn("self.confirm = wx.CheckBox", source)
+        self.assertNotIn("self.confirm.Wrap", source)
+
 
 if __name__ == "__main__":
     unittest.main()
