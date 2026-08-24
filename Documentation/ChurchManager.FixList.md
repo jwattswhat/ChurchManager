@@ -30,12 +30,14 @@ from Sent to Accounting in the batch list.
 | 10 | Completed | [Import, export, and duplicate management](ChurchManager.DataManagement.Specification.md) | Reviewed partial-row import, privacy-safe export, verified portable archives, duplicate decisions, merge-impact preflight, and guarded transactional merges are implemented and accepted. |
 | 11 | In progress | [Groups, committees, classes, and ministry teams](ChurchManager.GroupsMembership.Specification.md) | Migrations 106-108 provide normalized Groups, meetings, attendance, preserved meeting lifecycle, and privacy-safe roster, participation, and attendance reports. Communication preparation remains. |
 | 12 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
-| 13 | Later | General events and calendar integration | Useful, but Google Calendar should remain the primary calendar platform. |
-| 14 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
+| 13 | Later | [Asset management](ChurchManager.AssetManagement.Specification.md) | A deliberately small asset register, location, responsibility, maintenance-history, due-list, and retirement design is specified without turning ChurchManager into a full facilities-management system. |
+| 14 | Later | Projects and scheduling | Provide practical project plans, assignments, due dates, status, and scheduling for congregation work while remaining distinct from the retired generic Projects and Tasks subsystem. |
+| 15 | Later | Calendar integration | Share approved ChurchManager services, group meetings, assignments, and scheduled work with an external calendar; Google Calendar remains the primary calendar platform rather than duplicating a full calendar inside ChurchManager. |
+| 16 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
 | Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
 
 Item 8 is complete. Items 11 and 12 form the next ministry-development phase. Items 13 through
-14 should not delay a stable ChurchManager release.
+16 are separate later projects and should not delay a stable ChurchManager release.
 
 ## Completed foundations retained for regression protection
 
