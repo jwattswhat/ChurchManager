@@ -184,3 +184,67 @@ class GroupMeetingsDialog(wx.Dialog):
         dialog = GroupAttendanceDialog(self, self.service, self.rows[selected]["id"])
         try: dialog.ShowModal()
         finally: dialog.Destroy(); self.refresh()
+
+
+class GroupAttendanceLauncherDialog(wx.Dialog):
+    """Open routine Group attendance directly from the main menu."""
+
+    def __init__(self, parent, connection, session, authorization):
+        super().__init__(parent, title="Group Attendance", size=(880, 560), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        from group_repository import MariaDBGroupRepository
+        from group_service import GroupService
+        group_repository = MariaDBGroupRepository(connection)
+        self.group_service = GroupService(group_repository, session, authorization)
+        self.service = GroupMeetingService(MariaDBGroupMeetingRepository(connection), self.group_service, session, authorization)
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        title = wx.StaticText(panel, label="Group Attendance"); font = title.GetFont(); font.MakeBold(); font.SetPointSize(font.GetPointSize() + 2); title.SetFont(font)
+        outer.Add(title, 0, wx.ALL, 14)
+        filters = wx.BoxSizer(wx.HORIZONTAL)
+        filters.Add(wx.StaticText(panel, label="Church"), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 8)
+        churches = group_repository.churches(); self.church = wx.Choice(panel, choices=[str(row[1]) for row in churches]); self.church.rows = list(churches)
+        if churches: self.church.SetSelection(0)
+        filters.Add(self.church, 1, wx.RIGHT, 12)
+        filters.Add(wx.StaticText(panel, label="Group"), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 8)
+        self.group = wx.Choice(panel); self.group.rows = []; filters.Add(self.group, 1)
+        outer.Add(filters, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        self.list = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        for index, (label, width) in enumerate((("Date and time", 180), ("Meeting", 280), ("Location", 190), ("Status", 100), ("Head count", 90))):
+            self.list.InsertColumn(index, label, width=width)
+        outer.Add(self.list, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 14)
+        buttons = wx.BoxSizer(wx.HORIZONTAL); self.open = wx.Button(panel, label="Record Attendance...")
+        buttons.Add(self.open); buttons.AddStretchSpacer(); buttons.Add(wx.Button(panel, wx.ID_CLOSE, "Close"))
+        outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 14); panel.SetSizer(outer)
+        self.church.Bind(wx.EVT_CHOICE, self.refresh_groups); self.group.Bind(wx.EVT_CHOICE, self.refresh_meetings)
+        self.open.Bind(wx.EVT_BUTTON, self.on_open); self.list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_open)
+        self.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE), id=wx.ID_CLOSE)
+        self.refresh_groups()
+
+    def refresh_groups(self, _event=None):
+        church_id = _selected_id(self.church)
+        rows = self.group_service.list_groups(church_id, "ACTIVE") if church_id else []
+        self.group.Set([row["name"] for row in rows]); self.group.rows = [(row["id"], row["name"]) for row in rows]
+        if rows: self.group.SetSelection(0)
+        self.refresh_meetings()
+
+    def refresh_meetings(self, _event=None):
+        group_id = _selected_id(self.group)
+        self.rows = self.service.meetings(group_id) if group_id else []; self.list.DeleteAllItems()
+        for row in self.rows:
+            index = self.list.InsertItem(self.list.GetItemCount(), row["starts_at"].strftime("%m/%d/%Y %I:%M %p"))
+            for column, value in enumerate((row["title"], row.get("location") or "", row["status"].title(),
+                                            "" if row.get("total_head_count") is None else str(row["total_head_count"])), 1):
+                self.list.SetItem(index, column, value)
+
+    def on_open(self, _event):
+        selected = self.list.GetFirstSelected()
+        if selected < 0: return
+        dialog = GroupAttendanceDialog(self, self.service, self.rows[selected]["id"])
+        try: dialog.ShowModal()
+        finally: dialog.Destroy(); self.refresh_meetings()
+
+
+def show_group_attendance(parent, connection, session, authorization):
+    """Open direct Group attendance selection from the main menu."""
+    dialog = GroupAttendanceLauncherDialog(parent, connection, session, authorization)
+    try: dialog.ShowModal()
+    finally: dialog.Destroy()

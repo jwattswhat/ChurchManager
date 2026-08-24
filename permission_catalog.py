@@ -70,4 +70,5 @@ MAIN_MENU_PERMISSIONS = {
     "lblGivingReports": "giving.reports.summary",
     "lblPastoralCare": "pastoral.care.view.assigned",
     "lblGroups": "groups.view",
+    "lblGroupAttendance": "groups.attendance.view",
 }

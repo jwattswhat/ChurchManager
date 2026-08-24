@@ -16,6 +16,10 @@ class GroupMeetingDialogTests(unittest.TestCase):
         self.assertIn('label="Meetings..."', self.group_source)
         self.assertIn("GroupMeetingsDialog", self.group_source)
 
+    def test_main_menu_launcher_selects_group_and_meeting(self):
+        self.assertIn("class GroupAttendanceLauncherDialog", self.source)
+        self.assertIn("def show_group_attendance", self.source)
+
     def test_attendance_supports_status_cycle_and_guest_without_enrollment(self):
         self.assertIn("EVT_LIST_ITEM_ACTIVATED", self.source)
         self.assertIn('label="Add Guest..."', self.source)

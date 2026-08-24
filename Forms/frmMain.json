@@ -254,7 +254,7 @@
                 },
                 "sizech": [
                     12,
-                    10
+                    11
                 ]
             },
             "lblPerson": {
@@ -350,6 +350,14 @@
                 "label": "Groups",
                 "tooltip": "Maintain congregational Groups and dated membership.",
                 "security": {"invoke": "groups.view"}
+            },
+            "lblGroupAttendance": {
+                "name": "lblGroupAttendance",
+                "type": "StaticText",
+                "posch": [15, 10],
+                "label": "Group Attendance",
+                "tooltip": "Record attendance for a scheduled Group meeting.",
+                "security": {"invoke": "groups.attendance.view"}
             },
             "ReportBox": {
                 "type": "StaticBox",

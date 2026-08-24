@@ -13,6 +13,7 @@ class GroupDialogContractTests(unittest.TestCase):
         document = json.loads((ROOT / "Forms" / "frmMain.json").read_text(encoding="utf-8"))
         controls = document["frmMainFORM"]["CONTROLS"]
         self.assertEqual("groups.view", controls["lblGroups"]["security"]["invoke"])
+        self.assertEqual("groups.attendance.view", controls["lblGroupAttendance"]["security"]["invoke"])
 
     def test_dialog_uses_native_resizable_workspace(self):
         source = (ROOT / "group_dialog.py").read_text(encoding="utf-8")

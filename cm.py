@@ -75,6 +75,7 @@ from giving.batch_dialog import show_contribution_batches
 from giving.report_dialog import show_giving_reports
 from pastoral_care_dialog import show_pastoral_care
 from group_dialog import show_groups
+from group_meeting_dialog import show_group_attendance
 from data_management import show_data_management
 
 
@@ -565,6 +566,11 @@ def _buttonclick(event):
             return
         case "lblGroups":
             show_groups(
+                cmfrm.FRAME, context.connection, context.session, context.authorization,
+            )
+            return
+        case "lblGroupAttendance":
+            show_group_attendance(
                 cmfrm.FRAME, context.connection, context.session, context.authorization,
             )
             return

@@ -42,7 +42,7 @@ Active entries are ChurchManager definitions rendered by JSForm. Removed rows ar
 | `frmJournal` | ChurchManager + JSForm | Active | Not CM-only. |
 | Data Management | None | Active | ChurchManager-only because duplicate review and guarded import/export coordinate several membership tables and privacy rules. |
 | Groups | ChurchManager only | Active; membership visually accepted; meetings need visual verification | Enforces privacy-filtered Group visibility, same-congregation dated membership and roles, meeting history, roster-effective attendance, meeting-only guests, anonymous head counts, and transactional audit rules. |
-| Group Meetings and Attendance | ChurchManager only | Active; verify visually after migration 107 | ChurchManager-only because it combines Group privacy and lifecycle policy with effective membership rosters while remaining separate from worship attendance. |
+| Group Meetings and Attendance | ChurchManager only | Active; Group-detail flow visually accepted; direct main-menu flow needs verification | ChurchManager-only because it combines Group privacy and lifecycle policy with effective membership rosters while remaining separate from worship attendance. |
 | `frmOptions` | ChurchManager + JSForm | Active | Not CM-only. |
 | `frmHymnal` | ChurchManager + JSForm | Active | Not CM-only. |
 | `frmHymn` | ChurchManager + JSForm | Active | Not CM-only; CM adds hymn refresh behavior. |

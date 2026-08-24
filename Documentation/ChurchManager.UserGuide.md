@@ -113,6 +113,8 @@ the status. An existing same-congregation Person may be added as a meeting guest
 without becoming a Group member. The optional total head count can include
 unidentified visitors without creating artificial Person records. Group meeting
 attendance remains separate from worship attendance.
+For routine entry, select **Group Attendance** directly from **People and
+Congregation**, choose the Group and meeting, and open the attendance screen.
 
 Data Management provides a guarded duplicate review. Matching names, contact
 information, or mailing addresses are possible duplicates, not an automatic merge.
