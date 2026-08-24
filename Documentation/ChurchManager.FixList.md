@@ -28,7 +28,7 @@ from Sent to Accounting in the batch list.
 | 8 | Completed | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Safe scheduling, handoffs, protected reports, recovery acceptance, and the encrypted restricted-note editor passed final visual acceptance on August 24, 2026. |
 | 9 | Complete | Remove Projects and Tasks | The generic subsystem, screens, reports, permissions, views, and tables are retired by migration 098; worship preparation checklists remain. |
 | 10 | Completed | [Import, export, and duplicate management](ChurchManager.DataManagement.Specification.md) | Reviewed partial-row import, privacy-safe export, verified portable archives, duplicate decisions, merge-impact preflight, and guarded transactional merges are implemented and accepted. |
-| 11 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
+| 11 | In progress | [Groups, committees, classes, and ministry teams](ChurchManager.GroupsMembership.Specification.md) | The approved specification is reconciled and the existing Group data inventory is complete; normalized database implementation is next. |
 | 12 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
 | 13 | Later | General events and calendar integration | Useful, but Google Calendar should remain the primary calendar platform. |
 | 14 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
@@ -747,7 +747,8 @@ future roadmap projects:
 
 ### 11. Groups, committees, classes, and ministry teams
 
-- **Status: Approved design; implementation pending.** Follow
+- **Status: Implementation in progress.** The approved design is reconciled and
+  the read-only legacy-structure inventory is complete. Follow
   [ChurchManager.GroupsMembership.Specification.md](ChurchManager.GroupsMembership.Specification.md),
   approved August 22, 2026.
 - Add general groups independent of worship-participant roles.
