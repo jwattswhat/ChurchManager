@@ -146,6 +146,13 @@ SPECS = (
         c("LastName", "Last Name", 100), c("FirstName", "First Name", 95),
         c("AttendanceStatus", "Attendance", 75), c("MeetingStatus", "Meeting Status", 85)),
         "StartsAt DESC, LastName, FirstName", 4, "landscape", filter_fields=("GroupID",)),
+    ReportSpec("CMGR04", "Groups - Attendance Sheet", "groups.reports.view", "rpt_group_attendance_sheet", (
+        c("LastName", "Last Name", 92), c("FirstName", "First Name", 82),
+        c("Roles", "Role(s)", 86), c("Present", "Present", 48),
+        c("Absent", "Absent", 46), c("Excused", "Excused", 50),
+        c("Notes", "Notes", 136)),
+        "LastName, FirstName", 4, "landscape",
+        filter_fields=("GroupID", "MembershipStartDate", "MembershipEndDate")),
 
     ReportSpec("CMJR01", "Journal", "reports.pastoral.confidential", "rpt_journal", (
         c("StartDate", "Start", 75, "date"), c("EndDate", "End", 75, "date"), c("Event", "Event", 180),

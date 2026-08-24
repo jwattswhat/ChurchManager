@@ -15,6 +15,11 @@ This guide reflects the ChurchManager source and form definitions present in Aug
 
 > **Privacy warning:** ChurchManager handles membership, contact, attendance, and pastoral information. Database dumps, generated reports, OAuth files, and congregational documents must be treated as confidential records. Historical database copies can still contain financial and donor records even though those features have been removed from the application.
 
+Group secretaries can print **Groups - Attendance Sheet** from Reports. Select
+the Group and use Start Date as the meeting date. The sheet lists members whose
+membership is active on that date, provides attendance and note columns, and
+adds blank visitor lines. Restricted Groups remain limited to authorized users.
+
 ## 1. Application overview
 
 ChurchManager is a Windows desktop application for managing the administrative and worship life of a congregation. It was written in Python by Rev. Jonathan C. Watt and uses:

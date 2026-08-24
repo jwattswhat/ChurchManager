@@ -63,6 +63,8 @@ class TabularDatasetProvider:
             sql += f" ORDER BY {order_by}"
             cursor.execute(sql, tuple(values))
             records = self._rows(cursor)
+            if code == "CMGR04":
+                records.extend(self._group_attendance_visitor_rows(6))
             if spec.row_color_field:
                 threshold = self._positive_integer(parameters.get("MissedWeeks"), 3)
                 for record in records:
@@ -73,7 +75,7 @@ class TabularDatasetProvider:
         finally:
             cursor.close()
         display = "; ".join(
-            f"{key}: {value}" for key, value in parameters.items()
+            f"{self._parameter_label(code, key)}: {value}" for key, value in parameters.items()
             if value not in (None, "", "All")
         ) or "All records"
         return ReportDataset.create(contract, {
@@ -90,7 +92,7 @@ class TabularDatasetProvider:
             "rpt_journal", "rpt_pastor_report", "rpt_pastoral_care_work_list",
             "rpt_pastoral_care_activity_summary",
             "rpt_group_current_roster", "rpt_person_group_participation",
-            "rpt_group_meeting_attendance",
+            "rpt_group_meeting_attendance", "rpt_group_attendance_sheet",
         }
         if view in direct:
             where, values = [f"ChurchID={marker}"], [church_id]
@@ -120,6 +122,10 @@ class TabularDatasetProvider:
                 filters.append(f"{field}={self.marker}")
                 values.append(value)
         date_field = next((name for name in ("DateTime", "StartsAt", "Date", "StartDate") if name in field_names), None)
+        if spec.view == "rpt_group_attendance_sheet" and parameters.get("StartDate"):
+            filters.append(f"MembershipStartDate<={self.marker}")
+            filters.append(f"(MembershipEndDate IS NULL OR MembershipEndDate>={self.marker})")
+            values.extend((parameters["StartDate"], parameters["StartDate"]))
         if date_field and parameters.get("StartDate"):
             filters.append(f"{date_field}>={self.marker}")
             values.append(parameters["StartDate"])
@@ -130,6 +136,28 @@ class TabularDatasetProvider:
             filters.append(f"AttendanceType={self.marker}")
             values.append(parameters["AttendanceType"])
         return filters, values
+
+    @staticmethod
+    def _parameter_label(code, key):
+        if code == "CMGR04" and key == "StartDate":
+            return "Meeting date"
+        return key
+
+    @staticmethod
+    def _group_attendance_visitor_rows(count):
+        """Return writable guest lines without creating database identities."""
+        return [
+            {
+                "LastName": "Visitor / Guest",
+                "FirstName": "",
+                "Roles": "",
+                "Present": "",
+                "Absent": "",
+                "Excused": "",
+                "Notes": "",
+            }
+            for _ in range(count)
+        ]
 
     @staticmethod
     def _positive_integer(value, default):
