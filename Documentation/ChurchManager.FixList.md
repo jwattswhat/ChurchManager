@@ -30,15 +30,14 @@ from Sent to Accounting in the batch list.
 | 10 | Completed | [Import, export, and duplicate management](ChurchManager.DataManagement.Specification.md) | Reviewed partial-row import, privacy-safe export, verified portable archives, duplicate decisions, merge-impact preflight, and guarded transactional merges are implemented and accepted. |
 | 11 | Completed | [Groups, committees, classes, and ministry teams](ChurchManager.GroupsMembership.Specification.md) | Normalized Groups, membership, roles, meetings, attendance, communication review, protected sending, and privacy-safe reports have passed functional and visual acceptance. |
 | 12 | Completed | [Volunteer availability and responses](ChurchManager.VolunteerAvailability.Specification.md) | Date-specific unavailable periods, participant responses, conflicts, last-served information, and the maintained worship test dataset passed automated and visual acceptance. |
-| 13 | Later | [Asset management](ChurchManager.AssetManagement.Specification.md) | A deliberately small asset register, location, responsibility, maintenance-history, due-list, and retirement design is specified without turning ChurchManager into a full facilities-management system. |
-| 14 | Later | Projects and scheduling | Provide practical project plans, assignments, due dates, status, and scheduling for congregation work while remaining distinct from the retired generic Projects and Tasks subsystem. |
-| 15 | Later | Calendar integration | Share approved ChurchManager services, group meetings, assignments, and scheduled work with an external calendar; Google Calendar remains the primary calendar platform rather than duplicating a full calendar inside ChurchManager. |
-| 16 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
+| 13 | Next | [Custom profile fields and controlled tags](ChurchManager.CustomProfileFields.Specification.md) | Implement the approved application-neutral JSForm and ChurchManager contracts first. |
+| 14 | Spec proposed | [Calendar integration](ChurchManager.CalendarIntegration.Specification.md) | Maintain only ChurchManager-owned dates and a simple event list, then publish safely to an external calendar. |
+| 15 | Spec proposed | [Asset management](ChurchManager.AssetManagement.Specification.md) | A deliberately small asset register, location, responsibility, maintenance-history, due-list, and retirement design without a full facilities system. |
+| 16 | Spec proposed | [Projects and scheduling](ChurchManager.ProjectsScheduling.Specification.md) | Provide bounded congregation project plans, assignments, due dates, status, and external-calendar eligibility without restoring the retired generic subsystem. |
 | Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
 
-Item 13, the deliberately small Asset Management system, is the next
-development project. Items 14 through 16 remain separate later projects and
-should not delay a stable ChurchManager release.
+The approved Custom Profile Fields project is next, followed by Calendar
+Integration, Asset Management, and Projects and Scheduling in that order.
 
 ## Completed foundations retained for regression protection
 
