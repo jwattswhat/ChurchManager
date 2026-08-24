@@ -28,7 +28,7 @@ from Sent to Accounting in the batch list.
 | 8 | Completed | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Safe scheduling, handoffs, protected reports, recovery acceptance, and the encrypted restricted-note editor passed final visual acceptance on August 24, 2026. |
 | 9 | Complete | Remove Projects and Tasks | The generic subsystem, screens, reports, permissions, views, and tables are retired by migration 098; worship preparation checklists remain. |
 | 10 | Completed | [Import, export, and duplicate management](ChurchManager.DataManagement.Specification.md) | Reviewed partial-row import, privacy-safe export, verified portable archives, duplicate decisions, merge-impact preflight, and guarded transactional merges are implemented and accepted. |
-| 11 | In progress | [Groups, committees, classes, and ministry teams](ChurchManager.GroupsMembership.Specification.md) | Migration 106 normalized Group types, roles, membership terms, permissions, and existing valid data; application services and screens are next. |
+| 11 | In progress | [Groups, committees, classes, and ministry teams](ChurchManager.GroupsMembership.Specification.md) | Migration 106 normalized the database; the tested authorization and validation service is underway, with MariaDB persistence and screens next. |
 | 12 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
 | 13 | Later | General events and calendar integration | Useful, but Google Calendar should remain the primary calendar platform. |
 | 14 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
