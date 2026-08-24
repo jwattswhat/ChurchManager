@@ -178,9 +178,9 @@ class GroupCatalogDialog(wx.Dialog):
 class GroupDetailDialog(wx.Dialog):
     """Show Group identity and its current authorized roster."""
 
-    def __init__(self, parent, service, group_id):
+    def __init__(self, parent, connection, service, group_id):
         super().__init__(parent, title="Group", size=(820, 560), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
-        self.service = service; self.group_id = group_id
+        self.connection = connection; self.service = service; self.group_id = group_id
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
         self.heading = wx.StaticText(panel); font = self.heading.GetFont(); font.MakeBold(); font.SetPointSize(font.GetPointSize() + 2); self.heading.SetFont(font)
         self.summary = wx.StaticText(panel)
@@ -198,11 +198,14 @@ class GroupDetailDialog(wx.Dialog):
         outer.Add(self.members, 1, wx.EXPAND | wx.ALL, 14)
         buttons = wx.BoxSizer(wx.HORIZONTAL); self.add = wx.Button(panel, label="Add Member...")
         self.assign = wx.Button(panel, label="Assign Role..."); self.end = wx.Button(panel, label="End Membership...")
-        buttons.Add(self.add, 0, wx.RIGHT, 8); buttons.Add(self.assign, 0, wx.RIGHT, 8); buttons.Add(self.end)
+        self.meetings = wx.Button(panel, label="Meetings...")
+        buttons.Add(self.add, 0, wx.RIGHT, 8); buttons.Add(self.assign, 0, wx.RIGHT, 8); buttons.Add(self.end, 0, wx.RIGHT, 16)
+        buttons.Add(self.meetings)
         buttons.AddStretchSpacer(); buttons.Add(wx.Button(panel, wx.ID_CLOSE, "Close"))
         outer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14); panel.SetSizer(outer)
         self.add.Bind(wx.EVT_BUTTON, self.on_add); self.assign.Bind(wx.EVT_BUTTON, self.on_assign)
-        self.end.Bind(wx.EVT_BUTTON, self.on_end); self.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE), id=wx.ID_CLOSE)
+        self.end.Bind(wx.EVT_BUTTON, self.on_end); self.meetings.Bind(wx.EVT_BUTTON, self.on_meetings)
+        self.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE), id=wx.ID_CLOSE)
         self.show_ended.Bind(wx.EVT_CHECKBOX, lambda _event: self.refresh())
         self.refresh()
 
@@ -266,13 +269,19 @@ class GroupDetailDialog(wx.Dialog):
         except Exception as error: wx.MessageBox(str(error), "Unable to End Membership", wx.OK | wx.ICON_ERROR, self)
         finally: prompt.Destroy()
 
+    def on_meetings(self, _event):
+        from group_meeting_dialog import GroupMeetingsDialog
+        dialog = GroupMeetingsDialog(self, self.connection, self.service, self.group_id)
+        try: dialog.ShowModal()
+        finally: dialog.Destroy()
+
 
 class GroupsDialog(wx.Dialog):
     """List visible Groups and open their current membership workspace."""
 
     def __init__(self, parent, connection, session, authorization):
         super().__init__(parent, title="Groups", size=(900, 600), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
-        self.repository = MariaDBGroupRepository(connection); self.service = GroupService(self.repository, session, authorization)
+        self.connection = connection; self.repository = MariaDBGroupRepository(connection); self.service = GroupService(self.repository, session, authorization)
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
         title = wx.StaticText(panel, label="Congregational Groups"); font = title.GetFont(); font.MakeBold(); font.SetPointSize(font.GetPointSize() + 2); title.SetFont(font)
         outer.Add(title, 0, wx.ALL, 14)
@@ -312,7 +321,7 @@ class GroupsDialog(wx.Dialog):
     def on_open(self, _event):
         selected = self.list.GetFirstSelected()
         if selected < 0: return
-        dialog = GroupDetailDialog(self, self.service, self.rows[selected]["id"])
+        dialog = GroupDetailDialog(self, self.connection, self.service, self.rows[selected]["id"])
         try: dialog.ShowModal()
         finally: dialog.Destroy(); self.refresh()
 

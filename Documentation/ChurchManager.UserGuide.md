@@ -106,6 +106,14 @@ Authorized administrators may add congregation-owned **Group Types** and
 **Group Roles** from the Groups workspace. Retire an entry that should no longer
 be offered; retirement preserves its use on historical records.
 
+Choose **Meetings** inside a Group to schedule an individual meeting and review
+its meeting history. Open a meeting to record Present, Absent, Excused, or
+Unknown for the roster effective on that date. Double-clicking a person cycles
+the status. An existing same-congregation Person may be added as a meeting guest
+without becoming a Group member. The optional total head count can include
+unidentified visitors without creating artificial Person records. Group meeting
+attendance remains separate from worship attendance.
+
 Data Management provides a guarded duplicate review. Matching names, contact
 information, or mailing addresses are possible duplicates, not an automatic merge.
 Select a pair and choose **Not Duplicates** to record that both records are valid,
