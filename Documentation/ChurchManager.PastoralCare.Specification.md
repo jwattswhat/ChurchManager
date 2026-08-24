@@ -32,8 +32,11 @@ handoffs that copy no event note or prayer wording.
 The interactive `ChurchDBTest` restore path has been accepted with its protected
 recovery sidecar and required ChurchManager restart. Cross-machine recovery with
 actual restricted-note ciphertext and the isolated release rehearsal remain to
-be accepted before restricted-note entry is enabled. Key rotation also remains
-an acceptance requirement. Until all three protections pass, the scheduling
+be accepted before restricted-note entry is enabled. The disposable rehearsal
+is implemented in `accept_pastoral_key_recovery.py`; it rotates fictional
+ciphertext, restores both matched checkpoints into fresh isolated key stores,
+and proves wrong-password and tampered-package failures. Key rotation also
+remains an acceptance requirement. Until all three protections pass, the scheduling
 workflow is usable but the restricted-note editor must remain unavailable.
 Migration 105 and the restricted-note repository now establish and honor the
 authoritative active key version. The framework-independent rotation service
@@ -42,7 +45,7 @@ before/after backups, preserves older keys, atomically rewrites current rows,
 and leaves recovery unverified after any post-commit failure. Database Backup
 now provides the recovery-gated Master Administrator rotation control with
 distinct labeled backups and a working notice. Isolated replacement-machine
-acceptance remains gated.
+acceptance remains gated until that rehearsal is run successfully in apply mode.
 
 **Target:** ChurchManager
 

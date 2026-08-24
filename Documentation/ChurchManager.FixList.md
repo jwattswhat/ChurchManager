@@ -694,8 +694,9 @@ future roadmap projects:
   current rows, preserves older key versions, and fails closed if post-rotation
   recovery verification is incomplete. Database Backup now exposes the
   recovery-gated Master Administrator rotation control and creates distinct
-  labeled before/after backups. Visual acceptance and the isolated
-  replacement-machine recovery rehearsal remain.
+  labeled before/after backups. The disposable actual-ciphertext rehearsal is
+  implemented in `accept_pastoral_key_recovery.py`; visual acceptance and its
+  successful apply-mode result remain.
   - Interactive protected backup/restore and application restart passed in
     `ChurchDBTest`; ciphertext and isolated cross-machine recovery acceptance
     remain.
