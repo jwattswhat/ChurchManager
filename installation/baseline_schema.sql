@@ -1669,34 +1669,150 @@ CREATE TABLE `tblfamilydate` (
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblgroup` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
   `ChurchID` int(11) NOT NULL,
-  `Description` varchar(255) DEFAULT NULL,
-  `Number` int(11) DEFAULT NULL,
-  `GroupType` varchar(45) DEFAULT NULL,
-  `DateStarted` date DEFAULT NULL,
-  `Notes` longtext DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `fk_tblgroup_tblchurch1_idx` (`ChurchID`),
-  CONSTRAINT `fk_group_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+  `GroupKey` varchar(100) NOT NULL,
+  `Name` varchar(150) NOT NULL,
+  `GroupTypeID` int(11) NOT NULL,
+  `Description` varchar(500) DEFAULT NULL,
+  `Status` varchar(12) NOT NULL DEFAULT 'DRAFT',
+  `StartDate` date DEFAULT NULL,
+  `EndDate` date DEFAULT NULL,
+  `ExpectedClosureDate` date DEFAULT NULL,
+  `UsualMeetingDescription` varchar(255) DEFAULT NULL,
+  `DefaultLocation` varchar(150) DEFAULT NULL,
+  `CommunicationEnabled` tinyint(1) NOT NULL DEFAULT 0,
+  `PrivacyClass` varchar(12) NOT NULL DEFAULT 'STANDARD',
+  `Notes` varchar(1000) DEFAULT NULL,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  `Version` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_group_key` (`ChurchID`,`GroupKey`),
+  UNIQUE KEY `uq_group_current_name` (`ChurchID`,`Name`,`Status`),
+  KEY `ix_group_scope` (`ChurchID`,`Status`,`GroupTypeID`,`Name`),
+  KEY `fk_group_type` (`GroupTypeID`),
+  KEY `fk_group_creator` (`CreatedByUserID`),
+  KEY `fk_group_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_group_church_v2` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_group_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_group_type` FOREIGN KEY (`GroupTypeID`) REFERENCES `tblgrouptype` (`ID`),
+  CONSTRAINT `fk_group_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_group_status` CHECK (`Status` in ('DRAFT','ACTIVE','INACTIVE','CLOSED')),
+  CONSTRAINT `ck_group_privacy` CHECK (`PrivacyClass` in ('STANDARD','RESTRICTED')),
+  CONSTRAINT `ck_group_dates` CHECK (`EndDate` is null or `StartDate` is null or `EndDate` >= `StartDate`),
+  CONSTRAINT `ck_group_closed_date` CHECK (`Status` <> 'CLOSED' or `EndDate` is not null),
+  CONSTRAINT `ck_group_version` CHECK (`Version` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `tblgroupmember` (
+CREATE TABLE `tblgroupmembership` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `GroupID` int(11) NOT NULL,
-  `GroupRole` varchar(255) NOT NULL,
   `PersonID` int(11) NOT NULL,
-  `StartDate` date DEFAULT NULL,
+  `StartDate` date NOT NULL,
   `EndDate` date DEFAULT NULL,
-  `Notes` longtext NOT NULL,
+  `StatusReason` varchar(100) DEFAULT NULL,
+  `Notes` varchar(500) DEFAULT NULL,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  `Version` int(11) NOT NULL DEFAULT 1,
   PRIMARY KEY (`ID`),
-  KEY `fk_tblgroupmember_tblgroup1_idx` (`GroupID`),
-  KEY `fk_tblgroupmember_tblperson1_idx` (`PersonID`),
-  CONSTRAINT `fk_groupmember_group` FOREIGN KEY (`GroupID`) REFERENCES `tblgroup` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_groupmember_person` FOREIGN KEY (`PersonID`) REFERENCES `tblperson` (`ID`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+  KEY `ix_group_membership_current` (`GroupID`,`EndDate`,`StartDate`,`PersonID`),
+  KEY `ix_group_membership_person` (`PersonID`,`EndDate`,`StartDate`,`GroupID`),
+  KEY `fk_group_membership_creator` (`CreatedByUserID`),
+  KEY `fk_group_membership_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_group_membership_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_group_membership_group` FOREIGN KEY (`GroupID`) REFERENCES `tblgroup` (`ID`),
+  CONSTRAINT `fk_group_membership_person` FOREIGN KEY (`PersonID`) REFERENCES `tblperson` (`ID`),
+  CONSTRAINT `fk_group_membership_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_group_membership_dates` CHECK (`EndDate` is null or `EndDate` >= `StartDate`),
+  CONSTRAINT `ck_group_membership_version` CHECK (`Version` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblgroupmembershiprole` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `GroupMembershipID` int(11) NOT NULL,
+  `GroupRoleID` int(11) NOT NULL,
+  `StartDate` date NOT NULL,
+  `EndDate` date DEFAULT NULL,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  `Version` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`ID`),
+  KEY `ix_group_membership_role_current` (`GroupMembershipID`,`EndDate`,`StartDate`),
+  KEY `ix_group_role_current` (`GroupRoleID`,`EndDate`,`StartDate`),
+  KEY `fk_group_membership_role_creator` (`CreatedByUserID`),
+  KEY `fk_group_membership_role_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_group_membership_role_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_group_membership_role_membership` FOREIGN KEY (`GroupMembershipID`) REFERENCES `tblgroupmembership` (`ID`),
+  CONSTRAINT `fk_group_membership_role_role` FOREIGN KEY (`GroupRoleID`) REFERENCES `tblgrouprole` (`ID`),
+  CONSTRAINT `fk_group_membership_role_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_group_membership_role_dates` CHECK (`EndDate` is null or `EndDate` >= `StartDate`),
+  CONSTRAINT `ck_group_membership_role_version` CHECK (`Version` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblgrouprole` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `GroupRoleKey` varchar(80) NOT NULL,
+  `Label` varchar(100) NOT NULL,
+  `Description` varchar(255) DEFAULT NULL,
+  `LeadershipRole` tinyint(1) NOT NULL DEFAULT 0,
+  `WarningLimit` int(11) DEFAULT NULL,
+  `DisplayOrder` int(11) NOT NULL DEFAULT 0,
+  `Active` tinyint(1) NOT NULL DEFAULT 1,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_group_role_key` (`ChurchID`,`GroupRoleKey`),
+  UNIQUE KEY `uq_group_role_label` (`ChurchID`,`Label`),
+  KEY `fk_group_role_creator` (`CreatedByUserID`),
+  KEY `fk_group_role_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_group_role_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_group_role_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_group_role_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_group_role_warning_limit` CHECK (`WarningLimit` is null or `WarningLimit` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblgrouptype` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `GroupTypeKey` varchar(80) NOT NULL,
+  `Label` varchar(100) NOT NULL,
+  `Description` varchar(255) DEFAULT NULL,
+  `DisplayOrder` int(11) NOT NULL DEFAULT 0,
+  `DefaultPrivacyClass` varchar(12) NOT NULL DEFAULT 'STANDARD',
+  `Active` tinyint(1) NOT NULL DEFAULT 1,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_group_type_key` (`ChurchID`,`GroupTypeKey`),
+  UNIQUE KEY `uq_group_type_label` (`ChurchID`,`Label`),
+  KEY `fk_group_type_creator` (`CreatedByUserID`),
+  KEY `fk_group_type_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_group_type_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_group_type_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_group_type_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_group_type_privacy` CHECK (`DefaultPrivacyClass` in ('STANDARD','RESTRICTED'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;

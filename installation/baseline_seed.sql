@@ -570,6 +570,25 @@ INSERT IGNORE INTO tblPastoralEncryptionState
     (ID, ActiveKeyVersion, RecoveryVerified)
 VALUES (1, 1, 0);
 
+-- source: 106_add_normalized_groups_foundation.sql
+INSERT IGNORE INTO tblPermission (Name,Description,IsSensitive,Active) VALUES
+('groups.view','View standard Groups and membership.',0,1),
+('groups.edit','Create and update standard Groups.',0,1),
+('groups.define_types','Administer Group types.',0,1),
+('groups.view_restricted','View restricted Groups and membership.',1,1),
+('groups.edit_restricted','Create and update restricted Groups.',1,1),
+('groups.membership.view','View Group membership terms.',0,1),
+('groups.membership.edit','Create and update Group membership terms.',0,1),
+('groups.roles.define','Administer Group roles.',0,1),
+('groups.roles.assign','Assign dated Group roles.',0,1),
+('groups.reports.view','Run approved Group reports.',0,1),
+('groups.export','Export authorized Group data.',1,1);
+
+-- source: 106_add_normalized_groups_foundation.sql
+INSERT IGNORE INTO tblRolePermission (RoleID,PermissionID)
+SELECT r.ID,p.ID FROM tblRole r JOIN tblPermission p ON p.Name LIKE 'groups.%'
+WHERE r.Name='Master Administrator';
+
 -- source: current-schema starter policy
 INSERT INTO tblWorshipRole (Name,Description,DisplayOrder,Active) VALUES
 ('Liturgist',NULL,10,1),('Crucifer','Carries the cross',20,1),
