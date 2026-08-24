@@ -92,10 +92,20 @@ class ParticipantNotificationRepository:
 
 
 class ParticipantNotificationService:
-    DEFAULT_BODY = (
+    MESSAGES = {
+        "Service request": (
+            "Please let the worship planner know whether you can serve in the "
+            "position shown in the attached Worship Planning report."
+        ),
+        "Reminder": (
+            "This is a reminder that you are scheduled to serve in worship. "
+            "Please review the attached Worship Planning report for details."
+        ),
+        "Information": (
         "You are scheduled to serve in worship. Please review the attached "
         "Worship Planning report for details."
-    )
+        ),
+    }
 
     def __init__(self, repository, authorization, report_service, mail_service=None):
         self.repository = repository
@@ -104,12 +114,17 @@ class ParticipantNotificationService:
         self.mail = mail_service
 
     @staticmethod
-    def _subject(context):
+    def _subject(context, message_kind="Information"):
         service_date = context.service_datetime.strftime("%A, %B %d, %Y at %I:%M %p")
         service_date = service_date.replace(" 0", " ")
-        return "Worship Planning - {} - {}".format(service_date, context.church_name)
+        prefix = {"Service request": "Worship Service Request",
+                  "Reminder": "Worship Service Reminder"}.get(message_kind,"Worship Planning")
+        return "{} - {} - {}".format(prefix, service_date, context.church_name)
 
-    def prepare(self, service_id):
+    def prepare(self, service_id, message_kind="Information"):
+        """Prepare a reviewable request, reminder, or informational message."""
+        if message_kind not in self.MESSAGES:
+            raise ValueError("Select a valid participant message type.")
         self.authorization.require("worship.manage", operation="Review participant notification")
         context = self.repository.service_context(service_id)
         grouped = {}
@@ -134,7 +149,8 @@ class ParticipantNotificationService:
                 participant_id, name, email, tuple(positions), status,
             ))
         return NotificationPlan(
-            context, tuple(recipients), self._subject(context), self.DEFAULT_BODY,
+            context, tuple(recipients), self._subject(context,message_kind),
+            self.MESSAGES[message_kind],
         )
 
     def generate_attachment(self, plan, output=None):

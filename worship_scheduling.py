@@ -1,11 +1,13 @@
 """Normalized worship participants, requirements, and preview-based scheduling."""
 
+from datetime import date, datetime
+
 import wx
 import wx.adv
 
 from bulletin_orders import portable_connection
 from worship_scheduling_rules import (
-    AssignmentSuggestion, SchedulingSuggestionService, pattern_matches,
+    AssignmentSuggestion, SchedulingSuggestionService, exception_applies, pattern_matches,
     required_position_rows, serialized_values, time_text,
 )
 
@@ -100,6 +102,43 @@ class WorshipSchedulingRepository:
             "WHERE ParticipantID=? AND Active=1", (participant_id,),
         )}
 
+    def availability_exceptions(self, participant_id, active_only=False):
+        """Return date-specific unavailability for one participant."""
+        sql = (
+            "SELECT e.ID,e.WorshipRoleID,e.StartDate,e.EndDate,COALESCE(e.Reason,''),e.Active,"
+            "COALESCE(wr.Name,'All roles') FROM tblParticipantAvailabilityException e "
+            "LEFT JOIN tblWorshipRole wr ON wr.ID=e.WorshipRoleID WHERE e.ParticipantID=?"
+        )
+        if active_only:
+            sql += " AND e.Active=1"
+        return self.all(sql + " ORDER BY e.StartDate DESC,e.EndDate DESC,e.ID DESC", (participant_id,))
+
+    def save_availability_exception(self, exception_id, participant_id, values):
+        """Insert or update one date-specific unavailability period."""
+        role_id, start_date, end_date, reason, active = values
+        if end_date < start_date:
+            raise ValueError("The through date cannot be before the from date.")
+        cursor = self.connection.cursor()
+        try:
+            if exception_id is None:
+                cursor.execute(
+                    "INSERT INTO tblParticipantAvailabilityException "
+                    "(ParticipantID,WorshipRoleID,StartDate,EndDate,Reason,Active) "
+                    "VALUES (?,?,?,?,?,?)",
+                    (participant_id,role_id,start_date,end_date,reason or None,int(active)),
+                )
+            else:
+                cursor.execute(
+                    "UPDATE tblParticipantAvailabilityException SET WorshipRoleID=?,StartDate=?,"
+                    "EndDate=?,Reason=?,Active=? WHERE ID=? AND ParticipantID=?",
+                    (role_id,start_date,end_date,reason or None,int(active),exception_id,participant_id),
+                )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback(); raise
+        finally:
+            cursor.close()
+
     def save_participant(self, participant_id, values, role_ids, pattern_ids):
         person_id, display_name, email, phone, active, external, note = values
         cursor = self.connection.cursor()
@@ -166,6 +205,7 @@ class WorshipSchedulingRepository:
         references = (
             ("tblParticipantRole", "eligible participant"),
             ("tblParticipantAvailability", "availability pattern"),
+            ("tblParticipantAvailabilityException", "unavailable period"),
             ("tblWorshipRoleRequirement", "Order of Service template"),
             ("tblServiceRole", "worship service assignment"),
         )
@@ -220,13 +260,24 @@ class WorshipSchedulingRepository:
     def assignments(self, service_id):
         return self.all(
             "SELECT sr.ID,sr.WorshipRoleID,wr.Name,sr.ParticipantID,"
-            "COALESCE(NULLIF(p.DisplayName,''),p.Name),sr.AssignmentStatus,COALESCE(sr.Note,'') "
+            "COALESCE(NULLIF(p.DisplayName,''),p.Name),sr.AssignmentStatus,COALESCE(sr.Note,''),"
+            "sr.RespondedAt,COALESCE(sr.ResponseSource,''),"
+            "(SELECT MAX(DATE(previous.DateTime)) FROM tblServiceRole prior "
+            "JOIN tblService previous ON previous.ID=prior.ServiceID "
+            "WHERE prior.ParticipantID=sr.ParticipantID AND prior.WorshipRoleID=sr.WorshipRoleID "
+            "AND prior.AssignmentStatus<>'DECLINED' AND previous.DateTime<s.DateTime),"
+            "EXISTS(SELECT 1 FROM tblParticipantAvailabilityException blocked "
+            "WHERE blocked.ParticipantID=sr.ParticipantID AND blocked.Active=1 "
+            "AND (blocked.WorshipRoleID IS NULL OR blocked.WorshipRoleID=sr.WorshipRoleID) "
+            "AND DATE(s.DateTime) BETWEEN blocked.StartDate AND blocked.EndDate) "
             "FROM tblServiceRole sr JOIN tblParticipant p ON p.ID=sr.ParticipantID "
             "JOIN tblWorshipRole wr ON wr.ID=sr.WorshipRoleID "
+            "JOIN tblService s ON s.ID=sr.ServiceID "
             "WHERE sr.ServiceID=? ORDER BY wr.DisplayOrder,5,sr.ID", (service_id,),
         )
 
-    def save_assignment(self, assignment_id, service_id, role_id, participant_id, status, note):
+    def save_assignment(self, assignment_id, service_id, role_id, participant_id, status, note,
+                        responded_at=None, response_source=None):
         if not self.one("SELECT ID FROM tblWorshipRole WHERE ID=?", (role_id,)):
             raise ValueError("Select a valid worship role.")
         cursor = self.connection.cursor()
@@ -234,15 +285,18 @@ class WorshipSchedulingRepository:
             if assignment_id is None:
                 cursor.execute(
                     "INSERT INTO tblServiceRole "
-                    "(ServiceID,ParticipantID,WorshipRoleID,AssignmentStatus,Note) "
-                    "VALUES (?,?,?,?,?)",
-                    (service_id,participant_id,role_id,status,note or None),
+                    "(ServiceID,ParticipantID,WorshipRoleID,AssignmentStatus,RespondedAt,"
+                    "ResponseSource,Note) VALUES (?,?,?,?,?,?,?)",
+                    (service_id,participant_id,role_id,status,responded_at,
+                     response_source or None,note or None),
                 )
             else:
                 cursor.execute(
                     "UPDATE tblServiceRole SET ParticipantID=?,WorshipRoleID=?,"
-                    "AssignmentStatus=?,Note=? WHERE ID=? AND ServiceID=?",
-                    (participant_id,role_id,status,note or None,assignment_id,service_id),
+                    "AssignmentStatus=?,RespondedAt=?,ResponseSource=?,Note=? "
+                    "WHERE ID=? AND ServiceID=?",
+                    (participant_id,role_id,status,responded_at,response_source or None,
+                     note or None,assignment_id,service_id),
                 )
             self.connection.commit()
         except Exception:
@@ -354,7 +408,9 @@ class WorshipSchedulingRepository:
                 "AND a.Active=1 AND sp.Active=1", (participant[0], role_id),
             )
             if not patterns or any(pattern_matches(pattern, starts_at, season) for pattern in patterns):
-                result.append(participant)
+                exceptions = self.availability_exceptions(participant[0], active_only=True)
+                if not any(exception_applies(item, starts_at, role_id) for item in exceptions):
+                    result.append(participant)
         return result
 
 
@@ -419,7 +475,8 @@ class ParticipantManagerDialog(wx.Dialog):
             self.grid.AppendColumn(label,width=width)
         self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED,self.on_edit); outer.Add(self.grid,1,wx.EXPAND|wx.LEFT|wx.RIGHT,10)
         actions=wx.BoxSizer(wx.HORIZONTAL)
-        for label,handler in (("Add Participant...",self.on_add),("Edit Participant...",self.on_edit),("Manage Roles...",self.on_roles)):
+        for label,handler in (("Add Participant...",self.on_add),("Edit Participant...",self.on_edit),
+                              ("Availability...",self.on_availability),("Manage Roles...",self.on_roles)):
             button=wx.Button(panel,label=label); button.Bind(wx.EVT_BUTTON,handler); actions.Add(button,0,wx.RIGHT,8)
         actions.AddStretchSpacer(); actions.Add(wx.Button(panel,wx.ID_CANCEL,"Close"))
         outer.Add(actions,0,wx.EXPAND|wx.ALL,10); panel.SetSizer(outer); self.refresh()
@@ -448,6 +505,102 @@ class ParticipantManagerDialog(wx.Dialog):
         if row: self._edit(row)
     def on_roles(self,_event):
         dialog=RoleManagerDialog(self,self.repository); dialog.ShowModal(); dialog.Destroy(); self.refresh()
+    def on_availability(self,_event):
+        row=self.selected()
+        if not row:
+            wx.MessageBox("Select a participant first.","Volunteer Availability",wx.OK|wx.ICON_INFORMATION,self); return
+        dialog=AvailabilityManagerDialog(self,self.repository,row)
+        try: dialog.ShowModal()
+        finally: dialog.Destroy()
+
+
+def _wx_date(value):
+    result=wx.DateTime()
+    if value:
+        result.Set(int(value.day),int(value.month)-1,int(value.year))
+    else:
+        result.SetToCurrent()
+    return result
+
+
+def _python_date(control):
+    value=control.GetValue()
+    return date(value.GetYear(),value.GetMonth()+1,value.GetDay())
+
+
+class AvailabilityEditDialog(wx.Dialog):
+    """Edit one participant's date-specific unavailable period."""
+    def __init__(self,parent,repository,row=None):
+        super().__init__(parent,title="Unavailable Period",size=(520,310))
+        self.repository,self.row=repository,row; panel=wx.Panel(self)
+        self.roles=[(None,"All roles"),*[(item[0],item[1]) for item in repository.roles()]]
+        self.role=wx.Choice(panel,choices=[item[1] for item in self.roles])
+        self.start=wx.adv.DatePickerCtrl(panel); self.end=wx.adv.DatePickerCtrl(panel)
+        self.reason=wx.TextCtrl(panel); self.active=wx.CheckBox(panel,label="Active")
+        form=wx.FlexGridSizer(cols=2,vgap=9,hgap=10); form.AddGrowableCol(1,1)
+        for label,control in (("Applies to",self.role),("From",self.start),("Through",self.end),
+                              ("Brief reason",self.reason),("",self.active)):
+            form.Add(wx.StaticText(panel,label=label+(":" if label else "")),0,wx.ALIGN_CENTER_VERTICAL)
+            form.Add(control,1,wx.EXPAND)
+        note=wx.StaticText(panel,label="Do not enter pastoral or medical details here.")
+        note.SetForegroundColour(wx.Colour(0,90,190))
+        outer=wx.BoxSizer(wx.VERTICAL); outer.Add(note,0,wx.ALL,12); outer.Add(form,1,wx.EXPAND|wx.LEFT|wx.RIGHT,12)
+        outer.Add(dialog_button_sizer(self,panel),0,wx.EXPAND|wx.ALL,12); panel.SetSizer(outer)
+        self.role.SetSelection(0); self.active.SetValue(True)
+        if row:
+            self.role.SetSelection(next((i for i,item in enumerate(self.roles) if item[0]==row[1]),0))
+            self.start.SetValue(_wx_date(row[2])); self.end.SetValue(_wx_date(row[3]))
+            self.reason.SetValue(str(row[4] or "")); self.active.SetValue(bool(row[5]))
+
+    def values(self):
+        return (self.roles[self.role.GetSelection()][0],_python_date(self.start),
+                _python_date(self.end),self.reason.GetValue().strip(),self.active.GetValue())
+
+
+class AvailabilityManagerDialog(wx.Dialog):
+    """Maintain date-specific unavailability for one worship participant."""
+    def __init__(self,parent,repository,participant):
+        super().__init__(parent,title="Volunteer Availability",size=(760,480),
+                         style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+        self.repository,self.participant,self.rows=repository,participant,[]; panel=wx.Panel(self)
+        outer=wx.BoxSizer(wx.VERTICAL)
+        heading=wx.StaticText(panel,label=f"Unavailable periods for {participant[2]}")
+        heading.SetFont(heading.GetFont().Bold()); outer.Add(heading,0,wx.ALL,12)
+        note=wx.StaticText(panel,label="Usual service patterns remain unchanged. These dates override them.")
+        note.SetForegroundColour(wx.Colour(0,90,190)); outer.Add(note,0,wx.LEFT|wx.RIGHT|wx.BOTTOM,12)
+        self.grid=wx.ListCtrl(panel,style=wx.LC_REPORT|wx.LC_SINGLE_SEL)
+        for label,width in (("From",105),("Through",105),("Role",150),("Reason",280),("Status",80)):
+            self.grid.AppendColumn(label,width=width)
+        self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED,self.on_edit); outer.Add(self.grid,1,wx.EXPAND|wx.LEFT|wx.RIGHT,12)
+        actions=wx.BoxSizer(wx.HORIZONTAL)
+        for label,handler in (("Add Period...",self.on_add),("Edit Period...",self.on_edit)):
+            button=wx.Button(panel,label=label); button.Bind(wx.EVT_BUTTON,handler); actions.Add(button,0,wx.RIGHT,8)
+        actions.AddStretchSpacer(); actions.Add(wx.Button(panel,wx.ID_CANCEL,"Close"))
+        outer.Add(actions,0,wx.EXPAND|wx.ALL,12); panel.SetSizer(outer); self.refresh()
+
+    def refresh(self):
+        self.rows=self.repository.availability_exceptions(self.participant[0]); self.grid.DeleteAllItems()
+        for index,row in enumerate(self.rows):
+            item=self.grid.InsertItem(index,row[2].strftime("%m/%d/%Y"))
+            for column,value in enumerate((row[3].strftime("%m/%d/%Y"),row[6],row[4],
+                                           "Active" if row[5] else "Inactive"),1):
+                self.grid.SetItem(item,column,str(value or ""))
+            if not row[5]: self.grid.SetItemTextColour(item,wx.Colour(130,130,130))
+    def selected(self):
+        index=self.grid.GetFirstSelected(); return self.rows[index] if index>=0 else None
+    def _edit(self,row):
+        dialog=AvailabilityEditDialog(self,self.repository,row)
+        try:
+            if dialog.ShowModal()==wx.ID_OK:
+                self.repository.save_availability_exception(row[0] if row else None,
+                    self.participant[0],dialog.values()); self.refresh()
+        except Exception as error:
+            wx.MessageBox(str(error),"Unable to Save Availability",wx.OK|wx.ICON_ERROR,self)
+        finally: dialog.Destroy()
+    def on_add(self,_event): self._edit(None)
+    def on_edit(self,_event):
+        row=self.selected()
+        if row: self._edit(row)
 
 
 class RoleManagerDialog(wx.Dialog):
@@ -643,21 +796,25 @@ class RequirementDialog(wx.Dialog):
 
 
 class AssignmentEditDialog(wx.Dialog):
-    STATUSES=("ASSIGNED","SUGGESTED","CONFIRMED","DECLINED")
+    STATUSES=("PENDING","CONFIRMED","DECLINED","ASSIGNED","SUGGESTED")
+    SOURCES=("Not recorded","Planner","Email","Phone","In person")
     def __init__(self,parent,repository,row=None,required_role_id=None):
         super().__init__(parent,title="Service Participant Assignment"); self.repository=repository; self.roles=repository.roles(); self.participants=repository.participants(); panel=wx.Panel(self); s=wx.FlexGridSizer(cols=2,vgap=8,hgap=10); s.AddGrowableCol(1,1)
-        self.role=wx.Choice(panel,choices=[r[1] for r in self.roles]); self.participant=wx.Choice(panel,choices=[p[2] for p in self.participants]); self.status=wx.Choice(panel,choices=list(self.STATUSES)); self.note=wx.TextCtrl(panel)
-        for label,control in (("Role",self.role),("Participant",self.participant),("Status",self.status),("Note",self.note)): s.Add(wx.StaticText(panel,label=label+":"),0,wx.ALIGN_CENTER_VERTICAL); s.Add(control,1,wx.EXPAND)
-        outer=wx.BoxSizer(wx.VERTICAL); outer.Add(s,1,wx.EXPAND|wx.ALL,10); outer.Add(dialog_button_sizer(self,panel),0,wx.EXPAND|wx.ALL,10); panel.SetSizer(outer); dialog_size=(520,260); self.SetSize(dialog_size)
+        self.role=wx.Choice(panel,choices=[r[1] for r in self.roles]); self.participant=wx.Choice(panel,choices=[p[2] for p in self.participants]); self.status=wx.Choice(panel,choices=list(self.STATUSES)); self.source=wx.Choice(panel,choices=list(self.SOURCES)); self.note=wx.TextCtrl(panel)
+        for label,control in (("Role",self.role),("Participant",self.participant),("Response",self.status),("Recorded from",self.source),("Note",self.note)): s.Add(wx.StaticText(panel,label=label+":"),0,wx.ALIGN_CENTER_VERTICAL); s.Add(control,1,wx.EXPAND)
+        outer=wx.BoxSizer(wx.VERTICAL); outer.Add(s,1,wx.EXPAND|wx.ALL,10); outer.Add(dialog_button_sizer(self,panel),0,wx.EXPAND|wx.ALL,10); panel.SetSizer(outer); dialog_size=(540,320); self.SetSize(dialog_size)
         self.role.SetSelection(0 if self.roles else wx.NOT_FOUND); self.participant.SetSelection(0 if self.participants else wx.NOT_FOUND); self.status.SetSelection(0)
+        self.source.SetSelection(0)
         if row:
-            self.role.SetSelection(next((i for i,r in enumerate(self.roles) if r[0]==row[1]),0)); self.participant.SetSelection(next((i for i,p in enumerate(self.participants) if p[0]==row[3]),0)); self.status.SetSelection(next((i for i,v in enumerate(self.STATUSES) if v==row[5]),0)); self.note.SetValue(row[6] or "")
+            self.role.SetSelection(next((i for i,r in enumerate(self.roles) if r[0]==row[1]),0)); self.participant.SetSelection(next((i for i,p in enumerate(self.participants) if p[0]==row[3]),0)); self.status.SetSelection(next((i for i,v in enumerate(self.STATUSES) if v==row[5]),0)); self.note.SetValue(row[6] or ""); self.source.SetSelection(next((i for i,v in enumerate(self.SOURCES) if v==row[8]),0))
         elif required_role_id is not None:
             self.role.SetSelection(next((i for i,r in enumerate(self.roles) if r[0]==required_role_id),0))
             self.role.Enable(False)
     def values(self):
         if self.role.GetSelection()<0 or self.participant.GetSelection()<0: raise ValueError("Select both a role and a participant.")
-        return (self.roles[self.role.GetSelection()][0],self.participants[self.participant.GetSelection()][0],self.status.GetStringSelection(),self.note.GetValue().strip())
+        status=self.status.GetStringSelection(); source=self.source.GetStringSelection()
+        responded_at=datetime.now() if status in {"CONFIRMED","DECLINED"} else None
+        return (self.roles[self.role.GetSelection()][0],self.participants[self.participant.GetSelection()][0],status,self.note.GetValue().strip(),responded_at,None if source=="Not recorded" else source)
 
 
 class ServiceParticipantsDialog(wx.Dialog):
@@ -666,7 +823,7 @@ class ServiceParticipantsDialog(wx.Dialog):
         self.repository=WorshipSchedulingRepository(connection); self.service_id=service_id; self.rows=[]; context=self.repository.service_context(service_id)
         panel=wx.Panel(self); outer=wx.BoxSizer(wx.VERTICAL); heading=wx.StaticText(panel,label=(str(context[5]) + " - " + str(context[2])) if context else "Worship Service"); heading.SetFont(heading.GetFont().Bold()); outer.Add(heading,0,wx.ALL,10)
         self.grid=wx.ListCtrl(panel,style=wx.LC_REPORT|wx.LC_SINGLE_SEL)
-        for label,width in (("Required position",200),("Participant",240),("Status",110),("Note",280)): self.grid.AppendColumn(label,width=width)
+        for label,width in (("Required position",170),("Participant",190),("Response",95),("Last served",105),("Availability",105),("Note",210)): self.grid.AppendColumn(label,width=width)
         self.grid.Bind(wx.EVT_LIST_ITEM_ACTIVATED,self.on_edit)
         self.grid.Bind(wx.EVT_LIST_ITEM_SELECTED,self.on_selection)
         self.grid.Bind(wx.EVT_LIST_ITEM_DESELECTED,self.on_selection)
@@ -686,12 +843,14 @@ class ServiceParticipantsDialog(wx.Dialog):
             position=f"{role} {slot}" if required and total>1 else role
             item=self.grid.InsertItem(i,position)
             if assignment:
-                for col,value in enumerate((assignment[4],assignment[5].title(),assignment[6]),1): self.grid.SetItem(item,col,str(value or ""))
-                if assignment[5]=="DECLINED": self.grid.SetItemTextColour(item,wx.RED)
+                last_served=assignment[9].strftime("%m/%d/%Y") if assignment[9] else "Never"
+                conflict="Conflict" if assignment[10] else "Available"
+                for col,value in enumerate((assignment[4],assignment[5].title(),last_served,conflict,assignment[6]),1): self.grid.SetItem(item,col,str(value or ""))
+                if assignment[5]=="DECLINED" or assignment[10]: self.grid.SetItemTextColour(item,wx.RED)
                 elif assignment[5]=="SUGGESTED": self.grid.SetItemTextColour(item,wx.Colour(190,90,0))
             else:
                 self.grid.SetItem(item,1,"Double-click to assign")
-                self.grid.SetItem(item,2,"Open")
+                self.grid.SetItem(item,2,"Open"); self.grid.SetItem(item,4,"")
                 self.grid.SetItemTextColour(item,wx.RED)
     def selected(self):
         index=self.grid.GetFirstSelected(); return self.rows[index] if index>=0 else None
@@ -701,7 +860,7 @@ class ServiceParticipantsDialog(wx.Dialog):
         dialog=AssignmentEditDialog(self,self.repository,row,required_role_id)
         try:
             if dialog.ShowModal()==wx.ID_OK:
-                role,participant,status,note=dialog.values(); self.repository.save_assignment(row[0] if row else None,self.service_id,role,participant,status,note); self.refresh()
+                role,participant,status,note,responded_at,source=dialog.values(); self.repository.save_assignment(row[0] if row else None,self.service_id,role,participant,status,note,responded_at,source); self.refresh()
         except Exception as error: wx.MessageBox(str(error),"Unable to Save Assignment",wx.OK|wx.ICON_ERROR,self)
         finally: dialog.Destroy()
     def on_add(self,_event): self._edit(None)

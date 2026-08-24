@@ -612,7 +612,24 @@ SET character_set_client = utf8mb4;
   1 AS `Role`,
   1 AS `Participant`,
   1 AS `AssignmentStatus`,
+  1 AS `RespondedAt`,
+  1 AS `ResponseSource`,
   1 AS `Note` */;
+SET character_set_client = @saved_cs_client;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `rpt_worship_volunteer_availability` AS SELECT
+ 1 AS `ID`,
+  1 AS `ParticipantID`,
+  1 AS `Participant`,
+  1 AS `WorshipRoleID`,
+  1 AS `Role`,
+  1 AS `StartDate`,
+  1 AS `EndDate`,
+  1 AS `Reason`,
+  1 AS `Active`,
+  1 AS `CreatedAt`,
+  1 AS `UpdatedAt` */;
 SET character_set_client = @saved_cs_client;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
@@ -2418,6 +2435,25 @@ CREATE TABLE `tblparticipantavailability` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblparticipantavailabilityexception` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `ParticipantID` int(11) NOT NULL,
+  `WorshipRoleID` int(11) DEFAULT NULL,
+  `StartDate` date NOT NULL,
+  `EndDate` date NOT NULL,
+  `Reason` varchar(255) DEFAULT NULL,
+  `Active` tinyint(1) NOT NULL DEFAULT 1,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  KEY `ix_participant_exception_dates` (`ParticipantID`,`Active`,`StartDate`,`EndDate`),
+  KEY `ix_participant_exception_role` (`WorshipRoleID`),
+  CONSTRAINT `fk_participantexception_participant` FOREIGN KEY (`ParticipantID`) REFERENCES `tblparticipant` (`ID`) ON DELETE CASCADE,
+  CONSTRAINT `fk_participantexception_role` FOREIGN KEY (`WorshipRoleID`) REFERENCES `tblworshiprole` (`ID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblparticipantrole` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `ParticipantID` int(11) NOT NULL,
@@ -2986,6 +3022,8 @@ CREATE TABLE `tblservicerole` (
   `WorshipRoleID` int(11) NOT NULL,
   `Note` longtext DEFAULT NULL,
   `AssignmentStatus` varchar(30) NOT NULL DEFAULT 'ASSIGNED',
+  `RespondedAt` datetime DEFAULT NULL,
+  `ResponseSource` varchar(30) DEFAULT NULL,
   PRIMARY KEY (`ID`),
   KEY `fk_tblservicerole_tblservice1_idx` (`ServiceID`),
   KEY `fk_tblservicerole_tblparticipant1_idx` (`ParticipantID`),
@@ -3770,7 +3808,20 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013  SQL SECURITY DEFINER */
-/*!50001 VIEW `rpt_worship_service_assignment` AS select `sr`.`ID` AS `ID`,`sr`.`ServiceID` AS `ServiceID`,`sr`.`ParticipantID` AS `ParticipantID`,`sr`.`WorshipRoleID` AS `WorshipRoleID`,`wr`.`Name` AS `Role`,coalesce(nullif(`p`.`DisplayName`,''),`p`.`Name`) AS `Participant`,`sr`.`AssignmentStatus` AS `AssignmentStatus`,`sr`.`Note` AS `Note` from ((`tblservicerole` `sr` join `tblparticipant` `p` on(`p`.`ID` = `sr`.`ParticipantID`)) join `tblworshiprole` `wr` on(`wr`.`ID` = `sr`.`WorshipRoleID`)) */;
+/*!50001 VIEW `rpt_worship_service_assignment` AS select `sr`.`ID` AS `ID`,`sr`.`ServiceID` AS `ServiceID`,`sr`.`ParticipantID` AS `ParticipantID`,`sr`.`WorshipRoleID` AS `WorshipRoleID`,`wr`.`Name` AS `Role`,coalesce(nullif(`p`.`DisplayName`,''),`p`.`Name`) AS `Participant`,`sr`.`AssignmentStatus` AS `AssignmentStatus`,`sr`.`RespondedAt` AS `RespondedAt`,`sr`.`ResponseSource` AS `ResponseSource`,`sr`.`Note` AS `Note` from ((`tblservicerole` `sr` join `tblparticipant` `p` on(`p`.`ID` = `sr`.`ParticipantID`)) join `tblworshiprole` `wr` on(`wr`.`ID` = `sr`.`WorshipRoleID`)) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!50001 DROP VIEW IF EXISTS `rpt_worship_volunteer_availability`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013  SQL SECURITY DEFINER */
+/*!50001 VIEW `rpt_worship_volunteer_availability` AS select `e`.`ID` AS `ID`,`e`.`ParticipantID` AS `ParticipantID`,coalesce(nullif(`p`.`DisplayName`,''),`p`.`Name`) AS `Participant`,`e`.`WorshipRoleID` AS `WorshipRoleID`,coalesce(`wr`.`Name`,'All roles') AS `Role`,`e`.`StartDate` AS `StartDate`,`e`.`EndDate` AS `EndDate`,`e`.`Reason` AS `Reason`,`e`.`Active` AS `Active`,`e`.`CreatedAt` AS `CreatedAt`,`e`.`UpdatedAt` AS `UpdatedAt` from ((`tblparticipantavailabilityexception` `e` join `tblparticipant` `p` on(`p`.`ID` = `e`.`ParticipantID`)) left join `tblworshiprole` `wr` on(`wr`.`ID` = `e`.`WorshipRoleID`)) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;

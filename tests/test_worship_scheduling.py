@@ -7,6 +7,7 @@ from worship_scheduling import (
     required_position_rows, serialized_values, time_text,
 )
 from worship_scheduling_rules import report_participant_rows
+from worship_scheduling_rules import exception_applies
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -56,6 +57,21 @@ class WorshipSchedulingTests(unittest.TestCase):
         ))
         self.assertFalse(pattern_matches(
             (1, "Wrong time", time(10), "Sunday", "August", "Pentecost"), service, "Pentecost"
+        ))
+
+    def test_date_exception_can_block_all_roles_or_one_role(self):
+        service = datetime(2026, 8, 16, 9)
+        self.assertTrue(exception_applies(
+            (1, None, service.date(), service.date(), "Away", 1), service, 10,
+        ))
+        self.assertTrue(exception_applies(
+            (2, 10, service.date(), service.date(), "Away", 1), service, 10,
+        ))
+        self.assertFalse(exception_applies(
+            (2, 10, service.date(), service.date(), "Away", 1), service, 12,
+        ))
+        self.assertFalse(exception_applies(
+            (2, None, service.date(), service.date(), "Away", 0), service, 10,
         ))
 
     def test_suggestions_preserve_existing_assignments_and_fill_only_missing_slots(self):
@@ -143,10 +159,23 @@ class WorshipSchedulingTests(unittest.TestCase):
         self.assertIn('("Delete Role",self.on_delete)', source)
         for table in (
             "tblParticipantRole", "tblParticipantAvailability",
-            "tblWorshipRoleRequirement", "tblServiceRole",
+            "tblParticipantAvailabilityException", "tblWorshipRoleRequirement",
+            "tblServiceRole",
         ):
             self.assertIn(f'("{table}"', source)
         self.assertIn("Edit the position and clear Active instead.", source)
+
+    def test_volunteer_availability_migration_and_planner_contract(self):
+        migration = (ROOT / "migrations" / "111_add_volunteer_availability_and_responses.sql").read_text(
+            encoding="utf-8"
+        )
+        source = (ROOT / "worship_scheduling.py").read_text(encoding="utf-8")
+        self.assertIn("CREATE TABLE IF NOT EXISTS tblParticipantAvailabilityException", migration)
+        self.assertIn("ADD COLUMN IF NOT EXISTS RespondedAt", migration)
+        self.assertIn("ADD COLUMN IF NOT EXISTS ResponseSource", migration)
+        self.assertIn('("Availability...",self.on_availability)', source)
+        self.assertIn('conflict="Conflict" if assignment[10] else "Available"', source)
+        self.assertIn("exception_applies(item, starts_at, role_id)", source)
 
 
 if __name__ == "__main__":

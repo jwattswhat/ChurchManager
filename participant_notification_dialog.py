@@ -30,6 +30,9 @@ class ParticipantNotificationDialog(wx.Dialog):
         service_row.Add(wx.StaticText(panel, label="Service"), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 8)
         self.service_choice = wx.Choice(panel, choices=[row[1] for row in self.services])
         service_row.Add(self.service_choice, 1, wx.EXPAND)
+        service_row.Add(wx.StaticText(panel, label="Message type"), 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT, 8)
+        self.message_kind = wx.Choice(panel, choices=["Service request", "Reminder", "Information"])
+        self.message_kind.SetSelection(0); service_row.Add(self.message_kind, 0)
         outer.Add(service_row, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 10)
 
         self.recipients = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
@@ -59,6 +62,7 @@ class ParticipantNotificationDialog(wx.Dialog):
         panel.SetSizer(outer)
 
         self.service_choice.Bind(wx.EVT_CHOICE, self.on_service)
+        self.message_kind.Bind(wx.EVT_CHOICE, self.on_service)
         self.generate.Bind(wx.EVT_BUTTON, self.on_generate)
         self.preview.Bind(wx.EVT_BUTTON, self.on_preview)
         self.send.Bind(wx.EVT_BUTTON, self.on_send)
@@ -71,7 +75,9 @@ class ParticipantNotificationDialog(wx.Dialog):
         index = self.service_choice.GetSelection()
         if index == wx.NOT_FOUND: return
         try:
-            self.plan = self.service.prepare(self.services[index][0])
+            self.plan = self.service.prepare(
+                self.services[index][0], self.message_kind.GetStringSelection(),
+            )
         except Exception as error:
             wx.MessageBox(str(error), "Unable to review notification", wx.OK | wx.ICON_ERROR, self); return
         self.subject.SetValue(self.plan.subject); self.body.SetValue(self.plan.body)

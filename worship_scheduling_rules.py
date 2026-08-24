@@ -1,6 +1,7 @@
 """UI-free rules for worship participant availability and staffing plans."""
 
 from dataclasses import dataclass
+from datetime import date
 
 
 def serialized_values(value):
@@ -32,6 +33,21 @@ def pattern_matches(pattern, starts_at, season):
         (serialized_values(seasons), str(season or "")),
     )
     return all(not values or "All" in values or current in values for values, current in filters)
+
+
+def exception_applies(exception, service_date, role_id):
+    """Return whether an active date exception blocks the participant and role."""
+    _exception_id, exception_role_id, start_date, end_date, _reason, active = exception[:6]
+    if not active:
+        return False
+    if hasattr(service_date, "date"):
+        service_date = service_date.date()
+    if not isinstance(service_date, date):
+        raise TypeError("service_date must be a date or datetime")
+    return (
+        start_date <= service_date <= end_date
+        and (exception_role_id is None or int(exception_role_id) == int(role_id))
+    )
 
 
 @dataclass(frozen=True)

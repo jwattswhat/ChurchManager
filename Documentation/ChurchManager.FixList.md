@@ -29,7 +29,7 @@ from Sent to Accounting in the batch list.
 | 9 | Complete | Remove Projects and Tasks | The generic subsystem, screens, reports, permissions, views, and tables are retired by migration 098; worship preparation checklists remain. |
 | 10 | Completed | [Import, export, and duplicate management](ChurchManager.DataManagement.Specification.md) | Reviewed partial-row import, privacy-safe export, verified portable archives, duplicate decisions, merge-impact preflight, and guarded transactional merges are implemented and accepted. |
 | 11 | Completed | [Groups, committees, classes, and ministry teams](ChurchManager.GroupsMembership.Specification.md) | Normalized Groups, membership, roles, meetings, attendance, communication review, protected sending, and privacy-safe reports have passed functional and visual acceptance. |
-| 12 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
+| 12 | In progress | [Volunteer availability and responses](ChurchManager.VolunteerAvailability.Specification.md) | Date-specific unavailable periods, planner-recorded responses, conflicts, and last-served information extend the completed worship scheduling foundation without creating a second calendar. |
 | 13 | Later | [Asset management](ChurchManager.AssetManagement.Specification.md) | A deliberately small asset register, location, responsibility, maintenance-history, due-list, and retirement design is specified without turning ChurchManager into a full facilities-management system. |
 | 14 | Later | Projects and scheduling | Provide practical project plans, assignments, due dates, status, and scheduling for congregation work while remaining distinct from the retired generic Projects and Tasks subsystem. |
 | 15 | Later | Calendar integration | Share approved ChurchManager services, group meetings, assignments, and scheduled work with an external calendar; Google Calendar remains the primary calendar platform rather than duplicating a full calendar inside ChurchManager. |
@@ -765,6 +765,8 @@ future roadmap projects:
 
 ### 12. Volunteer availability and responses
 
+- **Status: Approved design; implementation in progress.** Follow
+  [ChurchManager.VolunteerAvailability.Specification.md](ChurchManager.VolunteerAvailability.Specification.md).
 - Add participant availability and blockout dates.
 - Send explicit serve requests and reminders.
 - Record accepted, declined, and pending responses.
@@ -772,6 +774,8 @@ future roadmap projects:
 - Preserve manual scheduling and small-congregation flexibility.
 - Consider optional scheduling suggestions, but never silently replace existing
   assignments.
+- Keep ChurchManager limited to its service/event dates. External calendar
+  export and synchronization belong to the later Calendar Integration project.
 
 ### 13. General events and calendar integration
 

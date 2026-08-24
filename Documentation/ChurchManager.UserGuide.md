@@ -124,6 +124,26 @@ Participation History**, and **Groups - Meeting Attendance**. Select the Group
 or Person requested and, for meeting attendance, the reporting dates.
 Restricted Groups appear only for users who have permission to view them.
 
+### Volunteer availability and responses
+
+Open **Participants**, select a worship participant, and choose
+**Availability...** to record dates when the person cannot serve. Select **All
+roles** for a general absence or a particular worship role for a limited
+exception. Keep the reason brief; pastoral and medical details do not belong in
+the scheduling record.
+
+The **Service Participants** screen shows each response, the last date the
+person served in that role, and an Availability warning. A conflict never
+removes an assignment automatically. Edit the assignment or the unavailable
+period after speaking with the participant. A declined response leaves the
+required position open.
+
+**Notify Participants** can prepare a service request, reminder, or general
+information message. Sending remains review-first and is disabled in TEST MODE.
+ChurchManager does not maintain a separate general calendar; future calendar
+integration will export approved services and assignments to an external
+calendar.
+
 Data Management provides a guarded duplicate review. Matching names, contact
 information, or mailing addresses are possible duplicates, not an automatic merge.
 Select a pair and choose **Not Duplicates** to record that both records are valid,

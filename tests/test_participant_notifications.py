@@ -57,6 +57,15 @@ class ParticipantNotificationTests(unittest.TestCase):
         self.assertEqual(plan.sendable_addresses, ("Sarah@example.org",))
         self.assertIn("Sunday, August 16, 2026 at 9:00 AM", plan.subject)
 
+    def test_request_and_reminder_have_explicit_distinct_language(self):
+        service = ParticipantNotificationService(Repository(), Authorization(), Reports(Path("unused")))
+        request = service.prepare(8, "Service request")
+        reminder = service.prepare(8, "Reminder")
+        self.assertIn("Worship Service Request", request.subject)
+        self.assertIn("whether you can serve", request.body)
+        self.assertIn("Worship Service Reminder", reminder.subject)
+        self.assertIn("reminder", reminder.body.lower())
+
     def test_fresh_report_is_required_and_generated_silently(self):
         with tempfile.TemporaryDirectory() as folder:
             output = Path(folder) / "CMWS01.pdf"
