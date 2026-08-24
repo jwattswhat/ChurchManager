@@ -36,8 +36,11 @@ be accepted before restricted-note entry is enabled. Key rotation also remains
 an acceptance requirement. Until all three protections pass, the scheduling
 workflow is usable but the restricted-note editor must remain unavailable.
 Migration 105 and the restricted-note repository now establish and honor the
-authoritative active key version; the transactional rotation operation itself
-remains gated.
+authoritative active key version. The framework-independent rotation service
+now requires authorization and the current recovery password, verifies matched
+before/after backups, preserves older keys, atomically rewrites current rows,
+and leaves recovery unverified after any post-commit failure. Administrator UI
+wiring and isolated replacement-machine acceptance remain gated.
 
 **Target:** ChurchManager
 

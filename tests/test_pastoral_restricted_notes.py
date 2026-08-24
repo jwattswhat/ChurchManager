@@ -42,6 +42,8 @@ class PastoralRestrictedNoteTests(unittest.TestCase):
         self.assertIn("key_version = self._active_key_version(cursor)", update)
         self.assertIn("key_version=key_version", update)
         self.assertIn("tblPastoralEncryptionState", active)
+        self.assertIn("RecoveryVerified", active)
+        self.assertIn("Pastoral-note recovery has not been verified", active)
         self.assertNotIn('"AES-256-GCM", 1, user_id', create)
 
     def test_writes_and_views_audit_without_narrative(self):

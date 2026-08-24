@@ -303,6 +303,19 @@ class PastoralRecoveryBackup:
         self._write_protected_package(package)
         return self.protected_package_path
 
+    def validate_protected_package(self, recovery_password):
+        """Authenticate the reusable package without changing protected storage."""
+
+        if not self.protected_package_path.is_file():
+            raise PastoralNoteCryptoError(
+                "Pastoral-note recovery is not configured."
+            )
+        package = self.protected_package_path.read_bytes()
+        temporary = PastoralKeyManager(
+            _MemoryCredentialStore(), self.key_manager.target
+        )
+        return temporary.restore_recovery_package(package, recovery_password)
+
     def _write_protected_package(self, package):
         self.protected_package_path.parent.mkdir(parents=True, exist_ok=True)
         temporary = None

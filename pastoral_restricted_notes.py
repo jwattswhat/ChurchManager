@@ -193,7 +193,8 @@ class MariaDBPastoralRestrictedNoteRepository:
 
         self._execute(
             cursor,
-            "SELECT ActiveKeyVersion FROM tblPastoralEncryptionState WHERE ID=1",
+            "SELECT ActiveKeyVersion,RecoveryVerified "
+            "FROM tblPastoralEncryptionState WHERE ID=1",
         )
         row = cursor.fetchone()
         try:
@@ -203,6 +204,10 @@ class MariaDBPastoralRestrictedNoteRepository:
         if key_version <= 0:
             raise PastoralCareValidationError(
                 "Pastoral-note encryption is not configured."
+            )
+        if not bool(row[1]):
+            raise PastoralCareValidationError(
+                "Pastoral-note recovery has not been verified."
             )
         return key_version
 

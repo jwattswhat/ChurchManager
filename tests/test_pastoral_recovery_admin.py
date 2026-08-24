@@ -27,8 +27,14 @@ class RecordingCursor:
     def __init__(self, connection):
         self.connection = connection
 
-    def execute(self, sql, values):
+    def execute(self, sql, values=()):
         self.connection.executed.append((sql, values))
+        self.rowcount = 1
+        if "SET RecoveryVerified=1" in sql:
+            self.connection.active_state = (self.connection.active_state[0], 1)
+
+    def fetchone(self):
+        return self.connection.active_state
 
     def close(self):
         pass
@@ -39,6 +45,7 @@ class RecordingConnection:
         self.executed = []
         self.commits = 0
         self.rollbacks = 0
+        self.active_state = (1, 0)
 
     def cursor(self):
         return RecordingCursor(self)
@@ -83,19 +90,31 @@ class PastoralRecoveryAdministrationTests(unittest.TestCase):
             path = service.configure(password)
             self.assertTrue(service.configured)
             self.assertTrue(path.is_file())
-            sql, values = connection.executed[0]
+            sql, values = next(
+                item for item in connection.executed
+                if "tblSecurityAuditEvent" in item[0]
+            )
             self.assertIn("tblSecurityAuditEvent", sql)
             self.assertEqual(values[1], "PASTORAL_RECOVERY_CONFIGURED")
             self.assertNotIn(password, repr(connection.executed))
             self.assertEqual(connection.commits, 1)
 
+    def test_recovery_configuration_uses_active_key_version(self):
+        with tempfile.TemporaryDirectory() as root:
+            service, connection = self.service(root)
+            connection.active_state = (3, 0)
+            service.configure("correct horse battery staple")
+            self.assertTrue(service.recovery.key_manager.has_key(3))
+            self.assertFalse(service.recovery.key_manager.has_key(1))
+            self.assertEqual(connection.executed[-1][1][2], "v3")
+
     def test_replacing_password_keeps_key_and_records_distinct_event(self):
         with tempfile.TemporaryDirectory() as root:
             service, connection = self.service(root)
             service.configure("correct horse battery staple")
-            key = service.recovery.key_manager.load_key()
+            key = service.recovery.key_manager.load_key(1)
             service.configure("a different secure recovery phrase")
-            self.assertEqual(service.recovery.key_manager.load_key(), key)
+            self.assertEqual(service.recovery.key_manager.load_key(1), key)
             self.assertEqual(
                 connection.executed[-1][1][1],
                 "PASTORAL_RECOVERY_PASSWORD_REPLACED",

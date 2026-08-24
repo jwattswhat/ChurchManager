@@ -96,6 +96,21 @@ class PastoralNoteCryptoTests(unittest.TestCase):
             restored.restore_recovery_package(package, "this password is incorrect")
         self.assertEqual(restored_store.values, {})
 
+    def test_reusable_package_can_be_validated_without_changing_key_store(self):
+        with tempfile.TemporaryDirectory() as folder:
+            recovery = PastoralRecoveryBackup(
+                self.keys, Path(folder) / "pastoral-recovery.json"
+            )
+            recovery.create_protected_package("correct horse battery staple")
+            before = dict(self.store.values)
+            self.assertEqual(
+                recovery.validate_protected_package(
+                    "correct horse battery staple"
+                ),
+                1,
+            )
+            self.assertEqual(self.store.values, before)
+
     def test_tampered_recovery_package_does_not_install_key(self):
         package = json.loads(
             self.keys.create_recovery_package("correct horse battery staple").decode("utf-8")

@@ -689,7 +689,11 @@ future roadmap projects:
   replacement-machine recovery, and the isolated release rehearsal pass.
   Migration 105 now supplies the authoritative active key version, and all new
   or changed restricted-note ciphertext honors it instead of hard-coding v1.
-  The transactional rotation operation and its recovery rehearsal remain.
+  The tested transactional rotation service now verifies the current recovery
+  password and matched before/after backup sidecars, atomically re-encrypts all
+  current rows, preserves older key versions, and fails closed if post-rotation
+  recovery verification is incomplete. Administrator UI wiring and the
+  isolated replacement-machine recovery rehearsal remain.
   - Interactive protected backup/restore and application restart passed in
     `ChurchDBTest`; ciphertext and isolated cross-machine recovery acceptance
     remain.
