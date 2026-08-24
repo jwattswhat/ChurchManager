@@ -22,6 +22,8 @@ class GroupRepositoryContractTests(unittest.TestCase):
     def test_mutations_are_audited_and_transactional(self):
         self.assertIn('"GROUP_CREATED"', self.source)
         self.assertIn('"GROUP_MEMBERSHIP_CREATED"', self.source)
+        self.assertIn('"GROUP_MEMBERSHIP_ENDED"', self.source)
+        self.assertIn('"GROUP_ROLE_ASSIGNED"', self.source)
         self.assertIn("self.connection.rollback()", self.source)
 
 

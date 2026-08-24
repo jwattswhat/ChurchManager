@@ -70,6 +70,7 @@ class MariaDBGroupRepository:
         return {
             "types": self._choice_rows("SELECT ID,Label FROM tblGroupType WHERE ChurchID=? AND Active=1 ORDER BY DisplayOrder,Label", (church_id,)),
             "people": self._choice_rows("SELECT ID,TRIM(CONCAT_WS(' ',FirstName,LastName)) FROM tblPerson WHERE ChurchID=? ORDER BY LastName,FirstName", (church_id,)),
+            "roles": self._choice_rows("SELECT ID,Label FROM tblGroupRole WHERE ChurchID=? AND Active=1 ORDER BY DisplayOrder,Label", (church_id,)),
         }
 
     def churches(self):
@@ -162,6 +163,81 @@ class MariaDBGroupRepository:
             sql += " ORDER BY p.LastName,p.FirstName,m.StartDate"
             self._execute(cursor, sql, (group_id,))
             return self._rows(cursor)
+        finally:
+            cursor.close()
+
+    def membership(self, membership_id):
+        """Return one membership with its Group privacy and Church scope."""
+        cursor = self.connection.cursor()
+        try:
+            self._execute(cursor, (
+                "SELECT m.ID id,m.GroupID group_id,m.PersonID person_id,m.StartDate start_date,"
+                "m.EndDate end_date,m.Notes notes,m.Version version,g.ChurchID church_id,"
+                "g.PrivacyClass privacy_class FROM tblGroupMembership m "
+                "JOIN tblGroup g ON g.ID=m.GroupID WHERE m.ID=?"
+            ), (membership_id,))
+            rows = self._rows(cursor); return rows[0] if rows else None
+        finally:
+            cursor.close()
+
+    def end_membership(self, record, end_date, user_id):
+        """Close one membership term without deleting its history."""
+        cursor = self.connection.cursor()
+        try:
+            self._execute(cursor, (
+                "UPDATE tblGroupMembership SET EndDate=?,UpdatedByUserID=?,Version=Version+1 "
+                "WHERE ID=? AND Version=?"
+            ), (end_date, user_id, record["id"], record["version"]))
+            self._require_one(cursor)
+            self._audit(cursor, user_id, "GROUP_MEMBERSHIP_ENDED", record["id"], "GroupMembership")
+            self.connection.commit(); return True
+        except Exception:
+            self.connection.rollback(); raise
+        finally:
+            cursor.close()
+
+    def membership_roles(self, membership_id, current_only=True):
+        """Return dated roles assigned to one membership term."""
+        cursor = self.connection.cursor()
+        try:
+            sql = (
+                "SELECT mr.ID id,mr.GroupRoleID group_role_id,r.Label role,mr.StartDate start_date,"
+                "mr.EndDate end_date,mr.Version version FROM tblGroupMembershipRole mr "
+                "JOIN tblGroupRole r ON r.ID=mr.GroupRoleID WHERE mr.GroupMembershipID=?"
+            )
+            if current_only:
+                sql += " AND mr.StartDate<=CURRENT_DATE AND (mr.EndDate IS NULL OR mr.EndDate>=CURRENT_DATE)"
+            sql += " ORDER BY r.DisplayOrder,r.Label,mr.StartDate"
+            self._execute(cursor, sql, (membership_id,)); return self._rows(cursor)
+        finally:
+            cursor.close()
+
+    def role_church_id(self, role_id):
+        rows = self._choice_rows("SELECT ChurchID,ID FROM tblGroupRole WHERE ID=? AND Active=1", (role_id,))
+        return rows[0][0] if rows else None
+
+    def role_overlaps(self, membership_id, role_id, start_date, end_date):
+        rows = self._choice_rows(
+            "SELECT ID,GroupRoleID FROM tblGroupMembershipRole WHERE GroupMembershipID=? AND GroupRoleID=? "
+            "AND StartDate<=COALESCE(?,'9999-12-31') AND COALESCE(EndDate,'9999-12-31')>=? LIMIT 1",
+            (membership_id, role_id, end_date, start_date),
+        )
+        return bool(rows)
+
+    def assign_role(self, values):
+        """Create one dated role assignment transactionally."""
+        cursor = self.connection.cursor()
+        try:
+            self._execute(cursor, (
+                "INSERT INTO tblGroupMembershipRole (GroupMembershipID,GroupRoleID,StartDate,EndDate,"
+                "CreatedByUserID,UpdatedByUserID) VALUES (?,?,?,?,?,?)"
+            ), (values["membership_id"], values["role_id"], values["start_date"], values.get("end_date"),
+                values["user_id"], values["user_id"]))
+            assignment_id = cursor.lastrowid
+            self._audit(cursor, values["user_id"], "GROUP_ROLE_ASSIGNED", assignment_id, "GroupMembershipRole")
+            self.connection.commit(); return assignment_id
+        except Exception:
+            self.connection.rollback(); raise
         finally:
             cursor.close()
 

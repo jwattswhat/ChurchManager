@@ -95,10 +95,11 @@ and the journal.
 
 **Groups** maintains committees, classes, studies, music groups, fellowship
 groups, and ministry teams separately from worship-service participant roles.
-Open a Group to review its current roster or add a dated membership term. A
-Person must belong to the same congregation as the Group, and overlapping
-membership terms are rejected. Restricted Groups appear only to users with the
-dedicated restricted-Group permission.
+Open a Group to review its current roster, add a dated membership term, end a
+membership without deleting its history, or assign a dated Group role. A Person,
+Group, and role must belong to the same congregation. Overlapping membership
+terms and duplicate overlapping role assignments are rejected. Restricted
+Groups appear only to users with the dedicated restricted-Group permission.
 
 Data Management provides a guarded duplicate review. Matching names, contact
 information, or mailing addresses are possible duplicates, not an automatic merge.

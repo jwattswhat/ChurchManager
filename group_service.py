@@ -96,6 +96,52 @@ class GroupService:
             "notes": _optional_text(notes, 500), "user_id": self.session.user_id,
         })
 
+    def end_membership(self, membership_id, end_date):
+        """End one membership term while preserving its history."""
+        self.authorization.require("groups.membership.edit", "end Group membership")
+        record = self.repository.membership(_identifier(membership_id, "membership"))
+        if record is None:
+            raise GroupValidationError("The selected membership is unavailable.")
+        if record["privacy_class"] == "RESTRICTED":
+            self.authorization.require("groups.edit_restricted", "end restricted Group membership")
+        end_date = _date(end_date, "end date")
+        if end_date < record["start_date"]:
+            raise GroupValidationError("The membership end date cannot precede its start date.")
+        return self.repository.end_membership(record, end_date, self.session.user_id)
+
+    def membership_roles(self, membership_id, current_only=True):
+        """Return role assignments for an authorized membership."""
+        self.authorization.require("groups.membership.view", "view Group roles")
+        record = self.repository.membership(_identifier(membership_id, "membership"))
+        if record is None:
+            raise GroupValidationError("The selected membership is unavailable.")
+        if record["privacy_class"] == "RESTRICTED":
+            self.authorization.require("groups.view_restricted", "view restricted Group roles")
+        return self.repository.membership_roles(record["id"], bool(current_only))
+
+    def assign_role(self, membership_id, role_id, start_date, end_date=None):
+        """Assign one same-Church, non-overlapping dated Group role."""
+        self.authorization.require("groups.roles.assign", "assign a Group role")
+        membership = self.repository.membership(_identifier(membership_id, "membership"))
+        if membership is None:
+            raise GroupValidationError("The selected membership is unavailable.")
+        if membership["privacy_class"] == "RESTRICTED":
+            self.authorization.require("groups.edit_restricted", "assign a restricted Group role")
+        role_id = _identifier(role_id, "Group role")
+        if self.repository.role_church_id(role_id) != membership["church_id"]:
+            raise GroupValidationError("The role and membership must belong to the same church.")
+        start_date = _date(start_date, "role start date")
+        end_date = None if end_date in (None, "") else _date(end_date, "role end date")
+        if start_date < membership["start_date"] or (membership["end_date"] and start_date > membership["end_date"]):
+            raise GroupValidationError("The role must begin within the membership term.")
+        if end_date and (end_date < start_date or (membership["end_date"] and end_date > membership["end_date"])):
+            raise GroupValidationError("The role dates must remain within the membership term.")
+        if self.repository.role_overlaps(membership["id"], role_id, start_date, end_date):
+            raise GroupValidationError("This membership already has an overlapping assignment for that role.")
+        return self.repository.assign_role({"membership_id": membership["id"], "role_id": role_id,
+                                            "start_date": start_date, "end_date": end_date,
+                                            "user_id": self.session.user_id})
+
     def _editable_group(self, group_id):
         group = self.repository.group(_identifier(group_id, "Group"))
         if group is None:

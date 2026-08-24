@@ -89,6 +89,26 @@ class AddMemberDialog(wx.Dialog):
         return _selected_id(self.person), date(value.GetYear(), value.GetMonth() + 1, value.GetDay()), self.notes.GetValue()
 
 
+class AssignRoleDialog(wx.Dialog):
+    """Collect a role and its effective start date."""
+
+    def __init__(self, parent, roles):
+        super().__init__(parent, title="Assign Group Role", size=(500, 190))
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        grid = wx.FlexGridSizer(cols=2, vgap=10, hgap=12); grid.AddGrowableCol(1, 1)
+        self.role = _choice(panel, roles); self.start = wx.adv.DatePickerCtrl(panel)
+        for label, control in (("Role", self.role), ("Starts", self.start)):
+            grid.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL); grid.Add(control, 1, wx.EXPAND)
+        outer.Add(grid, 1, wx.EXPAND | wx.ALL, 14)
+        buttons = wx.BoxSizer(wx.HORIZONTAL); buttons.AddStretchSpacer()
+        buttons.Add(wx.Button(panel, wx.ID_OK, "Assign Role"), 0, wx.RIGHT, 8); buttons.Add(wx.Button(panel, wx.ID_CANCEL, "Cancel"))
+        outer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14); panel.SetSizer(outer)
+
+    def values(self):
+        value = self.start.GetValue()
+        return _selected_id(self.role), date(value.GetYear(), value.GetMonth() + 1, value.GetDay())
+
+
 class GroupDetailDialog(wx.Dialog):
     """Show Group identity and its current authorized roster."""
 
@@ -101,12 +121,15 @@ class GroupDetailDialog(wx.Dialog):
         outer.Add(self.heading, 0, wx.ALL, 14); outer.Add(self.summary, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
         outer.Add(wx.StaticText(panel, label="Current members"), 0, wx.LEFT | wx.RIGHT, 14)
         self.members = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-        for index, (label, width) in enumerate((("Person", 330), ("Started", 110), ("Note", 280))): self.members.InsertColumn(index, label, width=width)
+        for index, (label, width) in enumerate((("Person", 270), ("Roles", 180), ("Started", 105), ("Note", 210))): self.members.InsertColumn(index, label, width=width)
         outer.Add(self.members, 1, wx.EXPAND | wx.ALL, 14)
         buttons = wx.BoxSizer(wx.HORIZONTAL); self.add = wx.Button(panel, label="Add Member...")
-        buttons.Add(self.add); buttons.AddStretchSpacer(); buttons.Add(wx.Button(panel, wx.ID_CLOSE, "Close"))
+        self.assign = wx.Button(panel, label="Assign Role..."); self.end = wx.Button(panel, label="End Membership...")
+        buttons.Add(self.add, 0, wx.RIGHT, 8); buttons.Add(self.assign, 0, wx.RIGHT, 8); buttons.Add(self.end)
+        buttons.AddStretchSpacer(); buttons.Add(wx.Button(panel, wx.ID_CLOSE, "Close"))
         outer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14); panel.SetSizer(outer)
-        self.add.Bind(wx.EVT_BUTTON, self.on_add); self.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE), id=wx.ID_CLOSE)
+        self.add.Bind(wx.EVT_BUTTON, self.on_add); self.assign.Bind(wx.EVT_BUTTON, self.on_assign)
+        self.end.Bind(wx.EVT_BUTTON, self.on_end); self.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE), id=wx.ID_CLOSE)
         self.refresh()
 
     def refresh(self):
@@ -114,9 +137,11 @@ class GroupDetailDialog(wx.Dialog):
         self.heading.SetLabel(record["name"])
         self.summary.SetLabel(f'{record["group_type"]} · {record["status"].title()} · {record["privacy_class"].title()}')
         self.members.DeleteAllItems()
-        for row in self.service.memberships(self.group_id):
+        self.member_rows = self.service.memberships(self.group_id)
+        for row in self.member_rows:
             index = self.members.InsertItem(self.members.GetItemCount(), row["person"])
-            self.members.SetItem(index, 1, _date_text(row["start_date"])); self.members.SetItem(index, 2, row.get("notes") or "")
+            roles = ", ".join(item["role"] for item in self.service.membership_roles(row["id"]))
+            self.members.SetItem(index, 1, roles or "Member"); self.members.SetItem(index, 2, _date_text(row["start_date"])); self.members.SetItem(index, 3, row.get("notes") or "")
 
     def on_add(self, _event):
         choices = self.service.choices(self.service.group(self.group_id)["church_id"])
@@ -127,6 +152,35 @@ class GroupDetailDialog(wx.Dialog):
         except Exception as error:
             wx.MessageBox(str(error), "Unable to Add Member", wx.OK | wx.ICON_ERROR, self)
         finally: dialog.Destroy()
+
+    def _selected_membership(self):
+        selected = self.members.GetFirstSelected()
+        return self.member_rows[selected] if 0 <= selected < len(self.member_rows) else None
+
+    def on_assign(self, _event):
+        membership = self._selected_membership()
+        if membership is None:
+            wx.MessageBox("Select a member first.", "Assign Group Role", wx.OK | wx.ICON_INFORMATION, self); return
+        group = self.service.group(self.group_id); roles = self.service.choices(group["church_id"])["roles"]
+        dialog = AssignRoleDialog(self, roles)
+        try:
+            if dialog.ShowModal() != wx.ID_OK: return
+            role_id, start = dialog.values(); self.service.assign_role(membership["id"], role_id, start); self.refresh()
+        except Exception as error: wx.MessageBox(str(error), "Unable to Assign Role", wx.OK | wx.ICON_ERROR, self)
+        finally: dialog.Destroy()
+
+    def on_end(self, _event):
+        membership = self._selected_membership()
+        if membership is None:
+            wx.MessageBox("Select a member first.", "End Group Membership", wx.OK | wx.ICON_INFORMATION, self); return
+        prompt = wx.TextEntryDialog(self, "Enter the last membership date (YYYY-MM-DD).", "End Group Membership", date.today().isoformat())
+        try:
+            if prompt.ShowModal() != wx.ID_OK: return
+            end_date = date.fromisoformat(prompt.GetValue().strip())
+            if wx.MessageBox(f'End {membership["person"]}\'s membership on {_date_text(end_date)}?', "Confirm End Membership", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES: return
+            self.service.end_membership(membership["id"], end_date); self.refresh()
+        except Exception as error: wx.MessageBox(str(error), "Unable to End Membership", wx.OK | wx.ICON_ERROR, self)
+        finally: prompt.Destroy()
 
 
 class GroupsDialog(wx.Dialog):
