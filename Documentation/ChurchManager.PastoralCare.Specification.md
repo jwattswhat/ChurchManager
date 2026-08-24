@@ -8,7 +8,7 @@
 
 **Approved by:** Rev. Jonathan C. Watt
 
-**Implementation status:** the safe scheduling release is implemented. It
+**Implementation status:** completed and visually accepted August 24, 2026. The safe scheduling release is implemented. It
 includes the migration 096 database, permission and controlled-choice
 foundation, protected backup sidecar plumbing, and Master Administrator
 recovery-package setup with safe creation/password-change audit. The

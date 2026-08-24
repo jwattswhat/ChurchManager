@@ -1,6 +1,6 @@
 # ChurchManager development roadmap
 
-Last reviewed: August 23, 2026
+Last reviewed: August 24, 2026
 
 This is the maintained ChurchManager development backlog. Priorities reflect
 the needs of a small congregation and a comparison with current paid and
@@ -25,7 +25,7 @@ Draft replacement, voids the original only when the reversal posts, prevents
 early accounting handoff of the replacement, and clearly distinguishes Ready
 from Sent to Accounting in the batch list.
 | 7A | Complete | Richer application login | Login now presents the ChurchManager icon and identity, local congregation name, version/release, copyright, and GPL notice without changing authentication behavior. |
-| 8 | In progress | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Safe scheduling, handoffs, protected reports, recovery acceptance, and the restricted-note editor are implemented; visual editor acceptance remains. |
+| 8 | Completed | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Safe scheduling, handoffs, protected reports, recovery acceptance, and the encrypted restricted-note editor passed final visual acceptance on August 24, 2026. |
 | 9 | Complete | Remove Projects and Tasks | The generic subsystem, screens, reports, permissions, views, and tables are retired by migration 098; worship preparation checklists remain. |
 | 10 | Completed | [Import, export, and duplicate management](ChurchManager.DataManagement.Specification.md) | Reviewed partial-row import, privacy-safe export, verified portable archives, duplicate decisions, merge-impact preflight, and guarded transactional merges are implemented and accepted. |
 | 11 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
@@ -34,8 +34,7 @@ from Sent to Accounting in the batch list.
 | 14 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
 | Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
 
-Finish the acceptance gate for item 6 before beginning item 8.
-Items 8 through 12 form the next ministry-development phase. Items 13 through
+Item 8 is complete. Items 11 and 12 form the next ministry-development phase. Items 13 through
 14 should not delay a stable ChurchManager release.
 
 ## Completed foundations retained for regression protection
@@ -665,7 +664,7 @@ future roadmap projects:
 
 ### 8. Pastoral follow-up
 
-- **Status: implementation complete; restricted-note visual acceptance pending.** The independently tested AES-256-GCM
+- **Status: completed and visually accepted August 24, 2026.** The independently tested AES-256-GCM
   note/key-recovery service and migration 096 normalized care foundation are
   implemented. Database backups now pair with an available password-protected
   pastoral recovery sidecar; restore validates it before closing database
@@ -697,7 +696,7 @@ future roadmap projects:
   recovery-gated Master Administrator rotation control and creates distinct
   labeled before/after backups. The disposable actual-ciphertext rehearsal is
   implemented in `accept_pastoral_key_recovery.py`; its apply-mode result passed
-  on August 24, 2026. Visual acceptance of the restricted-note editor remains.
+  on August 24, 2026. The restricted-note editor subsequently passed visual acceptance.
   - Interactive protected backup/restore and application restart passed in
     `ChurchDBTest`; isolated ciphertext cross-machine recovery also passed.
 
