@@ -255,6 +255,30 @@ SET character_set_client = utf8mb4;
 SET character_set_client = @saved_cs_client;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `rpt_pastoral_care_activity_summary` AS SELECT
+ 1 AS `ChurchID`,
+  1 AS `ActionDate`,
+  1 AS `Category`,
+  1 AS `ActionType`,
+  1 AS `Result`,
+  1 AS `ActionCount` */;
+SET character_set_client = @saved_cs_client;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `rpt_pastoral_care_work_list` AS SELECT
+ 1 AS `CareNeedID`,
+  1 AS `ChurchID`,
+  1 AS `Subject`,
+  1 AS `Category`,
+  1 AS `Assignee`,
+  1 AS `Priority`,
+  1 AS `Status`,
+  1 AS `DueDate`,
+  1 AS `NextFollowUpDate`,
+  1 AS `ScheduleText` */;
+SET character_set_client = @saved_cs_client;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
 /*!50001 CREATE VIEW `rpt_pastors_attendance_comparison` AS SELECT
  1 AS `ChurchID`,
   1 AS `ReportYear`,
@@ -2257,6 +2281,19 @@ CREATE TABLE `tblpastoralcareneed` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblpastoralencryptionstate` (
+  `ID` tinyint(3) unsigned NOT NULL,
+  `ActiveKeyVersion` int(10) unsigned NOT NULL DEFAULT 1,
+  `RecoveryVerified` tinyint(1) NOT NULL DEFAULT 0,
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  CONSTRAINT `ck_pastoral_encryption_state_id` CHECK (`ID` = 1),
+  CONSTRAINT `ck_pastoral_encryption_active_version` CHECK (`ActiveKeyVersion` > 0),
+  CONSTRAINT `ck_pastoral_encryption_recovery_verified` CHECK (`RecoveryVerified` in (0,1))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblpastoralrestrictednote` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
   `ChurchID` int(11) NOT NULL,
@@ -3114,6 +3151,32 @@ SET character_set_client = @saved_cs_client;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013  SQL SECURITY DEFINER */
 /*!50001 VIEW `rpt_pastor_report` AS select `tblpastor`.`ChurchID` AS `ChurchID`,`tblpastor`.`Date` AS `Date`,`tblpastor`.`Pastor` AS `Pastor`,`tblpastor`.`Reported` AS `Reported`,`tblpastor`.`Note` AS `Note` from `tblpastor` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!50001 DROP VIEW IF EXISTS `rpt_pastoral_care_activity_summary`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013  SQL SECURITY DEFINER */
+/*!50001 VIEW `rpt_pastoral_care_activity_summary` AS select `n`.`ChurchID` AS `ChurchID`,cast(`a`.`ActionDateTime` as date) AS `ActionDate`,`n`.`Category` AS `Category`,`a`.`ActionType` AS `ActionType`,`a`.`Result` AS `Result`,count(0) AS `ActionCount` from (`tblpastoralcareaction` `a` join `tblpastoralcareneed` `n` on(`n`.`ID` = `a`.`CareNeedID`)) group by `n`.`ChurchID`,cast(`a`.`ActionDateTime` as date),`n`.`Category`,`a`.`ActionType`,`a`.`Result` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!50001 DROP VIEW IF EXISTS `rpt_pastoral_care_work_list`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013  SQL SECURITY DEFINER */
+/*!50001 VIEW `rpt_pastoral_care_work_list` AS select `n`.`ID` AS `CareNeedID`,`n`.`ChurchID` AS `ChurchID`,coalesce(nullif(trim(concat_ws(' ',`p`.`FirstName`,`p`.`LastName`)),''),`f`.`FamilyName`,`n`.`DisplaySubject`) AS `Subject`,`n`.`Category` AS `Category`,coalesce(`u`.`DisplayName`,'Unassigned') AS `Assignee`,`n`.`Priority` AS `Priority`,`n`.`Status` AS `Status`,`n`.`DueDate` AS `DueDate`,`n`.`NextFollowUpDate` AS `NextFollowUpDate`,`n`.`ScheduleText` AS `ScheduleText` from (((`tblpastoralcareneed` `n` left join `tblperson` `p` on(`p`.`ID` = `n`.`PersonID`)) left join `tblfamily` `f` on(`f`.`ID` = `n`.`FamilyID`)) left join `tbluser` `u` on(`u`.`ID` = `n`.`AssignedUserID`)) where `n`.`Status` in ('OPEN','WAITING') */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;

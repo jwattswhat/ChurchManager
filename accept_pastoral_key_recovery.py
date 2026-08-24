@@ -73,7 +73,9 @@ def create_fixture(connection, cipher):
     cursor = connection.cursor()
     try:
         cursor.execute(
-            "UPDATE tblPastoralEncryptionState SET ActiveKeyVersion=1,RecoveryVerified=1 WHERE ID=1"
+            "INSERT INTO tblPastoralEncryptionState "
+            "(ID,ActiveKeyVersion,RecoveryVerified) VALUES (1,1,1) "
+            "ON DUPLICATE KEY UPDATE ActiveKeyVersion=1,RecoveryVerified=1"
         )
         cursor.execute(
             "INSERT INTO tblPastoralCareNeed "

@@ -14,6 +14,7 @@ from migration_service import MigrationService, split_sql_statements
 SEED_TABLES = frozenset({
     "tblchoices",
     "tblmailsettings",
+    "tblpastoralencryptionstate",
     "tblpermission",
     "tblreports",
     "tblrole",

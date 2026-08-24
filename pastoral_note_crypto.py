@@ -12,6 +12,7 @@ import json
 import secrets
 import shutil
 import tempfile
+import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
@@ -317,6 +318,8 @@ class PastoralRecoveryBackup:
         return temporary.restore_recovery_package(package, recovery_password)
 
     def _write_protected_package(self, package):
+        """Persist a package safely despite brief Windows replacement locks."""
+
         self.protected_package_path.parent.mkdir(parents=True, exist_ok=True)
         temporary = None
         try:
@@ -326,7 +329,24 @@ class PastoralRecoveryBackup:
             ) as stream:
                 stream.write(package)
                 temporary = Path(stream.name)
-            temporary.replace(self.protected_package_path)
+            for attempt in range(4):
+                try:
+                    temporary.replace(self.protected_package_path)
+                    return
+                except PermissionError:
+                    if attempt == 3:
+                        break
+                    time.sleep(0.05 * (attempt + 1))
+            # Windows may briefly deny replacement of an existing user-owned
+            # file while still permitting an in-place update. A failed or
+            # partial fallback remains fail-closed because callers validate
+            # the new package before enabling restricted-note editing, and the
+            # matched pre-rotation backup retains the previous package.
+            self.protected_package_path.write_bytes(package)
+        except OSError as error:
+            raise PastoralNoteCryptoError(
+                "The pastoral-note recovery package could not be saved."
+            ) from error
         finally:
             if temporary:
                 temporary.unlink(missing_ok=True)

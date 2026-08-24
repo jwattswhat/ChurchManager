@@ -547,6 +547,29 @@ UPDATE tblPermission
 SET Description='Manage documents, announcements, and journal entries.'
 WHERE Name='ministry.manage';
 
+-- source: 104_add_pastoral_care_reports.sql
+INSERT INTO tblReports (Report,Title,Params,Batch,Note,Available,RequiredPermissionID)
+SELECT 'CMPC01','Pastoral Care - Work List','[ChurchID\r\nStartDate\r\nEndDate]',NULL,
+       'Protected operational work list; restricted notes and narrative are excluded.',1,p.ID
+FROM tblPermission p WHERE p.Name='pastoral.care.report'
+ON DUPLICATE KEY UPDATE
+Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),Available=1,
+RequiredPermissionID=VALUES(RequiredPermissionID);
+
+-- source: 104_add_pastoral_care_reports.sql
+INSERT INTO tblReports (Report,Title,Params,Batch,Note,Available,RequiredPermissionID)
+SELECT 'CMPC02','Pastoral Care - Activity Summary','[ChurchID\r\nStartDate\r\nEndDate]',NULL,
+       'Protected aggregate action counts without subject identity or narrative.',1,p.ID
+FROM tblPermission p WHERE p.Name='pastoral.care.report'
+ON DUPLICATE KEY UPDATE
+Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),Available=1,
+RequiredPermissionID=VALUES(RequiredPermissionID);
+
+-- source: 105_add_pastoral_encryption_state.sql
+INSERT IGNORE INTO tblPastoralEncryptionState
+    (ID, ActiveKeyVersion, RecoveryVerified)
+VALUES (1, 1, 0);
+
 -- source: current-schema starter policy
 INSERT INTO tblWorshipRole (Name,Description,DisplayOrder,Active) VALUES
 ('Liturgist',NULL,10,1),('Crucifer','Carries the cross',20,1),

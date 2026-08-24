@@ -2,8 +2,8 @@
   "artifact": "ChurchManager fresh-install starter-data baseline",
   "format_version": 1,
   "release_version": "0.3.0-dev",
-  "seed_sha256": "598b0e077ae3accfb8a6b86cdce9f8a6f57c6a5445717da6767551efb905c583",
-  "statement_count": 81,
+  "seed_sha256": "1d3c6c6810cda1b9cbe6d0ed90b62052935214f3e58433b9b880c9c7a08a0575",
+  "statement_count": 84,
   "source_migrations": [
     {
       "version": "003_add_user_security.sql",
@@ -154,12 +154,23 @@
       "version": "098_retire_projects_and_tasks.sql",
       "checksum": "d2b273003a243d9b1aaac427fb893b63a5eee7f1a365d3f952ebb4b047054b74",
       "statements": 4
+    },
+    {
+      "version": "104_add_pastoral_care_reports.sql",
+      "checksum": "1c74cbb821d79bd5b403ab5e8562ea1f087b2e5bfb16173453b3b6b2600be009",
+      "statements": 2
+    },
+    {
+      "version": "105_add_pastoral_encryption_state.sql",
+      "checksum": "ce69d2348ca839112437c9cdbe41c65a5241e74c27084878af0b1722b06c4572",
+      "statements": 1
     }
   ],
   "current_schema_statements": 1,
   "tables": [
     "tblchoices",
     "tblmailsettings",
+    "tblpastoralencryptionstate",
     "tblpermission",
     "tblreports",
     "tblrole",

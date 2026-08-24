@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from dataclasses import replace
 from pathlib import Path
+from unittest import mock
 
 from pastoral_note_crypto import (
     PastoralKeyManager,
@@ -110,6 +111,25 @@ class PastoralNoteCryptoTests(unittest.TestCase):
                 1,
             )
             self.assertEqual(self.store.values, before)
+
+    def test_recovery_package_survives_windows_replacement_lock(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "pastoral-recovery.json"
+            recovery = PastoralRecoveryBackup(self.keys, path)
+            recovery.create_protected_package("correct horse battery staple")
+            self.keys.provision(2)
+            with mock.patch.object(
+                Path, "replace", side_effect=PermissionError("locked")
+            ):
+                recovery.create_protected_package(
+                    "correct horse battery staple", key_version=2
+                )
+            self.assertEqual(
+                recovery.validate_protected_package(
+                    "correct horse battery staple"
+                ),
+                2,
+            )
 
     def test_tampered_recovery_package_does_not_install_key(self):
         package = json.loads(

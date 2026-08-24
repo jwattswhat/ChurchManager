@@ -42,6 +42,12 @@ class BaselineSeedTests(unittest.TestCase):
             self.assertEqual(sql.read_text(encoding="utf-8"), artifact.sql)
             self.assertIn(artifact.manifest["seed_sha256"], manifest.read_text(encoding="utf-8"))
 
+    def test_pastoral_encryption_singleton_is_fresh_install_seed_data(self):
+        migrations = Path(__file__).resolve().parents[1] / "migrations"
+        artifact = build_seed_artifact(migrations, "0.3.0-dev")
+        self.assertIn("INSERT IGNORE INTO tblPastoralEncryptionState", artifact.sql)
+        self.assertIn("tblpastoralencryptionstate", artifact.manifest["tables"])
+
 
 if __name__ == "__main__":
     unittest.main()
