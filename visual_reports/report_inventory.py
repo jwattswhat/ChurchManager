@@ -131,6 +131,22 @@ SPECS = (
         c("Location", "Location", 120), c("OrderofService", "Order of Service", 185)),
         "DateTime DESC", 4),
 
+    ReportSpec("CMGR01", "Groups - Current Roster", "groups.reports.view", "rpt_group_current_roster", (
+        c("GroupName", "Group", 145), c("LastName", "Last Name", 115),
+        c("FirstName", "First Name", 105), c("Roles", "Role(s)", 105),
+        c("StartDate", "Member Since", 70, "date")),
+        "LastName, FirstName", 4, filter_fields=("GroupID",)),
+    ReportSpec("CMGR02", "Groups - Person Participation History", "groups.reports.view", "rpt_person_group_participation", (
+        c("LastName", "Last Name", 95), c("FirstName", "First Name", 90),
+        c("GroupName", "Group", 140), c("MembershipStatus", "Status", 65),
+        c("StartDate", "Started", 70, "date"), c("EndDate", "Ended", 70, "date")),
+        "LastName, FirstName, StartDate DESC", 4, filter_fields=("PersonID",)),
+    ReportSpec("CMGR03", "Groups - Meeting Attendance", "groups.reports.view", "rpt_group_meeting_attendance", (
+        c("StartsAt", "Date and Time", 95, "datetime"), c("MeetingTitle", "Meeting", 130),
+        c("LastName", "Last Name", 100), c("FirstName", "First Name", 95),
+        c("AttendanceStatus", "Attendance", 75), c("MeetingStatus", "Meeting Status", 85)),
+        "StartsAt DESC, LastName, FirstName", 4, "landscape", filter_fields=("GroupID",)),
+
     ReportSpec("CMJR01", "Journal", "reports.pastoral.confidential", "rpt_journal", (
         c("StartDate", "Start", 75, "date"), c("EndDate", "End", 75, "date"), c("Event", "Event", 180),
         c("Complete", "Complete", 65, "boolean"), c("Note", "Notes", 245)), "StartDate DESC", 5, "landscape"),

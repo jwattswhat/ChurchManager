@@ -37,7 +37,7 @@ class ChurchManagerReportService:
         church_id = controls["ChurchID"].GetValue()
         parameters = {}
         for name in (
-            "ServiceID", "PersonID", "HymnID", "HymnalID", "StartDate", "EndDate",
+            "ServiceID", "PersonID", "GroupID", "HymnID", "HymnalID", "StartDate", "EndDate",
             "AttendanceType", "Detail", "MissedWeeks",
         ):
             if name not in controls:
@@ -93,6 +93,29 @@ class ChurchManagerReportService:
             except Exception:
                 customized.add(custom.stem)
         return self.access.configure_picker(control, customized)
+
+    def configure_group_picker(self, control):
+        """Populate the report Group selector without disclosing restricted Groups."""
+        sql = (
+            "SELECT g.ID,CONCAT(g.Name,' — ',c.Church) FROM tblGroup g "
+            "JOIN tblChurch c ON c.ID=g.ChurchID "
+            "WHERE g.Status IN ('ACTIVE','INACTIVE','CLOSED')"
+        )
+        if not self.access.authorization.has_permission("groups.view_restricted"):
+            sql += " AND g.PrivacyClass='STANDARD'"
+        sql += " ORDER BY c.Church,g.Name"
+        cursor = self.access.connection.cursor()
+        try:
+            cursor.execute(sql)
+            rows = cursor.fetchall()
+        finally:
+            cursor.close()
+        control.choices.id = [row[0] for row in rows]
+        control.choices.display = [row[1] for row in rows]
+        control.choices.fielddata = [[row[1]] for row in rows]
+        control.Set(control.choices.display)
+        control.ChangeValue("")
+        return len(rows)
 
     def start_python_report(self, script, settings, extra_arguments=()):
         from churchmanager_mode import connection_arguments

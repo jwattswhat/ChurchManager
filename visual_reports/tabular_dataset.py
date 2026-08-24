@@ -89,9 +89,15 @@ class TabularDatasetProvider:
             "rpt_membership_person", "rpt_directory_family",
             "rpt_journal", "rpt_pastor_report", "rpt_pastoral_care_work_list",
             "rpt_pastoral_care_activity_summary",
+            "rpt_group_current_roster", "rpt_person_group_participation",
+            "rpt_group_meeting_attendance",
         }
         if view in direct:
-            return view, [f"ChurchID={marker}"], [church_id]
+            where, values = [f"ChurchID={marker}"], [church_id]
+            if view.startswith("rpt_group_") or view == "rpt_person_group_participation":
+                if self.authorization is None or not self.authorization.has_permission("groups.view_restricted"):
+                    where.append("PrivacyClass='STANDARD'")
+            return view, where, values
         if view == "rpt_hymn_usage":
             return "rpt_hymn_usage r JOIN rpt_service s ON s.ID=r.ServiceID", [f"s.ChurchID={marker}"], [church_id]
         if view in {"rpt_person_date", "rpt_person_contact"}:
@@ -104,7 +110,8 @@ class TabularDatasetProvider:
         field_names = {column.field for column in spec.columns} | set(spec.filter_fields)
         filters, values = [], []
         for parameter, field in (
-            ("PersonID", "PersonID"), ("HymnID", "HymnID"),
+            ("PersonID", "PersonID"), ("GroupID", "GroupID"),
+            ("HymnID", "HymnID"),
             ("HymnalID", "HymnalID"),
             ("ServiceID", "ServiceID"),
         ):
@@ -112,7 +119,7 @@ class TabularDatasetProvider:
             if value not in (None, "", "All") and field in field_names:
                 filters.append(f"{field}={self.marker}")
                 values.append(value)
-        date_field = next((name for name in ("DateTime", "Date", "StartDate") if name in field_names), None)
+        date_field = next((name for name in ("DateTime", "StartsAt", "Date", "StartDate") if name in field_names), None)
         if date_field and parameters.get("StartDate"):
             filters.append(f"{date_field}>={self.marker}")
             values.append(parameters["StartDate"])

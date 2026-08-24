@@ -119,6 +119,11 @@ From a Group's meeting history, **Cancel Meeting** preserves a cancelled
 occurrence. **Reschedule** creates a new replacement occurrence and marks the
 original as Rescheduled, preserving the historical relationship.
 
+The Reports screen includes **Groups - Current Roster**, **Groups - Person
+Participation History**, and **Groups - Meeting Attendance**. Select the Group
+or Person requested and, for meeting attendance, the reporting dates.
+Restricted Groups appear only for users who have permission to view them.
+
 Data Management provides a guarded duplicate review. Matching names, contact
 information, or mailing addresses are possible duplicates, not an automatic merge.
 Select a pair and choose **Not Duplicates** to record that both records are valid,

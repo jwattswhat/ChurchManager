@@ -507,6 +507,7 @@ def _buttonclick(event):
         case "lblReports":
             frm = context.form_factory.create("frmReports", ["Close"])
             context.services.reports.configure_catalog_picker(frm.CONTROLID["ReportID"])
+            context.services.reports.configure_group_picker(frm.CONTROLID["GroupID"])
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runReports)
             frm.disable_all_buttons()
             frm.enable_button("ChurchID")

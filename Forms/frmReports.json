@@ -185,12 +185,31 @@
                 "value": "All",
                 "tooltip": "Select the person."
             },
+            "lblGroup": {
+                "name": "lblGroup",
+                "type": "StaticText",
+                "posch": [2, 16],
+                "label": "Group:"
+            },
+            "GroupID": {
+                "name": "GroupID",
+                "type": "ComboBox",
+                "posch": [9, 16],
+                "sizech": [25, 2],
+                "lookupchoices": {
+                    "name": "tblGroup",
+                    "fields": ["ID", "Name"],
+                    "where": "Status IN ('ACTIVE','INACTIVE','CLOSED')",
+                    "orderby": "Name"
+                },
+                "tooltip": "Select the Group. Restricted Groups require their separate permission."
+            },
             "lblHymn": {
                 "name": "lblHymn",
                 "type": "StaticText",
                 "posch": [
                     2,
-                    16
+                    19
                 ],
                 "label": "Hymn:"
             },
@@ -199,7 +218,7 @@
                 "type": "ComboBox",
                 "posch": [
                     9,
-                    16
+                    19
                 ],
                 "lookupchoices": {
                     "name": "tblHymn",
@@ -215,13 +234,13 @@
             "lblHymnal": {
                 "name": "lblHymnal",
                 "type": "StaticText",
-                "posch": [2, 19],
+                "posch": [2, 22],
                 "label": "Hymnal:"
             },
             "HymnalID": {
                 "name": "HymnalID",
                 "type": "ComboBox",
-                "posch": [9, 19],
+                "posch": [9, 22],
                 "sizech": [25, 2],
                 "lookupchoices": {
                     "name": "tblHymnal",
@@ -235,7 +254,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    22
+                    25
                 ],
                 "label": "Start Date:"
             },
@@ -244,7 +263,7 @@
                 "type": "DatePickerCtrl",
                 "posch": [
                     9,
-                    22
+                    25
                 ],
                 "format": "%Y/%m/%d",
                 "tooltip": "Select the start date."
@@ -254,7 +273,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    25
+                    28
                 ],
                 "label": "End Date:"
             },
@@ -263,7 +282,7 @@
                 "type": "DatePickerCtrl",
                 "posch": [
                     9,
-                    25
+                    28
                 ],
                 "format": "%Y/%m/%d",
                 "tooltip": "Select the end date."
@@ -273,7 +292,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    28
+                    31
                 ],
                 "label": "Attend Type:"
             },
@@ -282,7 +301,7 @@
                 "type": "ComboBox",
                 "posch": [
                     9,
-                    28
+                    31
                 ],
                 "sizech": [
                     25,
@@ -296,7 +315,7 @@
                 "type": "StaticText",
                 "posch": [
                     2,
-                    31
+                    34
                 ],
                 "label": "Detail:"
             },
@@ -305,7 +324,7 @@
                 "type": "CheckBox",
                 "posch": [
                     9,
-                    31
+                    34
                 ],
                 "value": 0,
                 "tooltip": "Include detailed information in reports that support it."
