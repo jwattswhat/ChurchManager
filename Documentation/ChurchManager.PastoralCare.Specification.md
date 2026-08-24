@@ -24,20 +24,21 @@ and atomically audit note views and changes without narrative. The first native
 dashboard and safe care-history workflow now support Assigned to Me, authorized
 All Open, new follow-ups, assignment, action recording, and explicit status
 changes. The protected Pastoral Care - Work List and aggregate Activity Summary
-reports exclude restricted notes and narrative by contract. Restricted-note
-entry remains disabled while remaining recovery acceptance is gated. Attendance
+reports exclude restricted notes and narrative by contract. The restricted-note
+editor is now implemented: its list exposes metadata only, content remains
+closed until an authorized user explicitly opens one note, and creation or
+editing fails closed unless recovery is verified. Attendance
 and Prayer Requests now offer deliberate permission-controlled care follow-up
 handoffs that copy no event note or prayer wording.
 
 The interactive `ChurchDBTest` restore path has been accepted with its protected
-recovery sidecar and required ChurchManager restart. Cross-machine recovery with
-actual restricted-note ciphertext and the isolated release rehearsal remain to
-be accepted before restricted-note entry is enabled. The disposable rehearsal
+recovery sidecar and required ChurchManager restart. The isolated
+replacement-machine rehearsal with actual fictional ciphertext, key rotation,
+wrong-password rejection, and tamper rejection passed on August 24, 2026. The disposable rehearsal
 is implemented in `accept_pastoral_key_recovery.py`; it rotates fictional
 ciphertext, restores both matched checkpoints into fresh isolated key stores,
-and proves wrong-password and tampered-package failures. Key rotation also
-remains an acceptance requirement. Until all three protections pass, the scheduling
-workflow is usable but the restricted-note editor must remain unavailable.
+and proves wrong-password and tampered-package failures. With these protections
+accepted, the permission-controlled restricted-note editor is enabled.
 Migration 105 and the restricted-note repository now establish and honor the
 authoritative active key version. The framework-independent rotation service
 now requires authorization and the current recovery password, verifies matched

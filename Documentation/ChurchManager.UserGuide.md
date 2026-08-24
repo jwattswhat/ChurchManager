@@ -452,11 +452,13 @@ Care - Activity Summary** contains aggregate counts. Neither report includes
 restricted notes or confidential narrative. Report access is protected by
 Pastoral Care permissions.
 
-Restricted narrative entry is not enabled in the current development release.
-It will remain unavailable until replacement-computer recovery, key rotation,
-and failure-handling acceptance have all passed. Do not place confidential
-narrative in an ordinary summary, action, report, document, prayer request, or
-other unprotected field as a substitute.
+Authorized users may select **Restricted Notes...** from a follow-up history.
+The list shows dates and updater information only; note text stays closed until
+one note is explicitly opened. Creating or changing a note also requires the
+restricted-note edit permission and verified recovery protection. Use the
+minimum necessary wording. Restricted notes never appear in reports, exports,
+diagnostics, or search. Do not place confidential narrative in an ordinary
+summary, action, report, document, prayer request, or other unprotected field.
 
 ChurchManager is a reminder and recordkeeping aid, not an emergency-response or
 mandated-reporting system. Follow the congregation's safeguarding procedures

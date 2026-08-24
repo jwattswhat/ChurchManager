@@ -33,10 +33,18 @@ class PastoralCareDialogTests(unittest.TestCase):
         )
         self.assertEqual(controls["PastoralCareBox"]["layout"], {"row": 2, "column": 2})
 
-    def test_restricted_note_entry_is_not_exposed(self):
-        self.assertNotIn("PastoralRestrictedNoteService", self.source)
-        self.assertNotIn("pastoral.notes.edit", self.source)
-        self.assertIn("not available in this workflow yet", self.source)
+    def test_restricted_note_entry_is_permission_controlled_and_closed_by_default(self):
+        self.assertIn("PastoralRestrictedNoteService", self.source)
+        self.assertIn('has_permission("pastoral.notes.edit")', self.source)
+        self.assertIn("remains closed until explicitly opened", self.source)
+        self.assertIn("Restricted Notes...", self.source)
+
+    def test_restricted_note_failures_do_not_enter_support_diagnostics(self):
+        restricted = self.source.split("class RestrictedNoteEditorDialog", 1)[1].split(
+            "class CareHistoryDialog", 1
+        )[0]
+        self.assertNotIn("report_exception", restricted)
+        self.assertNotIn("safe_context", restricted)
 
     def test_dashboard_supports_assigned_and_authorized_all_scope(self):
         self.assertIn("service.work_list(scope)", self.source)

@@ -558,7 +558,8 @@ def _buttonclick(event):
             return
         case "lblPastoralCare":
             show_pastoral_care(
-                cmfrm.FRAME, context.connection, context.session, context.authorization
+                cmfrm.FRAME, context.connection, context.session, context.authorization,
+                context.services.pastoral_cipher,
             )
             return
         case "lblDataManagement":
@@ -684,7 +685,7 @@ def main(argv=None):
         authorization_policy=context.authorization,
     )
     processes = ProcessService()
-    from pastoral_note_crypto import PastoralKeyManager, PastoralRecoveryBackup
+    from pastoral_note_crypto import PastoralKeyManager, PastoralNoteCipher, PastoralRecoveryBackup
     recovery_root = Path(os.environ.get("LOCALAPPDATA", Path.cwd())) / "ChurchManager"
     recovery = PastoralRecoveryBackup(
         PastoralKeyManager(
@@ -698,6 +699,7 @@ def main(argv=None):
     context.services = SimpleNamespace(
         processes=processes,
         backups=BackupService(recovery=recovery),
+        pastoral_cipher=PastoralNoteCipher(recovery.key_manager),
         reports=ChurchManagerReportService(
             JSForm, processes,
             ReportAccessService(context.connection, context.authorization),

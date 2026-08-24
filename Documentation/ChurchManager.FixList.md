@@ -25,7 +25,7 @@ Draft replacement, voids the original only when the reversal posts, prevents
 early accounting handoff of the replacement, and clearly distinguishes Ready
 from Sent to Accounting in the batch list.
 | 7A | Complete | Richer application login | Login now presents the ChurchManager icon and identity, local congregation name, version/release, copyright, and GPL notice without changing authentication behavior. |
-| 8 | In progress | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Safe scheduling, handoffs, and protected reports are complete; restricted notes remain gated by key rotation and replacement-machine recovery acceptance. |
+| 8 | In progress | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Safe scheduling, handoffs, protected reports, recovery acceptance, and the restricted-note editor are implemented; visual editor acceptance remains. |
 | 9 | Complete | Remove Projects and Tasks | The generic subsystem, screens, reports, permissions, views, and tables are retired by migration 098; worship preparation checklists remain. |
 | 10 | Completed | [Import, export, and duplicate management](ChurchManager.DataManagement.Specification.md) | Reviewed partial-row import, privacy-safe export, verified portable archives, duplicate decisions, merge-impact preflight, and guarded transactional merges are implemented and accepted. |
 | 11 | Next | Groups, committees, classes, and ministry teams | Adds the most broadly missing congregational structure. |
@@ -665,7 +665,7 @@ future roadmap projects:
 
 ### 8. Pastoral follow-up
 
-- **Status: safe scheduling release complete; restricted notes gated.** The independently tested AES-256-GCM
+- **Status: implementation complete; restricted-note visual acceptance pending.** The independently tested AES-256-GCM
   note/key-recovery service and migration 096 normalized care foundation are
   implemented. Database backups now pair with an available password-protected
   pastoral recovery sidecar; restore validates it before closing database
@@ -685,8 +685,9 @@ future roadmap projects:
   changes. Attendance and Prayer Requests now provide deliberate follow-up
   handoffs without copying event notes or prayer wording. Protected Work List
   and aggregate Activity Summary reports exclude restricted notes and narrative.
-  Restricted-note entry remains disabled until key rotation, actual-ciphertext
-  replacement-machine recovery, and the isolated release rehearsal pass.
+  Restricted-note entry is now permission-controlled, metadata-only until an
+  explicit open, and fails closed unless recovery is verified. Key rotation and
+  actual-ciphertext replacement-machine recovery passed in the isolated release rehearsal.
   Migration 105 now supplies the authoritative active key version, and all new
   or changed restricted-note ciphertext honors it instead of hard-coding v1.
   The tested transactional rotation service now verifies the current recovery
@@ -695,11 +696,10 @@ future roadmap projects:
   recovery verification is incomplete. Database Backup now exposes the
   recovery-gated Master Administrator rotation control and creates distinct
   labeled before/after backups. The disposable actual-ciphertext rehearsal is
-  implemented in `accept_pastoral_key_recovery.py`; visual acceptance and its
-  successful apply-mode result remain.
+  implemented in `accept_pastoral_key_recovery.py`; its apply-mode result passed
+  on August 24, 2026. Visual acceptance of the restricted-note editor remains.
   - Interactive protected backup/restore and application restart passed in
-    `ChurchDBTest`; ciphertext and isolated cross-machine recovery acceptance
-    remain.
+    `ChurchDBTest`; isolated ciphertext cross-machine recovery also passed.
 
 - Research completed: [Pastoral care systems research and ChurchManager recommendations](ChurchManager.PastoralCare.Research.md).
 - Proposed implementation specification: [ChurchManager pastoral care specification](ChurchManager.PastoralCare.Specification.md).

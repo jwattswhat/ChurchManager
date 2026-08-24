@@ -22,6 +22,15 @@ class PastoralRestrictedNoteTests(unittest.TestCase):
         self.assertNotIn("Ciphertext", metadata)
         self.assertNotIn("AuthenticationTag", metadata)
 
+    def test_note_list_contains_metadata_only(self):
+        listing = self.source.split("def list_metadata", 1)[1].split(
+            "def read(self, metadata", 1
+        )[0]
+        self.assertNotIn("Ciphertext", listing)
+        self.assertNotIn("AuthenticationTag", listing)
+        self.assertIn("CreatedAt", listing)
+        self.assertIn("UpdatedAt", listing)
+
     def test_new_note_is_bound_to_allocated_database_id(self):
         create = self.source.split("def create(self, need", 1)[1].split("def update", 1)[0]
         self.assertLess(create.index("lastrowid"), create.index("cipher.encrypt"))

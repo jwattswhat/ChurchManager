@@ -31,6 +31,16 @@ class PastoralRestrictedNoteService:
         self.care_service.need(metadata["care_need_id"])
         return self.repository.read(metadata, self.session.user_id)
 
+    def list_for_need(self, care_need_id):
+        """List note metadata only after care-record and note authorization."""
+
+        self.authorization.require(
+            "pastoral.notes.view", "list restricted pastoral notes"
+        )
+        care_need_id = _identifier(care_need_id, "care need")
+        self.care_service.need(care_need_id)
+        return self.repository.list_metadata(care_need_id)
+
     def create(self, care_need_id, plaintext, care_action_id=None):
         """Create a bound ciphertext row after explicit edit authorization."""
 
@@ -83,6 +93,27 @@ class MariaDBPastoralRestrictedNoteRepository:
             return dict(zip(
                 ("id", "church_id", "care_need_id", "care_action_id", "version"), row
             ))
+        finally:
+            cursor.close()
+
+    def list_metadata(self, care_need_id):
+        """Return display-safe note metadata without reading ciphertext."""
+
+        cursor = self.connection.cursor()
+        try:
+            self._execute(
+                cursor,
+                "SELECT n.ID,n.CareActionID,n.CreatedAt,n.UpdatedAt,n.Version,"
+                "COALESCE(u.DisplayName,u.Username) "
+                "FROM tblPastoralRestrictedNote n "
+                "JOIN tblUser u ON u.ID=n.UpdatedByUserID "
+                "WHERE n.CareNeedID=? ORDER BY n.CreatedAt DESC,n.ID DESC",
+                (care_need_id,),
+            )
+            return [dict(zip(
+                ("id", "care_action_id", "created_at", "updated_at", "version", "updated_by"),
+                row,
+            )) for row in cursor.fetchall()]
         finally:
             cursor.close()
 

@@ -10,6 +10,10 @@ import JSForm
 
 from pastoral_care_repository import MariaDBPastoralCareRepository
 from pastoral_care_service import PastoralCareService
+from pastoral_restricted_notes import (
+    MariaDBPastoralRestrictedNoteRepository,
+    PastoralRestrictedNoteService,
+)
 
 
 def _date_text(value):
@@ -204,13 +208,125 @@ class RecordCareActionDialog(wx.Dialog):
         }
 
 
+class RestrictedNoteEditorDialog(wx.Dialog):
+    """Decrypt one note only after explicit open and keep it off reports/logs."""
+
+    def __init__(self, parent, service, care_need_id, metadata=None):
+        title = "Restricted Pastoral Note" if metadata else "New Restricted Pastoral Note"
+        super().__init__(parent, title=title, size=(680, 500),
+                         style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        self.service = service
+        self.care_need_id = care_need_id
+        self.metadata = metadata
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        warning = wx.StaticText(
+            panel,
+            label=("Restricted and encrypted. Enter only minimum-necessary pastoral "
+                   "information. This content is excluded from reports, exports, "
+                   "diagnostics, and search."),
+        )
+        warning.SetForegroundColour(wx.Colour(145, 45, 0))
+        outer.Add(warning, 0, wx.EXPAND | wx.ALL, 14)
+        self.text = wx.TextCtrl(panel, style=wx.TE_MULTILINE)
+        outer.Add(self.text, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        can_edit = service.authorization.has_permission("pastoral.notes.edit")
+        self.text.SetEditable(can_edit)
+        buttons = wx.BoxSizer(wx.HORIZONTAL); buttons.AddStretchSpacer()
+        if can_edit:
+            buttons.Add(wx.Button(panel, wx.ID_OK, "Save Restricted Note"), 0, wx.RIGHT, 8)
+        buttons.Add(wx.Button(panel, wx.ID_CANCEL, "Close"))
+        outer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        panel.SetSizer(outer)
+        if metadata:
+            self.text.SetValue(service.read(metadata["id"]))
+
+    def save(self):
+        """Encrypt a new or changed value without retaining it in diagnostics."""
+
+        value = self.text.GetValue()
+        if self.metadata:
+            return self.service.update(
+                self.metadata["id"], value, self.metadata["version"]
+            )
+        return self.service.create(self.care_need_id, value)
+
+
+class RestrictedNotesDialog(wx.Dialog):
+    """List only safe note metadata and decrypt content on explicit open."""
+
+    def __init__(self, parent, service, care_need_id):
+        super().__init__(parent, title="Restricted Pastoral Notes", size=(720, 430),
+                         style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        self.service = service; self.care_need_id = care_need_id; self.rows = []
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        guidance = wx.StaticText(
+            panel, label="Note text remains closed until you explicitly open a selected note."
+        )
+        guidance.SetForegroundColour(wx.Colour(0, 82, 155))
+        outer.Add(guidance, 0, wx.ALL, 14)
+        self.list = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        for index, (label, width) in enumerate((
+            ("Created", 165), ("Updated", 165), ("Updated by", 210),
+        )): self.list.InsertColumn(index, label, width=width)
+        outer.Add(self.list, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 14)
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        new = wx.Button(panel, label="New Restricted Note...")
+        new.Show(service.authorization.has_permission("pastoral.notes.edit"))
+        new.Bind(wx.EVT_BUTTON, self.on_new)
+        open_button = wx.Button(panel, label="Open Selected Note")
+        open_button.Bind(wx.EVT_BUTTON, self.on_open)
+        buttons.Add(new, 0, wx.RIGHT, 8); buttons.Add(open_button)
+        buttons.AddStretchSpacer(); buttons.Add(wx.Button(panel, wx.ID_CLOSE, "Close"))
+        outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 14); panel.SetSizer(outer)
+        self.list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_open)
+        self.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE), id=wx.ID_CLOSE)
+        self.refresh()
+
+    def refresh(self):
+        self.rows = self.service.list_for_need(self.care_need_id)
+        self.list.DeleteAllItems()
+        for row in self.rows:
+            created = row["created_at"].strftime("%m/%d/%Y %I:%M %p")
+            updated = row["updated_at"].strftime("%m/%d/%Y %I:%M %p")
+            index = self.list.InsertItem(self.list.GetItemCount(), created)
+            self.list.SetItem(index, 1, updated)
+            self.list.SetItem(index, 2, str(row["updated_by"]))
+
+    def _edit(self, metadata=None):
+        dialog = None
+        try:
+            dialog = RestrictedNoteEditorDialog(
+                self, self.service, self.care_need_id, metadata
+            )
+            if dialog.ShowModal() == wx.ID_OK:
+                dialog.save(); self.refresh()
+        except Exception as error:
+            wx.MessageBox(
+                str(error), "Unable to Open Restricted Note",
+                wx.OK | wx.ICON_ERROR, self,
+            )
+        finally:
+            if dialog is not None: dialog.Destroy()
+
+    def on_new(self, _event): self._edit()
+
+    def on_open(self, _event):
+        selected = self.list.GetFirstSelected()
+        if selected < 0:
+            wx.MessageBox("Select a restricted note first.", "Restricted Notes",
+                          wx.OK | wx.ICON_INFORMATION, self)
+            return
+        self._edit(self.rows[selected])
+
+
 class CareHistoryDialog(wx.Dialog):
     """Show safe operational details and non-restricted action history."""
 
-    def __init__(self, parent, service, care_need_id):
+    def __init__(self, parent, service, care_need_id, restricted_notes=None):
         super().__init__(parent, title="Pastoral Care History", size=(900, 620),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.service = service; self.care_need_id = care_need_id
+        self.restricted_notes = restricted_notes
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
         self.heading = wx.StaticText(panel)
         font = self.heading.GetFont(); font.MakeBold(); font.SetPointSize(font.GetPointSize() + 2)
@@ -223,9 +339,16 @@ class CareHistoryDialog(wx.Dialog):
         )):
             self.list.InsertColumn(index, label, width=width)
         outer.Add(self.list, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
-        note = wx.StaticText(panel, label="Restricted notes are protected and are not available in this workflow yet.")
-        note.SetForegroundColour(wx.Colour(110, 80, 0)); outer.Add(note, 0, wx.ALL, 12)
+        if restricted_notes is not None:
+            note = wx.StaticText(
+                panel, label="Restricted note text is encrypted and remains closed until explicitly opened."
+            )
+            note.SetForegroundColour(wx.Colour(110, 80, 0)); outer.Add(note, 0, wx.ALL, 12)
         buttons = wx.BoxSizer(wx.HORIZONTAL)
+        if restricted_notes is not None:
+            restricted = wx.Button(panel, label="Restricted Notes...")
+            restricted.Bind(wx.EVT_BUTTON, self.on_restricted_notes)
+            buttons.Add(restricted, 0, wx.RIGHT, 7)
         for label, handler, permission in (
             ("Record Action...", self.on_action, "pastoral.care.update"),
             ("Assign...", self.on_assign, "pastoral.care.assign"),
@@ -243,6 +366,13 @@ class CareHistoryDialog(wx.Dialog):
         outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 12); panel.SetSizer(outer)
         self.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE), id=wx.ID_CLOSE)
         self.refresh()
+
+    def on_restricted_notes(self, _event):
+        dialog = RestrictedNotesDialog(
+            self, self.restricted_notes, self.care_need_id
+        )
+        try: dialog.ShowModal()
+        finally: dialog.Destroy()
 
     def refresh(self):
         self.record, rows = self.service.history(self.care_need_id)
@@ -298,10 +428,11 @@ class CareHistoryDialog(wx.Dialog):
 class PastoralCareDashboard(wx.Dialog):
     """Display assigned or all open pastoral care using safe operational fields."""
 
-    def __init__(self, parent, service, authorization):
+    def __init__(self, parent, service, authorization, restricted_notes=None):
         super().__init__(parent, title="Pastoral Care", size=(1050, 650),
                          style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
-        self.service = service; self.authorization = authorization; self.rows = []
+        self.service = service; self.authorization = authorization
+        self.restricted_notes = restricted_notes; self.rows = []
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
         header = wx.BoxSizer(wx.HORIZONTAL)
         title = wx.StaticText(panel, label="Pastoral Care Follow-ups")
@@ -351,7 +482,9 @@ class PastoralCareDashboard(wx.Dialog):
         if selected < 0:
             wx.MessageBox("Select a pastoral follow-up first.", "Pastoral Care", wx.OK | wx.ICON_INFORMATION, self)
             return
-        dialog = CareHistoryDialog(self, self.service, self.rows[selected]["id"])
+        dialog = CareHistoryDialog(
+            self, self.service, self.rows[selected]["id"], self.restricted_notes
+        )
         dialog.ShowModal(); dialog.Destroy(); self.refresh()
 
     def on_new(self, _event):
@@ -362,7 +495,9 @@ class PastoralCareDashboard(wx.Dialog):
                 submitted = dialog.values()
                 care_need_id = self.service.create_need(submitted)
                 dialog.Destroy(); self.refresh()
-                history = CareHistoryDialog(self, self.service, care_need_id)
+                history = CareHistoryDialog(
+                    self, self.service, care_need_id, self.restricted_notes
+                )
                 history.ShowModal(); history.Destroy()
                 return
             dialog.Destroy()
@@ -379,12 +514,18 @@ class PastoralCareDashboard(wx.Dialog):
             wx.MessageBox(str(error), "Unable to Create Follow-up", wx.OK | wx.ICON_ERROR, self)
 
 
-def show_pastoral_care(parent, connection, session, authorization):
+def show_pastoral_care(parent, connection, session, authorization, cipher=None):
     """Open the permission-controlled pastoral-care dashboard."""
 
     repository = MariaDBPastoralCareRepository(connection)
     service = PastoralCareService(repository, session, authorization)
-    dialog = PastoralCareDashboard(parent, service, authorization)
+    restricted = None
+    if cipher is not None and authorization.has_permission("pastoral.notes.view"):
+        restricted = PastoralRestrictedNoteService(
+            MariaDBPastoralRestrictedNoteRepository(connection, cipher),
+            service, session, authorization,
+        )
+    dialog = PastoralCareDashboard(parent, service, authorization, restricted)
     try:
         return dialog.ShowModal()
     finally:
