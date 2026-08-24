@@ -30,14 +30,14 @@ from Sent to Accounting in the batch list.
 | 10 | Completed | [Import, export, and duplicate management](ChurchManager.DataManagement.Specification.md) | Reviewed partial-row import, privacy-safe export, verified portable archives, duplicate decisions, merge-impact preflight, and guarded transactional merges are implemented and accepted. |
 | 11 | Completed | [Groups, committees, classes, and ministry teams](ChurchManager.GroupsMembership.Specification.md) | Normalized Groups, membership, roles, meetings, attendance, communication review, protected sending, and privacy-safe reports have passed functional and visual acceptance. |
 | 12 | Completed | [Volunteer availability and responses](ChurchManager.VolunteerAvailability.Specification.md) | Date-specific unavailable periods, participant responses, conflicts, last-served information, and the maintained worship test dataset passed automated and visual acceptance. |
-| 13 | Next | [Custom profile fields and controlled tags](ChurchManager.CustomProfileFields.Specification.md) | Implement the approved application-neutral JSForm and ChurchManager contracts first. |
+| 13 | In progress | [Custom profile fields and controlled tags](ChurchManager.CustomProfileFields.Specification.md) | Schema, permissions, application-neutral JSForm host, ChurchManager services, administration, and Person/Family value editing are implemented; search, reporting, import/export, and visual acceptance remain. |
 | 14 | Approved; implementation pending | [Calendar integration](ChurchManager.CalendarIntegration.Specification.md) | Maintain only ChurchManager-owned dates and a simple event list, then publish safely to an external calendar. |
 | 15 | Spec proposed | [Asset management](ChurchManager.AssetManagement.Specification.md) | A deliberately small asset register, location, responsibility, maintenance-history, due-list, and retirement design without a full facilities system. |
 | 16 | Approved; implementation pending | [Projects and scheduling](ChurchManager.ProjectsScheduling.Specification.md) | Provide bounded congregation project plans, assignments, due dates, status, and external-calendar eligibility without restoring the retired generic subsystem. |
 | Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
 
-The approved Custom Profile Fields project is next, followed by Calendar
-Integration, Asset Management, and Projects and Scheduling in that order.
+Custom Profile Fields is in progress, followed by Calendar Integration, Asset
+Management, and Projects and Scheduling in that order.
 
 ## Completed foundations retained for regression protection
 

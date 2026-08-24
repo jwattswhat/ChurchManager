@@ -78,6 +78,7 @@ from group_dialog import show_groups
 from group_meeting_dialog import show_group_attendance
 from data_management import show_data_management
 from custom_profile_dialog import show_custom_profile
+from custom_profile_admin_dialog import show_custom_profile_administration
 
 
 arguments = None
@@ -605,6 +606,11 @@ def _buttonclick(event):
             return
         case "lblDataManagement":
             show_data_management(cmfrm.FRAME, context.connection, context.session)
+            return
+        case "lblCustomProfileFields":
+            show_custom_profile_administration(
+                cmfrm.FRAME, context.connection, context.session, context.authorization,
+            )
             return
         case "lblPropers":
             show_local_lectionaries(

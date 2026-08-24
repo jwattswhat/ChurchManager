@@ -180,6 +180,13 @@ class CustomProfileFieldService:
             self.authorization.has_permission("profiles.custom_fields.view_restricted"),
         )
 
+    def tag_catalog(self, church_id, entity_type):
+        """Return all tags for authorized administration, including retired tags."""
+        self.authorization.require("profiles.tags.define", "maintain profile tags")
+        return self.repository.tags(
+            _identifier(church_id, "church"), _entity(entity_type), True, active_only=False,
+        )
+
     def assign_tag(self, church_id, entity_type, profile_id, tag_id, assigned):
         """Assign or remove one same-church controlled tag."""
         self.authorization.require("profiles.tags.assign", "assign profile tags")

@@ -93,6 +93,16 @@ needed.
 This group contains church information, people, families, attendance, documents,
 and the journal.
 
+Authorized administrators use **Custom Profile Fields** under ChurchManager
+Settings to define bounded additional fields and controlled tags for People or
+Families. Create a field as a Draft, add choices when it is a single- or
+multiple-choice field, and then activate it. Retire fields and tags instead of
+deleting them so prior information remains understandable. Open a saved Person
+or Family and choose **Additional Information...** to enter the values. Standard
+and restricted fields follow separate permissions; custom fields must not be
+used for passwords, payment data, full worship content, or confidential
+pastoral narratives.
+
 **Groups** maintains committees, classes, studies, music groups, fellowship
 groups, and ministry teams separately from worship-service participant roles.
 Open a Group to review its current roster, add a dated membership term, end a

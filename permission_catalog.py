@@ -71,4 +71,5 @@ MAIN_MENU_PERMISSIONS = {
     "lblPastoralCare": "pastoral.care.view.assigned",
     "lblGroups": "groups.view",
     "lblGroupAttendance": "groups.attendance.view",
+    "lblCustomProfileFields": "profiles.custom_fields.define",
 }

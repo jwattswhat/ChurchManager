@@ -254,7 +254,7 @@
                 },
                 "sizech": [
                     12,
-                    11
+                    12
                 ]
             },
             "lblPerson": {
@@ -672,6 +672,14 @@
                 "posch": [28, 9],
                 "tooltip": "Validate, preview, install, or upgrade lectionary metadata packages.",
                 "security": {"invoke": "application.config.manage"}
+            },
+            "lblCustomProfileFields": {
+                "name": "lblCustomProfileFields",
+                "type": "StaticText",
+                "label": "Custom Profile Fields",
+                "posch": [28, 10],
+                "tooltip": "Define additional Person and Family fields and controlled tags.",
+                "security": {"invoke": "profiles.custom_fields.define"}
             },
             "lblEmailSettings": {
                 "name": "lblEmailSettings",

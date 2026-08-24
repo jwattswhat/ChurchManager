@@ -188,10 +188,11 @@ class MariaDBCustomProfileRepository:
             self.connection.rollback(); raise
         finally: cursor.close()
 
-    def tags(self, church_id, entity_type, include_restricted=False):
+    def tags(self, church_id, entity_type, include_restricted=False, active_only=True):
         cursor = self.connection.cursor()
         try:
-            sql = "SELECT ID id,ChurchID church_id,EntityType entity_type,TagKey tag_key,Label label,Description description,PrivacyClass privacy_class,DisplayColor display_color,Active active FROM tblProfileTagDefinition WHERE ChurchID=? AND EntityType=? AND Active=1"
+            sql = "SELECT ID id,ChurchID church_id,EntityType entity_type,TagKey tag_key,Label label,Description description,PrivacyClass privacy_class,DisplayColor display_color,DisplayOrder display_order,Active active FROM tblProfileTagDefinition WHERE ChurchID=? AND EntityType=?"
+            if active_only: sql += " AND Active=1"
             if not include_restricted: sql += " AND PrivacyClass='STANDARD'"
             sql += " ORDER BY DisplayOrder,Label"
             self._execute(cursor, sql, (church_id, entity_type)); return self._rows(cursor)
