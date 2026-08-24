@@ -27,6 +27,9 @@ class Repository:
     def role_church_id(self, _role_id): return 2
     def role_overlaps(self, *_args): return False
     def assign_role(self, values): self.created_role = values; return 10
+    def catalog(self, _church_id, _kind): return []
+    def create_catalog_item(self, kind, values): self.catalog_created = (kind, values); return 12
+    def set_catalog_active(self, kind, item_id, active, user_id): return (kind, item_id, active, user_id)
 
 
 class GroupServiceTests(unittest.TestCase):
@@ -68,6 +71,14 @@ class GroupServiceTests(unittest.TestCase):
         service.repository.role_church_id = lambda _role_id: 3
         with self.assertRaisesRegex(GroupValidationError, "same church"):
             service.assign_role(9, 3, date(2026, 8, 24))
+
+    def test_catalog_creation_requires_specific_permission(self):
+        service = self.service({"groups.define_types"})
+        self.assertEqual(service.create_catalog_item(2, "type", {
+            "item_key": "care-team", "label": "Care Team", "privacy_class": "RESTRICTED",
+        }), 12)
+        with self.assertRaises(PermissionError):
+            service.create_catalog_item(2, "role", {"item_key": "host", "label": "Host"})
 
 
 if __name__ == "__main__": unittest.main()

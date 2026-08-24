@@ -24,6 +24,8 @@ class GroupRepositoryContractTests(unittest.TestCase):
         self.assertIn('"GROUP_MEMBERSHIP_CREATED"', self.source)
         self.assertIn('"GROUP_MEMBERSHIP_ENDED"', self.source)
         self.assertIn('"GROUP_ROLE_ASSIGNED"', self.source)
+        self.assertIn('"GROUP_CATALOG_CREATED"', self.source)
+        self.assertIn('"GROUP_CATALOG_STATUS_CHANGED"', self.source)
         self.assertIn("self.connection.rollback()", self.source)
 
 

@@ -77,6 +77,61 @@ class MariaDBGroupRepository:
         """Return congregations available to the Groups workspace."""
         return self._choice_rows("SELECT ID,Church FROM tblChurch ORDER BY Church")
 
+    def catalog(self, church_id, kind):
+        """Return maintained Group types or roles, including retired entries."""
+        cursor = self.connection.cursor()
+        try:
+            if kind == "type":
+                sql = ("SELECT ID id,GroupTypeKey item_key,Label label,Description description,"
+                       "DefaultPrivacyClass privacy_class,0 leadership_role,Active active "
+                       "FROM tblGroupType WHERE ChurchID=? ORDER BY DisplayOrder,Label")
+            elif kind == "role":
+                sql = ("SELECT ID id,GroupRoleKey item_key,Label label,Description description,"
+                       "'STANDARD' privacy_class,LeadershipRole leadership_role,Active active "
+                       "FROM tblGroupRole WHERE ChurchID=? ORDER BY DisplayOrder,Label")
+            else:
+                raise ValueError("Unknown Group catalog.")
+            self._execute(cursor, sql, (church_id,)); return self._rows(cursor)
+        finally:
+            cursor.close()
+
+    def create_catalog_item(self, kind, values):
+        """Create a controlled local Group type or role."""
+        cursor = self.connection.cursor()
+        try:
+            if kind == "type":
+                sql = ("INSERT INTO tblGroupType (ChurchID,GroupTypeKey,Label,Description,DefaultPrivacyClass,"
+                       "CreatedByUserID,UpdatedByUserID) VALUES (?,?,?,?,?,?,?)")
+                args = (values["church_id"], values["item_key"], values["label"], values.get("description"),
+                        values["privacy_class"], values["user_id"], values["user_id"])
+                entity = "GroupType"
+            elif kind == "role":
+                sql = ("INSERT INTO tblGroupRole (ChurchID,GroupRoleKey,Label,Description,LeadershipRole,"
+                       "CreatedByUserID,UpdatedByUserID) VALUES (?,?,?,?,?,?,?)")
+                args = (values["church_id"], values["item_key"], values["label"], values.get("description"),
+                        values["leadership_role"], values["user_id"], values["user_id"])
+                entity = "GroupRole"
+            else: raise ValueError("Unknown Group catalog.")
+            self._execute(cursor, sql, args); item_id = cursor.lastrowid
+            self._audit(cursor, values["user_id"], "GROUP_CATALOG_CREATED", item_id, entity)
+            self.connection.commit(); return item_id
+        except Exception:
+            self.connection.rollback(); raise
+        finally: cursor.close()
+
+    def set_catalog_active(self, kind, item_id, active, user_id):
+        """Activate or retire a catalog entry without deleting history."""
+        table = "tblGroupType" if kind == "type" else "tblGroupRole" if kind == "role" else None
+        if table is None: raise ValueError("Unknown Group catalog.")
+        cursor = self.connection.cursor()
+        try:
+            self._execute(cursor, f"UPDATE {table} SET Active=?,UpdatedByUserID=? WHERE ID=?", (int(bool(active)), user_id, item_id))
+            self._require_one(cursor); self._audit(cursor, user_id, "GROUP_CATALOG_STATUS_CHANGED", item_id, "GroupCatalog")
+            self.connection.commit(); return True
+        except Exception:
+            self.connection.rollback(); raise
+        finally: cursor.close()
+
     def _choice_rows(self, sql, values=()):
         cursor = self.connection.cursor()
         try:

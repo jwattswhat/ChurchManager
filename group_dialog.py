@@ -109,6 +109,72 @@ class AssignRoleDialog(wx.Dialog):
         return _selected_id(self.role), date(value.GetYear(), value.GetMonth() + 1, value.GetDay())
 
 
+class NewCatalogItemDialog(wx.Dialog):
+    """Collect one congregation-owned Group type or role."""
+
+    def __init__(self, parent, kind):
+        super().__init__(parent, title=f"New Group {kind.title()}", size=(520, 320))
+        self.kind = kind; panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        grid = wx.FlexGridSizer(cols=2, vgap=9, hgap=12); grid.AddGrowableCol(1, 1)
+        self.label = wx.TextCtrl(panel); self.key = wx.TextCtrl(panel); self.description = wx.TextCtrl(panel, style=wx.TE_MULTILINE)
+        fields = [("Label", self.label), ("Stable key", self.key), ("Description", self.description)]
+        self.special = wx.CheckBox(panel, label="Leadership role" if kind == "role" else "Restricted by default")
+        fields.append(("Behavior", self.special))
+        for label, control in fields:
+            grid.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL); grid.Add(control, 1, wx.EXPAND)
+        outer.Add(grid, 1, wx.EXPAND | wx.ALL, 14)
+        buttons = wx.BoxSizer(wx.HORIZONTAL); buttons.AddStretchSpacer()
+        buttons.Add(wx.Button(panel, wx.ID_OK, f"Create {kind.title()}"), 0, wx.RIGHT, 8); buttons.Add(wx.Button(panel, wx.ID_CANCEL, "Cancel"))
+        outer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14); panel.SetSizer(outer)
+        self.label.Bind(wx.EVT_TEXT, self._suggest_key)
+
+    def _suggest_key(self, _event):
+        if not self.key.IsModified(): self.key.ChangeValue(re.sub(r"[^a-z0-9]+", "-", self.label.GetValue().lower()).strip("-"))
+
+    def values(self):
+        return {"label": self.label.GetValue(), "item_key": self.key.GetValue(), "description": self.description.GetValue(),
+                "privacy_class": "RESTRICTED" if self.kind == "type" and self.special.GetValue() else "STANDARD",
+                "leadership_role": self.kind == "role" and self.special.GetValue()}
+
+
+class GroupCatalogDialog(wx.Dialog):
+    """Maintain local Group types or roles without deleting referenced history."""
+
+    def __init__(self, parent, service, church_id, kind):
+        super().__init__(parent, title=f"Group {kind.title()}s", size=(680, 480), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        self.service = service; self.church_id = church_id; self.kind = kind
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        note = wx.StaticText(panel, label=f"Maintain this congregation's Group {kind}s. Retired entries remain on historical records.")
+        note.SetForegroundColour(wx.Colour(0, 82, 155)); outer.Add(note, 0, wx.ALL, 14)
+        self.list = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        for index, (label, width) in enumerate((("Label", 190), ("Key", 170), ("Description", 230), ("Status", 70))): self.list.InsertColumn(index, label, width=width)
+        outer.Add(self.list, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 14)
+        buttons = wx.BoxSizer(wx.HORIZONTAL); self.add = wx.Button(panel, label=f"Add {kind.title()}..."); self.toggle = wx.Button(panel, label="Retire Selected")
+        buttons.Add(self.add, 0, wx.RIGHT, 8); buttons.Add(self.toggle); buttons.AddStretchSpacer(); buttons.Add(wx.Button(panel, wx.ID_CLOSE, "Close"))
+        outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 14); panel.SetSizer(outer)
+        self.add.Bind(wx.EVT_BUTTON, self.on_add); self.toggle.Bind(wx.EVT_BUTTON, self.on_toggle)
+        self.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE), id=wx.ID_CLOSE); self.refresh()
+
+    def refresh(self):
+        self.rows = self.service.catalog(self.church_id, self.kind); self.list.DeleteAllItems()
+        for row in self.rows:
+            index = self.list.InsertItem(self.list.GetItemCount(), row["label"])
+            self.list.SetItem(index, 1, row["item_key"]); self.list.SetItem(index, 2, row.get("description") or "")
+            self.list.SetItem(index, 3, "Active" if row["active"] else "Retired")
+
+    def on_add(self, _event):
+        dialog = NewCatalogItemDialog(self, self.kind)
+        try:
+            if dialog.ShowModal() == wx.ID_OK: self.service.create_catalog_item(self.church_id, self.kind, dialog.values()); self.refresh()
+        except Exception as error: wx.MessageBox(str(error), f"Unable to Create {self.kind.title()}", wx.OK | wx.ICON_ERROR, self)
+        finally: dialog.Destroy()
+
+    def on_toggle(self, _event):
+        selected = self.list.GetFirstSelected()
+        if selected < 0: return
+        row = self.rows[selected]; self.service.set_catalog_active(self.kind, row["id"], not bool(row["active"])); self.refresh()
+
+
 class GroupDetailDialog(wx.Dialog):
     """Show Group identity and its current authorized roster."""
 
@@ -201,10 +267,13 @@ class GroupsDialog(wx.Dialog):
         for index, (label, width) in enumerate((("Group", 300), ("Type", 200), ("Status", 100), ("Members", 90), ("Privacy", 110))): self.list.InsertColumn(index, label, width=width)
         outer.Add(self.list, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 14)
         buttons = wx.BoxSizer(wx.HORIZONTAL); self.new = wx.Button(panel, label="New Group..."); self.open = wx.Button(panel, label="Open Group")
-        buttons.Add(self.new, 0, wx.RIGHT, 8); buttons.Add(self.open); buttons.AddStretchSpacer(); buttons.Add(wx.Button(panel, wx.ID_CLOSE, "Close"))
+        self.types = wx.Button(panel, label="Group Types..."); self.roles = wx.Button(panel, label="Group Roles...")
+        buttons.Add(self.new, 0, wx.RIGHT, 8); buttons.Add(self.open, 0, wx.RIGHT, 16); buttons.Add(self.types, 0, wx.RIGHT, 8); buttons.Add(self.roles)
+        buttons.AddStretchSpacer(); buttons.Add(wx.Button(panel, wx.ID_CLOSE, "Close"))
         outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 14); panel.SetSizer(outer)
         self.church.Bind(wx.EVT_CHOICE, self.refresh); self.status.Bind(wx.EVT_CHOICE, self.refresh)
         self.new.Bind(wx.EVT_BUTTON, self.on_new); self.open.Bind(wx.EVT_BUTTON, self.on_open); self.list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_open)
+        self.types.Bind(wx.EVT_BUTTON, lambda _event: self.open_catalog("type")); self.roles.Bind(wx.EVT_BUTTON, lambda _event: self.open_catalog("role"))
         self.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE), id=wx.ID_CLOSE); self.refresh()
 
     def refresh(self, _event=None):
@@ -228,6 +297,15 @@ class GroupsDialog(wx.Dialog):
         dialog = GroupDetailDialog(self, self.service, self.rows[selected]["id"])
         try: dialog.ShowModal()
         finally: dialog.Destroy(); self.refresh()
+
+    def open_catalog(self, kind):
+        church_id = _selected_id(self.church)
+        if church_id is None: return
+        try: dialog = GroupCatalogDialog(self, self.service, church_id, kind)
+        except Exception as error:
+            wx.MessageBox(str(error), "Group Catalog Unavailable", wx.OK | wx.ICON_ERROR, self); return
+        try: dialog.ShowModal()
+        finally: dialog.Destroy()
 
 
 def show_groups(parent, connection, session, authorization):

@@ -142,6 +142,34 @@ class GroupService:
                                             "start_date": start_date, "end_date": end_date,
                                             "user_id": self.session.user_id})
 
+    def catalog(self, church_id, kind):
+        """Return one authorized Group catalog."""
+        permission = "groups.define_types" if kind == "type" else "groups.roles.define"
+        self.authorization.require(permission, f"view Group {kind}s")
+        return self.repository.catalog(_identifier(church_id, "church"), kind)
+
+    def create_catalog_item(self, church_id, kind, values):
+        """Create a local type or role after validating its stable key."""
+        permission = "groups.define_types" if kind == "type" else "groups.roles.define"
+        self.authorization.require(permission, f"create a Group {kind}")
+        values = dict(values or {}); key = str(values.get("item_key") or "").strip().lower()
+        if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", key):
+            raise GroupValidationError("Catalog key must use lowercase letters, numbers, and single hyphens.")
+        item = {"church_id": _identifier(church_id, "church"), "item_key": key,
+                "label": _required_text(values.get("label"), "Label", 100),
+                "description": _optional_text(values.get("description"), 255),
+                "privacy_class": str(values.get("privacy_class") or "STANDARD").upper(),
+                "leadership_role": int(bool(values.get("leadership_role"))), "user_id": self.session.user_id}
+        if item["privacy_class"] not in self.PRIVACY:
+            raise GroupValidationError("Choose a valid privacy class.")
+        return self.repository.create_catalog_item(kind, item)
+
+    def set_catalog_active(self, kind, item_id, active):
+        """Retire or reactivate a catalog item without deleting it."""
+        permission = "groups.define_types" if kind == "type" else "groups.roles.define"
+        self.authorization.require(permission, f"change a Group {kind}")
+        return self.repository.set_catalog_active(kind, _identifier(item_id, kind), active, self.session.user_id)
+
     def _editable_group(self, group_id):
         group = self.repository.group(_identifier(group_id, "Group"))
         if group is None:
