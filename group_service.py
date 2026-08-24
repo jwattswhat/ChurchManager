@@ -30,6 +30,27 @@ class GroupService:
             self.authorization.has_permission("groups.view_restricted"),
         )
 
+    def group(self, group_id):
+        """Return one Group when the user may view its privacy class."""
+        self.authorization.require("groups.view", "view Groups")
+        record = self.repository.group(_identifier(group_id, "Group"))
+        if record and record["privacy_class"] == "RESTRICTED":
+            self.authorization.require("groups.view_restricted", "view a restricted Group")
+        return record
+
+    def choices(self, church_id):
+        """Return Group types and same-Church people for editors."""
+        self.authorization.require("groups.view", "view Group choices")
+        return self.repository.choices(_identifier(church_id, "church"))
+
+    def memberships(self, group_id, current_only=True):
+        """Return authorized current or historical membership terms."""
+        self.authorization.require("groups.membership.view", "view Group membership")
+        group = self.group(group_id)
+        if group is None:
+            raise GroupValidationError("The selected Group is unavailable.")
+        return self.repository.memberships(group["id"], bool(current_only))
+
     def create_group(self, values):
         """Validate and create one Group with stable identity and audit attribution."""
 

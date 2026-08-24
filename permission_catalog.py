@@ -69,4 +69,5 @@ MAIN_MENU_PERMISSIONS = {
     "lblContributionBatches": "giving.batches.enter",
     "lblGivingReports": "giving.reports.summary",
     "lblPastoralCare": "pastoral.care.view.assigned",
+    "lblGroups": "groups.view",
 }

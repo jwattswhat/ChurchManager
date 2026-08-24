@@ -343,6 +343,14 @@
                 "tooltip": "Review duplicate membership records and manage guarded data exchange.",
                 "security": {"invoke": "membership.manage"}
             },
+            "lblGroups": {
+                "name": "lblGroups",
+                "type": "StaticText",
+                "posch": [15, 9],
+                "label": "Groups",
+                "tooltip": "Maintain congregational Groups and dated membership.",
+                "security": {"invoke": "groups.view"}
+            },
             "ReportBox": {
                 "type": "StaticBox",
                 "name": "ReportBox",

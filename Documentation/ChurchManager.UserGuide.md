@@ -93,6 +93,13 @@ needed.
 This group contains church information, people, families, attendance, documents,
 and the journal.
 
+**Groups** maintains committees, classes, studies, music groups, fellowship
+groups, and ministry teams separately from worship-service participant roles.
+Open a Group to review its current roster or add a dated membership term. A
+Person must belong to the same congregation as the Group, and overlapping
+membership terms are rejected. Restricted Groups appear only to users with the
+dedicated restricted-Group permission.
+
 Data Management provides a guarded duplicate review. Matching names, contact
 information, or mailing addresses are possible duplicates, not an automatic merge.
 Select a pair and choose **Not Duplicates** to record that both records are valid,

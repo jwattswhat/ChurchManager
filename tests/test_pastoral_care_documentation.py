@@ -22,20 +22,20 @@ class PastoralCareDocumentationTests(unittest.TestCase):
         guide = (ROOT / "Documentation" / "ChurchManager.UserGuide.md").read_text(
             encoding="utf-8"
         )
-        self.assertIn("Restricted narrative entry is not enabled", guide)
-        self.assertIn("key rotation", guide)
+        self.assertIn("Restricted Notes...", guide)
+        self.assertIn("note text stays closed", guide)
         self.assertIn("two matched files", guide)
         self.assertIn("protected pastoral\nrecovery sidecar", guide)
         self.assertIn("ChurchManager does not store that password", guide)
         self.assertIn("Rotate Encryption Key", guide)
         self.assertIn("before-and-after backups", guide)
 
-    def test_roadmap_keeps_restricted_notes_gated(self):
+    def test_roadmap_records_restricted_note_acceptance(self):
         roadmap = (ROOT / "Documentation" / "ChurchManager.FixList.md").read_text(
             encoding="utf-8"
         )
-        self.assertIn("safe scheduling release complete; restricted notes gated", roadmap)
-        self.assertIn("actual-ciphertext\n  replacement-machine recovery", roadmap)
+        self.assertIn("encrypted restricted-note editor passed final visual acceptance", roadmap)
+        self.assertIn("actual-ciphertext replacement-machine recovery passed", roadmap)
 
     def test_approved_spec_defines_fail_closed_key_rotation(self):
         specification = (
