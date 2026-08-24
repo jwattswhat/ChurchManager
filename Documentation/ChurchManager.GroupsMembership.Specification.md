@@ -664,6 +664,7 @@ The subsystem is accepted only when all of the following are demonstrated:
    report provides permitted contact fields separately.
 5. Restricted Groups are included in version 1 and require their dedicated
    permissions at every operation boundary.
-6. The initial communication increment prepares and reviews recipient lists;
-   actual sending is deferred until that workflow receives separate acceptance.
+6. Group communication prepares and reviews the exact recipient list before
+   sending. Protected TEST MODE behavior and explicit send confirmation received
+   functional and visual acceptance on August 24, 2026.
 7. Temporary Groups may have an optional expected closure date and reminder.

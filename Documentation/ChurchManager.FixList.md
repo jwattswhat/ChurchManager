@@ -28,7 +28,7 @@ from Sent to Accounting in the batch list.
 | 8 | Completed | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Safe scheduling, handoffs, protected reports, recovery acceptance, and the encrypted restricted-note editor passed final visual acceptance on August 24, 2026. |
 | 9 | Complete | Remove Projects and Tasks | The generic subsystem, screens, reports, permissions, views, and tables are retired by migration 098; worship preparation checklists remain. |
 | 10 | Completed | [Import, export, and duplicate management](ChurchManager.DataManagement.Specification.md) | Reviewed partial-row import, privacy-safe export, verified portable archives, duplicate decisions, merge-impact preflight, and guarded transactional merges are implemented and accepted. |
-| 11 | In progress | [Groups, committees, classes, and ministry teams](ChurchManager.GroupsMembership.Specification.md) | Migrations 106-108 provide normalized Groups, meetings, attendance, preserved meeting lifecycle, and privacy-safe roster, participation, and attendance reports. Communication preparation remains. |
+| 11 | Completed | [Groups, committees, classes, and ministry teams](ChurchManager.GroupsMembership.Specification.md) | Normalized Groups, membership, roles, meetings, attendance, communication review, protected sending, and privacy-safe reports have passed functional and visual acceptance. |
 | 12 | Next | Volunteer availability and responses | Builds on the completed worship scheduling foundation. |
 | 13 | Later | [Asset management](ChurchManager.AssetManagement.Specification.md) | A deliberately small asset register, location, responsibility, maintenance-history, due-list, and retirement design is specified without turning ChurchManager into a full facilities-management system. |
 | 14 | Later | Projects and scheduling | Provide practical project plans, assignments, due dates, status, and scheduling for congregation work while remaining distinct from the retired generic Projects and Tasks subsystem. |
@@ -36,8 +36,8 @@ from Sent to Accounting in the batch list.
 | 16 | Later | Custom profile fields and controlled tags | Adds flexibility after the core normalized relationships are settled. |
 | Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
 
-Item 8 is complete. Items 11 and 12 form the next ministry-development phase. Items 13 through
-16 are separate later projects and should not delay a stable ChurchManager release.
+Item 12 is the next ministry-development phase. Items 13 through 16 are
+separate later projects and should not delay a stable ChurchManager release.
 
 ## Completed foundations retained for regression protection
 
