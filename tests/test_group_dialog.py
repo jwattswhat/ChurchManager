@@ -19,6 +19,8 @@ class GroupDialogContractTests(unittest.TestCase):
         self.assertIn("wx.LC_REPORT", source)
         self.assertIn("wx.RESIZE_BORDER", source)
         self.assertIn("EVT_LIST_ITEM_ACTIVATED", source)
+        self.assertIn("Show ended memberships", source)
+        self.assertIn('status = "Ends today"', source)
 
 
 if __name__ == "__main__":

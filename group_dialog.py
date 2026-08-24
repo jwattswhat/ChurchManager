@@ -185,9 +185,16 @@ class GroupDetailDialog(wx.Dialog):
         self.heading = wx.StaticText(panel); font = self.heading.GetFont(); font.MakeBold(); font.SetPointSize(font.GetPointSize() + 2); self.heading.SetFont(font)
         self.summary = wx.StaticText(panel)
         outer.Add(self.heading, 0, wx.ALL, 14); outer.Add(self.summary, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
-        outer.Add(wx.StaticText(panel, label="Current members"), 0, wx.LEFT | wx.RIGHT, 14)
+        roster_header = wx.BoxSizer(wx.HORIZONTAL)
+        roster_header.Add(wx.StaticText(panel, label="Members"), 0, wx.ALIGN_CENTER_VERTICAL)
+        roster_header.AddStretchSpacer()
+        self.show_ended = wx.CheckBox(panel, label="Show ended memberships")
+        roster_header.Add(self.show_ended)
+        outer.Add(roster_header, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 14)
         self.members = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-        for index, (label, width) in enumerate((("Person", 270), ("Roles", 180), ("Started", 105), ("Note", 210))): self.members.InsertColumn(index, label, width=width)
+        for index, (label, width) in enumerate((("Person", 220), ("Roles", 150), ("Started", 95),
+                                                ("Ended", 95), ("Status", 75), ("Note", 170))):
+            self.members.InsertColumn(index, label, width=width)
         outer.Add(self.members, 1, wx.EXPAND | wx.ALL, 14)
         buttons = wx.BoxSizer(wx.HORIZONTAL); self.add = wx.Button(panel, label="Add Member...")
         self.assign = wx.Button(panel, label="Assign Role..."); self.end = wx.Button(panel, label="End Membership...")
@@ -196,6 +203,7 @@ class GroupDetailDialog(wx.Dialog):
         outer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14); panel.SetSizer(outer)
         self.add.Bind(wx.EVT_BUTTON, self.on_add); self.assign.Bind(wx.EVT_BUTTON, self.on_assign)
         self.end.Bind(wx.EVT_BUTTON, self.on_end); self.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE), id=wx.ID_CLOSE)
+        self.show_ended.Bind(wx.EVT_CHECKBOX, lambda _event: self.refresh())
         self.refresh()
 
     def refresh(self):
@@ -203,11 +211,21 @@ class GroupDetailDialog(wx.Dialog):
         self.heading.SetLabel(record["name"])
         self.summary.SetLabel(f'{record["group_type"]} · {record["status"].title()} · {record["privacy_class"].title()}')
         self.members.DeleteAllItems()
-        self.member_rows = self.service.memberships(self.group_id)
+        self.member_rows = self.service.memberships(self.group_id, current_only=not self.show_ended.GetValue())
         for row in self.member_rows:
+            end_date = row.get("end_date")
+            ended = end_date is not None and end_date < date.today()
+            status = "Current"
+            if end_date == date.today(): status = "Ends today"
+            elif ended: status = "Ended"
+            elif end_date is not None: status = f"Ends {_date_text(end_date)}"
             index = self.members.InsertItem(self.members.GetItemCount(), row["person"])
-            roles = ", ".join(item["role"] for item in self.service.membership_roles(row["id"]))
-            self.members.SetItem(index, 1, roles or "Member"); self.members.SetItem(index, 2, _date_text(row["start_date"])); self.members.SetItem(index, 3, row.get("notes") or "")
+            roles = ", ".join(item["role"] for item in self.service.membership_roles(row["id"], current_only=not ended))
+            self.members.SetItem(index, 1, roles or "Member"); self.members.SetItem(index, 2, _date_text(row["start_date"]))
+            self.members.SetItem(index, 3, _date_text(end_date)); self.members.SetItem(index, 4, status)
+            self.members.SetItem(index, 5, row.get("notes") or "")
+            if ended:
+                self.members.SetItemTextColour(index, wx.Colour(105, 105, 105))
 
     def on_add(self, _event):
         choices = self.service.choices(self.service.group(self.group_id)["church_id"])
@@ -244,7 +262,7 @@ class GroupDetailDialog(wx.Dialog):
             if prompt.ShowModal() != wx.ID_OK: return
             end_date = date.fromisoformat(prompt.GetValue().strip())
             if wx.MessageBox(f'End {membership["person"]}\'s membership on {_date_text(end_date)}?', "Confirm End Membership", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES: return
-            self.service.end_membership(membership["id"], end_date); self.refresh()
+            self.service.end_membership(membership["id"], end_date); self.show_ended.SetValue(True); self.refresh()
         except Exception as error: wx.MessageBox(str(error), "Unable to End Membership", wx.OK | wx.ICON_ERROR, self)
         finally: prompt.Destroy()
 

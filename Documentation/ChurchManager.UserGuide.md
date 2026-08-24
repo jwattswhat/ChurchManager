@@ -100,6 +100,8 @@ membership without deleting its history, or assign a dated Group role. A Person,
 Group, and role must belong to the same congregation. Overlapping membership
 terms and duplicate overlapping role assignments are rejected. Restricted
 Groups appear only to users with the dedicated restricted-Group permission.
+Select **Show ended memberships** to review former members, their effective end
+dates, and their preserved historical terms.
 Authorized administrators may add congregation-owned **Group Types** and
 **Group Roles** from the Groups workspace. Retire an entry that should no longer
 be offered; retirement preserves its use on historical records.
