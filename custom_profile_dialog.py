@@ -31,6 +31,23 @@ class CustomProfileDialog(wx.Dialog):
         else:
             empty = wx.StaticText(panel, label="No custom fields are active for this profile type.")
             outer.Add(empty, 1, wx.EXPAND | wx.ALL, 12)
+        self.tag_rows = []
+        self.original_tag_ids = set()
+        self.tags = None
+        try:
+            self.tag_rows, self.original_tag_ids = service.profile_tags(
+                church_id, entity_type, profile_id,
+            )
+        except PermissionError:
+            pass
+        if self.tag_rows:
+            box = wx.StaticBoxSizer(wx.VERTICAL, panel, "Tags")
+            self.tags = wx.CheckListBox(panel, choices=[item["label"] for item in self.tag_rows])
+            self.tags.Enable(service.authorization.has_permission("profiles.tags.assign"))
+            for index, item in enumerate(self.tag_rows):
+                self.tags.Check(index, item["id"] in self.original_tag_ids)
+                if not item["active"]: self.tags.SetString(index, f"{item['label']} (retired)")
+            box.Add(self.tags, 1, wx.EXPAND | wx.ALL, 8); outer.Add(box, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 12)
         buttons = wx.StdDialogButtonSizer()
         save = wx.Button(panel, wx.ID_SAVE, "Save")
         close = wx.Button(panel, wx.ID_CANCEL, "Close")
@@ -48,6 +65,16 @@ class CustomProfileDialog(wx.Dialog):
                 self.service.save_profile_values(
                     self.church_id, self.entity_type, self.profile_id, changes,
                 )
+            if self.tags is not None:
+                selected = {self.tag_rows[index]["id"] for index in self.tags.GetCheckedItems()}
+                for item in self.tag_rows:
+                    tag_id = item["id"]
+                    should_assign = tag_id in selected
+                    was_assigned = tag_id in self.original_tag_ids
+                    if should_assign != was_assigned:
+                        self.service.assign_tag(
+                            self.church_id, self.entity_type, self.profile_id, tag_id, should_assign,
+                        )
         except (CustomProfileValidationError, DynamicFieldError, ValueError) as error:
             wx.MessageBox(str(error), "Unable to Save Additional Information", wx.OK | wx.ICON_ERROR, self)
             return

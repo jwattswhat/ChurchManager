@@ -192,7 +192,7 @@ class CustomProfileFieldService:
         self.authorization.require("profiles.tags.assign", "assign profile tags")
         entity_type = _entity(entity_type); profile_id = _identifier(profile_id, "profile")
         church_id = _identifier(church_id, "church"); tag = self.repository.tag(_identifier(tag_id, "tag"))
-        if not tag or not tag["active"] or tag["church_id"] != church_id or tag["entity_type"] != entity_type:
+        if not tag or (assigned and not tag["active"]) or tag["church_id"] != church_id or tag["entity_type"] != entity_type:
             raise CustomProfileValidationError("The selected tag is unavailable.")
         if self.repository.profile_church_id(entity_type, profile_id) != church_id:
             raise CustomProfileValidationError("The selected profile is unavailable.")
@@ -201,6 +201,18 @@ class CustomProfileFieldService:
         if assigned and self.repository.profile_tag_count(entity_type, profile_id) >= self.MAX_TAGS:
             raise CustomProfileValidationError(f"A profile may contain at most {self.MAX_TAGS} tags.")
         return self.repository.set_tag(entity_type, profile_id, tag, bool(assigned), self.session.user_id)
+
+    def profile_tags(self, church_id, entity_type, profile_id):
+        """Return authorized active tags plus retired tags already assigned."""
+        self.authorization.require("profiles.tags.view", "view profile tags")
+        church_id = _identifier(church_id, "church"); entity_type = _entity(entity_type)
+        profile_id = _identifier(profile_id, "profile")
+        if self.repository.profile_church_id(entity_type, profile_id) != church_id:
+            raise CustomProfileValidationError("The selected profile is unavailable.")
+        assigned = self.repository.assigned_tag_ids(entity_type, profile_id)
+        restricted = self.authorization.has_permission("profiles.custom_fields.view_restricted")
+        catalog = self.repository.tags(church_id, entity_type, restricted, active_only=False)
+        return tuple(item for item in catalog if item["active"] or item["id"] in assigned), assigned
 
     def _definition(self, definition_id):
         current = self.repository.definition(_identifier(definition_id, "custom field"))

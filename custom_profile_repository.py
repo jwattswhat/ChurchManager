@@ -251,6 +251,16 @@ class MariaDBCustomProfileRepository:
         column = "PersonID" if entity_type == "PERSON" else "FamilyID"
         return int(self._scalar(f"SELECT COUNT(*) FROM {table} WHERE {column}=?", (profile_id,)))
 
+    def assigned_tag_ids(self, entity_type, profile_id):
+        table = "tblPersonTag" if entity_type == "PERSON" else "tblFamilyTag"
+        column = "PersonID" if entity_type == "PERSON" else "FamilyID"
+        cursor = self.connection.cursor()
+        try:
+            self._execute(cursor, f"SELECT TagDefinitionID FROM {table} WHERE {column}=?", (profile_id,))
+            return {row[0] for row in cursor.fetchall()}
+        finally:
+            cursor.close()
+
     def set_tag(self, entity_type, profile_id, tag, assigned, user_id):
         table = "tblPersonTag" if entity_type == "PERSON" else "tblFamilyTag"
         column = "PersonID" if entity_type == "PERSON" else "FamilyID"

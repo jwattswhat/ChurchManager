@@ -46,6 +46,7 @@ class Repository:
     def create_tag(self, item): self.tag_created = item; return 8
     def set_tag_active(self, *_args): return True
     def profile_tag_count(self, *_args): return 0
+    def assigned_tag_ids(self, *_args): return {8}
     def set_tag(self, *_args): return True
 
 
@@ -104,6 +105,16 @@ class CustomProfileServiceTests(unittest.TestCase):
         service.repository.profile_tag_count = lambda *_args: 25
         with self.assertRaisesRegex(CustomProfileValidationError, "25"):
             service.assign_tag(2, "PERSON", 10, 8, True)
+
+    def test_profile_tags_preserve_assigned_catalog_identity(self):
+        service = self.service({"profiles.tags.view"})
+        service.repository.tags = lambda *_args, **_kwargs: [
+            {"id": 8, "active": 0, "privacy_class": "STANDARD"},
+            {"id": 9, "active": 1, "privacy_class": "STANDARD"},
+        ]
+        tags, assigned = service.profile_tags(2, "PERSON", 10)
+        self.assertEqual([item["id"] for item in tags], [8, 9])
+        self.assertEqual(assigned, {8})
 
 
 if __name__ == "__main__": unittest.main()
