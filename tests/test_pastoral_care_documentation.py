@@ -27,6 +27,8 @@ class PastoralCareDocumentationTests(unittest.TestCase):
         self.assertIn("two matched files", guide)
         self.assertIn("protected pastoral\nrecovery sidecar", guide)
         self.assertIn("ChurchManager does not store that password", guide)
+        self.assertIn("Rotate Encryption Key", guide)
+        self.assertIn("before-and-after backups", guide)
 
     def test_roadmap_keeps_restricted_notes_gated(self):
         roadmap = (ROOT / "Documentation" / "ChurchManager.FixList.md").read_text(

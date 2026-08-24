@@ -8,6 +8,11 @@ import wx
 
 from backup_service import BackupError, BackupPreferences
 from pastoral_recovery_admin import PastoralRecoveryAdministration
+from pastoral_key_rotation import (
+    MariaDBPastoralKeyRotationRepository,
+    PastoralKeyRotationService,
+)
+from pastoral_note_crypto import PastoralNoteCipher
 
 
 def mariadb_tools_directory(jsform):
@@ -75,6 +80,16 @@ class BackupRestoreDialog(wx.Dialog):
             self.recovery_button = wx.Button(panel, label=self._recovery_button_label())
             self.recovery_button.Bind(wx.EVT_BUTTON, self.on_configure_recovery)
             recovery_box.Add(self.recovery_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
+            self.rotation_button = wx.Button(panel, label="Rotate Encryption Key...")
+            self.rotation_button.Enable(self.pastoral_recovery.configured)
+            self.rotation_button.SetToolTip(
+                "Creates verified before-and-after backups and re-encrypts all "
+                "restricted pastoral notes with a new key version."
+            )
+            self.rotation_button.Bind(wx.EVT_BUTTON, self.on_rotate_pastoral_key)
+            recovery_box.Add(
+                self.rotation_button, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8
+            )
             outer.Add(recovery_box, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
         line=wx.StaticLine(panel); outer.Add(line,0,wx.EXPAND|wx.ALL,10)
         restore_title=wx.StaticText(panel,label="Restore Database")
@@ -141,6 +156,7 @@ class BackupRestoreDialog(wx.Dialog):
             self.pastoral_recovery.configure(password)
             self.recovery_status.SetLabel(self._recovery_status_text())
             self.recovery_button.SetLabel(self._recovery_button_label())
+            self.rotation_button.Enable(True)
             wx.MessageBox(
                 "Pastoral-note recovery is ready. Future ChurchManager backups will "
                 "include a protected recovery file beside the SQL backup.",
@@ -151,6 +167,88 @@ class BackupRestoreDialog(wx.Dialog):
         finally:
             password = None
             confirmation = None
+
+    def on_rotate_pastoral_key(self, _event):
+        """Confirm and run protected key rotation with matched backups."""
+
+        self.context.authorization.require(
+            "pastoral.care.admin", "rotate pastoral-note encryption"
+        )
+        warning = wx.MessageDialog(
+            self,
+            "ChurchManager will create a verified backup, rotate the pastoral-note "
+            "encryption key, and create a second verification backup.\n\n"
+            "Do not close ChurchManager or interrupt MariaDB during this operation.\n\n"
+            "Continue?",
+            "Rotate Pastoral Note Encryption Key",
+            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING,
+        )
+        try:
+            if warning.ShowModal() != wx.ID_YES:
+                return
+        finally:
+            warning.Destroy()
+        prompt = wx.PasswordEntryDialog(
+            self,
+            "Enter the separate pastoral-note recovery password:",
+            "Authorize Key Rotation",
+        )
+        try:
+            if prompt.ShowModal() != wx.ID_OK:
+                return
+            recovery_password = prompt.GetValue()
+        finally:
+            prompt.Destroy()
+        try:
+            self.save_preferences()
+            folder = Path(self.folder.GetPath()).expanduser().resolve()
+            tools = mariadb_tools_directory(self.jsform)
+            backups = self.context.services.backups
+
+            def create_named_backup(label):
+                return backups.create(
+                    self.context.settings, tools,
+                    folder / "PastoralKeyRotation.{}".format(label),
+                )
+
+            service = PastoralKeyRotationService(
+                MariaDBPastoralKeyRotationRepository(self.context.connection),
+                self.pastoral_recovery.recovery.key_manager,
+                PastoralNoteCipher(self.pastoral_recovery.recovery.key_manager),
+                self.pastoral_recovery.recovery,
+                self.context.session,
+                self.context.authorization,
+                lambda: create_named_backup("Before"),
+                lambda: create_named_backup("Verified"),
+            )
+            busy = wx.BusyInfo(
+                "Rotating the pastoral-note encryption key and verifying backups...",
+                self,
+            )
+            try:
+                wx.YieldIfNeeded()
+                result = service.rotate(recovery_password)
+            finally:
+                del busy
+            self.record_success(result.verification_backup)
+            self.recovery_status.SetLabel(self._recovery_status_text())
+            wx.MessageBox(
+                "Pastoral-note encryption was rotated from version {} to version {}.\n\n"
+                "{} restricted note(s) were re-encrypted.\n\n"
+                "Verification backup:\n{}".format(
+                    result.previous_version, result.active_version,
+                    result.notes_rotated, result.verification_backup.path,
+                ),
+                "Key Rotation Complete",
+                wx.OK | wx.ICON_INFORMATION,
+                self,
+            )
+        except Exception as error:
+            wx.MessageBox(
+                str(error), "Key Rotation Failed", wx.OK | wx.ICON_ERROR, self
+            )
+        finally:
+            recovery_password = None
 
     def record_success(self,result):
         self.values["last_successful_backup"]=str(result.path)

@@ -536,6 +536,12 @@ Before restricted pastoral notes can ever be enabled, a Master Administrator
 must configure a separate Pastoral Care recovery password in **Database
 Backup**. ChurchManager does not store that password and cannot recover it.
 
+An authorized Master Administrator may use **Rotate Encryption Key** from that
+same protected section. Rotation requires the recovery password and creates
+separate, clearly labeled before-and-after backups. Do not interrupt
+ChurchManager or MariaDB while it is running. Keep both backups and their
+matching sidecars according to the congregation's protected retention policy.
+
 A complete backup of encrypted pastoral notes consists of two matched files:
 the SQL backup, which contains ciphertext only, and its protected pastoral
 recovery sidecar. Preserve both files together in protected storage. The SQL
