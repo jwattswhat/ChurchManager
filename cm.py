@@ -568,6 +568,7 @@ def _buttonclick(event):
         case "lblGroups":
             show_groups(
                 cmfrm.FRAME, context.connection, context.session, context.authorization,
+                test_mode=context.test_mode,
             )
             return
         case "lblGroupAttendance":

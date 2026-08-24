@@ -170,6 +170,14 @@ class GroupService:
         self.authorization.require(permission, f"change a Group {kind}")
         return self.repository.set_catalog_active(kind, _identifier(item_id, kind), active, self.session.user_id)
 
+    def set_communication_enabled(self, group_id, enabled):
+        """Deliberately enable or disable reviewed recipient preparation."""
+        self.authorization.require("groups.edit", "change Group communication settings")
+        group = self._editable_group(group_id)
+        return self.repository.set_communication_enabled(
+            group["id"], bool(enabled), self.session.user_id,
+        )
+
     def _editable_group(self, group_id):
         group = self.repository.group(_identifier(group_id, "Group"))
         if group is None:

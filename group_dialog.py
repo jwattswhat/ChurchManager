@@ -178,13 +178,20 @@ class GroupCatalogDialog(wx.Dialog):
 class GroupDetailDialog(wx.Dialog):
     """Show Group identity and its current authorized roster."""
 
-    def __init__(self, parent, connection, service, group_id):
+    def __init__(self, parent, connection, service, group_id, session, authorization, test_mode=False):
         super().__init__(parent, title="Group", size=(820, 560), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.connection = connection; self.service = service; self.group_id = group_id
+        self.session = session; self.authorization = authorization; self.test_mode = test_mode
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
         self.heading = wx.StaticText(panel); font = self.heading.GetFont(); font.MakeBold(); font.SetPointSize(font.GetPointSize() + 2); self.heading.SetFont(font)
         self.summary = wx.StaticText(panel)
         outer.Add(self.heading, 0, wx.ALL, 14); outer.Add(self.summary, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        communication_row = wx.BoxSizer(wx.HORIZONTAL)
+        self.communication_enabled = wx.CheckBox(panel, label="Enable reviewed Group communication")
+        self.communication = wx.Button(panel, label="Prepare Group Email...")
+        communication_row.Add(self.communication_enabled, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 14)
+        communication_row.Add(self.communication)
+        outer.Add(communication_row, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
         roster_header = wx.BoxSizer(wx.HORIZONTAL)
         roster_header.Add(wx.StaticText(panel, label="Members"), 0, wx.ALIGN_CENTER_VERTICAL)
         roster_header.AddStretchSpacer()
@@ -205,6 +212,8 @@ class GroupDetailDialog(wx.Dialog):
         outer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14); panel.SetSizer(outer)
         self.add.Bind(wx.EVT_BUTTON, self.on_add); self.assign.Bind(wx.EVT_BUTTON, self.on_assign)
         self.end.Bind(wx.EVT_BUTTON, self.on_end); self.meetings.Bind(wx.EVT_BUTTON, self.on_meetings)
+        self.communication_enabled.Bind(wx.EVT_CHECKBOX, self.on_communication_enabled)
+        self.communication.Bind(wx.EVT_BUTTON, self.on_communication)
         self.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CLOSE), id=wx.ID_CLOSE)
         self.show_ended.Bind(wx.EVT_CHECKBOX, lambda _event: self.refresh())
         self.refresh()
@@ -212,6 +221,8 @@ class GroupDetailDialog(wx.Dialog):
     def refresh(self):
         record = self.service.group(self.group_id)
         self.heading.SetLabel(record["name"])
+        self.communication_enabled.SetValue(bool(record["communication_enabled"]))
+        self.communication.Enable(bool(record["communication_enabled"]))
         self.summary.SetLabel(f'{record["group_type"]} · {record["status"].title()} · {record["privacy_class"].title()}')
         self.members.DeleteAllItems()
         self.member_rows = self.service.memberships(self.group_id, current_only=not self.show_ended.GetValue())
@@ -275,13 +286,31 @@ class GroupDetailDialog(wx.Dialog):
         try: dialog.ShowModal()
         finally: dialog.Destroy()
 
+    def on_communication_enabled(self, _event):
+        enabled = self.communication_enabled.GetValue()
+        try:
+            self.service.set_communication_enabled(self.group_id, enabled)
+            self.refresh()
+        except Exception as error:
+            self.communication_enabled.SetValue(not enabled)
+            wx.MessageBox(str(error), "Unable to Change Group Communication", wx.OK | wx.ICON_ERROR, self)
+
+    def on_communication(self, _event):
+        from group_communication_dialog import show_group_communication
+        show_group_communication(
+            self, self.connection, self.session, self.authorization,
+            self.group_id, self.test_mode,
+        )
+
 
 class GroupsDialog(wx.Dialog):
     """List visible Groups and open their current membership workspace."""
 
-    def __init__(self, parent, connection, session, authorization):
+    def __init__(self, parent, connection, session, authorization, test_mode=False):
         super().__init__(parent, title="Groups", size=(900, 600), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
-        self.connection = connection; self.repository = MariaDBGroupRepository(connection); self.service = GroupService(self.repository, session, authorization)
+        self.connection = connection; self.session = session; self.authorization = authorization
+        self.test_mode = test_mode; self.repository = MariaDBGroupRepository(connection)
+        self.service = GroupService(self.repository, session, authorization)
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
         title = wx.StaticText(panel, label="Congregational Groups"); font = title.GetFont(); font.MakeBold(); font.SetPointSize(font.GetPointSize() + 2); title.SetFont(font)
         outer.Add(title, 0, wx.ALL, 14)
@@ -321,7 +350,10 @@ class GroupsDialog(wx.Dialog):
     def on_open(self, _event):
         selected = self.list.GetFirstSelected()
         if selected < 0: return
-        dialog = GroupDetailDialog(self, self.connection, self.service, self.rows[selected]["id"])
+        dialog = GroupDetailDialog(
+            self, self.connection, self.service, self.rows[selected]["id"],
+            self.session, self.authorization, self.test_mode,
+        )
         try: dialog.ShowModal()
         finally: dialog.Destroy(); self.refresh()
 
@@ -335,8 +367,8 @@ class GroupsDialog(wx.Dialog):
         finally: dialog.Destroy()
 
 
-def show_groups(parent, connection, session, authorization):
+def show_groups(parent, connection, session, authorization, test_mode=False):
     """Open the authorized Groups workspace modally."""
-    dialog = GroupsDialog(parent, connection, session, authorization)
+    dialog = GroupsDialog(parent, connection, session, authorization, test_mode)
     try: dialog.ShowModal()
     finally: dialog.Destroy()

@@ -346,6 +346,15 @@ unsolicited bulk messages, or treat Group membership as consent for every
 communication purpose. Email transport and credentials follow the existing
 mail specification and protected credential mechanism.
 
+Implemented behavior requires communication to be deliberately enabled on the
+selected Group. Recipient review uses membership and role terms effective on
+the chosen date, shows non-sensitive exclusion reasons, never reveals an
+unlisted email address, and deduplicates shared addresses. Sending requires a
+separate permission and explicit confirmation. The recipient snapshot is
+resolved again immediately before delivery; any membership or contact change
+returns the user to review. TEST MODE remains fail-closed and cannot transmit
+email.
+
 ## 13. Worship roles and application security
 
 Group membership does not automatically create a worship participant, assign a

@@ -176,6 +176,29 @@ class MariaDBGroupRepository:
         finally:
             cursor.close()
 
+    def set_communication_enabled(self, group_id, enabled, user_id):
+        """Enable or disable reviewed communication preparation for one Group."""
+        cursor = self.connection.cursor()
+        try:
+            self._execute(
+                cursor,
+                "UPDATE tblGroup SET CommunicationEnabled=?,UpdatedByUserID=?,Version=Version+1 WHERE ID=?",
+                (int(bool(enabled)), user_id, group_id),
+            )
+            self._require_one(cursor)
+            self._audit(
+                cursor, user_id,
+                "GROUP_COMMUNICATION_ENABLED" if enabled else "GROUP_COMMUNICATION_DISABLED",
+                group_id,
+            )
+            self.connection.commit()
+            return True
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
     def person_church_id(self, person_id):
         rows = self._choice_rows("SELECT ChurchID,ID FROM tblPerson WHERE ID=?", (person_id,))
         return rows[0][0] if rows else None
