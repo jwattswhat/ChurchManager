@@ -23,6 +23,20 @@ class WorshipResetTests(unittest.TestCase):
         self.assertIn("except KeyError", source)
         self.assertIn("getpass.getpass", source)
 
+    def test_seed_scenario_covers_weekly_planning_and_volunteer_states(self):
+        self.assertEqual(3, len(reset.TEST_SERVICES))
+        states = {row[3] for row in reset.TEST_SERVICES}
+        self.assertEqual({"COMPLETE", "PLANNED", "INCOMPLETE"}, states)
+        source = Path(reset.__file__).read_text(encoding="utf-8")
+        self.assertIn("tblServiceBulletinOrderLine", source)
+        self.assertIn("tblParticipantAvailabilityException", source)
+        self.assertIn("tblServiceChecklistItem", source)
+        self.assertIn("HandCountCommunion", source)
+        self.assertIn('"CONFIRMED"', source)
+        self.assertIn('"DECLINED"', source)
+        self.assertIn('"PENDING"', source)
+        self.assertIn("worship_test_dataset_verified=true", source)
+
 
 if __name__ == "__main__":
     unittest.main()

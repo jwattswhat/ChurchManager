@@ -45,9 +45,22 @@ a repeatable beta-test reset. Preview and apply it with the commands below.
 Batch dates are derived from open fiscal periods so all four quarterly
 statement paths and the Ready accounting handoff can be exercised.
 
+`reset_worship_test_services.py --seed` replaces Worship Services and their
+dependent weekly Orders of Service in local `ChurchDBTest`. It creates three
+fictional services covering complete, planned, and incomplete weekly plans;
+participant responses; one intentional availability conflict; preparation
+checklists; and a completed attendance count. Like the other guarded resets, it
+creates and verifies a complete SQL backup before changing data. Run it without
+an action first to review the current counts.
+
 ```powershell
 .\.runtime-venv\Scripts\python.exe reset_giving_test_data.py
 .\.runtime-venv\Scripts\python.exe reset_giving_test_data.py --apply
+```
+
+```powershell
+.\.runtime-venv\Scripts\python.exe reset_worship_test_services.py
+.\.runtime-venv\Scripts\python.exe reset_worship_test_services.py --seed
 ```
 
 ```powershell
