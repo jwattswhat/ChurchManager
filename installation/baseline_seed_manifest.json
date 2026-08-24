@@ -2,8 +2,8 @@
   "artifact": "ChurchManager fresh-install starter-data baseline",
   "format_version": 1,
   "release_version": "0.3.0-dev",
-  "seed_sha256": "7081aba893574d9b2f8da1dfb8b24c44ec64d3b8674da07385b9368ee3edc9d3",
-  "statement_count": 86,
+  "seed_sha256": "93508fb497d9c704f95933fbad0d1f4fd54c6c9f52f8347f2fe25b916d96ac03",
+  "statement_count": 88,
   "source_migrations": [
     {
       "version": "003_add_user_security.sql",
@@ -168,6 +168,11 @@
     {
       "version": "106_add_normalized_groups_foundation.sql",
       "checksum": "ffce8d6e283136d514360e010376f59dbd059e797159ac21842be44a99f8c8cf",
+      "statements": 2
+    },
+    {
+      "version": "107_add_group_meetings_and_attendance.sql",
+      "checksum": "e5a10a449c2e69821b67e4c062414f938f8204a12b1b9316cf2e040e52788920",
       "statements": 2
     }
   ],

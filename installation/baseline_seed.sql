@@ -589,6 +589,19 @@ INSERT IGNORE INTO tblRolePermission (RoleID,PermissionID)
 SELECT r.ID,p.ID FROM tblRole r JOIN tblPermission p ON p.Name LIKE 'groups.%'
 WHERE r.Name='Master Administrator';
 
+-- source: 107_add_group_meetings_and_attendance.sql
+INSERT IGNORE INTO tblPermission (Name,Description,IsSensitive,Active) VALUES
+('groups.meetings.view','View authorized Group meetings.',0,1),
+('groups.meetings.edit','Create, reschedule, cancel, and update Group meetings.',0,1),
+('groups.attendance.view','View authorized Group meeting attendance.',0,1),
+('groups.attendance.record','Record and update Group meeting attendance.',0,1);
+
+-- source: 107_add_group_meetings_and_attendance.sql
+INSERT IGNORE INTO tblRolePermission (RoleID,PermissionID)
+SELECT r.ID,p.ID FROM tblRole r JOIN tblPermission p ON p.Name IN (
+    'groups.meetings.view','groups.meetings.edit','groups.attendance.view','groups.attendance.record'
+) WHERE r.Name='Master Administrator';
+
 -- source: current-schema starter policy
 INSERT INTO tblWorshipRole (Name,Description,DisplayOrder,Active) VALUES
 ('Liturgist',NULL,10,1),('Crucifer','Carries the cross',20,1),

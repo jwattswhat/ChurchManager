@@ -1709,6 +1709,72 @@ CREATE TABLE `tblgroup` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblgroupmeeting` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `GroupID` int(11) NOT NULL,
+  `StartsAt` datetime NOT NULL,
+  `EndsAt` datetime DEFAULT NULL,
+  `Title` varchar(150) NOT NULL,
+  `Location` varchar(150) DEFAULT NULL,
+  `Status` varchar(12) NOT NULL DEFAULT 'SCHEDULED',
+  `AttendanceMode` varchar(12) NOT NULL DEFAULT 'ROSTER',
+  `TotalHeadCount` int(11) DEFAULT NULL,
+  `RescheduledToMeetingID` bigint(20) DEFAULT NULL,
+  `Notes` varchar(1000) DEFAULT NULL,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  `Version` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_group_meeting_start` (`GroupID`,`StartsAt`),
+  KEY `ix_group_meeting_date` (`GroupID`,`StartsAt`,`Status`),
+  KEY `fk_group_meeting_replacement` (`RescheduledToMeetingID`),
+  KEY `fk_group_meeting_creator` (`CreatedByUserID`),
+  KEY `fk_group_meeting_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_group_meeting_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_group_meeting_group` FOREIGN KEY (`GroupID`) REFERENCES `tblgroup` (`ID`),
+  CONSTRAINT `fk_group_meeting_replacement` FOREIGN KEY (`RescheduledToMeetingID`) REFERENCES `tblgroupmeeting` (`ID`),
+  CONSTRAINT `fk_group_meeting_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_group_meeting_times` CHECK (`EndsAt` is null or `EndsAt` >= `StartsAt`),
+  CONSTRAINT `ck_group_meeting_status` CHECK (`Status` in ('SCHEDULED','HELD','CANCELLED','RESCHEDULED')),
+  CONSTRAINT `ck_group_meeting_mode` CHECK (`AttendanceMode` in ('ROSTER','HEADCOUNT','BOTH')),
+  CONSTRAINT `ck_group_meeting_head_count` CHECK (`TotalHeadCount` is null or `TotalHeadCount` >= 0),
+  CONSTRAINT `ck_group_meeting_reschedule` CHECK (`Status` = 'RESCHEDULED' and `RescheduledToMeetingID` is not null or `Status` <> 'RESCHEDULED' and `RescheduledToMeetingID` is null),
+  CONSTRAINT `ck_group_meeting_version` CHECK (`Version` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblgroupmeetingattendance` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `GroupMeetingID` bigint(20) NOT NULL,
+  `PersonID` int(11) NOT NULL,
+  `AttendanceStatus` varchar(10) NOT NULL DEFAULT 'UNKNOWN',
+  `ArrivedAt` datetime DEFAULT NULL,
+  `DepartedAt` datetime DEFAULT NULL,
+  `Notes` varchar(500) DEFAULT NULL,
+  `RecordedByUserID` int(11) NOT NULL,
+  `RecordedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedByUserID` int(11) NOT NULL,
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  `Version` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_group_meeting_person` (`GroupMeetingID`,`PersonID`),
+  KEY `ix_group_attendance_person` (`PersonID`,`AttendanceStatus`,`GroupMeetingID`),
+  KEY `fk_group_attendance_recorder` (`RecordedByUserID`),
+  KEY `fk_group_attendance_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_group_attendance_meeting` FOREIGN KEY (`GroupMeetingID`) REFERENCES `tblgroupmeeting` (`ID`),
+  CONSTRAINT `fk_group_attendance_person` FOREIGN KEY (`PersonID`) REFERENCES `tblperson` (`ID`),
+  CONSTRAINT `fk_group_attendance_recorder` FOREIGN KEY (`RecordedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_group_attendance_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_group_attendance_status` CHECK (`AttendanceStatus` in ('PRESENT','ABSENT','EXCUSED','UNKNOWN')),
+  CONSTRAINT `ck_group_attendance_times` CHECK (`DepartedAt` is null or `ArrivedAt` is null or `DepartedAt` >= `ArrivedAt`),
+  CONSTRAINT `ck_group_attendance_version` CHECK (`Version` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblgroupmembership` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `GroupID` int(11) NOT NULL,
