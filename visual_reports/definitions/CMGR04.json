@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMGR04",
-      "title": "Groups - Attendance Sheet",
+      "title":"Groups - Attendance Sheet",
       "dataset": "churchmanager.cmgr04",
       "datasetversion": 1,
       "pagesize": "letter",

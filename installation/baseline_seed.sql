@@ -602,6 +602,81 @@ SELECT r.ID,p.ID FROM tblRole r JOIN tblPermission p ON p.Name IN (
     'groups.meetings.view','groups.meetings.edit','groups.attendance.view','groups.attendance.record'
 ) WHERE r.Name='Master Administrator';
 
+-- source: 108_add_group_reports.sql
+INSERT INTO tblReports (Report,Title,Params,Batch,Note,Available,RequiredPermissionID)
+SELECT 'CMGR01','Groups - Current Roster','[ChurchID\r\nGroupID]',NULL,
+       'Current authorized roster for one selected Group.',1,p.ID
+FROM tblPermission p WHERE p.Name='groups.reports.view'
+ON DUPLICATE KEY UPDATE Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),
+Available=1,RequiredPermissionID=VALUES(RequiredPermissionID);
+
+-- source: 108_add_group_reports.sql
+INSERT INTO tblReports (Report,Title,Params,Batch,Note,Available,RequiredPermissionID)
+SELECT 'CMGR02','Groups - Person Participation History','[ChurchID\r\nPersonID]',NULL,
+       'Current and ended authorized Group membership for one Person or all People.',1,p.ID
+FROM tblPermission p WHERE p.Name='groups.reports.view'
+ON DUPLICATE KEY UPDATE Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),
+Available=1,RequiredPermissionID=VALUES(RequiredPermissionID);
+
+-- source: 108_add_group_reports.sql
+INSERT INTO tblReports (Report,Title,Params,Batch,Note,Available,RequiredPermissionID)
+SELECT 'CMGR03','Groups - Meeting Attendance','[ChurchID\r\nGroupID\r\nStartDate\r\nEndDate]',NULL,
+       'Recorded attendance for authorized Group meetings in a selected period.',1,p.ID
+FROM tblPermission p WHERE p.Name='groups.reports.view'
+ON DUPLICATE KEY UPDATE Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),
+Available=1,RequiredPermissionID=VALUES(RequiredPermissionID);
+
+-- source: 109_add_group_attendance_sheet.sql
+INSERT INTO tblReports (Report,Title,Params,Batch,Note,Available,RequiredPermissionID)
+SELECT 'CMGR04','Groups - Attendance Sheet','[ChurchID\r\nGroupID\r\nStartDate]',NULL,
+       'Printable effective-date Group roster with blank attendance, notes, and visitor lines.',1,p.ID
+FROM tblPermission p WHERE p.Name='groups.reports.view'
+ON DUPLICATE KEY UPDATE Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),
+Available=1,RequiredPermissionID=VALUES(RequiredPermissionID);
+
+-- source: 110_standardize_report_names.sql
+UPDATE tblReports report
+JOIN cm_report_rename mapping ON mapping.ReportID=report.ID
+SET report.Report=CONCAT('ZZ', report.ID);
+
+-- source: 110_standardize_report_names.sql
+UPDATE tblReports report
+JOIN cm_report_rename mapping ON mapping.ReportID=report.ID
+SET report.Report=mapping.NewCode, report.Title=mapping.NewTitle;
+
+-- source: 110_standardize_report_names.sql
+UPDATE tblReports SET Title='Attendance - Event Listing' WHERE Report='CMAT01';
+
+-- source: 110_standardize_report_names.sql
+UPDATE tblReports SET Title='Attendance - Weekly Summary' WHERE Report='CMAT02';
+
+-- source: 110_standardize_report_names.sql
+UPDATE tblReports SET Title='Attendance - Individual History' WHERE Report='CMAT03';
+
+-- source: 110_standardize_report_names.sql
+UPDATE tblReports SET Title='Attendance - Pastor''s Comparison' WHERE Report='CMAT04';
+
+-- source: 110_standardize_report_names.sql
+UPDATE tblReports SET Title='Attendance - Member Follow-up' WHERE Report='CMAT05';
+
+-- source: 110_standardize_report_names.sql
+UPDATE tblReports SET Title='Groups - Current Roster' WHERE Report='CMGR01';
+
+-- source: 110_standardize_report_names.sql
+UPDATE tblReports SET Title='Groups - Person Participation History' WHERE Report='CMGR02';
+
+-- source: 110_standardize_report_names.sql
+UPDATE tblReports SET Title='Groups - Meeting Attendance' WHERE Report='CMGR03';
+
+-- source: 110_standardize_report_names.sql
+UPDATE tblReports SET Title='Groups - Attendance Sheet' WHERE Report='CMGR04';
+
+-- source: 110_standardize_report_names.sql
+UPDATE tblReports SET Title='Pastoral Care - Work List' WHERE Report='CMPC01';
+
+-- source: 110_standardize_report_names.sql
+UPDATE tblReports SET Title='Pastoral Care - Activity Summary' WHERE Report='CMPC02';
+
 -- source: current-schema starter policy
 INSERT INTO tblWorshipRole (Name,Description,DisplayOrder,Active) VALUES
 ('Liturgist',NULL,10,1),('Crucifer','Carries the cross',20,1),

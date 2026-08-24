@@ -67,7 +67,7 @@ TRIAL_BALANCE_CONTRACT = JSForm.ReportDatasetContract(
 
 TRIAL_BALANCE_MANIFEST = JSForm.ReportProtectionManifest(
     required_settings={
-        "name": "ACCT-TB", "dataset": "accounting.trialbalance",
+        "name": "CMFI01", "dataset": "accounting.trialbalance",
         "datasetversion": 1, "classification": "official",
     },
     required_bands=("ReportHeader", "Detail", "ReportFooter", "PageFooter"),
@@ -180,17 +180,17 @@ def _manifest(code, dataset, total_bindings):
     )
 
 
-POSITION_MANIFEST = _manifest("ACCT-FP", "accounting.position", {
+POSITION_MANIFEST = _manifest("CMFI03", "accounting.position", {
     "TotalAssets": {"collection": "totals", "field": "TotalAssets"},
     "LiabilitiesAndNetAssets": {"collection": "totals", "field": "LiabilitiesAndNetAssets"},
     "Difference": {"collection": "totals", "field": "Difference"},
 })
-ACTIVITIES_MANIFEST = _manifest("ACCT-ACT", "accounting.activities", {
+ACTIVITIES_MANIFEST = _manifest("CMFI04", "accounting.activities", {
     "ChangeWithout": {"collection": "totals", "field": "WithoutRestrictions"},
     "ChangeWith": {"collection": "totals", "field": "WithRestrictions"},
     "ChangeTotal": {"collection": "totals", "field": "Total"},
 })
-FUND_MANIFEST = _manifest("ACCT-FUND", "accounting.funds", {
+FUND_MANIFEST = _manifest("CMFI05", "accounting.funds", {
     "BeginningTotal": {"collection": "totals", "field": "Beginning"},
     "EndingTotal": {"collection": "totals", "field": "Ending"},
 })
@@ -202,7 +202,7 @@ FUNCTIONAL_CONTRACT = JSForm.ReportDatasetContract(
         field("Amount", "Amount", "currency"),
     ), (field("GrandTotal", "Grand Total", "currency"),), date_range=True),
 )
-FUNCTIONAL_MANIFEST = _manifest("ACCT-FUNC", "accounting.functionalexpenses", {
+FUNCTIONAL_MANIFEST = _manifest("CMFI08", "accounting.functionalexpenses", {
     "ExpenseMatrix": {"repeatcollection":"records", "rowfield":"Account",
                       "columnfield":"Function", "valuefield":"Amount"},
     "GrandTotal": {"collection":"totals", "field":"GrandTotal"},
@@ -254,8 +254,8 @@ def _budget_manifest(code,dataset):
     })
 
 
-BUDGET_ACTUAL_MANIFEST=_budget_manifest("ACCT-BVA","accounting.budgetactual")
-ADOPTED_BUDGET_MANIFEST=_budget_manifest("ACCT-BUD","accounting.adoptedbudget")
+BUDGET_ACTUAL_MANIFEST=_budget_manifest("CMFI07","accounting.budgetactual")
+ADOPTED_BUDGET_MANIFEST=_budget_manifest("CMFI10","accounting.adoptedbudget")
 
 GENERAL_LEDGER_CONTRACT=JSForm.ReportDatasetContract(
     "accounting.generalledger",1,"accounting.reports.run",
@@ -270,7 +270,7 @@ GENERAL_LEDGER_CONTRACT=JSForm.ReportDatasetContract(
         field("CreditTotal","Total Credits","currency"),field("EndingBalance","Ending Balance","currency"),
     ),date_range=True),
 )
-GENERAL_LEDGER_MANIFEST=_manifest("ACCT-GL","accounting.generalledger",{
+GENERAL_LEDGER_MANIFEST=_manifest("CMFI02","accounting.generalledger",{
     "OpeningBalance":{"collection":"totals","field":"OpeningBalance"},
     "DebitTotal":{"collection":"totals","field":"DebitTotal"},
     "CreditTotal":{"collection":"totals","field":"CreditTotal"},
@@ -292,7 +292,7 @@ REGISTER_CONTRACT=JSForm.ReportDatasetContract(
         JSForm.ReportCollection("totals","Protected Totals",(
             field("TransactionCount","Transaction Count","integer"),field("Total","Register Total","currency"))),
     ))
-REGISTER_MANIFEST=_manifest("ACCT-REG","accounting.register",{
+REGISTER_MANIFEST=_manifest("CMFI13","accounting.register",{
     "TransactionCount":{"collection":"totals","field":"TransactionCount"},
     "RegisterTotal":{"collection":"totals","field":"Total"},
 })
@@ -316,7 +316,7 @@ JOURNAL_CONTRACT=JSForm.ReportDatasetContract(
         JSForm.ReportCollection("totals","Protected Totals",(
             field("Debit","Total Debits","currency"),field("Credit","Total Credits","currency"),field("Difference","Difference","currency"))),
     ))
-JOURNAL_MANIFEST=_manifest("ACCT-JE","accounting.journalentry",{
+JOURNAL_MANIFEST=_manifest("CMFI12","accounting.journalentry",{
     "Created":{"collection":"parameters","field":"Created"},
     "Reviewed":{"collection":"parameters","field":"Reviewed"},
     "Posted":{"collection":"parameters","field":"Posted"},
@@ -343,7 +343,7 @@ RECONCILIATION_CONTRACT=JSForm.ReportDatasetContract(
             field("Ending","Statement Ending Balance","currency"),field("Difference","Difference","currency"),
             field("Outstanding","Outstanding Total","currency"))),
     ))
-RECONCILIATION_MANIFEST=_manifest("ACCT-REC","accounting.reconciliation",{
+RECONCILIATION_MANIFEST=_manifest("CMFI06","accounting.reconciliation",{
     "PreparedBy":{"collection":"parameters","field":"PreparedBy"},
     "CompletedAt":{"collection":"parameters","field":"CompletedAt"},
     "Beginning":{"collection":"totals","field":"Beginning"},"Cleared":{"collection":"totals","field":"Cleared"},
@@ -365,7 +365,7 @@ CLOSE_CONTRACT=JSForm.ReportDatasetContract(
         JSForm.ReportCollection("totals","Protected Conclusion",(
             field("Conclusion","Conclusion"),field("Ready","Ready","boolean"))),
     ))
-CLOSE_MANIFEST=_manifest("ACCT-CLOSE","accounting.closechecklist",{
+CLOSE_MANIFEST=_manifest("CMFI11","accounting.closechecklist",{
     "PeriodStatus":{"collection":"parameters","field":"PeriodStatus"},
     "Conclusion":{"collection":"totals","field":"Conclusion"},
 })
@@ -383,7 +383,7 @@ YEAR_END_CONTRACT=JSForm.ReportDatasetContract(
             field("Revenue","Total Revenue","currency"),field("Expense","Total Expense","currency"),
             field("Transfers","Total Transfers","currency"),field("Change","Total Change","currency"),field("Conclusion","Conclusion"))),
     ))
-YEAR_END_MANIFEST=_manifest("ACCT-YE","accounting.yearend",{
+YEAR_END_MANIFEST=_manifest("CMFI14","accounting.yearend",{
     "Status":{"collection":"parameters","field":"Status"},"ClosingTransaction":{"collection":"parameters","field":"ClosingTransaction"},
     "ChangeTotal":{"collection":"totals","field":"Change"},"Conclusion":{"collection":"totals","field":"Conclusion"},
 })
@@ -399,7 +399,7 @@ AUDIT_CONTRACT=JSForm.ReportDatasetContract(
             field("Before","Before JSON"),field("After","After JSON"))),
         JSForm.ReportCollection("totals","Protected Audit Count",(field("Count","Event Count","integer"),)),
     ))
-AUDIT_MANIFEST=_manifest("ACCT-AUDIT","accounting.audithistory",{
+AUDIT_MANIFEST=_manifest("CMFI09","accounting.audithistory",{
     "ConfidentialLabel":{"label":"CONFIDENTIAL ACCOUNTING AUDIT RECORD"},
     "EventCount":{"collection":"totals","field":"Count"},
 })
@@ -845,7 +845,7 @@ class AccountingVisualReportService:
     def run_trial_balance(self, organization_id, as_of_date):
         self.authorization.require("accounting.reports.run", "run the Trial Balance report")
         definition_path = ensure_user_definition(
-            "ACCT-TB", local_app_data=self.local_app_data,
+            "CMFI01", local_app_data=self.local_app_data,
             starter_directory=ACCOUNTING_DEFINITIONS,
         )
         definition = JSForm.ReportDefinitionLoader().load(definition_path)
@@ -855,7 +855,7 @@ class AccountingVisualReportService:
         )
         dataset = provider.build(organization_id, as_of_date)
         self.output_directory.mkdir(parents=True, exist_ok=True)
-        output = self.output_directory / "ACCT-TB.pdf"
+        output = self.output_directory / "CMFI01.pdf"
         rendered = JSForm.PDFReportRenderer().render(
             definition, dataset, output,
             context={"run_user": self.session.display_name},
@@ -911,122 +911,122 @@ class AccountingVisualReportService:
 
     def run_financial_position(self, organization_id, as_of_date):
         return self._run(
-            "ACCT-FP", POSITION_CONTRACT, POSITION_MANIFEST,
+            "CMFI03", POSITION_CONTRACT, POSITION_MANIFEST,
             FinancialPositionDatasetProvider(self.connection, self.authorization),
             organization_id, as_of_date,
         )
 
     def design_financial_position(self, organization_id, as_of_date):
         return self._design(
-            "ACCT-FP", POSITION_CONTRACT, POSITION_MANIFEST,
+            "CMFI03", POSITION_CONTRACT, POSITION_MANIFEST,
             FinancialPositionDatasetProvider(self.connection,self.authorization),
             organization_id,as_of_date,
         )
 
     def run_activities(self, organization_id, date_from, date_to):
         return self._run(
-            "ACCT-ACT", ACTIVITIES_CONTRACT, ACTIVITIES_MANIFEST,
+            "CMFI04", ACTIVITIES_CONTRACT, ACTIVITIES_MANIFEST,
             ActivitiesDatasetProvider(self.connection, self.authorization),
             organization_id, date_from, date_to,
         )
 
     def design_activities(self, organization_id, date_from, date_to):
         return self._design(
-            "ACCT-ACT", ACTIVITIES_CONTRACT, ACTIVITIES_MANIFEST,
+            "CMFI04", ACTIVITIES_CONTRACT, ACTIVITIES_MANIFEST,
             ActivitiesDatasetProvider(self.connection,self.authorization),
             organization_id,date_from,date_to,
         )
 
     def run_funds(self, organization_id, date_from, date_to):
         return self._run(
-            "ACCT-FUND", FUND_CONTRACT, FUND_MANIFEST,
+            "CMFI05", FUND_CONTRACT, FUND_MANIFEST,
             FundDatasetProvider(self.connection, self.authorization),
             organization_id, date_from, date_to,
         )
 
     def design_funds(self, organization_id, date_from, date_to):
         return self._design(
-            "ACCT-FUND", FUND_CONTRACT, FUND_MANIFEST,
+            "CMFI05", FUND_CONTRACT, FUND_MANIFEST,
             FundDatasetProvider(self.connection,self.authorization),
             organization_id,date_from,date_to,
         )
 
     def run_functional_expenses(self, organization_id, date_from, date_to):
         return self._run(
-            "ACCT-FUNC",FUNCTIONAL_CONTRACT,FUNCTIONAL_MANIFEST,
+            "CMFI08",FUNCTIONAL_CONTRACT,FUNCTIONAL_MANIFEST,
             FunctionalExpenseDatasetProvider(self.connection,self.authorization),
             organization_id,date_from,date_to,
         )
 
     def design_functional_expenses(self, organization_id, date_from, date_to):
         return self._design(
-            "ACCT-FUNC",FUNCTIONAL_CONTRACT,FUNCTIONAL_MANIFEST,
+            "CMFI08",FUNCTIONAL_CONTRACT,FUNCTIONAL_MANIFEST,
             FunctionalExpenseDatasetProvider(self.connection,self.authorization),
             organization_id,date_from,date_to,
         )
 
     def run_budget_actual(self,budget_id,period_id):
-        return self._run("ACCT-BVA",BUDGET_ACTUAL_CONTRACT,BUDGET_ACTUAL_MANIFEST,
+        return self._run("CMFI07",BUDGET_ACTUAL_CONTRACT,BUDGET_ACTUAL_MANIFEST,
                          BudgetDatasetProvider(self.connection,self.authorization),budget_id,period_id)
 
     def design_budget_actual(self,budget_id,period_id):
-        return self._design("ACCT-BVA",BUDGET_ACTUAL_CONTRACT,BUDGET_ACTUAL_MANIFEST,
+        return self._design("CMFI07",BUDGET_ACTUAL_CONTRACT,BUDGET_ACTUAL_MANIFEST,
                             BudgetDatasetProvider(self.connection,self.authorization),budget_id,period_id)
 
     def run_adopted_budget(self,budget_id):
         provider=BudgetDatasetProvider(self.connection,self.authorization)
         class Adopted:
             def build(inner,*arguments):return provider.build(*arguments,adopted_budget=True)
-        return self._run("ACCT-BUD",ADOPTED_BUDGET_CONTRACT,ADOPTED_BUDGET_MANIFEST,Adopted(),budget_id)
+        return self._run("CMFI10",ADOPTED_BUDGET_CONTRACT,ADOPTED_BUDGET_MANIFEST,Adopted(),budget_id)
 
     def run_general_ledger(self,organization_id,account_id,date_from,date_to,fund_id=None):
-        return self._run("ACCT-GL",GENERAL_LEDGER_CONTRACT,GENERAL_LEDGER_MANIFEST,
+        return self._run("CMFI02",GENERAL_LEDGER_CONTRACT,GENERAL_LEDGER_MANIFEST,
                          GeneralLedgerDatasetProvider(self.connection,self.authorization),
                          organization_id,account_id,date_from,date_to,fund_id)
 
     def design_general_ledger(self,organization_id,account_id,date_from,date_to,fund_id=None):
-        return self._design("ACCT-GL",GENERAL_LEDGER_CONTRACT,GENERAL_LEDGER_MANIFEST,
+        return self._design("CMFI02",GENERAL_LEDGER_CONTRACT,GENERAL_LEDGER_MANIFEST,
                             GeneralLedgerDatasetProvider(self.connection,self.authorization),
                             organization_id,account_id,date_from,date_to,fund_id)
 
     def run_register(self):
-        return self._run("ACCT-REG",REGISTER_CONTRACT,REGISTER_MANIFEST,
+        return self._run("CMFI13",REGISTER_CONTRACT,REGISTER_MANIFEST,
                          RegisterDatasetProvider(self.connection,self.authorization))
 
     def design_register(self):
-        return self._design("ACCT-REG",REGISTER_CONTRACT,REGISTER_MANIFEST,
+        return self._design("CMFI13",REGISTER_CONTRACT,REGISTER_MANIFEST,
                             RegisterDatasetProvider(self.connection,self.authorization))
 
     def run_journal_entry(self,transaction_id):
-        return self._run("ACCT-JE",JOURNAL_CONTRACT,JOURNAL_MANIFEST,
+        return self._run("CMFI12",JOURNAL_CONTRACT,JOURNAL_MANIFEST,
                          JournalEntryDatasetProvider(self.connection,self.authorization),transaction_id)
 
     def design_journal_entry(self,transaction_id):
-        return self._design("ACCT-JE",JOURNAL_CONTRACT,JOURNAL_MANIFEST,
+        return self._design("CMFI12",JOURNAL_CONTRACT,JOURNAL_MANIFEST,
                             JournalEntryDatasetProvider(self.connection,self.authorization),transaction_id)
 
     def run_reconciliation(self,reconciliation_id):
-        return self._run("ACCT-REC",RECONCILIATION_CONTRACT,RECONCILIATION_MANIFEST,
+        return self._run("CMFI06",RECONCILIATION_CONTRACT,RECONCILIATION_MANIFEST,
                          ReconciliationDatasetProvider(self.connection,self.authorization),reconciliation_id)
 
     def design_reconciliation(self,reconciliation_id):
-        return self._design("ACCT-REC",RECONCILIATION_CONTRACT,RECONCILIATION_MANIFEST,
+        return self._design("CMFI06",RECONCILIATION_CONTRACT,RECONCILIATION_MANIFEST,
                             ReconciliationDatasetProvider(self.connection,self.authorization),reconciliation_id)
 
     def run_close_checklist(self,organization_id,period_id):
-        return self._run("ACCT-CLOSE",CLOSE_CONTRACT,CLOSE_MANIFEST,
+        return self._run("CMFI11",CLOSE_CONTRACT,CLOSE_MANIFEST,
                          CloseChecklistDatasetProvider(self.connection,self.authorization),organization_id,period_id)
 
     def design_close_checklist(self,organization_id,period_id):
-        return self._design("ACCT-CLOSE",CLOSE_CONTRACT,CLOSE_MANIFEST,
+        return self._design("CMFI11",CLOSE_CONTRACT,CLOSE_MANIFEST,
                             CloseChecklistDatasetProvider(self.connection,self.authorization),organization_id,period_id)
 
     def run_year_end(self,organization_id,year_id):
-        return self._run("ACCT-YE",YEAR_END_CONTRACT,YEAR_END_MANIFEST,
+        return self._run("CMFI14",YEAR_END_CONTRACT,YEAR_END_MANIFEST,
                          YearEndDatasetProvider(self.connection,self.authorization),organization_id,year_id)
 
     def run_audit(self,organization_id=None,user_text="",action_text="",entity_text="",date_from=None,date_to=None):
-        return self._run("ACCT-AUDIT",AUDIT_CONTRACT,AUDIT_MANIFEST,
+        return self._run("CMFI09",AUDIT_CONTRACT,AUDIT_MANIFEST,
                          AuditDatasetProvider(self.connection,self.authorization),organization_id,user_text,action_text,entity_text,date_from,date_to)
 
     def design_trial_balance(self, organization_id, as_of_date):
@@ -1035,7 +1035,7 @@ class AccountingVisualReportService:
             "accounting.reports.design", "customize accounting report layouts",
         )
         definition_path = ensure_user_definition(
-            "ACCT-TB", local_app_data=self.local_app_data,
+            "CMFI01", local_app_data=self.local_app_data,
             starter_directory=ACCOUNTING_DEFINITIONS,
         )
 
@@ -1045,7 +1045,7 @@ class AccountingVisualReportService:
                 self.connection, self.authorization,
             )
             dataset = provider.build(organization_id, as_of_date)
-            output = Path(tempfile.gettempdir()) / "ChurchManager-ACCT-TB-preview.pdf"
+            output = Path(tempfile.gettempdir()) / "ChurchManager-CMFI01-preview.pdf"
             return JSForm.PDFReportRenderer().render(
                 definition, dataset, output,
                 context={"run_user": self.session.display_name},
@@ -1055,7 +1055,7 @@ class AccountingVisualReportService:
             definition_path,
             dataset_contract=TRIAL_BALANCE_CONTRACT,
             preview_handler=preview,
-            starter_definition_path=ACCOUNTING_DEFINITIONS / "ACCT-TB.json",
+            starter_definition_path=ACCOUNTING_DEFINITIONS / "CMFI01.json",
             export_directory=self.output_directory,
             protection_manifest=TRIAL_BALANCE_MANIFEST,
         )

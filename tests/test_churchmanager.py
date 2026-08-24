@@ -39,7 +39,7 @@ class TestCopyrightSensitiveWorshipFields(unittest.TestCase):
             ROOT / "worship_service_dialog.py",
             FORMS / "frmPropers.json",
             ROOT / "visual_reports" / "report_inventory.py",
-            ROOT / "visual_reports" / "definitions" / "CMWP01.json",
+            ROOT / "visual_reports" / "definitions" / "CMWS01.json",
         )
         combined = "\n".join(path.read_text(encoding="utf-8-sig") for path in current_sources)
         self.assertNotIn("PsalmorIntroit", combined)
@@ -1248,16 +1248,19 @@ class TestNonAccountingTestDataset(unittest.TestCase):
         source = (ROOT / "migrations" / "015_add_report_permissions.sql").read_text(
             encoding="utf-8-sig"
         )
+        source += (ROOT / "migrations" / "110_standardize_report_names.sql").read_text(
+            encoding="utf-8-sig"
+        )
         self.assertIn("RequiredPermissionID", source)
         self.assertIn("fk_reports_required_permission", source)
         self.assertIn("ALTER TABLE tblReports MODIFY RequiredPermissionID", source)
         for code in (
-            "CMAS01", "CMAT01", "CMBATCH00", "CMDO01",
-            "CMHU01", "CMHU02", "CMHU03", "CMHU04", "CMJR01",
-            "CMMD01", "CMMI01", "CMMI02", "CMMI03", "CMML01",
-            "CMML02", "CMPA01", "CMPE01", "CMPH02", "CMPJ01",
-            "CMPJ02", "CMPJ03", "CMPJ04", "CMPR01", "CMRP01",
-            "CMSM01", "CMWP01", "CMWS01",
+            "CMGN01", "CMAT01", "CMBATCH00", "CMGN02",
+            "CMWS03", "CMWS04", "CMWS05", "CMWS06", "CMPC03",
+            "CMMB01", "CMMB02", "CMMB03", "CMMB04", "CMMB05",
+            "CMMB06", "CMPC04", "CMMB07", "CMMB08", "CMPJ01",
+            "CMPJ02", "CMPJ03", "CMPJ04", "CMPC05", "CMGN03",
+            "CMSM01", "CMWS01", "CMWS02",
         ):
             with self.subTest(report=code):
                 self.assertIn("'{}'".format(code), source)

@@ -134,6 +134,53 @@ SET character_set_client = utf8mb4;
 SET character_set_client = @saved_cs_client;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `rpt_group_attendance_sheet` AS SELECT
+ 1 AS `ChurchID`,
+  1 AS `GroupID`,
+  1 AS `GroupName`,
+  1 AS `PrivacyClass`,
+  1 AS `PersonID`,
+  1 AS `LastName`,
+  1 AS `FirstName`,
+  1 AS `MembershipStartDate`,
+  1 AS `MembershipEndDate`,
+  1 AS `Roles`,
+  1 AS `Present`,
+  1 AS `Absent`,
+  1 AS `Excused`,
+  1 AS `Notes` */;
+SET character_set_client = @saved_cs_client;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `rpt_group_current_roster` AS SELECT
+ 1 AS `ChurchID`,
+  1 AS `GroupID`,
+  1 AS `GroupName`,
+  1 AS `PrivacyClass`,
+  1 AS `PersonID`,
+  1 AS `LastName`,
+  1 AS `FirstName`,
+  1 AS `StartDate`,
+  1 AS `Roles` */;
+SET character_set_client = @saved_cs_client;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `rpt_group_meeting_attendance` AS SELECT
+ 1 AS `ChurchID`,
+  1 AS `GroupID`,
+  1 AS `GroupName`,
+  1 AS `PrivacyClass`,
+  1 AS `GroupMeetingID`,
+  1 AS `StartsAt`,
+  1 AS `MeetingTitle`,
+  1 AS `MeetingStatus`,
+  1 AS `PersonID`,
+  1 AS `LastName`,
+  1 AS `FirstName`,
+  1 AS `AttendanceStatus` */;
+SET character_set_client = @saved_cs_client;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
 /*!50001 CREATE VIEW `rpt_hymn` AS SELECT
  1 AS `ID`,
   1 AS `HymnalID`,
@@ -321,6 +368,20 @@ SET character_set_client = utf8mb4;
   1 AS `DateType`,
   1 AS `Date`,
   1 AS `Note` */;
+SET character_set_client = @saved_cs_client;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `rpt_person_group_participation` AS SELECT
+ 1 AS `ChurchID`,
+  1 AS `GroupID`,
+  1 AS `GroupName`,
+  1 AS `PrivacyClass`,
+  1 AS `PersonID`,
+  1 AS `LastName`,
+  1 AS `FirstName`,
+  1 AS `StartDate`,
+  1 AS `EndDate`,
+  1 AS `MembershipStatus` */;
 SET character_set_client = @saved_cs_client;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8mb4;
@@ -3232,6 +3293,45 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
+/*!50001 DROP VIEW IF EXISTS `rpt_group_attendance_sheet`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013  SQL SECURITY DEFINER */
+/*!50001 VIEW `rpt_group_attendance_sheet` AS select `g`.`ChurchID` AS `ChurchID`,`g`.`ID` AS `GroupID`,`g`.`Name` AS `GroupName`,`g`.`PrivacyClass` AS `PrivacyClass`,`p`.`ID` AS `PersonID`,`p`.`LastName` AS `LastName`,`p`.`FirstName` AS `FirstName`,`m`.`StartDate` AS `MembershipStartDate`,`m`.`EndDate` AS `MembershipEndDate`,group_concat(distinct `r`.`Label` order by `r`.`DisplayOrder` ASC,`r`.`Label` ASC separator ', ') AS `Roles`,cast('' as char(8) charset utf8mb4) AS `Present`,cast('' as char(8) charset utf8mb4) AS `Absent`,cast('' as char(8) charset utf8mb4) AS `Excused`,cast('' as char(160) charset utf8mb4) AS `Notes` from ((((`tblgroup` `g` join `tblgroupmembership` `m` on(`m`.`GroupID` = `g`.`ID`)) join `tblperson` `p` on(`p`.`ID` = `m`.`PersonID`)) left join `tblgroupmembershiprole` `mr` on(`mr`.`GroupMembershipID` = `m`.`ID`)) left join `tblgrouprole` `r` on(`r`.`ID` = `mr`.`GroupRoleID`)) group by `g`.`ChurchID`,`g`.`ID`,`g`.`Name`,`g`.`PrivacyClass`,`p`.`ID`,`p`.`LastName`,`p`.`FirstName`,`m`.`StartDate`,`m`.`EndDate` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!50001 DROP VIEW IF EXISTS `rpt_group_current_roster`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013  SQL SECURITY DEFINER */
+/*!50001 VIEW `rpt_group_current_roster` AS select `g`.`ChurchID` AS `ChurchID`,`g`.`ID` AS `GroupID`,`g`.`Name` AS `GroupName`,`g`.`PrivacyClass` AS `PrivacyClass`,`p`.`ID` AS `PersonID`,`p`.`LastName` AS `LastName`,`p`.`FirstName` AS `FirstName`,`m`.`StartDate` AS `StartDate`,group_concat(distinct `r`.`Label` order by `r`.`DisplayOrder` ASC,`r`.`Label` ASC separator ', ') AS `Roles` from ((((`tblgroup` `g` join `tblgroupmembership` `m` on(`m`.`GroupID` = `g`.`ID`)) join `tblperson` `p` on(`p`.`ID` = `m`.`PersonID`)) left join `tblgroupmembershiprole` `mr` on(`mr`.`GroupMembershipID` = `m`.`ID` and `mr`.`StartDate` <= curdate() and (`mr`.`EndDate` is null or `mr`.`EndDate` >= curdate()))) left join `tblgrouprole` `r` on(`r`.`ID` = `mr`.`GroupRoleID`)) where `m`.`StartDate` <= curdate() and (`m`.`EndDate` is null or `m`.`EndDate` >= curdate()) group by `g`.`ChurchID`,`g`.`ID`,`g`.`Name`,`g`.`PrivacyClass`,`p`.`ID`,`p`.`LastName`,`p`.`FirstName`,`m`.`StartDate` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!50001 DROP VIEW IF EXISTS `rpt_group_meeting_attendance`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013  SQL SECURITY DEFINER */
+/*!50001 VIEW `rpt_group_meeting_attendance` AS select `g`.`ChurchID` AS `ChurchID`,`g`.`ID` AS `GroupID`,`g`.`Name` AS `GroupName`,`g`.`PrivacyClass` AS `PrivacyClass`,`gm`.`ID` AS `GroupMeetingID`,`gm`.`StartsAt` AS `StartsAt`,`gm`.`Title` AS `MeetingTitle`,`gm`.`Status` AS `MeetingStatus`,`p`.`ID` AS `PersonID`,`p`.`LastName` AS `LastName`,`p`.`FirstName` AS `FirstName`,`a`.`AttendanceStatus` AS `AttendanceStatus` from (((`tblgroupmeeting` `gm` join `tblgroup` `g` on(`g`.`ID` = `gm`.`GroupID`)) join `tblgroupmeetingattendance` `a` on(`a`.`GroupMeetingID` = `gm`.`ID`)) join `tblperson` `p` on(`p`.`ID` = `a`.`PersonID`)) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!50001 DROP VIEW IF EXISTS `rpt_hymn`*/;
 /*!50001 SET @saved_cs_client          = @@character_set_client */;
 /*!50001 SET @saved_cs_results         = @@character_set_results */;
@@ -3411,6 +3511,19 @@ SET character_set_client = @saved_cs_client;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013  SQL SECURITY DEFINER */
 /*!50001 VIEW `rpt_person_date` AS select `tblpersondate`.`ID` AS `ID`,`tblpersondate`.`PersonID` AS `PersonID`,`tblpersondate`.`DateType` AS `DateType`,`tblpersondate`.`Date` AS `Date`,`tblpersondate`.`Note` AS `Note` from `tblpersondate` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!50001 DROP VIEW IF EXISTS `rpt_person_group_participation`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013  SQL SECURITY DEFINER */
+/*!50001 VIEW `rpt_person_group_participation` AS select `g`.`ChurchID` AS `ChurchID`,`g`.`ID` AS `GroupID`,`g`.`Name` AS `GroupName`,`g`.`PrivacyClass` AS `PrivacyClass`,`p`.`ID` AS `PersonID`,`p`.`LastName` AS `LastName`,`p`.`FirstName` AS `FirstName`,`m`.`StartDate` AS `StartDate`,`m`.`EndDate` AS `EndDate`,case when `m`.`StartDate` <= curdate() and (`m`.`EndDate` is null or `m`.`EndDate` >= curdate()) then 'Current' else 'Ended' end AS `MembershipStatus` from ((`tblgroupmembership` `m` join `tblgroup` `g` on(`g`.`ID` = `m`.`GroupID`)) join `tblperson` `p` on(`p`.`ID` = `m`.`PersonID`)) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;

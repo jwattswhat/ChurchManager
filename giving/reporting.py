@@ -55,7 +55,7 @@ BATCH_SUMMARY_CONTRACT = JSForm.ReportDatasetContract(
 
 BATCH_SUMMARY_MANIFEST = JSForm.ReportProtectionManifest(
     required_settings={
-        "name": "GIVE-BATCH", "dataset": "giving.batchsummary",
+        "name": "CMGV01", "dataset": "giving.batchsummary",
         "datasetversion": 1, "classification": "confidential",
     },
     required_bands=("ReportHeader", "Detail", "ReportFooter", "PageFooter"),
@@ -104,7 +104,7 @@ STATEMENT_CONTRACT = JSForm.ReportDatasetContract(
 
 STATEMENT_MANIFEST = JSForm.ReportProtectionManifest(
     required_settings={
-        "name": "GIVE-STMT", "dataset": "giving.statement",
+        "name": "CMGV04", "dataset": "giving.statement",
         "datasetversion": 1, "classification": "confidential",
     },
     required_bands=("ReportHeader", "Detail", "ReportFooter", "PageFooter"),
@@ -139,7 +139,7 @@ TRIBUTE_CONTRACT = JSForm.ReportDatasetContract(
 )
 
 TRIBUTE_MANIFEST = JSForm.ReportProtectionManifest(
-    required_settings={"name": "GIVE-TRIBUTE", "dataset": "giving.tributeacknowledgments",
+    required_settings={"name": "CMGV08", "dataset": "giving.tributeacknowledgments",
                        "datasetversion": 1, "classification": "confidential"},
     required_bands=("ReportHeader", "Detail", "PageFooter"),
     required_controls={
@@ -169,7 +169,7 @@ DIRECTED_GIFT_CONTRACT = JSForm.ReportDatasetContract(
 )
 
 DIRECTED_GIFT_MANIFEST = JSForm.ReportProtectionManifest(
-    required_settings={"name": "GIVE-DIRECTED", "dataset": "giving.directedgiftreviews",
+    required_settings={"name": "CMGV07", "dataset": "giving.directedgiftreviews",
                        "datasetversion": 1, "classification": "confidential"},
     required_bands=("ReportHeader", "Detail", "PageFooter"),
     required_controls={
@@ -230,7 +230,7 @@ ENVELOPE_LABEL_CONTRACT = JSForm.ReportDatasetContract(
 
 ENVELOPE_LABEL_MANIFEST = JSForm.ReportProtectionManifest(
     required_settings={
-        "name": "GIVE-ENVELOPE-LABELS", "dataset": "giving.envelopelabels",
+        "name": "CMGV09", "dataset": "giving.envelopelabels",
         "datasetversion": 1, "classification": "confidential",
     },
     required_bands=("Detail",),
@@ -257,7 +257,7 @@ ENVELOPE_REGISTER_CONTRACT = JSForm.ReportDatasetContract(
 
 ENVELOPE_REGISTER_MANIFEST = JSForm.ReportProtectionManifest(
     required_settings={
-        "name": "GIVE-ENVELOPE-REGISTER", "dataset": "giving.enveloperegister",
+        "name": "CMGV10", "dataset": "giving.enveloperegister",
         "datasetversion": 1, "classification": "confidential",
     },
     required_bands=("ReportHeader", "Detail", "PageFooter"),
@@ -531,30 +531,30 @@ class GivingVisualReportService:
 
     def run_batch_summary(self, start_date, end_date):
         self.authorization.require("giving.reports.summary", "run the Giving batch summary")
-        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "GIVE-BATCH.json")
+        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "CMGV01.json")
         BATCH_SUMMARY_MANIFEST.validate(definition)
         dataset = GivingBatchSummaryProvider(self.connection, self.authorization).build(start_date, end_date)
         self.output_directory.mkdir(parents=True, exist_ok=True)
-        output = self.output_directory / "GIVE-BATCH.pdf"
+        output = self.output_directory / "CMGV01.pdf"
         if output.exists():
             try:
                 with output.open("ab"):
                     pass
             except PermissionError:
-                output = self.output_directory / f"GIVE-BATCH-{datetime.now():%Y%m%d-%H%M%S}.pdf"
+                output = self.output_directory / f"CMGV01-{datetime.now():%Y%m%d-%H%M%S}.pdf"
         rendered = JSForm.PDFReportRenderer().render(
             definition, dataset, output, context={"run_user": self.session.display_name},
         )
         self.processes.open_file(rendered)
         return rendered
 
-    def run_statements(self, contributor_ids, start_date, end_date, output_name="GIVE-STMT", *, issue=False):
+    def run_statements(self, contributor_ids, start_date, end_date, output_name="CMGV04", *, issue=False):
         """Render statements and optionally record their immutable identifiers."""
         self.authorization.require("giving.statements.generate", "preview contribution statements")
         contributor_ids = tuple(contributor_ids)
         if not contributor_ids:
             raise ValueError("Select at least one contributor for the statement preview.")
-        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "GIVE-STMT.json")
+        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "CMGV04.json")
         STATEMENT_MANIFEST.validate(definition)
         provider = ContributionStatementProvider(self.connection, self.authorization)
         self.output_directory.mkdir(parents=True, exist_ok=True)
@@ -612,13 +612,13 @@ class GivingVisualReportService:
         """Render three-column, 30-up envelope-box labels on US Letter paper."""
         self.authorization.require("giving.reports.confidential", "print envelope-box labels")
         definition = JSForm.ReportDefinitionLoader().load(
-            DEFINITIONS / "GIVE-ENVELOPE-LABELS.json"
+            DEFINITIONS / "CMGV09.json"
         )
         ENVELOPE_LABEL_MANIFEST.validate(definition)
         dataset = EnvelopeBoxReportProvider(self.connection, self.authorization).labels(
             year, include_inactive, include_outside, include_church,
         )
-        output = self._available_output(f"GIVE-ENVELOPE-LABELS-{year}.pdf")
+        output = self._available_output(f"CMGV09-{year}.pdf")
         rendered = JSForm.PDFReportRenderer().render(definition, dataset, output)
         self.processes.open_file(rendered)
         return rendered
@@ -627,13 +627,13 @@ class GivingVisualReportService:
         """Render the protected annual envelope assignment register."""
         self.authorization.require("giving.reports.confidential", "print the envelope register")
         definition = JSForm.ReportDefinitionLoader().load(
-            DEFINITIONS / "GIVE-ENVELOPE-REGISTER.json"
+            DEFINITIONS / "CMGV10.json"
         )
         ENVELOPE_REGISTER_MANIFEST.validate(definition)
         dataset = EnvelopeBoxReportProvider(self.connection, self.authorization).register(
             year, include_inactive, include_outside,
         )
-        output = self._available_output(f"GIVE-ENVELOPE-REGISTER-{year}.pdf")
+        output = self._available_output(f"CMGV10-{year}.pdf")
         rendered = JSForm.PDFReportRenderer().render(
             definition, dataset, output, context={"run_user": self.session.display_name},
         )
@@ -643,10 +643,10 @@ class GivingVisualReportService:
     def run_tribute_acknowledgments(self, start_date, end_date):
         """Render the protected memorial and honor acknowledgment list."""
         self.authorization.require("giving.reports.confidential", "print memorial and honor gifts")
-        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "GIVE-TRIBUTE.json")
+        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "CMGV08.json")
         TRIBUTE_MANIFEST.validate(definition)
         dataset = TributeAcknowledgmentProvider(self.connection, self.authorization).build(start_date, end_date)
-        output = self._available_output("GIVE-TRIBUTE.pdf")
+        output = self._available_output("CMGV08.pdf")
         rendered = JSForm.PDFReportRenderer().render(
             definition, dataset, output, context={"run_user": self.session.display_name},
         )
@@ -656,12 +656,12 @@ class GivingVisualReportService:
     def run_directed_gift_reviews(self, start_date, end_date):
         """Render the restricted directed-gift review and disposition list."""
         self.authorization.require("giving.reports.confidential", "print directed gift reviews")
-        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "GIVE-DIRECTED.json")
+        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "CMGV07.json")
         DIRECTED_GIFT_MANIFEST.validate(definition)
         dataset = DirectedGiftReviewProvider(self.connection, self.authorization).build(
             start_date, end_date
         )
-        output = self._available_output("GIVE-DIRECTED.pdf")
+        output = self._available_output("CMGV07.pdf")
         rendered = JSForm.PDFReportRenderer().render(
             definition, dataset, output, context={"run_user": self.session.display_name},
         )

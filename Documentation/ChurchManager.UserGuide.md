@@ -331,7 +331,7 @@ contributor's Ready and Posted allocations for the selected dates. Draft gifts
 are deliberately excluded from contributor history. The **Refresh** buttons
 update the on-screen review and display the completion time beneath the grid;
 they do not create a PDF. **Preview PDF** on the Batch Control Summary creates
-the protected donor-free `GIVE-BATCH` report for the selected dates. Contributor
+the protected donor-free `CMGV01` report for the selected dates. Contributor
 statements are available only to users with the statement-generation permission.
 
 The **Operational Reports** tab provides protected printable batch detail,

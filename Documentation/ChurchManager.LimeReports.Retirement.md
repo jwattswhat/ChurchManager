@@ -15,7 +15,7 @@ ChurchManager does not call it.
 
 | Classification | Codes | Disposition |
 | --- | --- | --- |
-| Supported visual reports | `CMAS01`, `CMAT01`-`CMAT05`, `CMDO01`, `CMHU01`-`CMHU04`, `CMJR01`, `CMMD01`, `CMMI01`-`CMMI03`, `CMML01`-`CMML02`, `CMPA01`, `CMPE01`, `CMPH02`, `CMPR01`, `CMRP01`, `CMWP01`, `CMWS01` | JSON starter exists and the JSForm PDF renderer is used. |
+| Supported visual reports | `CMGN01`, `CMAT01`-`CMAT05`, `CMGN02`, `CMWS03`-`CMWS06`, `CMPC03`, `CMMB01`, `CMMB02`-`CMMB04`, `CMMB05`-`CMMB06`, `CMPC04`, `CMMB07`, `CMMB08`, `CMPC05`, `CMGN03`, `CMWS01`, `CMWS02` | JSON starter exists and the JSForm PDF renderer is used. |
 | Consolidated old layouts | `CMAD01`, `CMPH01` | Their useful output is covered by supported visual reports. |
 | Disabled report | `CMSM01` | Remains retired. |
 | Former batch launcher | `CMBATCH00` | Retired; users run authorized reports individually. |
@@ -49,7 +49,7 @@ regression testing; do not reintroduce LimeReports.
 2. Open the Reports screen and confirm no retired code is listed.
 3. Run at least one report from each permission family: general, attendance,
    membership, worship, ministry, and pastoral.
-4. Confirm Prayer Requests (`CMPR01`) runs through the ordinary report screen.
+4. Confirm Prayer Requests (`CMPC05`) runs through the ordinary report screen.
 5. Confirm a customized report still opens and a missing customization falls
    back to its JSON starter.
 6. Inspect representative PDFs for privacy, clipping, wrapping, pagination, and

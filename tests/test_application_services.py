@@ -213,12 +213,12 @@ class TestReportService(unittest.TestCase):
             authorization = object()
             @staticmethod
             def require_report(report_id):
-                return ("CMAS01", "reports.general.run")
+                return ("CMGN01", "reports.general.run")
         service = ChurchManagerReportService(object(), object(), AccessStub())
         service._run_visual_report = lambda code, form, connection: (code, form, connection)
         self.assertEqual(
             service.run_catalog_report(26, "form", "connection"),
-            ("CMAS01", "form", "connection"),
+            ("CMGN01", "form", "connection"),
         )
 
 

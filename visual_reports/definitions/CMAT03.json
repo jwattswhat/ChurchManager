@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMAT03",
-      "title": "Attendance - Individual History",
+      "title":"Attendance - Individual History",
       "dataset": "churchmanager.cmat03",
       "datasetversion": 1,
       "pagesize": "letter",

@@ -25,7 +25,7 @@ class WorshipChecklistTests(unittest.TestCase):
         self.assertIn("rpt_worship_planner_checklist_summary", source)
 
     def test_standard_planner_does_not_print_checklist_by_default(self):
-        source = (ROOT / "visual_reports" / "definitions" / "CMWP01.json").read_text()
+        source = (ROOT / "visual_reports" / "definitions" / "CMWS01.json").read_text()
         self.assertNotIn('"repeatcollection": "checklist"', source)
 
     def test_participant_summary_uses_current_assignment_status_column(self):

@@ -62,7 +62,7 @@ class EnvelopeBoxReportTests(unittest.TestCase):
 
     def test_label_definition_renders_thirty_labels_on_first_page(self):
         definition = JSForm.ReportDefinitionLoader().load(
-            DEFINITIONS / "GIVE-ENVELOPE-LABELS.json"
+            DEFINITIONS / "CMGV09.json"
         )
         ENVELOPE_LABEL_MANIFEST.validate(definition)
         dataset = self.provider(31).labels(2027, False, True, False)
@@ -79,7 +79,7 @@ class EnvelopeBoxReportTests(unittest.TestCase):
 
     def test_register_contains_effective_dates_and_identity(self):
         definition = JSForm.ReportDefinitionLoader().load(
-            DEFINITIONS / "GIVE-ENVELOPE-REGISTER.json"
+            DEFINITIONS / "CMGV10.json"
         )
         ENVELOPE_REGISTER_MANIFEST.validate(definition)
         dataset = self.provider(2).register(2027, False, True)

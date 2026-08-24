@@ -2,8 +2,8 @@
   "artifact": "ChurchManager fresh-install starter-data baseline",
   "format_version": 1,
   "release_version": "0.3.0-dev",
-  "seed_sha256": "93508fb497d9c704f95933fbad0d1f4fd54c6c9f52f8347f2fe25b916d96ac03",
-  "statement_count": 88,
+  "seed_sha256": "8eba42742f7e93d85780d3c8154572c946577fd2acc15e906e705f73c2511f33",
+  "statement_count": 105,
   "source_migrations": [
     {
       "version": "003_add_user_security.sql",
@@ -174,6 +174,21 @@
       "version": "107_add_group_meetings_and_attendance.sql",
       "checksum": "e5a10a449c2e69821b67e4c062414f938f8204a12b1b9316cf2e040e52788920",
       "statements": 2
+    },
+    {
+      "version": "108_add_group_reports.sql",
+      "checksum": "99f56aeada6a6445a2417f8f465ad0949a4a0929c2ed742efc689df06c51c32e",
+      "statements": 3
+    },
+    {
+      "version": "109_add_group_attendance_sheet.sql",
+      "checksum": "2e2f9475efe58c0147f1eb450a3f6b9ac16cdba53ba3bc292f4c64f2ad5566f9",
+      "statements": 1
+    },
+    {
+      "version": "110_standardize_report_names.sql",
+      "checksum": "29ad000c64a0173368c80cbd661bddde70c41baaddf2a3b827a2a5a2aa030491",
+      "statements": 13
     }
   ],
   "current_schema_statements": 1,

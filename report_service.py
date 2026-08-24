@@ -49,7 +49,7 @@ class ChurchManagerReportService:
         if definition.dataset_name == "membership.directory":
             from visual_reports.directory_dataset import DirectoryDatasetProvider
             dataset = DirectoryDatasetProvider(connection, self.access.authorization).build(church_id)
-        elif code == "CMWP01":
+        elif code == "CMWS01":
             return self.render_worship_planning(
                 church_id, parameters.get("ServiceID"), connection, open_output=True,
             )
@@ -66,12 +66,12 @@ class ChurchManagerReportService:
         self, church_id, service_id, connection, *, open_output=False, output=None,
     ):
         """Render a fresh planner for one service, optionally without opening it."""
-        definition_path = resolve_report_definition("CMWP01")
+        definition_path = resolve_report_definition("CMWS01")
         definition = self.jsform.ReportDefinitionLoader().load(definition_path)
         dataset = WorshipPlanningDatasetProvider(
             connection, self.access.authorization,
         ).build(church_id, service_id)
-        output = Path(output or (writable_directory("Reports") / "CMWP01.pdf"))
+        output = Path(output or (writable_directory("Reports") / "CMWS01.pdf"))
         rendered = self.jsform.PDFReportRenderer().render(definition, dataset, output)
         if open_output:
             self.processes.open_file(rendered)

@@ -51,9 +51,9 @@ def main():
     finally:
         connection.close()
     definition = JSForm.ReportDefinitionLoader().load(
-        ROOT / "visual_reports" / "definitions" / "CMMD01.json"
+        ROOT / "visual_reports" / "definitions" / "CMMB01.json"
     )
-    output = ROOT / "Reports" / "CMMD01.visual-proof.pdf"
+    output = ROOT / "Reports" / "CMMB01.visual-proof.pdf"
     JSForm.PDFReportRenderer().render(definition, dataset, output)
     print(output)
 

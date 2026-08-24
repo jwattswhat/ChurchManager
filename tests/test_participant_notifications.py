@@ -59,7 +59,7 @@ class ParticipantNotificationTests(unittest.TestCase):
 
     def test_fresh_report_is_required_and_generated_silently(self):
         with tempfile.TemporaryDirectory() as folder:
-            output = Path(folder) / "CMWP01.pdf"
+            output = Path(folder) / "CMWS01.pdf"
             reports = Reports(output)
             authorization = Authorization()
             service = ParticipantNotificationService(Repository(), authorization, reports)
@@ -71,7 +71,7 @@ class ParticipantNotificationTests(unittest.TestCase):
 
     def test_send_uses_only_ready_unique_addresses_and_current_attachment(self):
         with tempfile.TemporaryDirectory() as folder:
-            output = Path(folder) / "CMWP01.pdf"; output.write_bytes(b"%PDF-test")
+            output = Path(folder) / "CMWS01.pdf"; output.write_bytes(b"%PDF-test")
             mail = Mail()
             service = ParticipantNotificationService(Repository(), Authorization(), Reports(output), mail)
             plan = service.prepare(8)

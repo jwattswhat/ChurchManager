@@ -52,30 +52,30 @@ Templates contain no SQL. Dataset providers use the existing parameterized accou
 
 | Code | Report | Parameters | Required structure |
 |---|---|---|---|
-| ACCT-TB | Trial Balance | Organization; as-of date | Account code/name/type/normal balance; debit and credit activity; debit and credit balances; locked balance totals and difference |
-| ACCT-FP | Statement of Financial Position | Organization; as-of date | Assets, liabilities, net assets without donor restrictions, net assets with donor restrictions, current activity; locked accounting equation and difference |
-| ACCT-ACT | Statement of Activities | Organization; from/through dates | Revenue, expenses, transfers, and change in net assets; columns for without restrictions, with restrictions, and total |
-| ACCT-FUNC | Statement of Functional Expenses | Organization; from/through dates | Natural expense accounts by ministry function, dynamically generated function columns, row totals, column totals, grand total |
-| ACCT-FUND | Fund Activity and Balances | Organization; from/through dates | Beginning balance, revenue, expense, transfers/releases, other activity, ending balance by fund and restriction class; locked totals |
-| ACCT-BVA | Budget to Actual | Adopted budget; through period | General-account summary plus optional detailed budget lines; period and year-to-date budget, actual, variance, and percentage |
+| CMFI01 | Trial Balance | Organization; as-of date | Account code/name/type/normal balance; debit and credit activity; debit and credit balances; locked balance totals and difference |
+| CMFI03 | Statement of Financial Position | Organization; as-of date | Assets, liabilities, net assets without donor restrictions, net assets with donor restrictions, current activity; locked accounting equation and difference |
+| CMFI04 | Statement of Activities | Organization; from/through dates | Revenue, expenses, transfers, and change in net assets; columns for without restrictions, with restrictions, and total |
+| CMFI08 | Statement of Functional Expenses | Organization; from/through dates | Natural expense accounts by ministry function, dynamically generated function columns, row totals, column totals, grand total |
+| CMFI05 | Fund Activity and Balances | Organization; from/through dates | Beginning balance, revenue, expense, transfers/releases, other activity, ending balance by fund and restriction class; locked totals |
+| CMFI07 | Budget to Actual | Adopted budget; through period | General-account summary plus optional detailed budget lines; period and year-to-date budget, actual, variance, and percentage |
 
 ### 4.2 Detailed and supporting reports
 
 | Code | Report | Parameters | Required structure |
 |---|---|---|---|
-| ACCT-GL | General Ledger | Organization; account; optional fund; from/through dates | Opening balance; transaction date/number/type/description/reference/fund/line description; debit, credit, running normal balance; ending balance |
-| ACCT-REG | Posted Transaction Register | Organization; optional dates/type/status | Posted and reversed transactions only; number, date, type, status, description, reference, total; optional line detail |
-| ACCT-JE | Journal Entry | Posted/reversed transaction | Transaction metadata, creator/reviewer/poster attribution, reversal links, balanced lines, totals, and attachment names plus hashes |
-| ACCT-REC | Bank Reconciliation Report | Completed reconciliation | Beginning balance plus cleared activity equals statement ending balance; difference; cleared items; outstanding items; preparer and completion timestamp |
-| ACCT-BUD | Adopted Budget | Adopted budget; optional through period | Account-only or detailed form matching the budget's adopted mode; period values and fiscal-year totals |
+| CMFI02 | General Ledger | Organization; account; optional fund; from/through dates | Opening balance; transaction date/number/type/description/reference/fund/line description; debit, credit, running normal balance; ending balance |
+| CMFI13 | Posted Transaction Register | Organization; optional dates/type/status | Posted and reversed transactions only; number, date, type, status, description, reference, total; optional line detail |
+| CMFI12 | Journal Entry | Posted/reversed transaction | Transaction metadata, creator/reviewer/poster attribution, reversal links, balanced lines, totals, and attachment names plus hashes |
+| CMFI06 | Bank Reconciliation Report | Completed reconciliation | Beginning balance plus cleared activity equals statement ending balance; difference; cleared items; outstanding items; preparer and completion timestamp |
+| CMFI10 | Adopted Budget | Adopted budget; optional through period | Account-only or detailed form matching the budget's adopted mode; period values and fiscal-year totals |
 
 ### 4.3 Control, audit, and close reports
 
 | Code | Report | Parameters | Required structure |
 |---|---|---|---|
-| ACCT-CLOSE | Fiscal Period Close Checklist | Organization; fiscal period | Every readiness check, clear/blocked status and explanation; period status; run timestamp; explicit READY/NOT READY conclusion |
-| ACCT-YE | Year-End Close Preview/Proof | Organization; fiscal year | Revenue, expense, transfers, change by fund, destination net-asset account, blockers, readiness; after close, closing transaction and audit attribution |
-| ACCT-AUDIT | Accounting Audit History | Organization; optional user/action/date range | Timestamp, actor, action, entity, reason, before/after details; clearly marked confidential audit record |
+| CMFI11 | Fiscal Period Close Checklist | Organization; fiscal period | Every readiness check, clear/blocked status and explanation; period status; run timestamp; explicit READY/NOT READY conclusion |
+| CMFI14 | Year-End Close Preview/Proof | Organization; fiscal year | Revenue, expense, transfers, change by fund, destination net-asset account, blockers, readiness; after close, closing transaction and audit attribution |
+| CMFI09 | Accounting Audit History | Organization; optional user/action/date range | Timestamp, actor, action, entity, reason, before/after details; clearly marked confidential audit record |
 
 The bank-import review, budget editor, transaction entry, approval, posting, and reversal dialogs remain operational screens rather than printed reports. They may link to the appropriate proof or journal-entry report after completion.
 
@@ -206,22 +206,22 @@ Starter restoration remains available. User customizations remain under `%LOCALA
 
 ### Phase 3 - Core financial statements
 
-- ACCT-TB, ACCT-FP, ACCT-ACT, ACCT-FUND.
+- CMFI01, CMFI03, CMFI04, CMFI05.
 - Verify every printed total against the existing service result and accounting equation.
 
 ### Phase 4 - Complex statements and budgets
 
-- ACCT-FUNC, ACCT-BVA, ACCT-BUD.
+- CMFI08, CMFI07, CMFI10.
 - Exercise matrix output, dynamic functions, account-only budgets, and detailed budgets.
 
 ### Phase 5 - Detailed support
 
-- ACCT-GL, ACCT-REG, ACCT-JE, ACCT-REC.
+- CMFI02, CMFI13, CMFI12, CMFI06.
 - Replace the journal-entry HTML export only after PDF output is verified equivalent or better.
 
 ### Phase 6 - Controls and audit
 
-- ACCT-CLOSE, ACCT-YE, ACCT-AUDIT.
+- CMFI11, CMFI14, CMFI09.
 - Keep close/reopen actions in their operational dialogs; reports are immutable previews/proofs, never action surfaces.
 
 ## 11. Testing and acceptance

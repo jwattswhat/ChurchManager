@@ -73,8 +73,8 @@ class FakeCatalogControl:
 
 class TestReportAccessService(unittest.TestCase):
     ROWS = (
-        (1, "CMWP01", "Worship Planning", "reports.worship.run"),
-        (2, "CMMD01", "Member Directory", "reports.membership.contact"),
+        (1, "CMWS01", "Worship Planning", "reports.worship.run"),
+        (2, "CMMB01", "Member Directory", "reports.membership.contact"),
     )
 
     def service(self, allowed):
@@ -85,23 +85,23 @@ class TestReportAccessService(unittest.TestCase):
         count = self.service({"reports.worship.run"}).configure_picker(control)
         self.assertEqual(count, 1)
         self.assertEqual(control.choices.id, [1])
-        self.assertEqual(control.items, ["Worship Planning (CMWP01)"])
+        self.assertEqual(control.items, ["Worship Planning (CMWS01)"])
         self.assertEqual(control.value, "")
 
     def test_catalog_grid_marks_customized_reports_blue(self):
         control = FakeCatalogControl()
         count = self.service({"reports.worship.run", "reports.membership.contact"}).configure_picker(
-            control, {"CMMD01"},
+            control, {"CMMB01"},
         )
         self.assertEqual(count, 2)
         by_code = {row["values"][0]: row for row in control.rows}
-        self.assertEqual(by_code["CMMD01"]["values"], ["CMMD01", "Member Directory", "Customized"])
-        self.assertEqual(by_code["CMMD01"]["foreground"], "#0066CC")
-        self.assertEqual(by_code["CMWP01"]["values"], ["CMWP01", "Worship Planning", "Starter"])
+        self.assertEqual(by_code["CMMB01"]["values"], ["CMMB01", "Member Directory", "Customized"])
+        self.assertEqual(by_code["CMMB01"]["foreground"], "#0066CC")
+        self.assertEqual(by_code["CMWS01"]["values"], ["CMWS01", "Worship Planning", "Starter"])
 
     def test_direct_report_invocation_rechecks_permission(self):
         service = self.service({"reports.worship.run"})
-        self.assertEqual(service.require_report(1)[0], "CMWP01")
+        self.assertEqual(service.require_report(1)[0], "CMWS01")
         with self.assertRaises(AuthorizationDenied):
             service.require_report(2)
 

@@ -173,7 +173,7 @@ class Processes:
 
 class TestAccountingVisualReports(unittest.TestCase):
     def test_trial_balance_contract_and_starter_are_valid_and_protected(self):
-        starter = Path(__file__).parents[1] / "accounting" / "report_definitions" / "ACCT-TB.json"
+        starter = Path(__file__).parents[1] / "accounting" / "report_definitions" / "CMFI01.json"
         definition = JSForm.ReportDefinitionLoader().load(starter)
         self.assertEqual(definition.dataset_name, TRIAL_BALANCE_CONTRACT.name)
         self.assertIs(TRIAL_BALANCE_MANIFEST.validate(definition), definition)
@@ -239,16 +239,16 @@ class TestAccountingVisualReports(unittest.TestCase):
         root = Path(__file__).parents[1] / "accounting" / "report_definitions"
         loader = JSForm.ReportDefinitionLoader()
         for code, contract, manifest in (
-            ("ACCT-FP",POSITION_CONTRACT,POSITION_MANIFEST),
-            ("ACCT-ACT",ACTIVITIES_CONTRACT,ACTIVITIES_MANIFEST),
-            ("ACCT-FUND",FUND_CONTRACT,FUND_MANIFEST),
-            ("ACCT-FUNC",FUNCTIONAL_CONTRACT,FUNCTIONAL_MANIFEST),
-            ("ACCT-BVA",BUDGET_ACTUAL_CONTRACT,BUDGET_ACTUAL_MANIFEST),
-            ("ACCT-BUD",ADOPTED_BUDGET_CONTRACT,ADOPTED_BUDGET_MANIFEST),
-            ("ACCT-GL",GENERAL_LEDGER_CONTRACT,GENERAL_LEDGER_MANIFEST),
-            ("ACCT-REG",REGISTER_CONTRACT,REGISTER_MANIFEST),
-            ("ACCT-JE",JOURNAL_CONTRACT,JOURNAL_MANIFEST),
-            ("ACCT-REC",RECONCILIATION_CONTRACT,RECONCILIATION_MANIFEST),
+            ("CMFI03",POSITION_CONTRACT,POSITION_MANIFEST),
+            ("CMFI04",ACTIVITIES_CONTRACT,ACTIVITIES_MANIFEST),
+            ("CMFI05",FUND_CONTRACT,FUND_MANIFEST),
+            ("CMFI08",FUNCTIONAL_CONTRACT,FUNCTIONAL_MANIFEST),
+            ("CMFI07",BUDGET_ACTUAL_CONTRACT,BUDGET_ACTUAL_MANIFEST),
+            ("CMFI10",ADOPTED_BUDGET_CONTRACT,ADOPTED_BUDGET_MANIFEST),
+            ("CMFI02",GENERAL_LEDGER_CONTRACT,GENERAL_LEDGER_MANIFEST),
+            ("CMFI13",REGISTER_CONTRACT,REGISTER_MANIFEST),
+            ("CMFI12",JOURNAL_CONTRACT,JOURNAL_MANIFEST),
+            ("CMFI06",RECONCILIATION_CONTRACT,RECONCILIATION_MANIFEST),
         ):
             definition=loader.load(root / f"{code}.json")
             self.assertEqual(definition.dataset_name,contract.name)
@@ -298,14 +298,14 @@ class TestAccountingVisualReports(unittest.TestCase):
 
     def test_budget_summary_columns_fit_printable_landscape_width(self):
         root=Path(__file__).parents[1]/"accounting"/"report_definitions"
-        for code in ("ACCT-BVA","ACCT-BUD"):
+        for code in ("CMFI07","CMFI10"):
             definition=JSForm.ReportDefinitionLoader().load(root/f"{code}.json")
             columns=definition.controls["Records"]["columns"]
             self.assertEqual(sum(column["width"] for column in columns),720)
 
     def test_audit_report_uses_readable_event_cards_within_legal_width(self):
         definition=JSForm.ReportDefinitionLoader().load(
-            Path(__file__).parents[1]/"accounting"/"report_definitions"/"ACCT-AUDIT.json")
+            Path(__file__).parents[1]/"accounting"/"report_definitions"/"CMFI09.json")
         control=definition.controls["Records"]
         self.assertEqual(control["type"],"repeater")
         self.assertEqual(control["size"][0],936)
@@ -325,7 +325,7 @@ class TestAccountingVisualReports(unittest.TestCase):
         self.assertEqual(dataset.collections["records"][0]["Type"],"Receipt")
         self.assertEqual(dataset.collections["organization"][0]["LegalName"],"")
         definition=JSForm.ReportDefinitionLoader().load(
-            Path(__file__).parents[1]/"accounting"/"report_definitions"/"ACCT-GL.json")
+            Path(__file__).parents[1]/"accounting"/"report_definitions"/"CMFI02.json")
         self.assertEqual(definition.settings["pagesize"],"legal")
         self.assertEqual(sum(column["width"] for column in definition.controls["Records"]["columns"]),900)
 
@@ -340,19 +340,19 @@ class TestAccountingVisualReports(unittest.TestCase):
     def test_core_statement_starters_render_to_pdf(self):
         root=Path(__file__).parents[1]/"accounting"/"report_definitions"
         providers=(
-            ("ACCT-FP",FinancialPositionDatasetProvider(Connection(),Authorization(),PositionService()),
+            ("CMFI03",FinancialPositionDatasetProvider(Connection(),Authorization(),PositionService()),
              (1,date(2027,8,12))),
-            ("ACCT-ACT",ActivitiesDatasetProvider(Connection(),Authorization(),ActivitiesServiceStub()),
+            ("CMFI04",ActivitiesDatasetProvider(Connection(),Authorization(),ActivitiesServiceStub()),
              (1,date(2027,1,1),date(2027,8,12))),
-            ("ACCT-FUND",FundDatasetProvider(Connection(),Authorization(),FundService()),
+            ("CMFI05",FundDatasetProvider(Connection(),Authorization(),FundService()),
              (1,date(2027,1,1),date(2027,8,12))),
-            ("ACCT-FUNC",FunctionalExpenseDatasetProvider(Connection(),Authorization(),FunctionalService()),
+            ("CMFI08",FunctionalExpenseDatasetProvider(Connection(),Authorization(),FunctionalService()),
              (1,date(2027,1,1),date(2027,8,12))),
-            ("ACCT-BVA",BudgetDatasetProvider(BudgetConnection(),Authorization(),BudgetActualServiceStub()),
+            ("CMFI07",BudgetDatasetProvider(BudgetConnection(),Authorization(),BudgetActualServiceStub()),
              (3,12)),
-            ("ACCT-GL",GeneralLedgerDatasetProvider(Connection(),Authorization(),GeneralLedgerServiceStub()),
+            ("CMFI02",GeneralLedgerDatasetProvider(Connection(),Authorization(),GeneralLedgerServiceStub()),
              (1,10,date(2027,1,1),date(2027,1,31))),
-            ("ACCT-JE",JournalEntryDatasetProvider(Connection(),Authorization(),JournalServiceStub()),(7,)),
+            ("CMFI12",JournalEntryDatasetProvider(Connection(),Authorization(),JournalServiceStub()),(7,)),
         )
         with tempfile.TemporaryDirectory() as folder:
             for code,provider,arguments in providers:
@@ -376,7 +376,7 @@ class TestAccountingVisualReports(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             service=AccountingVisualReportService(Connection(),Authorization(),Session(),
                                                    output_directory=folder)
-            original=Path(folder)/"ACCT-GL.pdf";original.write_bytes(b"open report")
+            original=Path(folder)/"CMFI02.pdf";original.write_bytes(b"open report")
             real_open=Path.open
             def locked(path,*args,**kwargs):
                 if path==original and args and args[0]=="ab":raise PermissionError("locked")
@@ -385,8 +385,8 @@ class TestAccountingVisualReports(unittest.TestCase):
                 "accounting.reporting.datetime"
             ) as clock:
                 clock.now.return_value=datetime(2026,8,12,17,6,7)
-                self.assertEqual(service._available_output("ACCT-GL").name,
-                                 "ACCT-GL-20260812-170607.pdf")
+                self.assertEqual(service._available_output("CMFI02").name,
+                                 "CMFI02-20260812-170607.pdf")
 
 
 if __name__ == "__main__":

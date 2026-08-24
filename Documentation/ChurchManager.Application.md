@@ -679,38 +679,26 @@ Common parameters include:
 
 ### 9.2 Documented report catalog
 
-The installed SQL report data includes the following reports. The database currently in use may contain additions or updated codes.
+Every current report uses the stable `CMss99` pattern: `CM` identifies
+ChurchManager, `ss` identifies the subsystem, and `99` is that subsystem's
+two-digit sequence. Report filenames use the same code. Titles begin with the
+subsystem name followed by a hyphen, which keeps related reports together in
+the report catalog.
 
-| Code | Report |
-| --- | --- |
-| `CMPR01` | Prayer Requests |
-| `CMWP01` | Worship Planning Worksheet |
-| `CMFD01` | Congregation Family Directory; the corresponding template is absent from the current pattern directory and may have been retired or renamed. |
-| `CMPH02` | Member Contact Listing |
-| `CMHU01` | Hymn Usage by Service |
-| `CMHU02` | Hymn Usage by Hymn |
-| `CMPE01` | Transfers |
-| `CMWS01` | Worship Services by Date |
-| `CMHU03` | Hymn Usage for a selected hymn |
-| `CMML01` | Member Status List |
-| `CMML02` | Member Date Listing |
-| `CMML03` | Mailing Labels - Families (three-column label stock) |
-| `CMML04` | Mailing Labels - Members (three-column label stock) |
-| `CMCL01` | Family Listing; its template appears to have been renamed to `CMMD01`. Verify the database code before use. |
-| `CMMI01` | One Member Information report |
-| `CMMI02` | All Member Information listing |
-| `CMMI03` | Member Update Forms |
-| `CMHU04` | Hymn Usage Since a Date |
-| `CMHU05` | Favorite Hymns for a selected hymnal |
-| `CMAT01` | Attendance Event Listing |
-| `CMJR01` | Journal report |
-| `CMAS01` | Asset Listing |
-| `CMBATCH00` | Pastor's Reports batch |
+| Subsystem code | Subsystem | Current sequence |
+| --- | --- | --- |
+| `GN` | General | `CMGN01`-`CMGN03` |
+| `AT` | Attendance | `CMAT01`-`CMAT05` |
+| `WS` | Worship | `CMWS01`-`CMWS07` |
+| `MB` | Membership | `CMMB01`-`CMMB10` |
+| `GR` | Groups | `CMGR01`-`CMGR04` |
+| `PC` | Pastoral Care | `CMPC01`-`CMPC05` |
+| `FI` | Finance | `CMFI01`-`CMFI14` |
+| `GV` | Giving | `CMGV01`-`CMGV12` |
 
-Additional templates currently present include attendance, membership, project,
-prayer, and worship reports whose exact titles should be confirmed against the
-live `tblReports` data. Removed financial and donor report codes are filtered from
-the report menu even when historical `tblReports` rows remain in a database.
+`visual_reports/report_inventory.py` and the three report-definition directories
+are the authoritative current inventory. Customized layouts saved under a prior
+report code are copied to the canonical code the first time that report is used.
 
 #### Favorite hymns
 

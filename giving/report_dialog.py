@@ -330,14 +330,14 @@ class GivingReportsDialog(wx.Dialog):
         guidance.SetForegroundColour(wx.Colour(0, 75, 150)); guidance.Wrap(920)
         root.Add(guidance, 0, wx.ALL, 10)
         reports = [
-            ("Giving by Fund and Period", "GIVE-FUND-PERIOD", "fund-period", False),
-            ("Accounting Posting Reconciliation", "GIVE-RECONCILE", "accounting-reconciliation", False),
-            ("Contribution Batch Detail", "GIVE-BATCH-DETAIL", "batch-detail", False),
-            ("Statement Exception List", "GIVE-STMT-EXCEPTIONS", "statement-exceptions", False),
-            ("Unassigned and Conflicting Envelopes", "GIVE-ENVELOPE-EXCEPTIONS", "envelope-exceptions", False),
+            ("Giving - Fund and Period", "CMGV06", "fund-period", False),
+            ("Giving - Accounting Reconciliation", "CMGV12", "accounting-reconciliation", False),
+            ("Giving - Batch Detail", "CMGV02", "batch-detail", False),
+            ("Giving - Statement Exceptions", "CMGV05", "statement-exceptions", False),
+            ("Giving - Envelope Exceptions", "CMGV11", "envelope-exceptions", False),
         ]
         if self.authorization.has_permission("giving.history.view"):
-            reports.insert(3, ("Contributor History (Printable)", "GIVE-HISTORY", "contributor-history", True))
+            reports.insert(3, ("Giving - Contributor History", "CMGV03", "contributor-history", True))
         self.operational_reports = tuple(reports)
         self.operational_report = wx.Choice(panel, choices=[row[0] for row in self.operational_reports])
         self.operational_report.SetSelection(0); self.operational_report.Bind(wx.EVT_CHOICE, self.on_operational_choice)
@@ -445,7 +445,7 @@ class GivingReportsDialog(wx.Dialog):
         try:
             first, last, suffix, _display, contributor_ids = self._statement_selection()
             self.report_service.run_statements(
-                contributor_ids, first, last, output_name=f"GIVE-STMT-{suffix}",
+                contributor_ids, first, last, output_name=f"CMGV04-{suffix}",
             )
         except Exception as error:
             wx.MessageBox(str(error), "Contribution Statements", wx.OK | wx.ICON_ERROR, self)
@@ -492,7 +492,7 @@ class GivingReportsDialog(wx.Dialog):
                 return
             self.report_service.run_statements(
                 contributor_ids, first, last,
-                output_name=f"GIVE-STMT-ISSUED-{suffix}", issue=True,
+                output_name=f"CMGV04-ISSUED-{suffix}", issue=True,
             )
             self.on_statement_history()
         except Exception as error:

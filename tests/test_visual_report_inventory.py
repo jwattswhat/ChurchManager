@@ -31,7 +31,7 @@ class TestVisualReportInventory(unittest.TestCase):
             with self.subTest(code=code):
                 definition = loader.load(ROOT / "visual_reports" / "definitions" / f"{code}.json")
                 self.assertEqual(definition.report_id, code)
-                if code == "CMWP01":
+                if code == "CMWS01":
                     WORSHIP_PLANNING_CONTRACT.validate_definition(definition)
                 elif definition.dataset_name == "membership.directory":
                     from visual_reports.directory_dataset import DIRECTORY_CONTRACT
@@ -41,7 +41,7 @@ class TestVisualReportInventory(unittest.TestCase):
 
     def test_mailing_labels_are_json_only_directory_reports(self):
         loader = JSForm.ReportDefinitionLoader()
-        for code, collection in (("CMML03", "directory_entries"), ("CMML04", "directory_people")):
+        for code, collection in (("CMMB09", "directory_entries"), ("CMMB10", "directory_people")):
             definition = loader.load(ROOT / "visual_reports" / "definitions" / f"{code}.json")
             repeater = next(
                 control for control in definition.controls.values()
@@ -54,7 +54,7 @@ class TestVisualReportInventory(unittest.TestCase):
     def test_tabular_definitions_use_standard_metadata_and_empty_message(self):
         loader = JSForm.ReportDefinitionLoader()
         for spec in SPECS:
-            if spec.code == "CMWP01":
+            if spec.code == "CMWS01":
                 continue
             definition = loader.load(ROOT / "visual_reports" / "definitions" / f"{spec.code}.json")
             controls = definition.controls
@@ -64,7 +64,7 @@ class TestVisualReportInventory(unittest.TestCase):
 
     def test_worship_planner_uses_specialized_service_collections(self):
         definition = JSForm.ReportDefinitionLoader().load(
-            ROOT / "visual_reports" / "definitions" / "CMWP01.json"
+            ROOT / "visual_reports" / "definitions" / "CMWS01.json"
         )
         WORSHIP_PLANNING_CONTRACT.validate_definition(definition)
         self.assertEqual(definition.controls["OrderLines"]["repeatcollection"], "order_lines")
@@ -126,14 +126,14 @@ class TestVisualReportInventory(unittest.TestCase):
     def test_every_tabular_report_view_is_approved_by_the_provider(self):
         provider = TabularDatasetProvider(object(), None)
         for spec in SPECS:
-            if spec.code == "CMWP01":
+            if spec.code == "CMWS01":
                 continue
             with self.subTest(code=spec.code, view=spec.view):
                 source, _where, _values = provider._scope(spec.view, 1)
                 self.assertIn(spec.view, source)
 
     def test_favorite_hymns_report_requires_a_hymnal_and_exact_tag_view(self):
-        spec = next(item for item in SPECS if item.code == "CMHU05")
+        spec = next(item for item in SPECS if item.code == "CMWS07")
         self.assertEqual(spec.filter_fields, ("HymnalID",))
         migration = (ROOT / "migrations" / "075_add_favorite_hymns_report.sql").read_text(
             encoding="utf-8-sig"
@@ -141,7 +141,26 @@ class TestVisualReportInventory(unittest.TestCase):
         self.assertIn("rpt_favorite_hymn", migration)
         self.assertIn("#favorite", migration)
         self.assertIn("HymnalID=2 AND EntrySlot=363", migration)
-        self.assertIn("'CMHU05','Favorite Hymns'", migration)
+        naming = (ROOT / "migrations" / "110_standardize_report_names.sql").read_text(
+            encoding="utf-8-sig"
+        )
+        self.assertIn("'CMHU05' THEN 'CMWS07'", naming)
+        self.assertIn("'Worship - Favorite Hymns'", naming)
+
+    def test_codes_and_titles_follow_the_subsystem_standard(self):
+        subsystem_names = {
+            "GN": "General", "AT": "Attendance", "WS": "Worship",
+            "MB": "Membership", "GR": "Groups", "PC": "Pastoral Care",
+        }
+        for code in OFFICIAL_CODES:
+            with self.subTest(code=code):
+                self.assertRegex(code, r"^CM[A-Z]{2}\d{2}$")
+                definition = JSForm.ReportDefinitionLoader().load(
+                    ROOT / "visual_reports" / "definitions" / f"{code}.json"
+                )
+                self.assertTrue(
+                    definition.title.startswith(subsystem_names[code[2:4]] + " - ")
+                )
 
 
 if __name__ == "__main__":

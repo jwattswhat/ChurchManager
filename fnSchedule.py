@@ -55,7 +55,7 @@ class NotificationService:
 
 def notifyviaeMail(service_id, dbconn):
     """Notify active, assigned participants who have an email address."""
-    attachment = JSForm.CONFIG.get_Config_Value("Location", "Report") + "CMWP01.pdf"
+    attachment = JSForm.CONFIG.get_Config_Value("Location", "Report") + "CMWS01.pdf"
     return NotificationService(
         WorshipRepository(dbconn), JSForm.clsSMTP(), attachment
     ).notify(service_id)

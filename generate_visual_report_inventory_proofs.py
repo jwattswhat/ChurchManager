@@ -11,7 +11,7 @@ from visual_reports.tabular_dataset import contract_for
 
 
 ROOT = Path(__file__).resolve().parent
-PROOF_CODES = ("CMAS01", "CMAT02", "CMDO01", "CMMI02", "CMJR01")
+PROOF_CODES = ("CMGN01", "CMAT02", "CMGN02", "CMMB03", "CMPC03")
 
 
 def sample_value(field, number):

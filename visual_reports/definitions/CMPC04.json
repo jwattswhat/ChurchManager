@@ -1,0 +1,236 @@
+{
+  "CMPC04REPORT": {
+    "REPORT": {
+      "schema_version": 1,
+      "name": "CMPC04",
+      "title":"Pastoral Care - Pastor's Report",
+      "dataset": "churchmanager.cmpc04",
+      "datasetversion": 1,
+      "pagesize": "letter",
+      "orientation": "portrait",
+      "margins": {
+        "top": 30,
+        "right": 36,
+        "bottom": 30,
+        "left": 36
+      },
+      "theme": "churchmanager.standard",
+      "emptytext": "No records match the selected criteria.",
+      "bands": {
+        "ReportHeader": {
+          "type": "reportheader",
+          "height": 92
+        },
+        "PageHeader": {
+          "type": "pageheader",
+          "height": 8,
+          "repeat": true
+        },
+        "Detail": {
+          "type": "detail",
+          "height": 42
+        },
+        "PageFooter": {
+          "type": "pagefooter",
+          "height": 24,
+          "repeat": true
+        }
+      },
+      "sort": [
+        {
+          "collection": "records",
+          "field": "Date",
+          "direction": "descending"
+        }
+      ]
+    },
+    "CONTROLS": {
+      "ChurchLogo": {
+        "type": "image",
+        "band": "ReportHeader",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          62,
+          62
+        ],
+        "collection": "church",
+        "field": "Logo"
+      },
+      "ChurchName": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          72,
+          2
+        ],
+        "size": [
+          468,
+          22
+        ],
+        "collection": "church",
+        "field": "Church",
+        "fontsize": 15,
+        "bold": true,
+        "align": "center"
+      },
+      "ReportTitle": {
+        "type": "systemtext",
+        "band": "ReportHeader",
+        "position": [
+          72,
+          29
+        ],
+        "size": [
+          468,
+          20
+        ],
+        "systemvalue": "report_title",
+        "fontsize": 13,
+        "bold": true,
+        "align": "center"
+      },
+      "Parameters": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          72,
+          54
+        ],
+        "size": [
+          360,
+          16
+        ],
+        "collection": "parameters",
+        "field": "Display",
+        "fontsize": 8,
+        "color": "#555555"
+      },
+      "RunDate": {
+        "type": "systemtext",
+        "band": "ReportHeader",
+        "position": [
+          440,
+          54
+        ],
+        "size": [
+          100,
+          16
+        ],
+        "systemvalue": "run_date",
+        "prefix": "Run: ",
+        "fontsize": 8,
+        "align": "right",
+        "color": "#555555"
+      },
+      "HeaderRule": {
+        "type": "line",
+        "band": "PageHeader",
+        "position": [
+          0,
+          4
+        ],
+        "size": [
+          540,
+          1
+        ],
+        "bordercolor": "#6D7780",
+        "borderwidth": 0.7
+      },
+      "Records": {
+        "type": "table",
+        "band": "Detail",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          540,
+          40
+        ],
+        "repeatcollection": "records",
+        "columns": [
+          {
+            "name": "Date",
+            "label": "Date",
+            "collection": "records",
+            "field": "Date",
+            "width": 79.67,
+            "format": "date"
+          },
+          {
+            "name": "Pastor",
+            "label": "Pastor",
+            "collection": "records",
+            "field": "Pastor",
+            "width": 123.93
+          },
+          {
+            "name": "Reported",
+            "label": "Reported",
+            "collection": "records",
+            "field": "Reported",
+            "width": 70.82,
+            "format": "boolean"
+          },
+          {
+            "name": "Note",
+            "label": "Notes",
+            "collection": "records",
+            "field": "Note",
+            "width": 265.57
+          }
+        ]
+      },
+      "FooterLine": {
+        "type": "line",
+        "band": "PageFooter",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          540,
+          1
+        ],
+        "bordercolor": "#808080",
+        "borderwidth": 0.5
+      },
+      "FooterCode": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          0,
+          6
+        ],
+        "size": [
+          270.0,
+          14
+        ],
+        "systemvalue": "report_code",
+        "prefix": "ChurchManager report ",
+        "fontsize": 8,
+        "color": "#555555"
+      },
+      "PageNumber": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          450,
+          6
+        ],
+        "size": [
+          90,
+          14
+        ],
+        "systemvalue": "page_number",
+        "prefix": "Page ",
+        "fontsize": 8,
+        "align": "right",
+        "color": "#555555"
+      }
+    }
+  }
+}

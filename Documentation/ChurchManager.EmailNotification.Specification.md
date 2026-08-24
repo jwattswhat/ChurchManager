@@ -47,7 +47,7 @@ for this workflow.
 
 The current `fnSchedule.notifyviaeMail` workflow:
 
-- assumes `Reports/CMWP01.pdf` is already current;
+- assumes `Reports/CMWS01.pdf` is already current;
 - sends without a recipient and message review;
 - does not show participants with missing email addresses;
 - provides no useful delivery summary;
@@ -63,7 +63,7 @@ review screen rather than the old JSON form.
 3. The screen lists each participant, assignment position, address, and status.
 4. Missing and invalid addresses are visibly flagged and excluded from sending.
 5. Repeated addresses are combined into one recipient entry and visibly noted.
-6. ChurchManager generates a fresh `CMWP01` PDF from the selected service.
+6. ChurchManager generates a fresh `CMWS01` PDF from the selected service.
 7. The screen displays the subject, editable message, and exact attachment.
 8. The user previews the PDF if desired.
 9. **Send** opens a final confirmation containing the recipient count and
@@ -93,7 +93,7 @@ No eligible recipient means Send is disabled.
 The attachment must be generated from the selected service immediately before
 the review is finalized. It uses the authorized visual-report definition:
 
-1. saved customized `CMWP01` layout, when present;
+1. saved customized `CMWS01` layout, when present;
 2. otherwise the protected starter layout.
 
 The generated report must not depend on a prior report-menu run. A generation

@@ -1,0 +1,44 @@
+{
+  "CMGV07REPORT": {
+    "REPORT": {
+      "schema_version": 1,
+      "name": "CMGV07",
+      "title":"Giving - Directed Gift Review",
+      "dataset": "giving.directedgiftreviews",
+      "datasetversion": 1,
+      "pagesize": "legal",
+      "orientation": "landscape",
+      "margins": {"top": 30, "right": 36, "bottom": 30, "left": 36},
+      "classification": "confidential",
+      "emptytext": "No donor directions match the selected period.",
+      "bands": {
+        "ReportHeader": {"type": "reportheader", "height": 100},
+        "Detail": {"type": "detail", "height": 50},
+        "PageFooter": {"type": "pagefooter", "height": 24, "repeat": true}
+      }
+    },
+    "CONTROLS": {
+      "ChurchLogo": {"type":"image","band":"ReportHeader","position":[0,0],"size":[64,64],"collection":"church","field":"Logo"},
+      "ChurchName": {"type":"text","band":"ReportHeader","position":[75,0],"size":[750,22],"collection":"church","field":"Church","fontsize":15,"bold":true,"align":"center"},
+      "ReportTitle": {"type":"systemtext","band":"ReportHeader","position":[75,28],"size":[750,20],"systemvalue":"report_title","fontsize":13,"bold":true,"align":"center"},
+      "Period": {"type":"text","band":"ReportHeader","position":[75,54],"size":[750,16],"collection":"parameters","field":"Display","fontsize":9,"align":"center"},
+      "RunUser": {"type":"systemtext","band":"ReportHeader","position":[650,80],"size":[210,14],"systemvalue":"run_user","prefix":"Run by: ","fontsize":8,"align":"right"},
+      "Records": {
+        "type":"table","band":"Detail","position":[0,0],"size":[860,48],"repeatcollection":"records",
+        "columns":[
+          {"name":"Date","label":"Date","collection":"records","field":"Date","width":60,"format":"date"},
+          {"name":"Contributor","label":"Contributor","collection":"records","field":"Contributor","width":105},
+          {"name":"Direction","label":"Donor direction","collection":"records","field":"Direction","width":170},
+          {"name":"Status","label":"Disposition","collection":"records","field":"Status","width":85},
+          {"name":"Resolution","label":"Resolution","collection":"records","field":"Resolution","width":190},
+          {"name":"ResolvedBy","label":"Resolved by","collection":"records","field":"ResolvedBy","width":90},
+          {"name":"ResolvedAt","label":"Resolved at","collection":"records","field":"ResolvedAt","width":90,"format":"datetime"},
+          {"name":"Batch","label":"Batch","collection":"records","field":"Batch","width":70}
+        ]
+      },
+      "ReportCode": {"type":"systemtext","band":"PageFooter","position":[0,5],"size":[200,12],"systemvalue":"report_code","prefix":"ChurchManager report ","fontsize":7},
+      "Classification": {"type":"systemtext","band":"PageFooter","position":[370,5],"size":[120,12],"systemvalue":"classification","fontsize":7,"align":"center"},
+      "PageNumber": {"type":"systemtext","band":"PageFooter","position":[790,5],"size":[70,12],"systemvalue":"page_number","prefix":"Page ","fontsize":7,"align":"right"}
+    }
+  }
+}

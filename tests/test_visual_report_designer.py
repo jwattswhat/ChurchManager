@@ -24,38 +24,53 @@ class TestVisualReportDesignerStorage(unittest.TestCase):
 
     def test_current_starter_is_used_until_a_custom_definition_exists(self):
         with tempfile.TemporaryDirectory() as folder:
-            starter=resolve_report_definition("CMMD01",folder)
-            self.assertEqual(starter.name,"CMMD01.json")
+            starter=resolve_report_definition("CMMB01",folder)
+            self.assertEqual(starter.name,"CMMB01.json")
             self.assertNotEqual(starter.parent,user_definition_directory(folder))
-            custom=ensure_user_definition("CMMD01",folder)
-            self.assertEqual(resolve_report_definition("CMMD01",folder),custom)
+            custom=ensure_user_definition("CMMB01",folder)
+            self.assertEqual(resolve_report_definition("CMMB01",folder),custom)
 
     def test_starter_is_copied_without_being_overwritten(self):
         with tempfile.TemporaryDirectory() as folder:
-            first = ensure_user_definition("CMMD01", folder)
+            first = ensure_user_definition("CMMB01", folder)
             original = first.read_text(encoding="utf-8")
             first.write_text(original.replace("Member Directory", "Custom Directory", 1), encoding="utf-8")
-            second = ensure_user_definition("CMMD01", folder)
+            second = ensure_user_definition("CMMB01", folder)
             self.assertEqual(first, second)
             self.assertIn("Custom Directory", second.read_text(encoding="utf-8"))
-            self.assertEqual(first, user_definition_path("CMMD01", folder))
+            self.assertEqual(first, user_definition_path("CMMB01", folder))
             self.assertEqual(first.parent, user_definition_directory(folder))
+
+    def test_saved_layout_under_prior_code_is_migrated_once(self):
+        with tempfile.TemporaryDirectory() as folder:
+            directory = user_definition_directory(folder)
+            directory.mkdir(parents=True)
+            source = Path(__file__).resolve().parents[1] / "visual_reports" / "definitions" / "CMGN01.json"
+            old_text = source.read_text(encoding="utf-8")
+            old_text = old_text.replace("CMGN01", "CMAS01").replace("cmgn01", "cmas01")
+            (directory / "CMAS01.json").write_text(old_text, encoding="utf-8")
+
+            migrated = resolve_report_definition("CMGN01", folder)
+
+            self.assertEqual(migrated, directory / "CMGN01.json")
+            definition = JSForm.ReportDefinitionLoader().load(migrated)
+            self.assertEqual(definition.dataset_name, "churchmanager.cmgn01")
 
     def test_incompatible_custom_dataset_is_backed_up_and_upgraded(self):
         with tempfile.TemporaryDirectory() as folder, tempfile.TemporaryDirectory() as starters:
-            source = Path(__file__).resolve().parents[1] / "visual_reports" / "definitions" / "CMWP01.json"
-            starter = Path(starters) / "CMWP01.json"
+            source = Path(__file__).resolve().parents[1] / "visual_reports" / "definitions" / "CMWS01.json"
+            starter = Path(starters) / "CMWS01.json"
             starter.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
-            custom = ensure_user_definition("CMWP01", folder, starters)
+            custom = ensure_user_definition("CMWS01", folder, starters)
             data = json.loads(custom.read_text(encoding="utf-8"))
-            data["CMWP01REPORT"]["REPORT"]["datasetversion"] = 1
-            data["CMWP01REPORT"]["REPORT"]["title"] = "Older Custom Planner"
+            data["CMWS01REPORT"]["REPORT"]["datasetversion"] = 1
+            data["CMWS01REPORT"]["REPORT"]["title"] = "Older Custom Planner"
             custom.write_text(json.dumps(data), encoding="utf-8")
 
-            self.assertEqual(resolve_report_definition("CMWP01", folder, starters), starter)
-            upgraded = ensure_user_definition("CMWP01", folder, starters)
+            self.assertEqual(resolve_report_definition("CMWS01", folder, starters), starter)
+            upgraded = ensure_user_definition("CMWS01", folder, starters)
             self.assertEqual(json.loads(upgraded.read_text(encoding="utf-8"))[
-                "CMWP01REPORT"
+                "CMWS01REPORT"
             ]["REPORT"]["datasetversion"], 4)
             self.assertTrue(upgraded.with_suffix(".v1.json.bak").is_file())
 

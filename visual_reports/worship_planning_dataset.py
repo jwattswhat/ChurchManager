@@ -8,7 +8,7 @@ from liturgical_colors import liturgical_color_hex
 
 
 WORSHIP_PLANNING_CONTRACT = ReportDatasetContract(
-    "churchmanager.cmwp01", 4, "reports.worship.run",
+    "churchmanager.cmws01", 4, "reports.worship.run",
     (
         ReportCollection("church", "Church", (
             ReportField("ID", "Church ID", "integer"),

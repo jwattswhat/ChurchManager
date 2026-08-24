@@ -58,7 +58,7 @@ class GivingReportTests(unittest.TestCase):
                       Path("permission_catalog.py").read_text(encoding="utf-8"))
 
     def test_batch_summary_pdf_is_protected_and_donor_free(self):
-        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "GIVE-BATCH.json")
+        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "CMGV01.json")
         BATCH_SUMMARY_MANIFEST.validate(definition)
         self.assertEqual(BATCH_SUMMARY_CONTRACT.required_permission, "giving.reports.summary")
         source = inspect.getsource(GivingBatchSummaryProvider)
@@ -92,7 +92,7 @@ class GivingReportTests(unittest.TestCase):
         self.assertIn("No statement-enabled contributors have eligible Posted", source)
 
     def test_contribution_statement_is_confidential_and_posted_only(self):
-        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "GIVE-STMT.json")
+        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "CMGV04.json")
         STATEMENT_MANIFEST.validate(definition)
         self.assertEqual(STATEMENT_CONTRACT.required_permission, "giving.statements.generate")
         query = inspect.getsource(GivingReportService.statement_lines)
@@ -117,7 +117,7 @@ class GivingReportTests(unittest.TestCase):
         self.assertIn("issue=False", renderer)
 
     def test_tribute_report_honors_separate_disclosure_consent(self):
-        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "GIVE-TRIBUTE.json")
+        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "CMGV08.json")
         TRIBUTE_MANIFEST.validate(definition)
         self.assertEqual(TRIBUTE_CONTRACT.required_permission, "giving.reports.confidential")
         query = inspect.getsource(GivingReportService.tribute_acknowledgments)
@@ -131,7 +131,7 @@ class GivingReportTests(unittest.TestCase):
         self.assertIn("run_tribute_acknowledgments", dialog)
 
     def test_directed_gift_report_includes_resolution_audit(self):
-        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "GIVE-DIRECTED.json")
+        definition = JSForm.ReportDefinitionLoader().load(DEFINITIONS / "CMGV07.json")
         DIRECTED_GIFT_MANIFEST.validate(definition)
         self.assertEqual(DIRECTED_GIFT_CONTRACT.required_permission, "giving.reports.confidential")
         query = inspect.getsource(GivingReportService.directed_gift_reviews)
@@ -150,8 +150,8 @@ class GivingReportTests(unittest.TestCase):
 
     def test_required_operational_reports_have_protected_definitions(self):
         codes = (
-            "GIVE-FUND-PERIOD", "GIVE-RECONCILE", "GIVE-BATCH-DETAIL",
-            "GIVE-HISTORY", "GIVE-STMT-EXCEPTIONS", "GIVE-ENVELOPE-EXCEPTIONS",
+            "CMGV06", "CMGV12", "CMGV02",
+            "CMGV03", "CMGV05", "CMGV11",
         )
         self.assertEqual(OPERATIONAL_CONTRACT.required_permission, "giving.reports.confidential")
         for code in codes:

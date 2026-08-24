@@ -55,9 +55,9 @@ def edge_case_dataset():
 
 def main():
     definition = JSForm.ReportDefinitionLoader().load(
-        ROOT / "visual_reports" / "definitions" / "CMMD01.json"
+        ROOT / "visual_reports" / "definitions" / "CMMB01.json"
     )
-    output = ROOT / "Reports" / "CMMD01.edge-case-proof.pdf"
+    output = ROOT / "Reports" / "CMMB01.edge-case-proof.pdf"
     JSForm.PDFReportRenderer().render(definition, edge_case_dataset(), output)
     print(output)
 

@@ -33,14 +33,14 @@ def c(field, label, width, data_type="text", align="left"):
 
 
 SPECS = (
-    ReportSpec("CMAS01", "Asset Listing", "reports.general.run", "rpt_asset", (
+    ReportSpec("CMGN01", "General - Asset Listing", "reports.general.run", "rpt_asset", (
         c("AssetID", "Asset", 85), c("Description", "Description", 220),
         c("PurchaseDate", "Purchased", 80, "date"), c("Reserve", "Reserve", 75, "currency", "right"),
         c("Depreciate", "Depreciate", 70, "boolean")), "AssetID", 1),
-    ReportSpec("CMDO01", "Document Listing", "reports.general.run", "rpt_document", (
+    ReportSpec("CMGN02", "General - Document Listing", "reports.general.run", "rpt_document", (
         c("DocumentType", "Type", 85), c("Date", "Date", 75, "date"),
         c("Title", "Title", 170), c("Document", "Document", 210)), "DocumentType, Date DESC, Title", 1),
-    ReportSpec("CMRP01", "Available Reports Listing", "reports.general.run", "rpt_report_catalog", (
+    ReportSpec("CMGN03", "General - Available Reports", "reports.general.run", "rpt_report_catalog", (
         c("Report", "Code", 75), c("Title", "Report", 225), c("Params", "Parameters", 160),
         c("Note", "Notes", 155)), "Title", 1, "landscape"),
 
@@ -79,54 +79,54 @@ SPECS = (
         c("MissedWeeks", "Consecutive weeks missed", 130, "integer", "right"),
         c("Status", "Member status", 100)), "MissedWeeks DESC, LastName, FirstName", 2,
         row_color_field="FlagColor"),
-    ReportSpec("CMHU01", "Hymn Usage by Service", "reports.worship.run", "rpt_hymn_usage", (
+    ReportSpec("CMWS03", "Worship - Hymn Usage by Service", "reports.worship.run", "rpt_hymn_usage", (
         c("ServiceID", "Service", 75, "integer"), c("UsedAs", "Used As", 110),
         c("HymnID", "Hymn ID", 75, "integer"), c("Note", "Notes", 275)), "ServiceID DESC, UsedAs", 2),
-    ReportSpec("CMHU02", "Hymn Usage by Hymn", "reports.worship.run", "rpt_hymn", (
+    ReportSpec("CMWS04", "Worship - Hymn Usage by Hymn", "reports.worship.run", "rpt_hymn", (
         c("Hymn", "Hymn", 60), c("Title", "Title", 175), c("Tune", "Tune", 145),
         c("Category", "Category", 95), c("BibleText", "Bible Text", 85)), "Hymn", 2),
-    ReportSpec("CMHU03", "Selected Hymn Usage", "reports.worship.run", "rpt_hymn_usage", (
+    ReportSpec("CMWS05", "Worship - Selected Hymn Usage", "reports.worship.run", "rpt_hymn_usage", (
         c("HymnID", "Hymn ID", 70, "integer"), c("ServiceID", "Service", 75, "integer"),
         c("UsedAs", "Used As", 120), c("Note", "Notes", 275)), "ServiceID DESC", 2),
-    ReportSpec("CMHU04", "Recent Hymn Usage", "reports.worship.run", "rpt_hymn_usage", (
+    ReportSpec("CMWS06", "Worship - Recent Hymn Usage", "reports.worship.run", "rpt_hymn_usage", (
         c("ServiceID", "Service", 75, "integer"), c("HymnID", "Hymn ID", 70, "integer"),
         c("UsedAs", "Used As", 120), c("Note", "Notes", 275)), "ServiceID DESC", 2),
-    ReportSpec("CMHU05", "Favorite Hymns", "reports.worship.run", "rpt_favorite_hymn", (
+    ReportSpec("CMWS07", "Worship - Favorite Hymns", "reports.worship.run", "rpt_favorite_hymn", (
         c("PrintedReference", "Hymn", 80), c("Title", "Title", 190),
         c("Tune", "Tune", 145), c("Category", "Category", 100),
         c("BibleText", "Scripture", 95)), "PrintedReference, Title", 2,
         filter_fields=("HymnalID",)),
-    ReportSpec("CMWS01", "Worship Services by Date", "reports.worship.run", "rpt_service", (
+    ReportSpec("CMWS02", "Worship - Services by Date", "reports.worship.run", "rpt_service", (
         c("DateTime", "Date and Time", 100, "datetime"), c("LiturgicalDate", "Liturgical Day", 150),
         c("Location", "Location", 95), c("OrderofService", "Service", 110),
         c("Attendance", "Attendance", 65, "integer", "right")), "DateTime DESC", 2),
 
-    ReportSpec("CMMI01", "Member Information", "reports.membership.contact", "rpt_membership_person", (
+    ReportSpec("CMMB02", "Membership - Member Information", "reports.membership.contact", "rpt_membership_person", (
         c("LastName", "Last Name", 105), c("FirstName", "First Name", 95), c("Status", "Status", 85),
         c("MaritalStatus", "Marital Status", 90), c("Member", "Member", 60, "boolean"),
         c("AssociateMember", "Associate", 65, "boolean")), "LastName, FirstName", 4),
-    ReportSpec("CMMI02", "Member Information Listing", "reports.membership.contact", "rpt_membership_person", (
+    ReportSpec("CMMB03", "Membership - Information Listing", "reports.membership.contact", "rpt_membership_person", (
         c("LastName", "Last Name", 105), c("FirstName", "First Name", 95), c("Status", "Status", 85),
         c("MaritalStatus", "Marital Status", 90), c("Member", "Member", 60, "boolean"),
         c("Voter", "Voter", 60, "boolean")), "LastName, FirstName", 4),
-    ReportSpec("CMMI03", "Member Update Forms", "reports.membership.contact", "rpt_membership_person", (
+    ReportSpec("CMMB04", "Membership - Update Forms", "reports.membership.contact", "rpt_membership_person", (
         c("LastName", "Last Name", 105), c("FirstName", "First Name", 95), c("Status", "Status", 85),
         c("MaritalStatus", "Marital Status", 90), c("Baptized", "Baptized", 65, "boolean"),
         c("Confirmed", "Confirmed", 65, "boolean")), "LastName, FirstName", 4),
-    ReportSpec("CMML01", "Member Status List", "reports.membership.run", "rpt_membership_person", (
+    ReportSpec("CMMB05", "Membership - Status List", "reports.membership.run", "rpt_membership_person", (
         c("Status", "Status", 95), c("LastName", "Last Name", 125), c("FirstName", "First Name", 115),
         c("Member", "Member", 65, "boolean"), c("AssociateMember", "Associate", 75, "boolean"),
         c("Voter", "Voter", 60, "boolean")), "Status, LastName, FirstName", 4),
-    ReportSpec("CMML02", "Member Date Listing", "reports.membership.run", "rpt_person_date", (
+    ReportSpec("CMMB06", "Membership - Date Listing", "reports.membership.run", "rpt_person_date", (
         c("DateType", "Date Type", 120), c("Date", "Date", 90, "date"),
         c("PersonID", "Person ID", 75, "integer"), c("Note", "Notes", 250)), "DateType, Date DESC", 4),
-    ReportSpec("CMPE01", "Membership Transfers", "reports.membership.run", "rpt_person_date", (
+    ReportSpec("CMMB07", "Membership - Transfers", "reports.membership.run", "rpt_person_date", (
         c("Date", "Date", 90, "date"), c("DateType", "Transfer Type", 130),
         c("PersonID", "Person ID", 75, "integer"), c("Note", "Notes", 235)), "Date DESC", 4),
-    ReportSpec("CMPH02", "Member Contact Listing", "reports.membership.contact", "rpt_person_contact", (
+    ReportSpec("CMMB08", "Membership - Contact Listing", "reports.membership.contact", "rpt_person_contact", (
         c("PersonID", "Person ID", 75, "integer"), c("ContactLabel", "Label", 100),
         c("Type", "Type", 90), c("Contact", "Contact", 275)), "PersonID, Type, ContactLabel", 4),
-    ReportSpec("CMWP01", "Worship Service Planner", "reports.worship.run", "rpt_service", (
+    ReportSpec("CMWS01", "Worship - Service Planner", "reports.worship.run", "rpt_service", (
         c("DateTime", "Date and Time", 100, "datetime"), c("LiturgicalDate", "Liturgical Day", 160),
         c("Location", "Location", 120), c("OrderofService", "Order of Service", 185)),
         "DateTime DESC", 4),
@@ -154,13 +154,13 @@ SPECS = (
         "LastName, FirstName", 4, "landscape",
         filter_fields=("GroupID", "MembershipStartDate", "MembershipEndDate")),
 
-    ReportSpec("CMJR01", "Journal", "reports.pastoral.confidential", "rpt_journal", (
+    ReportSpec("CMPC03", "Pastoral Care - Journal", "reports.pastoral.confidential", "rpt_journal", (
         c("StartDate", "Start", 75, "date"), c("EndDate", "End", 75, "date"), c("Event", "Event", 180),
         c("Complete", "Complete", 65, "boolean"), c("Note", "Notes", 245)), "StartDate DESC", 5, "landscape"),
-    ReportSpec("CMPA01", "Pastor's Report", "reports.pastoral.confidential", "rpt_pastor_report", (
+    ReportSpec("CMPC04", "Pastoral Care - Pastor's Report", "reports.pastoral.confidential", "rpt_pastor_report", (
         c("Date", "Date", 90, "date"), c("Pastor", "Pastor", 140), c("Reported", "Reported", 80, "boolean"),
         c("Note", "Notes", 300)), "Date DESC", 5),
-    ReportSpec("CMPR01", "Prayer Requests", "reports.pastoral.confidential", "rpt_journal", (
+    ReportSpec("CMPC05", "Pastoral Care - Prayer Requests", "reports.pastoral.confidential", "rpt_journal", (
         c("StartDate", "Date", 80, "date"), c("Event", "Request", 190),
         c("Complete", "Complete", 65, "boolean"), c("EndDate", "Ended", 80, "date"),
         c("Note", "Pastoral Notes", 225)), "Complete, StartDate DESC", 5, "landscape"),

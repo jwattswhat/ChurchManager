@@ -1,0 +1,53 @@
+{
+  "CMGV04REPORT": {
+    "REPORT": {
+      "schema_version": 1,
+      "name": "CMGV04",
+      "title":"Giving - Contribution Statement",
+      "dataset": "giving.statement",
+      "datasetversion": 1,
+      "pagesize": "letter",
+      "orientation": "portrait",
+      "margins": {"top": 36, "right": 42, "bottom": 36, "left": 42},
+      "theme": "churchmanager.giving",
+      "classification": "confidential",
+      "emptytext": "No eligible posted contributions match the selected period.",
+      "bands": {
+        "ReportHeader": {"type": "reportheader", "height": 190},
+        "Detail": {"type": "detail", "height": 42},
+        "ReportFooter": {"type": "reportfooter", "height": 105},
+        "PageFooter": {"type": "pagefooter", "height": 24, "repeat": true}
+      }
+    },
+    "CONTROLS": {
+      "ChurchLogo": {"type":"image","band":"ReportHeader","position":[0,0],"size":[64,64],"collection":"church","field":"Logo"},
+      "ChurchName": {"type":"text","band":"ReportHeader","position":[75,0],"size":[390,22],"collection":"church","field":"Church","fontsize":15,"bold":true,"align":"center"},
+      "ChurchAddress": {"type":"text","band":"ReportHeader","position":[75,25],"size":[390,30],"collection":"church","field":"Address","fontsize":8,"align":"center"},
+      "ChurchContact": {"type":"text","band":"ReportHeader","position":[75,57],"size":[390,14],"collection":"church","field":"Contact","fontsize":8,"align":"center"},
+      "ReportTitle": {"type":"systemtext","band":"ReportHeader","position":[75,80],"size":[390,20],"systemvalue":"report_title","fontsize":13,"bold":true,"align":"center"},
+      "Period": {"type":"text","band":"ReportHeader","position":[75,103],"size":[390,16],"collection":"parameters","field":"Display","fontsize":9,"align":"center"},
+      "RecipientLabel": {"type":"label","band":"ReportHeader","position":[0,130],"size":[90,14],"label":"Statement for:","fontsize":8,"bold":true},
+      "ContributorName": {"type":"text","band":"ReportHeader","position":[0,146],"size":[250,16],"collection":"contributor","field":"Name","fontsize":10,"bold":true},
+      "ContributorAddress": {"type":"text","band":"ReportHeader","position":[0,164],"size":[300,25],"collection":"contributor","field":"Address","fontsize":8},
+      "RunUser": {"type":"systemtext","band":"ReportHeader","position":[330,166],"size":[210,14],"systemvalue":"run_user","prefix":"Prepared by: ","fontsize":7,"align":"right"},
+      "Records": {
+        "type":"table","band":"Detail","position":[0,0],"size":[540,40],"repeatcollection":"records",
+        "columns":[
+          {"name":"Date","label":"Date","collection":"records","field":"Date","width":60,"format":"date"},
+          {"name":"Purpose","label":"Purpose","collection":"records","field":"Purpose","width":125},
+          {"name":"Method","label":"Method","collection":"records","field":"Method","width":65},
+          {"name":"Description","label":"Non-cash description","collection":"records","field":"Description","width":100},
+          {"name":"Benefit","label":"Goods or services","collection":"records","field":"Benefit","width":115},
+          {"name":"Amount","label":"Amount","collection":"records","field":"Amount","width":75,"format":"currency","align":"right"}
+        ]
+      },
+      "TotalLabel": {"type":"label","band":"ReportFooter","position":[250,4],"size":[205,16],"label":"Eligible monetary contributions","bold":true,"align":"right"},
+      "EligibleTotal": {"type":"text","band":"ReportFooter","position":[460,4],"size":[80,16],"collection":"totals","field":"EligibleAmount","format":"currency","bold":true,"align":"right"},
+      "Acknowledgment": {"type":"text","band":"ReportFooter","position":[0,32],"size":[540,48],"collection":"parameters","field":"Acknowledgment","fontsize":8},
+      "AdviserNote": {"type":"label","band":"ReportFooter","position":[0,84],"size":[540,16],"label":"Please retain this statement with your records and consult your tax adviser when needed.","fontsize":8,"italic":true},
+      "ReportCode": {"type":"systemtext","band":"PageFooter","position":[0,5],"size":[180,12],"systemvalue":"report_code","prefix":"ChurchManager report ","fontsize":7},
+      "Classification": {"type":"systemtext","band":"PageFooter","position":[210,5],"size":[120,12],"systemvalue":"classification","fontsize":7,"align":"center"},
+      "PageNumber": {"type":"systemtext","band":"PageFooter","position":[470,5],"size":[70,12],"systemvalue":"page_number","prefix":"Page ","fontsize":7,"align":"right"}
+    }
+  }
+}

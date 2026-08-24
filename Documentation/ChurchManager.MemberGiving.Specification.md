@@ -591,7 +591,7 @@ Rollout sequence:
    complete accounting dimensions, privacy-safe summarized transaction
    creation, atomic posting synchronization, and linked posted-batch
    reversal/replacement workflow.)*
-6. Implement reports and statements. *(The protected donor-free `GIVE-BATCH`
+6. Implement reports and statements. *(The protected donor-free `CMGV01`
    Batch Control Summary PDF and quarterly single/all-contributor statement
    previews, calendar-year and custom ranges, and identifiable issuance history
    are implemented. The remaining report inventory continues next.)*

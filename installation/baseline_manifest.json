@@ -2,7 +2,7 @@
   "artifact": "ChurchManager fresh-install schema baseline",
   "format_version": 1,
   "release_version": "0.3.0-dev",
-  "schema_sha256": "a0e7411e743efcadb60d3cdf51aaafbc0f8eacf70d3c7ece375664403cc30808",
+  "schema_sha256": "ac6248b5b1d6f313ccdfbdf302acb9fe5a7b2a114ea6e9852d5c5f17852c275a",
   "represented_migrations": [
     {
       "version": "001_normalize_and_convert_innodb.sql",
@@ -431,6 +431,18 @@
     {
       "version": "107_add_group_meetings_and_attendance.sql",
       "checksum": "e5a10a449c2e69821b67e4c062414f938f8204a12b1b9316cf2e040e52788920"
+    },
+    {
+      "version": "108_add_group_reports.sql",
+      "checksum": "99f56aeada6a6445a2417f8f465ad0949a4a0929c2ed742efc689df06c51c32e"
+    },
+    {
+      "version": "109_add_group_attendance_sheet.sql",
+      "checksum": "2e2f9475efe58c0147f1eb450a3f6b9ac16cdba53ba3bc292f4c64f2ad5566f9"
+    },
+    {
+      "version": "110_standardize_report_names.sql",
+      "checksum": "29ad000c64a0173368c80cbd661bddde70c41baaddf2a3b827a2a5a2aa030491"
     }
   ]
 }

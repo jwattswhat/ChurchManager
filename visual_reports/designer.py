@@ -10,6 +10,7 @@ import mariadb
 
 from churchmanager_mode import load_config, resolve_database
 from configuration_paths import writable_directory
+from report_codes import legacy_report_code
 from visual_reports.directory_dataset import DIRECTORY_CONTRACT
 from visual_reports.directory_dataset import DirectoryDatasetProvider
 from visual_reports.report_inventory import REPORTS_BY_CODE
@@ -26,9 +27,9 @@ STARTERS = ROOT / "definitions"
 def source_code_for_definition(definition):
     """Return the approved source report code for a custom report definition."""
     if definition.dataset_name == DIRECTORY_CONTRACT.name:
-        return "CMMD01"
+        return "CMMB01"
     if definition.dataset_name == WORSHIP_PLANNING_CONTRACT.name:
-        return "CMWP01"
+        return "CMWS01"
     for code in REPORTS_BY_CODE:
         if definition.dataset_name == contract_for(code).name:
             return code
@@ -42,9 +43,9 @@ def source_code_for_definition(definition):
 def contract_for_definition(definition):
     """Resolve a designer contract from stable dataset identity, not report code."""
     code = source_code_for_definition(definition)
-    if code == "CMMD01":
+    if code == "CMMB01":
         return DIRECTORY_CONTRACT, "directory"
-    if code == "CMWP01":
+    if code == "CMWS01":
         return WORSHIP_PLANNING_CONTRACT, "worship"
     return contract_for(code), "tabular"
 
@@ -89,7 +90,7 @@ def build_directory_preview(definition, authorization):
         ).build(rows[0][0])
     finally:
         connection.close()
-    output = Path(tempfile.gettempdir()) / "ChurchManager-CMMD01-preview.pdf"
+    output = Path(tempfile.gettempdir()) / "ChurchManager-CMMB01-preview.pdf"
     return JSForm.PDFReportRenderer().render(definition, dataset, output)
 
 
@@ -115,7 +116,7 @@ def build_tabular_preview(definition, authorization):
         cursor.close()
         if len(rows) != 1:
             raise RuntimeError("Preview requires exactly one Reformation Lutheran Church test record.")
-        if code == "CMWP01":
+        if code == "CMWS01":
             cursor = connection.cursor()
             cursor.execute(
                 "SELECT ID FROM rpt_worship_planner_service WHERE ChurchID=? "
@@ -140,6 +141,25 @@ def user_definition_path(report_code, local_app_data=None):
     return user_definition_directory(local_app_data) / f"{report_code}.json"
 
 
+def migrate_saved_definition(report_code, local_app_data=None):
+    """Copy a saved pre-standardization layout to its canonical report code."""
+    target = user_definition_path(report_code, local_app_data)
+    legacy_code = legacy_report_code(report_code)
+    if target.exists() or not legacy_code:
+        return target
+    legacy = user_definition_path(legacy_code, local_app_data)
+    if not legacy.is_file():
+        return target
+    target.parent.mkdir(parents=True, exist_ok=True)
+    content = legacy.read_text(encoding="utf-8")
+    content = content.replace(legacy_code, report_code)
+    content = content.replace(legacy_code.lower(), report_code.lower())
+    temporary = target.with_suffix(".json.tmp")
+    temporary.write_text(content, encoding="utf-8")
+    temporary.replace(target)
+    return target
+
+
 def user_definition_directory(local_app_data=None):
     base = Path(local_app_data or os.environ["LOCALAPPDATA"])
     return base / "ChurchManager" / "ReportDefinitions"
@@ -149,7 +169,7 @@ def ensure_user_definition(report_code, local_app_data=None, starter_directory=N
     starter = Path(starter_directory or STARTERS) / f"{report_code}.json"
     if not starter.is_file():
         raise FileNotFoundError(f"Starter report definition not found: {report_code}")
-    target = user_definition_path(report_code, local_app_data)
+    target = migrate_saved_definition(report_code, local_app_data)
     replace_incompatible = False
     if target.exists():
         loader = JSForm.ReportDefinitionLoader()
@@ -174,7 +194,7 @@ def ensure_user_definition(report_code, local_app_data=None, starter_directory=N
 def resolve_report_definition(report_code, local_app_data=None, starter_directory=None):
     """Use a customization when present; otherwise read the current starter directly."""
     starter = Path(starter_directory or STARTERS) / f"{report_code}.json"
-    custom = user_definition_path(report_code, local_app_data)
+    custom = migrate_saved_definition(report_code, local_app_data)
     selected = custom if custom.is_file() else starter
     if custom.is_file() and starter.is_file():
         loader = JSForm.ReportDefinitionLoader()
