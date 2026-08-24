@@ -1,10 +1,11 @@
 # ChurchManager external calendar integration specification
 
-**Status:** Proposed for approval  
-**Version:** 1.0 draft  
-**Date:** August 24, 2026  
-**Target application:** ChurchManager  
-**Primary external calendar:** Google Calendar  
+**Status:** Approved
+**Version:** 1.0
+**Date:** August 24, 2026
+**Approved by:** Rev. Jonathan C. Watt
+**Target application:** ChurchManager
+**Primary external calendar:** Google Calendar
 **Portable interchange:** iCalendar (`.ics`)
 
 ## 1. Purpose
@@ -237,13 +238,11 @@ Acceptance proves:
 8. Add documentation, diagnostics, baseline changes, and fictional test data.
 9. Complete automated and visual acceptance.
 
-## 15. Decisions requiring approval
+## 15. Approved version 1 decisions
 
-Before implementation, confirm:
+The approved version 1 boundaries are:
 
-1. version 1 recurrence remains external-calendar-only for standalone Events;
-2. Google publishing is included in version 1 rather than following `.ics`
-   acceptance as a later increment;
+1. recurrence remains external-calendar-only for standalone Events;
+2. Google publishing follows `.ics` acceptance within version 1;
 3. automatic publication remains disabled initially; and
 4. ChurchManager never imports external-calendar edits in version 1.
-

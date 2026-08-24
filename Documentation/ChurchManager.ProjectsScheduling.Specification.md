@@ -1,10 +1,11 @@
 # ChurchManager projects and scheduling specification
 
-**Status:** Proposed for approval  
-**Version:** 1.0 draft  
-**Date:** August 24, 2026  
-**Target application:** ChurchManager  
-**Application framework:** JSForm  
+**Status:** Approved
+**Version:** 1.0
+**Date:** August 24, 2026
+**Approved by:** Rev. Jonathan C. Watt
+**Target application:** ChurchManager
+**Application framework:** JSForm
 **Database:** MariaDB/MySQL
 
 ## 1. Purpose
@@ -212,4 +213,3 @@ fictional test set. Acceptance proves:
 6. Add fictional acceptance data and backup/restore verification.
 7. Update documentation, inventories, and baseline artifacts.
 8. Complete automated and visual acceptance.
-
