@@ -21,12 +21,15 @@ class Groups:
 class Repository:
     def create_meeting(self, values): self.created = values; return 8
     def meeting(self, _meeting_id):
-        return {"id": 8, "group_id": 4, "church_id": 2, "starts_at": datetime(2026, 8, 24, 19), "version": 1}
+        return {"id": 8, "group_id": 4, "church_id": 2, "starts_at": datetime(2026, 8, 24, 19),
+                "status": "SCHEDULED", "attendance_mode": "ROSTER", "title": "Council", "location": None, "version": 1}
     def roster_for_date(self, *_args): return [{"person_id": 10, "person": "Ada Member", "is_member": 1}]
     def attendance(self, _meeting_id): return []
     def available_people(self, _church_id): return [{"id": 10, "person": "Ada Member"}, {"id": 11, "person": "Gus Guest"}]
     def add_guest(self, meeting_id, person_id, user_id): self.guest = (meeting_id, person_id, user_id); return True
     def replace_attendance(self, meeting, entries, count, user_id): self.recorded = (meeting, entries, count, user_id); return True
+    def cancel_meeting(self, meeting, user_id): self.cancelled = (meeting, user_id); return True
+    def reschedule_meeting(self, meeting, values): self.rescheduled = (meeting, values); return 9
 
 
 class GroupMeetingServiceTests(unittest.TestCase):
@@ -50,6 +53,12 @@ class GroupMeetingServiceTests(unittest.TestCase):
             service.record_attendance(8, [(10, "PRESENT"), (10, "ABSENT")])
         with self.assertRaisesRegex(GroupValidationError, "cannot be negative"):
             service.record_attendance(8, [(10, "PRESENT")], -1)
+
+    def test_cancel_and_reschedule_preserve_original_occurrence(self):
+        service = self.service({"groups.meetings.edit"})
+        self.assertTrue(service.cancel_meeting(8))
+        self.assertEqual(service.reschedule_meeting(8, {"starts_at": "2026-08-31 19:00"}), 9)
+        self.assertEqual(service.repository.rescheduled[0]["id"], 8)
 
 
 if __name__ == "__main__": unittest.main()

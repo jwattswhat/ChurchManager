@@ -115,6 +115,9 @@ unidentified visitors without creating artificial Person records. Group meeting
 attendance remains separate from worship attendance.
 For routine entry, select **Group Attendance** directly from **People and
 Congregation**, choose the Group and meeting, and open the attendance screen.
+From a Group's meeting history, **Cancel Meeting** preserves a cancelled
+occurrence. **Reschedule** creates a new replacement occurrence and marks the
+original as Rescheduled, preserving the historical relationship.
 
 Data Management provides a guarded duplicate review. Matching names, contact
 information, or mailing addresses are possible duplicates, not an automatic merge.

@@ -25,6 +25,10 @@ class GroupMeetingDialogTests(unittest.TestCase):
         self.assertIn('label="Add Guest..."', self.source)
         self.assertIn("does not create Group membership", self.source)
 
+    def test_meeting_history_supports_cancel_and_reschedule(self):
+        self.assertIn('label="Reschedule..."', self.source)
+        self.assertIn('label="Cancel Meeting"', self.source)
+
     def test_dialog_buttons_are_children_of_the_sized_panel(self):
         self.assertNotIn("self.CreateStdDialogButtonSizer", self.source)
         self.assertIn("wx.Button(panel, wx.ID_CANCEL", self.source)

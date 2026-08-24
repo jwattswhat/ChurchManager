@@ -24,24 +24,24 @@ def _selected_id(control):
 class NewGroupMeetingDialog(wx.Dialog):
     """Collect a single meeting occurrence rather than a recurrence rule."""
 
-    def __init__(self, parent, group):
-        super().__init__(parent, title="New Group Meeting", size=(570, 430))
+    def __init__(self, parent, group, meeting=None):
+        super().__init__(parent, title="Reschedule Group Meeting" if meeting else "New Group Meeting", size=(570, 430))
         panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
         note = wx.StaticText(panel, label="Schedule one meeting. Attendance can be recorded after it is created.")
         note.SetForegroundColour(wx.Colour(0, 82, 155)); outer.Add(note, 0, wx.ALL, 14)
         grid = wx.FlexGridSizer(cols=2, vgap=10, hgap=12); grid.AddGrowableCol(1, 1)
-        self.title = wx.TextCtrl(panel, value=group["name"])
+        self.title = wx.TextCtrl(panel, value=(meeting or {}).get("title") or group["name"])
         self.meeting_date = wx.adv.DatePickerCtrl(panel)
         self.meeting_time = wx.adv.TimePickerCtrl(panel); self.meeting_time.SetTime(19, 0, 0)
-        self.location = wx.TextCtrl(panel, value=group.get("default_location") or "")
+        self.location = wx.TextCtrl(panel, value=(meeting or {}).get("location") or group.get("default_location") or "")
         self.mode = wx.Choice(panel, choices=["Roster", "Head count", "Both"]); self.mode.SetSelection(0)
-        self.notes = wx.TextCtrl(panel, style=wx.TE_MULTILINE)
+        self.notes = wx.TextCtrl(panel, value=(meeting or {}).get("notes") or "", style=wx.TE_MULTILINE)
         for label, control in (("Title", self.title), ("Date", self.meeting_date), ("Time", self.meeting_time),
                                ("Location", self.location), ("Attendance", self.mode), ("Administrative note", self.notes)):
             grid.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL); grid.Add(control, 1, wx.EXPAND)
         outer.Add(grid, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 14)
         buttons = wx.BoxSizer(wx.HORIZONTAL); buttons.AddStretchSpacer()
-        buttons.Add(wx.Button(panel, wx.ID_OK, "Create Meeting"), 0, wx.RIGHT, 8)
+        buttons.Add(wx.Button(panel, wx.ID_OK, "Create Replacement" if meeting else "Create Meeting"), 0, wx.RIGHT, 8)
         buttons.Add(wx.Button(panel, wx.ID_CANCEL, "Cancel"))
         outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 14); panel.SetSizer(outer)
 
@@ -157,9 +157,13 @@ class GroupMeetingsDialog(wx.Dialog):
             self.list.InsertColumn(index, label, width=width)
         outer.Add(self.list, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 14)
         buttons = wx.BoxSizer(wx.HORIZONTAL); self.new = wx.Button(panel, label="New Meeting..."); self.attendance = wx.Button(panel, label="Record Attendance...")
-        buttons.Add(self.new, 0, wx.RIGHT, 8); buttons.Add(self.attendance); buttons.AddStretchSpacer(); buttons.Add(wx.Button(panel, wx.ID_CLOSE, "Close"))
+        self.reschedule = wx.Button(panel, label="Reschedule..."); self.cancel = wx.Button(panel, label="Cancel Meeting")
+        buttons.Add(self.new, 0, wx.RIGHT, 8); buttons.Add(self.attendance, 0, wx.RIGHT, 16)
+        buttons.Add(self.reschedule, 0, wx.RIGHT, 8); buttons.Add(self.cancel)
+        buttons.AddStretchSpacer(); buttons.Add(wx.Button(panel, wx.ID_CLOSE, "Close"))
         outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 14); panel.SetSizer(outer)
         self.new.Bind(wx.EVT_BUTTON, self.on_new); self.attendance.Bind(wx.EVT_BUTTON, self.on_attendance)
+        self.reschedule.Bind(wx.EVT_BUTTON, self.on_reschedule); self.cancel.Bind(wx.EVT_BUTTON, self.on_cancel)
         self.list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_attendance); self.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_CLOSE), id=wx.ID_CLOSE)
         self.refresh()
 
@@ -184,6 +188,27 @@ class GroupMeetingsDialog(wx.Dialog):
         dialog = GroupAttendanceDialog(self, self.service, self.rows[selected]["id"])
         try: dialog.ShowModal()
         finally: dialog.Destroy(); self.refresh()
+
+    def _selected_meeting(self):
+        selected = self.list.GetFirstSelected()
+        return self.rows[selected] if 0 <= selected < len(self.rows) else None
+
+    def on_reschedule(self, _event):
+        meeting = self._selected_meeting()
+        if meeting is None: return
+        dialog = NewGroupMeetingDialog(self, self.group_service.group(self.group_id), meeting)
+        try:
+            if dialog.ShowModal() == wx.ID_OK: self.service.reschedule_meeting(meeting["id"], dialog.values()); self.refresh()
+        except Exception as error: wx.MessageBox(str(error), "Unable to Reschedule Meeting", wx.OK | wx.ICON_ERROR, self)
+        finally: dialog.Destroy()
+
+    def on_cancel(self, _event):
+        meeting = self._selected_meeting()
+        if meeting is None: return
+        if wx.MessageBox(f'Cancel {meeting["title"]} on {meeting["starts_at"]:%m/%d/%Y}?', "Cancel Group Meeting",
+                         wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES: return
+        try: self.service.cancel_meeting(meeting["id"]); self.refresh()
+        except Exception as error: wx.MessageBox(str(error), "Unable to Cancel Meeting", wx.OK | wx.ICON_ERROR, self)
 
 
 class GroupAttendanceLauncherDialog(wx.Dialog):

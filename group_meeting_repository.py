@@ -65,6 +65,42 @@ class MariaDBGroupMeetingRepository:
             self.connection.rollback(); raise
         finally: cursor.close()
 
+    def cancel_meeting(self, meeting, user_id):
+        """Cancel one meeting without removing its history."""
+        cursor = self.connection.cursor()
+        try:
+            self._execute(cursor, "UPDATE tblGroupMeeting SET Status='CANCELLED',UpdatedByUserID=?,Version=Version+1 "
+                          "WHERE ID=? AND Version=? AND Status='SCHEDULED'",
+                          (user_id, meeting["id"], meeting["version"]))
+            if cursor.rowcount != 1: raise GroupMeetingConflictError("Only an unchanged Scheduled meeting can be cancelled.")
+            self._audit(cursor, user_id, "GROUP_MEETING_CANCELLED", "GroupMeeting", meeting["id"])
+            self.connection.commit(); return True
+        except Exception:
+            self.connection.rollback(); raise
+        finally: cursor.close()
+
+    def reschedule_meeting(self, meeting, values):
+        """Create a replacement and link the original in one transaction."""
+        cursor = self.connection.cursor()
+        try:
+            self._execute(cursor, "INSERT INTO tblGroupMeeting (GroupID,StartsAt,EndsAt,Title,Location,Status,"
+                          "AttendanceMode,TotalHeadCount,Notes,CreatedByUserID,UpdatedByUserID) "
+                          "VALUES (?,?,?,?,?,'SCHEDULED',?,NULL,?,?,?)",
+                          (meeting["group_id"], values["starts_at"], values.get("ends_at"), values["title"],
+                           values.get("location"), values["attendance_mode"], values.get("notes"),
+                           values["user_id"], values["user_id"]))
+            replacement_id = cursor.lastrowid
+            self._execute(cursor, "UPDATE tblGroupMeeting SET Status='RESCHEDULED',RescheduledToMeetingID=?,"
+                          "UpdatedByUserID=?,Version=Version+1 WHERE ID=? AND Version=? AND Status='SCHEDULED'",
+                          (replacement_id, values["user_id"], meeting["id"], meeting["version"]))
+            if cursor.rowcount != 1: raise GroupMeetingConflictError("Only an unchanged Scheduled meeting can be rescheduled.")
+            self._audit(cursor, values["user_id"], "GROUP_MEETING_RESCHEDULED", "GroupMeeting", meeting["id"])
+            self._audit(cursor, values["user_id"], "GROUP_MEETING_CREATED", "GroupMeeting", replacement_id)
+            self.connection.commit(); return replacement_id
+        except Exception:
+            self.connection.rollback(); raise
+        finally: cursor.close()
+
     def roster_for_date(self, group_id, meeting_id, meeting_date):
         """Return the effective roster plus any existing guest attendance rows."""
         return self._all(

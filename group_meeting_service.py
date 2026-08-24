@@ -52,6 +52,33 @@ class GroupMeetingService:
             "notes": _optional_text(item.get("notes"), 1000), "user_id": self.session.user_id,
         })
 
+    def cancel_meeting(self, meeting_id):
+        """Cancel a Scheduled meeting while preserving the occurrence."""
+        self.authorization.require("groups.meetings.edit", "cancel a Group meeting")
+        meeting = self._meeting(meeting_id)
+        if meeting["status"] != "SCHEDULED":
+            raise GroupValidationError("Only a Scheduled meeting can be cancelled.")
+        return self.repository.cancel_meeting(meeting, self.session.user_id)
+
+    def reschedule_meeting(self, meeting_id, values):
+        """Create a replacement occurrence and link the original history."""
+        self.authorization.require("groups.meetings.edit", "reschedule a Group meeting")
+        meeting = self._meeting(meeting_id)
+        if meeting["status"] != "SCHEDULED":
+            raise GroupValidationError("Only a Scheduled meeting can be rescheduled.")
+        item = dict(values or {})
+        starts = _datetime(item.get("starts_at"), "replacement meeting start")
+        ends = None if item.get("ends_at") in (None, "") else _datetime(item["ends_at"], "replacement meeting end")
+        if ends and ends < starts: raise GroupValidationError("The replacement meeting end cannot precede its start.")
+        mode = str(item.get("attendance_mode") or meeting["attendance_mode"]).upper()
+        if mode not in self.MODES: raise GroupValidationError("Choose a valid attendance mode.")
+        return self.repository.reschedule_meeting(meeting, {
+            "starts_at": starts, "ends_at": ends,
+            "title": _required_text(item.get("title") or meeting["title"], "Meeting title", 150),
+            "location": _optional_text(item.get("location"), 150), "attendance_mode": mode,
+            "notes": _optional_text(item.get("notes"), 1000), "user_id": self.session.user_id,
+        })
+
     def attendance_rows(self, meeting_id):
         """Combine the effective roster with saved guest and attendance status."""
         self.authorization.require("groups.attendance.view", "view Group attendance")
@@ -80,6 +107,8 @@ class GroupMeetingService:
         """Record one supported status per displayed Person and optional head count."""
         self.authorization.require("groups.attendance.record", "record Group attendance")
         meeting = self._meeting(meeting_id)
+        if meeting["status"] in {"CANCELLED", "RESCHEDULED"}:
+            raise GroupValidationError("Attendance cannot be recorded for a cancelled or rescheduled meeting.")
         valid_people = {row["person_id"] for row in self.repository.roster_for_date(
             meeting["group_id"], meeting["id"], meeting["starts_at"].date()
         )}
