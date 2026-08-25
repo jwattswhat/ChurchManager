@@ -80,6 +80,7 @@ from data_management import show_data_management
 from custom_profile_dialog import show_custom_profile
 from custom_profile_admin_dialog import show_custom_profile_administration
 from custom_profile_search_dialog import show_custom_profile_search
+from calendar_event_dialog import show_calendar_events
 
 
 arguments = None
@@ -615,6 +616,11 @@ def _buttonclick(event):
             return
         case "lblCustomProfileSearch":
             show_custom_profile_search(
+                cmfrm.FRAME, context.connection, context.session, context.authorization,
+            )
+            return
+        case "lblCalendarEvents":
+            show_calendar_events(
                 cmfrm.FRAME, context.connection, context.session, context.authorization,
             )
             return

@@ -73,4 +73,5 @@ MAIN_MENU_PERMISSIONS = {
     "lblGroupAttendance": "groups.attendance.view",
     "lblCustomProfileFields": "profiles.custom_fields.define",
     "lblCustomProfileSearch": "profiles.custom_fields.view",
+    "lblCalendarEvents": "calendar.view",
 }

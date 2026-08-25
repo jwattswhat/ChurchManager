@@ -367,6 +367,14 @@
                 "tooltip": "Search administrator-approved additional Person and Family fields.",
                 "security": {"invoke": "profiles.custom_fields.view"}
             },
+            "lblCalendarEvents": {
+                "name": "lblCalendarEvents",
+                "type": "StaticText",
+                "posch": [15, 12],
+                "label": "Events",
+                "tooltip": "Maintain the simple Church event list for external calendar export.",
+                "security": {"invoke": "calendar.view"}
+            },
             "ReportBox": {
                 "type": "StaticBox",
                 "name": "ReportBox",

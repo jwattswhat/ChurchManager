@@ -184,9 +184,12 @@ required position open.
 
 **Notify Participants** can prepare a service request, reminder, or general
 information message. Sending remains review-first and is disabled in TEST MODE.
-ChurchManager does not maintain a separate general calendar; future calendar
-integration will export approved services and assignments to an external
-calendar.
+ChurchManager does not maintain a separate general calendar. **Events** under
+**People and Congregation** is a compact list for congregation dates that are
+not already Worship Services or Group Meetings. Each event stores only a
+public-safe title, date and optional time, location, status, and an external
+calendar eligibility choice. Recurrence, reminders, invitations, and personal
+calendar notes remain in the external calendar.
 
 Data Management provides a guarded duplicate review. Matching names, contact
 information, or mailing addresses are possible duplicates, not an automatic merge.
