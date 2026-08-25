@@ -158,6 +158,8 @@ class TestApplicationMenuAndDashboard(unittest.TestCase):
         self.assertIn("OCTET_LENGTH(Logo)=0", branding)
         self.assertIn("SetClientSize(desired)", branding)
         self.assertIn("ShowScrollbars(wx.SHOW_SB_NEVER", branding)
+        self.assertEqual(controls["lblChurchName"]["posch"], [2, 2])
+        self.assertEqual(controls["lblChurchLogo"]["posch"], [2, 4])
 
     def test_all_visual_designers_are_grouped_under_tools(self):
         definition = load_json(ROOT / "Menus" / "main.menu.json")

@@ -12,8 +12,8 @@
     },
     "CONTROLS": {
       "BrandBox": {"type": "StaticBox", "name": "BrandBox", "label": "Your Congregation", "posch": [1, 1], "sizech": [12, 13], "layout": {"row": 0, "column": 0, "rowspan": 2}},
-      "lblChurchLogo": {"type": "StaticText", "name": "lblChurchLogo", "label": "", "posch": [2, 2], "sizech": [10, 8]},
-      "lblChurchName": {"type": "StaticText", "name": "lblChurchName", "label": "Church", "posch": [2, 10], "sizech": [10, 2]},
+      "lblChurchName": {"type": "StaticText", "name": "lblChurchName", "label": "Church", "posch": [2, 2], "sizech": [10, 2]},
+      "lblChurchLogo": {"type": "StaticText", "name": "lblChurchLogo", "label": "", "posch": [2, 4], "sizech": [10, 7]},
       "lblDashboardNote": {"type": "StaticText", "name": "lblDashboardNote", "label": "Daily and weekly work", "posch": [2, 12], "sizech": [10, 1]},
 
       "PlanningBox": {"type": "StaticBox", "name": "PlanningBox", "label": "This Week's Worship", "posch": [14, 1], "sizech": [13, 10], "layout": {"row": 0, "column": 1}},
