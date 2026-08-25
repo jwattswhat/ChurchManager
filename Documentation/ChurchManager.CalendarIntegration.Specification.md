@@ -172,6 +172,11 @@ Provider credentials are never stored in this table. Removing a binding does
 not delete the source record and requires a clear choice about cancelling or
 leaving the existing external event.
 
+**Implementation status:** Migration 116 defines the provider-neutral binding,
+unique destination/UID protection, safe result fields, source lookup, and
+Church ownership. It deliberately stores neither credentials nor event text.
+The repository and optional provider adapter are the next stage.
+
 ## 9. Privacy and security
 
 - Publication requires `calendar.view` plus source-view permission;
