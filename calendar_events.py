@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 import re
 
-from sunday_content_rules import parse_schedule
+from event_schedule_rules import parse_event_schedule
 
 
 class CalendarEventError(ValueError):
@@ -112,7 +112,7 @@ class CalendarEventService:
         status = str(item.get("status") or "PLANNED").upper()
         if status not in self.STATUSES: raise CalendarEventError("Choose a valid event status.")
         try:
-            schedule_text, schedule_rule = parse_schedule(item.get("schedule_text"))
+            schedule_text, schedule_rule = parse_event_schedule(item.get("schedule_text"))
         except ValueError as error:
             raise CalendarEventError(str(error)) from error
         normalized = {

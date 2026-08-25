@@ -4,7 +4,7 @@ import unittest
 from sunday_content_rules import (
     ANNUAL_FIRST_SUNDAY, EVERY_SUNDAY, annual_date_rule, describe_rule,
     is_active, matches_rule, monthly_rule, next_occurrences,
-    occurs_in_service_week, one_time_rule, parse_schedule, service_week, weekly_rule,
+    occurs_in_service_week, one_time_rule, parse_schedule, service_week,
 )
 
 
@@ -58,18 +58,6 @@ class SundayContentRuleTests(unittest.TestCase):
             ("Each year on October 1", "Every year on October 1"),
         ):
             self.assertEqual(parse_schedule(each), parse_schedule(every))
-
-    def test_every_weekday_is_supported_for_general_events(self):
-        for phrase, expected, occurrence in (
-            ("Every Tuesday.", "Every Tuesday", date(2026, 8, 25)),
-            ("Each Wednesday", "Every Wednesday", date(2026, 8, 26)),
-            ("Weekly on Friday", "Every Friday", date(2026, 8, 28)),
-        ):
-            text, rule = parse_schedule(phrase)
-            self.assertEqual(text, expected)
-            self.assertEqual(describe_rule(rule), expected)
-            self.assertTrue(matches_rule(rule, occurrence))
-        self.assertEqual(weekly_rule("TU"), "RRULE:FREQ=WEEKLY;BYDAY=TU")
 
     def test_first_sunday_strictly_after_fixed_date(self):
         text, rule = parse_schedule("The first Sunday after December 1")

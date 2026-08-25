@@ -5,6 +5,7 @@ from pathlib import Path
 import unittest
 
 from calendar_events import CalendarEventError, CalendarEventService
+from event_schedule_rules import event_occurrences, parse_event_schedule
 
 
 class Authorization:
@@ -51,6 +52,18 @@ class CalendarEventTests(unittest.TestCase):
         with self.assertRaisesRegex(CalendarEventError, "Schedule not understood"):
             service.save({"church_id": 2, "title": "Bad", "starts_at": "2026-09-10T12:00:00",
                           "schedule_text": "Whenever convenient"})
+
+    def test_event_rules_are_broader_than_sunday_content_rules(self):
+        cases = (
+            ("Every Tuesday and Thursday.", "Every Tuesday and Thursday", "RRULE:FREQ=WEEKLY;BYDAY=TU,TH"),
+            ("1st Tuesday of Every month.", "First Tuesday of every month", "RRULE:FREQ=MONTHLY;BYDAY=1TU"),
+            ("Last Tuesday of the month.", "Last Tuesday of every month", "RRULE:FREQ=MONTHLY;BYDAY=-1TU"),
+            ("Frist tuseday in October.", "First Tuesday in October", "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=1TU"),
+        )
+        for phrase, text, rule in cases:
+            self.assertEqual(parse_event_schedule(phrase), (text, rule))
+        self.assertEqual(event_occurrences(cases[0][2], datetime(2026, 8, 24).date(), 2),
+                         [datetime(2026, 8, 25).date(), datetime(2026, 8, 27).date()])
 
     def test_main_menu_is_permission_guarded(self):
         from main_menu import MENU_CONTROLS

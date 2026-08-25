@@ -87,9 +87,12 @@ changes to fields owned by ChurchManager.
 | `CalendarEligible` | Explicit publication eligibility. |
 | audit fields | Creator/editor and timestamps. |
 
-Standalone events use the same controlled natural-language scheduling engine
-as other ChurchManager recurring content. `Each` and `Every` are equivalent;
-the stored rule is deterministic rather than unrestricted prose. External
+Standalone events use a dedicated controlled natural-language scheduling
+engine because event recurrence is broader than the Sunday-centered rules used
+by Prayers and Announcements. It supports phrases such as `Every Tuesday and
+Thursday`, `First Tuesday of every month`, `Last Tuesday of the month`, and
+`First Tuesday in October`. `Each` and `Every` are equivalent; the stored rule
+is deterministic rather than unrestricted prose. External
 exports expand the rule into occurrences for the selected date range. Worship
 and Group records retain their own source schedules and are not duplicated in
 `tblChurchEvent`.

@@ -189,7 +189,8 @@ ChurchManager does not maintain a separate general calendar. **Events** under
 not already Worship Services or Group Meetings. Each event stores only a
 public-safe title, date and optional time, location, status, and an external
 calendar eligibility choice. Enter recurrence naturally, such as **Every
-Tuesday**, **Each Wednesday**, or **Once on October 1, 2026**. ChurchManager
+Tuesday and Thursday**, **First Tuesday of every month**, **Last Tuesday of the
+month**, **First Tuesday in October**, or **Once on October 1, 2026**. ChurchManager
 stores a standardized rule so later calendar exports are dependable. Reminders,
 invitations, and personal calendar notes remain in the external calendar.
 
