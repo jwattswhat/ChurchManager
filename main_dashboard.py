@@ -22,11 +22,14 @@ def _church_identity(connection):
 def apply_congregation_branding(main_form, connection):
     """Display the first configured congregation name and logo prominently."""
     church_name, logo_bytes = _church_identity(connection)
-    main_form.CONTROLID["lblChurchName"].SetLabel(church_name or "ChurchManager")
-    name_font = main_form.CONTROLID["lblChurchName"].GetFont()
+    name = main_form.CONTROLID["lblChurchName"]
+    name.SetLabel(church_name or "ChurchManager")
+    name_font = name.GetFont()
     name_font.SetWeight(wx.FONTWEIGHT_BOLD)
     name_font.SetPointSize(name_font.GetPointSize() + 2)
-    main_form.CONTROLID["lblChurchName"].SetFont(name_font)
+    name.SetFont(name_font)
+    name.Wrap(name.GetSize().width)
+    name.SetMinSize((name.GetSize().width, name.GetBestSize().height))
 
     placeholder = main_form.CONTROLID["lblChurchLogo"]
     if not logo_bytes:
@@ -36,20 +39,22 @@ def apply_congregation_branding(main_form, connection):
     if not image.IsOk():
         placeholder.SetLabel("Church logo unavailable")
         return None
-    width, height = placeholder.GetSize()
+    maximum = placeholder.FromDIP((120, 72))
+    width = min(placeholder.GetSize().width, maximum.width)
+    height = min(placeholder.GetSize().height, maximum.height)
     scale = min(width / image.GetWidth(), height / image.GetHeight())
     image.Rescale(
         max(1, int(image.GetWidth() * scale)),
         max(1, int(image.GetHeight() * scale)),
         wx.IMAGE_QUALITY_HIGH,
     )
-    bitmap = wx.StaticBitmap(
-        placeholder.GetParent(), wx.ID_ANY, wx.Bitmap(image),
-        pos=placeholder.GetPosition(), size=placeholder.GetSize(),
-    )
+    bitmap = wx.StaticBitmap(placeholder.GetParent(), wx.ID_ANY, wx.Bitmap(image))
     bitmap.SetToolTip(church_name or "Church logo")
+    containing_sizer = placeholder.GetContainingSizer()
+    if containing_sizer is not None:
+        containing_sizer.Replace(placeholder, bitmap)
     placeholder.Hide()
-    bitmap.Raise()
+    placeholder.GetParent().Layout()
     return bitmap
 
 

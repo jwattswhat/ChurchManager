@@ -158,6 +158,8 @@ class TestApplicationMenuAndDashboard(unittest.TestCase):
         self.assertIn("OCTET_LENGTH(Logo)=0", branding)
         self.assertIn("SetClientSize(desired)", branding)
         self.assertIn("ShowScrollbars(wx.SHOW_SB_NEVER", branding)
+        self.assertIn("containing_sizer.Replace(placeholder, bitmap)", branding)
+        self.assertNotIn("pos=placeholder.GetPosition()", branding)
         self.assertEqual(controls["lblChurchName"]["posch"], [2, 2])
         self.assertEqual(controls["lblChurchLogo"]["posch"], [2, 4])
 
