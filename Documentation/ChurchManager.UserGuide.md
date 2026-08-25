@@ -112,6 +112,15 @@ still be adjusted. Retired definitions open read-only. A field does not appear
 in Custom Profile Search until it is Active and Searchable, and it does not
 appear in the custom-profile report until it is Active and approved for reports.
 
+Use **Export Values...** for a separate custom-profile CSV. It includes only
+Active fields marked for approved export and writes a companion metadata file
+beside the CSV. Restricted fields are excluded unless an authorized user checks
+the separate Restricted option and confirms the warning. Use **Import Values...**
+to preview a compatible stable-key CSV and update existing People or Families.
+All rows must show **Ready** before import. Import does not create People,
+Families, field definitions, or choices; add those through their normal screens
+first. Keep the CSV and its metadata file together when transferring data.
+
 **Custom Profile Search** under People and Congregation lists only active fields
 that were marked searchable and that the signed-in user may view. Choose the
 profile type, field, comparison, and value. Ranges and multiple-choice searches

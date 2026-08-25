@@ -417,6 +417,20 @@ validation and writes an audit event.
 An import cannot create definitions or options implicitly. Catalog changes are
 separate administrative operations.
 
+The implemented exchange is deliberately separate from ordinary membership
+CSV export. **Export Values...** writes only Active definitions marked for
+approved export and creates a companion JSON manifest containing stable field
+keys, types, privacy classes, and stable choice keys. Restricted values require
+the restricted-view permission plus a separate explicit confirmation.
+
+**Import Values...** updates custom values for existing People or Families. It
+matches the profile by its exact portable name fields and definitions by
+`custom.<stable_key>` CSV headings. Every row is previewed as Ready or needing
+attention; duplicate or missing profile matches, unknown or inactive fields,
+invalid typed values, inactive choices, and unauthorized restricted fields
+block the entire import. Commit rereads the source and saves all reviewed rows
+in one transaction. It never creates profiles, definitions, or choices.
+
 ## 16. Lifecycle and conversion
 
 Definitions move through these states:

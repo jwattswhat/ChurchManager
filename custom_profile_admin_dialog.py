@@ -5,6 +5,7 @@ from __future__ import annotations
 import wx
 
 from custom_profile_fields import CustomProfileFieldService, CustomProfileValidationError
+from custom_profile_exchange import CustomProfileExchangeService
 from custom_profile_repository import MariaDBCustomProfileRepository
 
 
@@ -178,7 +179,7 @@ class CustomProfileAdministrationDialog(wx.Dialog):
         for index, (name, width) in enumerate((("Field", 220), ("Type", 140), ("Section", 190), ("Privacy", 100), ("Status", 90))): self.fields.InsertColumn(index, name, width=width)
         outer.Add(self.fields, 1, wx.EXPAND | wx.ALL, 8)
         row = wx.BoxSizer(wx.HORIZONTAL)
-        for label, handler in (("New Field...", self.new_field), ("Open Field...", self.open_field), ("Add Choice...", self.add_choice), ("Activate", self.activate), ("Retire", self.retire)):
+        for label, handler in (("New Field...", self.new_field), ("Open Field...", self.open_field), ("Add Choice...", self.add_choice), ("Activate", self.activate), ("Retire", self.retire), ("Export Values...", self.export_values), ("Import Values...", self.import_values)):
             button = wx.Button(panel, label=label); button.Bind(wx.EVT_BUTTON, handler); row.Add(button, 0, wx.RIGHT, 8)
         self.fields.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.open_field)
         outer.Add(row, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8); panel.SetSizer(outer); self.tabs.AddPage(panel, "Custom Fields")
@@ -247,6 +248,16 @@ class CustomProfileAdministrationDialog(wx.Dialog):
         try: self.service.add_option(item["id"], key, label); self.refresh()
         except (CustomProfileValidationError, ValueError) as error: wx.MessageBox(str(error), "Unable to Add Choice", wx.OK | wx.ICON_ERROR, self)
 
+    def export_values(self, _event):
+        dialog = CustomProfileExportDialog(self, CustomProfileExchangeService(self.service), *self.scope())
+        try: dialog.ShowModal()
+        finally: dialog.Destroy()
+
+    def import_values(self, _event):
+        dialog = CustomProfileImportDialog(self, CustomProfileExchangeService(self.service), *self.scope())
+        try: dialog.ShowModal()
+        finally: dialog.Destroy()
+
     def activate(self, _event): self._field_status(True)
     def retire(self, _event): self._field_status(False)
     def _field_status(self, active):
@@ -270,6 +281,102 @@ class CustomProfileAdministrationDialog(wx.Dialog):
         if index < 0: return
         try: self.service.set_tag_active(self.tag_rows[index]["id"], active); self.refresh()
         except (CustomProfileValidationError, ValueError) as error: wx.MessageBox(str(error), "Unable to Change Tag", wx.OK | wx.ICON_ERROR, self)
+
+
+class CustomProfileExportDialog(wx.Dialog):
+    """Confirm an explicit stable-key custom-value export."""
+
+    def __init__(self, parent, service, church_id, entity_type):
+        super().__init__(parent, title="Export Custom Profile Values", size=(610, 300))
+        self.service = service; self.church_id = church_id; self.entity_type = entity_type
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        note = wx.StaticText(panel, label=(
+            "This separate export contains only Active custom fields marked for approved export. "
+            "A metadata manifest records stable field and choice keys."
+        )); note.Wrap(560); note.SetForegroundColour(wx.Colour(0, 82, 170)); outer.Add(note, 0, wx.EXPAND | wx.ALL, 14)
+        self.restricted = wx.CheckBox(panel, label="Include authorized Restricted custom values")
+        self.restricted.Enable(service.authorization.has_permission("profiles.custom_fields.view_restricted"))
+        outer.Add(self.restricted, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        warning = wx.StaticText(panel, label="Restricted exports require a separate explicit selection and must be handled securely.")
+        outer.Add(warning, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        row = wx.BoxSizer(wx.HORIZONTAL); export = wx.Button(panel, label="Choose File and Export..."); close = wx.Button(panel, wx.ID_CANCEL, "Close")
+        export.Bind(wx.EVT_BUTTON, self.on_export); row.Add(export, 0, wx.RIGHT, 8); row.Add(close)
+        outer.AddStretchSpacer(); outer.Add(row, 0, wx.ALIGN_RIGHT | wx.ALL, 14); panel.SetSizer(outer); self.CentreOnParent()
+
+    def on_export(self, _event):
+        if self.restricted.GetValue() and wx.MessageBox(
+            "Include Restricted custom values in this export?\n\nThe destination must be protected.",
+            "Confirm Restricted Export", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self,
+        ) != wx.YES: return
+        dialog = wx.FileDialog(self, "Save custom profile values", wildcard="CSV files (*.csv)|*.csv",
+                               style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+        try:
+            if dialog.ShowModal() != wx.ID_OK: return
+            count, manifest = self.service.export(self.church_id, self.entity_type, dialog.GetPath(), self.restricted.GetValue())
+            wx.MessageBox(f"Exported {count} profile row(s).\nMetadata: {manifest.name}", "Custom Profile Export Complete", wx.OK | wx.ICON_INFORMATION, self)
+        except (CustomProfileValidationError, PermissionError, OSError, ValueError) as error:
+            wx.MessageBox(str(error), "Unable to Export Custom Profiles", wx.OK | wx.ICON_ERROR, self)
+        finally: dialog.Destroy()
+
+
+class CustomProfileImportDialog(wx.Dialog):
+    """Preview and atomically import stable-key values for existing profiles."""
+
+    def __init__(self, parent, service, church_id, entity_type):
+        super().__init__(parent, title="Import Custom Profile Values", size=(820, 590))
+        self.service = service; self.church_id = church_id; self.entity_type = entity_type
+        self.source = None; self.preview = []
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        note = wx.StaticText(panel, label=(
+            "Choose a stable-key custom-profile CSV. Preview makes no database changes. "
+            "Imports update existing matching profiles and never create fields, choices, People, or Families."
+        )); note.Wrap(770); note.SetForegroundColour(wx.Colour(0, 82, 170)); outer.Add(note, 0, wx.EXPAND | wx.ALL, 12)
+        choose = wx.Button(panel, label="Choose CSV and Preview..."); choose.Bind(wx.EVT_BUTTON, self.on_choose)
+        outer.Add(choose, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        self.rows = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        for index, (label, width) in enumerate((("CSV row", 80), ("Profile", 300), ("Fields", 90), ("Status", 290))): self.rows.InsertColumn(index, label, width=width)
+        outer.Add(self.rows, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
+        self.status = wx.StaticText(panel, label="Choose a CSV file to begin."); outer.Add(self.status, 0, wx.EXPAND | wx.ALL, 12)
+        buttons = wx.BoxSizer(wx.HORIZONTAL); self.commit = wx.Button(panel, label="Import All Ready Rows"); self.commit.Enable(False)
+        self.commit.Bind(wx.EVT_BUTTON, self.on_commit); close = wx.Button(panel, wx.ID_CANCEL, "Close")
+        buttons.Add(self.commit, 0, wx.RIGHT, 8); buttons.Add(close); outer.Add(buttons, 0, wx.ALIGN_RIGHT | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        panel.SetSizer(outer); self.CentreOnParent()
+
+    def on_choose(self, _event):
+        dialog = wx.FileDialog(self, "Choose custom profile CSV", wildcard="CSV files (*.csv)|*.csv")
+        try:
+            if dialog.ShowModal() != wx.ID_OK: return
+            self.source = dialog.GetPath(); self.preview = self.service.preview_import(self.church_id, self.entity_type, self.source)
+            self._show_preview()
+        except (CustomProfileValidationError, PermissionError, OSError, ValueError) as error:
+            self.preview = []; self.commit.Enable(False)
+            wx.MessageBox(str(error), "Unable to Preview Custom Profiles", wx.OK | wx.ICON_ERROR, self)
+        finally: dialog.Destroy()
+
+    def _show_preview(self):
+        self.rows.DeleteAllItems(); error_count = 0
+        for item in self.preview:
+            status = "; ".join(item.errors) if item.errors else "Ready"
+            index = self.rows.InsertItem(self.rows.GetItemCount(), str(item.row_number))
+            self.rows.SetItem(index, 1, item.display_name); self.rows.SetItem(index, 2, str(len(item.changes))); self.rows.SetItem(index, 3, status)
+            if item.errors:
+                error_count += 1; self.rows.SetItemTextColour(index, wx.Colour(190, 0, 0))
+        ready = len(self.preview) - error_count
+        self.status.SetLabel(f"Previewed {len(self.preview)} row(s): {ready} Ready, {error_count} need attention. No database records were changed.")
+        self.commit.Enable(bool(self.preview) and not error_count)
+
+    def on_commit(self, _event):
+        if not self.preview or not self.source: return
+        if wx.MessageBox(
+            f"Import custom values for all {len(self.preview)} reviewed profile row(s)?",
+            "Confirm Custom Profile Import", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self,
+        ) != wx.YES: return
+        try:
+            count = self.service.commit_import(self.church_id, self.entity_type, self.source, self.preview)
+            wx.MessageBox(f"Imported custom values for {count} profile row(s).", "Custom Profile Import Complete", wx.OK | wx.ICON_INFORMATION, self)
+            self.commit.Enable(False); self.status.SetLabel("Import complete. Close this window or preview another file.")
+        except (CustomProfileValidationError, PermissionError, OSError, ValueError, RuntimeError) as error:
+            wx.MessageBox(str(error), "Unable to Import Custom Profiles", wx.OK | wx.ICON_ERROR, self)
 
 
 def show_custom_profile_administration(parent, connection, session, authorization):

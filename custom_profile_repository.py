@@ -232,26 +232,65 @@ class MariaDBCustomProfileRepository:
         finally: cursor.close()
 
     def save_profile_values(self, entity_type, profile_id, changes, user_id):
-        table, id_column = self._profile_table(entity_type)
-        multi = "tblPersonCustomFieldOptionValue" if entity_type == "PERSON" else "tblFamilyCustomFieldOptionValue"
         cursor = self.connection.cursor()
         try:
-            for definition_id, (definition, value) in changes.items():
-                if definition["data_type"] == "MULTIPLE_CHOICE":
-                    self._execute(cursor, f"DELETE FROM {multi} WHERE {id_column}=? AND DefinitionID=?", (profile_id, definition_id))
-                    for option_key in value or ():
-                        option_id = self._option_id(cursor, definition_id, option_key)
-                        self._execute(cursor, f"INSERT INTO {multi} ({id_column},DefinitionID,OptionID,AssignedByUserID) VALUES (?,?,?,?)",
-                                      (profile_id, definition_id, option_id, user_id))
-                else:
-                    self._execute(cursor, f"DELETE FROM {table} WHERE {id_column}=? AND DefinitionID=?", (profile_id, definition_id))
-                    if value is not None:
-                        column = self.VALUE_COLUMNS[definition["data_type"]]
-                        stored = self._option_id(cursor, definition_id, value) if column == "OptionID" else value
-                        self._execute(cursor, f"INSERT INTO {table} ({id_column},DefinitionID,{column},CreatedByUserID,UpdatedByUserID) VALUES (?,?,?,?,?)",
-                                      (profile_id, definition_id, stored, user_id, user_id))
-                self._audit(cursor, definition["church_id"], user_id, "CUSTOM_FIELD_VALUE_CHANGED", entity_type, profile_id, definition_id)
+            self._save_profile_changes(cursor, entity_type, profile_id, changes, user_id)
             self.connection.commit(); return True
+        except Exception:
+            self.connection.rollback(); raise
+        finally: cursor.close()
+
+    def save_profile_value_batch(self, entity_type, profiles, user_id):
+        """Save reviewed profile changes in one transaction for controlled import."""
+        cursor = self.connection.cursor()
+        try:
+            for profile_id, changes in profiles:
+                self._save_profile_changes(cursor, entity_type, profile_id, changes, user_id)
+            if profiles:
+                first = next(iter(profiles[0][1].values()))[0]
+                self._audit(cursor, first["church_id"], user_id, "CUSTOM_FIELD_IMPORT_COMPLETED", entity_type, len(profiles), None)
+            self.connection.commit(); return True
+        except Exception:
+            self.connection.rollback(); raise
+        finally: cursor.close()
+
+    def _save_profile_changes(self, cursor, entity_type, profile_id, changes, user_id):
+        table, id_column = self._profile_table(entity_type)
+        multi = "tblPersonCustomFieldOptionValue" if entity_type == "PERSON" else "tblFamilyCustomFieldOptionValue"
+        for definition_id, (definition, value) in changes.items():
+            if definition["data_type"] == "MULTIPLE_CHOICE":
+                self._execute(cursor, f"DELETE FROM {multi} WHERE {id_column}=? AND DefinitionID=?", (profile_id, definition_id))
+                for option_key in value or ():
+                    option_id = self._option_id(cursor, definition_id, option_key)
+                    self._execute(cursor, f"INSERT INTO {multi} ({id_column},DefinitionID,OptionID,AssignedByUserID) VALUES (?,?,?,?)",
+                                  (profile_id, definition_id, option_id, user_id))
+            else:
+                self._execute(cursor, f"DELETE FROM {table} WHERE {id_column}=? AND DefinitionID=?", (profile_id, definition_id))
+                if value is not None:
+                    column = self.VALUE_COLUMNS[definition["data_type"]]
+                    stored = self._option_id(cursor, definition_id, value) if column == "OptionID" else value
+                    self._execute(cursor, f"INSERT INTO {table} ({id_column},DefinitionID,{column},CreatedByUserID,UpdatedByUserID) VALUES (?,?,?,?,?)",
+                                  (profile_id, definition_id, stored, user_id, user_id))
+            self._audit(cursor, definition["church_id"], user_id, "CUSTOM_FIELD_VALUE_CHANGED", entity_type, profile_id, definition_id)
+
+    def profile_catalog(self, church_id, entity_type):
+        """Return deterministic portable identity fields for existing profiles."""
+        cursor = self.connection.cursor()
+        try:
+            if entity_type == "PERSON":
+                self._execute(cursor, "SELECT ID,FirstName,COALESCE(MiddleName,''),LastName FROM tblPerson WHERE ChurchID=? ORDER BY LastName,FirstName,ID", (church_id,))
+                return [{"id": row[0], "first_name": row[1], "middle_name": row[2], "last_name": row[3],
+                         "display_name": ", ".join(part for part in (row[3], " ".join(part for part in (row[1], row[2]) if part)) if part)} for row in cursor.fetchall()]
+            self._execute(cursor, "SELECT ID,FamilyName FROM tblFamily WHERE ChurchID=? ORDER BY FamilyName,ID", (church_id,))
+            return [{"id": row[0], "family_name": row[1], "display_name": row[1]} for row in cursor.fetchall()]
+        finally: cursor.close()
+
+    def audit_exchange(self, church_id, user_id, action, entity_type, count):
+        """Record safe exchange attribution without copying field values."""
+        cursor = self.connection.cursor()
+        try:
+            self._audit(cursor, church_id, user_id, action, entity_type, int(count), None)
+            self.connection.commit()
         except Exception:
             self.connection.rollback(); raise
         finally: cursor.close()
