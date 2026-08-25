@@ -17,7 +17,7 @@ from application_context import ApplicationContext
 from form_factory import ChurchManagerFormFactory
 from main_menu import FORM_ROUTES, MENU_CONTROLS, SESSION_CONTROLS
 from churchmanager_menu import install_churchmanager_menu
-from main_dashboard import apply_congregation_branding
+from main_dashboard import apply_congregation_branding, fit_dashboard_window
 from login_dialog import change_own_password
 from authentication import MariaDBUserRepository
 from permission_catalog import MAIN_MENU_PERMISSIONS
@@ -779,6 +779,7 @@ def main(argv=None):
     context.church_logo = apply_congregation_branding(
         cmfrm, context.connection,
     )
+    fit_dashboard_window(cmfrm)
 
     closing = {"started": False}
     def on_main_close(event):

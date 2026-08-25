@@ -155,6 +155,22 @@ class TestApplicationMenuAndDashboard(unittest.TestCase):
         )
         branding = (ROOT / "main_dashboard.py").read_text(encoding="utf-8")
         self.assertIn("SELECT Church, Logo FROM tblChurch", branding)
+        self.assertIn("OCTET_LENGTH(Logo)=0", branding)
+        self.assertIn("SetClientSize(desired)", branding)
+        self.assertIn("ShowScrollbars(wx.SHOW_SB_NEVER", branding)
+
+    def test_all_visual_designers_are_grouped_under_tools(self):
+        definition = load_json(ROOT / "Menus" / "main.menu.json")
+        tools = next(menu for menu in definition["menus"] if menu["label"] == "&Tools")
+        designers = next(item for item in tools["items"] if item.get("label") == "&Designers")
+        self.assertEqual(
+            [item["command"] for item in designers["items"]],
+            [
+                "churchmanager.report_designer",
+                "churchmanager.screen_designer",
+                "tools.menu_designer",
+            ],
+        )
 
 
 def load_json(path: Path):

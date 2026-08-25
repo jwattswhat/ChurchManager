@@ -10,7 +10,9 @@ def _church_identity(connection):
     try:
         cursor.execute(
             "SELECT Church, Logo FROM tblChurch "
-            "WHERE ID > 0 ORDER BY ID LIMIT 1"
+            "WHERE ID > 0 "
+            "ORDER BY CASE WHEN Logo IS NULL OR OCTET_LENGTH(Logo)=0 "
+            "THEN 1 ELSE 0 END, ID LIMIT 1"
         )
         return cursor.fetchone() or ("ChurchManager", None)
     finally:
@@ -49,3 +51,17 @@ def apply_congregation_branding(main_form, connection):
     placeholder.Hide()
     bitmap.Raise()
     return bitmap
+
+
+def fit_dashboard_window(main_form):
+    """Fit the dashboard client area exactly and suppress needless scroll bars."""
+    sizer = main_form.FORM.GetSizer()
+    if sizer is None:
+        return
+    desired = sizer.GetMinSize()
+    main_form.FRAME.SetClientSize(desired)
+    if isinstance(main_form.FORM, wx.ScrolledWindow):
+        main_form.FORM.SetVirtualSize(desired)
+        main_form.FORM.SetScrollRate(0, 0)
+        main_form.FORM.ShowScrollbars(wx.SHOW_SB_NEVER, wx.SHOW_SB_NEVER)
+    main_form.FRAME.Center(wx.BOTH)

@@ -104,16 +104,17 @@
     {
       "label": "&Reports",
       "items": [
-        {"command": "churchmanager.reports"},
-        {"separator": true},
-        {"command": "churchmanager.report_designer"},
-        {"command": "churchmanager.screen_designer"}
+        {"command": "churchmanager.reports"}
       ]
     },
     {
       "label": "&Tools",
       "items": [
-        {"command": "tools.menu_designer"},
+        {"label": "&Designers", "items": [
+          {"command": "churchmanager.report_designer"},
+          {"command": "churchmanager.screen_designer"},
+          {"command": "tools.menu_designer"}
+        ]},
         {"separator": true},
         {"command": "churchmanager.users"},
         {"command": "churchmanager.choices"},
