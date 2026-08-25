@@ -188,8 +188,10 @@ ChurchManager does not maintain a separate general calendar. **Events** under
 **People and Congregation** is a compact list for congregation dates that are
 not already Worship Services or Group Meetings. Each event stores only a
 public-safe title, date and optional time, location, status, and an external
-calendar eligibility choice. Recurrence, reminders, invitations, and personal
-calendar notes remain in the external calendar.
+calendar eligibility choice. Enter recurrence naturally, such as **Every
+Tuesday**, **Each Wednesday**, or **Once on October 1, 2026**. ChurchManager
+stores a standardized rule so later calendar exports are dependable. Reminders,
+invitations, and personal calendar notes remain in the external calendar.
 
 Data Management provides a guarded duplicate review. Matching names, contact
 information, or mailing addresses are possible duplicates, not an automatic merge.

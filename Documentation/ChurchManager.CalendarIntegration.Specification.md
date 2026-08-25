@@ -1,7 +1,7 @@
 # ChurchManager external calendar integration specification
 
 **Status:** Approved
-**Version:** 1.0
+**Version:** 1.1
 **Date:** August 24, 2026
 **Approved by:** Rev. Jonathan C. Watt
 **Target application:** ChurchManager
@@ -22,7 +22,7 @@ Version 1 includes:
 
 - a simple Church event record for congregation events not already represented
   by Worship Services, Group Meetings, or approved project milestones;
-- one-time event date, start/end time, all-day flag, location, safe description,
+- natural-language recurrence, first event date, start/end time, all-day flag, location, safe description,
   owner, status, and publication flag;
 - an agenda-style ChurchManager event list, not a month/week calendar UI;
 - provider-neutral event descriptors from approved ChurchManager subsystems;
@@ -76,7 +76,9 @@ changes to fields owned by ChurchManager.
 | `EventKey` | Immutable Church-scoped stable key. |
 | `Title` | Required safe public/administrative title. |
 | `Description` | Optional bounded nonconfidential description. |
-| `StartDateTime` / `EndDateTime` | Native local date-times; end may not precede start. |
+| `StartDateTime` / `EndDateTime` | Native local date-times for the first occurrence; end may not precede start. |
+| `ScheduleText` | Required controlled natural language, such as `Every Tuesday`. |
+| `ScheduleRule` | Canonical RFC 5545 rule derived from and displayed through `ScheduleText`. |
 | `AllDay` | Uses dates rather than midnight-to-midnight guessing. |
 | `TimeZoneName` | IANA/approved configured Church time zone. |
 | `Location` | Optional bounded text. |
@@ -85,9 +87,11 @@ changes to fields owned by ChurchManager.
 | `CalendarEligible` | Explicit publication eligibility. |
 | audit fields | Creator/editor and timestamps. |
 
-Recurring standalone events are deferred from version 1. Users may create the
-next occurrence or manage recurrence in the external calendar. Worship and
-Group records already carry their own schedules and are not duplicated in
+Standalone events use the same controlled natural-language scheduling engine
+as other ChurchManager recurring content. `Each` and `Every` are equivalent;
+the stored rule is deterministic rather than unrestricted prose. External
+exports expand the rule into occurrences for the selected date range. Worship
+and Group records retain their own source schedules and are not duplicated in
 `tblChurchEvent`.
 
 ## 5. Provider-neutral event contract
@@ -242,7 +246,7 @@ Acceptance proves:
 
 The approved version 1 boundaries are:
 
-1. recurrence remains external-calendar-only for standalone Events;
+1. standalone Events use controlled natural-language recurrence;
 2. Google publishing follows `.ics` acceptance within version 1;
 3. automatic publication remains disabled initially; and
 4. ChurchManager never imports external-calendar edits in version 1.

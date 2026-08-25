@@ -34,13 +34,23 @@ class CalendarEventTests(unittest.TestCase):
     def test_create_validates_and_assigns_stable_key(self):
         service, repository = self.service()
         result = service.save({"church_id": 2, "title": "Community Supper",
-                               "starts_at": datetime(2026, 9, 10, 17, 30), "status": "Confirmed"})
+                               "starts_at": datetime(2026, 9, 10, 17, 30),
+                               "schedule_text": "Every Thursday", "status": "Confirmed"})
         self.assertEqual(result, 9); self.assertTrue(repository.created["event_key"].startswith("202609101730-"))
+        self.assertEqual(repository.created["schedule_text"], "Every Thursday")
+        self.assertEqual(repository.created["schedule_rule"], "RRULE:FREQ=WEEKLY;BYDAY=TH")
 
     def test_end_before_start_is_rejected(self):
         service, _repository = self.service()
         with self.assertRaises(CalendarEventError):
-            service.save({"church_id": 2, "title": "Bad", "starts_at": "2026-09-10T12:00:00", "ends_at": "2026-09-10T11:00:00"})
+            service.save({"church_id": 2, "title": "Bad", "starts_at": "2026-09-10T12:00:00",
+                          "ends_at": "2026-09-10T11:00:00", "schedule_text": "Every Thursday"})
+
+    def test_unrecognized_natural_schedule_is_rejected(self):
+        service, _repository = self.service()
+        with self.assertRaisesRegex(CalendarEventError, "Schedule not understood"):
+            service.save({"church_id": 2, "title": "Bad", "starts_at": "2026-09-10T12:00:00",
+                          "schedule_text": "Whenever convenient"})
 
     def test_main_menu_is_permission_guarded(self):
         from main_menu import MENU_CONTROLS

@@ -5,6 +5,8 @@ from __future__ import annotations
 from datetime import datetime
 import re
 
+from sunday_content_rules import parse_schedule
+
 
 class CalendarEventError(ValueError):
     """Raised when an event violates the approved calendar boundary."""
@@ -41,6 +43,7 @@ class MariaDBCalendarEventRepository:
         try:
             self._execute(cursor, "SELECT ID id,ChurchID church_id,EventKey event_key,Title title,Description description,"
                           "StartDateTime starts_at,EndDateTime ends_at,AllDay all_day,TimeZoneName time_zone,"
+                          "ScheduleText schedule_text,ScheduleRule schedule_rule,"
                           "Location location,OwnerType owner_type,OwnerID owner_id,Status status,"
                           "CalendarEligible calendar_eligible,Version version FROM tblChurchEvent "
                           "WHERE ChurchID=? ORDER BY StartDateTime DESC,ID DESC", (church_id,))
@@ -51,10 +54,11 @@ class MariaDBCalendarEventRepository:
         cursor = self.connection.cursor()
         try:
             self._execute(cursor, "INSERT INTO tblChurchEvent (ChurchID,EventKey,Title,Description,StartDateTime,"
-                          "EndDateTime,AllDay,TimeZoneName,Location,Status,CalendarEligible,CreatedByUserID,UpdatedByUserID) "
-                          "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", (
+                          "EndDateTime,AllDay,TimeZoneName,ScheduleText,ScheduleRule,Location,Status,CalendarEligible,CreatedByUserID,UpdatedByUserID) "
+                          "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
                               values["church_id"], values["event_key"], values["title"], values["description"],
                               values["starts_at"], values["ends_at"], values["all_day"], values["time_zone"],
+                              values["schedule_text"], values["schedule_rule"],
                               values["location"], values["status"], values["calendar_eligible"],
                               values["user_id"], values["user_id"],
                           ))
@@ -68,10 +72,11 @@ class MariaDBCalendarEventRepository:
         cursor = self.connection.cursor()
         try:
             self._execute(cursor, "UPDATE tblChurchEvent SET Title=?,Description=?,StartDateTime=?,EndDateTime=?,"
-                          "AllDay=?,TimeZoneName=?,Location=?,Status=?,CalendarEligible=?,UpdatedByUserID=?,Version=Version+1 "
+                          "AllDay=?,TimeZoneName=?,ScheduleText=?,ScheduleRule=?,Location=?,Status=?,CalendarEligible=?,UpdatedByUserID=?,Version=Version+1 "
                           "WHERE ID=? AND ChurchID=? AND Version=?", (
                               values["title"], values["description"], values["starts_at"], values["ends_at"],
-                              values["all_day"], values["time_zone"], values["location"], values["status"],
+                              values["all_day"], values["time_zone"], values["schedule_text"], values["schedule_rule"],
+                              values["location"], values["status"],
                               values["calendar_eligible"], values["user_id"], values["id"],
                               values["church_id"], values["version"],
                           ))
@@ -106,12 +111,17 @@ class CalendarEventService:
         if ends and ends < starts: raise CalendarEventError("The event end cannot precede its start.")
         status = str(item.get("status") or "PLANNED").upper()
         if status not in self.STATUSES: raise CalendarEventError("Choose a valid event status.")
+        try:
+            schedule_text, schedule_rule = parse_schedule(item.get("schedule_text"))
+        except ValueError as error:
+            raise CalendarEventError(str(error)) from error
         normalized = {
             "church_id": _positive(item.get("church_id"), "church"),
             "event_key": str(item.get("event_key") or "").strip(),
             "title": _text(item.get("title"), "Title", 150, True),
             "description": _text(item.get("description"), "Description", 1000, False),
             "starts_at": starts, "ends_at": ends, "all_day": bool(item.get("all_day")),
+            "schedule_text": schedule_text, "schedule_rule": schedule_rule,
             "time_zone": _text(item.get("time_zone") or "America/Chicago", "Time zone", 64, True),
             "location": _text(item.get("location"), "Location", 150, False),
             "status": status, "calendar_eligible": bool(item.get("calendar_eligible")),

@@ -27,6 +27,11 @@ _HOLIDAYS = {
     "christmas eve": (12, 24), "christmas day": (12, 25),
     "new year's eve": (12, 31), "new years eve": (12, 31),
 }
+_WEEKDAYS = {
+    "monday": "MO", "tuesday": "TU", "wednesday": "WE",
+    "thursday": "TH", "friday": "FR", "saturday": "SA", "sunday": "SU",
+}
+_WEEKDAY_NAMES = {value: name.title() for name, value in _WEEKDAYS.items()}
 _MOVABLE_WORDS = (
     "advent", "ash wednesday", "easter", "palm sunday", "pentecost",
 )
@@ -50,6 +55,15 @@ def monthly_rule(weeks):
 def annual_date_rule(month, day):
     date(2000, int(month), int(day))
     return f"RRULE:FREQ=YEARLY;BYMONTH={int(month)};BYMONTHDAY={int(day)}"
+
+
+def weekly_rule(weekday):
+    """Return a weekly RFC 5545 rule for a weekday name or code."""
+    value = str(weekday or "").strip().lower()
+    code = _WEEKDAYS.get(value, value.upper())
+    if code not in _WEEKDAY_NAMES:
+        raise ValueError("Choose a valid weekday.")
+    return f"RRULE:FREQ=WEEKLY;BYDAY={code}"
 
 
 def annual_sunday_after_rule(month, day):
@@ -96,6 +110,8 @@ def describe_rule(value):
         return f"Once on {occurrence.strftime('%B')} {occurrence.day}, {occurrence.year}"
     body = rule.split(":", 1)[1]
     parts = dict(item.split("=", 1) for item in body.split(";") if "=" in item)
+    if parts.get("FREQ") == "WEEKLY" and parts.get("BYDAY") in _WEEKDAY_NAMES:
+        return f"Every {_WEEKDAY_NAMES[parts['BYDAY']]}"
     if parts.get("FREQ") == "MONTHLY" and parts.get("BYDAY"):
         numbers = [int(item[:-2]) for item in parts["BYDAY"].split(",")]
         names = [_ORDINAL_NAMES[number] for number in numbers]
@@ -137,8 +153,10 @@ def parse_schedule(value):
         raise ValueError("Enter a schedule, such as Every Sunday.")
     if any(word in text for word in _MOVABLE_WORDS):
         raise ValueError("Church-year and movable-feast schedules are not supported. Use a fixed date or Sunday schedule.")
-    if text in ("every sunday", "each sunday", "weekly on sunday"):
-        return "Every Sunday", EVERY_SUNDAY
+    weekly = re.fullmatch(r"(?:every|each|weekly on)\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)", text)
+    if weekly:
+        rule = weekly_rule(weekly.group(1))
+        return describe_rule(rule), rule
 
     annual = re.fullmatch(r"(?:every|each|annually on)\s+(.+)", text)
     if annual:
@@ -187,7 +205,7 @@ def parse_schedule(value):
         return describe_rule(rule), rule
 
     raise ValueError(
-        "Schedule not understood. Try Every Sunday; First and third Sundays of each month; "
+        "Schedule not understood. Try Every Tuesday; First and third Sundays of each month; "
         "Every Christmas Eve; Every year on October 1; or Once on December 24, 2026."
     )
 
