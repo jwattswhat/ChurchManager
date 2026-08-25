@@ -48,6 +48,9 @@ class Repository:
     def profile_tag_count(self, *_args): return 0
     def assigned_tag_ids(self, *_args): return {8}
     def set_tag(self, *_args): return True
+    def search_profiles(self, definition, operator, value, limit=500):
+        self.search = (definition, operator, value, limit)
+        return [{"id": 10, "display_name": "Agricola, Agnes"}]
 
 
 class CustomProfileServiceTests(unittest.TestCase):
@@ -115,6 +118,15 @@ class CustomProfileServiceTests(unittest.TestCase):
         tags, assigned = service.profile_tags(2, "PERSON", 10)
         self.assertEqual([item["id"] for item in tags], [8, 9])
         self.assertEqual(assigned, {8})
+
+    def test_search_is_limited_to_active_searchable_authorized_fields(self):
+        service = self.service({"profiles.custom_fields.view"})
+        rows = service.search_profiles(2, "PERSON", 4, "GREATER_THAN", "12")
+        self.assertEqual(rows[0]["id"], 10)
+        self.assertEqual(service.repository.search[1:3], ("GREATER_THAN", 12))
+        service.repository.definition_rows[0]["searchable"] = 0
+        with self.assertRaisesRegex(CustomProfileValidationError, "unavailable"):
+            service.search_profiles(2, "PERSON", 4, "EQUALS", "12")
 
 
 if __name__ == "__main__": unittest.main()

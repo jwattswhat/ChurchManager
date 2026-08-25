@@ -45,6 +45,11 @@ class NewFieldDialog(wx.Dialog):
             grid.Add(control, 1, wx.EXPAND); self.controls[key] = control
         self.controls["data_type"].SetSelection(0); self.controls["privacy_class"].SetSelection(0)
         outer.Add(grid, 0, wx.EXPAND | wx.ALL, 14)
+        policies = wx.BoxSizer(wx.HORIZONTAL)
+        for key, label in (("searchable", "Allow search"), ("report_allowed", "Allow approved reports"), ("export_allowed", "Allow approved exports")):
+            control = wx.CheckBox(panel, label=label); self.controls[key] = control
+            policies.Add(control, 0, wx.RIGHT, 16)
+        outer.Add(policies, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
         self.confirm = wx.CheckBox(panel, label="I confirm this field will not duplicate protected, prohibited, or existing core information.")
         outer.Add(self.confirm, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
         buttons = wx.StdDialogButtonSizer(); buttons.AddButton(wx.Button(panel, wx.ID_OK, "Create Draft")); buttons.AddButton(wx.Button(panel, wx.ID_CANCEL)); buttons.Realize()
@@ -57,6 +62,9 @@ class NewFieldDialog(wx.Dialog):
             "data_type": self.TYPES[self.controls["data_type"].GetSelection()][1],
             "privacy_class": "RESTRICTED" if self.controls["privacy_class"].GetSelection() == 1 else "STANDARD",
             "help_text": self.controls["help_text"].GetValue(),
+            "searchable": self.controls["searchable"].GetValue(),
+            "report_allowed": self.controls["report_allowed"].GetValue(),
+            "export_allowed": self.controls["export_allowed"].GetValue(),
             "content_boundary_confirmed": self.confirm.GetValue(),
         }
 

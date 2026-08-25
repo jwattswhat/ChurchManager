@@ -254,7 +254,7 @@
                 },
                 "sizech": [
                     12,
-                    11
+                    12
                 ]
             },
             "lblPerson": {
@@ -358,6 +358,14 @@
                 "label": "Group Attendance",
                 "tooltip": "Record attendance for a scheduled Group meeting.",
                 "security": {"invoke": "groups.attendance.view"}
+            },
+            "lblCustomProfileSearch": {
+                "name": "lblCustomProfileSearch",
+                "type": "StaticText",
+                "posch": [15, 11],
+                "label": "Custom Profile Search",
+                "tooltip": "Search administrator-approved additional Person and Family fields.",
+                "security": {"invoke": "profiles.custom_fields.view"}
             },
             "ReportBox": {
                 "type": "StaticBox",

@@ -47,6 +47,16 @@ class CustomProfileFieldMigrationTests(unittest.TestCase):
         source = (ROOT / "custom_profile_admin_dialog.py").read_text(encoding="utf-8")
         self.assertIn("self.confirm = wx.CheckBox", source)
         self.assertNotIn("self.confirm.Wrap", source)
+        for policy in ("searchable", "report_allowed", "export_allowed"):
+            self.assertIn(f'("{policy}"', source)
+
+    def test_search_screen_is_routed_and_permission_guarded(self):
+        form = (ROOT / "Forms" / "frmMain.json").read_text(encoding="utf-8")
+        router = (ROOT / "main_menu.py").read_text(encoding="utf-8")
+        permissions = (ROOT / "permission_catalog.py").read_text(encoding="utf-8")
+        self.assertIn('"lblCustomProfileSearch"', form)
+        self.assertIn('"lblCustomProfileSearch"', router)
+        self.assertIn('"lblCustomProfileSearch": "profiles.custom_fields.view"', permissions)
 
 
 if __name__ == "__main__":

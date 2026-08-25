@@ -72,4 +72,5 @@ MAIN_MENU_PERMISSIONS = {
     "lblGroups": "groups.view",
     "lblGroupAttendance": "groups.attendance.view",
     "lblCustomProfileFields": "profiles.custom_fields.define",
+    "lblCustomProfileSearch": "profiles.custom_fields.view",
 }

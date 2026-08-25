@@ -163,6 +163,50 @@ class MariaDBCustomProfileRepository:
             return result
         finally: cursor.close()
 
+    def search_profiles(self, definition, operator, value, limit=500):
+        """Search one preauthorized definition with controlled SQL fragments."""
+        entity = definition["entity_type"]
+        profile_table = "tblPerson" if entity == "PERSON" else "tblFamily"
+        value_table, profile_id = self._profile_table(entity)
+        display = "CONCAT_WS(', ',NULLIF(p.LastName,''),NULLIF(CONCAT_WS(' ',p.FirstName,p.MiddleName),''))" if entity == "PERSON" else "p.FamilyName"
+        data_type = definition["data_type"]
+        column = self.VALUE_COLUMNS.get(data_type)
+        values = [definition["church_id"], definition["id"]]
+        if data_type == "MULTIPLE_CHOICE":
+            multi = "tblPersonCustomFieldOptionValue" if entity == "PERSON" else "tblFamilyCustomFieldOptionValue"
+            keys = tuple(value or ())
+            marks = ",".join("?" for _ in keys)
+            comparison = f"o.OptionKey IN ({marks})"
+            values.extend(keys)
+            count_rule = f"COUNT(DISTINCT o.OptionKey)={len(keys)}" if operator == "HAS_ALL" else "COUNT(*)>0"
+            exists = f"EXISTS (SELECT 1 FROM {multi} m JOIN tblCustomFieldOption o ON o.ID=m.OptionID WHERE m.{profile_id}=p.ID AND m.DefinitionID=? AND {comparison} GROUP BY m.{profile_id} HAVING {count_rule})"
+            if operator == "HAS_NONE": exists = "NOT " + exists
+            where = exists
+        elif operator in {"IS_BLANK", "IS_NOT_BLANK"}:
+            exists = f"EXISTS (SELECT 1 FROM {value_table} v WHERE v.{profile_id}=p.ID AND v.DefinitionID=?)"
+            where = ("NOT " if operator == "IS_BLANK" else "") + exists
+        else:
+            comparisons = {"EQUALS": "=", "LESS_THAN": "<", "GREATER_THAN": ">"}
+            if operator in {"STARTS_WITH", "CONTAINS"}:
+                where = f"EXISTS (SELECT 1 FROM {value_table} v WHERE v.{profile_id}=p.ID AND v.DefinitionID=? AND v.TextValue LIKE ?)"
+                values.append(str(value) + "%" if operator == "STARTS_WITH" else "%" + str(value) + "%")
+            elif operator == "RANGE":
+                where = f"EXISTS (SELECT 1 FROM {value_table} v WHERE v.{profile_id}=p.ID AND v.DefinitionID=? AND v.{column} BETWEEN ? AND ?)"
+                values.extend(value)
+            else:
+                stored = int(value) if data_type == "BOOLEAN" else value
+                if data_type == "SINGLE_CHOICE":
+                    option = next((item["id"] for item in self.options(definition["id"], False) if item["option_key"] == value), None)
+                    if option is None: return []
+                    stored = option
+                where = f"EXISTS (SELECT 1 FROM {value_table} v WHERE v.{profile_id}=p.ID AND v.DefinitionID=? AND v.{column}{comparisons.get(operator, '=')}?)"
+                values.append(stored)
+        cursor = self.connection.cursor()
+        try:
+            self._execute(cursor, f"SELECT p.ID id,{display} display_name FROM {profile_table} p WHERE p.ChurchID=? AND {where} ORDER BY display_name,p.ID LIMIT {max(1, min(int(limit), 500))}", tuple(values))
+            return self._rows(cursor)
+        finally: cursor.close()
+
     def save_profile_values(self, entity_type, profile_id, changes, user_id):
         table, id_column = self._profile_table(entity_type)
         multi = "tblPersonCustomFieldOptionValue" if entity_type == "PERSON" else "tblFamilyCustomFieldOptionValue"

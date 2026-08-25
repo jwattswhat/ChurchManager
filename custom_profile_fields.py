@@ -41,6 +41,60 @@ class CustomProfileFieldService:
             restricted,
         )
 
+    def searchable_definitions(self, church_id, entity_type):
+        """Return active, authorized definitions explicitly approved for search."""
+        return [
+            item for item in self.definitions(church_id, entity_type)
+            if item["lifecycle_status"] == "ACTIVE" and bool(item["searchable"])
+        ]
+
+    def search_profiles(self, church_id, entity_type, definition_id, operator, raw_value=""):
+        """Run one bounded, type-aware custom-field search without exposing tables."""
+        self.authorization.require("profiles.custom_fields.view", "search custom profile fields")
+        church_id = _identifier(church_id, "church"); entity_type = _entity(entity_type)
+        definition_id = _identifier(definition_id, "custom field")
+        allowed = {item["id"]: item for item in self.searchable_definitions(church_id, entity_type)}
+        definition = allowed.get(definition_id)
+        if not definition:
+            raise CustomProfileValidationError("The selected searchable field is unavailable.")
+        operator = str(operator or "").strip().upper()
+        operations = {
+            "SHORT_TEXT": {"EQUALS", "STARTS_WITH", "CONTAINS", "IS_BLANK", "IS_NOT_BLANK"},
+            "LONG_TEXT": {"EQUALS", "STARTS_WITH", "CONTAINS", "IS_BLANK", "IS_NOT_BLANK"},
+            "INTEGER": {"EQUALS", "LESS_THAN", "GREATER_THAN", "RANGE", "IS_BLANK"},
+            "DECIMAL": {"EQUALS", "LESS_THAN", "GREATER_THAN", "RANGE", "IS_BLANK"},
+            "DATE": {"EQUALS", "LESS_THAN", "GREATER_THAN", "RANGE", "IS_BLANK"},
+            "BOOLEAN": {"YES", "NO", "IS_BLANK"},
+            "SINGLE_CHOICE": {"EQUALS", "IS_BLANK"},
+            "MULTIPLE_CHOICE": {"HAS_ANY", "HAS_ALL", "HAS_NONE"},
+        }
+        if operator not in operations[definition["data_type"]]:
+            raise CustomProfileValidationError("Choose a valid search operation for this field.")
+        value = None
+        if operator not in {"IS_BLANK", "IS_NOT_BLANK", "YES", "NO"}:
+            parts = [part.strip() for part in str(raw_value or "").split(",") if part.strip()]
+            if not parts:
+                raise CustomProfileValidationError("Enter a search value.")
+            if operator == "RANGE" and len(parts) != 2:
+                raise CustomProfileValidationError("Enter the beginning and ending values separated by a comma.")
+            options = self.repository.options(definition_id, active_only=False)
+            if definition["data_type"] in {"SINGLE_CHOICE", "MULTIPLE_CHOICE"}:
+                available = {str(item["option_key"]).casefold(): item["option_key"] for item in options if item["active"]}
+                available.update({str(item["label"]).casefold(): item["option_key"] for item in options if item["active"]})
+                try: parts = [available[part.casefold()] for part in parts]
+                except KeyError as error: raise CustomProfileValidationError("Choose an available field option.") from error
+            descriptor = _descriptor(definition, options)
+            try:
+                if definition["data_type"] == "MULTIPLE_CHOICE":
+                    value = tuple(parts)
+                    for part in value: normalize_dynamic_value(descriptor, (part,))
+                elif operator == "RANGE": value = tuple(normalize_dynamic_value(descriptor, part) for part in parts)
+                else: value = normalize_dynamic_value(descriptor, parts[0])
+            except DynamicFieldError as error:
+                raise CustomProfileValidationError(str(error)) from error
+        elif operator in {"YES", "NO"}: value = operator == "YES"
+        return self.repository.search_profiles(definition, operator, value, limit=500)
+
     def create_definition(self, values):
         """Create one bounded Draft definition after explicit prohibited-use confirmation."""
         self.authorization.require("profiles.custom_fields.define", "define custom profile fields")
