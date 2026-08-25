@@ -91,7 +91,7 @@ class CalendarIntegrationDialog(wx.Dialog):
     def _churches(self):
         cursor = self.connection.cursor()
         try:
-            cursor.execute("SELECT ID,ChurchName FROM tblChurch WHERE ID>0 ORDER BY ChurchName,ID")
+            cursor.execute("SELECT ID,Church FROM tblChurch WHERE ID>0 ORDER BY Church,ID")
             return cursor.fetchall()
         finally:
             cursor.close()

@@ -64,5 +64,10 @@ class ICalendarExportTests(unittest.TestCase):
         self.assertIn("lblCalendarIntegration", MENU_CONTROLS)
         self.assertEqual(MAIN_MENU_PERMISSIONS["lblCalendarIntegration"], "calendar.view")
 
+    def test_calendar_integration_uses_current_church_name_column(self):
+        source = Path("calendar_integration_dialog.py").read_text(encoding="utf-8")
+        self.assertIn("SELECT ID,Church FROM tblChurch", source)
+        self.assertNotIn("SELECT ID,ChurchName FROM tblChurch", source)
+
 
 if __name__ == "__main__": unittest.main()
