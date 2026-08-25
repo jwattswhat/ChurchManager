@@ -611,6 +611,19 @@ Year-End Close is controlled and auditable; make a verified backup first.
 
 ## 10. Users, email, backup, and recovery
 
+### Calendar Integration
+
+Use **Calendar Integration** under ChurchManager Settings to combine eligible
+Church Events, Worship Services, and standard Group Meetings for a selected
+date range. Select **Preview Calendar** before exporting. Only sources the
+signed-in user may view are available. Select **Export .ics** to create a
+portable calendar file that can be imported by Google Calendar, Outlook, Apple
+Calendar, and other calendar applications.
+
+Export does not change ChurchManager or the external calendar. Repeating the
+export creates another snapshot; automatic publishing and synchronization are
+not part of this stage.
+
 ### Users and roles
 
 Administrators create individual accounts and assign only the permissions each

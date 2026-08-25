@@ -70,6 +70,8 @@ class CalendarEventTests(unittest.TestCase):
         from permission_catalog import MAIN_MENU_PERMISSIONS
         self.assertIn("lblCalendarEvents", MENU_CONTROLS)
         self.assertEqual(MAIN_MENU_PERMISSIONS["lblCalendarEvents"], "calendar.view")
+        self.assertIn("lblCalendarIntegration", MENU_CONTROLS)
+        self.assertEqual(MAIN_MENU_PERMISSIONS["lblCalendarIntegration"], "calendar.view")
 
     def test_end_controls_are_children_of_their_sizer_panel(self):
         source = Path("calendar_event_dialog.py").read_text(encoding="utf-8")

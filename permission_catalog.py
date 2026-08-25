@@ -74,4 +74,5 @@ MAIN_MENU_PERMISSIONS = {
     "lblCustomProfileFields": "profiles.custom_fields.define",
     "lblCustomProfileSearch": "profiles.custom_fields.view",
     "lblCalendarEvents": "calendar.view",
+    "lblCalendarIntegration": "calendar.view",
 }

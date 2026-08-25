@@ -697,6 +697,14 @@
                 "tooltip": "Define additional Person and Family fields and controlled tags.",
                 "security": {"invoke": "profiles.custom_fields.define"}
             },
+            "lblCalendarIntegration": {
+                "name": "lblCalendarIntegration",
+                "type": "StaticText",
+                "label": "Calendar Integration",
+                "posch": [28, 11],
+                "tooltip": "Preview eligible dates and export a standard iCalendar file.",
+                "security": {"invoke": "calendar.view"}
+            },
             "lblEmailSettings": {
                 "name": "lblEmailSettings",
                 "type": "StaticText",

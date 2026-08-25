@@ -137,6 +137,13 @@ subsystem.
 - Export writes a new file and never modifies the user's external calendar
   directly.
 
+**Implementation status:** Portable iCalendar serialization and the protected
+Calendar Integration preview/export screen are implemented. The exporter uses
+CRLF content lines, UTF-8-safe folding, text escaping, time-zone-aware timed
+events, DATE values for all-day events, stable source UIDs, and explicit
+cancelled status. The user chooses the destination file; an existing file is
+replaced only after the normal save-file confirmation.
+
 ## 7. Google Calendar publishing
 
 Google Calendar support is optional and one-way. Setup uses OAuth rather than
@@ -189,15 +196,17 @@ The main-menu **Events** screen is a compact upcoming/past list with Add, Edit,
 Cancel, Complete, Export, and Close. Double-click edits. It is not a visual
 calendar.
 
-### Calendar publishing
+### Calendar Integration
 
-The protected **Calendar Integration** screen contains:
+The protected **Calendar Integration** screen currently contains:
 
-- provider/destination status;
 - date range and source filters;
-- a preview grid with Create, Update, Cancel, Skip, and Error actions;
-- Export `.ics`, Publish Selected, Test Connection, and Settings; and
-- the most recent publication result.
+- a safe preview grid; and
+- Export `.ics`.
+
+Provider/destination status, Create/Update/Cancel comparison, Publish Selected,
+Test Connection, Settings, and the most recent publication result belong to the
+later optional provider-publishing stage.
 
 ## 11. Reports and exports
 

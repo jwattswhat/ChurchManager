@@ -1083,3 +1083,13 @@ omits Group notes, restricted Groups, membership/contact data, pastoral data,
 Giving data, and provider credentials. Source-specific permissions are checked
 in addition to `calendar.view`. Recurring Church Events are expanded only for a
 requested date range and receive stable occurrence UIDs.
+
+### Portable calendar export
+
+`icalendar_export.py` converts only approved `CalendarEventDescriptor` values
+to a standard UTF-8 `.ics` calendar. `calendar_integration_dialog.py` provides
+the protected **Calendar Integration** screen: users select a church, date
+range, and authorized sources, review the combined list, and choose the output
+file. Export requires `calendar.export`; source-specific viewing permissions
+remain enforced. This stage writes a portable file only and makes no network
+connection or change to an external calendar.

@@ -81,6 +81,7 @@ from custom_profile_dialog import show_custom_profile
 from custom_profile_admin_dialog import show_custom_profile_administration
 from custom_profile_search_dialog import show_custom_profile_search
 from calendar_event_dialog import show_calendar_events
+from calendar_integration_dialog import show_calendar_integration
 
 
 arguments = None
@@ -623,6 +624,9 @@ def _buttonclick(event):
             show_calendar_events(
                 cmfrm.FRAME, context.connection, context.session, context.authorization,
             )
+            return
+        case "lblCalendarIntegration":
+            show_calendar_integration(cmfrm.FRAME, context.connection, context.authorization)
             return
         case "lblPropers":
             show_local_lectionaries(
