@@ -93,11 +93,15 @@ class TabularDatasetProvider:
             "rpt_pastoral_care_activity_summary",
             "rpt_group_current_roster", "rpt_person_group_participation",
             "rpt_group_meeting_attendance", "rpt_group_attendance_sheet",
+            "rpt_custom_profile_value",
         }
         if view in direct:
             where, values = [f"ChurchID={marker}"], [church_id]
             if view.startswith("rpt_group_") or view == "rpt_person_group_participation":
                 if self.authorization is None or not self.authorization.has_permission("groups.view_restricted"):
+                    where.append("PrivacyClass='STANDARD'")
+            if view == "rpt_custom_profile_value":
+                if self.authorization is None or not self.authorization.has_permission("profiles.custom_fields.view_restricted"):
                     where.append("PrivacyClass='STANDARD'")
             return view, where, values
         if view == "rpt_hymn_usage":

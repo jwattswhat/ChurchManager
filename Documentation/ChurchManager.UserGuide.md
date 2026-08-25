@@ -111,6 +111,15 @@ use comma-separated values; dates use `YYYY-MM-DD`. Double-click a result to
 open its Additional Information screen. Search results are bounded and never
 reveal restricted field metadata to an unauthorized user.
 
+Run **Membership - Custom Profile Listing** from Reports to review fields that
+an administrator explicitly marked **Allow in approved reports**. The report
+lists Person and Family values together and identifies retired definitions as
+historical. Standard users never receive restricted custom values; those values
+appear only when the signed-in user also has the restricted custom-field
+permission. Custom fields remain excluded from ordinary directories and mailing
+labels unless a future purpose-built directory surface explicitly approves
+them.
+
 **Groups** maintains committees, classes, studies, music groups, fellowship
 groups, and ministry teams separately from worship-service participant roles.
 Open a Group to review its current roster, add a dated membership term, end a

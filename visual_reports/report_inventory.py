@@ -126,6 +126,11 @@ SPECS = (
     ReportSpec("CMMB08", "Membership - Contact Listing", "reports.membership.contact", "rpt_person_contact", (
         c("PersonID", "Person ID", 75, "integer"), c("ContactLabel", "Label", 100),
         c("Type", "Type", 90), c("Contact", "Contact", 275)), "PersonID, Type, ContactLabel", 4),
+    ReportSpec("CMMB11", "Membership - Custom Profile Listing", "reports.membership.contact", "rpt_custom_profile_value", (
+        c("ProfileType", "Type", 55), c("ProfileName", "Person or Family", 140),
+        c("FieldLabel", "Custom Field", 120), c("FieldKey", "Stable Key", 110),
+        c("DisplayValue", "Value", 225), c("FieldStatus", "Status", 70)),
+        "ProfileType, ProfileName, FieldLabel", 4, "landscape"),
     ReportSpec("CMWS01", "Worship - Service Planner", "reports.worship.run", "rpt_service", (
         c("DateTime", "Date and Time", 100, "datetime"), c("LiturgicalDate", "Liturgical Day", 160),
         c("Location", "Location", 120), c("OrderofService", "Order of Service", 185)),

@@ -387,6 +387,14 @@ Exports include a metadata header or companion manifest that identifies field
 keys, labels, types, and option keys. Restricted values are excluded unless an
 explicit restricted export is both authorized and confirmed.
 
+The first approved reporting surface is **Membership - Custom Profile
+Listing** (`CMMB11`). Its safe database view exposes only definitions marked
+`ReportAllowed`, keeps `FieldKey` in the dataset contract as the stable identity,
+formats typed values for display, combines multiple-choice labels in their
+defined order, and identifies retired definitions. Church and restricted-value
+authorization are reapplied when the dataset is built. The starter layout uses
+the human-readable field label; a customized layout may also use the stable key.
+
 ## 15. Imports
 
 Imports match definitions and options by stable key. Unknown fields, invalid

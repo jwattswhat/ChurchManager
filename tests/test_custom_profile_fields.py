@@ -6,6 +6,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATION = ROOT / "migrations" / "112_add_custom_profile_fields.sql"
+REPORT_MIGRATION = ROOT / "migrations" / "113_add_custom_profile_report.sql"
 
 
 class CustomProfileFieldMigrationTests(unittest.TestCase):
@@ -57,6 +58,21 @@ class CustomProfileFieldMigrationTests(unittest.TestCase):
         self.assertIn('"lblCustomProfileSearch"', form)
         self.assertIn('"lblCustomProfileSearch"', router)
         self.assertIn('"lblCustomProfileSearch": "profiles.custom_fields.view"', permissions)
+
+    def test_approved_report_uses_safe_view_and_stable_field_identity(self):
+        sql = REPORT_MIGRATION.read_text(encoding="utf-8")
+        self.assertIn("CREATE OR REPLACE SQL SECURITY DEFINER VIEW rpt_custom_profile_value", sql)
+        self.assertIn("d.FieldKey", sql)
+        self.assertIn("d.ReportAllowed=1", sql)
+        self.assertIn("d.LifecycleStatus IN ('ACTIVE','RETIRED')", sql)
+        self.assertIn("GROUP_CONCAT(o.Label", sql)
+        self.assertIn("'CMMB11','Membership - Custom Profile Listing'", sql)
+
+    def test_custom_profile_report_filters_restricted_values_without_permission(self):
+        source = (ROOT / "visual_reports" / "tabular_dataset.py").read_text(encoding="utf-8")
+        self.assertIn('view == "rpt_custom_profile_value"', source)
+        self.assertIn('has_permission("profiles.custom_fields.view_restricted")', source)
+        self.assertIn("where.append(\"PrivacyClass='STANDARD'\")", source)
 
 
 if __name__ == "__main__":
