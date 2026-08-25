@@ -162,6 +162,7 @@ class TestApplicationMenuAndDashboard(unittest.TestCase):
         self.assertNotIn("pos=placeholder.GetPosition()", branding)
         self.assertEqual(controls["lblChurchName"]["posch"], [2, 2])
         self.assertEqual(controls["lblChurchLogo"]["posch"], [2, 4])
+        self.assertNotIn("lblDashboardNote", controls)
 
     def test_all_visual_designers_are_grouped_under_tools(self):
         definition = load_json(ROOT / "Menus" / "main.menu.json")
