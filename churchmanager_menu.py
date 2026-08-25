@@ -41,6 +41,49 @@ def install_churchmanager_menu(main_form, application_context, dispatch_control)
         ),
     ))
 
+    customization = (
+        Path(os.environ.get("LOCALAPPDATA", Path.cwd()))
+        / "ChurchManager" / "Menus" / "main.menu.json"
+    )
+
+    def command_descriptors():
+        categories = {
+            "churchmanager": "ChurchManager",
+            "session": "Session",
+            "tools": "Tools",
+        }
+        return tuple(
+            JSForm.MenuCommandDescriptor(
+                command.name, command.label,
+                help_text=command.help_text,
+                category=categories.get(
+                    command.name.split(".", 1)[0], "Other",
+                ),
+            )
+            for command in (registry.get(name) for name in registry.names)
+        )
+
+    def open_churchmanager_menu_designer():
+        catalog = JSForm.MenuCatalogModel(customization.parent, MENU_ROOT)
+        entry = next(
+            item for item in catalog.entries()
+            if item["filename"] == "main.menu.json"
+        )
+        custom = catalog.open_customization(entry)
+        frame = JSForm.open_menu_designer(
+            custom, command_descriptors(), save_path=custom,
+            starter_path=MENU_ROOT / "main.menu.json",
+        )
+        application_context.menu_designer = frame
+        return frame
+
+    registry.register(JSForm.ApplicationCommand(
+        "tools.menu_designer", "Menu &Designer...",
+        lambda _context: open_churchmanager_menu_designer(),
+        permission="screens.design",
+        help_text="Customize the ChurchManager application menu for the next launch",
+    ))
+
     def command_context():
         return JSForm.CommandContext(
             frame=main_form.FRAME,
@@ -52,10 +95,6 @@ def install_churchmanager_menu(main_form, application_context, dispatch_control)
             services={"application": application_context},
         )
 
-    customization = (
-        Path(os.environ.get("LOCALAPPDATA", Path.cwd()))
-        / "ChurchManager" / "Menus" / "main.menu.json"
-    )
     definition = JSForm.MenuDefinitionLoader().load_application(
         MENU_ROOT / "main.menu.json", customization, fallback_to_starter=True,
     )

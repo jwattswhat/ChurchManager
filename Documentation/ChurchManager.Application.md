@@ -874,6 +874,12 @@ Add a matching control to `Forms/frmMain.json` only when the action belongs on
 the routine-work dashboard. Setup and maintenance actions should normally remain
 in the application menus so the dashboard stays compact.
 
+ChurchManager exposes JSForm's visual Menu Designer through **Tools > Menu
+Designer**. It writes the customization to the current user's LocalAppData
+ChurchManager menu directory and preserves `Menus/main.menu.json` as the
+protected starter. Saved menu changes take effect on the next application
+launch.
+
 ### 14.3 Adding a report
 
 1. Define an approved dataset contract and report-safe data source.

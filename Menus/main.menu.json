@@ -113,6 +113,8 @@
     {
       "label": "&Tools",
       "items": [
+        {"command": "tools.menu_designer"},
+        {"separator": true},
         {"command": "churchmanager.users"},
         {"command": "churchmanager.choices"},
         {"command": "churchmanager.config"},

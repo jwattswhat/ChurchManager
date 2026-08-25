@@ -132,6 +132,12 @@ class TestApplicationMenuAndDashboard(unittest.TestCase):
             if command.startswith("churchmanager.")
         }
         self.assertEqual(referenced, {command_name(name) for name in MENU_CONTROLS})
+        all_commands = {
+            command
+            for menu in definition["menus"]
+            for command in commands(menu["items"])
+        }
+        self.assertIn("tools.menu_designer", all_commands)
 
     def test_dashboard_uses_the_congregation_logo_and_only_routine_groups(self):
         controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
@@ -143,6 +149,10 @@ class TestApplicationMenuAndDashboard(unittest.TestCase):
         self.assertIn("DailyAccountingBox", controls)
         self.assertNotIn("AccountingSetupBox", controls)
         self.assertNotIn("DesignersBox", controls)
+        self.assertEqual(
+            load_json(FORMS / "frmMain.json")["frmMainFORM"]["FORM"]["sizech"],
+            [52, 32],
+        )
         branding = (ROOT / "main_dashboard.py").read_text(encoding="utf-8")
         self.assertIn("SELECT Church, Logo FROM tblChurch", branding)
 

@@ -79,6 +79,10 @@ The church logo displayed on the dashboard comes from **People > Church
 Information**. That screen also maintains the congregation name shown beside
 the logo.
 
+Authorized designers can use **Tools > Menu Designer** to customize the native
+application menu. The protected starter remains available for recovery, and a
+saved customization is used the next time ChurchManager starts.
+
 ### Service Planning
 
 - **Worship Services** creates and completes a service plan and its weekly
