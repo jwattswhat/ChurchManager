@@ -14,8 +14,9 @@ class Authorization:
 
 
 class Repository:
-    def __init__(self, bindings=None): self.values = bindings or {}
+    def __init__(self, bindings=None): self.values = bindings or {}; self.recorded = []
     def bindings(self, _provider, _destination, _uids): return self.values
+    def record_result(self, *values): self.recorded.append(values)
 
 
 def event(status="CONFIRMED", version="1"):
@@ -45,6 +46,28 @@ class CalendarPublicationTests(unittest.TestCase):
         self.assertEqual(descriptor_hash(event()), descriptor_hash(event()))
         self.assertNotEqual(descriptor_hash(event()), descriptor_hash(event(version="2")))
         with self.assertRaises(CalendarPublicationError): descriptor_hash({"title": "unsafe"})
+
+    def test_publish_executes_plan_and_records_safe_result(self):
+        class Adapter:
+            def create(self, destination, row): return "google-1"
+        repository = Repository(); service = CalendarPublicationService(
+            repository, Authorization({"calendar.view", "calendar.publish"}), False)
+        plan = service.plan("GOOGLE", "primary", [event()])
+        result = service.publish("GOOGLE", "primary", plan, Adapter())
+        self.assertEqual(result[0][1], "SUCCESS")
+        self.assertEqual(repository.recorded[0][5], "google-1")
+
+    def test_cancelled_result_is_recorded_for_retry_safety(self):
+        class Adapter:
+            def cancel(self, destination, provider_event_id): pass
+        row = event(status="CANCELLED")
+        repository = Repository({row.uid: {"provider_event_id": "google-1", "version": "1",
+                                           "hash": "old", "active": True}})
+        service = CalendarPublicationService(
+            repository, Authorization({"calendar.view", "calendar.publish"}), False)
+        result = service.publish("GOOGLE", "primary", service.plan("GOOGLE", "primary", [row]), Adapter())
+        self.assertEqual(result[0][1], "CANCELLED")
+        self.assertEqual(repository.recorded[0][4], "CANCELLED")
 
 
 if __name__ == "__main__": unittest.main()

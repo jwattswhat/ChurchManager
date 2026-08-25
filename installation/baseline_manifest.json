@@ -2,7 +2,7 @@
   "artifact": "ChurchManager fresh-install schema baseline",
   "format_version": 1,
   "release_version": "0.3.0-dev",
-  "schema_sha256": "6cf95608f48c70e8f3ccedda1de6631124c60077c05a9b60345ae9a7058ca05e",
+  "schema_sha256": "6012fe47e1be50e638868299925aac4f43e7a8c9e6297e3d428d75ee78fd7bed",
   "represented_migrations": [
     {
       "version": "001_normalize_and_convert_innodb.sql",
@@ -447,6 +447,26 @@
     {
       "version": "111_add_volunteer_availability_and_responses.sql",
       "checksum": "6cb65b398417a35537d4e5d457f56aa1c65e44f19ebfc22fcca0eaddd8b8660e"
+    },
+    {
+      "version": "112_add_custom_profile_fields.sql",
+      "checksum": "3c15d06fa9414029ced89e63be1d1d2cbdd1f91a226bd1923ece8f6f13d91f0a"
+    },
+    {
+      "version": "113_add_custom_profile_report.sql",
+      "checksum": "89ee31432af89c31ea33a7a535302caf0f16347eb02204dc49cb58967d80ee5e"
+    },
+    {
+      "version": "114_add_church_events.sql",
+      "checksum": "5f80bc8f94eeac6fb4f1db3693e45012d1428ad332ad159440da1a042363199c"
+    },
+    {
+      "version": "115_add_natural_event_schedules.sql",
+      "checksum": "9bcc8211d1f160a061a870373c3b8924da90f2745606daedf32e7a7c92b8f0e9"
+    },
+    {
+      "version": "116_add_calendar_publication_state.sql",
+      "checksum": "54e2d9715df6cce2d4bbde0aae3d3a6c067d6e132603d5c1ff81f529f1e5ef8d"
     }
   ]
 }

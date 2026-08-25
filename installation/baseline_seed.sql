@@ -677,6 +677,43 @@ UPDATE tblReports SET Title='Pastoral Care - Work List' WHERE Report='CMPC01';
 -- source: 110_standardize_report_names.sql
 UPDATE tblReports SET Title='Pastoral Care - Activity Summary' WHERE Report='CMPC02';
 
+-- source: 112_add_custom_profile_fields.sql
+INSERT IGNORE INTO tblPermission (Name,Description,IsSensitive,Active) VALUES
+('profiles.custom_fields.define','Define and administer custom Person and Family fields.',1,1),
+('profiles.custom_fields.view','View standard custom Person and Family fields.',0,1),
+('profiles.custom_fields.edit','Edit standard custom Person and Family fields.',1,1),
+('profiles.custom_fields.view_restricted','View restricted custom Person and Family fields.',1,1),
+('profiles.custom_fields.edit_restricted','Edit restricted custom Person and Family fields.',1,1),
+('profiles.tags.define','Define and administer controlled profile tags.',1,1),
+('profiles.tags.view','View authorized controlled profile tags.',0,1),
+('profiles.tags.assign','Assign authorized controlled profile tags.',1,1);
+
+-- source: 112_add_custom_profile_fields.sql
+INSERT IGNORE INTO tblRolePermission (RoleID,PermissionID)
+SELECT r.ID,p.ID FROM tblRole r JOIN tblPermission p ON p.Name LIKE 'profiles.%'
+WHERE r.Name='Master Administrator';
+
+-- source: 113_add_custom_profile_report.sql
+INSERT INTO tblReports (Report,Title,Params,Batch,Note,Available,RequiredPermissionID)
+SELECT 'CMMB11','Membership - Custom Profile Listing','[ChurchID]',NULL,
+       'Report-approved custom Person and Family values. Restricted values require separate authorization.',1,p.ID
+FROM tblPermission p WHERE p.Name='reports.membership.contact'
+ON DUPLICATE KEY UPDATE Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),
+Available=1,RequiredPermissionID=VALUES(RequiredPermissionID);
+
+-- source: 114_add_church_events.sql
+INSERT IGNORE INTO tblPermission (Name,Description,IsSensitive,Active) VALUES
+('calendar.view','View safe ChurchManager calendar events.',0,1),
+('calendar.events.manage','Create and maintain simple Church events.',1,1),
+('calendar.export','Preview and export approved events to iCalendar files.',1,1),
+('calendar.configure','Configure protected external calendar integration.',1,1),
+('calendar.publish','Publish approved events to an external calendar.',1,1);
+
+-- source: 114_add_church_events.sql
+INSERT IGNORE INTO tblRolePermission (RoleID,PermissionID)
+SELECT r.ID,p.ID FROM tblRole r JOIN tblPermission p ON p.Name LIKE 'calendar.%'
+WHERE r.Name='Master Administrator';
+
 -- source: current-schema starter policy
 INSERT INTO tblWorshipRole (Name,Description,DisplayOrder,Active) VALUES
 ('Liturgist',NULL,10,1),('Crucifer','Carries the cross',20,1),

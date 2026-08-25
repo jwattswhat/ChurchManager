@@ -8,6 +8,8 @@ import wx
 import wx.adv
 
 from calendar_sources import CalendarSourceService, MariaDBCalendarSourceRepository
+from calendar_publication import CalendarPublicationService, MariaDBCalendarPublicationRepository
+from google_calendar_provider import connect_google_calendar
 from icalendar_export import ICalendarExportService
 
 
@@ -26,7 +28,7 @@ def _date_value(control):
 class CalendarIntegrationDialog(wx.Dialog):
     """Present a bounded preview before creating a portable calendar file."""
 
-    def __init__(self, parent, connection, authorization):
+    def __init__(self, parent, connection, authorization, test_mode=False):
         super().__init__(parent, title="Calendar Integration", size=(1040, 680))
         self.connection = connection
         self.authorization = authorization
@@ -34,6 +36,11 @@ class CalendarIntegrationDialog(wx.Dialog):
             MariaDBCalendarSourceRepository(connection), authorization,
         )
         self.export_service = ICalendarExportService(authorization)
+        self.publication_service = CalendarPublicationService(
+            MariaDBCalendarPublicationRepository(connection), authorization, test_mode,
+        )
+        self.test_mode = bool(test_mode)
+        self.google_provider = None
         self.descriptors = []
         panel = wx.Panel(self)
         outer = wx.BoxSizer(wx.VERTICAL)
@@ -72,6 +79,26 @@ class CalendarIntegrationDialog(wx.Dialog):
             control.Enable(self.authorization.has_permission(permission)); self.sources[key] = control
             source_row.Add(control, 0, wx.RIGHT, 18)
         outer.Add(source_row, 0, wx.ALL, 14)
+
+        publish_row = wx.BoxSizer(wx.HORIZONTAL)
+        publish_row.Add(wx.StaticText(panel, label="Google calendar"), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 10)
+        self.destination = wx.TextCtrl(panel, value="primary", size=(260, -1))
+        self.destination.SetToolTip("Use primary, or enter the Google Calendar identifier supplied by Google.")
+        publish_row.Add(self.destination, 0, wx.RIGHT, 10)
+        self.connect = wx.Button(panel, label="Connect to Google")
+        self.connect.Bind(wx.EVT_BUTTON, self.on_connect)
+        publish_row.Add(self.connect, 0, wx.RIGHT, 8)
+        self.publish = wx.Button(panel, label="Publish Preview")
+        self.publish.Bind(wx.EVT_BUTTON, self.on_publish)
+        publish_row.Add(self.publish, 0)
+        live_allowed = not self.test_mode
+        self.connect.Enable(live_allowed and self.authorization.has_permission("calendar.configure"))
+        self.publish.Enable(False)
+        outer.Add(publish_row, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        if self.test_mode:
+            notice = wx.StaticText(panel, label="Google publishing is disabled in TEST MODE. Portable .ics export remains available.")
+            notice.SetForegroundColour(wx.Colour(150, 80, 0))
+            outer.Add(notice, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
 
         self.list = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         for index, (label, width) in enumerate((("When", 170), ("Source", 130), ("Event", 280), ("Location", 190), ("Status", 90))):
@@ -124,6 +151,57 @@ class CalendarIntegrationDialog(wx.Dialog):
         count = len(self.descriptors)
         self.summary.SetLabel(f"{count} eligible calendar item{'s' if count != 1 else ''} ready for export.")
         self.export.Enable(bool(count) and self.authorization.has_permission("calendar.export"))
+        self.publish.Enable(
+            bool(count) and not self.test_mode
+            and self.authorization.has_permission("calendar.publish")
+        )
+
+    def on_connect(self, _event):
+        """Authorize the separate production-only Google publishing token."""
+        try:
+            self.authorization.require("calendar.configure", "configure Google Calendar")
+            self.publication_service.ensure_live_publish_allowed()
+            self.google_provider = connect_google_calendar()
+            wx.MessageBox("Google Calendar is connected for this Windows user.",
+                          "Google Calendar Connected", wx.OK | wx.ICON_INFORMATION, self)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Connect to Google Calendar", wx.OK | wx.ICON_ERROR, self)
+
+    def on_publish(self, _event):
+        """Preview deterministic provider actions, confirm, and publish once."""
+        if not self.descriptors:
+            return
+        try:
+            destination = self.destination.GetValue().strip()
+            decisions = self.publication_service.plan("GOOGLE", destination, self.descriptors)
+            counts = {action: 0 for action in ("CREATE", "UPDATE", "CANCEL", "SKIP")}
+            for decision in decisions:
+                counts[decision.action] += 1
+            message = (
+                f"Google Calendar: {destination}\n\n"
+                f"Create: {counts['CREATE']}   Update: {counts['UPDATE']}   "
+                f"Cancel: {counts['CANCEL']}   Unchanged: {counts['SKIP']}\n\n"
+                "Publish this preview now? ChurchManager remains the source of truth."
+            )
+            if wx.MessageBox(message, "Confirm Calendar Publication",
+                             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES:
+                return
+            if self.google_provider is None:
+                self.google_provider = connect_google_calendar()
+            results = self.publication_service.publish(
+                "GOOGLE", destination, decisions, self.google_provider,
+            )
+            totals = {name: sum(1 for _decision, result, _code in results if result == name)
+                      for name in ("SUCCESS", "CANCELLED", "SKIPPED", "ERROR")}
+            wx.MessageBox(
+                f"Published: {totals['SUCCESS']}   Cancelled: {totals['CANCELLED']}   "
+                f"Unchanged: {totals['SKIPPED']}   Errors: {totals['ERROR']}",
+                "Calendar Publication Complete",
+                wx.OK | (wx.ICON_WARNING if totals["ERROR"] else wx.ICON_INFORMATION), self,
+            )
+            self.on_preview(None)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Publish Calendar", wx.OK | wx.ICON_ERROR, self)
 
     def on_export(self, _event):
         if not self.descriptors:
@@ -141,9 +219,9 @@ class CalendarIntegrationDialog(wx.Dialog):
             dialog.Destroy()
 
 
-def show_calendar_integration(parent, connection, authorization):
+def show_calendar_integration(parent, connection, authorization, test_mode=False):
     """Open the protected calendar preview and export screen."""
     authorization.require("calendar.view", "open Calendar Integration")
-    dialog = CalendarIntegrationDialog(parent, connection, authorization)
+    dialog = CalendarIntegrationDialog(parent, connection, authorization, test_mode)
     try: return dialog.ShowModal()
     finally: dialog.Destroy()

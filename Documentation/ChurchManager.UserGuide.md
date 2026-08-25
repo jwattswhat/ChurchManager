@@ -621,8 +621,20 @@ portable calendar file that can be imported by Google Calendar, Outlook, Apple
 Calendar, and other calendar applications.
 
 Export does not change ChurchManager or the external calendar. Repeating the
-export creates another snapshot; automatic publishing and synchronization are
-not part of this stage.
+export creates another snapshot.
+
+An administrator may optionally connect a production installation to Google
+Calendar. Place the Google desktop OAuth client file at
+`%LOCALAPPDATA%\ChurchManager\OAuth\client_secret.json`, enter `primary` (or a
+specific Google Calendar identifier), select **Connect to Google**, preview the
+range, and then select **Publish Preview**. ChurchManager shows how many events
+will be created, updated, cancelled, or left unchanged before final
+confirmation. ChurchManager remains the source of truth; Google edits do not
+return to ChurchManager and may be replaced by a later publish.
+
+The Google token is kept in Windows Credential Manager and is not included in
+the ChurchManager database or backup. Google publishing is disabled in TEST
+MODE. Automatic and two-way synchronization are not supported.
 
 ### Users and roles
 

@@ -174,10 +174,11 @@ leaving the existing external event.
 
 **Implementation status:** Migration 116 defines the provider-neutral binding,
 unique destination/UID protection, safe result fields, source lookup, and
-Church ownership. `calendar_publication.py` now plans deterministic Create,
-Update, Cancel, and Skip actions from safe hashes and persists provider results
-without credentials or event text. The optional provider adapter is the next
-stage. TEST MODE is rejected before any live provider mutation.
+Church ownership. `calendar_publication.py` plans deterministic Create, Update,
+Cancel, and Skip actions from safe hashes and persists provider results without
+credentials or event text. The optional Google adapter executes the same plan
+and records each safe result. TEST MODE is rejected before OAuth or any live
+provider mutation.
 
 ## 9. Privacy and security
 
@@ -205,15 +206,22 @@ calendar.
 
 ### Calendar Integration
 
-The protected **Calendar Integration** screen currently contains:
+The protected **Calendar Integration** screen contains:
 
 - date range and source filters;
-- a safe preview grid; and
-- Export `.ics`.
+- a safe preview grid;
+- Export `.ics`;
+- a Google destination identifier, normally `primary`;
+- **Connect to Google**; and
+- **Publish Preview**, with Create/Update/Cancel/Unchanged counts and explicit
+  confirmation before any provider change.
 
-Provider/destination status, Create/Update/Cancel comparison, Publish Selected,
-Test Connection, Settings, and the most recent publication result belong to the
-later optional provider-publishing stage.
+Google controls are disabled in TEST MODE. OAuth uses the narrow
+`calendar.events` scope. The refresh token is stored under the separate
+`ChurchManager/GoogleCalendarPublisher` Windows Credential Manager target and
+never in MariaDB, configuration JSON, backups, logs, or Git. The administrator
+supplies the Google desktop OAuth client file locally at
+`%LOCALAPPDATA%\ChurchManager\OAuth\client_secret.json`.
 
 ## 11. Reports and exports
 
@@ -266,7 +274,9 @@ Acceptance proves:
 6. Add optional Google OAuth settings and one-way publishing.
 7. Integrate approved Worship, Group, and Project sources.
 8. Add documentation, diagnostics, baseline changes, and fictional test data.
-9. Complete automated and visual acceptance.
+9. Complete automated acceptance and TEST MODE visual acceptance. A live Google
+   mutation is an installation-specific administrator acceptance, not a release
+   test and never runs against ChurchDBTest.
 
 ## 15. Approved version 1 decisions
 

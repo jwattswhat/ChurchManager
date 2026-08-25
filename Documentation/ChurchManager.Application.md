@@ -1091,7 +1091,7 @@ to a standard UTF-8 `.ics` calendar. `calendar_integration_dialog.py` provides
 the protected **Calendar Integration** screen: users select a church, date
 range, and authorized sources, review the combined list, and choose the output
 file. Export requires `calendar.export`; source-specific viewing permissions
-remain enforced. This stage writes a portable file only and makes no network
+remain enforced. Portable export writes a file only and makes no network
 connection or change to an external calendar.
 
 `calendar_publication.py` is the duplicate-prevention boundary for later live
@@ -1099,4 +1099,13 @@ providers. It compares the safe descriptor version and hash with migration
 116's `tblCalendarPublication` binding and returns deterministic Create,
 Update, Cancel, or Skip decisions. The table stores provider identifiers and
 safe results only; event text and OAuth credentials are excluded. TEST MODE
-fails closed before a provider may perform a network mutation.
+fails closed before OAuth or a provider mutation.
+
+`google_calendar_provider.py` is the optional production-only Google adapter.
+It requests only the Google `calendar.events` scope, translates only approved
+descriptor fields, and stores its refresh token in the distinct
+`ChurchManager/GoogleCalendarPublisher` Windows Credential Manager target.
+`calendar_integration_dialog.py` displays deterministic action counts and
+requires explicit confirmation before invoking the adapter. Provider failures
+retain only a safe exception-class diagnostic and remain retryable without
+creating duplicate events.

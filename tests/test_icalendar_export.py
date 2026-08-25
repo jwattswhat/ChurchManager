@@ -69,5 +69,13 @@ class ICalendarExportTests(unittest.TestCase):
         self.assertIn("SELECT ID,Church FROM tblChurch", source)
         self.assertNotIn("SELECT ID,ChurchName FROM tblChurch", source)
 
+    def test_google_publish_is_wired_and_test_mode_fails_closed(self):
+        source = Path("calendar_integration_dialog.py").read_text(encoding="utf-8")
+        main = Path("cm.py").read_text(encoding="utf-8")
+        self.assertIn("Connect to Google", source)
+        self.assertIn("Publish Preview", source)
+        self.assertIn("Google publishing is disabled in TEST MODE", source)
+        self.assertIn("context.authorization, context.test_mode", main)
+
 
 if __name__ == "__main__": unittest.main()

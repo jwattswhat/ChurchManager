@@ -626,7 +626,9 @@ def _buttonclick(event):
             )
             return
         case "lblCalendarIntegration":
-            show_calendar_integration(cmfrm.FRAME, context.connection, context.authorization)
+            show_calendar_integration(
+                cmfrm.FRAME, context.connection, context.authorization, context.test_mode,
+            )
             return
         case "lblPropers":
             show_local_lectionaries(

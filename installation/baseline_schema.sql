@@ -73,6 +73,20 @@ SET character_set_client = utf8mb4;
 SET character_set_client = @saved_cs_client;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `rpt_custom_profile_value` AS SELECT
+ 1 AS `ChurchID`,
+  1 AS `ProfileType`,
+  1 AS `ProfileID`,
+  1 AS `ProfileName`,
+  1 AS `FieldKey`,
+  1 AS `FieldLabel`,
+  1 AS `FieldType`,
+  1 AS `DisplayValue`,
+  1 AS `FieldStatus`,
+  1 AS `PrivacyClass` */;
+SET character_set_client = @saved_cs_client;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
 /*!50001 CREATE VIEW `rpt_directory_family` AS SELECT
  1 AS `ID`,
   1 AS `ChurchID`,
@@ -1227,6 +1241,34 @@ CREATE TABLE `tblbulletinordertemplate` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblcalendarpublication` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `SourceType` varchar(24) NOT NULL,
+  `SourceID` bigint(20) NOT NULL,
+  `StableUID` varchar(255) NOT NULL,
+  `Provider` varchar(32) NOT NULL,
+  `DestinationIdentifier` varchar(255) NOT NULL,
+  `ProviderEventID` varchar(255) DEFAULT NULL,
+  `LastPublishedVersion` varchar(255) DEFAULT NULL,
+  `LastPublishedHash` char(64) DEFAULT NULL,
+  `LastPublishedAt` datetime(6) DEFAULT NULL,
+  `LastResult` varchar(20) NOT NULL DEFAULT 'PENDING',
+  `SafeDiagnosticCode` varchar(100) DEFAULT NULL,
+  `Active` tinyint(1) NOT NULL DEFAULT 1,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_calendar_publication_binding` (`Provider`,`DestinationIdentifier`,`StableUID`),
+  KEY `ix_calendar_publication_source` (`ChurchID`,`SourceType`,`SourceID`,`Active`),
+  CONSTRAINT `fk_calendar_publication_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`) ON DELETE CASCADE,
+  CONSTRAINT `ck_calendar_publication_source` CHECK (`SourceType` in ('CHURCH_EVENT','WORSHIP_SERVICE','GROUP_MEETING','PROJECT_MILESTONE')),
+  CONSTRAINT `ck_calendar_publication_result` CHECK (`LastResult` in ('PENDING','SUCCESS','ERROR','CANCELLED','REMOVED')),
+  CONSTRAINT `ck_calendar_publication_source_id` CHECK (`SourceID` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblchoices` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `Field` varchar(255) NOT NULL,
@@ -1259,6 +1301,44 @@ CREATE TABLE `tblchurch` (
   CONSTRAINT `fk_church_primary_hymnal` FOREIGN KEY (`PrimaryHymnalID`) REFERENCES `tblhymnal` (`ID`) ON DELETE SET NULL,
   CONSTRAINT `fk_church_primary_lectionary_edition` FOREIGN KEY (`PrimaryLectionaryEditionID`) REFERENCES `tbllectionaryedition` (`ID`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblchurchevent` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `EventKey` varchar(64) NOT NULL,
+  `Title` varchar(150) NOT NULL,
+  `Description` varchar(1000) DEFAULT NULL,
+  `StartDateTime` datetime NOT NULL,
+  `EndDateTime` datetime DEFAULT NULL,
+  `AllDay` tinyint(1) NOT NULL DEFAULT 0,
+  `TimeZoneName` varchar(64) NOT NULL DEFAULT 'America/Chicago',
+  `ScheduleText` varchar(255) NOT NULL,
+  `ScheduleRule` varchar(255) NOT NULL,
+  `Location` varchar(150) DEFAULT NULL,
+  `OwnerType` varchar(12) DEFAULT NULL,
+  `OwnerID` int(11) DEFAULT NULL,
+  `Status` varchar(12) NOT NULL DEFAULT 'PLANNED',
+  `CalendarEligible` tinyint(1) NOT NULL DEFAULT 0,
+  `Version` int(11) NOT NULL DEFAULT 1,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_church_event_key` (`ChurchID`,`EventKey`),
+  KEY `ix_church_event_agenda` (`ChurchID`,`StartDateTime`,`Status`),
+  KEY `fk_church_event_creator` (`CreatedByUserID`),
+  KEY `fk_church_event_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_church_event_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_church_event_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_church_event_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_church_event_status` CHECK (`Status` in ('PLANNED','CONFIRMED','CANCELLED','COMPLETED')),
+  CONSTRAINT `ck_church_event_owner` CHECK (`OwnerType` is null or `OwnerType` in ('PERSON','GROUP','USER')),
+  CONSTRAINT `ck_church_event_end` CHECK (`EndDateTime` is null or `EndDateTime` >= `StartDateTime`),
+  CONSTRAINT `ck_church_event_version` CHECK (`Version` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
@@ -1626,6 +1706,76 @@ CREATE TABLE `tblcontributionstatementissue` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblcustomfielddefinition` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `EntityType` varchar(10) NOT NULL,
+  `FieldKey` varchar(64) NOT NULL,
+  `Label` varchar(100) NOT NULL,
+  `HelpText` varchar(500) DEFAULT NULL,
+  `SectionLabel` varchar(100) NOT NULL DEFAULT 'Additional Information',
+  `DataType` varchar(20) NOT NULL,
+  `LifecycleStatus` varchar(10) NOT NULL DEFAULT 'DRAFT',
+  `PrivacyClass` varchar(12) NOT NULL DEFAULT 'STANDARD',
+  `DisplayOrder` int(11) NOT NULL DEFAULT 0,
+  `Required` tinyint(1) NOT NULL DEFAULT 0,
+  `Searchable` tinyint(1) NOT NULL DEFAULT 0,
+  `ReportAllowed` tinyint(1) NOT NULL DEFAULT 0,
+  `ExportAllowed` tinyint(1) NOT NULL DEFAULT 0,
+  `MaxLength` int(11) DEFAULT NULL,
+  `MinimumValue` decimal(18,4) DEFAULT NULL,
+  `MaximumValue` decimal(18,4) DEFAULT NULL,
+  `DecimalPlaces` tinyint(4) NOT NULL DEFAULT 2,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  `Version` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_custom_field_key` (`ChurchID`,`EntityType`,`FieldKey`),
+  KEY `ix_custom_field_display` (`ChurchID`,`EntityType`,`LifecycleStatus`,`SectionLabel`,`DisplayOrder`),
+  KEY `fk_custom_field_creator` (`CreatedByUserID`),
+  KEY `fk_custom_field_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_custom_field_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_custom_field_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_custom_field_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_custom_field_entity` CHECK (`EntityType` in ('PERSON','FAMILY')),
+  CONSTRAINT `ck_custom_field_type` CHECK (`DataType` in ('SHORT_TEXT','LONG_TEXT','INTEGER','DECIMAL','DATE','BOOLEAN','SINGLE_CHOICE','MULTIPLE_CHOICE')),
+  CONSTRAINT `ck_custom_field_lifecycle` CHECK (`LifecycleStatus` in ('DRAFT','ACTIVE','RETIRED')),
+  CONSTRAINT `ck_custom_field_privacy` CHECK (`PrivacyClass` in ('STANDARD','RESTRICTED')),
+  CONSTRAINT `ck_custom_field_order` CHECK (`DisplayOrder` >= 0),
+  CONSTRAINT `ck_custom_field_places` CHECK (`DecimalPlaces` between 0 and 4),
+  CONSTRAINT `ck_custom_field_range` CHECK (`MinimumValue` is null or `MaximumValue` is null or `MinimumValue` <= `MaximumValue`),
+  CONSTRAINT `ck_custom_field_text_length` CHECK (`MaxLength` is null or `DataType` = 'SHORT_TEXT' and `MaxLength` between 1 and 255 or `DataType` = 'LONG_TEXT' and `MaxLength` between 1 and 2000),
+  CONSTRAINT `ck_custom_field_version` CHECK (`Version` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblcustomfieldoption` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `DefinitionID` int(11) NOT NULL,
+  `OptionKey` varchar(64) NOT NULL,
+  `Label` varchar(100) NOT NULL,
+  `DisplayOrder` int(11) NOT NULL DEFAULT 0,
+  `Active` tinyint(1) NOT NULL DEFAULT 1,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_custom_field_option_key` (`DefinitionID`,`OptionKey`),
+  KEY `ix_custom_field_option_display` (`DefinitionID`,`Active`,`DisplayOrder`),
+  KEY `fk_custom_field_option_creator` (`CreatedByUserID`),
+  KEY `fk_custom_field_option_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_custom_field_option_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_custom_field_option_definition` FOREIGN KEY (`DefinitionID`) REFERENCES `tblcustomfielddefinition` (`ID`),
+  CONSTRAINT `fk_custom_field_option_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_custom_field_option_order` CHECK (`DisplayOrder` >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbldocument` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `ChurchID` int(11) NOT NULL,
@@ -1733,6 +1883,56 @@ CREATE TABLE `tblfamilycontact` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblfamilycustomfieldoptionvalue` (
+  `FamilyID` int(11) NOT NULL,
+  `DefinitionID` int(11) NOT NULL,
+  `OptionID` int(11) NOT NULL,
+  `AssignedByUserID` int(11) NOT NULL,
+  `AssignedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  PRIMARY KEY (`FamilyID`,`DefinitionID`,`OptionID`),
+  KEY `fk_family_multi_definition` (`DefinitionID`),
+  KEY `fk_family_multi_option` (`OptionID`),
+  KEY `fk_family_multi_assigner` (`AssignedByUserID`),
+  CONSTRAINT `fk_family_multi_assigner` FOREIGN KEY (`AssignedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_family_multi_definition` FOREIGN KEY (`DefinitionID`) REFERENCES `tblcustomfielddefinition` (`ID`),
+  CONSTRAINT `fk_family_multi_family` FOREIGN KEY (`FamilyID`) REFERENCES `tblfamily` (`ID`) ON DELETE CASCADE,
+  CONSTRAINT `fk_family_multi_option` FOREIGN KEY (`OptionID`) REFERENCES `tblcustomfieldoption` (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblfamilycustomfieldvalue` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `FamilyID` int(11) NOT NULL,
+  `DefinitionID` int(11) NOT NULL,
+  `TextValue` varchar(2000) DEFAULT NULL,
+  `IntegerValue` bigint(20) DEFAULT NULL,
+  `DecimalValue` decimal(18,4) DEFAULT NULL,
+  `DateValue` date DEFAULT NULL,
+  `BooleanValue` tinyint(1) DEFAULT NULL,
+  `OptionID` int(11) DEFAULT NULL,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  `Version` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_family_custom_value` (`FamilyID`,`DefinitionID`),
+  KEY `ix_family_custom_definition` (`DefinitionID`),
+  KEY `fk_family_custom_option` (`OptionID`),
+  KEY `fk_family_custom_creator` (`CreatedByUserID`),
+  KEY `fk_family_custom_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_family_custom_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_family_custom_definition` FOREIGN KEY (`DefinitionID`) REFERENCES `tblcustomfielddefinition` (`ID`),
+  CONSTRAINT `fk_family_custom_family` FOREIGN KEY (`FamilyID`) REFERENCES `tblfamily` (`ID`) ON DELETE CASCADE,
+  CONSTRAINT `fk_family_custom_option` FOREIGN KEY (`OptionID`) REFERENCES `tblcustomfieldoption` (`ID`),
+  CONSTRAINT `fk_family_custom_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_family_custom_one_value` CHECK ((`TextValue` is not null) + (`IntegerValue` is not null) + (`DecimalValue` is not null) + (`DateValue` is not null) + (`BooleanValue` is not null) + (`OptionID` is not null) = 1),
+  CONSTRAINT `ck_family_custom_version` CHECK (`Version` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblfamilydate` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `FamilyID` int(11) DEFAULT NULL,
@@ -1743,6 +1943,21 @@ CREATE TABLE `tblfamilydate` (
   KEY `fk_tblfamilydate_tblfamily1_idx` (`FamilyID`),
   CONSTRAINT `fk_familydate_family` FOREIGN KEY (`FamilyID`) REFERENCES `tblfamily` (`ID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblfamilytag` (
+  `FamilyID` int(11) NOT NULL,
+  `TagDefinitionID` int(11) NOT NULL,
+  `AssignedByUserID` int(11) NOT NULL,
+  `AssignedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  PRIMARY KEY (`FamilyID`,`TagDefinitionID`),
+  KEY `fk_family_tag_definition` (`TagDefinitionID`),
+  KEY `fk_family_tag_assigner` (`AssignedByUserID`),
+  CONSTRAINT `fk_family_tag_assigner` FOREIGN KEY (`AssignedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_family_tag_definition` FOREIGN KEY (`TagDefinitionID`) REFERENCES `tblprofiletagdefinition` (`ID`),
+  CONSTRAINT `fk_family_tag_family` FOREIGN KEY (`FamilyID`) REFERENCES `tblfamily` (`ID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
@@ -2682,6 +2897,56 @@ CREATE TABLE `tblpersoncontact` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblpersoncustomfieldoptionvalue` (
+  `PersonID` int(11) NOT NULL,
+  `DefinitionID` int(11) NOT NULL,
+  `OptionID` int(11) NOT NULL,
+  `AssignedByUserID` int(11) NOT NULL,
+  `AssignedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  PRIMARY KEY (`PersonID`,`DefinitionID`,`OptionID`),
+  KEY `fk_person_multi_definition` (`DefinitionID`),
+  KEY `fk_person_multi_option` (`OptionID`),
+  KEY `fk_person_multi_assigner` (`AssignedByUserID`),
+  CONSTRAINT `fk_person_multi_assigner` FOREIGN KEY (`AssignedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_person_multi_definition` FOREIGN KEY (`DefinitionID`) REFERENCES `tblcustomfielddefinition` (`ID`),
+  CONSTRAINT `fk_person_multi_option` FOREIGN KEY (`OptionID`) REFERENCES `tblcustomfieldoption` (`ID`),
+  CONSTRAINT `fk_person_multi_person` FOREIGN KEY (`PersonID`) REFERENCES `tblperson` (`ID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblpersoncustomfieldvalue` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `PersonID` int(11) NOT NULL,
+  `DefinitionID` int(11) NOT NULL,
+  `TextValue` varchar(2000) DEFAULT NULL,
+  `IntegerValue` bigint(20) DEFAULT NULL,
+  `DecimalValue` decimal(18,4) DEFAULT NULL,
+  `DateValue` date DEFAULT NULL,
+  `BooleanValue` tinyint(1) DEFAULT NULL,
+  `OptionID` int(11) DEFAULT NULL,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  `Version` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_person_custom_value` (`PersonID`,`DefinitionID`),
+  KEY `ix_person_custom_definition` (`DefinitionID`),
+  KEY `fk_person_custom_option` (`OptionID`),
+  KEY `fk_person_custom_creator` (`CreatedByUserID`),
+  KEY `fk_person_custom_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_person_custom_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_person_custom_definition` FOREIGN KEY (`DefinitionID`) REFERENCES `tblcustomfielddefinition` (`ID`),
+  CONSTRAINT `fk_person_custom_option` FOREIGN KEY (`OptionID`) REFERENCES `tblcustomfieldoption` (`ID`),
+  CONSTRAINT `fk_person_custom_person` FOREIGN KEY (`PersonID`) REFERENCES `tblperson` (`ID`) ON DELETE CASCADE,
+  CONSTRAINT `fk_person_custom_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_person_custom_one_value` CHECK ((`TextValue` is not null) + (`IntegerValue` is not null) + (`DecimalValue` is not null) + (`DateValue` is not null) + (`BooleanValue` is not null) + (`OptionID` is not null) = 1),
+  CONSTRAINT `ck_person_custom_version` CHECK (`Version` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblpersondate` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `PersonID` int(11) NOT NULL,
@@ -2692,6 +2957,21 @@ CREATE TABLE `tblpersondate` (
   KEY `fk_tblpersondate_tblperson1_idx` (`PersonID`),
   CONSTRAINT `fk_persondate_person` FOREIGN KEY (`PersonID`) REFERENCES `tblperson` (`ID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblpersontag` (
+  `PersonID` int(11) NOT NULL,
+  `TagDefinitionID` int(11) NOT NULL,
+  `AssignedByUserID` int(11) NOT NULL,
+  `AssignedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  PRIMARY KEY (`PersonID`,`TagDefinitionID`),
+  KEY `fk_person_tag_definition` (`TagDefinitionID`),
+  KEY `fk_person_tag_assigner` (`AssignedByUserID`),
+  CONSTRAINT `fk_person_tag_assigner` FOREIGN KEY (`AssignedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_person_tag_definition` FOREIGN KEY (`TagDefinitionID`) REFERENCES `tblprofiletagdefinition` (`ID`),
+  CONSTRAINT `fk_person_tag_person` FOREIGN KEY (`PersonID`) REFERENCES `tblperson` (`ID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
@@ -2711,6 +2991,63 @@ CREATE TABLE `tblprayer` (
   KEY `fk_tblprayer_tblchurch1_idx` (`ChurchID`),
   CONSTRAINT `fk_prayer_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblprofilecustomauditevent` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `UserID` int(11) NOT NULL,
+  `Action` varchar(80) NOT NULL,
+  `EntityType` varchar(20) NOT NULL,
+  `EntityID` bigint(20) DEFAULT NULL,
+  `DefinitionID` int(11) DEFAULT NULL,
+  `Outcome` varchar(20) NOT NULL DEFAULT 'SUCCESS',
+  `SafeSummary` varchar(500) DEFAULT NULL,
+  `OccurredAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  KEY `ix_profile_custom_audit_church_time` (`ChurchID`,`OccurredAt`),
+  KEY `ix_profile_custom_audit_entity` (`EntityType`,`EntityID`,`OccurredAt`),
+  KEY `fk_profile_custom_audit_user` (`UserID`),
+  KEY `fk_profile_custom_audit_definition` (`DefinitionID`),
+  CONSTRAINT `fk_profile_custom_audit_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_profile_custom_audit_definition` FOREIGN KEY (`DefinitionID`) REFERENCES `tblcustomfielddefinition` (`ID`),
+  CONSTRAINT `fk_profile_custom_audit_user` FOREIGN KEY (`UserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_profile_custom_audit_outcome` CHECK (`Outcome` in ('SUCCESS','REJECTED','FAILED'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblprofiletagdefinition` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `EntityType` varchar(10) NOT NULL,
+  `TagKey` varchar(64) NOT NULL,
+  `Label` varchar(100) NOT NULL,
+  `Description` varchar(500) DEFAULT NULL,
+  `PrivacyClass` varchar(12) NOT NULL DEFAULT 'STANDARD',
+  `DisplayColor` varchar(7) DEFAULT NULL,
+  `DisplayOrder` int(11) NOT NULL DEFAULT 0,
+  `Active` tinyint(1) NOT NULL DEFAULT 1,
+  `ReportAllowed` tinyint(1) NOT NULL DEFAULT 0,
+  `ExportAllowed` tinyint(1) NOT NULL DEFAULT 0,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_profile_tag_key` (`ChurchID`,`EntityType`,`TagKey`),
+  KEY `ix_profile_tag_display` (`ChurchID`,`EntityType`,`Active`,`DisplayOrder`),
+  KEY `fk_profile_tag_creator` (`CreatedByUserID`),
+  KEY `fk_profile_tag_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_profile_tag_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_profile_tag_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_profile_tag_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_profile_tag_entity` CHECK (`EntityType` in ('PERSON','FAMILY')),
+  CONSTRAINT `ck_profile_tag_privacy` CHECK (`PrivacyClass` in ('STANDARD','RESTRICTED')),
+  CONSTRAINT `ck_profile_tag_color` CHECK (`DisplayColor` is null or `DisplayColor` regexp '^#[0-9A-Fa-f]{6}$'),
+  CONSTRAINT `ck_profile_tag_order` CHECK (`DisplayOrder` >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
@@ -3263,6 +3600,19 @@ SET character_set_client = @saved_cs_client;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013  SQL SECURITY DEFINER */
 /*!50001 VIEW `rpt_church_identity` AS select `tblchurch`.`ID` AS `ID`,`tblchurch`.`Church` AS `Church`,`tblchurch`.`Address` AS `Address`,`tblchurch`.`Address2` AS `Address2`,`tblchurch`.`City` AS `City`,`tblchurch`.`State` AS `State`,`tblchurch`.`Zip` AS `Zip`,`tblchurch`.`Pastor` AS `Pastor`,`tblchurch`.`Phone` AS `Phone`,`tblchurch`.`eMail` AS `eMail`,`tblchurch`.`Logo` AS `Logo` from `tblchurch` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!50001 DROP VIEW IF EXISTS `rpt_custom_profile_value`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013  SQL SECURITY DEFINER */
+/*!50001 VIEW `rpt_custom_profile_value` AS select `d`.`ChurchID` AS `ChurchID`,'Person' AS `ProfileType`,`p`.`ID` AS `ProfileID`,trim(concat_ws(', ',`p`.`LastName`,trim(concat_ws(' ',`p`.`FirstName`,`p`.`MiddleName`)))) AS `ProfileName`,`d`.`FieldKey` AS `FieldKey`,`d`.`Label` AS `FieldLabel`,`d`.`DataType` AS `FieldType`,case `d`.`DataType` when 'SHORT_TEXT' then `v`.`TextValue` when 'LONG_TEXT' then `v`.`TextValue` when 'INTEGER' then cast(`v`.`IntegerValue` as char charset utf8mb4) when 'DECIMAL' then cast(`v`.`DecimalValue` as char charset utf8mb4) when 'DATE' then date_format(`v`.`DateValue`,'%Y-%m-%d') when 'BOOLEAN' then if(`v`.`BooleanValue` = 1,'Yes','No') when 'SINGLE_CHOICE' then `choice_value`.`Label` else NULL end AS `DisplayValue`,`d`.`LifecycleStatus` AS `FieldStatus`,`d`.`PrivacyClass` AS `PrivacyClass` from (((`tblpersoncustomfieldvalue` `v` join `tblcustomfielddefinition` `d` on(`d`.`ID` = `v`.`DefinitionID` and `d`.`EntityType` = 'PERSON')) join `tblperson` `p` on(`p`.`ID` = `v`.`PersonID` and `p`.`ChurchID` = `d`.`ChurchID`)) left join `tblcustomfieldoption` `choice_value` on(`choice_value`.`ID` = `v`.`OptionID`)) where `d`.`ReportAllowed` = 1 and `d`.`LifecycleStatus` in ('ACTIVE','RETIRED') union all select `d`.`ChurchID` AS `ChurchID`,'Family' AS `Family`,`f`.`ID` AS `ID`,`f`.`FamilyName` AS `FamilyName`,`d`.`FieldKey` AS `FieldKey`,`d`.`Label` AS `Label`,`d`.`DataType` AS `DataType`,case `d`.`DataType` when 'SHORT_TEXT' then `v`.`TextValue` when 'LONG_TEXT' then `v`.`TextValue` when 'INTEGER' then cast(`v`.`IntegerValue` as char charset utf8mb4) when 'DECIMAL' then cast(`v`.`DecimalValue` as char charset utf8mb4) when 'DATE' then date_format(`v`.`DateValue`,'%Y-%m-%d') when 'BOOLEAN' then if(`v`.`BooleanValue` = 1,'Yes','No') when 'SINGLE_CHOICE' then `choice_value`.`Label` else NULL end AS `Name_exp_8`,`d`.`LifecycleStatus` AS `LifecycleStatus`,`d`.`PrivacyClass` AS `PrivacyClass` from (((`tblfamilycustomfieldvalue` `v` join `tblcustomfielddefinition` `d` on(`d`.`ID` = `v`.`DefinitionID` and `d`.`EntityType` = 'FAMILY')) join `tblfamily` `f` on(`f`.`ID` = `v`.`FamilyID` and `f`.`ChurchID` = `d`.`ChurchID`)) left join `tblcustomfieldoption` `choice_value` on(`choice_value`.`ID` = `v`.`OptionID`)) where `d`.`ReportAllowed` = 1 and `d`.`LifecycleStatus` in ('ACTIVE','RETIRED') union all select `d`.`ChurchID` AS `ChurchID`,'Person' AS `Person`,`p`.`ID` AS `ID`,trim(concat_ws(', ',`p`.`LastName`,trim(concat_ws(' ',`p`.`FirstName`,`p`.`MiddleName`)))) AS `Name_exp_4`,`d`.`FieldKey` AS `FieldKey`,`d`.`Label` AS `Label`,`d`.`DataType` AS `DataType`,group_concat(`o`.`Label` order by `o`.`DisplayOrder` ASC,`o`.`Label` ASC separator ', ') AS `Name_exp_8`,`d`.`LifecycleStatus` AS `LifecycleStatus`,`d`.`PrivacyClass` AS `PrivacyClass` from (((`tblpersoncustomfieldoptionvalue` `v` join `tblcustomfielddefinition` `d` on(`d`.`ID` = `v`.`DefinitionID` and `d`.`EntityType` = 'PERSON')) join `tblperson` `p` on(`p`.`ID` = `v`.`PersonID` and `p`.`ChurchID` = `d`.`ChurchID`)) join `tblcustomfieldoption` `o` on(`o`.`ID` = `v`.`OptionID`)) where `d`.`ReportAllowed` = 1 and `d`.`LifecycleStatus` in ('ACTIVE','RETIRED') group by `d`.`ChurchID`,`p`.`ID`,`p`.`LastName`,`p`.`FirstName`,`p`.`MiddleName`,`d`.`FieldKey`,`d`.`Label`,`d`.`DataType`,`d`.`LifecycleStatus`,`d`.`PrivacyClass` union all select `d`.`ChurchID` AS `ChurchID`,'Family' AS `Family`,`f`.`ID` AS `ID`,`f`.`FamilyName` AS `FamilyName`,`d`.`FieldKey` AS `FieldKey`,`d`.`Label` AS `Label`,`d`.`DataType` AS `DataType`,group_concat(`o`.`Label` order by `o`.`DisplayOrder` ASC,`o`.`Label` ASC separator ', ') AS `Name_exp_8`,`d`.`LifecycleStatus` AS `LifecycleStatus`,`d`.`PrivacyClass` AS `PrivacyClass` from (((`tblfamilycustomfieldoptionvalue` `v` join `tblcustomfielddefinition` `d` on(`d`.`ID` = `v`.`DefinitionID` and `d`.`EntityType` = 'FAMILY')) join `tblfamily` `f` on(`f`.`ID` = `v`.`FamilyID` and `f`.`ChurchID` = `d`.`ChurchID`)) join `tblcustomfieldoption` `o` on(`o`.`ID` = `v`.`OptionID`)) where `d`.`ReportAllowed` = 1 and `d`.`LifecycleStatus` in ('ACTIVE','RETIRED') group by `d`.`ChurchID`,`f`.`ID`,`f`.`FamilyName`,`d`.`FieldKey`,`d`.`Label`,`d`.`DataType`,`d`.`LifecycleStatus`,`d`.`PrivacyClass` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;

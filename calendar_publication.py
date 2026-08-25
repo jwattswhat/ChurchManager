@@ -72,15 +72,15 @@ class MariaDBCalendarPublicationRepository:
                 "INSERT INTO tblCalendarPublication "
                 "(ChurchID,SourceType,SourceID,StableUID,Provider,DestinationIdentifier,ProviderEventID,"
                 "LastPublishedVersion,LastPublishedHash,LastPublishedAt,LastResult,SafeDiagnosticCode,Active) "
-                "VALUES (?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP(6),?,?,1) "
+                "VALUES (?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP(6),?,?,?) "
                 "ON DUPLICATE KEY UPDATE ChurchID=VALUES(ChurchID),SourceType=VALUES(SourceType),"
                 "SourceID=VALUES(SourceID),ProviderEventID=COALESCE(VALUES(ProviderEventID),ProviderEventID),"
                 "LastPublishedVersion=VALUES(LastPublishedVersion),LastPublishedHash=VALUES(LastPublishedHash),"
                 "LastPublishedAt=CURRENT_TIMESTAMP(6),LastResult=VALUES(LastResult),"
-                "SafeDiagnosticCode=VALUES(SafeDiagnosticCode),Active=1",
+                "SafeDiagnosticCode=VALUES(SafeDiagnosticCode),Active=VALUES(Active)",
                 (descriptor.church_id, descriptor.source_type, descriptor.source_id, descriptor.uid,
                  provider, destination, provider_event_id, descriptor.version, source_hash,
-                 result, diagnostic_code))
+                 result, diagnostic_code, 0 if result == "CANCELLED" else 1))
             self.connection.commit()
         except Exception:
             self.connection.rollback(); raise
@@ -121,6 +121,38 @@ class CalendarPublicationService:
         self.authorization.require("calendar.publish", "publish calendar events")
         if self.test_mode:
             raise CalendarPublicationError("TEST MODE never publishes to an external calendar.")
+
+    def publish(self, provider_name, destination, decisions, adapter):
+        """Execute an approved plan and retain retry-safe per-event results."""
+        self.ensure_live_publish_allowed()
+        results = []
+        for decision in decisions:
+            if not isinstance(decision, PublicationDecision):
+                raise CalendarPublicationError("The publication plan is invalid.")
+            if decision.action == "SKIP":
+                results.append((decision, "SKIPPED", None)); continue
+            try:
+                if decision.action == "CREATE":
+                    provider_event_id = adapter.create(destination, decision.descriptor)
+                    result = "SUCCESS"
+                elif decision.action == "UPDATE":
+                    provider_event_id = adapter.update(destination, decision.provider_event_id, decision.descriptor)
+                    result = "SUCCESS"
+                elif decision.action == "CANCEL":
+                    adapter.cancel(destination, decision.provider_event_id)
+                    provider_event_id = decision.provider_event_id; result = "CANCELLED"
+                else:
+                    raise CalendarPublicationError("The publication action is invalid.")
+                self.repository.record_result(decision.descriptor, provider_name, destination,
+                                              decision.source_hash, result, provider_event_id)
+                results.append((decision, result, None))
+            except Exception as error:
+                code = type(error).__name__[:100]
+                self.repository.record_result(decision.descriptor, provider_name, destination,
+                                              decision.source_hash, "ERROR",
+                                              decision.provider_event_id, code)
+                results.append((decision, "ERROR", code))
+        return tuple(results)
 
 
 def _required(value, label):
