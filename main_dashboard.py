@@ -1,0 +1,51 @@
+"""Brand and configure ChurchManager's compact daily-work dashboard."""
+
+import io
+
+import wx
+
+
+def _church_identity(connection):
+    cursor = connection.cursor()
+    try:
+        cursor.execute(
+            "SELECT Church, Logo FROM tblChurch "
+            "WHERE ID > 0 ORDER BY ID LIMIT 1"
+        )
+        return cursor.fetchone() or ("ChurchManager", None)
+    finally:
+        cursor.close()
+
+
+def apply_congregation_branding(main_form, connection):
+    """Display the first configured congregation name and logo prominently."""
+    church_name, logo_bytes = _church_identity(connection)
+    main_form.CONTROLID["lblChurchName"].SetLabel(church_name or "ChurchManager")
+    name_font = main_form.CONTROLID["lblChurchName"].GetFont()
+    name_font.SetWeight(wx.FONTWEIGHT_BOLD)
+    name_font.SetPointSize(name_font.GetPointSize() + 2)
+    main_form.CONTROLID["lblChurchName"].SetFont(name_font)
+
+    placeholder = main_form.CONTROLID["lblChurchLogo"]
+    if not logo_bytes:
+        placeholder.SetLabel("No church logo\nChurch Information can add one.")
+        return None
+    image = wx.Image(io.BytesIO(bytes(logo_bytes)))
+    if not image.IsOk():
+        placeholder.SetLabel("Church logo unavailable")
+        return None
+    width, height = placeholder.GetSize()
+    scale = min(width / image.GetWidth(), height / image.GetHeight())
+    image.Rescale(
+        max(1, int(image.GetWidth() * scale)),
+        max(1, int(image.GetHeight() * scale)),
+        wx.IMAGE_QUALITY_HIGH,
+    )
+    bitmap = wx.StaticBitmap(
+        placeholder.GetParent(), wx.ID_ANY, wx.Bitmap(image),
+        pos=placeholder.GetPosition(), size=placeholder.GetSize(),
+    )
+    bitmap.SetToolTip(church_name or "Church logo")
+    placeholder.Hide()
+    bitmap.Raise()
+    return bitmap

@@ -10,9 +10,6 @@ from permission_catalog import MAIN_MENU_PERMISSIONS
 
 class LectionaryPackageDialogTests(unittest.TestCase):
     def test_package_manager_is_protected_and_routed(self):
-        form = json.loads(Path("Forms/frmMain.json").read_text(encoding="utf-8"))
-        control = form["frmMainFORM"]["CONTROLS"]["lblLectionaryPackages"]
-        self.assertEqual(control["security"]["invoke"], "application.config.manage")
         self.assertIn("lblLectionaryPackages", SPECIAL_CONTROLS)
         self.assertEqual(
             MAIN_MENU_PERMISSIONS["lblLectionaryPackages"], "application.config.manage",

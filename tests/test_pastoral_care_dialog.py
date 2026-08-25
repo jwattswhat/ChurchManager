@@ -31,7 +31,7 @@ class PastoralCareDialogTests(unittest.TestCase):
             controls["lblPastoralCare"]["security"]["invoke"],
             "pastoral.care.view.assigned",
         )
-        self.assertEqual(controls["PastoralCareBox"]["layout"], {"row": 2, "column": 2})
+        self.assertEqual(controls["PeopleBox"]["layout"], {"row": 0, "column": 2})
 
     def test_restricted_note_entry_is_permission_controlled_and_closed_by_default(self):
         self.assertIn("PastoralRestrictedNoteService", self.source)

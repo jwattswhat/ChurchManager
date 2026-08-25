@@ -84,8 +84,6 @@ class TestChurchManagerScreenDesigner(unittest.TestCase):
         import json
         from main_menu import MENU_CONTROLS
         from permission_catalog import MAIN_MENU_PERMISSIONS
-        definition = json.loads(Path("Forms/frmMain.json").read_text(encoding="utf-8"))["frmMainFORM"]
-        self.assertEqual(definition["CONTROLS"]["lblScreenDesigner"]["security"]["invoke"], "screens.design")
         self.assertIn("lblScreenDesigner", MENU_CONTROLS)
         self.assertEqual(MAIN_MENU_PERMISSIONS["lblScreenDesigner"], "screens.design")
         sql = Path("migrations/021_add_screen_designer_permission.sql").read_text(encoding="utf-8")

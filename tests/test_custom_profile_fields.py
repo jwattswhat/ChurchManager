@@ -62,10 +62,10 @@ class CustomProfileFieldMigrationTests(unittest.TestCase):
             self.assertIn(f'"{field}"', source)
 
     def test_search_screen_is_routed_and_permission_guarded(self):
-        form = (ROOT / "Forms" / "frmMain.json").read_text(encoding="utf-8")
+        form = (ROOT / "Menus" / "main.menu.json").read_text(encoding="utf-8")
         router = (ROOT / "main_menu.py").read_text(encoding="utf-8")
         permissions = (ROOT / "permission_catalog.py").read_text(encoding="utf-8")
-        self.assertIn('"lblCustomProfileSearch"', form)
+        self.assertIn('churchmanager.custom_profile_search', form)
         self.assertIn('"lblCustomProfileSearch"', router)
         self.assertIn('"lblCustomProfileSearch": "profiles.custom_fields.view"', permissions)
 

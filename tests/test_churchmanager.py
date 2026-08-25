@@ -86,6 +86,8 @@ OPERATIONAL_MODULES = (
     "bootstrap_test_master.py",
     "form_factory.py",
     "main_menu.py",
+    "churchmanager_menu.py",
+    "main_dashboard.py",
     "startup.py",
     "login_dialog.py",
     "user_admin.py",
@@ -109,6 +111,40 @@ OPERATIONAL_MODULES = (
     "rptMemberDirectory.py",
     "sermon2blogger.py",
 )
+
+
+class TestApplicationMenuAndDashboard(unittest.TestCase):
+    def test_native_menu_references_every_registered_churchmanager_action(self):
+        from main_menu import MENU_CONTROLS, command_name
+
+        definition = load_json(ROOT / "Menus" / "main.menu.json")
+        def commands(items):
+            for item in items:
+                if "command" in item:
+                    yield item["command"]
+                elif "items" in item:
+                    yield from commands(item["items"])
+
+        referenced = {
+            command
+            for menu in definition["menus"]
+            for command in commands(menu["items"])
+            if command.startswith("churchmanager.")
+        }
+        self.assertEqual(referenced, {command_name(name) for name in MENU_CONTROLS})
+
+    def test_dashboard_uses_the_congregation_logo_and_only_routine_groups(self):
+        controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
+        self.assertIn("lblChurchLogo", controls)
+        self.assertIn("lblChurchName", controls)
+        self.assertIn("PlanningBox", controls)
+        self.assertIn("PeopleBox", controls)
+        self.assertIn("GivingBox", controls)
+        self.assertIn("DailyAccountingBox", controls)
+        self.assertNotIn("AccountingSetupBox", controls)
+        self.assertNotIn("DesignersBox", controls)
+        branding = (ROOT / "main_dashboard.py").read_text(encoding="utf-8")
+        self.assertIn("SELECT Church, Logo FROM tblChurch", branding)
 
 
 def load_json(path: Path):
@@ -750,18 +786,16 @@ class TestChurchManagerForms(unittest.TestCase):
         self.assertIn("DELETE FROM tblServiceReadingSnapshot", migration)
 
     def test_user_administration_is_a_protected_main_menu_action(self):
-        definition = next(iter(load_json(FORMS / "frmMain.json").values()))
-        control = definition["CONTROLS"]["lblUsers"]
-        self.assertEqual(control["security"]["invoke"], "security.users.manage")
         from main_menu import MENU_CONTROLS
+        from permission_catalog import MAIN_MENU_PERMISSIONS
         self.assertIn("lblUsers", MENU_CONTROLS)
+        self.assertEqual(MAIN_MENU_PERMISSIONS["lblUsers"], "security.users.manage")
 
     def test_report_designer_is_a_separately_protected_main_menu_action(self):
-        definition = next(iter(load_json(FORMS / "frmMain.json").values()))
-        control = definition["CONTROLS"]["lblReportDesigner"]
-        self.assertEqual(control["security"]["invoke"], "reports.design")
         from main_menu import MENU_CONTROLS
+        from permission_catalog import MAIN_MENU_PERMISSIONS
         self.assertIn("lblReportDesigner", MENU_CONTROLS)
+        self.assertEqual(MAIN_MENU_PERMISSIONS["lblReportDesigner"], "reports.design")
         source = (ROOT / "cm.py").read_text(encoding="utf-8-sig")
         self.assertIn('case "lblReportDesigner":', source)
         self.assertIn(
@@ -772,13 +806,11 @@ class TestChurchManagerForms(unittest.TestCase):
         from main_menu import MENU_CONTROLS
         from permission_catalog import MAIN_MENU_PERMISSIONS
 
-        controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
         self.assertEqual(set(MENU_CONTROLS), set(MAIN_MENU_PERMISSIONS))
-        for control_name, permission in MAIN_MENU_PERMISSIONS.items():
-            self.assertEqual(
-                controls[control_name]["security"]["invoke"], permission,
-                control_name,
-            )
+        menu_text = (ROOT / "Menus" / "main.menu.json").read_text(encoding="utf-8")
+        from main_menu import command_name
+        for control_name in MAIN_MENU_PERMISSIONS:
+            self.assertIn(command_name(control_name), menu_text, control_name)
 
     def test_main_menu_dispatch_rechecks_permissions(self):
         source = (ROOT / "cm.py").read_text(encoding="utf-8-sig")
@@ -860,14 +892,9 @@ class TestChurchManagerForms(unittest.TestCase):
                 set(definition["FORM"]["security"].values()),
                 {"accounting.master_data.manage"},
             )
-        main_controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
-        box = main_controls["FundAccountingBox"]
-        left, top = box["posch"]
-        width, height = box["sizech"]
-        for name in ("lblAccountingYears", "lblAccountingPeriods"):
-            x, y = main_controls[name]["posch"]
-            self.assertTrue(left < x < left + width, name)
-            self.assertTrue(top < y < top + height, name)
+        menu = (ROOT / "Menus" / "main.menu.json").read_text(encoding="utf-8")
+        self.assertIn("churchmanager.accounting_years", menu)
+        self.assertIn("churchmanager.accounting_periods", menu)
 
     def test_transaction_entry_is_a_protected_special_workflow(self):
         from main_menu import SPECIAL_CONTROLS
@@ -931,24 +958,18 @@ class TestChurchManagerForms(unittest.TestCase):
         from permission_catalog import MAIN_MENU_PERMISSIONS
         self.assertIn("lblAccountingTrialBalance", SPECIAL_CONTROLS)
         self.assertEqual(MAIN_MENU_PERMISSIONS["lblAccountingTrialBalance"], "accounting.reports.run")
-        controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
-        self.assertEqual(controls["lblAccountingTrialBalance"]["security"]["invoke"], "accounting.reports.run")
 
     def test_financial_position_is_a_protected_special_workflow(self):
         from main_menu import SPECIAL_CONTROLS
         from permission_catalog import MAIN_MENU_PERMISSIONS
         self.assertIn("lblAccountingPosition",SPECIAL_CONTROLS)
         self.assertEqual(MAIN_MENU_PERMISSIONS["lblAccountingPosition"],"accounting.reports.run")
-        controls=load_json(FORMS/"frmMain.json")["frmMainFORM"]["CONTROLS"]
-        self.assertEqual(controls["lblAccountingPosition"]["security"]["invoke"],"accounting.reports.run")
 
     def test_statement_of_activities_is_a_protected_special_workflow(self):
         from main_menu import SPECIAL_CONTROLS
         from permission_catalog import MAIN_MENU_PERMISSIONS
         self.assertIn("lblAccountingActivities",SPECIAL_CONTROLS)
         self.assertEqual(MAIN_MENU_PERMISSIONS["lblAccountingActivities"],"accounting.reports.run")
-        controls=load_json(FORMS/"frmMain.json")["frmMainFORM"]["CONTROLS"]
-        self.assertEqual(controls["lblAccountingActivities"]["security"]["invoke"],"accounting.reports.run")
 
     def test_bank_accounts_are_protected_jsform_master_data(self):
         from main_menu import FORM_ROUTES
@@ -960,9 +981,6 @@ class TestChurchManagerForms(unittest.TestCase):
         lookup=form["CONTROLS"]["AccountID"]["lookupchoices"]
         self.assertIn("AccountType = 'ASSET'",lookup["condition"])
         self.assertIn("last four digits",form["CONTROLS"]["AccountLastFour"]["tooltip"])
-        controls=load_json(FORMS/"frmMain.json")["frmMainFORM"]["CONTROLS"]
-        box=controls["DesignersBox"]; top=box["posch"][1]; bottom=top+box["sizech"][1]
-        self.assertTrue(top < controls["lblAccountingActivities"]["posch"][1] < bottom)
 
     def test_payees_are_protected_jsform_master_data(self):
         from main_menu import FORM_ROUTES
@@ -1059,31 +1077,23 @@ class TestChurchManagerForms(unittest.TestCase):
     def test_bound_main_menu_controls_exist(self):
         from main_menu import MENU_CONTROLS
 
-        bound = set(MENU_CONTROLS)
         main = next(iter(load_json(FORMS / "frmMain.json").values()))
         controls = set(main["CONTROLS"])
-        self.assertGreater(bound, set(), "No ChurchManager main-menu bindings found")
-        self.assertEqual(bound - controls, set(), "cm.py binds controls missing from frmMain.json")
+        visible_actions = controls & set(MENU_CONTROLS)
+        self.assertGreater(visible_actions, set(), "No dashboard actions found")
+        self.assertTrue(visible_actions <= set(MENU_CONTROLS))
 
-    def test_main_menu_has_compact_four_column_dashboard(self):
+    def test_main_menu_has_compact_daily_work_dashboard(self):
         main = next(iter(load_json(FORMS / "frmMain.json").values()))
         controls = main["CONTROLS"]
-        expected = {
-            "ChurchBox": "Service Planning",
-            "MemberBox": "People and Congregation",
-            "GivingBox": "Member Giving",
-            "ServiceBox": "Worship Resources",
-            "ReportBox": "Reports and Design",
-            "UtilitiesBox": "ChurchManager Settings",
-            "SessionBox": "Current User",
-            "BulletinBox": "Accounting - Daily Work",
-            "DesignersBox": "Accounting - Reports",
-            "FundAccountingBox": "Accounting - Setup and Close",
-        }
+        expected = {"BrandBox": "Your Congregation", "PlanningBox": "This Week's Worship",
+                    "PeopleBox": "People and Attendance", "QuickBox": "Regular Office Work",
+                    "GivingBox": "Member Giving", "DailyAccountingBox": "Accounting - Daily Work",
+                    "SessionBox": "Current User"}
         self.assertEqual(
             {name: controls[name]["label"] for name in expected}, expected,
         )
-        self.assertEqual({controls[name]["posch"][0] for name in expected}, {1, 14, 27, 40})
+        self.assertEqual({controls[name]["posch"][0] for name in expected}, {1, 14, 28})
 
         occupied = []
         for name in expected:
@@ -1094,8 +1104,7 @@ class TestChurchManagerForms(unittest.TestCase):
 
     def test_main_menu_groups_work_by_usage(self):
         controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
-        self.assertEqual(controls["ServiceBox"]["label"], "Worship Resources")
-        self.assertEqual(controls["ChurchBox"]["label"], "Service Planning")
+        self.assertEqual(controls["PlanningBox"]["label"], "This Week's Worship")
         planning_items = [
             "lblService", "lblWeeklyBulletinOrder", "lblServiceSchedule",
             "lblNotifyParticipants", "lblSundayPrayers", "lblAnnouncements",
@@ -1108,61 +1117,27 @@ class TestChurchManagerForms(unittest.TestCase):
         self.assertEqual(controls["lblGivingContributors"]["posch"], [15, 14])
         self.assertEqual(
             sorted(controls[name]["posch"][1] for name in (
-                "lblGivingContributors", "lblGivingPurposes",
-                "lblContributionBatches", "lblGivingReports",
-            )),
-            list(range(14, 18)),
+                "lblContributionBatches", "lblGivingContributors", "lblGivingReports",
+            )), [13, 14, 15],
         )
         self.assertEqual(
             controls["lblGivingContributors"]["security"]["invoke"],
             "giving.contributors.manage",
         )
-        self.assertEqual(controls["lblGivingPurposes"]["posch"], [15, 15])
-        self.assertEqual(
-            controls["lblGivingPurposes"]["security"]["invoke"],
-            "giving.purposes.manage",
-        )
-        self.assertEqual(controls["MemberBox"]["sizech"], [12, 12])
-        self.assertEqual(controls["GivingBox"]["sizech"], [12, 6])
-        self.assertEqual(controls["lblContributionBatches"]["posch"], [15, 16])
+        self.assertEqual(controls["GivingBox"]["sizech"], [13, 7])
+        self.assertEqual(controls["lblContributionBatches"]["posch"], [15, 13])
         self.assertEqual(
             controls["lblContributionBatches"]["security"]["invoke"],
             "giving.batches.enter",
         )
-        self.assertEqual(controls["lblGivingReports"]["posch"], [15, 17])
+        self.assertEqual(controls["lblGivingReports"]["posch"], [15, 15])
         self.assertEqual(
             controls["lblGivingReports"]["security"]["invoke"],
             "giving.reports.summary",
         )
-        self.assertEqual(controls["ReportBox"]["posch"], [14, 19])
-
-        stacked_boxes = ["MemberBox", "GivingBox", "ReportBox", "SessionBox"]
-        for upper_name, lower_name in zip(stacked_boxes, stacked_boxes[1:]):
-            upper = controls[upper_name]
-            lower = controls[lower_name]
-            upper_bottom = upper["posch"][1] + upper["sizech"][1]
-            self.assertLessEqual(
-                upper_bottom,
-                lower["posch"][1],
-                f"{upper_name} overlaps {lower_name}",
-            )
-        resource_items = [
-            "lblOS", "lblCheckList", "lblPropers", "lblSermon", "lblHymnal",
-            "lblHymn", "lblParticipant", "lblSchedule", "lblPrayers",
-            "lblWorshipPositions", "lblAnnouncement", "lblAttendanceEvent",
-        ]
-        self.assertEqual(
-            sorted(controls[name]["posch"][1] for name in resource_items),
-            list(range(12, 24)),
-        )
-        service_top = controls["ServiceBox"]["posch"][1]
-        service_bottom = service_top + controls["ServiceBox"]["sizech"][1]
-        self.assertTrue(all(
-            service_top < controls[name]["posch"][1] < service_bottom
-            for name in resource_items
-        ), "Every Worship Resources link must remain inside its box")
-        self.assertTrue(all(controls[name]["label"] == controls[name]["label"].strip()
-                            for name in resource_items))
+        menu = (ROOT / "Menus" / "main.menu.json").read_text(encoding="utf-8")
+        self.assertIn('"label": "Worship &Resources"', menu)
+        self.assertIn("churchmanager.giving_purposes", menu)
         from main_menu import FORM_ROUTES
         self.assertEqual(FORM_ROUTES["lblHymnal"], "frmHymnal")
         self.assertEqual(FORM_ROUTES["lblHymn"], "frmHymn")

@@ -16,6 +16,8 @@ import JSForm
 from application_context import ApplicationContext
 from form_factory import ChurchManagerFormFactory
 from main_menu import FORM_ROUTES, MENU_CONTROLS, SESSION_CONTROLS
+from churchmanager_menu import install_churchmanager_menu
+from main_dashboard import apply_congregation_branding
 from login_dialog import change_own_password
 from authentication import MariaDBUserRepository
 from permission_catalog import MAIN_MENU_PERMISSIONS
@@ -447,7 +449,7 @@ def _buttonclick(event):
         result = dlg.ShowModal()
         dlg.Destroy()
 
-    select = event.GetEventObject().GetName()
+    select = event if isinstance(event, str) else event.GetEventObject().GetName()
     if select == "lblHelp":
         try:
             open_user_guide()
@@ -771,6 +773,12 @@ def main(argv=None):
             connection_settings=context.settings,
         ),
     )
+    context.menu_installer = install_churchmanager_menu(
+        cmfrm, context, _buttonclick,
+    )
+    context.church_logo = apply_congregation_branding(
+        cmfrm, context.connection,
+    )
 
     closing = {"started": False}
     def on_main_close(event):
@@ -805,6 +813,10 @@ def main(argv=None):
     cmfrm.show()
     app.MainLoop()
     restart = bool(getattr(context, "restart_requested", False))
+    try:
+        context.menu_installer.dispose()
+    except Exception:
+        pass
     try:
         ChurchDB.DBConnection.close(); ChurchDB.JSConnection.close()
     except Exception:

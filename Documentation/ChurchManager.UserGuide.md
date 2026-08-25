@@ -53,10 +53,13 @@ not production congregation data.
 
 ### Moving around
 
-The main menu is organized by task. Select a blue item to open it. Close a task
-window to return to the main menu. Lists generally support double-clicking a row
-to open or edit the selected item. Buttons that are unavailable are disabled
-until the required selection is made.
+ChurchManager opens to a compact daily-work dashboard. The congregation's own
+logo and name identify the open church. Select a blue dashboard item for common
+weekly work, or use the application menus for setup, resource maintenance,
+design, reports, and other less-frequent work. Close a task window to return to
+the dashboard. Lists generally support double-clicking a row to open or edit
+the selected item. Buttons that are unavailable are disabled until the required
+selection is made.
 
 ### Saving work
 
@@ -65,6 +68,16 @@ screen reports unsaved changes, choose whether to save or discard them. Red
 rows or red text identify information that still needs attention.
 
 ## 2. The main menu
+
+The dashboard intentionally shows routine work rather than every ChurchManager
+function. The menu bar contains the complete authorized command set, grouped as
+**File**, **Worship**, **People**, **Giving**, **Accounting**, **Reports**,
+**Tools**, and **Help**. Menu items appear or become available according to the
+signed-in user's permissions.
+
+The church logo displayed on the dashboard comes from **People > Church
+Information**. That screen also maintains the congregation name shown beside
+the logo.
 
 ### Service Planning
 

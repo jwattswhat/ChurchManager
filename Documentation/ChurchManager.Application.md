@@ -144,13 +144,18 @@ During startup ChurchManager:
 - checks internet connectivity;
 - opens the database connection;
 - initializes JSForm configuration, options, and fonts;
-- creates the main menu from `Forms/frmMain.json`;
-- binds main-menu labels to forms and custom actions; and
+- creates the compact daily-work dashboard from `Forms/frmMain.json`;
+- loads the native application menu from `Menus/main.menu.json`;
+- registers permission-aware menu commands and their ChurchManager handlers;
+- displays the first configured congregation's name and database-stored logo;
+- binds the dashboard's routine-work labels to the same commands; and
 - enters the wxPython event loop.
 
 Application-specific orchestration is separated into small modules:
 
 - `main_menu.py` declares the menu-to-form routes;
+- `churchmanager_menu.py` registers and installs the JSForm application menu;
+- `main_dashboard.py` applies congregation branding to the daily dashboard;
 - `form_factory.py` consistently creates JSForm-backed ChurchManager forms;
 - `backup_service.py` creates backups without exposing a password in the
   process command line;
@@ -855,13 +860,19 @@ See [form.documentation.md](form.documentation.md) for the JSON reference.
 
 ### 14.2 Adding a main-menu item
 
-The main menu is defined in `Forms/frmMain.json`, but a visible label alone does not open a form. A complete menu addition normally requires:
+The complete application menu is defined in `Menus/main.menu.json` and installed
+through JSForm's shared command model. A complete menu addition normally
+requires:
 
-1. a `StaticText` or button control in `frmMain.json`;
-2. a matching event binding near the end of `cm.py`; and
-3. a matching `case` in `_buttonclick()` that either sets `formname` or runs a custom action.
+1. a stable ChurchManager control/action name in `main_menu.py`;
+2. a permission in the main-menu permission catalog;
+3. a handler route in `_buttonclick()` or the appropriate service;
+4. a registered command in `churchmanager_menu.py`; and
+5. a command reference in `Menus/main.menu.json`.
 
-Keep the control name identical across all three locations.
+Add a matching control to `Forms/frmMain.json` only when the action belongs on
+the routine-work dashboard. Setup and maintenance actions should normally remain
+in the application menus so the dashboard stays compact.
 
 ### 14.3 Adding a report
 

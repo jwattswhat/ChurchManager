@@ -182,12 +182,8 @@ class DataManagementTests(unittest.TestCase):
                 read_csv_rows(path)
 
     def test_main_menu_opens_data_management_with_membership_permission(self):
-        controls = json.loads((ROOT / "Forms" / "frmMain.json").read_text(encoding="utf-8"))[
-            "frmMainFORM"
-        ]["CONTROLS"]
-        self.assertEqual(
-            controls["lblDataManagement"]["security"]["invoke"], "membership.manage"
-        )
+        from permission_catalog import MAIN_MENU_PERMISSIONS
+        self.assertEqual(MAIN_MENU_PERMISSIONS["lblDataManagement"], "membership.manage")
         menu = (ROOT / "main_menu.py").read_text(encoding="utf-8")
         application = (ROOT / "cm.py").read_text(encoding="utf-8")
         permissions = (ROOT / "permission_catalog.py").read_text(encoding="utf-8")
