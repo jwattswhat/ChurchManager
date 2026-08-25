@@ -1073,3 +1073,13 @@ The separate JSForm framework guide is needed only by a developer changing the u
 ---
 
 ChurchManager represents both software and accumulated congregational operational knowledge. Maintaining it well requires protecting its records, preserving verified backups, documenting configuration, and testing workflows that cross the database, filesystem, reports, email, and calendar integrations.
+
+### Provider-neutral calendar sources
+
+`calendar_sources.py` is the privacy boundary between ChurchManager records and
+external calendar formats. It returns one bounded descriptor type for eligible
+Church Events, Worship Services, and standard Group Meetings. It deliberately
+omits Group notes, restricted Groups, membership/contact data, pastoral data,
+Giving data, and provider credentials. Source-specific permissions are checked
+in addition to `calendar.view`. Recurring Church Events are expanded only for a
+requested date range and receive stable occurrence UIDs.

@@ -115,6 +115,13 @@ The contract contains no SQL, callback, provider token, donor identity,
 pastoral narrative, or unrestricted Person/Family data. Unsupported or
 unauthorized sources fail closed.
 
+**Implementation status:** The common descriptor and read-only adapters for
+Church Events, Worship Services, and standard Group Meetings are implemented.
+Recurring Church Events expand into stable occurrence descriptors for a
+selected date range. Restricted Groups and Group notes are excluded at the
+repository boundary. Project adapters remain dependent on the future Projects
+subsystem.
+
 ## 6. iCalendar behavior
 
 - UID format is stable and globally namespaced to ChurchManager, for example
