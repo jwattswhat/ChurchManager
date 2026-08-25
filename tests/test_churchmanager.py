@@ -1105,36 +1105,47 @@ class TestChurchManagerForms(unittest.TestCase):
             sorted(controls[name]["posch"][1] for name in planning_items),
             list(range(2, 9)),
         )
-        self.assertEqual(controls["lblGivingContributors"]["posch"], [15, 12])
+        self.assertEqual(controls["lblGivingContributors"]["posch"], [15, 14])
         self.assertEqual(
             sorted(controls[name]["posch"][1] for name in (
                 "lblGivingContributors", "lblGivingPurposes",
                 "lblContributionBatches", "lblGivingReports",
             )),
-            list(range(12, 16)),
+            list(range(14, 18)),
         )
         self.assertEqual(
             controls["lblGivingContributors"]["security"]["invoke"],
             "giving.contributors.manage",
         )
-        self.assertEqual(controls["lblGivingPurposes"]["posch"], [15, 13])
+        self.assertEqual(controls["lblGivingPurposes"]["posch"], [15, 15])
         self.assertEqual(
             controls["lblGivingPurposes"]["security"]["invoke"],
             "giving.purposes.manage",
         )
         self.assertEqual(controls["MemberBox"]["sizech"], [12, 12])
         self.assertEqual(controls["GivingBox"]["sizech"], [12, 6])
-        self.assertEqual(controls["lblContributionBatches"]["posch"], [15, 14])
+        self.assertEqual(controls["lblContributionBatches"]["posch"], [15, 16])
         self.assertEqual(
             controls["lblContributionBatches"]["security"]["invoke"],
             "giving.batches.enter",
         )
-        self.assertEqual(controls["lblGivingReports"]["posch"], [15, 15])
+        self.assertEqual(controls["lblGivingReports"]["posch"], [15, 17])
         self.assertEqual(
             controls["lblGivingReports"]["security"]["invoke"],
             "giving.reports.summary",
         )
-        self.assertEqual(controls["ReportBox"]["posch"], [14, 18])
+        self.assertEqual(controls["ReportBox"]["posch"], [14, 19])
+
+        stacked_boxes = ["MemberBox", "GivingBox", "ReportBox", "SessionBox"]
+        for upper_name, lower_name in zip(stacked_boxes, stacked_boxes[1:]):
+            upper = controls[upper_name]
+            lower = controls[lower_name]
+            upper_bottom = upper["posch"][1] + upper["sizech"][1]
+            self.assertLessEqual(
+                upper_bottom,
+                lower["posch"][1],
+                f"{upper_name} overlaps {lower_name}",
+            )
         resource_items = [
             "lblOS", "lblCheckList", "lblPropers", "lblSermon", "lblHymnal",
             "lblHymn", "lblParticipant", "lblSchedule", "lblPrayers",
