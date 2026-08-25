@@ -35,8 +35,12 @@ class EventEditorDialog(wx.Dialog):
         grid = wx.FlexGridSizer(cols=2, hgap=12, vgap=9); grid.AddGrowableCol(1, 1)
         self.title = wx.TextCtrl(panel, value=str(self.event.get("title") or ""))
         self.date = wx.adv.DatePickerCtrl(panel)
-        self.start = wx.adv.TimePickerCtrl(panel); self.end = wx.adv.TimePickerCtrl(panel)
-        self.has_end = wx.CheckBox(panel, label="Use an end time")
+        self.start = wx.adv.TimePickerCtrl(panel)
+        self.end_panel = wx.Panel(panel); end_row = wx.BoxSizer(wx.HORIZONTAL)
+        self.has_end = wx.CheckBox(self.end_panel, label="Use an end time")
+        self.end = wx.adv.TimePickerCtrl(self.end_panel)
+        end_row.Add(self.has_end, 0, wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, 10)
+        end_row.Add(self.end, 1); self.end_panel.SetSizer(end_row)
         self.all_day = wx.CheckBox(panel, label="All-day event")
         self.location = wx.TextCtrl(panel, value=str(self.event.get("location") or ""))
         self.status = wx.Choice(panel, choices=["Planned", "Confirmed", "Cancelled", "Completed"])
@@ -52,7 +56,7 @@ class EventEditorDialog(wx.Dialog):
         else: self.end.SetTime(min(starts.hour + 1, 23), starts.minute, 0)
         self.all_day.SetValue(bool(self.event.get("all_day")))
         for label, control in (("Title", self.title), ("Date", self.date), ("Start time", self.start),
-                               ("End", self._end_panel(panel)), ("Timing", self.all_day),
+                               ("End", self.end_panel), ("Timing", self.all_day),
                                ("Location", self.location), ("Status", self.status),
                                ("Publication", self.eligible), ("Safe description", self.description)):
             grid.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL); grid.Add(control, 1, wx.EXPAND)
@@ -61,9 +65,6 @@ class EventEditorDialog(wx.Dialog):
         buttons.Add(wx.Button(panel, wx.ID_OK, "Save Event"), 0, wx.RIGHT, 8); buttons.Add(wx.Button(panel, wx.ID_CANCEL, "Cancel"))
         outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 14); panel.SetSizer(outer)
         self.all_day.Bind(wx.EVT_CHECKBOX, self._timing); self.has_end.Bind(wx.EVT_CHECKBOX, self._timing); self._timing(None)
-
-    def _end_panel(self, parent):
-        panel = wx.Panel(parent); row = wx.BoxSizer(wx.HORIZONTAL); row.Add(self.has_end, 0, wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, 10); row.Add(self.end, 1); panel.SetSizer(row); return panel
 
     def _timing(self, _event):
         timed = not self.all_day.GetValue(); self.start.Enable(timed); self.has_end.Enable(timed); self.end.Enable(timed and self.has_end.GetValue())

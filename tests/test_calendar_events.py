@@ -1,6 +1,7 @@
 """Contracts for the approved standalone Church event foundation."""
 
 from datetime import datetime
+from pathlib import Path
 import unittest
 
 from calendar_events import CalendarEventError, CalendarEventService
@@ -46,6 +47,11 @@ class CalendarEventTests(unittest.TestCase):
         from permission_catalog import MAIN_MENU_PERMISSIONS
         self.assertIn("lblCalendarEvents", MENU_CONTROLS)
         self.assertEqual(MAIN_MENU_PERMISSIONS["lblCalendarEvents"], "calendar.view")
+
+    def test_end_controls_are_children_of_their_sizer_panel(self):
+        source = Path("calendar_event_dialog.py").read_text(encoding="utf-8")
+        self.assertIn("wx.CheckBox(self.end_panel", source)
+        self.assertIn("wx.adv.TimePickerCtrl(self.end_panel)", source)
 
 
 if __name__ == "__main__": unittest.main()
