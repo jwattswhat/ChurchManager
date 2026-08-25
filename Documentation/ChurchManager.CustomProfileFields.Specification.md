@@ -334,6 +334,14 @@ reordering, and retiring field and tag definitions. Before activation, it shows
 a non-record preview of the JSForm control and summarizes privacy, permissions,
 directory, report, and export behavior.
 
+Double-clicking a definition, or choosing **Open Field**, displays its complete
+record, including stable identity, lifecycle, version, validation settings,
+usage policies, and choices. Draft definitions are fully editable. Once Active,
+the stable key, entity type, data type, privacy class, and validation boundaries
+are locked, while labels, help text, section, display order, required status,
+and approved search/report/export policies remain editable. Retired definitions
+are retained as read-only history.
+
 The screen warns when a proposed custom field appears to duplicate a built-in
 field or supported relationship. Activation requires an explicit confirmation
 that the field contains no prohibited content category.

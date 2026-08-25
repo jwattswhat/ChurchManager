@@ -104,6 +104,14 @@ and restricted fields follow separate permissions; custom fields must not be
 used for passwords, payment data, full worship content, or confidential
 pastoral narratives.
 
+Double-click a field in **Custom Profile Fields**, or select it and choose
+**Open Field...**, to see its complete definition. A Draft may be edited freely.
+After activation, its stable structure is protected, but its label, help text,
+section, order, required setting, and approved search/report/export policies may
+still be adjusted. Retired definitions open read-only. A field does not appear
+in Custom Profile Search until it is Active and Searchable, and it does not
+appear in the custom-profile report until it is Active and approved for reports.
+
 **Custom Profile Search** under People and Congregation lists only active fields
 that were marked searchable and that the signed-in user may view. Choose the
 profile type, field, comparison, and value. Ranges and multiple-choice searches

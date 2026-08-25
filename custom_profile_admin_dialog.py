@@ -69,6 +69,85 @@ class NewFieldDialog(wx.Dialog):
         }
 
 
+class FieldDetailsDialog(wx.Dialog):
+    """Display the complete definition and permit lifecycle-safe edits."""
+
+    TYPES = NewFieldDialog.TYPES
+
+    def __init__(self, parent, service, definition):
+        super().__init__(parent, title="Custom Field Definition", size=(650, 690))
+        self.service = service; self.definition = definition; self.controls = {}
+        panel = wx.Panel(self); outer = wx.BoxSizer(wx.VERTICAL)
+        status = definition["lifecycle_status"]
+        messages = {
+            "DRAFT": "Draft - all definition settings may be edited before activation.",
+            "ACTIVE": "Active - labels and usage policies may be edited; structural settings are locked.",
+            "RETIRED": "Retired - this historical definition is read-only.",
+        }
+        heading = wx.StaticText(panel, label=messages[status]); heading.SetForegroundColour(wx.Colour(0, 82, 170))
+        outer.Add(heading, 0, wx.EXPAND | wx.ALL, 12)
+        identity = wx.StaticText(panel, label=(
+            f"Definition ID: {definition['id']}    Church ID: {definition['church_id']}    "
+            f"Profile: {definition['entity_type'].title()}    Version: {definition['version']}"
+        ))
+        outer.Add(identity, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        grid = wx.FlexGridSizer(cols=2, hgap=10, vgap=7); grid.AddGrowableCol(1, 1)
+        type_labels = [item[0] for item in self.TYPES]; type_values = [item[1] for item in self.TYPES]
+        controls = (
+            ("label", "Label", wx.TextCtrl(panel, value=str(definition["label"] or ""))),
+            ("field_key", "Stable key", wx.TextCtrl(panel, value=str(definition["field_key"] or ""))),
+            ("section_label", "Section", wx.TextCtrl(panel, value=str(definition["section_label"] or ""))),
+            ("data_type", "Field type", wx.Choice(panel, choices=type_labels)),
+            ("privacy_class", "Privacy", wx.Choice(panel, choices=["Standard", "Restricted"])),
+            ("display_order", "Display order", wx.SpinCtrl(panel, min=0, max=9999, initial=int(definition["display_order"] or 0))),
+            ("max_length", "Maximum length", wx.TextCtrl(panel, value="" if definition["max_length"] is None else str(definition["max_length"]))),
+            ("minimum_value", "Minimum value", wx.TextCtrl(panel, value="" if definition["minimum_value"] is None else str(definition["minimum_value"]))),
+            ("maximum_value", "Maximum value", wx.TextCtrl(panel, value="" if definition["maximum_value"] is None else str(definition["maximum_value"]))),
+            ("decimal_places", "Decimal places", wx.SpinCtrl(panel, min=0, max=6, initial=int(definition["decimal_places"] or 0))),
+            ("help_text", "Help text", wx.TextCtrl(panel, value=str(definition["help_text"] or ""), style=wx.TE_MULTILINE, size=(-1, 75))),
+        )
+        for key, label, control in controls:
+            grid.Add(wx.StaticText(panel, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+            grid.Add(control, 1, wx.EXPAND); self.controls[key] = control
+        self.controls["data_type"].SetSelection(type_values.index(definition["data_type"]))
+        self.controls["privacy_class"].SetSelection(1 if definition["privacy_class"] == "RESTRICTED" else 0)
+        outer.Add(grid, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        policies = wx.StaticBoxSizer(wx.StaticBox(panel, label="Usage policies"), wx.HORIZONTAL)
+        for key, label in (("required", "Required"), ("searchable", "Searchable"),
+                           ("report_allowed", "Approved reports"), ("export_allowed", "Approved exports")):
+            control = wx.CheckBox(panel, label=label); control.SetValue(bool(definition[key])); self.controls[key] = control
+            policies.Add(control, 0, wx.ALL, 8)
+        outer.Add(policies, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        options = service.repository.options(definition["id"], active_only=False)
+        option_text = ", ".join(f"{item['label']} ({item['option_key']})" for item in options) or "None"
+        outer.Add(wx.StaticText(panel, label="Choices: " + option_text), 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        buttons = wx.StdDialogButtonSizer()
+        if status != "RETIRED": buttons.AddButton(wx.Button(panel, wx.ID_OK, "Save Changes"))
+        buttons.AddButton(wx.Button(panel, wx.ID_CANCEL, "Close")); buttons.Realize()
+        outer.Add(buttons, 0, wx.ALIGN_RIGHT | wx.ALL, 12); panel.SetSizer(outer)
+        if status != "DRAFT":
+            for key in ("field_key", "data_type", "privacy_class", "max_length", "minimum_value", "maximum_value", "decimal_places"):
+                self.controls[key].Enable(False)
+        if status == "RETIRED":
+            for control in self.controls.values(): control.Enable(False)
+        self.CentreOnParent()
+
+    def values(self):
+        values = {}
+        for key in ("label", "field_key", "section_label", "help_text", "max_length", "minimum_value", "maximum_value"):
+            values[key] = self.controls[key].GetValue()
+        values.update({
+            "church_id": self.definition["church_id"], "entity_type": self.definition["entity_type"],
+            "data_type": self.TYPES[self.controls["data_type"].GetSelection()][1],
+            "privacy_class": "RESTRICTED" if self.controls["privacy_class"].GetSelection() == 1 else "STANDARD",
+            "display_order": self.controls["display_order"].GetValue(),
+            "decimal_places": self.controls["decimal_places"].GetValue(),
+        })
+        for key in ("required", "searchable", "report_allowed", "export_allowed"):
+            values[key] = self.controls[key].GetValue()
+        return values
+
+
 class CustomProfileAdministrationDialog(wx.Dialog):
     """Maintain custom field definitions, choice catalogs, and profile tags."""
 
@@ -99,8 +178,9 @@ class CustomProfileAdministrationDialog(wx.Dialog):
         for index, (name, width) in enumerate((("Field", 220), ("Type", 140), ("Section", 190), ("Privacy", 100), ("Status", 90))): self.fields.InsertColumn(index, name, width=width)
         outer.Add(self.fields, 1, wx.EXPAND | wx.ALL, 8)
         row = wx.BoxSizer(wx.HORIZONTAL)
-        for label, handler in (("New Field...", self.new_field), ("Add Choice...", self.add_choice), ("Activate", self.activate), ("Retire", self.retire)):
+        for label, handler in (("New Field...", self.new_field), ("Open Field...", self.open_field), ("Add Choice...", self.add_choice), ("Activate", self.activate), ("Retire", self.retire)):
             button = wx.Button(panel, label=label); button.Bind(wx.EVT_BUTTON, handler); row.Add(button, 0, wx.RIGHT, 8)
+        self.fields.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.open_field)
         outer.Add(row, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 8); panel.SetSizer(outer); self.tabs.AddPage(panel, "Custom Fields")
 
     def _build_tags_tab(self):
@@ -143,6 +223,18 @@ class CustomProfileAdministrationDialog(wx.Dialog):
             values = dialog.values(); values.update(zip(("church_id", "entity_type"), self.scope()))
             self.service.create_definition(values); self.refresh()
         except (CustomProfileValidationError, ValueError) as error: wx.MessageBox(str(error), "Unable to Create Field", wx.OK | wx.ICON_ERROR, self)
+        finally: dialog.Destroy()
+
+    def open_field(self, _event):
+        item = self.selected_field()
+        if not item: return
+        dialog = FieldDetailsDialog(self, self.service, item)
+        try:
+            if item["lifecycle_status"] != "RETIRED" and dialog.ShowModal() == wx.ID_OK:
+                self.service.update_definition(item["id"], dialog.values()); self.refresh()
+            elif item["lifecycle_status"] == "RETIRED": dialog.ShowModal()
+        except (CustomProfileValidationError, ValueError, RuntimeError) as error:
+            wx.MessageBox(str(error), "Unable to Update Field", wx.OK | wx.ICON_ERROR, self)
         finally: dialog.Destroy()
 
     def add_choice(self, _event):

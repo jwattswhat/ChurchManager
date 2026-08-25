@@ -33,6 +33,7 @@ class Repository:
     def active_definition_count(self, *_args): return 0
     def options(self, *_args, **_kwargs): return []
     def set_definition_status(self, *_args): return True
+    def update_definition(self, current, item): self.updated = (current, item); return True
     def create_option(self, *_args): return 5
     def profile_church_id(self, *_args): return 2
     def profile_definitions(self, *_args): return self.definition_rows
@@ -81,6 +82,27 @@ class CustomProfileServiceTests(unittest.TestCase):
         service.repository.profile_church_id = lambda *_args: 3
         with self.assertRaisesRegex(CustomProfileValidationError, "unavailable"):
             service.profile(2, "PERSON", 10)
+
+    def test_draft_definition_can_change_structure(self):
+        service = self.service({"profiles.custom_fields.define"})
+        service.repository.definition_rows[0]["lifecycle_status"] = "DRAFT"
+        self.assertTrue(service.update_definition(4, {
+            "field_key": "parking_area", "label": "Parking Area", "data_type": "SHORT_TEXT",
+        }))
+        self.assertEqual(service.repository.updated[1]["field_key"], "parking_area")
+
+    def test_active_definition_allows_safe_edits_but_locks_structure(self):
+        service = self.service({"profiles.custom_fields.define"})
+        self.assertTrue(service.update_definition(4, {"label": "Assigned Parking", "searchable": False}))
+        self.assertEqual(service.repository.updated[1]["label"], "Assigned Parking")
+        with self.assertRaisesRegex(CustomProfileValidationError, "locked"):
+            service.update_definition(4, {"data_type": "SHORT_TEXT"})
+
+    def test_retired_definition_is_read_only(self):
+        service = self.service({"profiles.custom_fields.define"})
+        service.repository.definition_rows[0]["lifecycle_status"] = "RETIRED"
+        with self.assertRaisesRegex(CustomProfileValidationError, "read-only"):
+            service.update_definition(4, {"label": "Changed"})
 
     def test_restricted_edit_requires_restricted_permission(self):
         service = self.service({"profiles.custom_fields.view", "profiles.custom_fields.edit",

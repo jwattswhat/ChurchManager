@@ -51,6 +51,16 @@ class CustomProfileFieldMigrationTests(unittest.TestCase):
         for policy in ("searchable", "report_allowed", "export_allowed"):
             self.assertIn(f'("{policy}"', source)
 
+    def test_definition_catalog_opens_complete_lifecycle_aware_record(self):
+        source = (ROOT / "custom_profile_admin_dialog.py").read_text(encoding="utf-8")
+        self.assertIn('("Open Field...", self.open_field)', source)
+        self.assertIn("wx.EVT_LIST_ITEM_ACTIVATED, self.open_field", source)
+        self.assertIn("Draft - all definition settings may be edited", source)
+        self.assertIn("Retired - this historical definition is read-only", source)
+        for field in ("field_key", "data_type", "privacy_class", "display_order",
+                      "required", "searchable", "report_allowed", "export_allowed"):
+            self.assertIn(f'"{field}"', source)
+
     def test_search_screen_is_routed_and_permission_guarded(self):
         form = (ROOT / "Forms" / "frmMain.json").read_text(encoding="utf-8")
         router = (ROOT / "main_menu.py").read_text(encoding="utf-8")

@@ -108,6 +108,31 @@ class CustomProfileFieldService:
         item["user_id"] = self.session.user_id
         return self.repository.create_definition(item)
 
+    def update_definition(self, definition_id, values):
+        """Update a Draft broadly or the safe presentation policy of an Active field."""
+        self.authorization.require("profiles.custom_fields.define", "edit custom profile fields")
+        current = self._definition(definition_id)
+        if current["lifecycle_status"] == "RETIRED":
+            raise CustomProfileValidationError("A retired custom field is read-only.")
+        proposed = dict(current)
+        proposed.update(dict(values or {}))
+        item = _definition_values(proposed)
+        if current["lifecycle_status"] == "ACTIVE":
+            protected = (
+                "church_id", "entity_type", "field_key", "data_type", "privacy_class",
+                "max_length", "minimum_value", "maximum_value", "decimal_places",
+            )
+            if any(_comparable(item[name]) != _comparable(current[name]) for name in protected):
+                raise CustomProfileValidationError(
+                    "An Active field's key, type, privacy, and validation rules are locked."
+                )
+        elif item["field_key"] != current["field_key"] and self.repository.definition_key_exists(
+            item["church_id"], item["entity_type"], item["field_key"]
+        ):
+            raise CustomProfileValidationError("That custom field key is already in use.")
+        item["user_id"] = self.session.user_id
+        return self.repository.update_definition(current, item)
+
     def activate_definition(self, definition_id):
         """Activate a Draft only when limits and choice catalogs are complete."""
         self.authorization.require("profiles.custom_fields.define", "activate custom profile fields")
@@ -348,3 +373,8 @@ def _optional_text(value, limit):
     result = str(value or "").strip()
     if len(result) > limit: raise CustomProfileValidationError(f"Text cannot exceed {limit} characters.")
     return result or None
+
+
+def _comparable(value):
+    """Normalize persisted scalar representations for lifecycle comparisons."""
+    return None if value is None else str(value)

@@ -113,6 +113,30 @@ class MariaDBCustomProfileRepository:
             self.connection.rollback(); raise
         finally: cursor.close()
 
+    def update_definition(self, current, item):
+        """Persist an authorized definition edit with optimistic concurrency control."""
+        cursor = self.connection.cursor()
+        try:
+            assignments = (
+                "FieldKey=?,Label=?,HelpText=?,SectionLabel=?,DataType=?,PrivacyClass=?,"
+                "DisplayOrder=?,Required=?,Searchable=?,ReportAllowed=?,ExportAllowed=?,"
+                "MaxLength=?,MinimumValue=?,MaximumValue=?,DecimalPlaces=?,"
+                "UpdatedByUserID=?,Version=Version+1"
+            )
+            self._execute(cursor, f"UPDATE tblCustomFieldDefinition SET {assignments} WHERE ID=? AND Version=?", (
+                item["field_key"], item["label"], item["help_text"], item["section_label"],
+                item["data_type"], item["privacy_class"], item["display_order"], item["required"],
+                item["searchable"], item["report_allowed"], item["export_allowed"],
+                item["max_length"], item["minimum_value"], item["maximum_value"],
+                item["decimal_places"], item["user_id"], current["id"], current["version"],
+            ))
+            if cursor.rowcount != 1: raise RuntimeError("The custom field changed after it was loaded.")
+            self._audit(cursor, current["church_id"], item["user_id"], "CUSTOM_FIELD_UPDATED", "DEFINITION", current["id"], current["id"])
+            self.connection.commit(); return True
+        except Exception:
+            self.connection.rollback(); raise
+        finally: cursor.close()
+
     def options(self, definition_id, active_only=False):
         cursor = self.connection.cursor()
         try:
