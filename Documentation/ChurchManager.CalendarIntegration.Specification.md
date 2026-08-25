@@ -174,8 +174,10 @@ leaving the existing external event.
 
 **Implementation status:** Migration 116 defines the provider-neutral binding,
 unique destination/UID protection, safe result fields, source lookup, and
-Church ownership. It deliberately stores neither credentials nor event text.
-The repository and optional provider adapter are the next stage.
+Church ownership. `calendar_publication.py` now plans deterministic Create,
+Update, Cancel, and Skip actions from safe hashes and persists provider results
+without credentials or event text. The optional provider adapter is the next
+stage. TEST MODE is rejected before any live provider mutation.
 
 ## 9. Privacy and security
 
