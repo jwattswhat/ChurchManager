@@ -13,6 +13,19 @@
       ]
     },
     {
+      "label": "&Church",
+      "items": [
+        {"command": "churchmanager.church", "label": "Church &Information"},
+        {"command": "churchmanager.journal"},
+        {"command": "churchmanager.document"},
+        {"separator": true},
+        {"command": "churchmanager.assets"},
+        {"command": "churchmanager.asset_locations"},
+        {"command": "churchmanager.asset_maintenance"},
+        {"command": "churchmanager.asset_reports"}
+      ]
+    },
+    {
       "label": "&Worship",
       "items": [
         {"command": "churchmanager.service", "label": "&Worship Services"},
@@ -42,12 +55,9 @@
     {
       "label": "&People",
       "items": [
-        {"command": "churchmanager.church"},
         {"command": "churchmanager.person"},
         {"command": "churchmanager.family"},
         {"command": "churchmanager.record_attendance"},
-        {"command": "churchmanager.document"},
-        {"command": "churchmanager.journal"},
         {"separator": true},
         {"command": "churchmanager.groups"},
         {"command": "churchmanager.group_attendance"},
@@ -61,15 +71,6 @@
       "label": "&Projects",
       "items": [
         {"command": "churchmanager.projects", "label": "&Projects and Scheduling..."}
-      ]
-    },
-    {
-      "label": "A&ssets",
-      "items": [
-        {"command": "churchmanager.assets"},
-        {"command": "churchmanager.asset_locations"},
-        {"command": "churchmanager.asset_maintenance"},
-        {"command": "churchmanager.asset_reports"}
       ]
     },
     {

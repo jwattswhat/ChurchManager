@@ -217,7 +217,10 @@ Other output is created by dedicated Python scripts, including:
 | `visual_reports/` | ChurchManager integration for the JSForm visual report system. |
 | `schema/` | JSON Schema used or considered for validating ChurchManager form definitions. |
 
-Congregational administrative documents are stored in `C:\Users\Pastor\Documents\Church Documents`. Historical database dumps are stored in `D:\Backup.ChurchManager\DatabaseArchive`.
+The repository's `Documents` directory is the default development archive for
+cataloged congregational files. A production congregation may choose another
+managed folder. Historical database dumps are stored separately from ordinary
+documents and must never be treated as document-catalog content.
 
 ## 4. Requirements
 
@@ -625,27 +628,34 @@ Recommended workflow:
 
 Attendance and Communion records are sensitive pastoral data. Access and distribution should be limited appropriately.
 
-### 8.13 Financial and donor subsystem — removed
+### 8.13 Fund accounting and confidential giving
 
-The unfinished accounting, giving, envelope, donor, and gift features were
-removed from ChurchManager in August 2026. Their menu controls, form definitions,
-posting scripts, report templates, and donor-acknowledgment export are no longer
-part of the application.
-
-Historical financial and donor tables and records remain in existing databases
-for preservation. ChurchManager does not expose or use them. Removing those
-tables or their data requires a separate, explicitly approved database migration.
+ChurchManager includes double-entry fund accounting, reviewed posting,
+reconciliation, budgets, period and year-end controls, and maintained financial
+reports. The confidential giving subsystem maintains contributors, envelope
+assignments, approved purposes, reviewed batches, statements, corrections,
+imports, non-cash gifts, and memorial or honor acknowledgments. Donor identity
+does not enter the general ledger; summarized accounting transactions preserve
+the financial dimensions without exposing contributor details.
 
 ### 8.15 Assets, journals, and documents
 
-The Asset screen records church assets. The Journal screen records dated narrative entries and supports date-range reporting. The Document screen catalogs files or document metadata. The former generic Projects and Tasks subsystem was retired because focused ministry workflows now cover the active planning needs.
+The Asset screen records church assets. The Journal screen records dated,
+non-financial congregational history and supports date-range reporting. The
+Document screen catalogs existing files or document metadata. Projects and
+Scheduling links bounded work steps to cataloged documents without copying the
+files.
 
 Key tables include:
 
 - `tblAsset`
 - `tblJournal`
+- `tblDocument`
 
-The repository's `Documents` directory is a filesystem archive and is not identical to the database's Document catalog. Moving or renaming cataloged files may break stored file references.
+The repository's `Documents` directory is a filesystem archive and is not
+identical to the database's Document catalog. Moving or renaming cataloged files
+may break stored file references. `Sample Congregational Document.txt` is
+fictional ChurchDBTest material.
 
 ### 8.16 Checklists
 
@@ -657,7 +667,9 @@ database-backed enhancement tracker has been retired.
 
 ### 9.1 Report process
 
-The Reports screen reads report definitions from `tblReports`. A report definition contains:
+The Reports screen reads report definitions from `tblReports`. Double-clicking
+a selected report has the same effect as choosing **Run Report**. A report
+definition contains:
 
 - report code;
 - title;

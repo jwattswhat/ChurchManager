@@ -547,6 +547,7 @@ def _buttonclick(event):
             context.services.reports.configure_catalog_picker(frm.CONTROLID["ReportID"])
             context.services.reports.configure_group_picker(frm.CONTROLID["GroupID"])
             frm.CONTROLID["btnRun"].Bind(wx.EVT_LEFT_DOWN, _runReports)
+            frm.CONTROLID["ReportID"].Bind(wx.EVT_LIST_ITEM_ACTIVATED, _runReports)
             frm.disable_all_buttons()
             frm.enable_button("ChurchID")
             frm.enable_button("ReportID")

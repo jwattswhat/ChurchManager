@@ -50,10 +50,13 @@ Version 1 is one responsive page with these sections:
    and a link to testing instructions.
 7. **Documentation and help** — user guide, installation guide, support,
    security reporting, and treasurer guidance.
-8. **Data ownership and copyright boundary** — no hosted congregation database;
+8. **Voluntary support** — ChurchManager remains free to use with no required
+   support fee; congregations may make an optional one-time donation through a
+   clearly identified third-party payment link.
+9. **Data ownership and copyright boundary** — no hosted congregation database;
    ChurchManager stores planning metadata and outlines rather than copyrighted
    worship or hymn text.
-9. **Footer** — version, license, source, support, privacy, and copyright.
+10. **Footer** — version, license, source, support, privacy, and copyright.
 
 The page also includes a compact **Upcoming Updates** section between
 Capabilities and Screenshots. It may name only work backed by an approved
@@ -106,6 +109,9 @@ development-only, or unverified installer.
 ## Privacy, security, and maintenance boundaries
 
 - No analytics, tracking pixels, cookies, forms, or third-party scripts.
+- The optional donation link may lead to PayPal, but the site must identify it
+  as an independent third-party service and must not embed PayPal scripts,
+  forms, tracking, or account data.
 - No congregation or beta-tester personal information.
 - No database connection or application login.
 - No secrets, email credentials, error logs, or downloadable database samples.
@@ -144,7 +150,10 @@ without changing the portable source unnecessarily.
   copyrighted catalog content before making a repository public.
 - Render and visually inspect the page at desktop and mobile widths.
 - Test all keyboard navigation and all links.
-- Verify that no network request is made except for the page's own static files.
+- Verify the optional donation address and confirm that visiting the static site
+  alone does not contact PayPal.
+- Verify that loading the page makes no network request except for the page's
+  own static files.
 - Confirm the User Guide, support, security, license, and privacy information.
 - Obtain final approval before publishing.
 

@@ -71,13 +71,15 @@ rows or red text identify information that still needs attention.
 
 The dashboard intentionally shows routine work rather than every ChurchManager
 function. The menu bar contains the complete authorized command set, grouped as
-**File**, **Worship**, **People**, **Giving**, **Accounting**, **Reports**,
-**Tools**, and **Help**. Menu items appear or become available according to the
-signed-in user's permissions.
+**File**, **Church**, **Worship**, **People**, **Projects**, **Giving**,
+**Accounting**, **Reports**, **Tools**, and **Help**. Menu items appear or
+become available according to the signed-in user's permissions.
 
-The church logo displayed on the dashboard comes from **People > Church
+The church logo displayed on the dashboard comes from **Church > Church
 Information**. That screen also maintains the congregation name shown beside
-the logo.
+the logo. **Church** also contains the congregational Journal, Documents,
+Assets, Asset Locations, Maintenance Due, and Asset Reports. **People** is
+reserved for people, families, attendance, Groups, Pastoral Care, and Events.
 
 Authorized designers can use **Tools > Designers** to open the Report Designer,
 Screen Designer, or Menu Designer. The protected starter remains available for
@@ -108,8 +110,24 @@ needed.
 
 ### People and Congregation
 
-This group contains church information, people, families, attendance, documents,
-and the journal.
+This group contains people, families, attendance, Groups, Pastoral Care, and
+Events. Congregation-wide information, documents, journal records, and assets
+are under **Church**.
+
+### Church records, documents, and journal
+
+Use **Church > Church Information** to maintain the congregation's name,
+address, contact information, report logo, primary hymnal, and default
+lectionary. Use **Church > Documents** to catalog an existing file. The catalog
+stores its title, date, type, description, and file location; it does not copy
+the file into the database. Moving or renaming a cataloged file can therefore
+break its Open action. The project `Documents` folder contains a fictional
+sample for ChurchDBTest.
+
+Use **Church > Journal** for dated, non-financial congregational history such
+as council actions, significant ministry decisions, or property milestones.
+Do not use this general journal for accounting transactions, restricted
+pastoral notes, donor details, passwords, or other confidential narrative.
 
 Authorized administrators use **Custom Profile Fields** under ChurchManager
 Settings to define bounded additional fields and controlled tags for People or
@@ -586,7 +604,8 @@ may be required.
 
 ## 8. Reports and layout customization
 
-Select a report, supply its enabled parameters, and choose **Run Report**.
+Select a report, supply its enabled parameters, and choose **Run Report**, or
+double-click the selected report row.
 ChurchManager creates a PDF using a protected report dataset. A customized
 layout is shown in blue; when no customization exists, ChurchManager uses the
 starter layout.

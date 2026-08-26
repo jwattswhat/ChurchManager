@@ -107,7 +107,7 @@
         "CONTROLS": {
             "btnPersonAddress": {
                 "type": "Button",
-                "label": "Add/Edit/Delete Person Addresses",
+                "label": "Addresses...",
                 "name": "btnPersonAddress",
                 "action": [
                     "openlinkedform",
@@ -117,11 +117,12 @@
                     37,
                     1
                 ],
+                "sizech": [16, 2],
                 "tooltip": "Open the person's addresses form."
             },
             "btnPersonContact": {
                 "type": "Button",
-                "label": "Add/Edit/Delete Person Contacts",
+                "label": "Contacts...",
                 "name": "btnPersonContact",
                 "action": [
                     "openlinkedform",
@@ -131,11 +132,12 @@
                     37,
                     3
                 ],
+                "sizech": [16, 2],
                 "tooltip": "Open the person's contacts form."
             },
             "btnPersonDate": {
                 "type": "Button",
-                "label": "Add/Edit/Delete Person Date",
+                "label": "Significant Dates...",
                 "name": "btnPersonDate",
                 "action": [
                     "openlinkedform",
@@ -145,6 +147,7 @@
                     37,
                     5
                 ],
+                "sizech": [16, 2],
                 "tooltip": "Open the person's significant dates form."
             },
             "btnAdditionalInformation": {
@@ -388,12 +391,12 @@
                 "type": "StaticText",
                 "label": "Individual picture:",
                 "name": "lblPicture",
-                "posch": [37, 8]
+                "posch": [37, 9]
             },
             "Picture": {
                 "type": "ImagePickerCtrl",
                 "name": "Picture",
-                "posch": [37, 10],
+                "posch": [37, 11],
                 "sizech": [16, 15],
                 "maxbytes": 5242880,
                 "tooltip": "Choose the individual's picture stored in the database."
