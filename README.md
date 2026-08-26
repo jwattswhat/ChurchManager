@@ -1,5 +1,9 @@
 # ChurchManager
 
+![ChurchManager - Local-first church administration for Windows](assets/brand/ChurchManager-logo-horizontal.svg)
+
+**Local-first church administration for Windows.**
+
 ChurchManager is a Windows desktop application for the administrative, worship,
 membership, attendance, reporting, and fund-accounting work of a congregation.
 It is written in Python, uses wxPython, stores data in MariaDB, and uses the

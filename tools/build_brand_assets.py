@@ -98,7 +98,7 @@ def _horizontal_logo(width: int) -> Image.Image:
     draw.text((round(330 * scale), round(70 * scale)), "ChurchManager", fill=NAVY, font=title_font)
     draw.text(
         (round(336 * scale), round(182 * scale)),
-        "CHURCH ADMINISTRATION FOR SMALL CONGREGATIONS",
+        "LOCAL-FIRST CHURCH ADMINISTRATION FOR WINDOWS",
         fill=MUTED,
         font=tagline_font,
     )
