@@ -8,18 +8,18 @@ installation specification and roadmap.
 ## Current verified baseline
 
 - Application line: `0.3.0-beta.1`
-- Canonical schema: 95 represented migrations
-- Starter data: 73 statements
-- Schema SHA-256: `ef460b0f5f99d80b08a8ac8a992ef119ba88de42142081477cff16da8789277b`
-- Starter-data SHA-256: `f551760bc150d50ba8d0c73850f6cf95c2325c1a2db37c655c0e145dad715795`
+- Canonical schema: 120 represented migrations
+- Starter data: 122 statements
+- Schema SHA-256: `f95153beb456e8ab25064476299fb466a7a675550e15069c814c7ec78d3f6ad4`
+- Starter-data SHA-256: `73fc5604c3afe1920f8b240dd98a98ad1c41ccf268541eee718ee870e824329a`
 - Fresh setup, guarded upgrade, and guarded restore services have passed
   isolated live rehearsals. Restore acceptance includes confidential Giving
   contributor and envelope records.
 
 ## Accepted workflows
 
-- The complete source suite passes: 800 tests, 25 intentional
-  database/environment skips, and zero failures on August 22, 2026.
+- The complete source suite passes: 1,038 tests, 25 intentional
+  database/environment skips, and zero failures on August 26, 2026.
 - The owned-child cleanup regression confirms tracked JSForm child forms close
   and deleted native panels are safely ignored during application shutdown.
 - The source-construction audit reports 43 reviewed structural SQL exceptions,
@@ -32,6 +32,18 @@ installation specification and roadmap.
   were accepted.
 - LimeReports is retired. Official reports use JSForm JSON definitions and the
   internal PDF renderer.
+
+## Public beta publication
+
+- The audited source repository is public at
+  `https://github.com/jwattswhat/ChurchManager`.
+- Release `v0.3.0-beta.1` provides distinct clean-installation and fictional
+  beta-test kits.
+- The approved static project site, exact application screenshots, release
+  links, documentation links, support route, privacy statement, and licensing
+  notice are live at `https://jwattswhat.github.io/ChurchManager/`.
+- The website and release describe the build as beta and do not claim that the
+  remaining production-only or packaging-only gates have passed.
 
 ## Deliberately deferred until the next beta installer
 

@@ -15,8 +15,8 @@ open-source church-management systems.
 | 3 | Completed | Optional user-to-person relationship | Nullable links, administration, safe auditing, welcome email, migration, and acceptance are complete. |
 | 4 | Implemented; deployment check | Secure SMTP connection and email settings | Credential-safe settings and shared mail delivery are implemented; each installed congregation must enter and test its own provider credential. |
 | 5 | Completed | Hymnal, lectionary, and Order of Service catalogs | The permanent-ID and metadata-only catalog frameworks, local maintenance, included Historic One-Year Lectionary, and LSB Order of Service outlines are implemented and accepted. The unverified curated LSB hymnal package is intentionally withheld and is not a release requirement. |
-| 6 | In beta | Release, installation, and recovery readiness | Setup, upgrade, restore, backup, MSI, documentation, and beta installer foundations exist; repair/signing, current-beta packaging, and clean-machine exit acceptance remain. |
-| 6A | In progress | Open-source publication and distribution | Identity and website prototype are approved; ChurchManager history/privacy audit, public destinations, signed artifacts, and live links remain. |
+| 6 | In beta | Release, installation, and recovery readiness | Setup, upgrade, restore, backup, documentation, and the 0.3.0-beta.1 distribution are complete. MSI repair, code signing, and clean-machine exit acceptance remain release gates for a later installer update. |
+| 6A | Completed initial publication | Open-source publication and distribution | The audited public GitHub repository, versioned beta release assets, documentation links, approved screenshots, and live GitHub Pages site are published. Codeberg, SourceForge, WinGet, and a custom domain remain optional later distribution channels. |
 | 7 | Completed | [Confidential member giving and envelopes](ChurchManager.MemberGiving.Specification.md) | The approved first-release scope passed migrations, installation baseline, full automated suite, confidential-data restore rehearsal, and final visual acceptance. Pledges are explicitly deferred. |
 
 Posted-batch correction is implemented and accepted end to end: it creates a
@@ -309,10 +309,10 @@ future roadmap projects:
 
 ### 6. Release, installation, and recovery readiness
 
-- **Status: non-packaging beta release gates completed August 22, 2026.** The
+- **Status: current beta source gates completed August 26, 2026.** The
   current-state evidence is maintained in
   [ChurchManager Current Release Readiness](ChurchManager.ReleaseReadiness.Current.md).
-  The canonical `0.3.0-dev` baseline represents 95 migrations and 73 starter
+  The canonical `0.3.0-beta.1` baseline represents 120 migrations and 122 starter
   statements. The optional fictional beta dataset has a guarded versioned
   manifest. The source-construction audit, owned-child cleanup regression,
   report-family acceptance, accounting test acceptance, and permanent backup
@@ -477,8 +477,8 @@ future roadmap projects:
   restart dress rehearsal using non-production data.
 - Conduct a structured beta-testing phase after the fresh-install dress
   rehearsal and before the first stable release:
-  - **Active:** ChurchManager entered beta testing as `0.2.0-beta.1` on
-    August 17, 2026;
+  - **Active:** ChurchManager is in public beta as `0.3.0-beta.1`; the current
+    public release and project site were verified August 26, 2026;
   - recruit a small group representing pastors, office staff, worship planners,
     treasurers, and congregations with one-person administration;
   - provide a documented test installation and sample database rather than any
@@ -515,11 +515,22 @@ future roadmap projects:
 
 ### 6A. Open-source publication and distribution
 
+- **Status: initial public-beta publication complete August 26, 2026.** The
+  audited ChurchManager source is public at
+  `https://github.com/jwattswhat/ChurchManager`, release `v0.3.0-beta.1`
+  provides separate clean-installation and fictional-data beta kits, and the
+  approved static site is live at
+  `https://jwattswhat.github.io/ChurchManager/`. The site uses exact approved
+  application screenshots and links to the maintained documentation and
+  support destinations. Future mirrors, a custom domain, WinGet, and code
+  signing remain optional follow-up work rather than incomplete publication.
+
 - Approved design: [ChurchManager public website specification](ChurchManager.Website.Specification.md).
 - Approved identity: [ChurchManager visual identity specification](ChurchManager.VisualIdentity.Specification.md).
-- A destination-independent static prototype is maintained in `website/`; its
-  download, repository, documentation, support, and screenshot placeholders
-  must remain inactive until approved public destinations and artifacts exist.
+- The source for the live static GitHub Pages site is maintained in `website/`.
+  Its release links, version, screenshots, documentation, support destination,
+  and privacy statement must be reconciled whenever a new public build is
+  published.
 - Maintain separate public repositories for ChurchManager and JSForm.
 - Use GitHub as the primary source repository, issue tracker, contributor
   workflow, and binary-release location. Attach the Windows MSI, checksum,
