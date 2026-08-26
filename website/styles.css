@@ -123,6 +123,7 @@ h3 { margin-bottom: 10px; font-size: 1.16rem; }
 .section-tint { max-width: none; padding-right: max(24px, calc((100% - 1180px) / 2)); padding-left: max(24px, calc((100% - 1180px) / 2)); background: var(--blue-soft); }
 .screen-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 figure { margin: 0; }
+.product-screen { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: contain; background: #fff; border: 1px solid #b8c8d2; border-radius: 10px; box-shadow: 0 10px 25px rgba(11, 42, 67, .1); }
 .screen-placeholder { display: grid; place-content: center; min-height: 255px; padding: 22px; text-align: center; background: linear-gradient(145deg, #eef4f7, #fff); border: 2px dashed #8aa6b8; border-radius: 14px; }
 .screen-placeholder span { color: var(--blue); font-size: .72rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 .screen-placeholder strong { margin-top: 5px; color: var(--navy-deep); font-size: 1.18rem; }

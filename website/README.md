@@ -22,11 +22,12 @@ Replace the visibly marked placeholders for:
 - public User Guide, Installation Guide, and Treasurer Guide PDFs;
 - final domain and canonical URL;
 - approved screenshots of the main menu, worship planner, and an accounting
-  report.
+  report. The current images are approved fictional-data examples and need
+  replacement only when the corresponding interface materially changes.
 
-Use only fictional test data in screenshots. Recommended screenshot size is
-1600 by 900 pixels. Crop away unrelated windows, taskbars, notifications, chat
-content, names, and local file paths before publication.
+Use only fictional test data in screenshots. Crop away unrelated windows,
+taskbars, notifications, chat content, names, and local file paths before
+publication.
 
 Do not connect a placeholder to an existing development installer. The public
 download must come from the approved release process.
