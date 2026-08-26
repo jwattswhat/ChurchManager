@@ -1,0 +1,1361 @@
+"""Safe duplicate review foundation for ChurchManager data management."""
+
+from __future__ import annotations
+
+from collections import defaultdict
+from dataclasses import dataclass
+import csv
+from datetime import datetime, timezone
+import hashlib
+import io
+import json
+from pathlib import Path
+import re
+import unicodedata
+import zipfile
+
+import wx
+
+from bulletin_orders import portable_connection
+from churchmanager_version import __version__
+
+
+def normalized_text(value):
+    """Return conservative comparison text without presentation punctuation."""
+    text = unicodedata.normalize("NFKC", str(value or "")).casefold().strip()
+    return " ".join(re.findall(r"[\w]+", text, flags=re.UNICODE))
+
+
+def normalized_contact(value):
+    """Normalize an email or telephone value for exact duplicate comparison."""
+    text = str(value or "").strip().casefold()
+    if "@" in text:
+        return text
+    return "".join(character for character in text if character.isdigit())
+
+
+@dataclass(frozen=True)
+class DuplicateCandidate:
+    """A read-only possible duplicate pair shown for human review."""
+
+    entity: str
+    first_id: int
+    first_name: str
+    second_id: int
+    second_name: str
+    reason: str
+
+
+@dataclass(frozen=True)
+class MergeImpact:
+    """Counts of records linked to each side of a proposed duplicate merge."""
+
+    table: str
+    column: str
+    first_count: int
+    second_count: int
+
+
+def duplicate_pairs(records, key, entity, reason):
+    """Return unique record pairs sharing a nonblank normalized key."""
+    grouped = defaultdict(list)
+    for record in records:
+        value = key(record)
+        if value:
+            grouped[value].append(record)
+    found = []
+    for rows in grouped.values():
+        for index, first in enumerate(rows):
+            for second in rows[index + 1:]:
+                if first[0] != second[0]:
+                    found.append(DuplicateCandidate(
+                        entity, int(first[0]), first[1], int(second[0]), second[1], reason,
+                    ))
+    return found
+
+
+CSV_FIELDS = {
+    "People": (
+        ("First name", "FirstName", True),
+        ("Middle name", "MiddleName", False),
+        ("Last name", "LastName", True),
+        ("Title", "Title", False),
+        ("Email", "Email", False),
+        ("Phone", "Phone", False),
+    ),
+    "Families": (
+        ("Family name", "FamilyName", True),
+        ("Address", "Address", False),
+        ("Address line 2", "Address2", False),
+        ("City", "City", False),
+        ("State", "State", False),
+        ("ZIP", "Zip", False),
+        ("Email", "Email", False),
+        ("Phone", "Phone", False),
+    ),
+}
+
+
+def read_csv_rows(path):
+    """Read a UTF-8 CSV into headers and rows without changing application data."""
+    source = Path(path)
+    with source.open("r", encoding="utf-8-sig", newline="") as stream:
+        reader = csv.DictReader(stream)
+        headers = [str(value or "").strip() for value in (reader.fieldnames or [])]
+        if not headers or any(not value for value in headers):
+            raise ValueError("The CSV must have a nonblank header row.")
+        if len({normalized_text(value) for value in headers}) != len(headers):
+            raise ValueError("The CSV contains duplicate column names.")
+        rows = [{header: str(row.get(header) or "").strip() for header in headers} for row in reader]
+    if not rows:
+        raise ValueError("The CSV contains no data rows.")
+    return headers, rows
+
+
+def suggested_csv_mapping(headers, entity):
+    """Suggest conservative header mappings; the user must still review them."""
+    aliases = {
+        "FirstName": ("first name", "firstname", "given name"),
+        "MiddleName": ("middle name", "middlename"),
+        "LastName": ("last name", "lastname", "surname", "family name"),
+        "Title": ("title", "prefix"), "FamilyName": ("family name", "familyname", "household"),
+        "Address": ("address", "address 1", "street"),
+        "Address2": ("address 2", "address line 2"), "City": ("city",),
+        "State": ("state", "province"), "Zip": ("zip", "zipcode", "postal code"),
+        "Email": ("email", "e mail"), "Phone": ("phone", "telephone", "mobile"),
+    }
+    normalized = {normalized_text(header): header for header in headers}
+    mapping = {}
+    for _label, field, _required in CSV_FIELDS[entity]:
+        mapping[field] = next(
+            (normalized[name] for name in aliases.get(field, ()) if name in normalized), ""
+        )
+    return mapping
+
+
+def mapped_csv_preview(rows, entity, mapping):
+    """Return mapped preview rows after validating required and unique mappings."""
+    selected = [header for header in mapping.values() if header]
+    if len(selected) != len(set(selected)):
+        raise ValueError("A CSV column may be mapped to only one destination field.")
+    missing = [label for label, field, required in CSV_FIELDS[entity] if required and not mapping.get(field)]
+    if missing:
+        raise ValueError("Map the required field(s): {}.".format(", ".join(missing)))
+    return [
+        {field: row.get(mapping.get(field), "") if mapping.get(field) else ""
+         for _label, field, _required in CSV_FIELDS[entity]}
+        for row in rows
+    ]
+
+
+class DataManagementRepository:
+    """Read approved membership fields and retain explicit review decisions."""
+
+    def __init__(self, connection):
+        self.connection = portable_connection(connection)
+
+    def _all(self, sql, values=()):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(sql, values)
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def duplicate_candidates(self, include_deferred=False):
+        """Return unresolved possible duplicates, optionally including deferred pairs."""
+        people = self._all(
+            "SELECT p.ID,TRIM(CONCAT_WS(' ',NULLIF(p.FirstName,''),"
+            "NULLIF(p.MiddleName,''),NULLIF(p.LastName,''))),p.ChurchID "
+            "FROM tblPerson p ORDER BY p.ChurchID,p.LastName,p.FirstName,p.ID"
+        )
+        families = self._all(
+            "SELECT f.ID,COALESCE(f.FamilyName,''),f.ChurchID FROM tblFamily f "
+            "ORDER BY f.ChurchID,f.FamilyName,f.ID"
+        )
+        contacts = self._all(
+            "SELECT pc.PersonID,COALESCE(pc.Type,''),COALESCE(pc.Contact,''),"
+            "TRIM(CONCAT_WS(' ',NULLIF(p.FirstName,''),NULLIF(p.MiddleName,''),"
+            "NULLIF(p.LastName,''))),p.ChurchID FROM tblPersonContact pc "
+            "JOIN tblPerson p ON p.ID=pc.PersonID WHERE COALESCE(pc.Contact,'')<>''"
+        )
+        addresses = self._all(
+            "SELECT fa.FamilyID,TRIM(CONCAT_WS(' ',NULLIF(fa.Address,''),"
+            "NULLIF(fa.Address2,''),NULLIF(fa.City,''),NULLIF(fa.State,''),"
+            "NULLIF(fa.Zip,''))),COALESCE(f.FamilyName,''),f.ChurchID "
+            "FROM tblFamilyAddress fa JOIN tblFamily f ON f.ID=fa.FamilyID "
+            "WHERE COALESCE(fa.Address,'')<>''"
+        )
+        candidates = duplicate_pairs(
+            people,
+            lambda row: (row[2], normalized_text(row[1])),
+            "Person", "Same full name",
+        )
+        candidates.extend(duplicate_pairs(
+            [(row[0], row[3], row[4], row[1], row[2]) for row in contacts],
+            lambda row: (row[2], normalized_contact(row[4])),
+            "Person", "Same {}".format("contact information"),
+        ))
+        candidates.extend(duplicate_pairs(
+            families,
+            lambda row: (row[2], normalized_text(row[1])),
+            "Family", "Same family name",
+        ))
+        candidates.extend(duplicate_pairs(
+            [(row[0], row[2], row[3], row[1]) for row in addresses],
+            lambda row: (row[2], normalized_text(row[3])),
+            "Family", "Same mailing address",
+        ))
+        unique = {(item.entity, item.first_id, item.second_id, item.reason): item for item in candidates}
+        resolutions = self._all(
+            "SELECT EntityType,FirstRecordID,SecondRecordID,MatchReason,Resolution "
+            "FROM tblDuplicateReviewResolution"
+        )
+        hidden = {
+            (row[0], int(row[1]), int(row[2]), row[3])
+            for row in resolutions if row[4] == "NOT_DUPLICATE" or not include_deferred
+        }
+        return sorted((item for key, item in unique.items() if key not in hidden), key=lambda item: (
+            item.entity, item.first_name.casefold(), item.second_name.casefold(), item.reason,
+        ))
+
+    def resolve_duplicate(self, candidate, resolution, user_id, note=""):
+        """Persist a non-destructive human decision for one advisory match."""
+        if resolution not in ("NOT_DUPLICATE", "DEFERRED"):
+            raise ValueError("Unsupported duplicate resolution.")
+        first_id, second_id = sorted((int(candidate.first_id), int(candidate.second_id)))
+        church_table = "tblPerson" if candidate.entity == "Person" else "tblFamily"
+        rows = self._all(
+            "SELECT ID,ChurchID FROM {} WHERE ID IN (?,?) ORDER BY ID".format(church_table),
+            (first_id, second_id),
+        )
+        if len(rows) != 2 or int(rows[0][1]) != int(rows[1][1]):
+            raise ValueError("Both records must still exist in the same church.")
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "INSERT INTO tblDuplicateReviewResolution "
+                "(ChurchID,EntityType,FirstRecordID,SecondRecordID,MatchReason,Resolution,"
+                "ResolutionNote,ResolvedByUserID) VALUES (?,?,?,?,?,?,?,?) "
+                "ON DUPLICATE KEY UPDATE Resolution=VALUES(Resolution),"
+                "ResolutionNote=VALUES(ResolutionNote),ResolvedByUserID=VALUES(ResolvedByUserID),"
+                "ResolvedAt=CURRENT_TIMESTAMP",
+                (rows[0][1], candidate.entity, first_id, second_id, candidate.reason,
+                 resolution, str(note or "").strip() or None, int(user_id)),
+            )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
+    def merge_impact(self, candidate):
+        """Discover and count every current foreign-key dependency for both records."""
+        referenced = "tblperson" if candidate.entity == "Person" else "tblfamily"
+        relationships = self._all(
+            "SELECT TABLE_NAME,COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE "
+            "WHERE TABLE_SCHEMA=DATABASE() AND LOWER(REFERENCED_TABLE_NAME)=? "
+            "AND REFERENCED_COLUMN_NAME='ID' ORDER BY TABLE_NAME,COLUMN_NAME",
+            (referenced,),
+        )
+        impacts = []
+        cursor = self.connection.cursor()
+        try:
+            for table, column in relationships:
+                safe_table = str(table).replace("`", "``")
+                safe_column = str(column).replace("`", "``")
+                cursor.execute(
+                    "SELECT COALESCE(SUM(`{}`=?),0),COALESCE(SUM(`{}`=?),0) "
+                    "FROM `{}`".format(safe_column, safe_column, safe_table),
+                    (candidate.first_id, candidate.second_id),
+                )
+                counts = cursor.fetchone()
+                impacts.append(MergeImpact(
+                    str(table), str(column), int(counts[0]), int(counts[1]),
+                ))
+        finally:
+            cursor.close()
+        return impacts
+
+    def merge_duplicate(self, candidate, survivor_id, reason, user_id):
+        """Move all foreign-key relationships and remove one duplicate atomically."""
+        survivor_id = int(survivor_id)
+        first_id, second_id = int(candidate.first_id), int(candidate.second_id)
+        if survivor_id not in (first_id, second_id):
+            raise ValueError("Choose one of the reviewed records as the survivor.")
+        removed_id = second_id if survivor_id == first_id else first_id
+        reason = str(reason or "").strip()
+        if not reason:
+            raise ValueError("Enter a reason for this merge.")
+        table = "tblPerson" if candidate.entity == "Person" else "tblFamily"
+        name_expression = (
+            "TRIM(CONCAT_WS(' ',NULLIF(FirstName,''),NULLIF(MiddleName,''),NULLIF(LastName,'')))"
+            if candidate.entity == "Person" else "COALESCE(FamilyName,'')"
+        )
+        records = self._all(
+            "SELECT ID,ChurchID,{} FROM {} WHERE ID IN (?,?) ORDER BY ID".format(
+                name_expression, table,
+            ),
+            (first_id, second_id),
+        )
+        if len(records) != 2 or int(records[0][1]) != int(records[1][1]):
+            raise ValueError("Both records must still exist in the same church.")
+        record_by_id = {int(row[0]): row for row in records}
+        impacts = self.merge_impact(candidate)
+        cursor = self.connection.cursor()
+        moved = 0
+        try:
+            for impact in impacts:
+                safe_table = impact.table.replace("`", "``")
+                safe_column = impact.column.replace("`", "``")
+                cursor.execute(
+                    "UPDATE `{}` SET `{}`=? WHERE `{}`=?".format(
+                        safe_table, safe_column, safe_column,
+                    ),
+                    (survivor_id, removed_id),
+                )
+                moved += max(0, int(cursor.rowcount or 0))
+            cursor.execute("DELETE FROM {} WHERE ID=?".format(table), (removed_id,))
+            if cursor.rowcount != 1:
+                raise ValueError("The duplicate record no longer exists.")
+            cursor.execute(
+                "INSERT INTO tblMembershipMergeHistory "
+                "(ChurchID,EntityType,SurvivorRecordID,RemovedRecordID,SurvivorName,"
+                "RemovedName,MatchReason,MergeReason,RelationshipsMoved,MergedByUserID) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?)",
+                (record_by_id[survivor_id][1], candidate.entity, survivor_id, removed_id,
+                 record_by_id[survivor_id][2], record_by_id[removed_id][2],
+                 candidate.reason, reason, moved, int(user_id)),
+            )
+            self.connection.commit()
+        except Exception as error:
+            self.connection.rollback()
+            raise ValueError(
+                "The merge could not be completed, and no records were changed. "
+                "The two records may own conflicting unique history. Review the merge "
+                "impact and resolve that conflict first.\n\n{}".format(error)
+            ) from error
+        finally:
+            cursor.close()
+        return moved
+
+    def churches(self):
+        """Return positive-ID churches available as import destinations."""
+        return self._all("SELECT ID,Church FROM tblChurch WHERE ID>0 ORDER BY Church,ID")
+
+
+class MembershipImportService:
+    """Validate and atomically import reviewed membership preview rows."""
+
+    def __init__(self, connection, user_id):
+        self.connection = portable_connection(connection)
+        self.user_id = int(user_id)
+
+    def _existing_keys(self, entity, church_id):
+        cursor = self.connection.cursor()
+        try:
+            if entity == "People":
+                cursor.execute(
+                    "SELECT FirstName,LastName FROM tblPerson WHERE ChurchID=?", (church_id,)
+                )
+                names = {(normalized_text(row[0]), normalized_text(row[1])) for row in cursor.fetchall()}
+                cursor.execute(
+                    "SELECT pc.Contact FROM tblPersonContact pc JOIN tblPerson p ON p.ID=pc.PersonID "
+                    "WHERE p.ChurchID=? AND COALESCE(pc.Contact,'')<>''", (church_id,)
+                )
+                contacts = {normalized_contact(row[0]) for row in cursor.fetchall()}
+                return names, contacts
+            cursor.execute("SELECT FamilyName FROM tblFamily WHERE ChurchID=?", (church_id,))
+            names = {normalized_text(row[0]) for row in cursor.fetchall()}
+            cursor.execute(
+                "SELECT fc.Contact FROM tblFamilyContact fc JOIN tblFamily f ON f.ID=fc.FamilyID "
+                "WHERE f.ChurchID=? AND COALESCE(fc.Contact,'')<>''", (church_id,)
+            )
+            contacts = {normalized_contact(row[0]) for row in cursor.fetchall()}
+            return names, contacts
+        finally:
+            cursor.close()
+
+    def validate_rows(self, entity, church_id, rows):
+        """Return one list of validation messages per source row without writing data."""
+        if int(church_id) <= 0:
+            return [["Select a valid church."] for _row in rows]
+        existing_names, existing_contacts = self._existing_keys(entity, int(church_id))
+        seen_names, seen_contacts, results = set(), set(), []
+        for number, row in enumerate(rows, 2):
+            errors = []
+            for _label, field, _required in CSV_FIELDS[entity]:
+                if len(str(row.get(field) or "")) > 255:
+                    errors.append("Row {}: {} exceeds 255 characters.".format(number, field))
+            if entity == "People":
+                name = (normalized_text(row.get("FirstName")), normalized_text(row.get("LastName")))
+            else:
+                name = normalized_text(row.get("FamilyName"))
+            if name in existing_names:
+                errors.append("Row {}: the name already exists in the selected church.".format(number))
+            if name in seen_names:
+                errors.append("Row {}: the name is duplicated within this CSV.".format(number))
+            seen_names.add(name)
+            for field in ("Email", "Phone"):
+                contact = normalized_contact(row.get(field))
+                if contact and contact in existing_contacts:
+                    errors.append("Row {}: {} already belongs to a record in this church.".format(number, field))
+                if contact and contact in seen_contacts:
+                    errors.append("Row {}: {} is duplicated within this CSV.".format(number, field))
+                if contact:
+                    seen_contacts.add(contact)
+            results.append(errors)
+        return results
+
+    def validate(self, entity, church_id, rows):
+        """Return flattened row-numbered blocking errors without modifying the database."""
+        return [error for row_errors in self.validate_rows(entity, church_id, rows)
+                for error in row_errors]
+
+    def import_rows(self, entity, church_id, rows, source_path):
+        """Import fully reviewed rows in one transaction and record safe history."""
+        errors = self.validate(entity, church_id, rows)
+        if errors:
+            raise ValueError("\n".join(errors[:12]))
+        cursor = self.connection.cursor()
+        try:
+            for row in rows:
+                if entity == "People":
+                    cursor.execute(
+                        "INSERT INTO tblPerson "
+                        "(ChurchID,FirstName,MiddleName,LastName,Title,Status) VALUES (?,?,?,?,?,'Active')",
+                        (church_id, row["FirstName"], row["MiddleName"] or None,
+                         row["LastName"], row["Title"] or None),
+                    )
+                    record_id = cursor.lastrowid
+                    self._insert_contacts(cursor, "Person", record_id, row)
+                else:
+                    cursor.execute(
+                        "INSERT INTO tblFamily (ChurchID,FamilyName,Directory) VALUES (?,?,0)",
+                        (church_id, row["FamilyName"]),
+                    )
+                    record_id = cursor.lastrowid
+                    if any(row[field] for field in ("Address", "Address2", "City", "State", "Zip")):
+                        cursor.execute(
+                            "INSERT INTO tblFamilyAddress "
+                            "(FamilyID,AddressLabel,Address,Address2,City,State,Zip,Unlisted) "
+                            "VALUES (?,'Main',?,?,?,?,?,0)",
+                            (record_id, row["Address"] or None, row["Address2"] or None,
+                             row["City"] or None, row["State"] or None, row["Zip"] or None),
+                        )
+                    self._insert_contacts(cursor, "Family", record_id, row)
+            source = Path(source_path)
+            digest = hashlib.sha256(source.read_bytes()).hexdigest()
+            cursor.execute(
+                "INSERT INTO tblMembershipImportHistory "
+                "(ChurchID,ImportedByUserID,EntityType,SourceFileName,SourceSHA256,"
+                "RowCount,ImportedCount,RejectedCount) VALUES (?,?,?,?,?,?,?,0)",
+                (church_id, self.user_id, entity, source.name, digest, len(rows), len(rows)),
+            )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+        return len(rows)
+
+    @staticmethod
+    def _insert_contacts(cursor, entity, record_id, row):
+        """Insert optional email and phone records using established contact tables."""
+        parent = entity + "ID"
+        table = "tbl{}Contact".format(entity)
+        for kind in ("Email", "Phone"):
+            value = row.get(kind)
+            if value:
+                cursor.execute(
+                    "INSERT INTO {} ({},ContactLabel,Type,Contact,Unlisted) "
+                    "VALUES (?,'Primary',?,?,0)".format(table, parent),
+                    (record_id, kind, value),
+                )
+
+
+class MembershipExportService:
+    """Create privacy-safe membership CSV exports and retain safe history."""
+
+    def __init__(self, connection, user_id):
+        self.connection = portable_connection(connection)
+        self.user_id = int(user_id)
+
+    def rows(self, entity, church_id):
+        """Return approved export fields with every unlisted contact excluded."""
+        cursor = self.connection.cursor()
+        try:
+            if entity == "People":
+                cursor.execute(
+                    "SELECT p.FirstName,COALESCE(p.MiddleName,''),p.LastName,COALESCE(p.Title,''),"
+                    "COALESCE((SELECT pc.Contact FROM tblPersonContact pc "
+                    "WHERE pc.PersonID=p.ID AND COALESCE(pc.Unlisted,0)=0 "
+                    "AND LOWER(pc.Type)='email' ORDER BY pc.ID LIMIT 1),''),"
+                    "COALESCE((SELECT pc.Contact FROM tblPersonContact pc "
+                    "WHERE pc.PersonID=p.ID AND COALESCE(pc.Unlisted,0)=0 "
+                    "AND LOWER(pc.Type)='phone' ORDER BY pc.ID LIMIT 1),'') "
+                    "FROM tblPerson p WHERE p.ChurchID=? ORDER BY p.LastName,p.FirstName,p.ID",
+                    (church_id,),
+                )
+                headers = ["First Name", "Middle Name", "Last Name", "Title", "Email", "Phone"]
+            else:
+                cursor.execute(
+                    "SELECT f.FamilyName,COALESCE(fa.Address,''),COALESCE(fa.Address2,''),"
+                    "COALESCE(fa.City,''),COALESCE(fa.State,''),COALESCE(fa.Zip,''),"
+                    "COALESCE((SELECT fc.Contact FROM tblFamilyContact fc "
+                    "WHERE fc.FamilyID=f.ID AND COALESCE(fc.Unlisted,0)=0 "
+                    "AND LOWER(fc.Type)='email' ORDER BY fc.ID LIMIT 1),''),"
+                    "COALESCE((SELECT fc.Contact FROM tblFamilyContact fc "
+                    "WHERE fc.FamilyID=f.ID AND COALESCE(fc.Unlisted,0)=0 "
+                    "AND LOWER(fc.Type)='phone' ORDER BY fc.ID LIMIT 1),'') "
+                    "FROM tblFamily f LEFT JOIN tblFamilyAddress fa ON fa.ID=("
+                    "SELECT MIN(candidate.ID) FROM tblFamilyAddress candidate "
+                    "WHERE candidate.FamilyID=f.ID AND COALESCE(candidate.Unlisted,0)=0) "
+                    "WHERE f.ChurchID=? ORDER BY f.FamilyName,f.ID",
+                    (church_id,),
+                )
+                headers = [
+                    "Family Name", "Address", "Address 2", "City", "State", "ZIP", "Email", "Phone",
+                ]
+            return headers, cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def export(self, entity, church_id, destination):
+        """Write an approved CSV and record attribution without source content."""
+        headers, rows = self.rows(entity, church_id)
+        target = Path(destination)
+        temporary = target.with_name(target.name + ".tmp")
+        try:
+            with temporary.open("w", encoding="utf-8-sig", newline="") as stream:
+                writer = csv.writer(stream)
+                writer.writerow(headers)
+                writer.writerows(rows)
+            digest = hashlib.sha256(temporary.read_bytes()).hexdigest()
+            temporary.replace(target)
+            cursor = self.connection.cursor()
+            try:
+                cursor.execute(
+                    "INSERT INTO tblMembershipExportHistory "
+                    "(ChurchID,ExportedByUserID,EntityType,DestinationFileName,ExportSHA256,"
+                    "RowCount,IncludedUnlistedContacts) VALUES (?,?,?,?,?,?,0)",
+                    (church_id, self.user_id, entity, target.name, digest, len(rows)),
+                )
+                self.connection.commit()
+            except Exception:
+                self.connection.rollback()
+                target.unlink(missing_ok=True)
+                raise
+            finally:
+                cursor.close()
+        finally:
+            temporary.unlink(missing_ok=True)
+        return len(rows)
+
+
+class MembershipArchiveService:
+    """Create and verify a privacy-safe, versioned membership archive."""
+
+    FORMAT = "churchmanager-membership-archive"
+    FORMAT_VERSION = 1
+
+    def __init__(self, connection, user_id):
+        self.connection = portable_connection(connection)
+        self.user_id = int(user_id)
+        self.exports = MembershipExportService(connection, user_id)
+
+    @staticmethod
+    def _csv_bytes(headers, rows):
+        """Return deterministic UTF-8 CSV bytes for an approved dataset."""
+        stream = io.StringIO(newline="")
+        writer = csv.writer(stream, lineterminator="\n")
+        writer.writerow(headers)
+        writer.writerows(rows)
+        return ("\ufeff" + stream.getvalue()).encode("utf-8")
+
+    @classmethod
+    def validate(cls, archive_path):
+        """Validate format, manifest, member names, and every payload checksum."""
+        with zipfile.ZipFile(archive_path, "r") as archive:
+            names = set(archive.namelist())
+            if names != {"manifest.json", "People.csv", "Families.csv"}:
+                raise ValueError("The membership archive contains unexpected or missing files.")
+            manifest = json.loads(archive.read("manifest.json").decode("utf-8"))
+            if manifest.get("format") != cls.FORMAT or manifest.get("format_version") != cls.FORMAT_VERSION:
+                raise ValueError("This is not a supported ChurchManager membership archive.")
+            if manifest.get("includes_unlisted_contacts") is not False:
+                raise ValueError("The archive privacy declaration is invalid.")
+            for name in ("People.csv", "Families.csv"):
+                payload = archive.read(name)
+                expected = manifest.get("files", {}).get(name, {}).get("sha256")
+                if not expected or hashlib.sha256(payload).hexdigest() != expected:
+                    raise ValueError("The archive checksum failed for {}.".format(name))
+        return manifest
+
+    def create(self, church_id, church_name, destination):
+        """Write, verify, and audit one privacy-safe portable archive atomically."""
+        datasets = {}
+        for entity in ("People", "Families"):
+            headers, rows = self.exports.rows(entity, int(church_id))
+            payload = self._csv_bytes(headers, rows)
+            datasets[entity] = (payload, len(rows))
+        manifest = {
+            "format": self.FORMAT,
+            "format_version": self.FORMAT_VERSION,
+            "churchmanager_version": __version__,
+            "created_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+            "church": {"id": int(church_id), "name": str(church_name)},
+            "includes_unlisted_contacts": False,
+            "privacy": ("Membership directory fields only. Passwords, giving, accounting, "
+                        "audit internals, and pastoral care are excluded."),
+            "files": {
+                "{}.csv".format(entity): {
+                    "rows": count, "sha256": hashlib.sha256(payload).hexdigest(),
+                } for entity, (payload, count) in datasets.items()
+            },
+        }
+        target = Path(destination)
+        temporary = target.with_name(target.name + ".tmp")
+        try:
+            with zipfile.ZipFile(temporary, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                for entity, (payload, _count) in datasets.items():
+                    archive.writestr("{}.csv".format(entity), payload)
+                archive.writestr(
+                    "manifest.json",
+                    json.dumps(manifest, indent=2, sort_keys=True).encode("utf-8"),
+                )
+            self.validate(temporary)
+            digest = hashlib.sha256(temporary.read_bytes()).hexdigest()
+            temporary.replace(target)
+            cursor = self.connection.cursor()
+            try:
+                cursor.execute(
+                    "INSERT INTO tblMembershipArchiveHistory "
+                    "(ChurchID,CreatedByUserID,ArchiveFileName,ArchiveSHA256,"
+                    "PersonRowCount,FamilyRowCount,IncludedUnlistedContacts) "
+                    "VALUES (?,?,?,?,?,?,0)",
+                    (church_id, self.user_id, target.name, digest,
+                     datasets["People"][1], datasets["Families"][1]),
+                )
+                self.connection.commit()
+            except Exception:
+                self.connection.rollback()
+                target.unlink(missing_ok=True)
+                raise
+            finally:
+                cursor.close()
+        finally:
+            temporary.unlink(missing_ok=True)
+        return manifest
+
+
+class DataManagementDialog(wx.Dialog):
+    """Central guarded duplicate review, membership import, and export screen."""
+
+    def __init__(self, parent, connection, session):
+        super().__init__(parent, title="Data Management", size=(980, 620))
+        self.repository = DataManagementRepository(connection)
+        self.connection = connection
+        self.session = session
+        self.rows = []
+        panel = wx.Panel(self)
+        outer = wx.BoxSizer(wx.VERTICAL)
+        title = wx.StaticText(panel, label="Duplicate Review")
+        title.SetFont(title.GetFont().Bold())
+        outer.Add(title, 0, wx.LEFT | wx.RIGHT | wx.TOP, 12)
+        outer.Add(wx.StaticText(
+            panel,
+            label=("Possible matches require human review. Decisions never delete, merge, "
+                   "or alter membership records."),
+        ), 0, wx.ALL, 12)
+        self.list = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        for index, (label, width) in enumerate((
+            ("Type", 85), ("First record", 245), ("ID", 65),
+            ("Second record", 245), ("ID", 65), ("Reason", 210),
+        )):
+            self.list.InsertColumn(index, label, width=width)
+        outer.Add(self.list, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
+        self.status = wx.StaticText(panel, label="")
+        outer.Add(self.status, 0, wx.ALL, 12)
+        self.show_deferred = wx.CheckBox(panel, label="Include matches marked Review Later")
+        self.show_deferred.Bind(wx.EVT_CHECKBOX, lambda _event: self.refresh())
+        outer.Add(self.show_deferred, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        review_buttons = wx.BoxSizer(wx.HORIZONTAL)
+        transfer_buttons = wx.BoxSizer(wx.HORIZONTAL)
+        refresh = wx.Button(panel, label="Refresh Review")
+        not_duplicate = wx.Button(panel, label="Not Duplicates")
+        defer = wx.Button(panel, label="Review Later")
+        merge_impact = wx.Button(panel, label="Review Merge Impact...")
+        merge = wx.Button(panel, label="Merge Records...")
+        preview_csv = wx.Button(panel, label="Preview Membership CSV...")
+        export_csv = wx.Button(panel, label="Export Membership CSV...")
+        archive = wx.Button(panel, label="Create Portable Archive...")
+        close = wx.Button(panel, label="Close")
+        refresh.Bind(wx.EVT_BUTTON, lambda _event: self.refresh())
+        not_duplicate.Bind(wx.EVT_BUTTON, self.on_not_duplicate)
+        defer.Bind(wx.EVT_BUTTON, self.on_defer)
+        merge_impact.Bind(wx.EVT_BUTTON, self.on_merge_impact)
+        merge.Bind(wx.EVT_BUTTON, self.on_merge)
+        preview_csv.Bind(wx.EVT_BUTTON, self.on_preview_csv)
+        export_csv.Bind(wx.EVT_BUTTON, self.on_export_csv)
+        archive.Bind(wx.EVT_BUTTON, self.on_archive)
+        close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_OK))
+        review_buttons.Add(refresh, 0, wx.RIGHT, 8)
+        review_buttons.Add(not_duplicate, 0, wx.RIGHT, 8)
+        review_buttons.Add(defer, 0, wx.RIGHT, 8)
+        review_buttons.Add(merge_impact, 0)
+        review_buttons.Add(merge, 0, wx.LEFT, 8)
+        outer.Add(review_buttons, 0, wx.LEFT | wx.RIGHT | wx.TOP, 12)
+        transfer_buttons.Add(preview_csv, 0, wx.RIGHT, 8)
+        transfer_buttons.Add(export_csv, 0, wx.RIGHT, 8)
+        transfer_buttons.Add(archive, 0, wx.RIGHT, 8)
+        transfer_buttons.AddStretchSpacer()
+        transfer_buttons.Add(close, 0)
+        outer.Add(transfer_buttons, 0, wx.EXPAND | wx.ALL, 12)
+        panel.SetSizer(outer)
+        self.refresh()
+
+    def refresh(self):
+        """Reload possible matches without changing database state."""
+        self.list.DeleteAllItems()
+        try:
+            rows = self.repository.duplicate_candidates(self.show_deferred.GetValue())
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Review Duplicates", wx.OK | wx.ICON_ERROR, self)
+            return
+        self.rows = rows
+        for candidate in rows:
+            index = self.list.InsertItem(self.list.GetItemCount(), candidate.entity)
+            values = (
+                candidate.first_name, str(candidate.first_id), candidate.second_name,
+                str(candidate.second_id), candidate.reason,
+            )
+            for column, value in enumerate(values, 1):
+                self.list.SetItem(index, column, value)
+        self.status.SetLabel(
+            "{} possible duplicate pair(s).".format(len(rows)) if rows
+            else "No likely duplicates were found by the current exact-match rules."
+        )
+
+    def _selected_candidate(self):
+        """Return the selected advisory match or explain that selection is required."""
+        selected = self.list.GetFirstSelected()
+        if selected < 0 or selected >= len(self.rows):
+            wx.MessageBox("Select a possible duplicate pair first.", "Duplicate Review",
+                          wx.OK | wx.ICON_INFORMATION, self)
+            return None
+        return self.rows[selected]
+
+    def _resolve(self, resolution, prompt):
+        """Confirm and store a non-destructive duplicate-review decision."""
+        candidate = self._selected_candidate()
+        if candidate is None:
+            return
+        message = "{}\n\n{} (ID {})\n{} (ID {})".format(
+            prompt, candidate.first_name, candidate.first_id,
+            candidate.second_name, candidate.second_id,
+        )
+        if wx.MessageBox(message, "Confirm Duplicate Review", wx.YES_NO | wx.NO_DEFAULT |
+                         wx.ICON_QUESTION, self) != wx.YES:
+            return
+        try:
+            self.repository.resolve_duplicate(candidate, resolution, self.session.user_id)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Save Review", wx.OK | wx.ICON_ERROR, self)
+            return
+        self.refresh()
+
+    def on_not_duplicate(self, _event):
+        """Record that the selected records are distinct without changing either one."""
+        self._resolve("NOT_DUPLICATE", "Mark these as separate records, not duplicates?")
+
+    def on_defer(self, _event):
+        """Remove the selected match from the active queue for later review."""
+        self._resolve("DEFERRED", "Defer this possible match for later review?")
+
+    def on_merge_impact(self, _event):
+        """Show every current database area affected by a possible merge."""
+        candidate = self._selected_candidate()
+        if candidate is None:
+            return
+        try:
+            impacts = self.repository.merge_impact(candidate)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Review Merge Impact",
+                          wx.OK | wx.ICON_ERROR, self)
+            return
+        dialog = MergeImpactDialog(self, candidate, impacts)
+        try:
+            dialog.ShowModal()
+        finally:
+            dialog.Destroy()
+
+    def on_merge(self, _event):
+        """Open the deliberate survivor-selection and merge confirmation workflow."""
+        candidate = self._selected_candidate()
+        if candidate is None:
+            return
+        try:
+            impacts = self.repository.merge_impact(candidate)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Prepare Merge", wx.OK | wx.ICON_ERROR, self)
+            return
+        dialog = DuplicateMergeDialog(
+            self, self.repository, self.session, candidate, impacts,
+        )
+        try:
+            if dialog.ShowModal() == wx.ID_OK:
+                self.refresh()
+        finally:
+            dialog.Destroy()
+
+
+    def on_preview_csv(self, _event):
+        """Open the non-writing CSV mapping and preview workflow."""
+        dialog = CsvImportPreviewDialog(self, self.connection, self.session)
+        try:
+            dialog.ShowModal()
+        finally:
+            dialog.Destroy()
+
+    def on_export_csv(self, _event):
+        """Open the privacy-safe membership export workflow."""
+        dialog = MembershipExportDialog(self, self.connection, self.session)
+        try:
+            dialog.ShowModal()
+        finally:
+            dialog.Destroy()
+
+    def on_archive(self, _event):
+        """Choose a church and destination for a privacy-safe portable archive."""
+        dialog = MembershipArchiveDialog(self, self.connection, self.session)
+        try:
+            dialog.ShowModal()
+        finally:
+            dialog.Destroy()
+
+
+class MergeImpactDialog(wx.Dialog):
+    """Display a read-only, schema-derived duplicate merge impact review."""
+
+    def __init__(self, parent, candidate, impacts):
+        super().__init__(parent, title="Duplicate Merge Impact", size=(760, 560))
+        panel = wx.Panel(self)
+        outer = wx.BoxSizer(wx.VERTICAL)
+        title = wx.StaticText(
+            panel,
+            label="{} (ID {})  and  {} (ID {})".format(
+                candidate.first_name, candidate.first_id,
+                candidate.second_name, candidate.second_id,
+            ),
+        )
+        title.SetFont(title.GetFont().Bold())
+        outer.Add(title, 0, wx.ALL, 12)
+        notice = wx.StaticText(
+            panel,
+            label=("Read-only preflight: these counts come from every current MariaDB foreign "
+                   "key. No records will be changed from this screen."),
+        )
+        notice.Wrap(710)
+        notice.SetForegroundColour(wx.Colour(0, 76, 153))
+        outer.Add(notice, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        listing = wx.ListCtrl(panel, style=wx.LC_REPORT)
+        for index, (label, width) in enumerate((
+            ("Related area", 300), ("Link field", 160),
+            ("First record", 110), ("Second record", 110),
+        )):
+            listing.InsertColumn(index, label, width=width)
+        for impact in impacts:
+            row = listing.InsertItem(listing.GetItemCount(), impact.table)
+            listing.SetItem(row, 1, impact.column)
+            listing.SetItem(row, 2, str(impact.first_count))
+            listing.SetItem(row, 3, str(impact.second_count))
+        outer.Add(listing, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
+        affected = sum(item.first_count + item.second_count for item in impacts)
+        outer.Add(wx.StaticText(
+            panel,
+            label="{} relationship(s) across {} database area(s).".format(
+                affected, len(impacts),
+            ),
+        ), 0, wx.ALL, 12)
+        close = wx.Button(panel, label="Close")
+        close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_OK))
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        buttons.AddStretchSpacer()
+        buttons.Add(close, 0)
+        outer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 12)
+        panel.SetSizer(outer)
+
+
+class DuplicateMergeDialog(wx.Dialog):
+    """Require survivor choice, reason, and final confirmation for a merge."""
+
+    def __init__(self, parent, repository, session, candidate, impacts):
+        super().__init__(parent, title="Merge Duplicate Records", size=(720, 570))
+        self.repository = repository
+        self.session = session
+        self.candidate = candidate
+        self.impacts = impacts
+        panel = wx.Panel(self)
+        outer = wx.BoxSizer(wx.VERTICAL)
+        notice = wx.StaticText(
+            panel,
+            label=("Choose the record to keep. All linked history will move to that record; "
+                   "the other duplicate will then be removed."),
+        )
+        notice.Wrap(670)
+        notice.SetForegroundColour(wx.Colour(0, 76, 153))
+        outer.Add(notice, 0, wx.ALL, 14)
+        self.keep_first = wx.RadioButton(
+            panel,
+            label="Keep {} (ID {})".format(candidate.first_name, candidate.first_id),
+            style=wx.RB_GROUP,
+        )
+        self.keep_second = wx.RadioButton(
+            panel,
+            label="Keep {} (ID {})".format(candidate.second_name, candidate.second_id),
+        )
+        outer.Add(self.keep_first, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        outer.Add(self.keep_second, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        listing = wx.ListCtrl(panel, style=wx.LC_REPORT)
+        for index, (label, width) in enumerate((
+            ("Related area", 290), ("Link field", 150),
+            ("First", 90), ("Second", 90),
+        )):
+            listing.InsertColumn(index, label, width=width)
+        for impact in impacts:
+            row = listing.InsertItem(listing.GetItemCount(), impact.table)
+            listing.SetItem(row, 1, impact.column)
+            listing.SetItem(row, 2, str(impact.first_count))
+            listing.SetItem(row, 3, str(impact.second_count))
+        outer.Add(listing, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 14)
+        outer.Add(wx.StaticText(panel, label="Reason for merging *"), 0, wx.ALL, 14)
+        self.reason = wx.TextCtrl(panel)
+        outer.Add(self.reason, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        merge = wx.Button(panel, label="Merge Records")
+        cancel = wx.Button(panel, label="Cancel")
+        merge.Bind(wx.EVT_BUTTON, self.on_merge)
+        cancel.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_CANCEL))
+        buttons.AddStretchSpacer()
+        buttons.Add(merge, 0, wx.RIGHT, 8)
+        buttons.Add(cancel, 0)
+        outer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        panel.SetSizer(outer)
+
+    def on_merge(self, _event):
+        """Perform the merge only after a second explicit confirmation."""
+        reason = self.reason.GetValue().strip()
+        if not reason:
+            wx.MessageBox("Enter the reason for this merge.", "Merge Records",
+                          wx.OK | wx.ICON_INFORMATION, self)
+            return
+        survivor_id = (
+            self.candidate.first_id if self.keep_first.GetValue()
+            else self.candidate.second_id
+        )
+        survivor_name = (
+            self.candidate.first_name if self.keep_first.GetValue()
+            else self.candidate.second_name
+        )
+        removed_name = (
+            self.candidate.second_name if self.keep_first.GetValue()
+            else self.candidate.first_name
+        )
+        message = (
+            "Keep '{}', move all linked history to it, and remove '{}'?\n\n"
+            "This cannot be undone from this screen."
+        ).format(survivor_name, removed_name)
+        if wx.MessageBox(message, "Confirm Record Merge",
+                         wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES:
+            return
+        try:
+            moved = self.repository.merge_duplicate(
+                self.candidate, survivor_id, reason, self.session.user_id,
+            )
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Merge Records",
+                          wx.OK | wx.ICON_ERROR, self)
+            return
+        wx.MessageBox(
+            "The records were merged. {} linked relationship(s) moved.".format(moved),
+            "Merge Complete", wx.OK | wx.ICON_INFORMATION, self,
+        )
+        self.EndModal(wx.ID_OK)
+
+
+class MembershipArchiveDialog(wx.Dialog):
+    """Collect and confirm creation of a membership portable archive."""
+
+    def __init__(self, parent, connection, session):
+        super().__init__(parent, title="Create Membership Portable Archive", size=(640, 300))
+        self.service = MembershipArchiveService(connection, session.user_id)
+        self.church_rows = DataManagementRepository(connection).churches()
+        panel = wx.Panel(self)
+        outer = wx.BoxSizer(wx.VERTICAL)
+        notice = wx.StaticText(
+            panel,
+            label=("This is a portable membership archive, not a database backup. It contains "
+                   "privacy-safe People and Families CSV files plus a verified manifest."),
+        )
+        notice.Wrap(590)
+        notice.SetForegroundColour(wx.Colour(0, 76, 153))
+        outer.Add(notice, 0, wx.ALL, 14)
+        outer.Add(wx.StaticText(
+            panel,
+            label=("Unlisted contacts, passwords, giving, accounting, audit internals, and "
+                   "pastoral-care information are excluded."),
+        ), 0, wx.LEFT | wx.RIGHT | wx.BOTTOM, 14)
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        row.Add(wx.StaticText(panel, label="Church"), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 10)
+        self.church = wx.Choice(panel, choices=[item[1] for item in self.church_rows])
+        if self.church_rows:
+            self.church.SetSelection(0)
+        row.Add(self.church, 1)
+        outer.Add(row, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 14)
+        outer.AddStretchSpacer()
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        create = wx.Button(panel, label="Choose File and Create...")
+        create.Bind(wx.EVT_BUTTON, self.on_create)
+        close = wx.Button(panel, label="Close")
+        close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_OK))
+        buttons.Add(create, 0)
+        buttons.AddStretchSpacer()
+        buttons.Add(close, 0)
+        outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 14)
+        panel.SetSizer(outer)
+
+    def on_create(self, _event):
+        """Confirm, create, verify, and report a portable membership archive."""
+        selected = self.church.GetSelection()
+        if selected < 0:
+            wx.MessageBox("Select a church.", "Portable Archive", wx.OK | wx.ICON_WARNING, self)
+            return
+        church_id, church_name = self.church_rows[selected]
+        dialog = wx.FileDialog(
+            self, "Save membership portable archive",
+            defaultFile="{}-Membership-Archive.zip".format(church_name).replace(" ", "-"),
+            wildcard="ZIP archives (*.zip)|*.zip", style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
+        )
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            destination = dialog.GetPath()
+        finally:
+            dialog.Destroy()
+        if wx.MessageBox(
+            "Create a privacy-safe membership archive for {}?".format(church_name),
+            "Confirm Portable Archive", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self,
+        ) != wx.YES:
+            return
+        try:
+            manifest = self.service.create(church_id, church_name, destination)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Create Portable Archive",
+                          wx.OK | wx.ICON_ERROR, self)
+            return
+        wx.MessageBox(
+            "Archive verified: {} people and {} families.".format(
+                manifest["files"]["People.csv"]["rows"],
+                manifest["files"]["Families.csv"]["rows"],
+            ),
+            "Portable Archive Complete", wx.OK | wx.ICON_INFORMATION, self,
+        )
+
+
+class MembershipExportDialog(wx.Dialog):
+    """Collect a bounded membership export destination and show its privacy rule."""
+
+    def __init__(self, parent, connection, session):
+        super().__init__(parent, title="Export Membership CSV", size=(600, 310))
+        self.service = MembershipExportService(connection, session.user_id)
+        self.church_rows = DataManagementRepository(connection).churches()
+        panel = wx.Panel(self)
+        outer = wx.BoxSizer(wx.VERTICAL)
+        notice = wx.StaticText(
+            panel,
+            label=("Exports contain only membership directory fields. Unlisted addresses, email "
+                   "addresses, and telephone numbers are always omitted."),
+        )
+        notice.Wrap(550)
+        notice.SetForegroundColour(wx.Colour(0, 76, 153))
+        outer.Add(notice, 0, wx.ALL, 14)
+        grid = wx.FlexGridSizer(cols=2, hgap=10, vgap=10)
+        grid.Add(wx.StaticText(panel, label="Record type"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self.entity = wx.Choice(panel, choices=list(CSV_FIELDS))
+        self.entity.SetSelection(0)
+        grid.Add(self.entity, 1, wx.EXPAND)
+        grid.Add(wx.StaticText(panel, label="Church"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self.church = wx.Choice(panel, choices=[row[1] for row in self.church_rows])
+        if self.church_rows:
+            self.church.SetSelection(0)
+        grid.Add(self.church, 1, wx.EXPAND)
+        grid.AddGrowableCol(1, 1)
+        outer.Add(grid, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 14)
+        outer.AddStretchSpacer()
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        export = wx.Button(panel, label="Choose File and Export...")
+        export.Bind(wx.EVT_BUTTON, self.on_export)
+        close = wx.Button(panel, label="Close")
+        close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_OK))
+        buttons.Add(export, 0)
+        buttons.AddStretchSpacer()
+        buttons.Add(close, 0)
+        outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 14)
+        panel.SetSizer(outer)
+
+    def on_export(self, _event):
+        """Choose the target, confirm disclosure, and write the safe export."""
+        if self.church.GetSelection() < 0:
+            wx.MessageBox("Select a church.", "Export Membership CSV", wx.OK | wx.ICON_WARNING, self)
+            return
+        entity = self.entity.GetStringSelection()
+        church_id, church_name = self.church_rows[self.church.GetSelection()]
+        dialog = wx.FileDialog(
+            self, "Save privacy-safe membership export",
+            defaultFile="{}-{}.csv".format(church_name, entity).replace(" ", "-"),
+            wildcard="CSV files (*.csv)|*.csv", style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
+        )
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            destination = dialog.GetPath()
+        finally:
+            dialog.Destroy()
+        confirmation = (
+            "Export {} directory fields for {}?\n\n"
+            "Unlisted contact information and confidential subsystems are excluded."
+        ).format(entity.lower(), church_name)
+        if wx.MessageBox(confirmation, "Confirm Membership Export", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES:
+            return
+        try:
+            count = self.service.export(entity, church_id, destination)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Export Membership CSV", wx.OK | wx.ICON_ERROR, self)
+            return
+        wx.MessageBox(
+            "Exported {} {} row(s).".format(count, entity.lower()),
+            "Membership Export Complete", wx.OK | wx.ICON_INFORMATION, self,
+        )
+
+
+class CsvImportPreviewDialog(wx.Dialog):
+    """Preview an explicitly mapped membership CSV without database writes."""
+
+    def __init__(self, parent, connection, session):
+        super().__init__(parent, title="Preview Membership CSV", size=(960, 680))
+        self.headers = []
+        self.rows = []
+        self.mapping_choices = {}
+        self.import_service = MembershipImportService(connection, session.user_id)
+        self.church_rows = DataManagementRepository(connection).churches()
+        self.preview_rows = []
+        panel = wx.Panel(self)
+        outer = wx.BoxSizer(wx.VERTICAL)
+        instruction = wx.StaticText(
+            panel,
+            label="Choose People or Families, map the CSV columns, then preview. Preview makes no database changes.",
+        )
+        instruction.SetForegroundColour(wx.Colour(0, 76, 153))
+        outer.Add(instruction, 0, wx.ALL, 12)
+
+        source = wx.FlexGridSizer(cols=3, hgap=8, vgap=8)
+        source.Add(wx.StaticText(panel, label="Record type"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self.entity = wx.Choice(panel, choices=list(CSV_FIELDS), size=(180, -1))
+        self.entity.SetSelection(0)
+        self.entity.Bind(wx.EVT_CHOICE, self.on_entity)
+        source.Add(self.entity, 0)
+        source.Add((1, 1))
+        source.Add(wx.StaticText(panel, label="Church"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self.church = wx.Choice(panel, choices=[row[1] for row in self.church_rows])
+        if self.church_rows:
+            self.church.SetSelection(0)
+        self.church.Bind(wx.EVT_CHOICE, self.on_mapping_changed)
+        source.Add(self.church, 1, wx.EXPAND)
+        source.Add((1, 1))
+        source.Add(wx.StaticText(panel, label="CSV file"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self.path = wx.TextCtrl(panel, style=wx.TE_READONLY)
+        source.Add(self.path, 1, wx.EXPAND)
+        browse = wx.Button(panel, label="Browse...")
+        browse.Bind(wx.EVT_BUTTON, self.on_browse)
+        source.Add(browse, 0)
+        source.AddGrowableCol(1, 1)
+        outer.Add(source, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
+
+        mapping_box = wx.StaticBoxSizer(wx.VERTICAL, panel, "CSV column mapping")
+        self.mapping_panel = wx.Panel(mapping_box.GetStaticBox())
+        mapping_box.Add(self.mapping_panel, 1, wx.EXPAND | wx.ALL, 8)
+        outer.Add(mapping_box, 0, wx.EXPAND | wx.ALL, 12)
+
+        preview = wx.StaticBoxSizer(wx.VERTICAL, panel, "Preview")
+        self.list = wx.ListCtrl(preview.GetStaticBox(), style=wx.LC_REPORT)
+        preview.Add(self.list, 1, wx.EXPAND | wx.ALL, 6)
+        outer.Add(preview, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 12)
+        self.status = wx.StaticText(panel, label="Choose a CSV file to begin.")
+        outer.Add(self.status, 0, wx.ALL, 12)
+        buttons = wx.BoxSizer(wx.HORIZONTAL)
+        run = wx.Button(panel, label="Preview Mapped Rows")
+        run.Bind(wx.EVT_BUTTON, self.on_preview)
+        self.import_button = wx.Button(panel, label="Import Reviewed Rows")
+        self.import_button.Disable()
+        self.import_button.Bind(wx.EVT_BUTTON, self.on_import)
+        close = wx.Button(panel, label="Close")
+        close.Bind(wx.EVT_BUTTON, lambda _event: self.EndModal(wx.ID_OK))
+        buttons.Add(run, 0)
+        buttons.Add(self.import_button, 0, wx.LEFT, 8)
+        buttons.AddStretchSpacer()
+        buttons.Add(close, 0)
+        outer.Add(buttons, 0, wx.EXPAND | wx.ALL, 12)
+        panel.SetSizer(outer)
+        self.rebuild_mapping()
+
+    @property
+    def entity_name(self):
+        """Return the selected membership record type."""
+        return self.entity.GetStringSelection()
+
+    def rebuild_mapping(self, suggestions=None):
+        """Rebuild destination mappings for the selected record type."""
+        grid = self.mapping_panel.GetSizer()
+        if grid is None:
+            grid = wx.FlexGridSizer(cols=2, hgap=12, vgap=6)
+            grid.AddGrowableCol(1, 1)
+            self.mapping_panel.SetSizer(grid)
+        else:
+            grid.Clear(delete_windows=True)
+        self.mapping_choices = {}
+        choices = ["Not mapped"] + self.headers
+        for label, field, required in CSV_FIELDS[self.entity_name]:
+            grid.Add(wx.StaticText(
+                self.mapping_panel, label=label + (" *" if required else "")
+            ), 0, wx.ALIGN_CENTER_VERTICAL)
+            choice = wx.Choice(self.mapping_panel, choices=choices, size=(270, -1))
+            selected = (suggestions or {}).get(field, "")
+            choice.SetSelection(choices.index(selected) if selected in choices else 0)
+            self.mapping_choices[field] = choice
+            choice.Bind(wx.EVT_CHOICE, self.on_mapping_changed)
+            grid.Add(choice, 0, wx.EXPAND)
+        self.mapping_panel.Layout()
+        self.Layout()
+
+    def on_mapping_changed(self, _event):
+        """Require a fresh preview after any destination or mapping change."""
+        self.preview_rows = []
+        self.import_button.Disable()
+        self.status.SetLabel("Mapping or destination changed. Preview the rows again before import.")
+
+    def on_entity(self, _event):
+        """Reset mappings when the record type changes."""
+        suggestions = suggested_csv_mapping(self.headers, self.entity_name) if self.headers else None
+        self.rebuild_mapping(suggestions)
+        self.list.DeleteAllItems()
+        self.preview_rows = []
+        self.import_button.Disable()
+        self.status.SetLabel("Review the mappings, then preview the CSV rows.")
+
+    def on_browse(self, _event):
+        """Read a chosen CSV and prepare conservative mapping suggestions."""
+        dialog = wx.FileDialog(self, "Choose membership CSV", wildcard="CSV files (*.csv)|*.csv")
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            path = dialog.GetPath()
+        finally:
+            dialog.Destroy()
+        try:
+            self.headers, self.rows = read_csv_rows(path)
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Read CSV", wx.OK | wx.ICON_ERROR, self)
+            return
+        self.path.SetValue(path)
+        self.rebuild_mapping(suggested_csv_mapping(self.headers, self.entity_name))
+        self.preview_rows = []
+        self.import_button.Disable()
+        self.status.SetLabel("{} source row(s). Review every mapping before preview.".format(len(self.rows)))
+
+    def on_preview(self, _event):
+        """Render mapped rows without opening a database transaction."""
+        if not self.rows:
+            wx.MessageBox("Choose a CSV file first.", "Preview Membership CSV", wx.OK | wx.ICON_INFORMATION, self)
+            return
+        mapping = {
+            field: (choice.GetStringSelection() if choice.GetSelection() > 0 else "")
+            for field, choice in self.mapping_choices.items()
+        }
+        try:
+            rows = mapped_csv_preview(self.rows, self.entity_name, mapping)
+        except ValueError as error:
+            wx.MessageBox(str(error), "Mapping Needs Attention", wx.OK | wx.ICON_WARNING, self)
+            return
+        if self.church.GetSelection() < 0:
+            wx.MessageBox("Select a church.", "Mapping Needs Attention", wx.OK | wx.ICON_WARNING, self)
+            return
+        row_errors = self.import_service.validate_rows(
+            self.entity_name, self.church_rows[self.church.GetSelection()][0], rows
+        )
+        self.list.ClearAll()
+        fields = [(label, field) for label, field, _required in CSV_FIELDS[self.entity_name]]
+        preview_widths = {
+            "FirstName": 105, "MiddleName": 90, "LastName": 110,
+            "FamilyName": 180, "Title": 65, "Email": 185, "Phone": 115,
+            "Address1": 180, "Address2": 140, "City": 120, "State": 65,
+            "ZIP": 80,
+        }
+        for index, (label, field) in enumerate(fields):
+            self.list.InsertColumn(index, label, width=preview_widths.get(field, 120))
+        self.list.InsertColumn(len(fields), "Import status", width=260)
+        accepted = []
+        for row, errors in zip(rows, row_errors):
+            index = self.list.InsertItem(self.list.GetItemCount(), row[fields[0][1]])
+            for column, (_label, field) in enumerate(fields[1:], 1):
+                self.list.SetItem(index, column, row[field])
+            if errors:
+                self.list.SetItem(index, len(fields), "Excluded: " + errors[0].split(": ", 1)[-1])
+                self.list.SetItemTextColour(index, wx.Colour(180, 0, 0))
+            else:
+                self.list.SetItem(index, len(fields), "Ready")
+                accepted.append(row)
+        rejected_count = len(rows) - len(accepted)
+        self.status.SetLabel(
+            "Previewed {} {} row(s): {} ready, {} excluded. No database records were changed."
+            .format(len(rows), self.entity_name.lower(), len(accepted), rejected_count)
+        )
+        self.preview_rows = accepted
+        self.import_button.Enable(bool(accepted))
+
+    def on_import(self, _event):
+        """Require explicit confirmation before the atomic reviewed import."""
+        if not self.preview_rows or self.church.GetSelection() < 0:
+            return
+        church_id, church_name = self.church_rows[self.church.GetSelection()]
+        message = (
+            "Import {} reviewed {} row(s) into {}?\n\n"
+            "This creates new records. It does not merge or replace existing records."
+        ).format(len(self.preview_rows), self.entity_name.lower(), church_name)
+        if wx.MessageBox(message, "Confirm Membership Import", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self) != wx.YES:
+            return
+        try:
+            count = self.import_service.import_rows(
+                self.entity_name, church_id, self.preview_rows, self.path.GetValue()
+            )
+        except Exception as error:
+            wx.MessageBox(str(error), "Unable to Import Membership CSV", wx.OK | wx.ICON_ERROR, self)
+            return
+        wx.MessageBox(
+            "Imported {} new {} record(s).".format(count, self.entity_name.lower()),
+            "Membership Import Complete", wx.OK | wx.ICON_INFORMATION, self,
+        )
+        self.preview_rows = []
+        self.import_button.Disable()
+        self.status.SetLabel("Import complete. Choose another file or close this window.")
+
+
+def show_data_management(parent, connection, session):
+    """Open the central ChurchManager Data Management dialog."""
+    dialog = DataManagementDialog(parent, connection, session)
+    try:
+        dialog.ShowModal()
+    finally:
+        dialog.Destroy()

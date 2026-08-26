@@ -1,0 +1,128 @@
+{
+    "frmFamilyDateFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmFamilyDate : Family Date Edit Form",
+            "name": "frmFamilyDate",
+            "table": {
+                "name": "tblFamilyDate",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "Date"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                40,
+                20
+            ],
+            "theme": "churchmanager"
+        },
+        "CONTROLS": {
+            "lblFamilyID": {
+                "type": "StaticText",
+                "label": "Family:",
+                "name": "lblFamilyID",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "FamilyID": {
+                "type": "ComboBox",
+                "name": "FamilyID",
+                "lookupchoices": {
+                    "name": "tblFamily",
+                    "fields": [
+                        "ID",
+                        "FamilyName"
+                    ]
+                },
+                "posch": [
+                    10,
+                    1
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Select the family."
+            },
+            "lblType": {
+                "type": "StaticText",
+                "label": "Type:",
+                "name": "lblType",
+                "posch": [
+                    1,
+                    3
+                ]
+            },
+            "DateType": {
+                "type": "ComboBox",
+                "name": "DateType",
+                "posch": [
+                    10,
+                    3
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Select the date type."
+            },
+            "lblDate": {
+                "type": "StaticText",
+                "label": "Date:",
+                "name": "lblDate",
+                "posch": [
+                    1,
+                    5
+                ]
+            },
+            "Date": {
+                "type": "DatePickerCtrl",
+                "name": "Date",
+                "posch": [
+                    10,
+                    5
+                ],
+                "sizech": [
+                    20,
+                    2
+                ],
+                "tooltip": "Enter the date."
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "name": "lblNote",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "Note": {
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Note",
+                "posch": [
+                    10,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    8
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
+            }
+        }
+    }
+}

@@ -1,0 +1,121 @@
+{
+    "frmHymnalFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmHymn: Hymnal Edit Form",
+            "name": "frmHymnal",
+            "table": {
+                "name": "tblHymnal",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "Title"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                51,
+                33
+            ],
+            "theme": "churchmanager"
+        },
+        "CONTROLS": {
+            "lblHymnal": {
+                "type": "StaticText",
+                "label": "Hymnal:",
+                "name": "lblHymnal",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "Hymnal": {
+                "type": "TextCtrl",
+                "name": "Hymnal",
+                "posch": [
+                    6,
+                    1
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the hymnal."
+            },
+            "lblTitle": {
+                "type": "StaticText",
+                "label": "Title:",
+                "name": "lblTitle",
+                "posch": [
+                    1,
+                    3
+                ]
+            },
+            "Title": {
+                "type": "TextCtrl",
+                "name": "Title",
+                "posch": [
+                    6,
+                    3
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the title."
+            },
+            "lblPublisher": {
+                "type": "StaticText",
+                "label": "Publisher:",
+                "name": "lblPublisher",
+                "posch": [
+                    1,
+                    5
+                ]
+            },
+            "Publisher": {
+                "type": "TextCtrl",
+                "name": "Publisher",
+                "posch": [
+                    6,
+                    5
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the publisher."
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "name": "lblNote",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "Note": {
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Note",
+                "posch": [
+                    6,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    8
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
+            }
+        }
+    }
+}

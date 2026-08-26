@@ -1,0 +1,244 @@
+{
+    "frmAttendanceEventFORM": {
+        "FORM": {
+            "type": "Panel",
+            "name": "frmAttendanceEvent",
+            "title": "frmAttendanceEvent :Attendance Event Edit Form",
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                50,
+                40
+            ],
+            "table": {
+                "name": "tblAttendanceEvent",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "DateTime DESC"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "theme": "churchmanager"
+        },
+        "CONTROLS": {
+            "lblChurchID": {
+                "type": "StaticText",
+                "label": "Church:",
+                "posch": [
+                    1,
+                    1
+                ],
+                "name": "lblChurchID"
+            },
+            "ChurchID": {
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblChurch",
+                    "fields": [
+                        "ID",
+                        "Church"
+                    ],
+                    "sort": "Church"
+                },
+                "posch": [
+                    17,
+                    1
+                ],
+                "sizech": [
+                    30,
+                    2
+                ],
+                "name": "ChurchID",
+                "tooltip": "Select the church."
+            },
+            "lblDescription": {
+                "type": "StaticText",
+                "label": "Description:",
+                "posch": [
+                    1,
+                    3
+                ],
+                "name": "lblDescription"
+            },
+            "Description": {
+                "type": "TextCtrl",
+                "posch": [
+                    17,
+                    3
+                ],
+                "sizech": [
+                    30,
+                    2
+                ],
+                "name": "Description",
+                "tooltip": "Enter the description."
+            },
+            "lblServiceID": {
+                "type": "StaticText",
+                "posch": [
+                    1,
+                    5
+                ],
+                "label": "Service:",
+                "name": "lblServiceID"
+            },
+            "ServiceID": {
+                "type": "ComboBox",
+                "posch": [
+                    17,
+                    5
+                ],
+                "sizech": [
+                    30,
+                    2
+                ],
+                "lookupchoices": {
+                    "name": "tblService",
+                    "fields": [
+                        "ID",
+                        "DateTime",
+                        "LiturgicalDate"
+                    ],
+                    "orderby": "DateTime DESC"
+                },
+                "name": "ServiceID",
+                "tooltip": "Select the service."
+            },
+            "lblDateTime": {
+                "type": "StaticText",
+                "posch": [
+                    1,
+                    7
+                ],
+                "name": "lblDateTime",
+                "label": "Date/Time:"
+            },
+            "DateTime": {
+                "type": "DateTime",
+                "posch": [
+                    17,
+                    7
+                ],
+                "sizech": [
+                    20,
+                    2
+                ],
+                "name": "DateTime",
+                "stylelist": [
+                    "ALLOWNONE"
+                ],
+                "tooltip": "Select the date and time."
+            },
+            "lblAttendanceType": {
+                "type": "StaticText",
+                "label": "Attendance Type:",
+                "posch": [
+                    1,
+                    9
+                ],
+                "name": "lblAttendanceType"
+            },
+            "AttendanceType": {
+                "type": "ComboBox",
+                "posch": [
+                    17,
+                    9
+                ],
+                "name": "AttendanceType",
+                "tooltip": "Select the attendance type."
+            },
+            "lblCommunionOffered": {
+                "type": "StaticText",
+                "label": "Holy Communion Offered:",
+                "posch": [
+                    1,
+                    11
+                ],
+                "name": "lblCommunionOffered"
+            },
+            "CommunionOffered": {
+                "type": "CheckBox",
+                "posch": [
+                    17,
+                    11
+                ],
+                "name": "CommunionOffered",
+                "tooltip": "Select this if communion offered applies."
+            },
+            "lblHandCount": {
+                "type": "StaticText",
+                "label": "Attendance Hand Count:",
+                "posch": [
+                    1,
+                    13
+                ],
+                "name": "lblHandCount"
+            },
+            "HandCount": {
+                "type": "TextCtrl",
+                "posch": [
+                    17,
+                    13
+                ],
+                "sizech": [
+                    5,
+                    2
+                ],
+                "name": "HandCount",
+                "tooltip": "Enter the total attendance counted for this event."
+            },
+            "lblHandCountCommunion": {
+                "type": "StaticText",
+                "label": "Communion Hand Count:",
+                "posch": [
+                    1,
+                    15
+                ],
+                "name": "lblHandCountCommunion"
+            },
+            "HandCountCommunion": {
+                "type": "TextCtrl",
+                "posch": [
+                    17,
+                    15
+                ],
+                "sizech": [
+                    5,
+                    2
+                ],
+                "name": "HandCountCommunion",
+                "tooltip": "Enter the number who received Holy Communion."
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "posch": [
+                    1,
+                    17
+                ],
+                "name": "lblNote"
+            },
+            "Note": {
+                "type": "MultiLine",
+                "posch": [
+                    17,
+                    17
+                ],
+                "sizech": [
+                    30,
+                    20
+                ],
+                "stylelist": [
+                    "MULTILINE",
+                    "WORDWRAP"
+                ],
+                "name": "Note",
+                "tooltip": "Enter the note. Multiple lines are allowed."
+            }
+        }
+    }
+}

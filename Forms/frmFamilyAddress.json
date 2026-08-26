@@ -1,0 +1,273 @@
+{
+    "frmFamilyAddressFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmFamilyAddress : FamilyAddress Edit Form",
+            "name": "frmFamilyAddress",
+            "table": {
+                "name": "tblFamilyAddress",
+                "fields": [
+                    "*"
+                ]
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                40,
+                35
+            ],
+            "theme": "churchmanager"
+        },
+        "CONTROLS": {
+            "lblFamilyID": {
+                "type": "StaticText",
+                "label": "Family:",
+                "name": "lblFamilyID",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "FamilyID": {
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblFamily",
+                    "fields": [
+                        "ID",
+                        "FamilyName"
+                    ]
+                },
+                "name": "FamilyID",
+                "readonly": true,
+                "posch": [
+                    10,
+                    1
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Select the family."
+            },
+            "lblUnlisted": {
+                "type": "StaticText",
+                "label": "Unlisted:",
+                "name": "lblUnlisted",
+                "posch": [
+                    1,
+                    3
+                ]
+            },
+            "Unlisted": {
+                "type": "CheckBox",
+                "name": "Unlisted",
+                "posch": [
+                    10,
+                    3
+                ],
+                "tooltip": "Select this if unlisted applies."
+            },
+            "lblLabel": {
+                "type": "StaticText",
+                "label": "Label:",
+                "name": "lblLabel",
+                "posch": [
+                    1,
+                    5
+                ]
+            },
+            "AddressLabel": {
+                "type": "ComboBox",
+                "name": "AddressLabel",
+                "posch": [
+                    10,
+                    5
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Select the address label."
+            },
+            "lblAddress": {
+                "type": "StaticText",
+                "label": "Address:",
+                "name": "lblAddress",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "Address": {
+                "type": "TextCtrl",
+                "validatorstr": "NotNull",
+                "name": "Address",
+                "posch": [
+                    10,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the address."
+            },
+            "Address2": {
+                "type": "TextCtrl",
+                "name": "Address2",
+                "posch": [
+                    10,
+                    9
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the second address line."
+            },
+            "lblCity": {
+                "type": "StaticText",
+                "label": "City:",
+                "name": "lblCity",
+                "posch": [
+                    1,
+                    11
+                ]
+            },
+            "City": {
+                "type": "TextCtrl",
+                "validatorstr": "NotNull",
+                "name": "City",
+                "posch": [
+                    10,
+                    11
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the city."
+            },
+            "lblState": {
+                "type": "StaticText",
+                "label": "State:",
+                "name": "lblState",
+                "posch": [
+                    1,
+                    13
+                ]
+            },
+            "State": {
+                "type": "ComboBox",
+                "validatorstr": "NotNull",
+                "name": "State",
+                "posch": [
+                    10,
+                    13
+                ],
+                "sizech": [
+                    4,
+                    2
+                ],
+                "tooltip": "Select the state."
+            },
+            "lblZip": {
+                "type": "StaticText",
+                "label": "ZIP:",
+                "name": "lblZip",
+                "posch": [
+                    1,
+                    15
+                ]
+            },
+            "Zip": {
+                "type": "TextCtrl",
+                "validatorstr": "Len5",
+                "name": "Zip",
+                "posch": [
+                    10,
+                    15
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the zip."
+            },
+            "lblStartDate": {
+                "type": "StaticText",
+                "label": "Start Date:",
+                "name": "lblStartDate",
+                "posch": [
+                    1,
+                    17
+                ]
+            },
+            "StartDate": {
+                "type": "DatePickerCtrl",
+                "name": "StartDate",
+                "posch": [
+                    10,
+                    17
+                ],
+                "sizech": [
+                    20,
+                    2
+                ],
+                "tooltip": "Enter the start date."
+            },
+            "lblEndDate": {
+                "type": "StaticText",
+                "label": "End Date:",
+                "name": "lblEndDate",
+                "posch": [
+                    1,
+                    19
+                ]
+            },
+            "EndDate": {
+                "type": "DatePickerCtrl",
+                "name": "EndDate",
+                "posch": [
+                    10,
+                    19
+                ],
+                "sizech": [
+                    20,
+                    2
+                ],
+                "tooltip": "Enter the end date."
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "name": "lblNote",
+                "posch": [
+                    1,
+                    21
+                ]
+            },
+            "Note": {
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "name": "Note",
+                "posch": [
+                    10,
+                    21
+                ],
+                "sizech": [
+                    24,
+                    8
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
+            }
+        }
+    }
+}

@@ -1,0 +1,260 @@
+[
+  {
+    "path": "accept_fresh_install_baseline.py",
+    "line": 48,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "accept_fresh_install_baseline.py",
+    "line": 49,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "accept_setup_services.py",
+    "line": 54,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "accept_setup_services.py",
+    "line": 55,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "bulletin_orders.py",
+    "line": 199,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "bulletin_orders.py",
+    "line": 206,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "certify_local_accounting_restore.py",
+    "line": 92,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "certify_local_accounting_restore.py",
+    "line": 93,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "certify_local_accounting_restore.py",
+    "line": 146,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "database_provisioning.py",
+    "line": 99,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "database_provisioning.py",
+    "line": 103,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "database_provisioning.py",
+    "line": 105,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "database_provisioning.py",
+    "line": 112,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "database_provisioning.py",
+    "line": 117,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "import_lsb_from_production.py",
+    "line": 29,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "import_lsb_from_production.py",
+    "line": 142,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "import_lsb_from_production.py",
+    "line": 149,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "import_lsb_from_production.py",
+    "line": 162,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "import_lsb_from_production.py",
+    "line": 170,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "installation_executor.py",
+    "line": 291,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "installation_executor.py",
+    "line": 292,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "lectionary_package_dialog.py",
+    "line": 61,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "local_lectionary_dialog.py",
+    "line": 477,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "migration_hooks.py",
+    "line": 15,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "reset_accounting_test_transactions.py",
+    "line": 25,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "reset_giving_test_data.py",
+    "line": 115,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "reset_test_activity.py",
+    "line": 106,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "reset_worship_test_services.py",
+    "line": 65,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "restore_local_test_databases.py",
+    "line": 50,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "sunday_content_dialog.py",
+    "line": 101,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "unified_worship_service_dialog.py",
+    "line": 127,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "verify_local_test_migration.py",
+    "line": 38,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "worship_scheduling.py",
+    "line": 176,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "accounting/reporting.py",
+    "line": 422,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "accounting/reporting.py",
+    "line": 659,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "accounting/reporting.py",
+    "line": 689,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "accounting/reporting.py",
+    "line": 795,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "accounting/reporting.py",
+    "line": 560,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "accounting/reporting.py",
+    "line": 567,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "giving/contributor_dialog.py",
+    "line": 286,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "tools/verify_report_views.py",
+    "line": 29,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "tools/verify_report_views.py",
+    "line": 37,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  },
+  {
+    "path": "visual_reports/tabular_dataset.py",
+    "line": 47,
+    "category": "sql",
+    "detail": "interpolated execute() SQL"
+  }
+]

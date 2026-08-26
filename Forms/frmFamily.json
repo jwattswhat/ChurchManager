@@ -1,0 +1,343 @@
+{
+    "frmFamilyFORM": {
+        "FORM": {
+            "type": "Panel",
+            "name": "frmFamily",
+            "title": "Add/Edit/Delete Family",
+            "table": {
+                "name": "tblFamily",
+                "fields": [
+                    "ID",
+                    "ChurchID",
+                    "FamilyName",
+                    "MarriageStatus",
+                    "Directory",
+                    "Image",
+                    "Note"
+                ],
+                "orderby": "FamilyName"
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "layout": {
+                "type": "responsive",
+                "border": 2,
+                "gap": 2
+            },
+            "linkedform": {
+                "frmFamilyAddress": {
+                    "name": "frmFamilyAddress",
+                    "title": "frmFamilyAddress",
+                    "controls": [
+                        "Close",
+                        "Navigation"
+                    ],
+                    "table": {
+                        "name": "tblFamilyAddress",
+                        "fields": [
+                            "*"
+                        ],
+                        "condition": "FamilyID = {ID}",
+                        "orderby": "Address,State"
+                    },
+                    "readonlyfields": [
+                        "FamilyID"
+                    ],
+                    "fillonblank": [
+                        "FamilyID",
+                        "ID"
+                    ]
+                },
+                "frmFamilyContact": {
+                    "name": "frmFamilyContact",
+                    "title": "frmFamilyConteact",
+                    "controls": [
+                        "Close",
+                        "Navigation"
+                    ],
+                    "table": {
+                        "name": "tblFamilyContact",
+                        "fields": [
+                            "*"
+                        ],
+                        "condition": "FamilyID = {ID}",
+                        "orderby": "Type"
+                    },
+                    "readonlyfields": [
+                        "FamilyID"
+                    ],
+                    "fillonblank": [
+                        "FamilyID",
+                        "ID"
+                    ]
+                },
+                "frmFamilyDate": {
+                    "name": "frmFamilyDate",
+                    "title": "frmFamilyDate",
+                    "controls": [
+                        "Close",
+                        "Navigation"
+                    ],
+                    "table": {
+                        "name": "tblFamilyDate",
+                        "fields": [
+                            "*"
+                        ],
+                        "condition": "FamilyID = {ID}",
+                        "orderby": "Date"
+                    },
+                    "readonlyfields": [
+                        "FamilyID"
+                    ],
+                    "fillonblank": [
+                        "FamilyID",
+                        "ID"
+                    ]
+                },
+                "frmPerson": {
+                    "name": "frmPerson",
+                    "title": "frmPerson",
+                    "controls": [
+                        "Close",
+                        "Navigation"
+                    ],
+                    "table": {
+                        "name": "tblPerson",
+                        "fields": [
+                            "ID",
+                            "ChurchID",
+                            "FamilyID",
+                            "FirstName",
+                            "MiddleName",
+                            "LastName",
+                            "Status",
+                            "Baptized",
+                            "Confirmed",
+                            "Member",
+                            "AssociateMember",
+                            "Picture",
+                            "Note"
+                        ],
+                        "condition": "FamilyID = {ID}",
+                        "orderby": "LastName"
+                    },
+                    "readonlyfields": [
+                        "PersonID"
+                    ],
+                    "fillonblank": [
+                        "FamilyID",
+                        "ID"
+                    ]
+                }
+            },
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                55,
+                20
+            ],
+            "theme": "churchmanager"
+        },
+        "CONTROLS": {
+            "btnFamilyAddress": {
+                "name": "btnFamilyAddress",
+                "type": "Button",
+                "label": "Add/Edit/Delete Family Addresses",
+                "action": [
+                    "openlinkedform",
+                    "frmFamilyAddress"
+                ],
+                "posch": [
+                    37,
+                    1
+                ],
+                "tooltip": "Open the family addresses form."
+            },
+            "btnFamilyContact": {
+                "type": "Button",
+                "label": "Add/Edit/Delete Family Contacts",
+                "name": "btnFamilyContact",
+                "action": [
+                    "openlinkedform",
+                    "frmFamilyContact"
+                ],
+                "posch": [
+                    37,
+                    3
+                ],
+                "tooltip": "Open the family contacts form."
+            },
+            "btnFamilyDate": {
+                "type": "Button",
+                "label": "Add/EditDelete Family Date",
+                "name": "btnFamilyDate",
+                "action": [
+                    "openlinkedform",
+                    "frmFamilyDate"
+                ],
+                "posch": [
+                    37,
+                    5
+                ],
+                "tooltip": "Open the family dates form."
+            },
+            "btnPerson": {
+                "type": "Button",
+                "label": "Add/Edit/Delete Family Members",
+                "name": "btnPerson",
+                "action": [
+                    "openlinkedform",
+                    "frmPerson"
+                ],
+                "posch": [
+                    37,
+                    7
+                ],
+                "tooltip": "Open the family members form."
+            },
+            "btnAdditionalInformation": {
+                "type": "Button",
+                "label": "Additional Information...",
+                "name": "btnAdditionalInformation",
+                "posch": [37, 9],
+                "tooltip": "Edit church-defined additional information for this family."
+            },
+            "lblChurchID": {
+                "type": "StaticText",
+                "label": "Church:",
+                "name": "lblChurchID",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "ChurchID": {
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblChurch",
+                    "fields": [
+                        "ID",
+                        "Church"
+                    ],
+                    "orderby": "Church"
+                },
+                "name": "ChurchID",
+                "posch": [
+                    10,
+                    1
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Select the church."
+            },
+            "lblFamilyName": {
+                "type": "StaticText",
+                "label": "Family Name:",
+                "name": "lblFamilyName",
+                "posch": [
+                    1,
+                    3
+                ]
+            },
+            "FamilyName": {
+                "type": "TextCtrl",
+                "value": "",
+                "name": "FamilyName",
+                "posch": [
+                    10,
+                    3
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the family name."
+            },
+            "lblMarriageStatus": {
+                "type": "StaticText",
+                "label": "Marriage Status:",
+                "name": "lblMarriageStatus",
+                "posch": [
+                    1,
+                    5
+                ]
+            },
+            "MarriageStatus": {
+                "type": "ComboBox",
+                "name": "MarriageStatus",
+                "posch": [
+                    10,
+                    5
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Select the marriage status."
+            },
+            "lblDirectory": {
+                "type": "StaticText",
+                "label": "Directory?:",
+                "name": "lblDirectory",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "Directory": {
+                "type": "CheckBox",
+                "name": "Directory",
+                "posch": [
+                    10,
+                    7
+                ],
+                "tooltip": "Select this if directory applies."
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "name": "lblNote",
+                "posch": [
+                    1,
+                    9
+                ]
+            },
+            "lblImage": {
+                "type": "StaticText",
+                "label": "Family picture:",
+                "name": "lblImage",
+                "posch": [37, 11]
+            },
+            "Image": {
+                "type": "ImagePickerCtrl",
+                "name": "Image",
+                "posch": [37, 13],
+                "sizech": [16, 12],
+                "layout": {"row_span": 5, "expand": true},
+                "maxbytes": 5242880,
+                "tooltip": "Choose the family picture stored in the database."
+            },
+            "Note": {
+                "type": "MultiLine",
+                "name": "Note",
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "posch": [
+                    10,
+                    9
+                ],
+                "sizech": [
+                    24,
+                    8
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
+            }
+        }
+    }
+}

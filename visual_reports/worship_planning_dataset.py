@@ -1,0 +1,172 @@
+"""Secure single-service dataset for the Worship Planning Worksheet."""
+
+from JSForm.report_dataset import (
+    ReportCollection, ReportDataset, ReportDatasetContract, ReportField,
+)
+from worship_scheduling_rules import report_participant_rows
+from liturgical_colors import liturgical_color_hex
+
+
+WORSHIP_PLANNING_CONTRACT = ReportDatasetContract(
+    "churchmanager.cmws01", 4, "reports.worship.run",
+    (
+        ReportCollection("church", "Church", (
+            ReportField("ID", "Church ID", "integer"),
+            ReportField("Church", "Church Name"),
+            ReportField("Logo", "Church Logo", "image"),
+        )),
+        ReportCollection("parameters", "Parameters", (
+            ReportField("Display", "Selected Parameters"),
+        )),
+        ReportCollection("service", "Worship Service", (
+            ReportField("ID", "Service ID", "integer"),
+            ReportField("DateTime", "Date and Time", "datetime"),
+            ReportField("Location", "Location"),
+            ReportField("LiturgicalDate", "Liturgical Date"),
+            ReportField("HolyCommunion", "Holy Communion", "boolean"),
+            ReportField("Lectionary", "Lectionary"),
+            ReportField("Season", "Season"),
+            ReportField("Color", "Color"),
+            ReportField("ColorHex", "Liturgical Color Block"),
+            ReportField("Theme", "Theme"),
+            ReportField("OrderOfService", "Order of Service"),
+            ReportField("Sermon", "Sermon"),
+            ReportField("Bulletin", "Bulletin"),
+            ReportField("OSNote", "Order of Service Note"),
+            ReportField("Note", "Service Note"),
+        )),
+        ReportCollection("order_lines", "Order of Service", (
+            ReportField("Sequence", "Sequence", "integer"),
+            ReportField("Label", "Order of Service"),
+            ReportField("Detail", "Selection or Reference"),
+        )),
+        ReportCollection("readings", "Readings", (
+            ReportField("Reading", "Reading"), ReportField("Reference", "Reference"),
+        )),
+        ReportCollection("hymns", "Selected Hymns", (
+            ReportField("UsedAs", "Use"), ReportField("Hymn", "Hymn"),
+            ReportField("HymnNumber", "Hymn Number"),
+            ReportField("Title", "Title"), ReportField("Stanzas", "Stanzas"),
+            ReportField("ReferenceText", "Formatted Reference"),
+        )),
+        ReportCollection("participants", "Participants", (
+            ReportField("Role", "Role"), ReportField("Name", "Participant"),
+            ReportField("Status", "Status"),
+        )),
+        ReportCollection("checklist", "Preparation Checklist (Optional)", (
+            ReportField("Sequence", "Sequence", "integer"),
+            ReportField("Task", "Preparation Item"), ReportField("Status", "Status"),
+            ReportField("Note", "Note"),
+            ReportField("CompletionSource", "Completion Source"),
+        )),
+        ReportCollection("checklist_summary", "Checklist Summary (Optional)", (
+            ReportField("Display", "Checklist Summary"),
+            ReportField("ManuallyConfirmed", "Manually Confirmed", "boolean"),
+        )),
+    ),
+)
+
+
+class WorshipPlanningDatasetProvider:
+    """Build the planner exclusively from the approved worship report views."""
+
+    def __init__(self, connection, authorization):
+        self.connection = connection
+        self.authorization = authorization
+        self.marker = "%s" if "mysql.connector" in type(connection).__module__ else "?"
+
+    def _rows(self, sql, values=()):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(sql.replace("?", self.marker), values)
+            columns = tuple(item[0] for item in cursor.description)
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
+        finally:
+            cursor.close()
+
+    @staticmethod
+    def _placeholder(rows, **values):
+        return rows or [values]
+
+    def build(self, church_id, service_id):
+        self.authorization.require(
+            WORSHIP_PLANNING_CONTRACT.required_permission,
+            operation="Create Worship Planning Worksheet dataset",
+        )
+        if service_id in (None, "", "All"):
+            raise ValueError("Select a Worship Service before running the planning worksheet.")
+
+        church = self._rows(
+            "SELECT ID,Church,Logo FROM rpt_church_identity WHERE ID=?", (church_id,),
+        )
+        service = self._rows(
+            "SELECT ID,DateTime,Location,LiturgicalDate,HolyCommunion,Lectionary,"
+            "Season,Color,Theme,OrderOfService,Sermon,Bulletin,OSNote,Note "
+            "FROM rpt_worship_planner_service WHERE ChurchID=? AND ID=?",
+            (church_id, service_id),
+        )
+        if not service:
+            raise ValueError("The selected Worship Service is unavailable.")
+        service[0]["ColorHex"] = liturgical_color_hex(service[0]["Color"])
+
+        order_lines = self._rows(
+            "SELECT Sequence,Label,TRIM(CONCAT_WS('  ',NULLIF(WeeklyValue,''),"
+            "NULLIF(ReferenceText,''))) AS Detail FROM rpt_worship_planner_order "
+            "WHERE ServiceID=? ORDER BY Sequence,ID", (service_id,),
+        )
+        readings = self._rows(
+            "SELECT Reading,Reference FROM rpt_worship_planner_reading "
+            "WHERE ServiceID=? ORDER BY SortOrder,ID", (service_id,),
+        )
+        hymns = self._rows(
+            "SELECT UsedAs,Hymn,HymnNumber,Title,Stanzas,ReferenceText "
+            "FROM rpt_worship_planner_hymn "
+            "WHERE ServiceID=? ORDER BY Sequence,ID", (service_id,),
+        )
+        requirements = self._rows(
+            "SELECT WorshipRoleID,Role,RequiredCount "
+            "FROM rpt_worship_planner_required_position WHERE ServiceID=? ORDER BY Role",
+            (service_id,),
+        )
+        assignments = self._rows(
+            "SELECT WorshipRoleID,Role,Name,Status FROM rpt_worship_planner_participant "
+            "WHERE ServiceID=? ORDER BY Role,Name", (service_id,),
+        )
+        participants = report_participant_rows(requirements, assignments)
+        checklist = self._rows(
+            "SELECT Sequence,Task,Status,Note,CompletionSource FROM rpt_worship_planner_checklist "
+            "WHERE ServiceID=? ORDER BY Sequence", (service_id,),
+        )
+        completion = self._rows(
+            "SELECT ManuallyConfirmed AS Complete FROM rpt_worship_planner_checklist_summary "
+            "WHERE ServiceID=?",
+            (service_id,),
+        )[0]["Complete"]
+        counts = {"DONE": 0, "NOT_DONE": 0, "NOT_NEEDED": 0}
+        for row in checklist:
+            counts[row["Status"]] = counts.get(row["Status"], 0) + 1
+        label = service[0]["LiturgicalDate"] or str(service[0]["DateTime"])
+        return ReportDataset.create(WORSHIP_PLANNING_CONTRACT, {
+            "church": church,
+            "parameters": [{"Display": label}],
+            "service": service,
+            "order_lines": self._placeholder(
+                order_lines, Sequence=0, Label="No weekly order of service has been saved.", Detail="",
+            ),
+            "readings": self._placeholder(readings, Reading="Readings", Reference="Not selected"),
+            "hymns": self._placeholder(
+                hymns, UsedAs="Hymns", Hymn="Not selected", HymnNumber="", Title="",
+                Stanzas="", ReferenceText="",
+            ),
+            "participants": self._placeholder(
+                participants, Role="Participants", Name="Not assigned", Status="Open",
+            ),
+            "checklist": self._placeholder(
+                checklist, Sequence=0, Task="No preparation checklist has been created.",
+                Status="NOT_DONE", Note="", CompletionSource="MANUAL",
+            ),
+            "checklist_summary": [{
+                "Display": f"{counts['DONE']} done · {counts['NOT_DONE']} not done · {counts['NOT_NEEDED']} not needed",
+                "ManuallyConfirmed": bool(completion),
+            }],
+        })

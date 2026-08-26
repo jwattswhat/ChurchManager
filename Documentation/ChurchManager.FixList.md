@@ -1,0 +1,854 @@
+# ChurchManager development roadmap
+
+Last reviewed: August 25, 2026
+
+This is the maintained ChurchManager development backlog. Priorities reflect
+the needs of a small congregation and a comparison with current paid and
+open-source church-management systems.
+
+## Authoritative priority sequence
+
+| Order | Priority | Project | Reason for placement |
+|---:|---|---|---|
+| 1 | Completed | User contact information | Foundational contact fields and administration are implemented. |
+| 2 | Completed | Email and participant notification review | The weekly participant-notification workflow has been modernized. |
+| 3 | Completed | Optional user-to-person relationship | Nullable links, administration, safe auditing, welcome email, migration, and acceptance are complete. |
+| 4 | Implemented; deployment check | Secure SMTP connection and email settings | Credential-safe settings and shared mail delivery are implemented; each installed congregation must enter and test its own provider credential. |
+| 5 | Completed | Hymnal, lectionary, and Order of Service catalogs | The permanent-ID and metadata-only catalog frameworks, local maintenance, included Historic One-Year Lectionary, and LSB Order of Service outlines are implemented and accepted. The unverified curated LSB hymnal package is intentionally withheld and is not a release requirement. |
+| 6 | In beta | Release, installation, and recovery readiness | Setup, upgrade, restore, backup, MSI, documentation, and beta installer foundations exist; repair/signing, current-beta packaging, and clean-machine exit acceptance remain. |
+| 6A | In progress | Open-source publication and distribution | Identity and website prototype are approved; ChurchManager history/privacy audit, public destinations, signed artifacts, and live links remain. |
+| 7 | Completed | [Confidential member giving and envelopes](ChurchManager.MemberGiving.Specification.md) | The approved first-release scope passed migrations, installation baseline, full automated suite, confidential-data restore rehearsal, and final visual acceptance. Pledges are explicitly deferred. |
+
+Posted-batch correction is implemented and accepted end to end: it creates a
+linked Ready accounting reversal, copies the original gifts into an editable
+Draft replacement, voids the original only when the reversal posts, prevents
+early accounting handoff of the replacement, and clearly distinguishes Ready
+from Sent to Accounting in the batch list.
+| 7A | Complete | Richer application login | Login now presents the ChurchManager icon and identity, local congregation name, version/release, copyright, and GPL notice without changing authentication behavior. |
+| 8 | Completed | [Pastoral follow-up](ChurchManager.PastoralCare.Specification.md) | Safe scheduling, handoffs, protected reports, recovery acceptance, and the encrypted restricted-note editor passed final visual acceptance on August 24, 2026. |
+| 9 | Complete | Remove Projects and Tasks | The generic subsystem, screens, reports, permissions, views, and tables are retired by migration 098; worship preparation checklists remain. |
+| 10 | Completed | [Import, export, and duplicate management](ChurchManager.DataManagement.Specification.md) | Reviewed partial-row import, privacy-safe export, verified portable archives, duplicate decisions, merge-impact preflight, and guarded transactional merges are implemented and accepted. |
+| 11 | Completed | [Groups, committees, classes, and ministry teams](ChurchManager.GroupsMembership.Specification.md) | Normalized Groups, membership, roles, meetings, attendance, communication review, protected sending, and privacy-safe reports have passed functional and visual acceptance. |
+| 12 | Completed | [Volunteer availability and responses](ChurchManager.VolunteerAvailability.Specification.md) | Date-specific unavailable periods, participant responses, conflicts, last-served information, and the maintained worship test dataset passed automated and visual acceptance. |
+| 13 | Completed | [Custom profile fields and controlled tags](ChurchManager.CustomProfileFields.Specification.md) | Schema, permissions, application-neutral JSForm host, lifecycle-aware administration, Person/Family values, search, reports, and controlled exchange passed final visual acceptance on August 25, 2026. |
+| 14 | Completed | [Calendar integration](ChurchManager.CalendarIntegration.Specification.md) | Event agenda, recurrence, neutral Worship/Group/Event adapters, protected preview, iCalendar export, duplicate-safe publication state, and optional one-way Google publishing are implemented. The Project milestone source will be registered when that future source exists. |
+| 15 | Completed | [Asset management](ChurchManager.AssetManagement.Specification.md) | The register, locations, activity history, due list, reviewed CSV exchange, permissions, reports, menu integration, test dataset, migration, and automated suite passed final visual acceptance on August 26, 2026. |
+| 16 | Completed | [Projects and scheduling](ChurchManager.ProjectsScheduling.Specification.md) | Normalized projects, ordered steps, ownership, dependencies, document links, reports, permissions, Calendar Integration sources, fictional test data, baseline, automated regression, and visual acceptance are complete. |
+| Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
+
+Calendar Integration, Asset Management, and Projects and Scheduling are
+complete. Projects now supplies milestone and step-date adapters to Calendar
+Integration.
+
+## Completed foundations retained for regression protection
+
+These completed areas remain part of release testing even though they are not
+future roadmap projects:
+
+- application authentication, roles, permissions, security auditing, user
+  contact information, and password-change enforcement;
+- fund accounting through entry, review, posting, reporting, reconciliation,
+  budgets, close, and year-end close;
+- JSForm visual report generation and design, report security, ChurchManager
+  visual screen design, and starter/custom definition separation;
+- unified worship planning, weekly Orders of Service, hymn selection and stanza
+  selection, Propers/readings, participants, scheduling, required positions,
+  preparation checklists, and worship-planning reports;
+- natural-language prayer and announcement scheduling;
+- synchronized attendance entry and attendance reporting;
+- participant notification email, Gmail thread separation, and safe delivery
+  history;
+- protected backup/restore, automatic exit backup, single-instance startup,
+  responsive main menu, and support-diagnostics/error capture.
+
+### Completed worship enhancement: hymn stanza selection
+
+- Implemented design: [Hymn stanza selection specification](ChurchManager.HymnStanzaSelection.Specification.md).
+- The planner records selected stanzas for each hymn occurrence in a
+  weekly Order of Service.
+- Stanza selections remain attached to the individual weekly service line so the
+  same hymn can have different selections in different positions.
+- Planning and bulletin-outline output include the selection.
+- Historical free-form notes are not treated as stanza selections.
+
+### 1. User contact information
+
+- Implemented design: [ChurchManager user contact information specification](ChurchManager.UserContact.Specification.md).
+- User accounts store validated email and phone values.
+- User Administration, migrations, auditing, permissions, display formatting,
+  and automated tests cover the fields.
+- Administrative contact details remain separate from congregation member
+  records.
+
+### 2. Email and participant notification review
+
+- The shared ChurchManager email configuration and sending service are
+  implemented.
+- Notify Participants shows recipients, missing addresses, subject, message,
+  and the current Worship Planning report attachment before sending.
+- Duplicate recipients are suppressed and delivery failures are reported.
+- Safe communication history excludes credentials and unnecessary message
+  content.
+- Sending remains an explicit user action, and unique message identifiers avoid
+  Gmail incorrectly joining unrelated notices into one conversation.
+
+### 3. Optional user-to-person relationship
+
+- Implemented design: [User-to-person link and welcome email specification](ChurchManager.UserPersonLink.Specification.md).
+- Migration 070 adds nullable `tblUser.PersonID` with a unique foreign key to
+  `tblPerson.ID`.
+- Permit users who are not congregation members by allowing the link to remain
+  blank.
+- Use `ON DELETE SET NULL` so removing a person record cannot remove or disable
+  an application account.
+- Add an optional Linked Person selector to User Administration.
+- Keep user email and phone independent from member contact records; linking must
+  not silently copy or synchronize contact information.
+- Audit linking, changing, and unlinking a person from a user account.
+- Add an optional new-user welcome email that reuses the shared ChurchManager
+  email service. Include the username, instructions for opening ChurchManager,
+  notice that the temporary password must be changed at first login, and an
+  administrator contact; do not include the temporary password.
+- Require the administrator to communicate the temporary password through a
+  separate channel, while retaining `MustChangePassword=1` until the user
+  successfully replaces it.
+- Record only safe delivery metadata for the welcome message; never store the
+  temporary password in email history, logs, or audit JSON.
+- Cover existing databases, fresh installation, uniqueness, unlinking, User
+  Administration, welcome-email delivery, password separation, and authorization
+  with automated tests.
+- Preserve the already completed participant design: `tblParticipant.PersonID`
+  remains optional so worship participants may be members or outside people.
+- Source implementation, migration, focused automated tests, and visual
+  acceptance are complete.
+
+### 4. Secure SMTP connection and email settings
+
+- Approved design: [Secure SMTP connection specification](ChurchManager.SMTPConnection.Specification.md).
+- Review findings: [SMTP connection review](ChurchManager.SMTPConnection.Review.md).
+- Move authentication secrets out of database configuration and into Windows
+  Credential Manager with strict test/production separation.
+- Add a protected Email Settings screen, offline validation, and an explicit
+  confirmed test-email workflow.
+- Require TLS, safe failure categories, redacted diagnostics, and one shared
+  mail factory for welcome and participant messages.
+- Revoke and remove any credential exposed in development source before testing
+  the replacement.
+- Implemented: migration 071 stores only non-secret settings, the protected
+  Email Settings screen manages the Windows credential, and mail entry points
+  fail closed before database, credential, or network access in test mode.
+- Remaining deployment action: revoke any historical provider credential that
+  may remain in repository history and enter a new application password through
+  Email Settings outside test mode.
+
+### 5. Hymnal, lectionary, and Order of Service catalog design
+
+#### Hymnal catalog and import workstream
+
+- Migration 074, `hymnal_packages.py`, and `local_hymns.py` implement the
+  permanent registry foundation, fail-closed LSB conversion, package preflight,
+  transactional import, local 5,001-9,999 allocation, retirement, passive
+  copyright/source metadata, and import/conversion logging.
+- Migration 074 removes the former ChurchDBTest synthetic hymnals, their sample
+  entries, and disposable worship-service data instead of assigning permanent
+  identities to fixtures. It also removes LSB entries outside the approved
+  printed-edition range of 1-966. The test-data seeder no longer creates a fake
+  distributable hymnal.
+- Hymnal and hymn titles are normalized to Title Case during conversion and
+  package import. Common connecting words remain lowercase inside a title, and
+  intentional uppercase abbreviations remain uppercase.
+- Migration 074 is accepted on `ChurchDBTest`, and local hymn creation and
+  retirement have passed visual acceptance. The deterministic LSB package
+  builder and 636-row stanza-review ledger are retained as optional future
+  curation tools. All 636 rows remain explicitly unverified, so the builder
+  correctly refuses to publish an LSB hymnal package. That package is
+  intentionally withheld and is not part of the completed catalog release
+  scope.
+
+- Use [Hymnal Research and Recommendations](ChurchManager.HymnalResearchAndRecommendations.md)
+  as the starting point for the multi-hymnal catalog design.
+- Implement the approved
+  [Permanent Hymn Identifier Specification](ChurchManager.PermanentHymnIdentifiers.Specification.md):
+  permanent 5,000-entry hymnal blocks, a reserved local-user range, transactional
+  collision checks, and retirement rather than ID reuse or cascade deletion.
+- Implement the approved
+  [Suggested Hymnal Import Process](ChurchManager.HymnalImportProcess.md), keeping
+  curated permanent-ID packages separate from congregation-supplied local CSV
+  imports.
+- Distinguish an underlying hymn from its numbered and titled appearance in a
+  particular hymnal.
+- Define how Proper hymn suggestions resolve against the congregation's selected
+  hymnal without assuming LSB numbering.
+- Define, validate, and test the permanent hymnal registry and reserved local-user
+  range before importing any additional hymnal package.
+- Build the curated hymnal-package validator and staged import workflow before
+  adding hymnal selection to installation.
+
+#### Lectionary catalog workstream
+
+- Use [Revised Common Lectionary Research](ChurchManager.RevisedCommonLectionary.Research.md)
+  as the starting point for denomination-neutral lectionary support.
+- The package loader, fail-closed metadata-only validator, reference exporter,
+  additive versioned-catalog migration, transactional package importer,
+  service-owned reading snapshots, bounded calendar resolver, explicit Worship
+  Service candidate selection, protected package screen, provenance-gated
+  builder, and authoring guide are implemented. Optional selection during a
+  fresh installation remains part of release-readiness item 6 rather than this
+  completed catalog-design item.
+- The official CCT and CPH policies were reviewed August 17, 2026. Public LSB
+  and RCL packages are blocked pending written electronic-redistribution
+  permission. Narrow permission-request drafts and the local-only fallback are
+  documented in `ChurchManager.LectionaryPackageProvenance.md`.
+- The redistributable ChurchManager Historic One-Year Lectionary package is
+  complete. It contains 62 Sundays and major days with 124 citation-only
+  Epistle and Gospel appointments derived from the public-domain 1919 Common
+  Service Book. The package manager opens in the included-package directory so
+  an administrator can install it without locating an internal source folder.
+- The included package passed installation through the protected package
+  screen, selection as the church default edition, Worship Service use, and
+  verification of its Proper, readings, liturgical date, color, and Worship
+  Planning report.
+- Migration 083 removes the obsolete required `tblLectionarySystem.OldID`
+  column found on databases upgraded from the original application. Package
+  installation now creates systems solely through their stable package keys.
+- Migration 084 removes the corresponding obsolete required
+  `tblReading.OldID` column. Imported citation appointments now use their stable
+  package appointment keys without requiring an unused historical identifier.
+- Church Information presents the primary hymnal and default lectionary as one
+  aligned, consistently sized catalog-selection column rather than separate
+  responsive-grid columns.
+- Worship Service saving no longer references the removed
+  `tblServiceBulletinOrder.GeneratedHtml` field. Weekly Orders of Service remain
+  outline-only and invalidate only their permitted generated plain-text cache.
+- Worship Service line actions now use the package-defined line type rather
+  than an obsolete `SERVICE_HYMN` source value. Included Order of Service
+  packages can select hymns and apply Proper readings and hymn suggestions
+  while preserving exact suggested-use matching after harmless key formatting.
+- Migration 081 removes the former LSB lectionary catalog, its dependent
+  Propers/readings/suggestions, and related development service snapshots.
+  Services themselves remain, with their Proper selection cleared. Obsolete
+  production-import utilities were removed so the catalog cannot be
+  accidentally reintroduced.
+- Migration 082 clears all disposable worship-service records and their linked
+  attendance events only when the active database is exactly `ChurchDBTest`.
+  It is inert on every production or differently named database.
+- Preserve the reviewed distribution scope inside every checksum-protected
+  lectionary package and installed package record. `LOCAL_ONLY` is displayed in
+  the package manager and cannot be silently treated as redistributable.
+- Local Lectionaries now provides protected, nontechnical maintenance of
+  congregation-owned systems, editions, cycles, Propers, and citation-only
+  reading appointments, including automatic A/B/C cycles and reversible
+  retirement. Appointment entry enforces the metadata-only boundary by storing
+  biblical references rather than Scripture text.
+- Local reading maintenance supports data-defined alternatives, tracks, option
+  groups, defaults, and optional same-Proper response pairing. It prevents
+  self-pairing and rejects pairings outside the active local Proper.
+- An active installed edition can be copied into a new congregation-owned
+  system and edition. The transaction assigns new local keys to every copied
+  cycle, Proper, and appointment, remaps paired responses, and leaves the
+  protected source and saved services unchanged.
+  When no approved package edition is installed, the copy action is visibly
+  disabled and explains that prerequisite instead of appearing to do nothing.
+- Migration 080 completes the runtime cutover to an edition-only congregation
+  default. Church Information presents one unambiguous active-edition selector,
+  and Worship Planning no longer falls back to the obsolete system-level
+  setting. Local appointment roles and citations are used when a Proper is
+  applied.
+- A future redistributable ChurchManager lectionary may provide independently
+  authored three-year and one-year citation metadata, but it must not reproduce
+  or claim to be Lutheran Service Book data. Exact publisher-specific editions
+  remain local-only unless written electronic-redistribution permission is
+  obtained.
+- The current ChurchDBTest lectionary catalog is reference-only. Export it for
+  citation, role, color, and hymn-suggestion reconciliation, then replace it
+  cleanly; do not preserve its IDs or obsolete structure.
+- Implement the
+  [Lectionary Catalog Specification](ChurchManager.LectionaryCatalog.Specification.md),
+  including stable package keys, flexible cycles, service-owned reading
+  snapshots, local customization, and the hard metadata-only boundary.
+
+#### Order of Service catalog workstream
+
+- Approved companion design: [Order of Service Catalog Specification](ChurchManager.OrderOfServiceCatalog.Specification.md).
+- Migrations 072-073, the metadata-only preflight validator, transactional
+  importer, guarded installer, and complete 22-template/338-line LSB package
+  implement the first Order of Service catalog. Fresh-install selection remains
+  part of the release installer workstream.
+- The LSB Order of Service package must include every supported LSB service
+  outline, and imported names use the `LSB ` prefix. Future service-book packages
+  use their own uppercase abbreviation followed by one space.
+- Maintained scope inventory: [LSB Order of Service Package Inventory](ChurchManager.LSBOrderOfService.Inventory.md).
+- Define separately installable Order of Service packages with stable identity,
+  version, source, license, dependencies, and supported update behavior.
+- Define how an Order of Service may reference a hymnal or service book while
+  still permitting "No hymnal."
+- Make Order of Service packages metadata-only. Their schema may contain sequence,
+  short outline labels, item types, references, conditions, inclusion choices,
+  required positions, and brief planning notes, but no full liturgical or musical
+  content fields.
+- Exclude full liturgical wording, published prayers or collects, responsive text,
+  meaningful-length verbatim rubrics, psalm or canticle text, tones, musical
+  settings, hymn lyrics, notation, accompaniment material, publisher artwork, and
+  page images from packages, database records, customized templates, weekly
+  copies, and generated output.
+- Add package-schema and import validation that rejects unapproved content fields,
+  long-form body fields, HTML or rich-text bodies, and embedded or linked media;
+  cover every rejection rule with automated tests.
+- Preserve customized catalog records and weekly service copies when starter
+  packages are installed or upgraded.
+- Define and test starter installation, upgrade, retirement, and removal behavior
+  without changing congregation-created templates or saved weekly services.
+
+#### Shared catalog completion criteria
+
+- Define separately installable packages for hymnals, lectionaries, and Orders
+  of Service, including package identity, version, source, license, dependencies,
+  and supported update behavior.
+- Approve the catalog schema and package contents before installation development
+  begins.
+
+### 6. Release, installation, and recovery readiness
+
+- **Status: non-packaging beta release gates completed August 22, 2026.** The
+  current-state evidence is maintained in
+  [ChurchManager Current Release Readiness](ChurchManager.ReleaseReadiness.Current.md).
+  The canonical `0.3.0-dev` baseline represents 95 migrations and 73 starter
+  statements. The optional fictional beta dataset has a guarded versioned
+  manifest. The source-construction audit, owned-child cleanup regression,
+  report-family acceptance, accounting test acceptance, and permanent backup
+  separation rule are maintained release gates. MSI rebuild, repair, signing,
+  and clean-machine acceptance remain intentionally deferred until the next
+  beta installer is requested.
+
+- Approved design:
+  [Installation, Upgrade, and Beta Release Specification](ChurchManager.InstallationRelease.Specification.md).
+- The read-only installation readiness inspector is implemented. It verifies
+  the Windows/runtime prerequisites, MariaDB client and backup tools, free
+  space, bundled package integrity, and unresolved catalog dependencies without
+  opening a database, requesting a credential, or changing the computer.
+- The password-free installation-plan engine is implemented. It validates the
+  congregation, safe database and administrator identifiers, optional package
+  selections, catalog dependencies, and independent default catalogs before
+  any installation action is permitted.
+- The numbered migration runner now delegates to a reusable checksum-verified
+  migration service. The existing development command retains its strict
+  ChurchDBTest target guard, while the future setup executable must supply its
+  own explicitly opened fresh-database connection.
+- Guarded fresh-database provisioning is implemented. It requires exact-name
+  confirmation, refuses existing databases and accounts, creates a local
+  database-scoped application account with a parameterized generated password,
+  and cleans up only newly created resources if provisioning fails. It has not
+  yet been exercised against a live isolated database.
+- Fresh-install review confirmed that migration 001 assumes the original base
+  tables and therefore cannot initialize an empty database. The installer must
+  use a reviewed, checksum-protected canonical baseline schema, seed accurate
+  migration history for the migrations represented by that baseline, and then
+  apply only later pending migrations. Creating and verifying this baseline is
+  the next release-readiness step.
+- Baseline generation includes an explicit schema-hygiene gate for `OldID`,
+  retired conversion fields and tables, obsolete JSForm database structures,
+  test-only objects, development-account definers, and machine-specific values.
+  Findings must be removed or individually documented and approved before a
+  release baseline is accepted. The guarded baseline loader/installer now
+  verifies the schema checksum and exact represented-migration ledger before
+  operating and refuses a nonempty target database.
+- The automated schema-hygiene gate is implemented and tested. It reports exact
+  line numbers for obsolete identifiers and retired tables, test database
+  names, account definers and grants, database-selection statements, fixture
+  data, destructive dump statements, persisted auto-increment state, and
+  machine-specific paths.
+- The deterministic baseline generator is implemented. It operates only on
+  fully migrated local ChurchDBTest, exports structure rather than records,
+  keeps the database password off the process command line, canonicalizes
+  permitted dump state, enforces schema hygiene, and produces a schema checksum
+  plus the exact represented-migration ledger. Live candidate generation and
+  review remain. The 0.2.0-dev candidate contains 84 represented migrations;
+  its schema SHA-256 is
+  `3333f3ade00a89c944462b95581990fa83612458ef31e49695296ecb4869e375`.
+- Disposable live-baseline acceptance is implemented. It creates only a unique
+  `CMFreshAcceptance_...` database and `cm_accept_...` local account, verifies
+  the baseline and migration ledger through that account, and removes both on
+  success or failure. Live acceptance passed August 17, 2026: 84 migration
+  checksums, 138 database objects, 67 starter-data statements, 43 active
+  permissions, and both canonical digests verified; cleanup completed.
+- The first task-oriented User Guide is maintained as Markdown and rendered as
+  a visually inspected PDF. A signed-in **Help - User Guide** control opens it
+  from the main menu without requiring an administrative permission. Installer
+  packaging and installed-build acceptance remain.
+- Initial Master Administrator bootstrap is implemented using the production
+  Argon2id policy, the existing one-user atomic guard, the installed system
+  role, and a corrected `Initial application setup` audit reason. Isolated live
+  acceptance passed August 17, 2026, including authentication verification for
+  Master Administrator ID 1 and complete cleanup of the disposable database.
+- Installation catalog services are ready for wizard integration. Hymnal,
+  lectionary, and Order of Service packages validate before transactional
+  installation; package dependencies are enforced; and congregation primary
+  hymnal and default lectionary selections are independent and optional.
+- The nontechnical fresh-install wizard is implemented with a safe preview
+  default. It collects no secrets in its review, generates the least-privilege
+  database-account password internally, uses Windows Credential Manager only
+  after successful installation, points both ChurchManager and JSForm
+  connections at the verified new database, and removes incomplete fresh
+  database/account creation after a failure. Visual acceptance and an isolated
+  apply-mode dress rehearsal remain.
+- Fresh-install backup proof and final persistence recovery are implemented.
+  Setup verifies the first dump's ChurchManager label, database name, table
+  definitions, size, and SHA-256 digest. The completion report contains that
+  evidence without credentials. A failed final configuration or Credential
+  Manager write restores both previous values before the incomplete new
+  database and account are removed.
+- The isolated fresh-install service rehearsal passed August 17, 2026. The
+  executor installed the verified schema and starter data, initial master,
+  public lectionary, and first backup; authenticated the temporary master;
+  verified the 277,721-byte dump and SHA-256 digest; and removed every
+  disposable database, account, and backup resource. The guarded upgrade
+  service is implemented with immutable-history preview, mandatory verified
+  pre-upgrade backup, shared migration conversion hooks, and failure rollback.
+  Its isolated rehearsal passed August 17, 2026 with one acceptance-only
+  migration, a verified 277,823-byte pre-upgrade backup, final clean preview,
+  and complete cleanup. The isolated restore rehearsal also passed August 17,
+  2026, recovering a deliberately changed congregation record, verifying all
+  84 migration records and the pre-restore safety backup, and removing all
+  disposable resources. Repair and installed-build rehearsals remain.
+- A reproducible PyInstaller shared onedir specification now builds the ordinary
+  ChurchManager and protected Setup executables with one compatible JSForm
+  runtime, application forms, canonical installation data, catalog packages,
+  report definitions, icon, and visually accepted User Guide. Both packaged
+  executables passed the password-free resource proof for release 0.2.0-dev on
+  August 17, 2026. WiX v5 MSI source defines per-machine application files,
+  shortcuts, and major-upgrade protection without claiming congregation-owned
+  data. Compiler validation, repair, signing, and clean-machine visual
+  acceptance remain.
+- Installed configuration now resolves to the writable local application-data
+  folder and is initialized from a non-secret template. Source development
+  retains its repository configuration, and neither mode stores a database
+  password in JSON.
+- A guarded routine test-activity reset preserves the reusable ChurchDBTest
+  baseline while clearing worship and accounting activity. It previews counts,
+  creates and verifies a complete SQL backup, runs only against local
+  `ChurchDBTest`, and verifies that every covered activity table is empty.
+
+#### LimeReports retirement workstream
+
+- Source implementation completed August 14, 2026.
+- All supported catalog reports use JSForm visual report definitions and the
+  internal PDF renderer.
+- The external LimeReports fallback, templates, diagnostics, and configuration
+  have been removed from ChurchManager.
+- Migration 065 disables obsolete catalog codes and removes obsolete path
+  settings.
+- Remaining acceptance work is the representative report-family visual review
+  documented in [LimeReports retirement](ChurchManager.LimeReports.Retirement.md).
+
+- Error logging and protected Support and Diagnostics are implemented from the
+  [ChurchManager error logging and support specification](ChurchManager.ErrorLogging.Specification.md);
+  retain them in release regression testing.
+- Complete the formal visual acceptance review of all official reports.
+- Record final acceptance of active ChurchManager screens and workflows.
+- Verify with a regression test that closing the main ChurchManager window closes
+  every owned child form and dialog without leaving hidden processes or database
+  connections open.
+- Audit remaining dynamically constructed SQL and external-command strings;
+  replace value interpolation with parameterized SQL and validated argument lists
+  before a public release.
+- Build a repeatable new-install and upgrade process.
+- Ask which hymnals and lectionary systems the congregation wants installed.
+- Review available Orders of Service and ask which starter templates should be installed.
+- Permit multiple selections and an explicit "None" choice for each catalog.
+- Install only selected starter datasets.
+- Choose the church's primary hymnal and default lectionary independently.
+- Keep the installer denomination-neutral: LSB and its lectionaries are
+  optional packages, not hard-coded requirements.
+- Treat Orders of Service as a separate selectable catalog that may be associated
+  with a hymnal or service book but may also use no hymnal.
+- Research representative Lutheran and non-Lutheran service outlines, distinguish
+  reusable structure from copyrighted full text, and import only content that may
+  legally be distributed with ChurchManager.
+- Preserve user-created Order of Service templates independently of installed
+  starter packages and never replace weekly service copies during catalog updates.
+- Install and verify database structure, numbered migrations, starter reports,
+  starter screens, permissions, runtime dependencies, and the first master
+  administrator.
+- Certify installation against a fresh local database rather than a copy of the
+  development database.
+- Document ordinary backup and restore procedures and the complete-backup
+  format.
+- Perform a full fresh-install, upgrade, automatic-exit-backup, restore, and
+  restart dress rehearsal using non-production data.
+- Conduct a structured beta-testing phase after the fresh-install dress
+  rehearsal and before the first stable release:
+  - **Active:** ChurchManager entered beta testing as `0.2.0-beta.1` on
+    August 17, 2026;
+  - recruit a small group representing pastors, office staff, worship planners,
+    treasurers, and congregations with one-person administration;
+  - provide a documented test installation and sample database rather than any
+    congregation's production records;
+  - give testers task-based acceptance scripts covering installation, people,
+    worship planning, attendance, reports, backup and restore, user security,
+    and the accounting workflows appropriate to their role;
+  - collect defects, usability observations, environment details, and safe
+    diagnostic packages through one maintained feedback list;
+  - classify findings as release-blocking, important, or post-release rather
+    than expanding the beta without limit;
+  - require explicit permission before receiving a tester's database or other
+    potentially confidential congregation data;
+  - repeat regression tests after every beta correction and verify upgrades
+    from the prior beta build; and
+  - define beta exit criteria: no unresolved release-blocking defects, clean
+    installation and upgrade, verified backup and restore, accepted core
+    workflows, reconciled documentation, and an identified release commit.
+- Complete and sign off the
+  [Accounting Go-Live Checklist](ChurchManager.Accounting.GoLive.Checklist.md),
+  including opening balances, permissions, audit behavior, representative
+  reports, period controls, backup/restore evidence, and the exact approved
+  release commit or tag.
+- Confirm the permanent backup location is separate from MariaDB's data storage
+  and from the same local-storage failure domain.
+- The obsolete historical development SQL tree and database model have been
+  removed from the current source tree; numbered migrations are authoritative.
+- Before configuring any public Git remote, purge the removed private SQL exports
+  from local Git history, verify they are absent from every reachable commit, and
+  retain a private recovery backup outside the public repository.
+- Reconcile specification status labels and operational documentation with the
+  implemented source so completed work is not presented as merely proposed and
+  current backup/restore behavior is described accurately.
+
+### 6A. Open-source publication and distribution
+
+- Approved design: [ChurchManager public website specification](ChurchManager.Website.Specification.md).
+- Approved identity: [ChurchManager visual identity specification](ChurchManager.VisualIdentity.Specification.md).
+- A destination-independent static prototype is maintained in `website/`; its
+  download, repository, documentation, support, and screenshot placeholders
+  must remain inactive until approved public destinations and artifacts exist.
+- Maintain separate public repositories for ChurchManager and JSForm.
+- Use GitHub as the primary source repository, issue tracker, contributor
+  workflow, and binary-release location. Attach the Windows MSI, checksum,
+  release notes, user documentation, and known issues to versioned releases.
+- Publish a simple, accessible static ChurchManager project website using GitHub
+  Pages, initially under the project address and later under a verified custom
+  domain if desired. The website is the public front door, not a browser-hosted
+  version of ChurchManager.
+- Include a plain-language overview, supported Windows versions, screenshots,
+  current release and verified download link, checksum and installation
+  instructions, user and treasurer documentation, feature summary, beta status
+  and known limitations, source and license links, issue/support instructions,
+  security-reporting instructions, privacy statement, and copyright/content
+  boundaries.
+- Generate website download links and displayed version information from the
+  maintained release metadata so the website cannot silently advertise an old
+  installer. Test every public link as part of release acceptance.
+- Keep the public website static and free of congregation logins, member data,
+  donor data, database connectivity, analytics requiring unnecessary tracking,
+  or uploaded diagnostic packages.
+- Add a read-only Codeberg mirror after the primary repositories are stable.
+  Keep issues and pull requests on GitHub so users and maintainers do not have
+  to follow multiple active trackers.
+- Consider SourceForge later as an installer-download mirror when release volume
+  justifies it; do not use it as the primary development repository.
+- Consider PyPI only when JSForm is packaged as a conventional reusable Python
+  library. Do not distribute the complete ChurchManager desktop application
+  through PyPI.
+- Consider WinGet after ChurchManager reaches a stable release and has a
+  suitably signed Windows installer.
+- Before making either repository public, audit the current tree and every
+  reachable Git commit for database credentials, congregation or donor data,
+  dumps, backups, logs, attachments, test images, and non-distributable hymnal,
+  lectionary, or Order of Service content.
+- Verify the MIT license, third-party notices, dependency licenses, copyright
+  boundaries, security-reporting instructions, contribution guidance, build
+  reproducibility, and release checksums.
+- Keep sample databases entirely fictitious. Never publish a tester's database
+  or a sanitized-looking copy of congregation data without an explicit,
+  independently verified release process.
+- Publish from an identified release commit and signed or annotated version tag;
+  retain a private complete backup before any history-rewriting cleanup needed
+  for the initial public release.
+
+### 7. Confidential member giving and envelopes
+
+- Approved design: [Member giving and envelope tracking specification](ChurchManager.MemberGiving.Specification.md).
+- **Status: First-release scope completed and accepted for beta.**
+  Pledges, online-giving provider integration, and statement email delivery are
+  deferred capabilities rather than incomplete first-release work.
+- The completed first-release inventory and its remaining rendered checks are maintained in
+  [Member Giving Acceptance Audit](ChurchManager.MemberGiving.AcceptanceAudit.md).
+- CSV contribution intake now provides explicit column mapping, a non-writing
+  validation preview, red issue rows, protected source-file evidence, duplicate
+  file prevention, and confirmed creation of a new Draft batch. Migration 090
+  adds the evidence ledger. Valid import, duplicate protection, Draft creation,
+  fiscal-period validation, Ready-to-Draft recovery, and accounting handoff were
+  accepted in ChurchDBTest on August 22, 2026.
+- Maintained treasurer guidance: [Congregation treasurer guide](ChurchManager.CongregationTreasurerGuide.md).
+- Migration 085 was accepted in ChurchDBTest and adds
+  the new confidential contributor, dated-envelope, approved-purpose, batch,
+  gift, allocation, and privacy-safe audit structures plus nine dedicated
+  Giving permissions and two Giving roles.
+- Service-level validation now enforces contributor link types, preserves
+  leading-zero envelope numbers, detects inclusive assignment overlap, requires
+  exact cent-balanced allocations, and validates acknowledgment facts.
+- Contributor maintenance now supports person, family, and outside identities,
+  confidential statement contact fields, active status, and dated envelope
+  history with overlap prevention. Selecting a directory record previews its
+  current name, address, and email as statement defaults; numeric envelope
+  values are canonicalized before conflict checks. Approved-purpose maintenance
+  now records authorization, effective dates, statement treatment, control and
+  discretion, and the accounting destination. The draft-batch service now
+  creates privacy-safe audited batches, resolves envelopes by the received
+  date, requires exact split allocations, and refreshes calculated totals in
+  one transaction. Draft batch creation and confidential monetary gift entry,
+  including multi-purpose allocations and a continuously refreshed control
+  difference, are now available from the main menu. Permission-controlled batch
+  review now explains unresolved envelopes, totals, allocations, purpose
+  mappings, donor directions, and duplicate references before marking a batch
+  Ready. Draft contributions can now be opened by double-click, fully corrected,
+  or deleted with confirmation; each operation recalculates totals and writes a
+  privacy-safe audit event. Migration 086 adds the optional or required
+  functional classification to approved purposes and saved allocations. Ready
+  batches can now create a single summarized Ready cash-receipt transaction;
+  no donor or envelope detail enters the ledger, and ordinary Accounting
+  Posting atomically marks the linked giving batch Posted.
+  Giving Reports provides donor-free batch controls, fund/period totals and
+  accounting reconciliation plus protected batch detail, contributor history,
+  statement and envelope exceptions, directed-gift review, memorial/honor
+  acknowledgments, envelope registers and labels, and contribution statements.
+  The protected reports remain outside the unrestricted report catalog and
+  designer.
+  Quarterly statement preview now supports one contributor or every
+  statement-enabled contributor in a combined PDF and includes only Posted,
+  eligible allocations. Preview does not claim issuance or delivery. Official
+  issuance records document hashes, revisions, covered periods, filenames, and
+  safe audit references without storing duplicate PDF content.
+  The same workflow supports quarterly, calendar-year, and explicit custom-date
+  statement periods.
+- Keep the normal installation seed clean. Package a separate, clearly
+  fictional and repeatable Beta Test Dataset that testers can reset safely;
+  include Giving statement fixtures without making them production defaults.
+  The versioned package and guarded fresh-install/reset contract are specified
+  in `ChurchManager.BetaTestDataset.Specification.md`; build its manifest,
+  isolated acceptance, and optional beta-setup integration before the next beta
+  installer is produced.
+- Annual envelope-box assignment is implemented with a complete preview,
+  either complete renumbering or preservation plus gap filling, guarded
+  year-conflict handling, and one audited transaction. Protected Avery 5160
+  box labels and a matching assignment register are implemented in Giving
+  Reports and accepted visually. Generic Avery-compatible family and member
+  mailing-label starters are also implemented in the ordinary secured report
+  catalog and accepted visually.
+- Design this as a separate confidential subledger with its own permissions.
+- Giving authorization is now enforced inside contributor, purpose, batch,
+  import, correction, annual-envelope, accounting-handoff, and protected-report
+  services in addition to menu and dialog checks. Direct-invocation denial tests
+  confirm fail-closed behavior before database or file access.
+- Contribution entry now records congregation-determined goods/services facts,
+  intangible religious benefits, statement-review reasons, and memorial/honor
+  facts with separate donor and amount disclosure consent. These facts survive
+  draft edits and posted-batch corrections. Description-only non-cash entry is
+  implemented without ChurchManager-assigned value. An optional donor estimate
+  is explicitly unverified and excluded from accounting and statements;
+  non-cash-only batches finish without a zero-dollar ledger transaction. The protected memorial/honor
+  acknowledgment list is implemented and independently honors donor-name and amount-disclosure consent.
+- Support contributor accounts linked optionally to a person or family; outside
+  donors must also be allowed without creating congregation-member records.
+- Assign and maintain envelope numbers with effective dates so numbers can be
+  reused in a later year without changing historical giving records.
+- Support contribution batches, envelope entry, loose or anonymous offerings,
+  funds/designations, pledges, non-cash gifts, corrections, and year-end
+  statements.
+- Provide contribution history, envelope-assignment, batch-control, and donor
+  statement reports while suppressing unlisted contact information.
+- Import contribution files where practical.
+- Post summarized, balanced deposits into fund accounting without exposing
+  donor identity in the general ledger.
+- Keep envelope and donor details out of ordinary accounting screens and
+  reports; access requires dedicated giving permissions.
+- Specify privacy, retention, audit, backup, correction, and statement-delivery
+  rules before implementation. Do not treat existing prototype giving tables as
+  the approved design or migrate their data without a separate reviewed plan.
+
+### 8. Pastoral follow-up
+
+- **Status: completed and visually accepted August 24, 2026.** The independently tested AES-256-GCM
+  note/key-recovery service and migration 096 normalized care foundation are
+  implemented. Database backups now pair with an available password-protected
+  pastoral recovery sidecar; restore validates it before closing database
+  connections and installs its key only after SQL restore succeeds. The Master
+  Administrator can configure or replace the separate recovery password from
+  Database Backup, and those successful actions are safely audited. The
+  operational service contract now independently enforces assigned/all viewing
+  and separate create, assign, update, and close permissions. The MariaDB
+  operational repository now provides parameterized safe-field reads,
+  optimistic locking, active-assignee checks, and atomic safe audits for care
+  creation, assignment, actions, and status changes. The restricted-note service
+  and repository now authorize the underlying care record before ciphertext
+  access, bind encryption to the allocated note identity, reject stale updates,
+  and atomically audit views and changes without narrative. The native Pastoral
+  Care dashboard and safe history workflow now support assigned/all-open views,
+  deliberate follow-up creation, assignment, safe action recording, and status
+  changes. Attendance and Prayer Requests now provide deliberate follow-up
+  handoffs without copying event notes or prayer wording. Protected Work List
+  and aggregate Activity Summary reports exclude restricted notes and narrative.
+  Restricted-note entry is now permission-controlled, metadata-only until an
+  explicit open, and fails closed unless recovery is verified. Key rotation and
+  actual-ciphertext replacement-machine recovery passed in the isolated release rehearsal.
+  Migration 105 now supplies the authoritative active key version, and all new
+  or changed restricted-note ciphertext honors it instead of hard-coding v1.
+  The tested transactional rotation service now verifies the current recovery
+  password and matched before/after backup sidecars, atomically re-encrypts all
+  current rows, preserves older key versions, and fails closed if post-rotation
+  recovery verification is incomplete. Database Backup now exposes the
+  recovery-gated Master Administrator rotation control and creates distinct
+  labeled before/after backups. The disposable actual-ciphertext rehearsal is
+  implemented in `accept_pastoral_key_recovery.py`; its apply-mode result passed
+  on August 24, 2026. The restricted-note editor subsequently passed visual acceptance.
+  - Interactive protected backup/restore and application restart passed in
+    `ChurchDBTest`; isolated ciphertext cross-machine recovery also passed.
+
+- Research completed: [Pastoral care systems research and ChurchManager recommendations](ChurchManager.PastoralCare.Research.md).
+- Proposed implementation specification: [ChurchManager pastoral care specification](ChurchManager.PastoralCare.Specification.md).
+- Recommended first release: a protected Pastoral Care subsystem with separate
+  care needs, care actions, and optional restricted minimum-necessary notes.
+- Do not reuse ordinary Tasks or store counseling transcripts, clinical detail,
+  attachments, automated spiritual assessments, or giving-based care triggers.
+- Create follow-up items from attendance warnings or manually.
+- Assign a follow-up to the pastor, an elder, or another authorized caregiver.
+- Record contact attempts, outcome, next-follow-up date, and completion.
+- Support regular shut-in and homebound Communion visits using the same
+  natural-language recurrence control as Prayers and Announcements.
+- Protect pastoral notes with a separate sensitive permission.
+- Show actionable overdue follow-ups without exposing confidential detail on
+  the main menu.
+- Provide a printable or exportable authorized follow-up list.
+
+### 9. Remove Projects and Tasks
+
+- **Status: complete.** The generic Projects and Tasks facilities have been
+  removed from the current ChurchManager system.
+- Migration 098 removes their database tables, views, report catalog entries,
+  and obsolete report permission. Their main-menu entries, form routes, JSON
+  screens, visual reports, filters, documentation, and tests are also removed.
+- Worship preparation checklists remain active because they are a separate,
+  focused service-planning subsystem.
+- Do not add a compatibility layer or preserve obsolete structures in the new
+  system. This work has no relationship to the separate frozen application.
+- The installation baseline must be regenerated after migration 098 is applied,
+  followed by the complete installation, upgrade, restore, and source-audit gates.
+
+### 10. Import, export, and duplicate management
+
+- **Status: complete.** The central Data Management screen, conservative
+  duplicate review decisions, read-only merge impact, guarded transactional
+  merge, confirmed atomic CSV import, and privacy-safe People/Families export are implemented. Follow
+  [ChurchManager.DataManagement.Specification.md](ChurchManager.DataManagement.Specification.md).
+- Add a central Data Management screen.
+- Import people and families from CSV with a preview and explicit field mapping.
+- Detect likely duplicate people, families, email addresses, and phone numbers.
+- Require review before merging records.
+- Export only approved datasets and always enforce unlisted/private contact
+  restrictions.
+- Record import results, rejected rows, and export history.
+- Provide a complete portable archive format where appropriate.
+
+### 11. Groups, committees, classes, and ministry teams
+
+- **Status: Implementation in progress.** The approved design is reconciled.
+  Migration 106 and its inventory/regression checks preserve valid Group IDs,
+  membership history, controlled types and roles, and security permissions. Follow
+  [ChurchManager.GroupsMembership.Specification.md](ChurchManager.GroupsMembership.Specification.md),
+  approved August 22, 2026.
+- Add general groups independent of worship-participant roles.
+- Support leaders, members, group roles, active dates, notes, and categories.
+- Accommodate boards, committees, Bible studies, Sunday school, choir,
+  confirmation, altar guild, outreach, and temporary teams.
+- Permit group attendance and authorized group communication.
+- Add group rosters and participation reports.
+- Meeting and attendance screens are implemented under the Group detail screen;
+  they require visual acceptance after migration 107 is applied.
+
+### 12. Volunteer availability and responses
+
+- **Status: Completed and visually accepted August 24, 2026.** Follow
+  [ChurchManager.VolunteerAvailability.Specification.md](ChurchManager.VolunteerAvailability.Specification.md).
+- Add participant availability and blockout dates.
+- Send explicit serve requests and reminders.
+- Record accepted, declined, and pending responses.
+- Show last-served information and scheduling conflicts.
+- Preserve manual scheduling and small-congregation flexibility.
+- Consider optional scheduling suggestions, but never silently replace existing
+  assignments.
+- Keep ChurchManager limited to its service/event dates. External calendar
+  export and synchronization belong to the later Calendar Integration project.
+- The maintained worship test dataset covers complete, planned, and incomplete
+  weekly Orders of Service; confirmed, declined, and pending responses; and an
+  intentional availability conflict for regression testing.
+
+### 13. General events and calendar integration
+
+- Add non-worship events with one-time or recurring dates.
+- Support simple invitations, RSVP/registration lists, attendance, and notes.
+- Integrate with Google Calendar rather than duplicating a complete calendar
+  platform.
+- Consider simple room or resource reservations only when a demonstrated need
+  exists.
+
+### 14. Custom profile fields and controlled tags
+
+- **Status: Approved design; implementation pending.** Follow
+  [ChurchManager.CustomProfileFields.Specification.md](ChurchManager.CustomProfileFields.Specification.md),
+  approved August 22, 2026.
+- Allow authorized administrators to define typed optional fields for Person
+  and Family profiles through ChurchManager and have JSForm render and validate
+  them without a schema change for each local field.
+- Keep choices and tags controlled and searchable.
+- Enforce privacy, permissions, auditing, directory, report, import, and export
+  policy for every definition.
+- Avoid arbitrary custom fields where a normalized ChurchManager relationship
+  or protected subsystem is more appropriate.
+
+### Conditional: secure remote access and two-factor authentication
+
+- Two-factor authentication is not required for the current local-only use.
+- Require it as part of any future remote, browser, or member-portal project.
+- Include recovery codes, administrative recovery, auditing, and clear account
+  ownership rules in its specification.
+- For remote use of the desktop application, recommend a professionally and
+  safely configured VPN appropriate to the congregation's network. Keep the
+  recommendation vendor-neutral.
+- Never expose MariaDB, its administration port, Windows file sharing, or an
+  unrestricted remote-desktop service directly to the public internet.
+- Require least-privilege VPN accounts, encrypted transport, revocable access,
+  endpoint updates, and documented removal of access when a user leaves a role.
+- A VPN protects the network path but does not replace individual ChurchManager
+  accounts, application permissions, database least privilege, auditing, or
+  future 2FA requirements.
+
+## Integration candidates rather than native subsystems
+
+ChurchManager should exchange data with established services instead of
+handling these high-risk or specialized functions itself:
+
+- online, card, text, or ACH giving and payment processing;
+- payroll calculation, tax filing, and direct deposit;
+- mass SMS and push notifications;
+- background-check processing;
+- website publishing and livestream services;
+- copyrighted music, sheet music, rehearsal audio, and CCLI reporting.
+
+## Deliberately outside the present scope
+
+- a social network, chat, reactions, or congregation newsfeed;
+- a native mobile application;
+- a full website builder;
+- multi-campus administration;
+- a full child check-in, badge, and secure-pickup system unless a congregation
+  demonstrates a need;
+- advanced facility management beyond possible simple reservations.
+
+## Roadmap maintenance rules
+
+1. Prepare and approve a specification before beginning a new numbered item.
+2. Use isolated test data and guarded migrations.
+3. Complete automated checks and user acceptance before marking an item done.
+4. Update the screen, report, and database inventories when ownership changes.
+5. Prefer a focused integration over recreating an established external
+   platform.
+6. Do not expand scope merely to match a commercial product's feature list.

@@ -1,0 +1,173 @@
+{
+    "frmAccountingFunctionFORM": {
+        "FORM": {
+            "name": "frmAccountingFunction",
+            "type": "Panel",
+            "title": "Functional Classifications",
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                48,
+                22
+            ],
+            "stylelist": [
+                "CAPTION"
+            ],
+            "layout": {
+                "type": "legacy"
+            },
+            "table": {
+                "name": "tblAccountingFunction",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "OrganizationID, DisplayOrder, Code"
+            },
+            "security": {
+                "open": "accounting.master_data.manage",
+                "create": "accounting.master_data.manage",
+                "update": "accounting.master_data.manage",
+                "delete": "accounting.master_data.manage"
+            },
+            "theme": "churchmanager"
+        },
+        "CONTROLS": {
+            "lblOrganizationID": {
+                "name": "lblOrganizationID",
+                "type": "StaticText",
+                "label": "Organization:",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "OrganizationID": {
+                "name": "OrganizationID",
+                "type": "ComboBox",
+                "posch": [
+                    12,
+                    1
+                ],
+                "sizech": [
+                    32,
+                    2
+                ],
+                "lookupchoices": {
+                    "name": "tblAccountingOrganization",
+                    "fields": [
+                        "ID",
+                        "LegalName"
+                    ],
+                    "condition": "Active = 1",
+                    "orderby": "LegalName"
+                },
+                "tooltip": "Select the accounting organization."
+            },
+            "lblCode": {
+                "name": "lblCode",
+                "type": "StaticText",
+                "label": "Function code:",
+                "posch": [
+                    1,
+                    3
+                ]
+            },
+            "Code": {
+                "name": "Code",
+                "type": "TextCtrl",
+                "posch": [
+                    12,
+                    3
+                ],
+                "sizech": [
+                    16,
+                    2
+                ],
+                "tooltip": "Enter the stable function code."
+            },
+            "lblName": {
+                "name": "lblName",
+                "type": "StaticText",
+                "label": "Function name:",
+                "posch": [
+                    1,
+                    5
+                ]
+            },
+            "Name": {
+                "name": "Name",
+                "type": "TextCtrl",
+                "posch": [
+                    12,
+                    5
+                ],
+                "sizech": [
+                    32,
+                    2
+                ],
+                "tooltip": "Enter the functional classification name."
+            },
+            "lblFunctionClass": {
+                "name": "lblFunctionClass",
+                "type": "StaticText",
+                "label": "Classification:",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "FunctionClass": {
+                "name": "FunctionClass",
+                "type": "ComboBox",
+                "posch": [
+                    12,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "choices": [
+                    "PROGRAM",
+                    "MANAGEMENT_GENERAL",
+                    "FUNDRAISING"
+                ],
+                "tooltip": "Choose program ministry or a supporting classification."
+            },
+            "lblDisplayOrder": {
+                "name": "lblDisplayOrder",
+                "type": "StaticText",
+                "label": "Display order:",
+                "posch": [
+                    1,
+                    9
+                ]
+            },
+            "DisplayOrder": {
+                "name": "DisplayOrder",
+                "type": "TextNumber",
+                "posch": [
+                    12,
+                    9
+                ],
+                "sizech": [
+                    10,
+                    2
+                ],
+                "tooltip": "Enter the report and list order."
+            },
+            "Active": {
+                "name": "Active",
+                "type": "CheckBox",
+                "label": "Active",
+                "posch": [
+                    12,
+                    11
+                ],
+                "tooltip": "Make this function available for journal lines."
+            }
+        }
+    }
+}

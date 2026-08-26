@@ -1,0 +1,23 @@
+{
+    "database_settings": {
+        "host": "127.0.0.1",
+        "port": 3306,
+        "user": "",
+        "database": "ChurchDB",
+        "jsform_database": "ChurchDB",
+        "credential_target": "ChurchManager/Production"
+    },
+    "security": {
+        "production_enabled": false,
+        "testing_enabled": false
+    },
+    "attachments": {
+        "production_root": "%LOCALAPPDATA%\\ChurchManager\\Attachments",
+        "test_root": "%LOCALAPPDATA%\\ChurchManager\\TestAttachments",
+        "allowed_extensions": [
+            ".pdf", ".jpg", ".jpeg", ".png", ".tif", ".tiff",
+            ".doc", ".docx", ".xls", ".xlsx", ".csv", ".txt"
+        ],
+        "maximum_megabytes": 20
+    }
+}

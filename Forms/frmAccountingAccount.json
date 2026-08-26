@@ -1,0 +1,312 @@
+{
+    "frmAccountingAccountFORM": {
+        "FORM": {
+            "name": "frmAccountingAccount",
+            "type": "Panel",
+            "title": "Chart of Accounts",
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                52,
+                30
+            ],
+            "stylelist": [
+                "CAPTION"
+            ],
+            "layout": {
+                "type": "legacy"
+            },
+            "table": {
+                "name": "tblAccountingAccount",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "OrganizationID, DisplayOrder, Code"
+            },
+            "security": {
+                "open": "accounting.master_data.manage",
+                "create": "accounting.master_data.manage",
+                "update": "accounting.master_data.manage",
+                "delete": "accounting.master_data.manage"
+            },
+            "theme": "churchmanager"
+        },
+        "CONTROLS": {
+            "lblOrganizationID": {
+                "name": "lblOrganizationID",
+                "type": "StaticText",
+                "label": "Organization:",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "OrganizationID": {
+                "name": "OrganizationID",
+                "type": "ComboBox",
+                "posch": [
+                    10,
+                    1
+                ],
+                "sizech": [
+                    38,
+                    2
+                ],
+                "lookupchoices": {
+                    "name": "tblAccountingOrganization",
+                    "fields": [
+                        "ID",
+                        "LegalName"
+                    ],
+                    "condition": "Active = 1",
+                    "orderby": "LegalName"
+                },
+                "tooltip": "Select the accounting organization."
+            },
+            "lblCode": {
+                "name": "lblCode",
+                "type": "StaticText",
+                "label": "Account code:",
+                "posch": [
+                    1,
+                    3
+                ]
+            },
+            "Code": {
+                "name": "Code",
+                "type": "TextCtrl",
+                "posch": [
+                    10,
+                    3
+                ],
+                "sizech": [
+                    12,
+                    2
+                ],
+                "tooltip": "Enter the stable account code."
+            },
+            "lblName": {
+                "name": "lblName",
+                "type": "StaticText",
+                "label": "Account name:",
+                "posch": [
+                    1,
+                    5
+                ]
+            },
+            "Name": {
+                "name": "Name",
+                "type": "TextCtrl",
+                "posch": [
+                    10,
+                    5
+                ],
+                "sizech": [
+                    38,
+                    2
+                ],
+                "tooltip": "Enter the account name."
+            },
+            "lblAccountType": {
+                "name": "lblAccountType",
+                "type": "StaticText",
+                "label": "Account type:",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "AccountType": {
+                "name": "AccountType",
+                "type": "ComboBox",
+                "posch": [
+                    10,
+                    7
+                ],
+                "sizech": [
+                    20,
+                    2
+                ],
+                "choices": [
+                    "ASSET",
+                    "LIABILITY",
+                    "NET_ASSET",
+                    "REVENUE",
+                    "EXPENSE",
+                    "TRANSFER",
+                    "OTHER"
+                ],
+                "tooltip": "Select the financial statement account type."
+            },
+            "lblNormalBalance": {
+                "name": "lblNormalBalance",
+                "type": "StaticText",
+                "label": "Normal balance:",
+                "posch": [
+                    1,
+                    9
+                ]
+            },
+            "NormalBalance": {
+                "name": "NormalBalance",
+                "type": "ComboBox",
+                "posch": [
+                    10,
+                    9
+                ],
+                "sizech": [
+                    12,
+                    2
+                ],
+                "choices": [
+                    "DEBIT",
+                    "CREDIT"
+                ],
+                "tooltip": "Select the account's normal balance."
+            },
+            "lblFunctionRequirement": {
+                "name": "lblFunctionRequirement",
+                "type": "StaticText",
+                "label": "Function requirement:",
+                "posch": [
+                    1,
+                    11
+                ]
+            },
+            "FunctionRequirement": {
+                "name": "FunctionRequirement",
+                "type": "ComboBox",
+                "posch": [
+                    10,
+                    11
+                ],
+                "sizech": [
+                    18,
+                    2
+                ],
+                "choices": [
+                    "REQUIRED",
+                    "OPTIONAL",
+                    "PROHIBITED"
+                ],
+                "tooltip": "Choose whether journal lines require a functional classification."
+            },
+            "PostingAllowed": {
+                "name": "PostingAllowed",
+                "type": "CheckBox",
+                "label": "Posting account",
+                "posch": [
+                    10,
+                    13
+                ],
+                "tooltip": "Allow this account on journal lines."
+            },
+            "Active": {
+                "name": "Active",
+                "type": "CheckBox",
+                "label": "Active",
+                "posch": [
+                    21,
+                    13
+                ],
+                "tooltip": "Make this account available for current use."
+            },
+            "lblStatementGroup": {
+                "name": "lblStatementGroup",
+                "type": "StaticText",
+                "label": "Statement group:",
+                "posch": [
+                    1,
+                    15
+                ]
+            },
+            "StatementGroup": {
+                "name": "StatementGroup",
+                "type": "TextCtrl",
+                "posch": [
+                    10,
+                    15
+                ],
+                "sizech": [
+                    38,
+                    2
+                ],
+                "tooltip": "Enter the report grouping label."
+            },
+            "lblDisplayOrder": {
+                "name": "lblDisplayOrder",
+                "type": "StaticText",
+                "label": "Display order:",
+                "posch": [
+                    1,
+                    17
+                ]
+            },
+            "DisplayOrder": {
+                "name": "DisplayOrder",
+                "type": "TextNumber",
+                "posch": [
+                    10,
+                    17
+                ],
+                "sizech": [
+                    10,
+                    2
+                ],
+                "tooltip": "Enter the report and list order."
+            },
+            "lblEffectiveFrom": {
+                "name": "lblEffectiveFrom",
+                "type": "StaticText",
+                "label": "Effective from:",
+                "posch": [
+                    1,
+                    19
+                ]
+            },
+            "EffectiveFrom": {
+                "name": "EffectiveFrom",
+                "type": "DatePickerCtrl",
+                "posch": [
+                    10,
+                    19
+                ],
+                "sizech": [
+                    20,
+                    2
+                ],
+                "stylelist": [
+                    "ALLOWNONE"
+                ],
+                "tooltip": "Optionally select the first active date."
+            },
+            "lblEffectiveUntil": {
+                "name": "lblEffectiveUntil",
+                "type": "StaticText",
+                "label": "Effective until:",
+                "posch": [
+                    1,
+                    21
+                ]
+            },
+            "EffectiveUntil": {
+                "name": "EffectiveUntil",
+                "type": "DatePickerCtrl",
+                "posch": [
+                    10,
+                    21
+                ],
+                "sizech": [
+                    20,
+                    2
+                ],
+                "stylelist": [
+                    "ALLOWNONE"
+                ],
+                "tooltip": "Optionally select the final active date."
+            }
+        }
+    }
+}

@@ -1,0 +1,154 @@
+{
+  "$schema": "https://jsform.local/schema/menu-definition-v1.json",
+  "schema_version": 1,
+  "name": "main",
+  "menus": [
+    {
+      "label": "&File",
+      "items": [
+        {"command": "churchmanager.backup_d_b", "label": "Database &Backup and Restore..."},
+        {"command": "churchmanager.data_management", "label": "Data &Management..."},
+        {"separator": true},
+        {"command": "session.logout", "label": "&Log Out"}
+      ]
+    },
+    {
+      "label": "&Church",
+      "items": [
+        {"command": "churchmanager.church", "label": "Church &Information"},
+        {"command": "churchmanager.journal"},
+        {"command": "churchmanager.document"},
+        {"separator": true},
+        {"command": "churchmanager.assets"},
+        {"command": "churchmanager.asset_locations"},
+        {"command": "churchmanager.asset_maintenance"},
+        {"command": "churchmanager.asset_reports"}
+      ]
+    },
+    {
+      "label": "&Worship",
+      "items": [
+        {"command": "churchmanager.service", "label": "&Worship Services"},
+        {"command": "churchmanager.weekly_bulletin_order"},
+        {"command": "churchmanager.service_schedule"},
+        {"command": "churchmanager.notify_participants"},
+        {"command": "churchmanager.sunday_prayers"},
+        {"command": "churchmanager.announcements"},
+        {"command": "churchmanager.generate_o_s"},
+        {"separator": true},
+        {"label": "Worship &Resources", "items": [
+          {"command": "churchmanager.o_s"},
+          {"command": "churchmanager.check_list"},
+          {"command": "churchmanager.propers"},
+          {"command": "churchmanager.sermon"},
+          {"command": "churchmanager.hymnal"},
+          {"command": "churchmanager.hymn"},
+          {"command": "churchmanager.participant"},
+          {"command": "churchmanager.worship_positions"},
+          {"command": "churchmanager.schedule"},
+          {"command": "churchmanager.prayers"},
+          {"command": "churchmanager.announcement"},
+          {"command": "churchmanager.attendance_event"}
+        ]}
+      ]
+    },
+    {
+      "label": "&People",
+      "items": [
+        {"command": "churchmanager.person"},
+        {"command": "churchmanager.family"},
+        {"command": "churchmanager.record_attendance"},
+        {"separator": true},
+        {"command": "churchmanager.groups"},
+        {"command": "churchmanager.group_attendance"},
+        {"command": "churchmanager.custom_profile_search"},
+        {"command": "churchmanager.pastoral_care"},
+        {"command": "churchmanager.calendar_events"},
+        {"command": "churchmanager.calendar_integration"}
+      ]
+    },
+    {
+      "label": "&Projects",
+      "items": [
+        {"command": "churchmanager.projects", "label": "&Projects and Scheduling..."}
+      ]
+    },
+    {
+      "label": "&Giving",
+      "items": [
+        {"command": "churchmanager.contribution_batches"},
+        {"command": "churchmanager.giving_contributors"},
+        {"command": "churchmanager.giving_purposes"},
+        {"command": "churchmanager.giving_reports"}
+      ]
+    },
+    {
+      "label": "&Accounting",
+      "items": [
+        {"command": "churchmanager.accounting_transactions"},
+        {"command": "churchmanager.accounting_review"},
+        {"command": "churchmanager.accounting_posting"},
+        {"command": "churchmanager.accounting_register"},
+        {"command": "churchmanager.accounting_bank_import"},
+        {"separator": true},
+        {"label": "&Reports", "items": [
+          {"command": "churchmanager.accounting_trial_balance"},
+          {"command": "churchmanager.accounting_general_ledger"},
+          {"command": "churchmanager.accounting_position"},
+          {"command": "churchmanager.accounting_activities"},
+          {"command": "churchmanager.accounting_fund_balances"},
+          {"command": "churchmanager.accounting_reconciliation_report"},
+          {"command": "churchmanager.accounting_budget_actual"},
+          {"command": "churchmanager.accounting_functional_expenses"},
+          {"command": "churchmanager.accounting_audit"}
+        ]},
+        {"label": "&Setup and Close", "items": [
+          {"command": "churchmanager.accounting_setup"},
+          {"command": "churchmanager.accounting_accounts"},
+          {"command": "churchmanager.accounting_funds"},
+          {"command": "churchmanager.accounting_functions"},
+          {"command": "churchmanager.accounting_years"},
+          {"command": "churchmanager.accounting_periods"},
+          {"command": "churchmanager.accounting_bank_accounts"},
+          {"command": "churchmanager.accounting_payees"},
+          {"command": "churchmanager.accounting_budgets"},
+          {"command": "churchmanager.accounting_close_checklist"},
+          {"command": "churchmanager.accounting_year_end"}
+        ]}
+      ]
+    },
+    {
+      "label": "&Reports",
+      "items": [
+        {"command": "churchmanager.reports"}
+      ]
+    },
+    {
+      "label": "&Tools",
+      "items": [
+        {"label": "&Designers", "items": [
+          {"command": "churchmanager.report_designer"},
+          {"command": "churchmanager.screen_designer"},
+          {"command": "tools.menu_designer"}
+        ]},
+        {"separator": true},
+        {"command": "churchmanager.users"},
+        {"command": "churchmanager.choices"},
+        {"command": "churchmanager.config"},
+        {"command": "churchmanager.options"},
+        {"command": "churchmanager.email_settings"},
+        {"command": "churchmanager.lectionary_packages"},
+        {"command": "churchmanager.custom_profile_fields"},
+        {"separator": true},
+        {"command": "churchmanager.support_diagnostics"}
+      ]
+    },
+    {
+      "label": "&Help",
+      "items": [
+        {"command": "session.help"},
+        {"command": "session.change_password"}
+      ]
+    }
+  ]
+}

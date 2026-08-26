@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">ChurchManager monochrome mark</title>
+  <desc id="desc">A church above three organized record lines in one color.</desc>
+  <g fill="#0B315B">
+    <rect x="246" y="58" width="20" height="82" rx="4"/>
+    <rect x="220" y="82" width="72" height="20" rx="4"/>
+    <path d="M256 118 194 184h26v116h72V184h26z"/>
+    <path d="M112 228 220 154l108 74v72h-72v-62c0-18-14-32-32-32s-32 14-32 32v62h-80z"/>
+    <path d="M292 228 358 182l66 46v72H292z"/>
+    <circle cx="224" cy="193" r="20" fill="#FFFFFF"/>
+    <rect x="220" y="173" width="8" height="40"/>
+    <rect x="204" y="189" width="40" height="8"/>
+    <rect x="104" y="342" width="304" height="22" rx="11"/>
+    <rect x="104" y="390" width="304" height="22" rx="11"/>
+    <rect x="104" y="438" width="304" height="22" rx="11"/>
+  </g>
+</svg>

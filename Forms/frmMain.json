@@ -1,0 +1,66 @@
+{
+  "frmMainFORM": {
+    "FORM": {
+      "name": "frmMain",
+      "type": "Panel",
+      "title": "ChurchManager",
+      "posch": [-1, -1],
+      "sizech": [52, 32],
+      "stylelist": ["CAPTION"],
+      "layout": {"type": "columns", "gap": 2, "border": 2, "item_padding": 1},
+      "theme": "churchmanager"
+    },
+    "CONTROLS": {
+      "BrandBox": {"type": "StaticBox", "name": "BrandBox", "label": "Your Congregation", "posch": [1, 1], "sizech": [12, 13], "layout": {"row": 0, "column": 0, "rowspan": 2}},
+      "lblChurchName": {"type": "StaticText", "name": "lblChurchName", "label": "Church", "posch": [2, 2], "sizech": [10, 2]},
+      "lblChurchLogo": {"type": "StaticText", "name": "lblChurchLogo", "label": "", "posch": [2, 4], "sizech": [10, 7]},
+
+      "PlanningBox": {"type": "StaticBox", "name": "PlanningBox", "label": "This Week's Worship", "posch": [14, 1], "sizech": [13, 10], "layout": {"row": 0, "column": 1}},
+      "lblService": {"type": "StaticText", "name": "lblService", "label": "Worship Services", "posch": [15, 2], "security": {"invoke": "worship.manage"}},
+      "lblWeeklyBulletinOrder": {"type": "StaticText", "name": "lblWeeklyBulletinOrder", "label": "Weekly Bulletin Order", "posch": [15, 3], "security": {"invoke": "worship.manage"}},
+      "lblServiceSchedule": {"type": "StaticText", "name": "lblServiceSchedule", "label": "Service Participants", "posch": [15, 4], "security": {"invoke": "worship.manage"}},
+      "lblNotifyParticipants": {"type": "StaticText", "name": "lblNotifyParticipants", "label": "Notify Participants", "posch": [15, 5], "security": {"invoke": "worship.manage"}},
+      "lblSundayPrayers": {"type": "StaticText", "name": "lblSundayPrayers", "label": "Weekly Prayers", "posch": [15, 6], "security": {"invoke": "worship.manage"}},
+      "lblAnnouncements": {"type": "StaticText", "name": "lblAnnouncements", "label": "Weekly Announcements", "posch": [15, 7], "security": {"invoke": "worship.manage"}},
+      "lblGenerateOS": {"type": "StaticText", "name": "lblGenerateOS", "label": "Prepare Bulletin Order", "posch": [15, 8], "security": {"invoke": "worship.manage"}},
+
+      "PeopleBox": {"type": "StaticBox", "name": "PeopleBox", "label": "People and Attendance", "posch": [28, 1], "sizech": [12, 10], "layout": {"row": 0, "column": 2}},
+      "lblPerson": {"type": "StaticText", "name": "lblPerson", "label": "People", "posch": [29, 2], "security": {"invoke": "membership.manage"}},
+      "lblFamily": {"type": "StaticText", "name": "lblFamily", "label": "Families", "posch": [29, 3], "security": {"invoke": "membership.manage"}},
+      "lblRecordAttendance": {"type": "StaticText", "name": "lblRecordAttendance", "label": "Record Attendance", "posch": [29, 4], "security": {"invoke": "attendance.record"}},
+      "lblGroups": {"type": "StaticText", "name": "lblGroups", "label": "Groups", "posch": [29, 5], "security": {"invoke": "groups.view"}},
+      "lblGroupAttendance": {"type": "StaticText", "name": "lblGroupAttendance", "label": "Group Attendance", "posch": [29, 6], "security": {"invoke": "groups.attendance.view"}},
+      "lblPastoralCare": {"type": "StaticText", "name": "lblPastoralCare", "label": "Pastoral Follow-ups", "posch": [29, 7], "security": {"invoke": "pastoral.care.view.assigned"}},
+      "lblCalendarEvents": {"type": "StaticText", "name": "lblCalendarEvents", "label": "Events", "posch": [29, 8], "security": {"invoke": "calendar.view"}},
+
+      "QuickBox": {"type": "StaticBox", "name": "QuickBox", "label": "Regular Office Work", "posch": [1, 15], "sizech": [12, 7], "layout": {"row": 2, "column": 0}},
+      "lblDocument": {"type": "StaticText", "name": "lblDocument", "label": "Documents", "posch": [2, 16], "security": {"invoke": "ministry.manage"}},
+      "lblJournal": {"type": "StaticText", "name": "lblJournal", "label": "Journal", "posch": [2, 17], "security": {"invoke": "ministry.manage"}},
+      "lblReports": {"type": "StaticText", "name": "lblReports", "label": "Reports", "posch": [2, 18], "security": {"invoke": "reports.run"}},
+      "lblCalendarIntegration": {"type": "StaticText", "name": "lblCalendarIntegration", "label": "Calendar Integration", "posch": [2, 19], "security": {"invoke": "calendar.view"}},
+      "lblProjects": {"type": "StaticText", "name": "lblProjects", "label": "Projects and Scheduling", "posch": [2, 20], "security": {"invoke": "projects.view"}},
+
+      "GivingBox": {"type": "StaticBox", "name": "GivingBox", "label": "Member Giving", "posch": [14, 12], "sizech": [13, 7], "layout": {"row": 2, "column": 1}},
+      "lblContributionBatches": {"type": "StaticText", "name": "lblContributionBatches", "label": "Contribution Batches", "posch": [15, 13], "security": {"invoke": "giving.batches.enter"}},
+      "lblGivingContributors": {"type": "StaticText", "name": "lblGivingContributors", "label": "Contributors and Envelopes", "posch": [15, 14], "security": {"invoke": "giving.contributors.manage"}},
+      "lblGivingReports": {"type": "StaticText", "name": "lblGivingReports", "label": "Giving Reports", "posch": [15, 15], "security": {"invoke": "giving.reports.summary"}},
+
+      "AssetBox": {"type": "StaticBox", "name": "AssetBox", "label": "Assets", "posch": [14, 20], "sizech": [13, 5], "layout": {"row": 3, "column": 1}},
+      "lblAssets": {"type": "StaticText", "name": "lblAssets", "label": "Assets", "posch": [15, 21], "security": {"invoke": "assets.view"}},
+      "lblAssetMaintenance": {"type": "StaticText", "name": "lblAssetMaintenance", "label": "Maintenance Due", "posch": [15, 22], "security": {"invoke": "assets.view"}},
+
+      "DailyAccountingBox": {"type": "StaticBox", "name": "DailyAccountingBox", "label": "Accounting - Daily Work", "posch": [28, 12], "sizech": [12, 8], "layout": {"row": 2, "column": 2}},
+      "lblAccountingTransactions": {"type": "StaticText", "name": "lblAccountingTransactions", "label": "Transaction Entry", "posch": [29, 13], "security": {"invoke": "accounting.transactions.create"}},
+      "lblAccountingReview": {"type": "StaticText", "name": "lblAccountingReview", "label": "Transaction Review", "posch": [29, 14], "security": {"invoke": "accounting.transactions.approve"}},
+      "lblAccountingPosting": {"type": "StaticText", "name": "lblAccountingPosting", "label": "Transaction Posting", "posch": [29, 15], "security": {"invoke": "accounting.transactions.post"}},
+      "lblAccountingRegister": {"type": "StaticText", "name": "lblAccountingRegister", "label": "Posted Register", "posch": [29, 16], "security": {"invoke": "accounting.transactions.view"}},
+      "lblAccountingBankImport": {"type": "StaticText", "name": "lblAccountingBankImport", "label": "Bank File Import", "posch": [29, 17], "security": {"invoke": "accounting.reconciliation.manage"}},
+
+      "SessionBox": {"type": "StaticBox", "name": "SessionBox", "label": "Current User", "posch": [1, 23], "sizech": [12, 5], "layout": {"row": 3, "column": 0}},
+      "lblCurrentUser": {"type": "StaticText", "name": "lblCurrentUser", "label": "Signed in", "posch": [2, 24]},
+      "lblHelp": {"type": "StaticText", "name": "lblHelp", "label": "Help - User Guide", "posch": [2, 25]},
+      "lblChangePassword": {"type": "StaticText", "name": "lblChangePassword", "label": "Change Password", "posch": [2, 26]},
+      "lblLogout": {"type": "StaticText", "name": "lblLogout", "label": "Log Out", "posch": [2, 27]}
+    }
+  }
+}

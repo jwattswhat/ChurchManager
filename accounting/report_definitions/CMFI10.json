@@ -1,0 +1,552 @@
+{
+  "CMFI10REPORT": {
+    "REPORT": {
+      "schema_version": 1,
+      "name": "CMFI10",
+      "title":"Finance - Adopted Budget",
+      "dataset": "accounting.adoptedbudget",
+      "datasetversion": 1,
+      "pagesize": "letter",
+      "orientation": "landscape",
+      "margins": {
+        "top": 30,
+        "right": 36,
+        "bottom": 30,
+        "left": 36
+      },
+      "theme": "churchmanager.accounting",
+      "classification": "official",
+      "emptytext": "No posted activity matches the selected reporting period.",
+      "bands": {
+        "ReportHeader": {
+          "type": "reportheader",
+          "height": 108
+        },
+        "PageHeader": {
+          "type": "pageheader",
+          "height": 8,
+          "repeat": true
+        },
+        "Detail": {
+          "type": "detail",
+          "height": 76
+        },
+        "ReportFooter": {
+          "type": "reportfooter",
+          "height": 54
+        },
+        "PageFooter": {
+          "type": "pagefooter",
+          "height": 24,
+          "repeat": true
+        }
+      }
+    },
+    "CONTROLS": {
+      "ChurchLogo": {
+        "type": "image",
+        "band": "ReportHeader",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          68,
+          68
+        ],
+        "collection": "church",
+        "field": "Logo"
+      },
+      "ChurchName": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          0
+        ],
+        "size": [
+          560,
+          22
+        ],
+        "collection": "church",
+        "field": "Church",
+        "fontsize": 15,
+        "bold": true,
+        "align": "center"
+      },
+      "OrganizationName": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          25
+        ],
+        "size": [
+          560,
+          17
+        ],
+        "collection": "organization",
+        "field": "LegalName",
+        "fontsize": 9,
+        "align": "center"
+      },
+      "ReportTitle": {
+        "type": "systemtext",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          45
+        ],
+        "size": [
+          560,
+          20
+        ],
+        "systemvalue": "report_title",
+        "fontsize": 13,
+        "bold": true,
+        "align": "center"
+      },
+      "Period": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          71
+        ],
+        "size": [
+          560,
+          16
+        ],
+        "collection": "parameters",
+        "field": "Display",
+        "fontsize": 8,
+        "align": "center"
+      },
+      "RunUser": {
+        "type": "systemtext",
+        "band": "ReportHeader",
+        "position": [
+          510,
+          89
+        ],
+        "size": [
+          210,
+          14
+        ],
+        "systemvalue": "run_user",
+        "prefix": "Run by: ",
+        "fontsize": 8,
+        "align": "right",
+        "color": "#555555"
+      },
+      "HeaderRule": {
+        "type": "line",
+        "band": "PageHeader",
+        "position": [
+          0,
+          4
+        ],
+        "size": [
+          720,
+          1
+        ],
+        "bordercolor": "#6D7780",
+        "borderwidth": 0.7
+      },
+      "Records": {
+        "type": "table",
+        "band": "Detail",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          720,
+          38
+        ],
+        "repeatcollection": "summary",
+        "columns": [
+          {
+            "name": "Account",
+            "label": "General account",
+            "collection": "summary",
+            "field": "Account",
+            "width": 117
+          },
+          {
+            "name": "Fund",
+            "label": "Fund",
+            "collection": "summary",
+            "field": "Fund",
+            "width": 76
+          },
+          {
+            "name": "Function",
+            "label": "Function",
+            "collection": "summary",
+            "field": "Function",
+            "width": 63
+          },
+          {
+            "name": "PeriodBudget",
+            "label": "Period budget",
+            "collection": "summary",
+            "field": "PeriodBudget",
+            "width": 68,
+            "format": "currency",
+            "align": "right"
+          },
+          {
+            "name": "PeriodActual",
+            "label": "Period actual",
+            "collection": "summary",
+            "field": "PeriodActual",
+            "width": 68,
+            "format": "currency",
+            "align": "right"
+          },
+          {
+            "name": "PeriodVariance",
+            "label": "Variance",
+            "collection": "summary",
+            "field": "PeriodVariance",
+            "width": 63,
+            "format": "currency",
+            "align": "right"
+          },
+          {
+            "name": "PeriodPercent",
+            "label": "%",
+            "collection": "summary",
+            "field": "PeriodPercent",
+            "width": 36,
+            "format": "decimal",
+            "align": "right"
+          },
+          {
+            "name": "YTDBudget",
+            "label": "YTD budget",
+            "collection": "summary",
+            "field": "YTDBudget",
+            "width": 68,
+            "format": "currency",
+            "align": "right"
+          },
+          {
+            "name": "YTDActual",
+            "label": "YTD actual",
+            "collection": "summary",
+            "field": "YTDActual",
+            "width": 68,
+            "format": "currency",
+            "align": "right"
+          },
+          {
+            "name": "YTDVariance",
+            "label": "Variance",
+            "collection": "summary",
+            "field": "YTDVariance",
+            "width": 63,
+            "format": "currency",
+            "align": "right"
+          },
+          {
+            "name": "YTDPercent",
+            "label": "%",
+            "collection": "summary",
+            "field": "YTDPercent",
+            "width": 30,
+            "format": "decimal",
+            "align": "right"
+          }
+        ]
+      },
+      "TotalsRule": {
+        "type": "line",
+        "band": "ReportFooter",
+        "position": [
+          0,
+          3
+        ],
+        "size": [
+          720,
+          1
+        ],
+        "bordercolor": "#202020",
+        "borderwidth": 0.8
+      },
+      "FooterLine": {
+        "type": "line",
+        "band": "PageFooter",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          720,
+          1
+        ],
+        "bordercolor": "#808080",
+        "borderwidth": 0.5
+      },
+      "ReportCode": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          0,
+          6
+        ],
+        "size": [
+          180,
+          14
+        ],
+        "systemvalue": "report_code",
+        "prefix": "ChurchManager report ",
+        "fontsize": 8,
+        "color": "#555555"
+      },
+      "Classification": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          270.0,
+          6
+        ],
+        "size": [
+          180,
+          14
+        ],
+        "systemvalue": "classification",
+        "fontsize": 8,
+        "bold": true,
+        "align": "center",
+        "color": "#555555"
+      },
+      "PageNumber": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          630,
+          6
+        ],
+        "size": [
+          90,
+          14
+        ],
+        "systemvalue": "page_number",
+        "prefix": "Page ",
+        "fontsize": 8,
+        "align": "right",
+        "color": "#555555"
+      },
+      "PeriodBudgetTotalLabel": {
+        "type": "label",
+        "band": "ReportFooter",
+        "position": [
+          0.0,
+          10
+        ],
+        "size": [
+          180.0,
+          14
+        ],
+        "label": "Period budget",
+        "fontsize": 8,
+        "bold": true,
+        "align": "right"
+      },
+      "PeriodBudgetTotal": {
+        "type": "text",
+        "band": "ReportFooter",
+        "position": [
+          0.0,
+          28
+        ],
+        "size": [
+          180.0,
+          17
+        ],
+        "collection": "totals",
+        "field": "PeriodBudget",
+        "format": "currency",
+        "fontsize": 9,
+        "bold": true,
+        "align": "right"
+      },
+      "PeriodActualTotalLabel": {
+        "type": "label",
+        "band": "ReportFooter",
+        "position": [
+          180.0,
+          10
+        ],
+        "size": [
+          180.0,
+          14
+        ],
+        "label": "Period actual",
+        "fontsize": 8,
+        "bold": true,
+        "align": "right"
+      },
+      "PeriodActualTotal": {
+        "type": "text",
+        "band": "ReportFooter",
+        "position": [
+          180.0,
+          28
+        ],
+        "size": [
+          180.0,
+          17
+        ],
+        "collection": "totals",
+        "field": "PeriodActual",
+        "format": "currency",
+        "fontsize": 9,
+        "bold": true,
+        "align": "right"
+      },
+      "YTDBudgetTotalLabel": {
+        "type": "label",
+        "band": "ReportFooter",
+        "position": [
+          360.0,
+          10
+        ],
+        "size": [
+          180.0,
+          14
+        ],
+        "label": "YTD budget",
+        "fontsize": 8,
+        "bold": true,
+        "align": "right"
+      },
+      "YTDBudgetTotal": {
+        "type": "text",
+        "band": "ReportFooter",
+        "position": [
+          360.0,
+          28
+        ],
+        "size": [
+          180.0,
+          17
+        ],
+        "collection": "totals",
+        "field": "YTDBudget",
+        "format": "currency",
+        "fontsize": 9,
+        "bold": true,
+        "align": "right"
+      },
+      "YTDActualTotalLabel": {
+        "type": "label",
+        "band": "ReportFooter",
+        "position": [
+          540.0,
+          10
+        ],
+        "size": [
+          180.0,
+          14
+        ],
+        "label": "YTD actual",
+        "fontsize": 8,
+        "bold": true,
+        "align": "right"
+      },
+      "YTDActualTotal": {
+        "type": "text",
+        "band": "ReportFooter",
+        "position": [
+          540.0,
+          28
+        ],
+        "size": [
+          180.0,
+          17
+        ],
+        "collection": "totals",
+        "field": "YTDActual",
+        "format": "currency",
+        "fontsize": 9,
+        "bold": true,
+        "align": "right"
+      },
+      "Details": {
+        "type": "table",
+        "band": "Detail",
+        "position": [
+          0,
+          40
+        ],
+        "size": [
+          720,
+          34
+        ],
+        "repeatcollection": "details",
+        "visiblewhen": {
+          "collection": "parameters",
+          "field": "ShowDetails",
+          "operator": "equals",
+          "value": true
+        },
+        "columns": [
+          {
+            "name": "Period",
+            "label": "Period",
+            "collection": "details",
+            "field": "Period",
+            "width": 65
+          },
+          {
+            "name": "Account",
+            "label": "General account",
+            "collection": "details",
+            "field": "Account",
+            "width": 140
+          },
+          {
+            "name": "Fund",
+            "label": "Fund",
+            "collection": "details",
+            "field": "Fund",
+            "width": 95
+          },
+          {
+            "name": "Function",
+            "label": "Function",
+            "collection": "details",
+            "field": "Function",
+            "width": 80
+          },
+          {
+            "name": "LineItem",
+            "label": "Detailed line item",
+            "collection": "details",
+            "field": "LineItem",
+            "width": 150
+          },
+          {
+            "name": "Budget",
+            "label": "Budget",
+            "collection": "details",
+            "field": "Budget",
+            "width": 75,
+            "format": "currency",
+            "align": "right"
+          },
+          {
+            "name": "Note",
+            "label": "Note",
+            "collection": "details",
+            "field": "Note",
+            "width": 115
+          }
+        ]
+      }
+    }
+  }
+}

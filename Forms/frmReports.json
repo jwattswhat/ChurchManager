@@ -1,0 +1,362 @@
+{
+    "frmReportsFORM": {
+        "FORM": {
+            "name": "frmReports",
+            "type": "Panel",
+            "title": "frmReports: Church Manager - Report Menu",
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                45,
+                46
+            ],
+            "stylelist": [
+                "CAPTION"
+            ],
+            "layout": {
+                "type": "responsive",
+                "gap": 3,
+                "border": 8,
+                "item_padding": 2
+            },
+            "theme": "churchmanager"
+        },
+        "CONTROLS": {
+            "lblChurchID": {
+                "name": "lblChurchID",
+                "type": "StaticText",
+                "label": "Church :",
+                "posch": [
+                    1,
+                    1
+                ],
+                "layout": {
+                    "row": 0,
+                    "column": 0
+                }
+            },
+            "ChurchID": {
+                "name": "ChurchID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblChurch",
+                    "fields": [
+                        "ID",
+                        "Church"
+                    ],
+                    "orderby": "Church"
+                },
+                "posch": [
+                    7,
+                    1
+                ],
+                "sizech": [
+                    25,
+                    2
+                ],
+                "value": "Reformation Lutheran Church",
+                "layout": {
+                    "row": 0,
+                    "column": 1,
+                    "expand": true
+                },
+                "tooltip": "Select the church."
+            },
+            "lblReports": {
+                "name": "lblReports",
+                "type": "StaticText",
+                "posch": [
+                    1,
+                    4
+                ],
+                "label": "Blue reports have a saved customization. Starter layouts remain available for recovery.",
+                "layout": {
+                    "row": 1,
+                    "column": 0,
+                    "column_span": 2
+                }
+            },
+            "ReportID": {
+                "name": "ReportID",
+                "type": "ListCtrlID",
+                "posch": [
+                    7,
+                    4
+                ],
+                "sizech": [
+                    40,
+                    10
+                ],
+                "label": "Report",
+                "singleselect": true,
+                "column": [
+                    {"label": "Report", "widthch": 10},
+                    {"label": "Title", "widthch": 24},
+                    {"label": "Status", "widthch": 10}
+                ],
+                "layout": {
+                    "row": 2,
+                    "column": 0,
+                    "column_span": 2,
+                    "expand": true,
+                    "proportion": 1
+                },
+                "action": [
+                    "onchange",
+                    "enablebuttons"
+                ],
+                "tooltip": "Select the report to run; its required parameters will be enabled."
+            },
+            "ParameterBox": {
+                "name": "ParameterBox",
+                "type": "StaticBox",
+                "posch": [
+                    1,
+                    8
+                ],
+                "sizech": [
+                    42,
+                    36
+                ],
+                "label": "Parameters",
+                "layout": {
+                    "row": 3,
+                    "column": 0,
+                    "column_span": 2,
+                    "expand": true
+                }
+            },
+            "lblService": {
+                "name": "lblService",
+                "type": "StaticText",
+                "posch": [
+                    2,
+                    10
+                ],
+                "label": "Service:"
+            },
+            "ServiceID": {
+                "name": "ServiceID",
+                "type": "ComboBox",
+                "posch": [
+                    9,
+                    10
+                ],
+                "lookupchoices": {
+                    "name": "tblService",
+                    "fields": [
+                        "ID",
+                        "DatetIME",
+                        "LiturgicalDate"
+                    ],
+                    "orderby": "DateTime DESC"
+                },
+                "tooltip": "Select the service."
+            },
+            "lblPerson": {
+                "name": "lblPerson",
+                "type": "StaticText",
+                "posch": [
+                    2,
+                    13
+                ],
+                "label": "Person:"
+            },
+            "PersonID": {
+                "name": "PersonID",
+                "type": "ComboBox",
+                "posch": [
+                    9,
+                    13
+                ],
+                "lookupchoices": {
+                    "name": "tblPerson",
+                    "fields": [
+                        "ID",
+                        "LastName",
+                        "FirstName"
+                    ],
+                    "orderby": "LastName,FirstName",
+                    "allowblank": true,
+                    "blanklabel": "All"
+                },
+                "value": "All",
+                "tooltip": "Select the person."
+            },
+            "lblGroup": {
+                "name": "lblGroup",
+                "type": "StaticText",
+                "posch": [2, 16],
+                "label": "Group:"
+            },
+            "GroupID": {
+                "name": "GroupID",
+                "type": "ComboBox",
+                "posch": [9, 16],
+                "sizech": [25, 2],
+                "lookupchoices": {
+                    "name": "tblGroup",
+                    "fields": ["ID", "Name"],
+                    "where": "Status IN ('ACTIVE','INACTIVE','CLOSED')",
+                    "orderby": "Name"
+                },
+                "tooltip": "Select the Group. Restricted Groups require their separate permission."
+            },
+            "lblHymn": {
+                "name": "lblHymn",
+                "type": "StaticText",
+                "posch": [
+                    2,
+                    19
+                ],
+                "label": "Hymn:"
+            },
+            "HymnID": {
+                "name": "HymnID",
+                "type": "ComboBox",
+                "posch": [
+                    9,
+                    19
+                ],
+                "lookupchoices": {
+                    "name": "tblHymn",
+                    "fields": [
+                        "ID",
+                        "Hymn",
+                        "Title"
+                    ],
+                    "orderby": "Hymn"
+                },
+                "tooltip": "Select the hymn."
+            },
+            "lblHymnal": {
+                "name": "lblHymnal",
+                "type": "StaticText",
+                "posch": [2, 22],
+                "label": "Hymnal:"
+            },
+            "HymnalID": {
+                "name": "HymnalID",
+                "type": "ComboBox",
+                "posch": [9, 22],
+                "sizech": [25, 2],
+                "lookupchoices": {
+                    "name": "tblHymnal",
+                    "fields": ["ID", "Hymnal", "Title"],
+                    "orderby": "Hymnal"
+                },
+                "tooltip": "Select the hymnal whose favorite hymns should be listed."
+            },
+            "lblStartDate": {
+                "name": "lblStartDate",
+                "type": "StaticText",
+                "posch": [
+                    2,
+                    25
+                ],
+                "label": "Start Date:"
+            },
+            "StartDate": {
+                "name": "StartDate",
+                "type": "DatePickerCtrl",
+                "posch": [
+                    9,
+                    25
+                ],
+                "format": "%Y/%m/%d",
+                "tooltip": "Select the start date."
+            },
+            "lblEndDate": {
+                "name": "lblEndDate",
+                "type": "StaticText",
+                "posch": [
+                    2,
+                    28
+                ],
+                "label": "End Date:"
+            },
+            "EndDate": {
+                "name": "EndDate",
+                "type": "DatePickerCtrl",
+                "posch": [
+                    9,
+                    28
+                ],
+                "format": "%Y/%m/%d",
+                "tooltip": "Select the end date."
+            },
+            "lblAttendanceType": {
+                "name": "lblAttendanceType",
+                "type": "StaticText",
+                "posch": [
+                    2,
+                    31
+                ],
+                "label": "Attend Type:"
+            },
+            "AttendanceType": {
+                "name": "AttendanceType",
+                "type": "ComboBox",
+                "posch": [
+                    9,
+                    31
+                ],
+                "sizech": [
+                    25,
+                    2
+                ],
+                "value": "All",
+                "tooltip": "Select the attendance type."
+            },
+            "lblDetail": {
+                "name": "lblDetail",
+                "type": "StaticText",
+                "posch": [
+                    2,
+                    34
+                ],
+                "label": "Detail:"
+            },
+            "Detail": {
+                "name": "Detail",
+                "type": "CheckBox",
+                "posch": [
+                    9,
+                    34
+                ],
+                "value": 0,
+                "tooltip": "Include detailed information in reports that support it."
+            },
+            "lblMissedWeeks": {
+                "name": "lblMissedWeeks",
+                "type": "StaticText",
+                "posch": [2, 37],
+                "label": "Flag after missed weeks:"
+            },
+            "MissedWeeks": {
+                "name": "MissedWeeks",
+                "type": "TextNumber",
+                "posch": [9, 37],
+                "sizech": [5, 2],
+                "value": 3,
+                "tooltip": "Enter the number of consecutive recorded worship weeks missed before a member is flagged."
+            },
+            "btnRun": {
+                "name": "btnRun",
+                "type": "Button",
+                "label": "Run Report",
+                "posch": [
+                    9,
+                    42
+                ],
+                "layout": {
+                    "row": 40,
+                    "column": 1
+                },
+                "tooltip": "Run the selected report using the entered parameters."
+            }
+        }
+    }
+}

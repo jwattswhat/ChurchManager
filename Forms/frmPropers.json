@@ -1,0 +1,375 @@
+{
+    "frmPropersFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmPropers: Propers Edit Form",
+            "name": "frmPropers",
+            "table": {
+                "name": "tblPropers",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "LectionarySystemID, Cycle, Sort"
+            },
+            "linkedform": {
+                "frmLectionarySystem": {
+                    "name": "frmLectionarySystem",
+                    "type": "Panel",
+                    "title": "Lectionary Systems",
+                    "table": {
+                        "name": "tblLectionarySystem",
+                        "fields": [
+                            "*"
+                        ],
+                        "condition": "ID = {LectionarySystemID}"
+                    },
+                    "controls": [
+                        "Update",
+                        "Close"
+                    ]
+                },
+                "frmProperHymnSuggestion": {
+                    "name": "frmProperHymnSuggestion",
+                    "type": "Panel",
+                    "title": "Suggested Hymns",
+                    "table": {
+                        "name": "tblProperHymnSuggestion",
+                        "fields": ["ID", "PropersID", "HymnID", "SuggestedAs", "Note"],
+                        "condition": "PropersID = {ID}",
+                        "orderby": "ID"
+                    },
+                    "controls": ["Navigation", "Update", "Delete", "Close"],
+                    "readonlyfields": ["PropersID"],
+                    "fillonblank": ["PropersID", "ID"]
+                }
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                64,
+                35
+            ],
+            "layout": {"type": "legacy"},
+            "theme": "churchmanager"
+        },
+        "CONTROLS": {
+            "lblLectionarySystemID": {
+                "type": "StaticText",
+                "label": "System:",
+                "name": "lblLectionarySystemID",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "LectionarySystemID": {
+                "type": "ComboBox",
+                "name": "LectionarySystemID",
+                "lookupchoices": {
+                    "name": "tblLectionarySystem",
+                    "fields": [
+                        "ID",
+                        "Name"
+                    ],
+                    "condition": "Active = 1",
+                    "orderby": "Name"
+                },
+                "posch": [
+                    10,
+                    1
+                ],
+                "sizech": [
+                    20,
+                    2
+                ],
+                "tooltip": "Select the lectionary."
+            },
+            "btnLectionarySystem": {
+                "name": "btnLectionarySystem",
+                "type": "Button",
+                "label": "Systems",
+                "action": [
+                    "openlinkedform",
+                    "frmLectionarySystem"
+                ],
+                "posch": [
+                    25,
+                    3
+                ],
+                "tooltip": "Edit the selected lectionary system."
+            },
+            "lblCycle": {
+                "name": "lblCycle",
+                "type": "StaticText",
+                "label": "Cycle:",
+                "posch": [
+                    1,
+                    3
+                ]
+            },
+            "Cycle": {
+                "name": "Cycle",
+                "type": "ComboBox",
+                "choices": [
+                    "A",
+                    "B",
+                    "C"
+                ],
+                "posch": [
+                    10,
+                    3
+                ],
+                "sizech": [
+                    10,
+                    2
+                ],
+                "tooltip": "Enter A, B, C, another cycle label, or leave blank."
+            },
+            "lblTheme": {
+                "type": "StaticText",
+                "label": "Theme:",
+                "name": "lblTheme",
+                "posch": [
+                    34,
+                    1
+                ]
+            },
+            "Theme": {
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE",
+                    "WORDWRAP"
+                ],
+                "name": "Theme",
+                "posch": [
+                    39,
+                    1
+                ],
+                "sizech": [
+                    23,
+                    6
+                ],
+                "tooltip": "Enter the theme. Multiple lines are allowed."
+            },
+            "lblSort": {
+                "type": "StaticText",
+                "label": "Sort:",
+                "name": "lblSort",
+                "posch": [
+                    1,
+                    5
+                ]
+            },
+            "Sort": {
+                "type": "TextCtrl",
+                "name": "Sort",
+                "posch": [
+                    10,
+                    5
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the sort."
+            },
+            "lblSeason": {
+                "type": "StaticText",
+                "label": "Season:",
+                "name": "lblSeason",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "Season": {
+                "type": "ComboBox",
+                "name": "Season",
+                "posch": [
+                    10,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Select the season."
+            },
+            "lblLiturgicalDate": {
+                "type": "StaticText",
+                "label": "Liturgical Date:",
+                "name": "lblLiturgicalDate",
+                "posch": [
+                    1,
+                    9
+                ]
+            },
+            "LiturgicalDate": {
+                "type": "TextCtrl",
+                "name": "LiturgicalDate",
+                "posch": [
+                    10,
+                    9
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the liturgical date."
+            },
+            "lblHymnSuggestions": {
+                "type": "StaticText",
+                "label": "Suggested hymns:",
+                "name": "lblHymnSuggestions",
+                "posch": [
+                    34,
+                    8
+                ]
+            },
+            "dvlHymnSuggestions": {
+                "type": "DataViewListCtrl",
+                "name": "dvlHymnSuggestions",
+                "table": {
+                    "name": "tblProperHymnSuggestion",
+                    "fields": ["ID", "HymnID", "SuggestedAs"],
+                    "condition": "PropersID = {ID}"
+                },
+                "column": [
+                    {"name": "HymnID", "label": "Hymn No.", "widthch": 12, "lookup": {"table": "tblHymn", "display": "Hymn", "key": "ID"}},
+                    {"name": "SuggestedAs", "label": "Use", "widthch": 14}
+                ],
+                "posch": [
+                    39,
+                    8
+                ],
+                "sizech": [
+                    23,
+                    6
+                ],
+                "tooltip": "View normalized hymn suggestions for this Proper."
+            },
+            "btnHymnSuggestions": {
+                "name": "btnHymnSuggestions",
+                "type": "Button",
+                "label": "Edit",
+                "action": ["openlinkedform", "frmProperHymnSuggestion"],
+                "posch": [34, 13],
+                "tooltip": "Add, edit, or delete suggested hymns for this Proper."
+            },
+            "lblColor": {
+                "type": "StaticText",
+                "label": "Liturgical Color:",
+                "name": "lblColor",
+                "posch": [
+                    1,
+                    11
+                ]
+            },
+            "Color": {
+                "type": "ComboBox",
+                "name": "Color",
+                "posch": [
+                    10,
+                    11
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Select the color."
+            },
+            "lblAltColor": {
+                "type": "StaticText",
+                "label": "Alt Color:",
+                "name": "lblAltColor",
+                "posch": [
+                    1,
+                    13
+                ]
+            },
+            "AltColor": {
+                "type": "ComboBox",
+                "name": "AltColor",
+                "posch": [
+                    10,
+                    13
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Select the alt color."
+            },
+            "dvlReadings": {
+                "name": "dvlReadings",
+                "type": "DataViewListCtrl",
+                "table": {
+                    "name": "tblReading",
+                    "fields": [
+                        "ID",
+                        "Reading",
+                        "Reference",
+                        "Note"
+                    ],
+                    "condition": "PropersID = {ID}"
+                },
+                "column": [
+                    {
+                        "name": "Reading",
+                        "label": "Reading",
+                        "widthch": 8
+                    },
+                    {
+                        "name": "Reference",
+                        "label": "Reference",
+                        "widthch": 10
+                    },
+                    {
+                        "name": "Note",
+                        "label": "Note",
+                        "widthch": 20
+                    }
+                ],
+                "posch": [
+                    1,
+                    15
+                ],
+                "sizech": [
+                    33,
+                    8
+                ],
+                "tooltip": "View the readings records and select a row when needed."
+            },
+            "lblNote": {
+                "type": "StaticText",
+                "label": "Note:",
+                "name": "lblNote",
+                "posch": [
+                    1,
+                    24
+                ]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "posch": [
+                    10,
+                    24
+                ],
+                "sizech": [
+                    24,
+                    8
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
+            }
+        }
+    }
+}

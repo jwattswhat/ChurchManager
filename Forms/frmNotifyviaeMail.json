@@ -1,0 +1,64 @@
+{
+    "frmNotifyviaeMailFORM": {
+        "FORM": {
+            "name": "frmNotifyviaeMail",
+            "type": "Dialog",
+            "title": "frmNotifyviaeMail: Notify Participants",
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                40,
+                10
+            ],
+            "stylelist": [
+                "CAPTION",
+                "CLOSEBOX"
+            ],
+            "controls": [
+                "Close"
+            ],
+            "theme": "churchmanager"
+        },
+        "CONTROLS": {
+            "lblService": {
+                "name": "lblService",
+                "type": "StaticText",
+                "label": "Service",
+                "posch": [
+                    2,
+                    2
+                ]
+            },
+            "ServiceID": {
+                "name": "ServiceID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblService",
+                    "fields": [
+                        "ID",
+                        "DateTime",
+                        "LiturgicalDate"
+                    ],
+                    "orderby": "DateTime DESC"
+                },
+                "posch": [
+                    9,
+                    2
+                ],
+                "tooltip": "Select the service."
+            },
+            "btnNotify": {
+                "name": "btnNotify",
+                "type": "Button",
+                "label": "Notify via Email",
+                "posch": [
+                    2,
+                    6
+                ],
+                "tooltip": "Email the participants scheduled for the selected service."
+            }
+        }
+    }
+}

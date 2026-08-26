@@ -1,0 +1,13 @@
+SYNTHETIC TEST DOCUMENT - NOT A CONGREGATION RECORD
+
+Opening Balance Test
+Cutover date: January 1, 2026
+
+General Operating Fund
+Checking                                  Debit $1,000.00
+Net Assets Without Donor Restrictions   Credit $1,000.00
+
+Total debits:  $1,000.00
+Total credits: $1,000.00
+
+Purpose: ChurchManager opening-balance workflow testing only.

@@ -1,0 +1,3 @@
+Asset Number,Asset Name,Category,Description,Quantity,Manufacturer,Model,Serial Number,Location,Acquisition Method,Acquisition Date,Reference Value,Condition,Status,Warranty Expires,Next Maintenance,Replacement Review,Retired Date,Note
+AST-TEST-101,Fellowship Hall Projector,Audio/Visual,Portable projector used for classes and meetings,1,Epson,PowerLite,,Fellowship Hall,Purchased,2026-01-15,650.00,Good,Active,2028-01-15,2027-01-15,2029-01-15,,Sample import record
+AST-TEST-102,Folding Tables,Furniture,Set of six folding tables,6,,,,Fellowship Hall,Donated,2026-02-01,480.00,Good,Active,,,2029-02-01,,Sample quantity record

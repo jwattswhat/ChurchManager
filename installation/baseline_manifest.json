@@ -1,0 +1,488 @@
+{
+  "artifact": "ChurchManager fresh-install schema baseline",
+  "format_version": 1,
+  "release_version": "0.3.0-beta.1",
+  "schema_sha256": "f95153beb456e8ab25064476299fb466a7a675550e15069c814c7ec78d3f6ad4",
+  "represented_migrations": [
+    {
+      "version": "001_normalize_and_convert_innodb.sql",
+      "checksum": "5db4cb8d5211649a873633bfca7bbf226a76c0dad129ab17e08b46ece00f128a"
+    },
+    {
+      "version": "002_add_foreign_keys.sql",
+      "checksum": "f9c4d977137f701ef2b06281bdc5865317f2ad1fe05786e4f70976ebbe7c4d96"
+    },
+    {
+      "version": "003_add_user_security.sql",
+      "checksum": "0148fdef680eb3c65684dd1fbabe732722f06b1fb81a14638ff79ef62b0587ff"
+    },
+    {
+      "version": "004_add_main_menu_permissions.sql",
+      "checksum": "d57da764a3eee1a7a35cb53d44e6a36e06868f08ea607d6d691bd1fe24dc745d"
+    },
+    {
+      "version": "005_restore_attendance_views.sql",
+      "checksum": "0b756cd7235fdd327c335b5dc023e91a303f3648937adafc5a7362316914deb0"
+    },
+    {
+      "version": "006_add_accounting_ledger_foundation.sql",
+      "checksum": "fe353af5523795a88f9871b3fb6d996b85bc60abe74abe1421520b82b9a19ca8"
+    },
+    {
+      "version": "007_normalize_lectionary_systems.sql",
+      "checksum": "709c931719f35f5a0b9209621501ae7e7fa573aa7c66751e055a32e34a414ae3"
+    },
+    {
+      "version": "008_remove_obsolete_current_lectionary_option.sql",
+      "checksum": "a2714ddfba494e7bd5ccc560d10a1e9f2d597f28fc93d061e62cd51cf7be818d"
+    },
+    {
+      "version": "009_add_audited_solo_approval.sql",
+      "checksum": "2356caaa23f41d4098e376536da7ff109b098cb312e6e7d3968385374492d02a"
+    },
+    {
+      "version": "010_add_bank_reconciliation_and_import.sql",
+      "checksum": "4d123f38f55645e2bf21b38e166ce776ab336b5df62b1abf30f5cc212ce33a45"
+    },
+    {
+      "version": "011_require_unique_bank_line_match.sql",
+      "checksum": "1e5de3a9d2e463494806efa29d1e295ff357cb6ad5e2bf849ecdf60788104a3c"
+    },
+    {
+      "version": "012_protect_reconciliation_items.sql",
+      "checksum": "ee7bd7e4498f78b012a7e269c5b8bbfb9cdeb46dee6da9af4c327fb3819d8640"
+    },
+    {
+      "version": "013_add_accounting_budgets.sql",
+      "checksum": "de475a44acabf1504231185dbae0cdd029b110cda80a41b8eb9a61bc93529091"
+    },
+    {
+      "version": "014_lock_used_fiscal_period_boundaries.sql",
+      "checksum": "c378d7c8ab7578691cfda3dbf21f0469ca11df2b650715592d34ae1118b0bfe7"
+    },
+    {
+      "version": "015_add_report_permissions.sql",
+      "checksum": "d127457784d426f3d807e12c4037ca9fcf8643d64ccc9a371b52b64845340d29"
+    },
+    {
+      "version": "016_grant_report_screen_access.sql",
+      "checksum": "92dcc245216dab32ed41d44ec5db98c56608d7a15c0baa8c86169ccf9b87aca2"
+    },
+    {
+      "version": "017_add_nonaccounting_report_views.sql",
+      "checksum": "cd912263381bf777bfe2d6e3956f4e665d63b6d4a7294cd459b7cb3038a58ef0"
+    },
+    {
+      "version": "018_add_report_designer_permission.sql",
+      "checksum": "9bf25404543dba25e5c65630b5bcf84418c7fb5aceab1b891b59aed8bb79ab24"
+    },
+    {
+      "version": "019_register_visual_report_inventory.sql",
+      "checksum": "f3c5cfdc588ea8c16c1d72cc9b66574322abe6688b39c2c292bec39f726c3308"
+    },
+    {
+      "version": "020_add_accounting_report_designer_permission.sql",
+      "checksum": "71189a4a64bbf773819dd3e23f3ea4b521d39d7a36f48471496728fd935a1cb3"
+    },
+    {
+      "version": "021_add_screen_designer_permission.sql",
+      "checksum": "e25cb60135c983a3f089337b5748ebc14dac1b4aa1a85bfa194ea76cf92b284a"
+    },
+    {
+      "version": "022_add_structured_bulletin_orders.sql",
+      "checksum": "26a896284d12232a5d750b8c52d0237d877a1271f8698d6e52d700b7d5e95186"
+    },
+    {
+      "version": "023_add_lcms_divine_service_one_starter.sql",
+      "checksum": "aca1b2dc16039c496aafbe29ff354ae8396eb83c67022dbe2c124559e27661b2"
+    },
+    {
+      "version": "024_add_weekly_bulletin_orders.sql",
+      "checksum": "78fefecc874d59bd0be42aeb100d5a0d0338afd7319ad4d91f4fc38aa83b92ce"
+    },
+    {
+      "version": "025_link_services_to_bulletin_order_templates.sql",
+      "checksum": "e9cddb4696dd4822e462ef2a836555271423de72d533805b8c6e859f60364153"
+    },
+    {
+      "version": "026_add_proper_hymn_suggestions.sql",
+      "checksum": "2f40afcf17466cc2e995586723fd9a50e213ae40b405592052a0012fb423dbaf"
+    },
+    {
+      "version": "027_add_church_primary_hymnal.sql",
+      "checksum": "c8eca389b52db9b5b1467ab083cd2e47ae0191ea9289e687dd512d92fd582352"
+    },
+    {
+      "version": "028_link_bulletin_orders_to_hymnals.sql",
+      "checksum": "da90946cd88ac3b0ea53297ed08ef3cb9c6635dd9c0b94508fa6bb5211e5f733"
+    },
+    {
+      "version": "029_add_church_primary_lectionary.sql",
+      "checksum": "89742153cd14340c0b0af632a6d5241b6dc888f97b5d9536854b9655e676b7ba"
+    },
+    {
+      "version": "030_abbreviate_lsb_lectionary_names.sql",
+      "checksum": "50a89ecaf1cddfed2d06a44ad2f66c0e9ecdcf78793c9d165ae2b9ba0d1464a9"
+    },
+    {
+      "version": "031_remove_proper_hymn_suggestion_priority.sql",
+      "checksum": "3b978d02a6383b594a45e997b964fa8a0abe23f53f9f05ba37140cc46a79ce6c"
+    },
+    {
+      "version": "032_normalize_lsb_reading_roles.sql",
+      "checksum": "864f804303fed40c113910e6b734c729a8e7f69b83bbc47fb4cfae2abc2db56e"
+    },
+    {
+      "version": "033_rename_suggested_hymn_roles.sql",
+      "checksum": "a2e325007fcd852714d8b39d14c714c66c576c16a3b571851e76ef5af8df0a43"
+    },
+    {
+      "version": "034_add_ds1_distribution_hymns.sql",
+      "checksum": "82d374daaf47fcfef464a28e2835592e37de397ba2a49d21c9e240a8b341b8fb"
+    },
+    {
+      "version": "035_preserve_weekly_orders_when_template_deleted.sql",
+      "checksum": "760f26a93fceb67e7d21944b91242cd90329cb9f5c10749b75877b0f699baab6"
+    },
+    {
+      "version": "036_replace_weekly_order_with_template.sql",
+      "checksum": "d27bb0cf5f4abfbc7e051fe6a59286d2a4b5d6d3573ebc0e1760da6b5146e5de"
+    },
+    {
+      "version": "037_remove_copyrighted_introit_fields.sql",
+      "checksum": "151b63c58e9a11164116cf5e98eca73370d3b197a8edad2b3efa3f23bb40412a"
+    },
+    {
+      "version": "038_add_printed_lsb_hymn_tunes.sql",
+      "checksum": "8737c65877e61011e1632a61f02db9d792355b06c3b48be001593d7fef277607"
+    },
+    {
+      "version": "039_normalize_printable_liturgical_dates.sql",
+      "checksum": "d334149e1c649e4e813567671b5b416c0e9d986fc239072c50526efde97e4318"
+    },
+    {
+      "version": "040_add_worship_planner_report_views.sql",
+      "checksum": "66efca22123aa5bf1e8ee9f44fa7ce2b68b19dac1271d9affbb2e63ce1a0d2a3"
+    },
+    {
+      "version": "041_normalize_worship_participants.sql",
+      "checksum": "0def56a6f3008f454fa3c22fe335f5241229e35338e994db91c910c99829d0ec"
+    },
+    {
+      "version": "042_add_required_positions_to_worship_planner.sql",
+      "checksum": "1de5b253085bb3312d8fb3b5805a00a35690cbc0fd5e7fbcf514f40ef58e7a1a"
+    },
+    {
+      "version": "043_require_template_for_participant_positions.sql",
+      "checksum": "6290aeecbdbc3c6d70de7f734cd17eec038ada6f0e5bd5ef5f827b5adc28806f"
+    },
+    {
+      "version": "044_attach_participant_positions_to_templates.sql",
+      "checksum": "515a4413c9c3e7b174b8305b591703b9a3988bf6d7b3a1556f2829284ac96380"
+    },
+    {
+      "version": "045_add_natural_sunday_content_schedules.sql",
+      "checksum": "718d631755536c277a709840113bb1533f44b573d4e6f95551809cae00e46980"
+    },
+    {
+      "version": "046_remove_legacy_sunday_checkbox_schedules.sql",
+      "checksum": "ddcde8445429a5893c9d36f5173818015a4cea3312ddc23936a413f29dfb3734"
+    },
+    {
+      "version": "047_normalize_sunday_content_categories.sql",
+      "checksum": "511d31b4d4f4c7b1318b3af7cc360238d4f4bbdf8e72953f37392bd1e2efc827"
+    },
+    {
+      "version": "048_clean_and_complete_choices.sql",
+      "checksum": "e7436b941eb70cfafd161e53ebc380a87ed49de1ffb0a950ceca43153372cbaf"
+    },
+    {
+      "version": "049_enforce_unique_choice_fields.sql",
+      "checksum": "d99c4bd6cb39f6581a2bf0e99b57acaebce9944a23f99a30a0e753a3e76fe790"
+    },
+    {
+      "version": "050_normalize_worship_preparation_checklists.sql",
+      "checksum": "a8d6b918b04f9aea85eb351a8fed685aff28625c5fea7b69f3cf1ce1f63cdcff"
+    },
+    {
+      "version": "051_add_database_restore_permission.sql",
+      "checksum": "ddbef7597263dc9ac6aaa515632ab4c232aec19f9a0797de541fa23a01cefff3"
+    },
+    {
+      "version": "052_convert_remaining_participant_relationships.sql",
+      "checksum": "ddaf1868a056e3c6733f1e44d5d8a5b84372d40eb8ab5974796e0471496c3db5"
+    },
+    {
+      "version": "053_remove_obsolete_jsform_database_structures.sql",
+      "checksum": "b7a4b6c36acaaaaa0544419d42d436fab788c54a6791b29507f4b813685f283f"
+    },
+    {
+      "version": "054_preserve_weekly_order_snapshots.sql",
+      "checksum": "9f6098395796a3eb19a0c3823f513b614e971a8078bce8b2879a4ab10f80b7b8"
+    },
+    {
+      "version": "055_separate_weekly_hymn_title_and_number.sql",
+      "checksum": "24202e248b0338e8311a0f705d0ce39d90c3917538226ebffde70774d6a65da1"
+    },
+    {
+      "version": "056_add_service_liturgical_color_override.sql",
+      "checksum": "772154bdcbbf928808be26d8c4828d7ec9e238a78ccce4d0cbbf8bf5011748d0"
+    },
+    {
+      "version": "057_improve_attendance_reports.sql",
+      "checksum": "c2a4e94c64f74e06ec0332e144b6cd358ff5bf4991f1e5b99969bedab6819bd8"
+    },
+    {
+      "version": "058_add_individual_attendance_report.sql",
+      "checksum": "202c32d0aa4c1c4d8dea0be94e5d7894cb5ef9249dc670ac650582407a70fb75"
+    },
+    {
+      "version": "059_add_pastors_attendance_comparison.sql",
+      "checksum": "c0019e2b2f3f1f3f49e0df4dc9b76ba51de402067482d8c6017e599eca35fac3"
+    },
+    {
+      "version": "060_add_member_attendance_followup.sql",
+      "checksum": "b5f74d5df794f1014e256b2d793b69502cc2ff3977aa65db305426369417bb51"
+    },
+    {
+      "version": "061_group_attendance_report_titles.sql",
+      "checksum": "07525787944ef9f35391b88113e7f02474f8c37cffaa0be4fd41e5b7a398146c"
+    },
+    {
+      "version": "062_add_support_diagnostics_permission.sql",
+      "checksum": "9cf454424ccb67ad20c5608b7d6847c2aa6c6878651fbbc1c2e5d6aeca766ca2"
+    },
+    {
+      "version": "063_add_user_contact_information.sql",
+      "checksum": "09b8c56903551c95c7b376fc617fd409b21c6e1a795b095f3a1f62c2ac33fa78"
+    },
+    {
+      "version": "064_normalize_lsb_starter_references.sql",
+      "checksum": "fb9d53629d76508720d484dee988164971a35187de4dc2ffa83ccb9878acb1c6"
+    },
+    {
+      "version": "065_retire_limereports_runtime.sql",
+      "checksum": "0a65f91f89572f515966e4aab1cb368c7dbc97401e953b22422705db743e9275"
+    },
+    {
+      "version": "066_retire_enhancement_tracker.sql",
+      "checksum": "d38f7ec2445d72b1b140e24458598d5fd19164af73ee3d22e560f755080a8b0d"
+    },
+    {
+      "version": "067_add_hymn_stanza_selections.sql",
+      "checksum": "183853448fe851ae8b1acaa2b380c2c837237807662d8b32a12704f39d6a8748"
+    },
+    {
+      "version": "068_include_stanzas_in_compatible_hymn_report_field.sql",
+      "checksum": "3f53468b4e887f627081f765f1473a97ae20382ac163182ed6e4aae435f7bb94"
+    },
+    {
+      "version": "069_standardize_natural_language_schedules.sql",
+      "checksum": "0cab326d497c78c40777e501f22b0c516ec36981ac0f272912f440ee7d0cfc7f"
+    },
+    {
+      "version": "070_link_users_to_people.sql",
+      "checksum": "ff0c25264c6a44bdc66a9fcd1f2c2c7b144dc9ce6fb490ca66af5cb874479b19"
+    },
+    {
+      "version": "071_add_secure_mail_settings.sql",
+      "checksum": "21bb26d93ef171005a864c310f74a5118fdbefdaec42b10d4f2e1b46d3f83e30"
+    },
+    {
+      "version": "072_add_order_of_service_package_catalog.sql",
+      "checksum": "5aa085179ece8192c86d76032205a7a39d26a64e05512f82cbfeec4108cb7e2a"
+    },
+    {
+      "version": "073_add_order_of_service_package_import_fields.sql",
+      "checksum": "011d75f4fe314cebc745a855c120156f877e7a428ea7fa5407b75941e0409994"
+    },
+    {
+      "version": "074_add_permanent_hymn_catalog.sql",
+      "checksum": "e9795ff6a5706d3706b34f4575729843bab61446109c37b14fbb43ad02488a4a"
+    },
+    {
+      "version": "075_add_favorite_hymns_report.sql",
+      "checksum": "8e263e214281d077c114f85af318dac8b853ac367d09ac77e5e1094d5c3459e4"
+    },
+    {
+      "version": "076_add_versioned_lectionary_catalog.sql",
+      "checksum": "5fed6565dd2863f219d618b2a8014325bf971a6aaeac667081c172e722a88a2b"
+    },
+    {
+      "version": "077_add_service_reading_snapshots.sql",
+      "checksum": "39d20b536b28e0e31e77f5274d7381ab9e6374c9019aafe330d5bdc92d8c447e"
+    },
+    {
+      "version": "078_add_lectionary_calendar_rules.sql",
+      "checksum": "5ffc4baa73e3bfab6549494dbad6280656375b134e6ab0e132e23f6fe044dba5"
+    },
+    {
+      "version": "079_preserve_lectionary_distribution_scope.sql",
+      "checksum": "57d61c4d5ec7471e175addbbe95a267a7dc32e35553ad940d9cd7d1afbb8f373"
+    },
+    {
+      "version": "080_complete_lectionary_edition_cutover.sql",
+      "checksum": "527cc0eaadd9376d65445f0faa1760714654175aa1720a18a01091ef81eabd11"
+    },
+    {
+      "version": "081_remove_lsb_lectionary_catalog.sql",
+      "checksum": "c509b2c25293e9d92642cfc907e94688e47a76e865933c894039281e80a9f3f1"
+    },
+    {
+      "version": "082_clear_test_worship_services.sql",
+      "checksum": "b629e97c6a49b7f6ac5f5dbc58ad03ffe9331c12b44558ae7abad764958d6b44"
+    },
+    {
+      "version": "083_remove_obsolete_lectionary_old_id.sql",
+      "checksum": "9d5171157c6dee7b0a4fe518b6639bdd052cc2edb79c5cec1ecc959eac8beb7c"
+    },
+    {
+      "version": "084_remove_obsolete_reading_old_id.sql",
+      "checksum": "6bdcaa074b549e75bfb688ddb6940c22ed751460575a60c2f56a8cfd339cb3cb"
+    },
+    {
+      "version": "085_add_confidential_member_giving.sql",
+      "checksum": "df6bf2234549eb8d122ad2ea01ef230a5d2df5fa659094ce1de24be792713464"
+    },
+    {
+      "version": "086_add_giving_accounting_dimensions.sql",
+      "checksum": "5900f5d7b5b2c5011f778a4a502ea53112fedce9461c272b217682801348dfba"
+    },
+    {
+      "version": "087_add_contribution_statement_issuance.sql",
+      "checksum": "91dfdd23718e729c577fc5cc9fc14d22320468b630803ef9e6b5f64e7a02027d"
+    },
+    {
+      "version": "088_add_member_and_family_mailing_labels.sql",
+      "checksum": "084615f235af1bef0e9e1cb9360af1ad914c52c282ce7aa03dd3b1b27fad378c"
+    },
+    {
+      "version": "089_add_posted_giving_corrections.sql",
+      "checksum": "9b21f1c3b81ec5543d93e3f8566b39cc9ab0c40dae2f814a1a3c178910c10038"
+    },
+    {
+      "version": "090_add_contribution_import_evidence.sql",
+      "checksum": "2da6caf1c2f97a2b1cc4063cee2dd3e0c968f9fe49f9309a08b5b961a1615df1"
+    },
+    {
+      "version": "091_support_non_cash_contributions.sql",
+      "checksum": "a7c0dbe1e9b3d82744d14f632141f45484a65999e4adc88ab27efa7cf5e86049"
+    },
+    {
+      "version": "092_add_donor_estimated_non_cash_value.sql",
+      "checksum": "eb2636af5861d36e77108ab043e5b9280105d795176b43ecca8192ded3244067"
+    },
+    {
+      "version": "093_add_directed_gift_resolution_audit.sql",
+      "checksum": "0e476dbb7010e0b01bc9c77d750da729c87c64239680e504857761fb2f40a744"
+    },
+    {
+      "version": "094_add_returned_contribution_checks.sql",
+      "checksum": "8fa7494002a74dbca0b65961ff4c181f3bd9eb62a845eb0d148cdcd8c8513d20"
+    },
+    {
+      "version": "095_add_contributor_merge_audit.sql",
+      "checksum": "4b4812b474d7b783b1d9400adfabc550a99b0bd288133df6b2447dc514a7c558"
+    },
+    {
+      "version": "096_add_pastoral_care_foundation.sql",
+      "checksum": "94ab854624e45dc386fa109683526e4b5021e88498ef563abb37083728d6db91"
+    },
+    {
+      "version": "097_normalize_positive_church_ids.sql",
+      "checksum": "12ff39df66d6f7cd8dc8c539c8e286b55f99d99ddba31f56308ba90d5cb00128"
+    },
+    {
+      "version": "098_retire_projects_and_tasks.sql",
+      "checksum": "d2b273003a243d9b1aaac427fb893b63a5eee7f1a365d3f952ebb4b047054b74"
+    },
+    {
+      "version": "099_add_membership_import_history.sql",
+      "checksum": "e83e8d54e65b8e5d1a3f196428b689494abd63e87bb3370ba6410c6faabaa436"
+    },
+    {
+      "version": "100_add_membership_export_history.sql",
+      "checksum": "5cf0f0a95a67daf96116cfc3e5cd81f49f9afdd66483607d2ae50e36487f4bfe"
+    },
+    {
+      "version": "101_add_duplicate_review_resolution.sql",
+      "checksum": "eb89f125a9454191d3988f43d75a973bb1ade4d164118411485d493011a1edb6"
+    },
+    {
+      "version": "102_add_membership_archive_history.sql",
+      "checksum": "233d0a59fcacef31591082c22d7f7a64fb0f4570c45b5cc9b2c5754010b01e47"
+    },
+    {
+      "version": "103_add_membership_merge_history.sql",
+      "checksum": "c6de3a0912dbd61119c15b7d6d1507c6c0c72f774aa7c9d64fd09a7ce6bd09c0"
+    },
+    {
+      "version": "104_add_pastoral_care_reports.sql",
+      "checksum": "1c74cbb821d79bd5b403ab5e8562ea1f087b2e5bfb16173453b3b6b2600be009"
+    },
+    {
+      "version": "105_add_pastoral_encryption_state.sql",
+      "checksum": "ce69d2348ca839112437c9cdbe41c65a5241e74c27084878af0b1722b06c4572"
+    },
+    {
+      "version": "106_add_normalized_groups_foundation.sql",
+      "checksum": "ffce8d6e283136d514360e010376f59dbd059e797159ac21842be44a99f8c8cf"
+    },
+    {
+      "version": "107_add_group_meetings_and_attendance.sql",
+      "checksum": "e5a10a449c2e69821b67e4c062414f938f8204a12b1b9316cf2e040e52788920"
+    },
+    {
+      "version": "108_add_group_reports.sql",
+      "checksum": "99f56aeada6a6445a2417f8f465ad0949a4a0929c2ed742efc689df06c51c32e"
+    },
+    {
+      "version": "109_add_group_attendance_sheet.sql",
+      "checksum": "2e2f9475efe58c0147f1eb450a3f6b9ac16cdba53ba3bc292f4c64f2ad5566f9"
+    },
+    {
+      "version": "110_standardize_report_names.sql",
+      "checksum": "29ad000c64a0173368c80cbd661bddde70c41baaddf2a3b827a2a5a2aa030491"
+    },
+    {
+      "version": "111_add_volunteer_availability_and_responses.sql",
+      "checksum": "6cb65b398417a35537d4e5d457f56aa1c65e44f19ebfc22fcca0eaddd8b8660e"
+    },
+    {
+      "version": "112_add_custom_profile_fields.sql",
+      "checksum": "3c15d06fa9414029ced89e63be1d1d2cbdd1f91a226bd1923ece8f6f13d91f0a"
+    },
+    {
+      "version": "113_add_custom_profile_report.sql",
+      "checksum": "89ee31432af89c31ea33a7a535302caf0f16347eb02204dc49cb58967d80ee5e"
+    },
+    {
+      "version": "114_add_church_events.sql",
+      "checksum": "5f80bc8f94eeac6fb4f1db3693e45012d1428ad332ad159440da1a042363199c"
+    },
+    {
+      "version": "115_add_natural_event_schedules.sql",
+      "checksum": "9bcc8211d1f160a061a870373c3b8924da90f2745606daedf32e7a7c92b8f0e9"
+    },
+    {
+      "version": "116_add_calendar_publication_state.sql",
+      "checksum": "54e2d9715df6cce2d4bbde0aae3d3a6c067d6e132603d5c1ff81f529f1e5ef8d"
+    },
+    {
+      "version": "117_add_asset_management.sql",
+      "checksum": "7b31144db77ee2e6b0a6f9d448367a09aea5293a1eb9acf0ff1cf25f31c2d30a"
+    },
+    {
+      "version": "118_fix_asset_register_condition_name.sql",
+      "checksum": "c7cdabe78be5d3e3ac809285c97e5a16f433a67f691702cb7dd1ef7aded981dd"
+    },
+    {
+      "version": "119_add_projects_scheduling_foundation.sql",
+      "checksum": "1e33b514318ef71e687bbce2b7bd80bcc0cdf357ca5aa73a69743af7c2a48933"
+    },
+    {
+      "version": "120_register_project_reports.sql",
+      "checksum": "8951afbac2753de07e5d3fbbcdce7028c47b8018cecc139106b4134360df3c22"
+    }
+  ]
+}

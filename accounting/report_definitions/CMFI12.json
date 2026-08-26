@@ -1,0 +1,512 @@
+{
+  "CMFI12REPORT": {
+    "REPORT": {
+      "schema_version": 1,
+      "name": "CMFI12",
+      "title":"Finance - Journal Entry",
+      "dataset": "accounting.journalentry",
+      "datasetversion": 1,
+      "pagesize": "legal",
+      "orientation": "landscape",
+      "margins": {
+        "top": 30,
+        "right": 36,
+        "bottom": 30,
+        "left": 36
+      },
+      "theme": "churchmanager.accounting",
+      "classification": "official",
+      "emptytext": "No posted activity matches the selected reporting period.",
+      "bands": {
+        "ReportHeader": {
+          "type": "reportheader",
+          "height": 154
+        },
+        "PageHeader": {
+          "type": "pageheader",
+          "height": 8,
+          "repeat": true
+        },
+        "Detail": {
+          "type": "detail",
+          "height": 76
+        },
+        "ReportFooter": {
+          "type": "reportfooter",
+          "height": 54
+        },
+        "PageFooter": {
+          "type": "pagefooter",
+          "height": 24,
+          "repeat": true
+        }
+      }
+    },
+    "CONTROLS": {
+      "ChurchLogo": {
+        "type": "image",
+        "band": "ReportHeader",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          68,
+          68
+        ],
+        "collection": "church",
+        "field": "Logo"
+      },
+      "ChurchName": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          0
+        ],
+        "size": [
+          650,
+          22
+        ],
+        "collection": "church",
+        "field": "Church",
+        "fontsize": 15,
+        "bold": true,
+        "align": "center"
+      },
+      "OrganizationName": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          25
+        ],
+        "size": [
+          650,
+          17
+        ],
+        "collection": "organization",
+        "field": "LegalName",
+        "fontsize": 9,
+        "align": "center"
+      },
+      "ReportTitle": {
+        "type": "systemtext",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          45
+        ],
+        "size": [
+          650,
+          20
+        ],
+        "systemvalue": "report_title",
+        "fontsize": 13,
+        "bold": true,
+        "align": "center"
+      },
+      "Period": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          71
+        ],
+        "size": [
+          650,
+          16
+        ],
+        "collection": "parameters",
+        "field": "Display",
+        "fontsize": 8,
+        "align": "center"
+      },
+      "RunUser": {
+        "type": "systemtext",
+        "band": "ReportHeader",
+        "position": [
+          600,
+          89
+        ],
+        "size": [
+          210,
+          14
+        ],
+        "systemvalue": "run_user",
+        "prefix": "Run by: ",
+        "fontsize": 8,
+        "align": "right",
+        "color": "#555555"
+      },
+      "HeaderRule": {
+        "type": "line",
+        "band": "PageHeader",
+        "position": [
+          0,
+          4
+        ],
+        "size": [
+          810,
+          1
+        ],
+        "bordercolor": "#6D7780",
+        "borderwidth": 0.7
+      },
+      "Records": {
+        "type": "table",
+        "band": "Detail",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          810,
+          40
+        ],
+        "repeatcollection": "records",
+        "columns": [
+          {
+            "name": "Line",
+            "label": "#",
+            "collection": "records",
+            "field": "Line",
+            "width": 30,
+            "format": "integer"
+          },
+          {
+            "name": "Account",
+            "label": "Account",
+            "collection": "records",
+            "field": "Account",
+            "width": 165
+          },
+          {
+            "name": "Fund",
+            "label": "Fund",
+            "collection": "records",
+            "field": "Fund",
+            "width": 120
+          },
+          {
+            "name": "Function",
+            "label": "Function",
+            "collection": "records",
+            "field": "Function",
+            "width": 90
+          },
+          {
+            "name": "Payee",
+            "label": "Payee",
+            "collection": "records",
+            "field": "Payee",
+            "width": 90
+          },
+          {
+            "name": "Description",
+            "label": "Description",
+            "collection": "records",
+            "field": "Description",
+            "width": 175
+          },
+          {
+            "name": "Debit",
+            "label": "Debit",
+            "collection": "records",
+            "field": "Debit",
+            "width": 70,
+            "format": "currency",
+            "align": "right"
+          },
+          {
+            "name": "Credit",
+            "label": "Credit",
+            "collection": "records",
+            "field": "Credit",
+            "width": 70,
+            "format": "currency",
+            "align": "right"
+          }
+        ]
+      },
+      "TotalsRule": {
+        "type": "line",
+        "band": "ReportFooter",
+        "position": [
+          0,
+          3
+        ],
+        "size": [
+          810,
+          1
+        ],
+        "bordercolor": "#202020",
+        "borderwidth": 0.8
+      },
+      "FooterLine": {
+        "type": "line",
+        "band": "PageFooter",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          810,
+          1
+        ],
+        "bordercolor": "#808080",
+        "borderwidth": 0.5
+      },
+      "ReportCode": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          0,
+          6
+        ],
+        "size": [
+          180,
+          14
+        ],
+        "systemvalue": "report_code",
+        "prefix": "ChurchManager report ",
+        "fontsize": 8,
+        "color": "#555555"
+      },
+      "Classification": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          315.0,
+          6
+        ],
+        "size": [
+          180,
+          14
+        ],
+        "systemvalue": "classification",
+        "fontsize": 8,
+        "bold": true,
+        "align": "center",
+        "color": "#555555"
+      },
+      "PageNumber": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          720,
+          6
+        ],
+        "size": [
+          90,
+          14
+        ],
+        "systemvalue": "page_number",
+        "prefix": "Page ",
+        "fontsize": 8,
+        "align": "right",
+        "color": "#555555"
+      },
+      "DebitTotalLabel": {
+        "type": "label",
+        "band": "ReportFooter",
+        "position": [
+          0.0,
+          10
+        ],
+        "size": [
+          270.0,
+          14
+        ],
+        "label": "Debits",
+        "fontsize": 8,
+        "bold": true,
+        "align": "right"
+      },
+      "DebitTotal": {
+        "type": "text",
+        "band": "ReportFooter",
+        "position": [
+          0.0,
+          28
+        ],
+        "size": [
+          270.0,
+          17
+        ],
+        "collection": "totals",
+        "field": "Debit",
+        "format": "currency",
+        "fontsize": 9,
+        "bold": true,
+        "align": "right"
+      },
+      "CreditTotalLabel": {
+        "type": "label",
+        "band": "ReportFooter",
+        "position": [
+          270.0,
+          10
+        ],
+        "size": [
+          270.0,
+          14
+        ],
+        "label": "Credits",
+        "fontsize": 8,
+        "bold": true,
+        "align": "right"
+      },
+      "CreditTotal": {
+        "type": "text",
+        "band": "ReportFooter",
+        "position": [
+          270.0,
+          28
+        ],
+        "size": [
+          270.0,
+          17
+        ],
+        "collection": "totals",
+        "field": "Credit",
+        "format": "currency",
+        "fontsize": 9,
+        "bold": true,
+        "align": "right"
+      },
+      "DifferenceLabel": {
+        "type": "label",
+        "band": "ReportFooter",
+        "position": [
+          540.0,
+          10
+        ],
+        "size": [
+          270.0,
+          14
+        ],
+        "label": "Difference",
+        "fontsize": 8,
+        "bold": true,
+        "align": "right"
+      },
+      "Difference": {
+        "type": "text",
+        "band": "ReportFooter",
+        "position": [
+          540.0,
+          28
+        ],
+        "size": [
+          270.0,
+          17
+        ],
+        "collection": "totals",
+        "field": "Difference",
+        "format": "currency",
+        "fontsize": 9,
+        "bold": true,
+        "align": "right"
+      },
+      "Created": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          106
+        ],
+        "size": [
+          650,
+          14
+        ],
+        "collection": "parameters",
+        "field": "Created",
+        "prefix": "Created: ",
+        "fontsize": 8
+      },
+      "Reviewed": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          121
+        ],
+        "size": [
+          650,
+          14
+        ],
+        "collection": "parameters",
+        "field": "Reviewed",
+        "prefix": "Reviewed: ",
+        "fontsize": 8
+      },
+      "Posted": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          80,
+          136
+        ],
+        "size": [
+          650,
+          14
+        ],
+        "collection": "parameters",
+        "field": "Posted",
+        "prefix": "Posted: ",
+        "fontsize": 8
+      },
+      "Attachments": {
+        "type": "table",
+        "band": "Detail",
+        "position": [
+          0,
+          40
+        ],
+        "size": [
+          810,
+          34
+        ],
+        "repeatcollection": "attachments",
+        "visiblewhen": {
+          "collection": "parameters",
+          "field": "HasAttachments",
+          "operator": "equals",
+          "value": true
+        },
+        "columns": [
+          {
+            "name": "Name",
+            "label": "Attachment",
+            "collection": "attachments",
+            "field": "Name",
+            "width": 180
+          },
+          {
+            "name": "Type",
+            "label": "Type",
+            "collection": "attachments",
+            "field": "Type",
+            "width": 100
+          },
+          {
+            "name": "Hash",
+            "label": "SHA-256 hash",
+            "collection": "attachments",
+            "field": "Hash",
+            "width": 390
+          },
+          {
+            "name": "AddedAt",
+            "label": "Added",
+            "collection": "attachments",
+            "field": "AddedAt",
+            "width": 140,
+            "format": "datetime"
+          }
+        ]
+      }
+    }
+  }
+}

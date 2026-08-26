@@ -1,0 +1,139 @@
+{
+    "frmHymnFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "Hymns",
+            "name": "frmHymn",
+            "table": {
+                "name": "tblHymn",
+                "fields": ["*"],
+                "orderby": "Hymn"
+            },
+            "stylelist": ["CAPTION"],
+            "posch": [0, 0],
+            "sizech": [46, 31],
+            "theme": "churchmanager"
+        },
+        "CONTROLS": {
+            "lblHymnal": {
+                "name": "lblHymnal",
+                "type": "StaticText",
+                "label": "Hymnal:",
+                "posch": [1, 1]
+            },
+            "HymnalID": {
+                "name": "HymnalID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "tblHymnal",
+                    "fields": ["ID", "Hymnal"],
+                    "orderby": "Hymnal"
+                },
+                "savestyle": "CB_READONLY",
+                "posch": [11, 1],
+                "sizech": [32, 2],
+                "tooltip": "Select the hymnal."
+            },
+            "lblHymn": {
+                "name": "lblHymn",
+                "type": "StaticText",
+                "label": "Hymn number:",
+                "posch": [1, 3]
+            },
+            "Hymn": {
+                "name": "Hymn",
+                "type": "TextCtrl",
+                "posch": [11, 3],
+                "sizech": [32, 2],
+                "tooltip": "Enter the hymn number as it appears in the selected hymnal."
+            },
+            "lblTitle": {
+                "name": "lblTitle",
+                "type": "StaticText",
+                "label": "Title:",
+                "posch": [1, 5]
+            },
+            "Title": {
+                "name": "Title",
+                "type": "TextCtrl",
+                "posch": [11, 5],
+                "sizech": [32, 2],
+                "tooltip": "Enter the hymn title."
+            },
+            "lblTune": {
+                "name": "lblTune",
+                "type": "StaticText",
+                "label": "Tune:",
+                "posch": [1, 7]
+            },
+            "Tune": {
+                "name": "Tune",
+                "type": "TextCtrl",
+                "posch": [11, 7],
+                "sizech": [32, 2],
+                "tooltip": "Enter the hymn tune name used to detect duplicate tunes in a service."
+            },
+            "lblBibleText": {
+                "name": "lblBibleText",
+                "type": "StaticText",
+                "label": "Scripture refs:",
+                "posch": [1, 9]
+            },
+            "BibleText": {
+                "name": "BibleText",
+                "type": "TextCtrl",
+                "posch": [11, 9],
+                "sizech": [32, 2],
+                "tooltip": "Enter Scripture references associated with the hymn."
+            },
+            "lblCategory": {
+                "name": "lblCategory",
+                "type": "StaticText",
+                "label": "Category:",
+                "posch": [1, 11]
+            },
+            "Category": {
+                "name": "Category",
+                "type": "ComboBox",
+                "posch": [11, 11],
+                "sizech": [32, 2],
+                "tooltip": "Select or enter the hymn category."
+            },
+            "lblPrintedStanzaCount": {
+                "name": "lblPrintedStanzaCount",
+                "type": "StaticText",
+                "label": "Printed stanzas:",
+                "posch": [1, 13]
+            },
+            "PrintedStanzaCount": {
+                "name": "PrintedStanzaCount",
+                "type": "TextNumber",
+                "posch": [11, 13],
+                "sizech": [8, 2],
+                "tooltip": "Enter the number of stanzas printed in this hymnal; use zero when not stanza-based."
+            },
+            "IsActive": {
+                "name": "IsActive",
+                "type": "CheckBox",
+                "label": "Available for new services",
+                "posch": [22, 13],
+                "sizech": [21, 2],
+                "tooltip": "Inactive hymns remain available in historical records."
+            },
+            "lblNote": {
+                "name": "lblNote",
+                "type": "StaticText",
+                "label": "Notes:",
+                "posch": [1, 15]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "stylelist": ["MULTILINE"],
+                "posch": [11, 15],
+                "sizech": [32, 6],
+                "tooltip": "Enter notes. Multiple lines are allowed."
+            }
+        }
+    }
+}

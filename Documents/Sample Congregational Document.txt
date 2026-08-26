@@ -1,0 +1,13 @@
+CHURCHMANAGER TEST SAMPLE
+
+Reformation Lutheran Church
+Congregational Planning Note
+August 26, 2026
+
+This fictional document demonstrates ChurchManager's document catalog. It is
+safe test data and contains no real congregation or member information.
+
+Suggested use:
+- Open Documents from the Church menu.
+- Locate "Sample Congregational Planning Note."
+- Use the catalog entry to open this file.

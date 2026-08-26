@@ -1,0 +1,330 @@
+{
+    "frmChurchFORM": {
+        "FORM": {
+            "type": "Panel",
+            "title": "frmChurch: Church Edit Form",
+            "name": "frmChurch",
+            "table": {
+                "name": "tblChurch",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "Church"
+            },
+            "linkedform": {
+                "frmHymnal": {
+                    "name": "frmHymnal",
+                    "type": "Panel",
+                    "title": "Hymnal Catalog",
+                    "table": {"name": "tblHymnal", "fields": ["*"], "orderby": "Title"},
+                    "controls": ["Navigation", "Update", "Delete", "Close"]
+                },
+                "frmLectionarySystem": {
+                    "name": "frmLectionarySystem",
+                    "type": "Panel",
+                    "title": "Lectionary Systems",
+                    "table": {"name": "tblLectionarySystem", "fields": ["*"], "orderby": "Name"},
+                    "controls": ["Navigation", "Update", "Delete", "Close"]
+                }
+            },
+            "stylelist": [
+                "CAPTION"
+            ],
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                51,
+                41
+            ],
+            "theme": "churchmanager"
+        },
+        "CONTROLS": {
+            "lblChurch": {
+                "name": "lblChurch",
+                "type": "StaticText",
+                "label": "Church:",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "Church": {
+                "name": "Church",
+                "type": "TextCtrl",
+                "posch": [
+                    6,
+                    1
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the church."
+            },
+            "lblAddress": {
+                "name": "lblAddress",
+                "type": "StaticText",
+                "label": "Address:",
+                "posch": [
+                    1,
+                    3
+                ]
+            },
+            "Address": {
+                "name": "Address",
+                "type": "TextCtrl",
+                "posch": [
+                    6,
+                    3
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the address."
+            },
+            "Address2": {
+                "name": "Address2",
+                "type": "TextCtrl",
+                "posch": [
+                    6,
+                    5
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the second address line."
+            },
+            "lblCity": {
+                "name": "lblCity",
+                "type": "StaticText",
+                "label": "City:",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "City": {
+                "name": "City",
+                "type": "TextCtrl",
+                "value": "",
+                "posch": [
+                    6,
+                    7
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the city."
+            },
+            "lblState": {
+                "name": "lblState",
+                "type": "StaticText",
+                "label": "State:",
+                "posch": [
+                    1,
+                    9
+                ]
+            },
+            "State": {
+                "name": "State",
+                "type": "ComboBox",
+                "posch": [
+                    6,
+                    9
+                ],
+                "sizech": [
+                    4,
+                    2
+                ],
+                "tooltip": "Select the state."
+            },
+            "lblZip": {
+                "name": "lblZip",
+                "type": "StaticText",
+                "label": "ZIP:",
+                "posch": [
+                    1,
+                    11
+                ]
+            },
+            "Zip": {
+                "name": "Zip",
+                "type": "TextCtrl",
+                "posch": [
+                    6,
+                    11
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the zip."
+            },
+            "lblPastor": {
+                "name": "lblPastor",
+                "type": "StaticText",
+                "label": "Pastor:",
+                "posch": [
+                    1,
+                    13
+                ]
+            },
+            "Pastor": {
+                "name": "Pastor",
+                "type": "TextCtrl",
+                "posch": [
+                    6,
+                    13
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the pastor."
+            },
+            "lblPhone": {
+                "name": "lblPhone",
+                "type": "StaticText",
+                "label": "Phone:",
+                "posch": [
+                    1,
+                    15
+                ]
+            },
+            "Phone": {
+                "name": "Phone",
+                "type": "TextCtrl",
+                "posch": [
+                    6,
+                    15
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the phone."
+            },
+            "lbleMail": {
+                "name": "lbleMail",
+                "type": "StaticText",
+                "label": "Email:",
+                "posch": [
+                    1,
+                    17
+                ]
+            },
+            "eMail": {
+                "name": "eMail",
+                "type": "TextCtrl",
+                "posch": [
+                    6,
+                    17
+                ],
+                "sizech": [
+                    24,
+                    2
+                ],
+                "tooltip": "Enter the email address."
+            },
+            "lblPrimaryHymnalID": {
+                "name": "lblPrimaryHymnalID",
+                "type": "StaticText",
+                "label": "Primary hymnal:",
+                "posch": [1, 19]
+            },
+            "PrimaryHymnalID": {
+                "name": "PrimaryHymnalID",
+                "type": "ComboBox",
+                "lookupchoices": {"name": "tblHymnal", "fields": ["ID", "Hymnal", "Title"], "orderby": "Title", "allowblank": true, "blanklabel": "No primary hymnal"},
+                "posch": [6, 19],
+                "sizech": [24, 2],
+                "tooltip": "Select the hymnal normally used by this church."
+            },
+            "btnHymnalCatalog": {
+                "name": "btnHymnalCatalog",
+                "type": "Button",
+                "label": "Hymnals...",
+                "action": ["openlinkedform", "frmHymnal"],
+                "posch": [33, 19],
+                "tooltip": "Review, add, or edit hymnals."
+            },
+            "lblPrimaryLectionaryEditionID": {
+                "name": "lblPrimaryLectionaryEditionID",
+                "type": "StaticText",
+                "label": "Default lectionary:",
+                "posch": [1, 21]
+            },
+            "PrimaryLectionaryEditionID": {
+                "name": "PrimaryLectionaryEditionID",
+                "type": "ComboBox",
+                "lookupchoices": {
+                    "name": "vwLectionaryEditionLookup",
+                    "fields": ["ID", "DisplayName"],
+                    "orderby": "DisplayName",
+                    "allowblank": true,
+                    "blanklabel": "No default edition"
+                },
+                "posch": [6, 21],
+                "sizech": [24, 2],
+                "tooltip": "Select the installed or local lectionary edition used by this church."
+            },
+            "lblNote": {
+                "name": "lblNote",
+                "type": "StaticText",
+                "label": "Note:",
+                "posch": [
+                    1,
+                    23
+                ]
+            },
+            "Note": {
+                "name": "Note",
+                "type": "MultiLine",
+                "stylelist": [
+                    "MULTILINE"
+                ],
+                "posch": [
+                    6,
+                    23
+                ],
+                "sizech": [
+                    24,
+                    8
+                ],
+                "tooltip": "Enter the note. Multiple lines are allowed."
+            },
+            "lblLogo": {
+                "name": "lblLogo",
+                "type": "StaticText",
+                "label": "Report logo:",
+                "posch": [
+                    33,
+                    1
+                ]
+            },
+            "Logo": {
+                "name": "Logo",
+                "type": "ImagePickerCtrl",
+                "posch": [
+                    33,
+                    3
+                ],
+                "sizech": [
+                    16,
+                    14
+                ],
+                "layout": {
+                    "row_span": 7,
+                    "expand": true
+                },
+                "maxbytes": 5242880,
+                "tooltip": "Choose the church logo printed on reports. PNG or JPEG is recommended."
+            }
+        }
+    }
+}

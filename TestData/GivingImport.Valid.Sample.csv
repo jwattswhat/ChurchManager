@@ -1,0 +1,3 @@
+Date,Envelope,Amount,Method,Reference,Purpose,Description
+01/07/2027,101,25.00,ACH,IMPORT-VALID-001,General Ministry,Sample electronic gift
+01/07/2027,102,40.00,Online,IMPORT-VALID-002,Building and Property,Sample designated gift

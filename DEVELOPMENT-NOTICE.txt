@@ -1,0 +1,6 @@
+CHURCHMANAGER DEVELOPMENT WORKSPACE
+
+This folder contains the independent ChurchManager application under development.
+
+Use ChurchManager-Test.bat for development and testing against ChurchDBTest.
+Do not change the development launcher to connect to production ChurchDB.

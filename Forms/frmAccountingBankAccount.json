@@ -1,0 +1,178 @@
+{
+    "frmAccountingBankAccountFORM": {
+        "FORM": {
+            "name": "frmAccountingBankAccount",
+            "type": "Panel",
+            "title": "Accounting Bank Accounts",
+            "posch": [
+                -1,
+                -1
+            ],
+            "sizech": [
+                50,
+                22
+            ],
+            "stylelist": [
+                "CAPTION"
+            ],
+            "layout": {
+                "type": "legacy"
+            },
+            "table": {
+                "name": "tblAccountingBankAccount",
+                "fields": [
+                    "*"
+                ],
+                "orderby": "OrganizationID, Name"
+            },
+            "security": {
+                "open": "accounting.master_data.manage",
+                "create": "accounting.master_data.manage",
+                "update": "accounting.master_data.manage",
+                "delete": "accounting.master_data.manage"
+            },
+            "theme": "churchmanager"
+        },
+        "CONTROLS": {
+            "lblOrganizationID": {
+                "name": "lblOrganizationID",
+                "type": "StaticText",
+                "label": "Organization:",
+                "posch": [
+                    1,
+                    1
+                ]
+            },
+            "OrganizationID": {
+                "name": "OrganizationID",
+                "type": "ComboBox",
+                "posch": [
+                    12,
+                    1
+                ],
+                "sizech": [
+                    34,
+                    2
+                ],
+                "lookupchoices": {
+                    "name": "tblAccountingOrganization",
+                    "fields": [
+                        "ID",
+                        "LegalName"
+                    ],
+                    "condition": "Active = 1",
+                    "orderby": "LegalName"
+                }
+            },
+            "lblAccountID": {
+                "name": "lblAccountID",
+                "type": "StaticText",
+                "label": "Ledger account:",
+                "posch": [
+                    1,
+                    3
+                ]
+            },
+            "AccountID": {
+                "name": "AccountID",
+                "type": "ComboBox",
+                "posch": [
+                    12,
+                    3
+                ],
+                "sizech": [
+                    34,
+                    2
+                ],
+                "lookupchoices": {
+                    "name": "tblAccountingAccount",
+                    "fields": [
+                        "ID",
+                        "Code",
+                        "Name"
+                    ],
+                    "condition": "AccountType = 'ASSET' AND Active = 1 AND PostingAllowed = 1",
+                    "orderby": "Code"
+                },
+                "tooltip": "Select the cash ledger account represented by this bank account."
+            },
+            "lblName": {
+                "name": "lblName",
+                "type": "StaticText",
+                "label": "Display name:",
+                "posch": [
+                    1,
+                    5
+                ]
+            },
+            "Name": {
+                "name": "Name",
+                "type": "TextCtrl",
+                "posch": [
+                    12,
+                    5
+                ],
+                "sizech": [
+                    34,
+                    2
+                ],
+                "tooltip": "Use a recognizable name such as Main Checking."
+            },
+            "lblInstitutionName": {
+                "name": "lblInstitutionName",
+                "type": "StaticText",
+                "label": "Institution:",
+                "posch": [
+                    1,
+                    7
+                ]
+            },
+            "InstitutionName": {
+                "name": "InstitutionName",
+                "type": "TextCtrl",
+                "posch": [
+                    12,
+                    7
+                ],
+                "sizech": [
+                    34,
+                    2
+                ]
+            },
+            "lblAccountLastFour": {
+                "name": "lblAccountLastFour",
+                "type": "StaticText",
+                "label": "Last four digits:",
+                "posch": [
+                    1,
+                    9
+                ]
+            },
+            "AccountLastFour": {
+                "name": "AccountLastFour",
+                "type": "TextCtrl",
+                "posch": [
+                    12,
+                    9
+                ],
+                "sizech": [
+                    8,
+                    2
+                ],
+                "maxlength": 4,
+                "maxlengthmessage": "Enter no more than the last four digits of the bank account.",
+                "tooltip": "Optional. Store only the last four digits, never the full bank account number."
+            },
+            "Active": {
+                "name": "Active",
+                "type": "CheckBox",
+                "label": "Active",
+                "posch": [
+                    12,
+                    11
+                ],
+                "tooltip": "Make this account available for imports and reconciliation."
+            }
+        }
+    }
+}

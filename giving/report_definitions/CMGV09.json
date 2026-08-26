@@ -1,0 +1,43 @@
+{
+  "CMGV09REPORT": {
+    "REPORT": {
+      "schema_version": 1,
+      "name": "CMGV09",
+      "title":"Giving - Envelope Box Labels",
+      "dataset": "giving.envelopelabels",
+      "datasetversion": 1,
+      "pagesize": "letter",
+      "orientation": "portrait",
+      "margins": {"top": 36, "right": 13.5, "bottom": 28, "left": 13.5},
+      "theme": "churchmanager.giving",
+      "classification": "confidential",
+      "showdefaultpagenumber": false,
+      "emptytext": "No envelope assignments match the selected options.",
+      "bands": {
+        "Detail": {"type": "detail", "height": 72}
+      }
+    },
+    "CONTROLS": {
+      "Labels": {
+        "type": "repeater",
+        "band": "Detail",
+        "position": [0, 0],
+        "size": [585, 72],
+        "repeatcollection": "labelrows",
+        "itemheight": 72,
+        "separator": false,
+        "items": [
+          {"name":"Box1","field":"Box1","position":[0,7],"size":[189,15],"fontsize":11,"bold":true,"align":"center"},
+          {"name":"Name1","field":"Name1","position":[0,26],"size":[189,14],"fontsize":9,"align":"center"},
+          {"name":"Church1","field":"Church1","position":[0,44],"size":[189,11],"fontsize":7,"align":"center"},
+          {"name":"Box2","field":"Box2","position":[198,7],"size":[189,15],"fontsize":11,"bold":true,"align":"center"},
+          {"name":"Name2","field":"Name2","position":[198,26],"size":[189,14],"fontsize":9,"align":"center"},
+          {"name":"Church2","field":"Church2","position":[198,44],"size":[189,11],"fontsize":7,"align":"center"},
+          {"name":"Box3","field":"Box3","position":[396,7],"size":[189,15],"fontsize":11,"bold":true,"align":"center"},
+          {"name":"Name3","field":"Name3","position":[396,26],"size":[189,14],"fontsize":9,"align":"center"},
+          {"name":"Church3","field":"Church3","position":[396,44],"size":[189,11],"fontsize":7,"align":"center"}
+        ]
+      }
+    }
+  }
+}

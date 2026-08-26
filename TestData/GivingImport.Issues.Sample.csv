@@ -1,0 +1,3 @@
+Date,Envelope,Contributor,Amount,Method,Reference,Purpose,Description
+01/07/2027,999,,25.00,ACH,IMPORT-ISSUE-001,General Ministry,Unknown envelope example
+01/07/2027,,Unknown Example,40.00,Online,IMPORT-ISSUE-002,Missing Purpose,Unknown contributor and purpose example

@@ -1,0 +1,371 @@
+"""Permission-enforcing read models for confidential Giving reports."""
+
+from __future__ import annotations
+
+from datetime import date
+
+from bulletin_orders import portable_connection
+
+
+class GivingReportService:
+    """Read summary and contributor history without exposing data accidentally."""
+
+    def __init__(self, connection, authorization):
+        self.connection = portable_connection(connection)
+        self.authorization = authorization
+
+    def _all(self, sql, values=()):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(sql, values)
+            return cursor.fetchall()
+        finally:
+            cursor.close()
+
+    def all(self, sql, values=()):
+        """Return report-provider rows while preserving portable query handling."""
+        return self._all(sql, values)
+
+    def church_id(self):
+        rows = self._all("SELECT ID FROM tblChurch ORDER BY ID LIMIT 1")
+        if not rows:
+            raise ValueError("Church information must be created first.")
+        return rows[0][0]
+
+    def date_bounds(self):
+        """Return the available Giving date range, or the current year."""
+        self.authorization.require("giving.reports.summary", "view Giving report dates")
+        rows = self._all(
+            "SELECT MIN(BatchDate),MAX(BatchDate) FROM tblContributionBatch "
+            "WHERE ChurchID=?", (self.church_id(),),
+        )
+        if rows and rows[0][0] and rows[0][1]:
+            return rows[0][0], rows[0][1]
+        today = date.today()
+        return date(today.year, 1, 1), today
+
+    def contributors(self):
+        """Return active and historical contributors for a confidential filter."""
+        self.authorization.require("giving.history.view", "view Giving contributors")
+        return self._all(
+            "SELECT ID,DisplayName FROM tblContributionContributor "
+            "WHERE ChurchID=? ORDER BY DisplayName,ID", (self.church_id(),),
+        )
+
+    def envelope_assignment_years(self):
+        """Return practical calendar years represented by envelope assignments."""
+        self.authorization.require("giving.reports.confidential", "view envelope assignments")
+        rows = self._all(
+            "SELECT MIN(YEAR(EffectiveFrom)),MAX(YEAR(COALESCE(EffectiveThrough,EffectiveFrom))) "
+            "FROM tblContributionEnvelopeAssignment WHERE ChurchID=?", (self.church_id(),),
+        )
+        today = date.today().year
+        if not rows or rows[0][0] is None:
+            return [today, today + 1]
+        first, last = int(rows[0][0]), int(rows[0][1])
+        last = min(max(last, today + 1), first + 25)
+        return list(range(last, first - 1, -1))
+
+    def envelope_assignments(self, year, *, include_inactive=False, include_outside=True):
+        """Return confidential envelope assignments overlapping one calendar year."""
+        self.authorization.require("giving.reports.confidential", "view envelope assignments")
+        first, last = date(int(year), 1, 1), date(int(year), 12, 31)
+        sql = (
+            "SELECT e.EnvelopeNumber,COALESCE(NULLIF(c.StatementName,''),c.DisplayName),"
+            "c.ContributorType,c.IsActive,e.EffectiveFrom,e.EffectiveThrough "
+            "FROM tblContributionEnvelopeAssignment e "
+            "JOIN tblContributionContributor c ON c.ID=e.ContributorID "
+            "WHERE e.ChurchID=? AND e.EffectiveFrom<=? "
+            "AND COALESCE(e.EffectiveThrough,'9999-12-31')>=?"
+        )
+        values = [self.church_id(), last, first]
+        if not include_inactive:
+            sql += " AND c.IsActive=1"
+        if not include_outside:
+            sql += " AND c.ContributorType<>'EXTERNAL'"
+        rows = self._all(sql, tuple(values))
+
+        def key(row):
+            value = str(row[0])
+            return (0, int(value), "") if value.isdecimal() else (1, 0, value.casefold())
+
+        return sorted(rows, key=key)
+
+    def batch_summary(self, start_date, end_date):
+        """Return donor-free batch controls for the requested period."""
+        self.authorization.require("giving.reports.summary", "view the Giving batch summary")
+        return self._all(
+            "SELECT b.BatchDate,b.Description,o.LegalName,b.Status,b.ControlTotal,"
+            "b.CalculatedTotal,(COALESCE(b.ControlTotal,b.CalculatedTotal)-b.CalculatedTotal),"
+            "b.AccountingTransactionID FROM tblContributionBatch b "
+            "JOIN tblAccountingOrganization o ON o.ID=b.OrganizationID "
+            "WHERE b.ChurchID=? AND b.BatchDate BETWEEN ? AND ? "
+            "ORDER BY b.BatchDate,b.ID",
+            (self.church_id(), start_date, end_date),
+        )
+
+    def contributor_history(self, contributor_id, start_date, end_date):
+        """Return reviewed or posted allocations for one contributor."""
+        self.authorization.require("giving.history.view", "view contributor Giving history")
+        return self._all(
+            "SELECT g.ReceivedDate,b.Description,g.ContributionMethod,g.ReferenceValue,"
+            "COALESCE(p.Name,'Unspecified'),a.Amount,b.Status,g.StatementEligibility "
+            "FROM tblContribution g JOIN tblContributionBatch b ON b.ID=g.BatchID "
+            "JOIN tblContributionAllocation a ON a.ContributionID=g.ID "
+            "LEFT JOIN tblContributionPurpose p ON p.ID=a.PurposeID "
+            "WHERE b.ChurchID=? AND g.ContributorID=? "
+            "AND g.ReceivedDate BETWEEN ? AND ? AND b.Status IN ('READY','POSTED') "
+            "ORDER BY g.ReceivedDate,b.ID,g.ID,a.ID",
+            (self.church_id(), contributor_id, start_date, end_date),
+        )
+
+    def envelope_exceptions(self, start_date, end_date):
+        """Return contributors lacking an envelope and overlapping envelope assignments."""
+        self.authorization.require("giving.reports.confidential", "review envelope exceptions")
+        church_id = self.church_id()
+        unassigned = self._all(
+            "SELECT NULL,'Unassigned',COALESCE(NULLIF(c.StatementName,''),c.DisplayName),'Active contributor',"
+            "NULL,c.ContributorType,'','No envelope assignment overlaps the selected period' "
+            "FROM tblContributionContributor c WHERE c.ChurchID=? AND c.IsActive=1 AND NOT EXISTS ("
+            "SELECT 1 FROM tblContributionEnvelopeAssignment e WHERE e.ContributorID=c.ID "
+            "AND e.EffectiveFrom<=? AND COALESCE(e.EffectiveThrough,'9999-12-31')>=?)",
+            (church_id, end_date, start_date),
+        )
+        conflicts = self._all(
+            "SELECT GREATEST(a.EffectiveFrom,b.EffectiveFrom),'Conflict',"
+            "CONCAT(COALESCE(NULLIF(c.StatementName,''),c.DisplayName),' / ',"
+            "COALESCE(NULLIF(d.StatementName,''),d.DisplayName)),a.EnvelopeNumber,NULL,'Envelope',"
+            "CONCAT(a.EffectiveFrom,' through ',COALESCE(a.EffectiveThrough,'open')),'Overlapping assignment' "
+            "FROM tblContributionEnvelopeAssignment a "
+            "JOIN tblContributionEnvelopeAssignment b ON b.ChurchID=a.ChurchID "
+            "AND b.EnvelopeNumber=a.EnvelopeNumber AND b.ID>a.ID "
+            "AND a.EffectiveFrom<=COALESCE(b.EffectiveThrough,'9999-12-31') "
+            "AND b.EffectiveFrom<=COALESCE(a.EffectiveThrough,'9999-12-31') "
+            "JOIN tblContributionContributor c ON c.ID=a.ContributorID "
+            "JOIN tblContributionContributor d ON d.ID=b.ContributorID "
+            "WHERE a.ChurchID=? AND a.EffectiveFrom<=? "
+            "AND COALESCE(a.EffectiveThrough,'9999-12-31')>=?",
+            (church_id, end_date, start_date),
+        )
+        return unassigned + conflicts
+
+    def batch_detail(self, start_date, end_date):
+        """Return protected gift/allocation detail for operational batch review."""
+        self.authorization.require("giving.reports.confidential", "print contribution batch detail")
+        return self._all(
+            "SELECT g.ReceivedDate,b.Description,COALESCE(c.DisplayName,'Anonymous'),"
+            "g.ContributionMethod,a.Amount,COALESCE(p.Name,'Unspecified'),"
+            "COALESCE(g.EnteredEnvelopeNumber,''),b.Status "
+            "FROM tblContribution g JOIN tblContributionBatch b ON b.ID=g.BatchID "
+            "JOIN tblContributionAllocation a ON a.ContributionID=g.ID "
+            "LEFT JOIN tblContributionContributor c ON c.ID=g.ContributorID "
+            "LEFT JOIN tblContributionPurpose p ON p.ID=a.PurposeID "
+            "WHERE b.ChurchID=? AND b.BatchDate BETWEEN ? AND ? "
+            "ORDER BY b.BatchDate,b.ID,g.ID,a.ID", (self.church_id(), start_date, end_date),
+        )
+
+    def giving_by_fund(self, start_date, end_date):
+        """Return donor-free Posted Giving totals by organization, fund, and purpose."""
+        self.authorization.require("giving.reports.summary", "print Giving by fund and period")
+        return self._all(
+            "SELECT MIN(g.ReceivedDate),o.LegalName,f.Name,'Posted',SUM(a.Amount),"
+            "COALESCE(p.Name,'Unspecified purpose'),'','Donor-free summarized total' "
+            "FROM tblContributionAllocation a JOIN tblContribution g ON g.ID=a.ContributionID "
+            "JOIN tblContributionBatch b ON b.ID=g.BatchID "
+            "JOIN tblAccountingOrganization o ON o.ID=a.OrganizationID "
+            "JOIN tblAccountingFund f ON f.ID=a.FundID "
+            "LEFT JOIN tblContributionPurpose p ON p.ID=a.PurposeID "
+            "WHERE b.ChurchID=? AND b.Status='POSTED' AND g.ContributionMethod<>'NON_CASH' "
+            "AND g.DirectionStatus<>'RETURNED' AND g.ReceivedDate BETWEEN ? AND ? "
+            "GROUP BY o.ID,o.LegalName,f.ID,f.Name,p.ID,p.Name ORDER BY o.LegalName,f.Name,p.Name",
+            (self.church_id(), start_date, end_date),
+        )
+
+    def statement_exceptions(self, start_date, end_date):
+        """Return posted gifts requiring statement or eligibility attention."""
+        self.authorization.require("giving.reports.confidential", "review statement exceptions")
+        return self._all(
+            "SELECT g.ReceivedDate,COALESCE(c.DisplayName,'Anonymous'),b.Description,"
+            "g.StatementEligibility,a.Amount,COALESCE(p.Name,'Unspecified'),g.ContributionMethod,"
+            "COALESCE(g.EligibilityOverrideReason,'Review statement treatment') "
+            "FROM tblContribution g JOIN tblContributionBatch b ON b.ID=g.BatchID "
+            "JOIN tblContributionAllocation a ON a.ContributionID=g.ID "
+            "LEFT JOIN tblContributionContributor c ON c.ID=g.ContributorID "
+            "LEFT JOIN tblContributionPurpose p ON p.ID=a.PurposeID "
+            "WHERE b.ChurchID=? AND b.Status='POSTED' AND g.ReceivedDate BETWEEN ? AND ? "
+            "AND (g.StatementEligibility<>'ELIGIBLE' "
+            "OR COALESCE(p.StatementTreatment,'ELIGIBLE')<>'ELIGIBLE' "
+            "OR g.DirectionStatus IN ('REVIEW','RETURNED')) ORDER BY g.ReceivedDate,g.ID,a.ID",
+            (self.church_id(), start_date, end_date),
+        )
+
+    def accounting_reconciliation(self, start_date, end_date):
+        """Return donor-free Giving batch/accounting posting reconciliation."""
+        self.authorization.require("giving.reports.summary", "reconcile Giving to Accounting")
+        return self._all(
+            "SELECT b.BatchDate,b.Description,o.LegalName,b.Status,b.CalculatedTotal,"
+            "COALESCE(t.Status,'Not sent'),COALESCE(t.TransactionNumber,''),"
+            "CASE WHEN b.Status='POSTED' AND COALESCE(t.Status,'')<>'POSTED' THEN 'Status mismatch' "
+            "WHEN b.Status='READY' AND t.ID IS NULL THEN 'Awaiting handoff' "
+            "WHEN b.Status='READY' THEN 'Awaiting accounting posting' ELSE '' END "
+            "FROM tblContributionBatch b JOIN tblAccountingOrganization o ON o.ID=b.OrganizationID "
+            "LEFT JOIN tblAccountingTransaction t ON t.ID=b.AccountingTransactionID "
+            "WHERE b.ChurchID=? AND b.BatchDate BETWEEN ? AND ? ORDER BY b.BatchDate,b.ID",
+            (self.church_id(), start_date, end_date),
+        )
+
+    def statement_contributors(self):
+        """Return contributors explicitly enabled for contribution statements."""
+        self.authorization.require("giving.statements.generate", "select statement contributors")
+        return self._all(
+            "SELECT ID,COALESCE(NULLIF(StatementName,''),DisplayName) "
+            "FROM tblContributionContributor WHERE ChurchID=? AND StatementEnabled=1 "
+            "ORDER BY COALESCE(NULLIF(StatementName,''),DisplayName),ID",
+            (self.church_id(),),
+        )
+
+    def statement_years(self):
+        """Return years containing posted contributions, newest first."""
+        self.authorization.require("giving.statements.generate", "select contribution statement years")
+        rows = self._all(
+            "SELECT DISTINCT YEAR(g.ReceivedDate) FROM tblContribution g "
+            "JOIN tblContributionBatch b ON b.ID=g.BatchID "
+            "WHERE b.ChurchID=? AND b.Status='POSTED' ORDER BY 1 DESC",
+            (self.church_id(),),
+        )
+        return [int(row[0]) for row in rows]
+
+    def statement_identity(self, contributor_id):
+        """Return the confidential statement name and mailing address."""
+        self.authorization.require("giving.statements.generate", "view a contribution statement identity")
+        rows = self._all(
+            "SELECT ID,COALESCE(NULLIF(StatementName,''),DisplayName),Address,Address2,"
+            "City,State,PostalCode FROM tblContributionContributor "
+            "WHERE ChurchID=? AND ID=? AND StatementEnabled=1",
+            (self.church_id(), contributor_id),
+        )
+        if not rows:
+            raise ValueError("The selected contributor is not enabled for statements.")
+        return rows[0]
+
+    def statement_contributors_for_period(self, start_date, end_date):
+        """Return enabled contributors having eligible posted gifts in a period."""
+        self.authorization.require("giving.statements.generate", "select contribution statement recipients")
+        return self._all(
+            "SELECT DISTINCT c.ID,COALESCE(NULLIF(c.StatementName,''),c.DisplayName) "
+            "FROM tblContributionContributor c JOIN tblContribution g ON g.ContributorID=c.ID "
+            "JOIN tblContributionBatch b ON b.ID=g.BatchID "
+            "JOIN tblContributionAllocation a ON a.ContributionID=g.ID "
+            "LEFT JOIN tblContributionPurpose p ON p.ID=a.PurposeID "
+            "WHERE c.ChurchID=? AND c.StatementEnabled=1 AND b.Status='POSTED' "
+            "AND g.StatementEligibility='ELIGIBLE' "
+            "AND (p.ID IS NULL OR p.StatementTreatment='ELIGIBLE') "
+            "AND g.ReceivedDate BETWEEN ? AND ? "
+            "ORDER BY COALESCE(NULLIF(c.StatementName,''),c.DisplayName),c.ID",
+            (self.church_id(), start_date, end_date),
+        )
+
+    def statement_lines(self, contributor_id, start_date, end_date):
+        """Return posted, statement-eligible allocation lines for one contributor."""
+        self.authorization.require("giving.statements.generate", "build a contribution statement")
+        return self._all(
+            "SELECT g.ReceivedDate,COALESCE(p.Name,'General contribution'),"
+            "g.ContributionMethod,a.Amount,g.NonCashDescription,"
+            "g.GoodsOrServicesProvided,g.GoodsOrServicesDescription,g.GoodsOrServicesValue,"
+            "g.IntangibleReligiousBenefitOnly "
+            "FROM tblContribution g JOIN tblContributionBatch b ON b.ID=g.BatchID "
+            "JOIN tblContributionAllocation a ON a.ContributionID=g.ID "
+            "LEFT JOIN tblContributionPurpose p ON p.ID=a.PurposeID "
+            "WHERE b.ChurchID=? AND g.ContributorID=? AND b.Status='POSTED' "
+            "AND g.StatementEligibility='ELIGIBLE' "
+            "AND (p.ID IS NULL OR p.StatementTreatment='ELIGIBLE') "
+            "AND g.ReceivedDate BETWEEN ? AND ? "
+            "ORDER BY g.ReceivedDate,g.ID,a.ID",
+            (self.church_id(), contributor_id, start_date, end_date),
+        )
+
+    def statement_issuance_history(self):
+        """Return confidential issued-statement identifiers, newest first."""
+        self.authorization.require("giving.statements.generate", "view contribution statement history")
+        return self._all(
+            "SELECT i.GeneratedAt,COALESCE(NULLIF(c.StatementName,''),c.DisplayName),"
+            "i.PeriodStart,i.PeriodEnd,i.RevisionNumber,i.OutputFileName,i.DocumentHash "
+            "FROM tblContributionStatementIssue i "
+            "JOIN tblContributionContributor c ON c.ID=i.ContributorID "
+            "WHERE i.ChurchID=? ORDER BY i.GeneratedAt DESC,i.ID DESC",
+            (self.church_id(),),
+        )
+
+    def tribute_acknowledgments(self, start_date, end_date):
+        """Return posted memorial/honor gifts with consent-controlled disclosure."""
+        self.authorization.require("giving.reports.confidential", "view memorial and honor gifts")
+        return self._all(
+            "SELECT g.ReceivedDate,g.TributeType,g.HonoreeName,"
+            "CASE WHEN g.DonorDisclosureAuthorized=1 THEN COALESCE(c.DisplayName,'Anonymous') "
+            "ELSE 'Not disclosed' END,"
+            "CASE WHEN g.AmountDisclosureAuthorized=1 THEN g.Amount ELSE NULL END,"
+            "COALESCE(g.AcknowledgmentContact,''),COALESCE(p.Purposes,'General contribution') "
+            "FROM tblContribution g JOIN tblContributionBatch b ON b.ID=g.BatchID "
+            "LEFT JOIN tblContributionContributor c ON c.ID=g.ContributorID "
+            "LEFT JOIN (SELECT a.ContributionID,GROUP_CONCAT(DISTINCT purpose.Name "
+            "ORDER BY purpose.Name SEPARATOR ', ') AS Purposes "
+            "FROM tblContributionAllocation a JOIN tblContributionPurpose purpose "
+            "ON purpose.ID=a.PurposeID GROUP BY a.ContributionID) p ON p.ContributionID=g.ID "
+            "WHERE b.ChurchID=? AND b.Status='POSTED' AND g.TributeType IS NOT NULL "
+            "AND g.ReceivedDate BETWEEN ? AND ? ORDER BY g.ReceivedDate,g.ID",
+            (self.church_id(), start_date, end_date),
+        )
+
+    def directed_gift_reviews(self, start_date, end_date):
+        """Return restricted donor-direction reviews and completed dispositions."""
+        self.authorization.require("giving.reports.confidential", "view directed gift reviews")
+        return self._all(
+            "SELECT g.ReceivedDate,COALESCE(c.DisplayName,'Anonymous'),g.DonorDirection,"
+            "g.DirectionStatus,COALESCE(g.DirectionResolution,''),"
+            "COALESCE(u.DisplayName,''),g.DirectionResolvedAt,b.Description "
+            "FROM tblContribution g JOIN tblContributionBatch b ON b.ID=g.BatchID "
+            "LEFT JOIN tblContributionContributor c ON c.ID=g.ContributorID "
+            "LEFT JOIN tblUser u ON u.ID=g.DirectionResolvedByUserID "
+            "WHERE b.ChurchID=? AND g.DirectionStatus<>'NONE' "
+            "AND g.ReceivedDate BETWEEN ? AND ? "
+            "ORDER BY (g.DirectionStatus='REVIEW') DESC,g.ReceivedDate,g.ID",
+            (self.church_id(), start_date, end_date),
+        )
+
+    def record_statement_issuances(self, issues, user_id):
+        """Atomically record rendered statement hashes and revision relationships."""
+        self.authorization.require("giving.statements.generate", "record contribution statements")
+        cursor = self.connection.cursor()
+        church_id = self.church_id()
+        try:
+            for contributor_id, start_date, end_date, version, digest, filename in issues:
+                cursor.execute(
+                    "SELECT ID,RevisionNumber FROM tblContributionStatementIssue "
+                    "WHERE ChurchID=? AND ContributorID=? AND PeriodStart=? AND PeriodEnd=? "
+                    "ORDER BY RevisionNumber DESC,ID DESC LIMIT 1 FOR UPDATE",
+                    (church_id, contributor_id, start_date, end_date),
+                )
+                prior = cursor.fetchone()
+                revision = (int(prior[1]) + 1) if prior else 1
+                cursor.execute(
+                    "INSERT INTO tblContributionStatementIssue "
+                    "(ChurchID,ContributorID,PeriodStart,PeriodEnd,GeneratedByUserID,TemplateVersion,"
+                    "DocumentHash,OutputFileName,RevisionOfID,RevisionNumber) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    (church_id, contributor_id, start_date, end_date, int(user_id), version,
+                     digest, filename, prior[0] if prior else None, revision),
+                )
+                issue_id = cursor.lastrowid
+                cursor.execute(
+                    "INSERT INTO tblContributionAuditEvent "
+                    "(ChurchID,UserID,Action,EntityType,EntityID,SafeReference) "
+                    "VALUES (?,?,'STATEMENT_ISSUED','STATEMENT',?,?)",
+                    (church_id, int(user_id), issue_id,
+                     f"{start_date} through {end_date}; revision {revision}"),
+                )
+            self.connection.commit()
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()

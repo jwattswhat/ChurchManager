@@ -1,0 +1,278 @@
+"""Tests for confidential draft contribution-batch persistence."""
+
+import unittest
+from datetime import date
+from decimal import Decimal
+
+from giving.batch_service import DraftBatchService
+from giving.validation import GivingValidationError
+
+
+class Authorization:
+    def require(self, _permission, _operation=None):
+        return None
+
+
+class Cursor:
+    def __init__(self, connection):
+        self.connection = connection
+        self.lastrowid = 0
+        self.rows = []
+        self.rowcount = 0
+
+    def execute(self, sql, values=()):
+        self.connection.calls.append((sql, values))
+        self.rowcount = 0
+        if "SELECT ID FROM tblChurch" in sql:
+            self.rows = [(7,)]
+        elif "SELECT OrganizationID,Status FROM tblContributionBatch" in sql:
+            self.rows = [self.connection.batch]
+        elif "SELECT Status FROM tblContributionBatch" in sql:
+            self.rows = [(self.connection.batch[1],)]
+        elif "SELECT ControlTotal,CalculatedTotal" in sql:
+            self.rows = [self.connection.totals]
+        elif "SUM(ContributionMethod='NON_CASH')" in sql:
+            self.rows = [self.connection.completion_gift_counts]
+        elif "SUM(ContributionMethod<>'NON_CASH')" in sql:
+            self.rows = [self.connection.review_gift_counts]
+        elif sql.startswith("SELECT COUNT(*)"):
+            self.rows = [(self.connection.review_counts.pop(0),)]
+        elif "FROM tblContributionEnvelopeAssignment" in sql:
+            self.rows = list(self.connection.envelopes)
+        elif sql.startswith("INSERT INTO tblContributionBatch"):
+            self.lastrowid = 21
+        elif sql.startswith("INSERT INTO tblContribution "):
+            self.lastrowid = 31
+        elif sql.startswith("UPDATE tblContribution SET") or sql.startswith("DELETE FROM tblContribution WHERE"):
+            self.rowcount = 1
+        else:
+            self.rows = []
+
+    def fetchall(self): return self.rows
+    def fetchone(self): return self.rows[0] if self.rows else None
+    def close(self): pass
+
+
+class Connection:
+    def __init__(self):
+        self.calls, self.commits, self.rollbacks = [], 0, 0
+        self.batch, self.envelopes = (4, "DRAFT"), []
+        self.totals = (Decimal("25.00"), Decimal("25.00"), date(2026, 8, 21), 2, 4)
+        self.review_counts = [1, 0, 0, 0, 0, 0, 0]
+        self.review_gift_counts = (1, 1)
+        self.completion_gift_counts = (1, 0)
+    def cursor(self): return Cursor(self)
+    def commit(self): self.commits += 1
+    def rollback(self): self.rollbacks += 1
+
+
+class DraftBatchServiceTests(unittest.TestCase):
+    def service(self, connection):
+        return DraftBatchService(connection, 3, Authorization())
+
+    def test_catalog_excludes_ready_batches_already_sent_to_accounting(self):
+        connection = Connection()
+        self.service(connection).draft_batches()
+        sql = next(sql for sql, _values in connection.calls
+                   if "FROM tblContributionBatch b" in sql)
+        self.assertIn("b.Status='DRAFT'", sql)
+        self.assertIn("b.Status='READY' AND b.AccountingTransactionID IS NULL", sql)
+
+    def test_creates_draft_batch_with_safe_audit(self):
+        connection = Connection()
+        batch_id = self.service(connection).create_batch(
+            batch_date=date(2026, 8, 21), description="Sunday offering",
+            organization_id=4, control_total="125.00")
+        self.assertEqual((batch_id, connection.commits), (21, 1))
+        self.assertTrue(any("BATCH_CREATED" in str(values) for _, values in connection.calls))
+
+    def test_resolves_numeric_envelope_without_leading_zero_distinction(self):
+        connection = Connection(); connection.envelopes = [(45,)]
+        contributor = self.service(connection).resolve_envelope("0012", date(2026, 8, 21))
+        self.assertEqual(contributor, 45)
+        call = next(item for item in connection.calls if "EnvelopeAssignment" in item[0])
+        self.assertEqual(call[1][1], 12)
+
+    def test_saves_balanced_gift_and_updates_batch_total(self):
+        connection = Connection()
+        contribution_id = self.service(connection).save_monetary_gift(
+            batch_id=21, received_date=date(2026, 8, 21), amount="25.00",
+            contributor_id=45, method="CHECK", reference="1001",
+            allocations=[(8, 4, 5, 6, None, "20.00", None), (9, 4, 7, 6, 12, "5.00", None)])
+        self.assertEqual((contribution_id, connection.commits), (31, 1))
+        inserts = [item for item in connection.calls if "INSERT INTO tblContributionAllocation" in item[0]]
+        self.assertEqual([item[1][6] for item in inserts], [Decimal("20.00"), Decimal("5.00")])
+        self.assertTrue(any("CalculatedTotal" in sql for sql, _ in connection.calls))
+
+    def test_saves_acknowledgment_and_memorial_facts(self):
+        connection = Connection()
+        self.service(connection).save_monetary_gift(
+            batch_id=21, received_date=date(2026, 8, 21), amount="25.00",
+            contributor_id=45, method="CHECK", reference="1001",
+            allocations=[(8, 4, 5, 6, None, "25.00", None)],
+            goods_or_services_provided=True,
+            goods_or_services_description="Dinner ticket",
+            goods_or_services_value="8.00",
+            tribute_type="IN_MEMORY_OF", honoree_name="Grace Example",
+            acknowledgment_contact="Example family",
+            donor_disclosure_authorized=True,
+        )
+        insert = next(item for item in connection.calls if item[0].startswith("INSERT INTO tblContribution "))
+        self.assertIn("GoodsOrServicesProvided", insert[0])
+        self.assertIn("AcknowledgmentContact", insert[0])
+        self.assertIn("Dinner ticket", insert[1])
+        self.assertIn("Grace Example", insert[1])
+
+    def test_saves_description_only_non_cash_contribution(self):
+        connection = Connection()
+        self.service(connection).save_monetary_gift(
+            batch_id=21, received_date=date(2026, 8, 21), amount="0.00",
+            contributor_id=45, method="NON_CASH", non_cash_description="Two altar chairs",
+            donor_estimated_value="275.00",
+            allocations=[(8, 4, 5, 6, None, "0.00", None)],
+        )
+        insert = next(item for item in connection.calls if item[0].startswith("INSERT INTO tblContribution "))
+        self.assertIn("NonCashDescription", insert[0])
+        self.assertIn("DonorEstimatedValue", insert[0])
+        self.assertIn("Two altar chairs", insert[1])
+        self.assertIn(Decimal("275.00"), insert[1])
+
+    def test_directed_gift_requires_instruction_and_resolution(self):
+        service = self.service(Connection())
+        with self.assertRaisesRegex(GivingValidationError, "donor's direction"):
+            service.save_monetary_gift(
+                batch_id=21, received_date=date.today(), amount="25.00",
+                allocations=[(8, 4, 5, 6, None, "25.00", None)],
+                direction_status="REVIEW",
+            )
+        with self.assertRaisesRegex(GivingValidationError, "resolved"):
+            service.save_monetary_gift(
+                batch_id=21, received_date=date.today(), amount="25.00",
+                allocations=[(8, 4, 5, 6, None, "25.00", None)],
+                donor_direction="For a named student", direction_status="CLARIFIED",
+            )
+
+    def test_returned_direction_is_audited_and_excluded_from_batch_total(self):
+        connection = Connection()
+        self.service(connection).save_monetary_gift(
+            batch_id=21, received_date=date.today(), amount="25.00",
+            allocations=[(8, 4, 5, 6, None, "25.00", None)],
+            donor_direction="For a named person", direction_status="RETURNED",
+            direction_resolution="Returned after speaking with donor.",
+        )
+        insert = next(item for item in connection.calls if item[0].startswith("INSERT INTO tblContribution "))
+        self.assertIn("DirectionResolvedByUserID", insert[0])
+        self.assertIn("RETURNED", insert[1])
+        self.assertIn("INELIGIBLE", insert[1])
+        total_sql = next(sql for sql, _ in connection.calls if "CalculatedTotal" in sql)
+        self.assertIn("DirectionStatus<>'RETURNED'", total_sql)
+
+    def test_rejects_incomplete_acknowledgment_facts(self):
+        with self.assertRaisesRegex(GivingValidationError, "Describe"):
+            self.service(Connection()).save_monetary_gift(
+                batch_id=21, received_date=date.today(), amount="25.00",
+                allocations=[(8, 4, 5, 6, None, "25.00", None)],
+                goods_or_services_provided=True, goods_or_services_value="5.00",
+            )
+
+    def test_rejects_unbalanced_or_non_draft_gift(self):
+        with self.assertRaises(GivingValidationError):
+            self.service(Connection()).save_monetary_gift(
+                batch_id=21, received_date=date.today(), amount="25.00",
+                allocations=[(8, 4, 5, 6, None, "24.99", None)])
+        connection = Connection(); connection.batch = (4, "READY")
+        with self.assertRaises(GivingValidationError):
+            self.service(connection).save_monetary_gift(
+                batch_id=21, received_date=date.today(), amount="25.00",
+                allocations=[(8, 4, 5, 6, None, "25.00", None)])
+        self.assertEqual(connection.rollbacks, 1)
+
+    def test_review_reports_control_difference_and_unresolved_items(self):
+        connection = Connection()
+        connection.totals = (Decimal("30.00"), Decimal("25.00"), date(2026, 8, 21), 2, 4)
+        connection.review_counts = [1, 1, 0, 0, 0, 0, 0]
+        issues = self.service(connection).review_issues(21)
+        self.assertIn("control total", " ".join(issues))
+        self.assertIn("envelope", " ".join(issues))
+
+    def test_complete_draft_is_marked_ready_and_audited(self):
+        connection = Connection()
+        self.service(connection).mark_ready(21)
+        self.assertEqual(connection.commits, 1)
+        self.assertTrue(any("Status='READY'" in sql for sql, _ in connection.calls))
+        self.assertTrue(any("BATCH_MARKED_READY" in str(values) for _, values in connection.calls))
+
+    def test_non_cash_only_batch_completes_without_accounting_handoff(self):
+        connection = Connection()
+        connection.review_gift_counts = (1, 0)
+        connection.completion_gift_counts = (1, 1)
+        connection.review_counts = [0, 0, 0, 0, 0, 0]
+        status = self.service(connection).mark_ready(21)
+        self.assertEqual(status, "POSTED")
+        self.assertTrue(any("Status='POSTED'" in sql for sql, _ in connection.calls))
+        self.assertIn("NON_CASH_BATCH_COMPLETED", str(connection.calls))
+
+    def test_invalid_deposit_period_prevents_ready_status(self):
+        connection = Connection(); connection.review_counts[0] = 0
+        issues = self.service(connection).review_issues(21)
+        self.assertIn("open fiscal period", " ".join(issues))
+
+    def test_unsent_ready_batch_can_return_to_draft(self):
+        connection = Connection()
+        original_execute = Cursor.execute
+        def execute(cursor, sql, values=()):
+            original_execute(cursor, sql, values)
+            if sql.startswith("UPDATE tblContributionBatch SET Status='DRAFT'"):
+                cursor.rowcount = 1
+        Cursor.execute = execute
+        try:
+            self.service(connection).return_to_draft(21)
+        finally:
+            Cursor.execute = original_execute
+        self.assertEqual(connection.commits, 1)
+        self.assertIn("BATCH_RETURNED_TO_DRAFT", str(connection.calls))
+
+    def test_draft_batch_header_update_is_audited(self):
+        connection = Connection()
+        original_execute = Cursor.execute
+        def execute(cursor, sql, values=()):
+            original_execute(cursor, sql, values)
+            if sql.startswith("SELECT OrganizationID FROM tblContributionBatch"):
+                cursor.rows = [(4,)]
+            elif sql.startswith("UPDATE tblContributionBatch SET BatchDate"):
+                cursor.rowcount = 1
+        Cursor.execute = execute
+        try:
+            self.service(connection).update_batch_header(
+                21, batch_date=date(2027, 1, 7), description="Imported gifts",
+                organization_id=4, control_total="65", deposit_date=date(2027, 1, 15),
+                bank_account_id=2)
+        finally:
+            Cursor.execute = original_execute
+        self.assertEqual(connection.commits, 1)
+        self.assertIn("BATCH_HEADER_UPDATED", str(connection.calls))
+
+    def test_update_replaces_allocations_and_recalculates_total(self):
+        connection = Connection()
+        self.service(connection).update_monetary_gift(
+            31, batch_id=21, received_date=date.today(), amount="30.00",
+            allocations=[(8, 4, 5, 6, None, "30.00", None)], contributor_id=45,
+            envelope_number="12", method="CHECK", reference="1002",
+            statement_eligibility="ELIGIBLE", note=None)
+        sql = "\n".join(item[0] for item in connection.calls)
+        self.assertIn("UPDATE tblContribution SET", sql)
+        self.assertIn("DELETE FROM tblContributionAllocation", sql)
+        self.assertIn("CONTRIBUTION_UPDATED", str(connection.calls))
+        self.assertEqual(connection.commits, 1)
+
+    def test_delete_removes_allocations_then_gift_and_recalculates(self):
+        connection = Connection()
+        self.service(connection).delete_gift(21, 31)
+        calls = [item[0] for item in connection.calls]
+        allocation = next(i for i, sql in enumerate(calls) if sql.startswith("DELETE FROM tblContributionAllocation"))
+        gift = next(i for i, sql in enumerate(calls) if sql.startswith("DELETE FROM tblContribution WHERE"))
+        self.assertLess(allocation, gift)
+        self.assertIn("CONTRIBUTION_DELETED", str(connection.calls))
+
+
+if __name__ == "__main__": unittest.main()

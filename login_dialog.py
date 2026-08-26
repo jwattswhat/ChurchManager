@@ -1,0 +1,244 @@
+"""ChurchManager login and initial master-administrator dialogs."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import wx
+
+from authentication import (
+    AuthenticationError, AuthenticationService, MariaDBUserRepository,
+    PasswordService,
+)
+from churchmanager_version import __version__
+
+
+ROOT = Path(__file__).resolve().parent
+APPLICATION_ICON = ROOT / "cm.ico"
+COPYRIGHT_NOTICE = "Copyright © 2026 Rev. Jonathan C. Watt"
+LICENSE_NOTICE = "Free and open-source software · GNU GPL v3 or later"
+
+
+class _CredentialDialog(wx.Dialog):
+    def add_field(self, sizer, label, style=0, value=""):
+        sizer.Add(wx.StaticText(self, label=label), 0, wx.ALIGN_CENTER_VERTICAL)
+        control = wx.TextCtrl(self, value=value, style=style, size=(280, -1))
+        sizer.Add(control, 1, wx.EXPAND)
+        return control
+
+    def finish(self, fields):
+        root = wx.BoxSizer(wx.VERTICAL)
+        root.Add(fields, 1, wx.ALL | wx.EXPAND, 16)
+        root.Add(self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL), 0, wx.ALL | wx.EXPAND, 12)
+        self.SetSizerAndFit(root)
+        self.CentreOnScreen()
+
+
+class LoginDialog(_CredentialDialog):
+    """Present congregation-branded credentials without changing authentication."""
+
+    def __init__(self, parent=None, congregation_name="Local Congregation"):
+        super().__init__(parent, title="ChurchManager Login")
+        if APPLICATION_ICON.exists():
+            self.SetIcon(wx.Icon(str(APPLICATION_ICON), wx.BITMAP_TYPE_ICO))
+
+        identity = wx.BoxSizer(wx.HORIZONTAL)
+        if APPLICATION_ICON.exists():
+            bitmap = wx.Bitmap(str(APPLICATION_ICON), wx.BITMAP_TYPE_ICO)
+            identity.Add(wx.StaticBitmap(self, bitmap=bitmap), 0,
+                         wx.ALIGN_TOP | wx.RIGHT, 14)
+        names = wx.BoxSizer(wx.VERTICAL)
+        product = wx.StaticText(self, label="ChurchManager")
+        product.SetFont(product.GetFont().Bold().Larger().Larger())
+        names.Add(product, 0, wx.BOTTOM, 3)
+        church = wx.StaticText(self, label=congregation_name or "Local Congregation")
+        church.SetFont(church.GetFont().Bold())
+        names.Add(church, 0, wx.BOTTOM, 4)
+        names.Add(wx.StaticText(self, label=f"Version {__version__}"))
+        identity.Add(names, 1, wx.EXPAND)
+
+        fields = wx.FlexGridSizer(2, 2, 10, 10)
+        fields.AddGrowableCol(1, 1)
+        self.username = self.add_field(fields, "Username")
+        self.password = self.add_field(fields, "Password", wx.TE_PASSWORD)
+        root = wx.BoxSizer(wx.VERTICAL)
+        root.Add(identity, 0, wx.ALL | wx.EXPAND, 18)
+        root.Add(wx.StaticLine(self), 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 18)
+        root.Add(fields, 0, wx.ALL | wx.EXPAND, 18)
+        root.Add(wx.StaticText(self, label=COPYRIGHT_NOTICE), 0,
+                 wx.LEFT | wx.RIGHT | wx.ALIGN_CENTER_HORIZONTAL, 18)
+        license_text = wx.StaticText(self, label=LICENSE_NOTICE)
+        license_text.SetForegroundColour(wx.Colour(70, 70, 70))
+        root.Add(license_text, 0, wx.LEFT | wx.RIGHT | wx.TOP |
+                 wx.ALIGN_CENTER_HORIZONTAL, 18)
+        root.Add(self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL), 0,
+                 wx.ALL | wx.EXPAND, 14)
+        self.SetSizerAndFit(root)
+        self.SetMinSize((500, self.GetSize().height))
+        self.CentreOnScreen()
+        self.username.SetFocus()
+
+
+def congregation_name(connection):
+    """Return the configured local congregation name for login presentation."""
+    cursor = connection.cursor()
+    try:
+        cursor.execute("SELECT ChurchName FROM tblChurch ORDER BY ID LIMIT 1")
+        row = cursor.fetchone()
+        return str(row[0]).strip() if row and row[0] else "Local Congregation"
+    except Exception:
+        return "Local Congregation"
+    finally:
+        cursor.close()
+
+
+class InitialMasterDialog(_CredentialDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent, title="Create Initial Master Administrator")
+        fields = wx.FlexGridSizer(4, 2, 10, 10)
+        fields.AddGrowableCol(1, 1)
+        self.username = self.add_field(fields, "Username", value="jonathan")
+        self.display_name = self.add_field(
+            fields, "Display name", value="Rev. Jonathan C. Watt"
+        )
+        self.password = self.add_field(fields, "Password", wx.TE_PASSWORD)
+        self.confirmation = self.add_field(fields, "Confirm password", wx.TE_PASSWORD)
+        self.finish(fields)
+
+
+class ChangePasswordDialog(_CredentialDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent, title="Change ChurchManager Password")
+        fields = wx.FlexGridSizer(2, 2, 10, 10)
+        fields.AddGrowableCol(1, 1)
+        self.password = self.add_field(fields, "New password", wx.TE_PASSWORD)
+        self.confirmation = self.add_field(fields, "Confirm password", wx.TE_PASSWORD)
+        self.finish(fields)
+
+
+class ChangeOwnPasswordDialog(_CredentialDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent, title="Change ChurchManager Password")
+        fields = wx.FlexGridSizer(3, 2, 10, 10)
+        fields.AddGrowableCol(1, 1)
+        self.current = self.add_field(fields, "Current password", wx.TE_PASSWORD)
+        self.password = self.add_field(fields, "New password", wx.TE_PASSWORD)
+        self.confirmation = self.add_field(fields, "Confirm password", wx.TE_PASSWORD)
+        self.finish(fields)
+
+
+def _message(parent, text, title, style=wx.OK | wx.ICON_ERROR):
+    dialog = wx.MessageDialog(parent, text, title, style)
+    try:
+        return dialog.ShowModal()
+    finally:
+        dialog.Destroy()
+
+
+def ensure_initial_master(repository, passwords, parent=None):
+    if repository.has_users():
+        return True
+    while True:
+        dialog = InitialMasterDialog(parent)
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return False
+            username = dialog.username.GetValue().strip()
+            display_name = dialog.display_name.GetValue().strip()
+            password = dialog.password.GetValue()
+            confirmation = dialog.confirmation.GetValue()
+        finally:
+            dialog.Destroy()
+        if not username or not display_name:
+            _message(parent, "Username and display name are required.", "Initial setup")
+            continue
+        if password != confirmation:
+            _message(parent, "The passwords do not match.", "Initial setup")
+            continue
+        try:
+            password_hash = passwords.hash(password)
+            repository.create_initial_master(username, display_name, password_hash)
+            return True
+        except (ValueError, RuntimeError) as error:
+            _message(parent, str(error), "Initial setup")
+
+
+def require_password_change(repository, passwords, session, parent=None):
+    if not session.must_change_password:
+        return True
+    while True:
+        dialog = ChangePasswordDialog(parent)
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return False
+            password = dialog.password.GetValue()
+            confirmation = dialog.confirmation.GetValue()
+        finally:
+            dialog.Destroy()
+        if password != confirmation:
+            _message(parent, "The passwords do not match.", "Change password")
+            continue
+        try:
+            repository.change_password(session.user_id, passwords.hash(password))
+            return True
+        except (ValueError, RuntimeError) as error:
+            _message(parent, str(error), "Change password")
+
+
+def change_own_password(connection, session, parent=None, minimum_length=12):
+    """Change the signed-in user's password after verifying the current one."""
+    repository = MariaDBUserRepository(connection)
+    passwords = PasswordService(minimum_length=minimum_length)
+    dialog = ChangeOwnPasswordDialog(parent)
+    try:
+        if dialog.ShowModal() != wx.ID_OK:
+            return False
+        current = dialog.current.GetValue()
+        password = dialog.password.GetValue()
+        confirmation = dialog.confirmation.GetValue()
+    finally:
+        dialog.Destroy()
+    account = repository.find_by_username(session.username)
+    if account is None or not passwords.verify(account.password_hash, current):
+        _message(parent, "The current password is incorrect.", "Change password")
+        return False
+    if password != confirmation:
+        _message(parent, "The new passwords do not match.", "Change password")
+        return False
+    try:
+        repository.change_password(session.user_id, passwords.hash(password))
+    except (ValueError, RuntimeError) as error:
+        _message(parent, str(error), "Change password")
+        return False
+    _message(
+        parent, "Your ChurchManager password has been changed.",
+        "Change password", wx.OK | wx.ICON_INFORMATION,
+    )
+    return True
+
+
+def authenticate_user(connection, parent=None, minimum_length=12):
+    """Run initial setup if needed, then return an authenticated session or None."""
+    repository = MariaDBUserRepository(connection)
+    passwords = PasswordService(minimum_length=minimum_length)
+    if not ensure_initial_master(repository, passwords, parent):
+        return None
+    service = AuthenticationService(repository, passwords)
+    local_church = congregation_name(connection)
+    while True:
+        dialog = LoginDialog(parent, local_church)
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return None
+            username = dialog.username.GetValue()
+            password = dialog.password.GetValue()
+        finally:
+            dialog.Destroy()
+        try:
+            session = service.authenticate(username, password)
+        except AuthenticationError as error:
+            _message(parent, str(error), "Login failed")
+            continue
+        if not require_password_change(repository, passwords, session, parent):
+            return None
+        return session
