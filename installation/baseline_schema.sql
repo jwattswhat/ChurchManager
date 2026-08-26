@@ -12,12 +12,74 @@ SET character_set_client = utf8mb4;
 /*!50001 CREATE VIEW `rpt_asset` AS SELECT
  1 AS `ID`,
   1 AS `ChurchID`,
-  1 AS `AssetID`,
+  1 AS `AssetNumber`,
+  1 AS `AssetName`,
+  1 AS `Category`,
   1 AS `Description`,
-  1 AS `Reserve`,
-  1 AS `PurchaseDate`,
-  1 AS `Depreciate`,
-  1 AS `Note` */;
+  1 AS `Quantity`,
+  1 AS `Manufacturer`,
+  1 AS `Model`,
+  1 AS `SerialNumber`,
+  1 AS `LocationID`,
+  1 AS `ResponsiblePersonID`,
+  1 AS `ResponsibleGroupID`,
+  1 AS `AcquisitionMethod`,
+  1 AS `AcquisitionDate`,
+  1 AS `ReferenceValue`,
+  1 AS `Condition`,
+  1 AS `Status`,
+  1 AS `WarrantyExpires`,
+  1 AS `NextMaintenanceDate`,
+  1 AS `ReplacementReviewDate`,
+  1 AS `RetiredDate`,
+  1 AS `Note`,
+  1 AS `Version` */;
+SET character_set_client = @saved_cs_client;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `rpt_asset_history` AS SELECT
+ 1 AS `ChurchID`,
+  1 AS `AssetID`,
+  1 AS `AssetNumber`,
+  1 AS `AssetName`,
+  1 AS `ActivityDate`,
+  1 AS `ActivityType`,
+  1 AS `Summary`,
+  1 AS `Cost`,
+  1 AS `LocationName`,
+  1 AS `NextActionDate`,
+  1 AS `CreatedAt` */;
+SET character_set_client = @saved_cs_client;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `rpt_asset_maintenance_due` AS SELECT
+ 1 AS `ChurchID`,
+  1 AS `AssetID`,
+  1 AS `AssetNumber`,
+  1 AS `AssetName`,
+  1 AS `LocationName`,
+  1 AS `Condition`,
+  1 AS `Status`,
+  1 AS `NextMaintenanceDate`,
+  1 AS `ReplacementReviewDate`,
+  1 AS `DueDate` */;
+SET character_set_client = @saved_cs_client;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `rpt_asset_register` AS SELECT
+ 1 AS `ChurchID`,
+  1 AS `AssetID`,
+  1 AS `AssetNumber`,
+  1 AS `AssetName`,
+  1 AS `Category`,
+  1 AS `Quantity`,
+  1 AS `LocationName`,
+  1 AS `ResponsiblePerson`,
+  1 AS `ResponsibleGroup`,
+  1 AS `ConditionName`,
+  1 AS `Status`,
+  1 AS `NextMaintenanceDate`,
+  1 AS `ReplacementReviewDate` */;
 SET character_set_client = @saved_cs_client;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8mb4;
@@ -1135,17 +1197,88 @@ CREATE TABLE `tblannouncement` (
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblasset` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `ChurchID` int(11) DEFAULT NULL,
-  `AssetID` varchar(255) NOT NULL,
-  `Description` varchar(255) NOT NULL,
-  `Reserve` tinyint(1) NOT NULL DEFAULT 0,
-  `PurchaseDate` date DEFAULT NULL,
-  `Depreciate` tinyint(1) NOT NULL DEFAULT 0,
+  `ChurchID` int(11) NOT NULL,
+  `AssetNumber` varchar(40) NOT NULL,
+  `AssetName` varchar(160) NOT NULL,
+  `Category` varchar(80) NOT NULL DEFAULT 'Other',
+  `Description` varchar(500) DEFAULT NULL,
+  `Quantity` int(11) NOT NULL DEFAULT 1,
+  `Manufacturer` varchar(120) DEFAULT NULL,
+  `Model` varchar(120) DEFAULT NULL,
+  `SerialNumber` varchar(120) DEFAULT NULL,
+  `LocationID` int(11) DEFAULT NULL,
+  `ResponsiblePersonID` int(11) DEFAULT NULL,
+  `ResponsibleGroupID` int(11) DEFAULT NULL,
+  `AcquisitionMethod` varchar(40) DEFAULT NULL,
+  `AcquisitionDate` date DEFAULT NULL,
+  `ReferenceValue` decimal(13,2) DEFAULT NULL,
+  `Condition` varchar(40) NOT NULL DEFAULT 'Unknown',
+  `Status` varchar(40) NOT NULL DEFAULT 'Active',
+  `WarrantyExpires` date DEFAULT NULL,
+  `NextMaintenanceDate` date DEFAULT NULL,
+  `ReplacementReviewDate` date DEFAULT NULL,
+  `RetiredDate` date DEFAULT NULL,
   `Note` longtext DEFAULT NULL,
+  `Version` int(11) NOT NULL DEFAULT 1,
   PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_asset_number` (`ChurchID`,`AssetNumber`),
   KEY `fk_tblasset_tblchurch1_idx` (`ChurchID`),
-  CONSTRAINT `fk_asset_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`) ON DELETE SET NULL
+  KEY `fk_asset_location` (`LocationID`),
+  KEY `fk_asset_person` (`ResponsiblePersonID`),
+  KEY `fk_asset_group` (`ResponsibleGroupID`),
+  KEY `ix_asset_due` (`ChurchID`,`Status`,`NextMaintenanceDate`,`ReplacementReviewDate`),
+  CONSTRAINT `fk_asset_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_asset_group` FOREIGN KEY (`ResponsibleGroupID`) REFERENCES `tblgroup` (`ID`),
+  CONSTRAINT `fk_asset_location` FOREIGN KEY (`LocationID`) REFERENCES `tblassetlocation` (`ID`),
+  CONSTRAINT `fk_asset_person` FOREIGN KEY (`ResponsiblePersonID`) REFERENCES `tblperson` (`ID`),
+  CONSTRAINT `ck_asset_quantity` CHECK (`Quantity` > 0),
+  CONSTRAINT `ck_asset_reference_value` CHECK (`ReferenceValue` is null or `ReferenceValue` >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblassetactivity` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `AssetID` int(11) NOT NULL,
+  `ActivityDate` date NOT NULL,
+  `ActivityType` varchar(50) NOT NULL,
+  `Summary` varchar(500) NOT NULL,
+  `Cost` decimal(13,2) DEFAULT NULL,
+  `LocationID` int(11) DEFAULT NULL,
+  `NextActionDate` date DEFAULT NULL,
+  `DocumentID` int(11) DEFAULT NULL,
+  `RecordedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`ID`),
+  KEY `fk_asset_activity_location` (`LocationID`),
+  KEY `fk_asset_activity_document` (`DocumentID`),
+  KEY `fk_asset_activity_user` (`RecordedByUserID`),
+  KEY `ix_asset_activity_history` (`AssetID`,`ActivityDate`,`ID`),
+  CONSTRAINT `fk_asset_activity_asset` FOREIGN KEY (`AssetID`) REFERENCES `tblasset` (`ID`),
+  CONSTRAINT `fk_asset_activity_document` FOREIGN KEY (`DocumentID`) REFERENCES `tbldocument` (`ID`),
+  CONSTRAINT `fk_asset_activity_location` FOREIGN KEY (`LocationID`) REFERENCES `tblassetlocation` (`ID`),
+  CONSTRAINT `fk_asset_activity_user` FOREIGN KEY (`RecordedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_asset_activity_cost` CHECK (`Cost` is null or `Cost` >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblassetlocation` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `LocationName` varchar(120) NOT NULL,
+  `ParentLocationID` int(11) DEFAULT NULL,
+  `Address` varchar(255) DEFAULT NULL,
+  `IsActive` tinyint(1) NOT NULL DEFAULT 1,
+  `Note` text DEFAULT NULL,
+  `Version` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_asset_location_name` (`ChurchID`,`ParentLocationID`,`LocationName`),
+  KEY `fk_asset_location_parent` (`ParentLocationID`),
+  KEY `ix_asset_location_church` (`ChurchID`,`IsActive`,`LocationName`),
+  CONSTRAINT `fk_asset_location_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_asset_location_parent` FOREIGN KEY (`ParentLocationID`) REFERENCES `tblassetlocation` (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
@@ -3547,7 +3680,46 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013  SQL SECURITY DEFINER */
-/*!50001 VIEW `rpt_asset` AS select `tblasset`.`ID` AS `ID`,`tblasset`.`ChurchID` AS `ChurchID`,`tblasset`.`AssetID` AS `AssetID`,`tblasset`.`Description` AS `Description`,`tblasset`.`Reserve` AS `Reserve`,`tblasset`.`PurchaseDate` AS `PurchaseDate`,`tblasset`.`Depreciate` AS `Depreciate`,`tblasset`.`Note` AS `Note` from `tblasset` */;
+/*!50001 VIEW `rpt_asset` AS select `tblasset`.`ID` AS `ID`,`tblasset`.`ChurchID` AS `ChurchID`,`tblasset`.`AssetNumber` AS `AssetNumber`,`tblasset`.`AssetName` AS `AssetName`,`tblasset`.`Category` AS `Category`,`tblasset`.`Description` AS `Description`,`tblasset`.`Quantity` AS `Quantity`,`tblasset`.`Manufacturer` AS `Manufacturer`,`tblasset`.`Model` AS `Model`,`tblasset`.`SerialNumber` AS `SerialNumber`,`tblasset`.`LocationID` AS `LocationID`,`tblasset`.`ResponsiblePersonID` AS `ResponsiblePersonID`,`tblasset`.`ResponsibleGroupID` AS `ResponsibleGroupID`,`tblasset`.`AcquisitionMethod` AS `AcquisitionMethod`,`tblasset`.`AcquisitionDate` AS `AcquisitionDate`,`tblasset`.`ReferenceValue` AS `ReferenceValue`,`tblasset`.`Condition` AS `Condition`,`tblasset`.`Status` AS `Status`,`tblasset`.`WarrantyExpires` AS `WarrantyExpires`,`tblasset`.`NextMaintenanceDate` AS `NextMaintenanceDate`,`tblasset`.`ReplacementReviewDate` AS `ReplacementReviewDate`,`tblasset`.`RetiredDate` AS `RetiredDate`,`tblasset`.`Note` AS `Note`,`tblasset`.`Version` AS `Version` from `tblasset` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!50001 DROP VIEW IF EXISTS `rpt_asset_history`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013  SQL SECURITY DEFINER */
+/*!50001 VIEW `rpt_asset_history` AS select `a`.`ChurchID` AS `ChurchID`,`a`.`ID` AS `AssetID`,`a`.`AssetNumber` AS `AssetNumber`,`a`.`AssetName` AS `AssetName`,`h`.`ActivityDate` AS `ActivityDate`,`h`.`ActivityType` AS `ActivityType`,`h`.`Summary` AS `Summary`,`h`.`Cost` AS `Cost`,`l`.`LocationName` AS `LocationName`,`h`.`NextActionDate` AS `NextActionDate`,`h`.`CreatedAt` AS `CreatedAt` from ((`tblassetactivity` `h` join `tblasset` `a` on(`a`.`ID` = `h`.`AssetID`)) left join `tblassetlocation` `l` on(`l`.`ID` = `h`.`LocationID`)) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!50001 DROP VIEW IF EXISTS `rpt_asset_maintenance_due`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013  SQL SECURITY DEFINER */
+/*!50001 VIEW `rpt_asset_maintenance_due` AS select `a`.`ChurchID` AS `ChurchID`,`a`.`ID` AS `AssetID`,`a`.`AssetNumber` AS `AssetNumber`,`a`.`AssetName` AS `AssetName`,`l`.`LocationName` AS `LocationName`,`a`.`Condition` AS `Condition`,`a`.`Status` AS `Status`,`a`.`NextMaintenanceDate` AS `NextMaintenanceDate`,`a`.`ReplacementReviewDate` AS `ReplacementReviewDate`,least(coalesce(`a`.`NextMaintenanceDate`,'9999-12-31'),coalesce(`a`.`ReplacementReviewDate`,'9999-12-31')) AS `DueDate` from (`tblasset` `a` left join `tblassetlocation` `l` on(`l`.`ID` = `a`.`LocationID`)) where `a`.`Status` not in ('Retired','Lost','Disposed') and (`a`.`NextMaintenanceDate` is not null or `a`.`ReplacementReviewDate` is not null) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!50001 DROP VIEW IF EXISTS `rpt_asset_register`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013  SQL SECURITY DEFINER */
+/*!50001 VIEW `rpt_asset_register` AS select `a`.`ChurchID` AS `ChurchID`,`a`.`ID` AS `AssetID`,`a`.`AssetNumber` AS `AssetNumber`,`a`.`AssetName` AS `AssetName`,`a`.`Category` AS `Category`,`a`.`Quantity` AS `Quantity`,`l`.`LocationName` AS `LocationName`,trim(concat_ws(' ',`p`.`FirstName`,`p`.`LastName`)) AS `ResponsiblePerson`,`g`.`Name` AS `ResponsibleGroup`,`a`.`Condition` AS `ConditionName`,`a`.`Status` AS `Status`,`a`.`NextMaintenanceDate` AS `NextMaintenanceDate`,`a`.`ReplacementReviewDate` AS `ReplacementReviewDate` from (((`tblasset` `a` left join `tblassetlocation` `l` on(`l`.`ID` = `a`.`LocationID`)) left join `tblperson` `p` on(`p`.`ID` = `a`.`ResponsiblePersonID`)) left join `tblgroup` `g` on(`g`.`ID` = `a`.`ResponsibleGroupID`)) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;

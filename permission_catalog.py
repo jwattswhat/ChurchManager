@@ -75,4 +75,8 @@ MAIN_MENU_PERMISSIONS = {
     "lblCustomProfileSearch": "profiles.custom_fields.view",
     "lblCalendarEvents": "calendar.view",
     "lblCalendarIntegration": "calendar.view",
+    "lblAssets": "assets.view",
+    "lblAssetLocations": "assets.view",
+    "lblAssetMaintenance": "assets.view",
+    "lblAssetReports": "assets.view",
 }

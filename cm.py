@@ -84,6 +84,7 @@ from custom_profile_admin_dialog import show_custom_profile_administration
 from custom_profile_search_dialog import show_custom_profile_search
 from calendar_event_dialog import show_calendar_events
 from calendar_integration_dialog import show_calendar_integration
+from asset_dialog import show_assets, show_asset_locations, show_asset_maintenance
 
 
 arguments = None
@@ -483,6 +484,8 @@ def _buttonclick(event):
     if select in FORM_ROUTES:
         context.form_factory.open(FORM_ROUTES[select])
         return
+    if select == "lblAssetReports":
+        select = "lblReports"
     match select:
         case "lblCheckList":
             show_checklist_maintenance(cmfrm.FRAME, context.connection)
@@ -512,6 +515,7 @@ def _buttonclick(event):
                 "DocumentType", "AttendanceType", "DateType", "ContactLabel",
                 "Type", "Location", "PrayerCategory", "AnnouncementCategory",
                 "AddressLabel", "Reading", "Season", "Category",
+                "AssetCategory", "AssetCondition", "AssetAcquisitionMethod", "AssetActivityType",
             }, choice_eligible_fields())
             return
         case "lblSchedule":
@@ -549,6 +553,15 @@ def _buttonclick(event):
             frm.enable_button("btnClose")
             frm.show()
             frm.CONTROLID["ReportID"].SetFocus()
+            return
+        case "lblAssets":
+            show_assets(cmfrm.FRAME, context.connection, context.session, context.authorization)
+            return
+        case "lblAssetLocations":
+            show_asset_locations(cmfrm.FRAME, context.connection, context.session, context.authorization)
+            return
+        case "lblAssetMaintenance":
+            show_asset_maintenance(cmfrm.FRAME, context.connection, context.session, context.authorization)
             return
         case "lblReportDesigner":
             open_directory_designer(authorization=context.authorization)

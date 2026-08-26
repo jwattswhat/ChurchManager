@@ -1,10 +1,12 @@
 # ChurchManager simple asset management specification
 
-**Status:** Proposed for approval
+**Status:** Approved
 
-**Version:** 1.0 draft
+**Version:** 1.0
 
-**Date:** August 24, 2026
+**Date:** August 25, 2026
+
+**Approved by:** Rev. Jonathan C. Watt
 
 **Target application:** ChurchManager
 

@@ -58,6 +58,15 @@
       ]
     },
     {
+      "label": "A&ssets",
+      "items": [
+        {"command": "churchmanager.assets"},
+        {"command": "churchmanager.asset_locations"},
+        {"command": "churchmanager.asset_maintenance"},
+        {"command": "churchmanager.asset_reports"}
+      ]
+    },
+    {
       "label": "&Giving",
       "items": [
         {"command": "churchmanager.contribution_batches"},

@@ -44,6 +44,10 @@
       "lblGivingContributors": {"type": "StaticText", "name": "lblGivingContributors", "label": "Contributors and Envelopes", "posch": [15, 14], "security": {"invoke": "giving.contributors.manage"}},
       "lblGivingReports": {"type": "StaticText", "name": "lblGivingReports", "label": "Giving Reports", "posch": [15, 15], "security": {"invoke": "giving.reports.summary"}},
 
+      "AssetBox": {"type": "StaticBox", "name": "AssetBox", "label": "Assets", "posch": [14, 20], "sizech": [13, 5], "layout": {"row": 3, "column": 1}},
+      "lblAssets": {"type": "StaticText", "name": "lblAssets", "label": "Assets", "posch": [15, 21], "security": {"invoke": "assets.view"}},
+      "lblAssetMaintenance": {"type": "StaticText", "name": "lblAssetMaintenance", "label": "Maintenance Due", "posch": [15, 22], "security": {"invoke": "assets.view"}},
+
       "DailyAccountingBox": {"type": "StaticBox", "name": "DailyAccountingBox", "label": "Accounting - Daily Work", "posch": [28, 12], "sizech": [12, 8], "layout": {"row": 2, "column": 2}},
       "lblAccountingTransactions": {"type": "StaticText", "name": "lblAccountingTransactions", "label": "Transaction Entry", "posch": [29, 13], "security": {"invoke": "accounting.transactions.create"}},
       "lblAccountingReview": {"type": "StaticText", "name": "lblAccountingReview", "label": "Transaction Review", "posch": [29, 14], "security": {"invoke": "accounting.transactions.approve"}},

@@ -714,6 +714,45 @@ INSERT IGNORE INTO tblRolePermission (RoleID,PermissionID)
 SELECT r.ID,p.ID FROM tblRole r JOIN tblPermission p ON p.Name LIKE 'calendar.%'
 WHERE r.Name='Master Administrator';
 
+-- source: 117_add_asset_management.sql
+INSERT INTO tblPermission (Name,Description,IsSensitive,Active) VALUES
+('assets.view','View congregational assets, locations, history, and reports.',0,1),
+('assets.manage','Create and update assets, locations, and activities.',0,1),
+('assets.retire','Retire, mark lost, dispose of, or restore an asset.',1,1)
+ON DUPLICATE KEY UPDATE Description=VALUES(Description),IsSensitive=VALUES(IsSensitive),Active=1;
+
+-- source: 117_add_asset_management.sql
+INSERT INTO tblRolePermission (RoleID,PermissionID)
+SELECT r.ID,p.ID FROM tblRole r CROSS JOIN tblPermission p
+WHERE r.Name='Master Administrator' AND p.Name IN ('assets.view','assets.manage','assets.retire')
+ON DUPLICATE KEY UPDATE RoleID=VALUES(RoleID);
+
+-- source: 117_add_asset_management.sql
+INSERT INTO tblChoices (Field,Choices,Note) VALUES
+('AssetCategory','[Audio/Visual\nBuilding Equipment\nFurniture\nKitchen Equipment\nMusical Instrument\nOffice Equipment\nTechnology\nVehicle\nOther]','Congregation-maintained asset categories.'),
+('AssetCondition','[Excellent\nGood\nFair\nPoor\nUnknown]','Current physical condition of an asset.'),
+('AssetAcquisitionMethod','[Purchased\nDonated\nTransferred\nOther]','How an asset came into congregational care.'),
+('AssetActivityType','[Maintenance\nInspection\nRepair\nTransfer\nCondition Review\nRetirement\nDisposal\nLoss\nNote]','Append-only asset activity types.')
+ON DUPLICATE KEY UPDATE Note=VALUES(Note);
+
+-- source: 117_add_asset_management.sql
+INSERT INTO tblReports (Report,Title,Params,Batch,Note,Available,RequiredPermissionID)
+SELECT 'CMAM01','Asset Management - Asset Register','[ChurchID]',NULL,'Current congregational asset register.',1,p.ID
+FROM tblPermission p WHERE p.Name='assets.view'
+ON DUPLICATE KEY UPDATE Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),Available=1,RequiredPermissionID=VALUES(RequiredPermissionID);
+
+-- source: 117_add_asset_management.sql
+INSERT INTO tblReports (Report,Title,Params,Batch,Note,Available,RequiredPermissionID)
+SELECT 'CMAM02','Asset Management - Maintenance Due','[ChurchID]',NULL,'Due and upcoming asset work.',1,p.ID
+FROM tblPermission p WHERE p.Name='assets.view'
+ON DUPLICATE KEY UPDATE Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),Available=1,RequiredPermissionID=VALUES(RequiredPermissionID);
+
+-- source: 117_add_asset_management.sql
+INSERT INTO tblReports (Report,Title,Params,Batch,Note,Available,RequiredPermissionID)
+SELECT 'CMAM03','Asset Management - Asset History','[ChurchID\r\nAssetID]',NULL,'Dated history for one selected asset.',1,p.ID
+FROM tblPermission p WHERE p.Name='assets.view'
+ON DUPLICATE KEY UPDATE Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),Available=1,RequiredPermissionID=VALUES(RequiredPermissionID);
+
 -- source: current-schema starter policy
 INSERT INTO tblWorshipRole (Name,Description,DisplayOrder,Active) VALUES
 ('Liturgist',NULL,10,1),('Crucifer','Carries the cross',20,1),

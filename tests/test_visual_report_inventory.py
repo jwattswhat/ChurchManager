@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import unittest
 
 import JSForm
@@ -132,6 +133,13 @@ class TestVisualReportInventory(unittest.TestCase):
                 source, _where, _values = provider._scope(spec.view, 1)
                 self.assertIn(spec.view, source)
 
+    def test_asset_report_filters_have_reports_screen_controls(self):
+        form = json.loads((ROOT / "Forms" / "frmReports.json").read_text(encoding="utf-8"))
+        controls = set(form["frmReportsFORM"]["CONTROLS"])
+        for spec in (item for item in SPECS if item.code.startswith("CMAM")):
+            with self.subTest(code=spec.code):
+                self.assertTrue(set(spec.filter_fields).issubset(controls))
+
     def test_favorite_hymns_report_requires_a_hymnal_and_exact_tag_view(self):
         spec = next(item for item in SPECS if item.code == "CMWS07")
         self.assertEqual(spec.filter_fields, ("HymnalID",))
@@ -151,6 +159,7 @@ class TestVisualReportInventory(unittest.TestCase):
         subsystem_names = {
             "GN": "General", "AT": "Attendance", "WS": "Worship",
             "MB": "Membership", "GR": "Groups", "PC": "Pastoral Care",
+            "AM": "Asset Management",
         }
         for code in OFFICIAL_CODES:
             with self.subTest(code=code):

@@ -2,8 +2,8 @@
   "artifact": "ChurchManager fresh-install starter-data baseline",
   "format_version": 1,
   "release_version": "0.3.0-dev",
-  "seed_sha256": "0dbc3294b31fb774912ae78a1f35cf90b97a0bb00ac82c9278759b544eaa1f1c",
-  "statement_count": 110,
+  "seed_sha256": "4a82fefc0df0728107bcb154178979c0da0caface3da0703bcc9b8449068f2f1",
+  "statement_count": 116,
   "source_migrations": [
     {
       "version": "003_add_user_security.sql",
@@ -204,6 +204,11 @@
       "version": "114_add_church_events.sql",
       "checksum": "5f80bc8f94eeac6fb4f1db3693e45012d1428ad332ad159440da1a042363199c",
       "statements": 2
+    },
+    {
+      "version": "117_add_asset_management.sql",
+      "checksum": "7b31144db77ee2e6b0a6f9d448367a09aea5293a1eb9acf0ff1cf25f31c2d30a",
+      "statements": 6
     }
   ],
   "current_schema_statements": 1,

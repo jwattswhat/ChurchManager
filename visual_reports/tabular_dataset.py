@@ -94,6 +94,7 @@ class TabularDatasetProvider:
             "rpt_group_current_roster", "rpt_person_group_participation",
             "rpt_group_meeting_attendance", "rpt_group_attendance_sheet",
             "rpt_custom_profile_value",
+            "rpt_asset_register", "rpt_asset_maintenance_due", "rpt_asset_history",
         }
         if view in direct:
             where, values = [f"ChurchID={marker}"], [church_id]
@@ -120,6 +121,7 @@ class TabularDatasetProvider:
             ("HymnID", "HymnID"),
             ("HymnalID", "HymnalID"),
             ("ServiceID", "ServiceID"),
+            ("AssetID", "AssetID"),
         ):
             value = parameters.get(parameter)
             if value not in (None, "", "All") and field in field_names:

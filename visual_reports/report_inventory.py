@@ -159,6 +159,22 @@ SPECS = (
         "LastName, FirstName", 4, "landscape",
         filter_fields=("GroupID", "MembershipStartDate", "MembershipEndDate")),
 
+    ReportSpec("CMAM01", "Asset Management - Asset Register", "assets.view", "rpt_asset_register", (
+        c("AssetNumber", "Number", 70), c("AssetName", "Asset", 150), c("Category", "Category", 95),
+        c("Quantity", "Qty", 35, "integer"), c("LocationName", "Location", 105),
+        c("ConditionName", "Condition", 65), c("Status", "Status", 70)),
+        "AssetNumber, AssetName", 1, "landscape"),
+    ReportSpec("CMAM02", "Asset Management - Maintenance Due", "assets.view", "rpt_asset_maintenance_due", (
+        c("DueDate", "Due", 70, "date"), c("AssetNumber", "Number", 70), c("AssetName", "Asset", 155),
+        c("LocationName", "Location", 120), c("NextMaintenanceDate", "Maintenance", 85, "date"),
+        c("ReplacementReviewDate", "Replacement Review", 100, "date"), c("Status", "Status", 70)),
+        "DueDate, AssetNumber", 1, "landscape"),
+    ReportSpec("CMAM03", "Asset Management - Asset History", "assets.view", "rpt_asset_history", (
+        c("ActivityDate", "Date", 70, "date"), c("ActivityType", "Activity", 90),
+        c("Summary", "Summary", 230), c("Cost", "Cost", 70, "currency"),
+        c("LocationName", "Location", 105), c("NextActionDate", "Next Action", 75, "date")),
+        "ActivityDate DESC, CreatedAt DESC", 1, "landscape"),
+
     ReportSpec("CMPC03", "Pastoral Care - Journal", "reports.pastoral.confidential", "rpt_journal", (
         c("StartDate", "Start", 75, "date"), c("EndDate", "End", 75, "date"), c("Event", "Event", 180),
         c("Complete", "Complete", 65, "boolean"), c("Note", "Notes", 245)), "StartDate DESC", 5, "landscape"),

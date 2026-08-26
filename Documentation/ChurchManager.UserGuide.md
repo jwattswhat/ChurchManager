@@ -654,6 +654,32 @@ The Google token is kept in Windows Credential Manager and is not included in
 the ChurchManager database or backup. Google publishing is disabled in TEST
 MODE. Automatic and two-way synchronization are not supported.
 
+### Asset Management
+
+Open **Assets** to maintain a simple congregational register of equipment,
+furnishings, instruments, technology, vehicles, and other property. Each asset
+has a permanent congregation-assigned number, name, category, location,
+condition, status, and optional acquisition, value, warranty, maintenance, and
+replacement-review information. Reference value is planning information; Asset
+Management does not calculate depreciation or replace the accounting ledger.
+
+Use **Locations** before entering assets so rooms, buildings, and storage areas
+are named consistently. Double-click an asset to review or edit it and to add
+dated maintenance, movement, repair, inspection, retirement, or other activity.
+Activity history is retained rather than overwritten. Retired, lost, and
+disposed assets require a date and remain in history.
+
+**Maintenance Due** lists active assets whose maintenance or replacement-review
+date is approaching. The Asset Register, Maintenance Due, and Asset Activity
+History reports are available under Reports.
+
+CSV import is a reviewed, all-or-nothing operation. Create locations first,
+select **Import CSV**, map an approved file, and review every row. Duplicate
+asset numbers, unknown locations, invalid dates, or other errors must be fixed
+before import. Repeated serial numbers are shown as warnings. Dates use
+`YYYY-MM-DD`. CSV export contains the current register fields but does not
+include activity history, documents, or protected information.
+
 ### Users and roles
 
 Administrators create individual accounts and assign only the permissions each

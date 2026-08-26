@@ -1,6 +1,6 @@
 # ChurchManager development roadmap
 
-Last reviewed: August 24, 2026
+Last reviewed: August 25, 2026
 
 This is the maintained ChurchManager development backlog. Priorities reflect
 the needs of a small congregation and a comparison with current paid and
@@ -32,13 +32,13 @@ from Sent to Accounting in the batch list.
 | 12 | Completed | [Volunteer availability and responses](ChurchManager.VolunteerAvailability.Specification.md) | Date-specific unavailable periods, participant responses, conflicts, last-served information, and the maintained worship test dataset passed automated and visual acceptance. |
 | 13 | Completed | [Custom profile fields and controlled tags](ChurchManager.CustomProfileFields.Specification.md) | Schema, permissions, application-neutral JSForm host, lifecycle-aware administration, Person/Family values, search, reports, and controlled exchange passed final visual acceptance on August 25, 2026. |
 | 14 | Completed | [Calendar integration](ChurchManager.CalendarIntegration.Specification.md) | Event agenda, recurrence, neutral Worship/Group/Event adapters, protected preview, iCalendar export, duplicate-safe publication state, and optional one-way Google publishing are implemented. The Project milestone source will be registered when that future source exists. |
-| 15 | Spec proposed | [Asset management](ChurchManager.AssetManagement.Specification.md) | A deliberately small asset register, location, responsibility, maintenance-history, due-list, and retirement design without a full facilities system. |
+| 15 | Completed | [Asset management](ChurchManager.AssetManagement.Specification.md) | The register, locations, activity history, due list, reviewed CSV exchange, permissions, reports, menu integration, test dataset, migration, and automated suite passed final visual acceptance on August 26, 2026. |
 | 16 | Approved; implementation pending | [Projects and scheduling](ChurchManager.ProjectsScheduling.Specification.md) | Provide bounded congregation project plans, assignments, due dates, status, and external-calendar eligibility without restoring the retired generic subsystem. |
 | Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
 
-Calendar Integration is complete. Asset Management and Projects and Scheduling
-follow in that order; Projects will register its milestone adapter with the
-completed Calendar Integration service.
+Calendar Integration and Asset Management are complete. Projects and
+Scheduling follows and will register its milestone adapter with the completed
+Calendar Integration service.
 
 ## Completed foundations retained for regression protection
 
