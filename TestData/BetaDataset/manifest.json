@@ -1,27 +1,37 @@
 {
   "dataset_id": "churchmanager-beta-test-data",
-  "dataset_version": "1.0.0",
-  "release_version": "0.3.0-dev",
-  "minimum_schema_migration": 95,
+  "dataset_version": "1.1.0",
+  "release_version": "0.3.0-beta.1",
+  "minimum_schema_migration": 120,
   "target_database": "ChurchDBTest",
   "fictional_organization": "Reformation Lutheran Church",
   "stages": [
-    "reset_test_activity",
-    "seed_nonaccounting_test_data",
-    "seed_duplicate_review_test_data",
-    "seed_accounting_test_scenario",
-    "reset_giving_test_data"
+    {"service": "reset_test_activity", "arguments": ["--apply"]},
+    {"service": "seed_nonaccounting_test_data", "arguments": ["--apply", "--skip-login-users"]},
+    {"service": "seed_beta_membership", "arguments": ["--apply"]},
+    {"service": "seed_duplicate_review_test_data", "arguments": ["--apply"]},
+    {"service": "reset_worship_test_services", "arguments": ["--seed"]},
+    {"service": "seed_beta_accounting_setup", "arguments": ["--apply"]},
+    {"service": "seed_accounting_test_scenario", "arguments": ["--apply"]},
+    {"service": "reset_giving_test_data", "arguments": ["--apply"]},
+    {"service": "reset_asset_test_data", "arguments": ["--apply"]},
+    {"service": "reset_project_test_data", "arguments": ["--apply"]},
+    {"service": "seed_document_journal_test_data", "arguments": ["--apply"]}
   ],
   "safety": {
     "local_only": true,
     "production_database_forbidden": "ChurchDB",
-    "backup_before_destructive_reset": true
+    "backup_before_destructive_reset": true,
+    "known_test_passwords_packaged": false
   },
   "coverage": [
     "people_and_families",
     "worship_and_attendance",
     "accounting",
     "giving",
+    "assets",
+    "projects_and_calendar",
+    "documents_and_journal",
     "reports_and_designers"
   ]
 }

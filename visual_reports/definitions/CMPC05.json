@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMPC05",
-      "title":"Pastoral Care - Prayer Requests",
+      "title": "Pastoral Care - Prayer Requests",
       "dataset": "churchmanager.cmpc05",
       "datasetversion": 1,
       "pagesize": "letter",

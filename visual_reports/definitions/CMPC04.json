@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMPC04",
-      "title":"Pastoral Care - Pastor's Report",
+      "title": "Pastoral Care - Pastor's Report",
       "dataset": "churchmanager.cmpc04",
       "datasetversion": 1,
       "pagesize": "letter",

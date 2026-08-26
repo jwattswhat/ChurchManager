@@ -1,6 +1,6 @@
 # ChurchManager User Guide
 
-**Version 0.3.0-dev**
+**Version 0.3.0-beta.1**
 
 **For congregations using ChurchManager**
 
@@ -15,15 +15,16 @@ installation and development procedures are maintained separately.
 
 1. Getting started
 2. The main menu
-3. People and congregation records
-4. Worship planning
-5. Attendance
-6. Prayers, announcements, and participant notices
-7. Pastoral Care
-8. Reports and layout customization
-9. Fund accounting
-10. Users, email, backup, and recovery
-11. Getting help
+3. Church records
+4. People and congregation records
+5. Worship planning
+6. Attendance
+7. Prayers, announcements, and participant notices
+8. Pastoral Care
+9. Reports and layout customization
+10. Fund accounting
+11. Users, email, backup, and recovery
+12. Getting help
 
 ## 1. Getting started
 
@@ -295,13 +296,15 @@ Starter layouts remain available for recovery.
 Authorized administrators maintain configuration, choices, users, email,
 catalog packages, backups, and support diagnostics here.
 
-## 3. People and congregation records
+## 3. Church records
 
 ### Church information
 
 Enter the congregation's name, address, contact information, report logo,
 primary hymnal, and default lectionary. The selected hymnal and lectionary guide
 the choices offered in worship planning.
+
+## 4. People and congregation records
 
 ### People
 
@@ -481,7 +484,7 @@ an approved purpose. ChurchManager documents the action; it does not decide tax
 deductibility. Use **Giving Reports > Directed Gift Review** for the confidential
 review and disposition list.
 
-## 4. Worship planning
+## 5. Worship planning
 
 ### Create a worship service
 
@@ -533,7 +536,7 @@ summary reports checklist progress, required participant coverage, and hymn
 completion. Marking the whole checklist complete records the planner's judgment
 even when an exception is intentional.
 
-## 5. Attendance
+## 6. Attendance
 
 Open **Attendance** and choose an event. Worship services normally create their
 attendance events automatically. Members appear first, followed by visitors.
@@ -545,7 +548,7 @@ totals, individual history, member follow-up, and a pastor's comparison report.
 The follow-up report can flag members after a chosen number of consecutive
 missed weeks.
 
-## 6. Prayers, announcements, and participant notices
+## 7. Prayers, announcements, and participant notices
 
 Prayers and announcements use categories maintained in Choices. Their natural
 language schedules may describe patterns such as `Every Sunday`, `First and
@@ -557,7 +560,7 @@ Use the weekly preview before preparing bulletin material. Participant notices
 use the congregation's configured email service. TEST MODE never sends external
 email.
 
-## 7. Pastoral Care
+## 8. Pastoral Care
 
 Pastoral Care is a protected ministry work list for follow-ups, completed care
 actions, and future reminders. It is not a counseling transcript, medical
@@ -602,7 +605,7 @@ mandated-reporting system. Follow the congregation's safeguarding procedures
 and applicable law whenever immediate action or a report to civil authorities
 may be required.
 
-## 8. Reports and layout customization
+## 9. Reports and layout customization
 
 Select a report, supply its enabled parameters, and choose **Run Report**, or
 double-click the selected report row.
@@ -615,7 +618,7 @@ starter, move and resize controls, preview the PDF, validate the definition,
 and restore the starter. Report definitions control presentation only; they do
 not bypass report permissions or expose unapproved database fields.
 
-## 9. Fund accounting
+## 10. Fund accounting
 
 ### Initial setup
 
@@ -646,7 +649,7 @@ Budgets may use general accounts alone or include detailed line items. Review
 Budget to Actual and the Close Checklist before period or year-end processing.
 Year-End Close is controlled and auditable; make a verified backup first.
 
-## 10. Users, email, backup, and recovery
+## 11. Users, email, backup, and recovery
 
 ### Calendar Integration
 
@@ -769,7 +772,7 @@ warning, verify the database name shown, and allow the operation to finish.
 ChurchManager must restart after a successful restore because its previous
 database connections were closed.
 
-## 11. Getting help
+## 12. Getting help
 
 Select **Help - User Guide** on the main menu to open this document. If an
 unexpected error occurs, note what you were doing and open **Support and
@@ -782,5 +785,5 @@ version when requesting help.
 ---
 
 ChurchManager is open-source congregation software. This guide describes the
-0.3.0-dev development line and will be revised as beta testing identifies
+0.3.0-beta.1 beta line and will be revised as beta testing identifies
 additional instructions or screenshots that are needed.

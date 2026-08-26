@@ -8,6 +8,7 @@ import os
 import subprocess
 from pathlib import Path
 
+import JSForm
 from churchmanager_version import __version__
 
 
@@ -55,7 +56,9 @@ def main() -> int:
     ])
 
     evidence_files = []
-    for executable in ("ChurchManager.exe", "ChurchManagerSetup.exe"):
+    for executable in (
+        "ChurchManager.exe", "ChurchManagerSetup.exe", "ChurchManagerBetaData.exe"
+    ):
         evidence = ROOT / "dist" / f"{Path(executable).stem}.package-check.json"
         run([str(bundle / executable), "--package-check", str(evidence)])
         result = json.loads(evidence.read_text(encoding="utf-8"))
@@ -80,6 +83,7 @@ def main() -> int:
     files = [path for path in bundle.rglob("*") if path.is_file()]
     summary = {
         "release": __version__,
+        "bundled_jsform_version": JSForm.__version__,
         "msi_version": msi_version(__version__),
         "bundle_files": len(files),
         "bundle_bytes": sum(path.stat().st_size for path in files),

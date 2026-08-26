@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMMB03",
-      "title":"Membership - Information Listing",
+      "title": "Membership - Information Listing",
       "dataset": "churchmanager.cmmb03",
       "datasetversion": 1,
       "pagesize": "letter",

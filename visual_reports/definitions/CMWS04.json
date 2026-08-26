@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMWS04",
-      "title":"Worship - Hymn Usage by Hymn",
+      "title": "Worship - Hymn Usage by Hymn",
       "dataset": "churchmanager.cmws04",
       "datasetversion": 1,
       "pagesize": "letter",

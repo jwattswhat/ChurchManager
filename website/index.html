@@ -29,14 +29,14 @@
   <main id="main">
     <section class="hero" id="top">
       <div class="hero-copy">
-        <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> Active development - Version 0.3.0-dev</p>
+        <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> Public beta - Version 0.3.0-beta.1</p>
         <h1>Church administration built for small congregations.</h1>
         <p class="lead">ChurchManager brings people records, worship planning, attendance, reporting, and fund accounting together in one congregation-controlled Windows application.</p>
         <div class="actions">
-          <a class="button primary placeholder-link" href="#availability" aria-describedby="download-note">Download for Windows</a>
+          <a class="button primary" href="#availability" aria-describedby="download-note">Download for Windows</a>
           <a class="button secondary" href="#features">See what it does</a>
         </div>
-        <p class="action-note" id="download-note">Download link will appear here after the beta installer is approved for public release.</p>
+        <p class="action-note" id="download-note">Choose a clean installation or a fictional-data beta test kit below.</p>
       </div>
       <aside class="hero-card" aria-label="ChurchManager principles">
         <p class="card-kicker">Made with small churches in mind</p>
@@ -63,7 +63,7 @@
         <p>ChurchManager connects day-to-day ministry and administration while keeping sensitive areas appropriately separated.</p>
       </div>
       <div class="feature-grid">
-        <article><span class="feature-number">01</span><h3>People and congregation</h3><p>Maintain people, families, contact details, directory privacy, documents, and journal records.</p></article>
+        <article><span class="feature-number">01</span><h3>People and congregation</h3><p>Maintain people, families, contact details, directory privacy, attendance, and Groups.</p></article>
         <article><span class="feature-number">02</span><h3>Worship planning</h3><p>Prepare services, Orders of Service, readings, hymns, participants, checklists, prayers, and announcements.</p></article>
         <article><span class="feature-number">03</span><h3>Attendance</h3><p>Record members, Communion, and visitors, then use follow-up and historical attendance reports.</p></article>
         <article><span class="feature-number">04</span><h3>Fund accounting</h3><p>Enter and post transactions, reconcile banks, manage budgets, close periods, and produce clear reports.</p></article>
@@ -123,15 +123,31 @@
         <p class="eyebrow">Public beta</p>
         <h2>Ready for careful, real-world testing</h2>
         <p>ChurchManager is in beta. It should be tested with backups and fictional or safely isolated data before a congregation depends on it for daily work.</p>
-        <p id="availability" class="notice"><strong>Release placeholder:</strong> the verified public installer, file size, and SHA-256 checksum will be added here.</p>
+        <div id="availability" class="download-grid" aria-label="ChurchManager beta downloads">
+          <article class="download-card recommended">
+            <p class="download-label">Recommended for testers</p>
+            <h3>Beta test with fictional data</h3>
+            <p>Includes the Windows installer, a guarded fictional-data loader, a test launcher, and short testing instructions. The loader works only with the ChurchDBTest test database.</p>
+            <a class="button primary" href="https://github.com/jwattswhat/ChurchManager/releases/download/v0.3.0-beta.1/ChurchManager-Beta-Test-With-Fictional-Data.zip">Download beta test kit</a>
+            <p class="download-meta">48.1 MB ZIP<br><code>f406495fca3c442565b1370e246748086f6d608c3952cb6ce1c34691339ed52c</code></p>
+          </article>
+          <article class="download-card">
+            <p class="download-label">New congregation</p>
+            <h3>Clean installation</h3>
+            <p>Includes the same verified Windows installer without fictional beta data. Use this when you want to create a new, empty ChurchManager database.</p>
+            <a class="button secondary" href="https://github.com/jwattswhat/ChurchManager/releases/download/v0.3.0-beta.1/ChurchManager-Clean-Installation.zip">Download clean installation</a>
+            <p class="download-meta">48.1 MB ZIP<br><code>37a83ca184fb78ca04e80e5c2e2f195cfcb7541e391c5a7b046f7be3585a6f6f</code></p>
+          </article>
+        </div>
+        <p class="notice"><strong>Beta notice:</strong> keep verified backups and use fictional or safely isolated data while evaluating this release. The installer bundles JSForm 0.1.0-beta.6.</p>
       </div>
       <div class="link-panel" id="help">
         <h3>Documentation and help</h3>
-        <a class="placeholder-link" href="#help">User Guide <span>PDF link pending</span></a>
-        <a class="placeholder-link" href="#help">Installation Guide <span>public link pending</span></a>
-        <a class="placeholder-link" href="#help">Treasurer Guide <span>PDF link pending</span></a>
-        <a class="placeholder-link" href="#help">Support and error logs <span>destination pending</span></a>
-        <a class="placeholder-link" href="#help">Report a security concern <span>destination pending</span></a>
+        <a href="https://github.com/jwattswhat/ChurchManager/blob/main/output/pdf/ChurchManager.UserGuide.pdf">User Guide <span>PDF</span></a>
+        <a href="https://github.com/jwattswhat/ChurchManager/blob/main/Documentation/ChurchManager.InstallationRelease.Specification.md">Installation and release guide <span>online</span></a>
+        <a href="https://github.com/jwattswhat/ChurchManager/blob/main/Documentation/ChurchManager.CongregationTreasurerGuide.md">Treasurer guidance <span>online</span></a>
+        <a href="https://github.com/jwattswhat/ChurchManager/issues/new">Support, error logs, and bug reports <span>GitHub Issues</span></a>
+        <a href="https://github.com/jwattswhat/ChurchManager/security">Report a security concern <span>privately</span></a>
       </div>
     </section>
 
@@ -148,7 +164,7 @@
       </div>
     </section>
 
-    <section class="section values">
+    <section class="section values" id="privacy">
       <div>
         <p class="eyebrow">Your records remain yours</p>
         <h2>A website about ChurchManager - not a home for church data</h2>
@@ -161,13 +177,13 @@
   <footer>
     <div><strong>ChurchManager</strong><span>Open-source church administration for Windows</span></div>
     <div class="footer-links">
-      <a class="placeholder-link" href="#availability">Download</a>
-      <a class="placeholder-link" href="#help">Source</a>
+      <a href="#availability">Download</a>
+      <a href="https://github.com/jwattswhat/ChurchManager">Source</a>
       <a href="#help">Help</a>
       <a href="#support">Donate</a>
-      <a class="placeholder-link" href="#help">Privacy</a>
+      <a href="#privacy">Privacy</a>
     </div>
-    <p>Version 0.3.0-dev - GPL-3.0-or-later - Copyright &copy; 2026 Rev. Jonathan C. Watt</p>
+    <p>Version 0.3.0-beta.1 - GPL-3.0-or-later - Copyright &copy; 2026 Rev. Jonathan C. Watt</p>
   </footer>
 </body>
 </html>

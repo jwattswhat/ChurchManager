@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMMB07",
-      "title":"Membership - Transfers",
+      "title": "Membership - Transfers",
       "dataset": "churchmanager.cmmb07",
       "datasetversion": 1,
       "pagesize": "letter",

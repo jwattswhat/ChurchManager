@@ -71,17 +71,34 @@ class TestChurchOfficePolish(unittest.TestCase):
         self.assertIn("DELETE FROM tblDocument WHERE Note=?", source)
         self.assertIn("DELETE FROM tblJournal WHERE Note LIKE ?", source)
         self.assertTrue((ROOT / "Documents" / "Sample Congregational Document.txt").is_file())
+        self.assertIn("create_sample_docx", source)
+        self.assertIn("Test.Document.70.docx", source)
 
     def test_user_guide_and_github_pages_site_cover_current_capabilities(self):
         guide = (ROOT / "Documentation" / "ChurchManager.UserGuide.md").read_text(
             encoding="utf-8"
         )
         self.assertIn("**Church > Documents**", guide)
+        church_records = guide.split("## 3. Church records", 1)[1].split(
+            "## 4. People and congregation records", 1
+        )[0]
+        people_records = guide.split("## 4. People and congregation records", 1)[1].split(
+            "## 5. Worship planning", 1
+        )[0]
+        self.assertIn("### Church information", church_records)
+        self.assertNotIn("### Church information", people_records)
         self.assertIn("double-click the selected report row", guide)
         site = (ROOT / "website" / "index.html").read_text(encoding="utf-8")
+        people_card = site.split("<h3>People and congregation</h3>", 1)[1].split(
+            "</article>", 1
+        )[0]
+        self.assertNotIn("documents", people_card.casefold())
+        self.assertNotIn("journal", people_card.casefold())
         for capability in ("Member giving", "Groups and pastoral care", "Church office", "Events and calendars"):
             self.assertIn(capability, site)
-        self.assertIn("Version 0.3.0-dev", site)
+        self.assertIn("Version 0.3.0-beta.1", site)
+        self.assertIn("ChurchManager-Beta-Test-With-Fictional-Data.zip", site)
+        self.assertIn("ChurchManager-Clean-Installation.zip", site)
         self.assertTrue((ROOT / "website" / ".nojekyll").is_file())
 
 

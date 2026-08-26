@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMGN02",
-      "title":"General - Document Listing",
+      "title": "General - Document Listing",
       "dataset": "churchmanager.cmgn02",
       "datasetversion": 1,
       "pagesize": "letter",

@@ -12,6 +12,13 @@ Backups/
 tmp/
 build/
 dist/
+# Local exports created while visually testing import and export workflows.
+TestData/ChurchManager-Assets.csv
+TestData/ChurchManager-Calendar-*.ics
+TestData/MembershipPeople.test.Sample.csv
+TestData/Reformation-Lutheran-Church-Membership-Archive.zip
+TestData/test.csv
+TestData/test.csv.manifest.json
 Log.txt
 root-reset.*.log
 .local-mariadb.ini

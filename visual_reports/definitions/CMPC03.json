@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMPC03",
-      "title":"Pastoral Care - Journal",
+      "title": "Pastoral Care - Journal",
       "dataset": "churchmanager.cmpc03",
       "datasetversion": 1,
       "pagesize": "letter",

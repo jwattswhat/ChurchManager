@@ -2,12 +2,13 @@
 
 ChurchManager uses semantic versioning and has one authoritative version in
 `churchmanager_version.py`. The locked first beta baseline is
-`0.2.0-beta.1`; current feature development targets `0.3.0-dev`.
+`0.2.0-beta.1`; the current beta test release is `0.3.0-beta.1`.
 
 - Patch versions identify compatible bug fixes.
 - Minor versions identify completed compatible features.
 - Major versions identify incompatible application or database changes.
-- The `-dev` suffix remains until a supported release is prepared.
+- The `-dev` suffix identifies active development; `-beta.N` identifies a
+  reviewable beta build distributed for structured testing.
 
 The main-window title, command description, diagnostic logs, Support and
 Diagnostics screen, and support packages must all read this authoritative

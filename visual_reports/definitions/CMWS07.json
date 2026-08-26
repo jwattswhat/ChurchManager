@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMWS07",
-      "title":"Worship - Favorite Hymns",
+      "title": "Worship - Favorite Hymns",
       "dataset": "churchmanager.cmws07",
       "datasetversion": 1,
       "pagesize": "letter",

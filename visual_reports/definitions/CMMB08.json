@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMMB08",
-      "title":"Membership - Contact Listing",
+      "title": "Membership - Contact Listing",
       "dataset": "churchmanager.cmmb08",
       "datasetversion": 1,
       "pagesize": "letter",

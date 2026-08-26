@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMMB04",
-      "title":"Membership - Update Forms",
+      "title": "Membership - Update Forms",
       "dataset": "churchmanager.cmmb04",
       "datasetversion": 1,
       "pagesize": "letter",

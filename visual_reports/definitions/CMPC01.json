@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMPC01",
-      "title":"Pastoral Care - Work List",
+      "title": "Pastoral Care - Work List",
       "dataset": "churchmanager.cmpc01",
       "datasetversion": 1,
       "pagesize": "letter",

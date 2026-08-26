@@ -62,6 +62,10 @@ def ensure_user(cursor, password_hash, username, display_name, role_name, assign
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apply", action="store_true", help="commit the previewed dataset")
+    parser.add_argument(
+        "--skip-login-users", action="store_true",
+        help="install fixtures without creating accounts or collecting a shared password",
+    )
     args = parser.parse_args()
     testing, username, database_password = settings()
     connection = mariadb.connect(
@@ -101,12 +105,14 @@ def main():
             connection.rollback()
             return 2
 
-        password = getpass.getpass("Password for the three fictional test users: ")
-        confirmation = getpass.getpass("Confirm test-user password: ")
-        if password != confirmation:
-            raise RuntimeError("The test-user passwords did not match.")
-        password_hash = PasswordService(minimum_length=4).hash(password)
-        password = confirmation = ""
+        password_hash = None
+        if not args.skip_login_users:
+            password = getpass.getpass("Password for the three fictional test users: ")
+            confirmation = getpass.getpass("Confirm test-user password: ")
+            if password != confirmation:
+                raise RuntimeError("The test-user passwords did not match.")
+            password_hash = PasswordService(minimum_length=4).hash(password)
+            password = confirmation = ""
 
         logo_path = ROOT / "TestData" / "Reformation-Lutheran-Church-Test-Logo.png"
         if not logo_path.is_file():
@@ -186,15 +192,13 @@ def main():
                 (person_ids[0], MARKER),
             )
 
-        users = (
+        users = () if args.skip_login_users else (
             ("pastor.test", "Rev. Martin Keller", "Pastor/Staff"),
             ("volunteer.test", "Anna Schmidt", "Volunteer"),
             ("auditor.test", "David Fischer", "Auditor"),
         )
-        user_ids = [
-            ensure_user(cursor, password_hash, login, display, role, master_id)
-            for login, display, role in users
-        ]
+        user_ids = [ensure_user(cursor, password_hash, login, display, role, master_id)
+                    for login, display, role in users]
         for user_id in user_ids:
             cursor.execute(
                 "INSERT INTO tblSecurityAuditEvent (UserID,Action,EntityType,EntityID,Reason) "

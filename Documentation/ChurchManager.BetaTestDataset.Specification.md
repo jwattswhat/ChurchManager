@@ -1,8 +1,8 @@
 # ChurchManager Beta Test Dataset Specification
 
-Status: Versioned dataset manifest and guarded component reset services implemented; isolated end-to-end acceptance pending
+Status: Packaged optional beta component implemented; isolated end-to-end acceptance pending
 Dataset identifier: `churchmanager-beta-test-data`  
-Initial dataset version: `1.0.0`
+Current dataset version: `1.1.0`
 
 ## 1. Purpose
 
@@ -119,11 +119,21 @@ verify it again, and remove the isolated database.
 ## 7. Release handling
 
 The dataset is source-controlled but excluded from ordinary baseline seed SQL.
-The next beta installer may bundle it as an optional component. Updating the
-dataset does not require changing normal installation defaults. A dataset
-version change and its verification manifest are committed together.
+Updating the dataset does not require changing normal installation defaults. A
+dataset version change and its verification manifest are committed together.
 
 The canonical manifest is `TestData/BetaDataset/manifest.json`. Its ordered
 stages use the existing guarded reset/seed services, each of which refuses
-non-local production targets. The optional installer integration remains
-deferred until the next beta installer is intentionally rebuilt.
+non-local production targets.
+
+Release `0.3.0-beta.1` provides two folders built from the same MSI:
+
+- **Clean-Installation** contains only the ordinary installer and never loads
+  fictional congregation records.
+- **Beta-Test-With-Fictional-Data** contains the same installer plus guarded
+  launchers for installing the version-matched dataset into local
+  `ChurchDBTest` and starting ChurchManager in test mode.
+
+The packaged beta utility does not contain shared ChurchManager login
+passwords. The tester creates the Master Administrator through the normal
+setup workflow.

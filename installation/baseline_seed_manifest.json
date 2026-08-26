@@ -1,7 +1,7 @@
 {
   "artifact": "ChurchManager fresh-install starter-data baseline",
   "format_version": 1,
-  "release_version": "0.3.0-dev",
+  "release_version": "0.3.0-beta.1",
   "seed_sha256": "73fc5604c3afe1920f8b240dd98a98ad1c41ccf268541eee718ee870e824329a",
   "statement_count": 122,
   "source_migrations": [

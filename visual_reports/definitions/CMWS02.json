@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMWS02",
-      "title":"Worship - Services by Date",
+      "title": "Worship - Services by Date",
       "dataset": "churchmanager.cmws02",
       "datasetversion": 1,
       "pagesize": "letter",

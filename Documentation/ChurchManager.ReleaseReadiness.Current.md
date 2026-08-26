@@ -1,13 +1,13 @@
 # ChurchManager Current Release Readiness
 
-Status date: August 22, 2026
+Status date: August 26, 2026
 
 This is the current-state companion to the historical evidence retained in the
 installation specification and roadmap.
 
 ## Current verified baseline
 
-- Application line: `0.3.0-dev`
+- Application line: `0.3.0-beta.1`
 - Canonical schema: 95 represented migrations
 - Starter data: 73 statements
 - Schema SHA-256: `ef460b0f5f99d80b08a8ac8a992ef119ba88de42142081477cff16da8789277b`

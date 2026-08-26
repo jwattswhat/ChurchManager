@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMGN03",
-      "title":"General - Available Reports",
+      "title": "General - Available Reports",
       "dataset": "churchmanager.cmgn03",
       "datasetversion": 1,
       "pagesize": "letter",

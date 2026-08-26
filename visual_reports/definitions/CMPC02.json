@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMPC02",
-      "title":"Pastoral Care - Activity Summary",
+      "title": "Pastoral Care - Activity Summary",
       "dataset": "churchmanager.cmpc02",
       "datasetversion": 1,
       "pagesize": "letter",

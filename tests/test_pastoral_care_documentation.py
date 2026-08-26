@@ -12,7 +12,7 @@ class PastoralCareDocumentationTests(unittest.TestCase):
         guide = (ROOT / "Documentation" / "ChurchManager.UserGuide.md").read_text(
             encoding="utf-8"
         )
-        self.assertIn("## 7. Pastoral Care", guide)
+        self.assertIn("## 8. Pastoral Care", guide)
         self.assertIn("Assigned to Me", guide)
         self.assertIn("does not copy an attendance-event note", guide)
         self.assertIn("the wording\nof a prayer request", guide)

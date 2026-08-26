@@ -3,7 +3,7 @@
     "REPORT": {
       "schema_version": 1,
       "name": "CMGR01",
-      "title":"Groups - Current Roster",
+      "title": "Groups - Current Roster",
       "dataset": "churchmanager.cmgr01",
       "datasetversion": 1,
       "pagesize": "letter",
