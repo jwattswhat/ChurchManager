@@ -680,6 +680,28 @@ before import. Repeated serial numbers are shown as warnings. Dates use
 `YYYY-MM-DD`. CSV export contains the current register fields but does not
 include activity history, documents, or protected information.
 
+### Projects and Scheduling
+
+Open **Projects and Scheduling** for bounded congregational work such as an
+annual meeting, fellowship event, building improvement, or stewardship effort.
+Each project has a stable project number, one accountable owner, status,
+priority, optional dates, a stated purpose, and an ordered list of concrete
+steps. A Group may be selected when responsibility is shared.
+
+Save a new project as **Active** before adding steps. Double-click a step to
+edit it. Use **Move Up** and **Move Down** to arrange the work, **Dependencies**
+to identify a step that must be completed first, and **Documents** to link an
+existing ChurchManager document without copying its file. A blocked step must
+include a short reason. Red rows identify blocked or overdue work, but the
+written status remains authoritative.
+
+The Due Work tab shows approaching and overdue steps. Calendar publication is
+optional for both project target dates and step due dates; use Calendar
+Integration to preview and export eligible items. The Projects reports provide
+an active summary, due and overdue work, a project plan, and completed history.
+Project notes are ordinary operational notes and must not contain pastoral,
+donor, personnel, medical, or other confidential narratives.
+
 ### Users and roles
 
 Administrators create individual accounts and assign only the permissions each

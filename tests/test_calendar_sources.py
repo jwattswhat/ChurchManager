@@ -25,6 +25,10 @@ class Repository:
         return [{"id": 9, "church_id": church_id, "starts_at": datetime(2026, 8, 31, 18),
                  "ends_at": datetime(2026, 8, 31, 19), "title": "Council", "location": "Library",
                  "status": "SCHEDULED", "version": 1}]
+    def project_milestones(self,church_id,_start,_end):
+        return [{"id":10,"church_id":church_id,"project_number":"PRJ-0001","project_name":"Paint Office","event_date":date(2026,9,1),"status":"Active","version":2}]
+    def project_steps(self,church_id,_start,_end):
+        return [{"id":11,"church_id":church_id,"project_number":"PRJ-0001","project_name":"Paint Office","step_title":"Select color","event_date":date(2026,8,29),"status":"Not Started","version":1}]
 
 
 class CalendarSourceTests(unittest.TestCase):
@@ -56,6 +60,14 @@ class CalendarSourceTests(unittest.TestCase):
         service = self.service({"calendar.view"})
         with self.assertRaises(CalendarSourceError): service.descriptors("PERSON", 2, "2026-08-01", "2026-09-01")
         with self.assertRaises(CalendarSourceError): service.descriptors("CHURCH_EVENT", 2, "2026-09-01", "2026-08-01")
+
+    def test_project_targets_and_steps_are_safe_all_day_descriptors(self):
+        service=self.service({"calendar.view","projects.view","projects.calendar"})
+        target=service.descriptors("PROJECT_MILESTONE",2,"2026-08-01","2026-09-02")[0]
+        step=service.descriptors("PROJECT_STEP",2,"2026-08-01","2026-09-02")[0]
+        self.assertTrue(target.all_day); self.assertTrue(step.all_day)
+        self.assertEqual("project-10@churchmanager.local",target.uid)
+        self.assertNotIn("note",target.description.casefold())
 
     def test_repository_query_excludes_restricted_groups_and_notes(self):
         from pathlib import Path

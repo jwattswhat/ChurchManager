@@ -17,6 +17,8 @@ SOURCE_OPTIONS = (
     ("CHURCH_EVENT", "Church Events", "calendar.view"),
     ("WORSHIP_SERVICE", "Worship Services", "worship.manage"),
     ("GROUP_MEETING", "Group Meetings", "groups.meetings.view"),
+    ("PROJECT_MILESTONE", "Project Targets", "projects.calendar"),
+    ("PROJECT_STEP", "Project Steps", "projects.calendar"),
 )
 
 

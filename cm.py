@@ -85,6 +85,7 @@ from custom_profile_search_dialog import show_custom_profile_search
 from calendar_event_dialog import show_calendar_events
 from calendar_integration_dialog import show_calendar_integration
 from asset_dialog import show_assets, show_asset_locations, show_asset_maintenance
+from project_dialog import show_projects
 
 
 arguments = None
@@ -562,6 +563,9 @@ def _buttonclick(event):
             return
         case "lblAssetMaintenance":
             show_asset_maintenance(cmfrm.FRAME, context.connection, context.session, context.authorization)
+            return
+        case "lblProjects":
+            show_projects(cmfrm.FRAME, context.connection, context.session, context.authorization)
             return
         case "lblReportDesigner":
             open_directory_designer(authorization=context.authorization)

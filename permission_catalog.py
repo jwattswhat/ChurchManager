@@ -79,4 +79,5 @@ MAIN_MENU_PERMISSIONS = {
     "lblAssetLocations": "assets.view",
     "lblAssetMaintenance": "assets.view",
     "lblAssetReports": "assets.view",
+    "lblProjects": "projects.view",
 }

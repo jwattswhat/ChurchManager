@@ -33,12 +33,12 @@ from Sent to Accounting in the batch list.
 | 13 | Completed | [Custom profile fields and controlled tags](ChurchManager.CustomProfileFields.Specification.md) | Schema, permissions, application-neutral JSForm host, lifecycle-aware administration, Person/Family values, search, reports, and controlled exchange passed final visual acceptance on August 25, 2026. |
 | 14 | Completed | [Calendar integration](ChurchManager.CalendarIntegration.Specification.md) | Event agenda, recurrence, neutral Worship/Group/Event adapters, protected preview, iCalendar export, duplicate-safe publication state, and optional one-way Google publishing are implemented. The Project milestone source will be registered when that future source exists. |
 | 15 | Completed | [Asset management](ChurchManager.AssetManagement.Specification.md) | The register, locations, activity history, due list, reviewed CSV exchange, permissions, reports, menu integration, test dataset, migration, and automated suite passed final visual acceptance on August 26, 2026. |
-| 16 | Approved; implementation pending | [Projects and scheduling](ChurchManager.ProjectsScheduling.Specification.md) | Provide bounded congregation project plans, assignments, due dates, status, and external-calendar eligibility without restoring the retired generic subsystem. |
+| 16 | Completed | [Projects and scheduling](ChurchManager.ProjectsScheduling.Specification.md) | Normalized projects, ordered steps, ownership, dependencies, document links, reports, permissions, Calendar Integration sources, fictional test data, baseline, automated regression, and visual acceptance are complete. |
 | Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
 
-Calendar Integration and Asset Management are complete. Projects and
-Scheduling follows and will register its milestone adapter with the completed
-Calendar Integration service.
+Calendar Integration, Asset Management, and Projects and Scheduling are
+complete. Projects now supplies milestone and step-date adapters to Calendar
+Integration.
 
 ## Completed foundations retained for regression protection
 

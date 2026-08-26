@@ -58,6 +58,12 @@
       ]
     },
     {
+      "label": "&Projects",
+      "items": [
+        {"command": "churchmanager.projects", "label": "&Projects and Scheduling..."}
+      ]
+    },
+    {
       "label": "A&ssets",
       "items": [
         {"command": "churchmanager.assets"},

@@ -49,7 +49,7 @@ SPECIAL_CONTROLS = {
     "lblContributionBatches",
     "lblGivingReports",
     "lblPastoralCare", "lblDataManagement", "lblGroups", "lblGroupAttendance", "lblCustomProfileFields", "lblCustomProfileSearch",
-    "lblCalendarEvents", "lblCalendarIntegration", "lblAssets", "lblAssetLocations", "lblAssetMaintenance", "lblAssetReports",
+    "lblCalendarEvents", "lblCalendarIntegration", "lblAssets", "lblAssetLocations", "lblAssetMaintenance", "lblAssetReports", "lblProjects",
 }
 MENU_CONTROLS = frozenset(FORM_ROUTES) | SPECIAL_CONTROLS
 SESSION_CONTROLS = frozenset({"lblHelp", "lblChangePassword", "lblLogout"})
@@ -136,6 +136,7 @@ MENU_LABELS = {
     'lblAssetLocations': 'Asset Locations',
     'lblAssetMaintenance': 'Maintenance Due',
     'lblAssetReports': 'Asset Reports',
+    'lblProjects': 'Projects and Scheduling',
 }
 
 

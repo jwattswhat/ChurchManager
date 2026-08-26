@@ -160,6 +160,7 @@ class TestVisualReportInventory(unittest.TestCase):
             "GN": "General", "AT": "Attendance", "WS": "Worship",
             "MB": "Membership", "GR": "Groups", "PC": "Pastoral Care",
             "AM": "Asset Management",
+            "PS": "Projects",
         }
         for code in OFFICIAL_CODES:
             with self.subTest(code=code):

@@ -31,7 +31,7 @@ class CalendarEventDescriptor:
     version: str = "1"
 
     def __post_init__(self):
-        if self.source_type not in {"CHURCH_EVENT", "WORSHIP_SERVICE", "GROUP_MEETING"}:
+        if self.source_type not in {"CHURCH_EVENT", "WORSHIP_SERVICE", "GROUP_MEETING", "PROJECT_MILESTONE", "PROJECT_STEP"}:
             raise CalendarSourceError("The calendar source type is not approved.")
         if int(self.source_id) <= 0 or int(self.church_id) <= 0:
             raise CalendarSourceError("Calendar descriptors require positive source and church IDs.")
@@ -87,6 +87,26 @@ class MariaDBCalendarSourceRepository:
             (church_id, from_date, through_date),
         )
 
+    def project_milestones(self, church_id, from_date, through_date):
+        return self._all(
+            "SELECT ID id,ChurchID church_id,ProjectNumber project_number,Name project_name,"
+            "TargetDate event_date,Status status,Version version FROM tblMinistryProject "
+            "WHERE ChurchID=? AND CalendarEligible=1 AND TargetDate BETWEEN ? AND ? "
+            "AND Status IN ('Planned','Active','On Hold') ORDER BY TargetDate,ProjectNumber",
+            (church_id,from_date,through_date),
+        )
+
+    def project_steps(self, church_id, from_date, through_date):
+        return self._all(
+            "SELECT s.ID id,p.ChurchID church_id,p.ProjectNumber project_number,p.Name project_name,"
+            "s.Title step_title,s.DueDate event_date,s.Status status,s.Version version "
+            "FROM tblMinistryProjectStep s JOIN tblMinistryProject p ON p.ID=s.ProjectID "
+            "WHERE p.ChurchID=? AND s.CalendarEligible=1 AND s.DueDate BETWEEN ? AND ? "
+            "AND p.Status IN ('Planned','Active','On Hold') AND s.Status IN ('Not Started','In Progress','Blocked') "
+            "ORDER BY s.DueDate,p.ProjectNumber,s.Sequence",
+            (church_id,from_date,through_date),
+        )
+
 
 class CalendarSourceService:
     """Authorize sources and translate them into the common safe contract."""
@@ -111,6 +131,10 @@ class CalendarSourceService:
             self.authorization.require("groups.view", "view Groups")
             self.authorization.require("groups.meetings.view", "view Group meetings")
             return self._groups(church_id, start, end)
+        if source in {"PROJECT_MILESTONE","PROJECT_STEP"}:
+            self.authorization.require("projects.view", "view projects")
+            self.authorization.require("projects.calendar", "use project calendar dates")
+            return self._projects(source,church_id,start,end)
         raise CalendarSourceError("The requested calendar source is not approved.")
 
     def _church_events(self, church_id, start, end):
@@ -150,6 +174,19 @@ class CalendarSourceService:
             status="CANCELLED" if row["status"] == "CANCELLED" else "CONFIRMED",
             version=str(row["version"]),
         ) for row in self.repository.group_meetings(church_id, start, end)]
+
+    def _projects(self, source, church_id, start, end):
+        rows=(self.repository.project_milestones(church_id,start,end) if source=="PROJECT_MILESTONE"
+              else self.repository.project_steps(church_id,start,end))
+        result=[]
+        for row in rows:
+            title=(f"Project target: {row['project_number']} - {row['project_name']}" if source=="PROJECT_MILESTONE"
+                   else f"Project step due: {row['project_number']} - {row['step_title']}")
+            starts=datetime.combine(row["event_date"],time())
+            result.append(CalendarEventDescriptor(source,row["id"],row["church_id"],
+                f"{'project' if source=='PROJECT_MILESTONE' else 'project-step'}-{row['id']}@churchmanager.local",
+                title,starts,all_day=True,version=str(row["version"])))
+        return result
 
 
 def _positive(value, label):

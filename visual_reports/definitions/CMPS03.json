@@ -1,0 +1,258 @@
+{
+  "CMPS03REPORT": {
+    "REPORT": {
+      "schema_version": 1,
+      "name": "CMPS03",
+      "title": "Projects - Project Plan",
+      "dataset": "churchmanager.cmps03",
+      "datasetversion": 1,
+      "pagesize": "letter",
+      "orientation": "landscape",
+      "margins": {
+        "top": 30,
+        "right": 36,
+        "bottom": 30,
+        "left": 36
+      },
+      "theme": "churchmanager.standard",
+      "emptytext": "No records match the selected criteria.",
+      "bands": {
+        "ReportHeader": {
+          "type": "reportheader",
+          "height": 92
+        },
+        "PageHeader": {
+          "type": "pageheader",
+          "height": 8,
+          "repeat": true
+        },
+        "Detail": {
+          "type": "detail",
+          "height": 42
+        },
+        "PageFooter": {
+          "type": "pagefooter",
+          "height": 24,
+          "repeat": true
+        }
+      },
+      "sort": [
+        {
+          "collection": "records",
+          "field": "ProjectNumber",
+          "direction": "ascending"
+        }
+      ]
+    },
+    "CONTROLS": {
+      "ChurchLogo": {
+        "type": "image",
+        "band": "ReportHeader",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          62,
+          62
+        ],
+        "collection": "church",
+        "field": "Logo"
+      },
+      "ChurchName": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          72,
+          2
+        ],
+        "size": [
+          648,
+          22
+        ],
+        "collection": "church",
+        "field": "Church",
+        "fontsize": 15,
+        "bold": true,
+        "align": "center"
+      },
+      "ReportTitle": {
+        "type": "systemtext",
+        "band": "ReportHeader",
+        "position": [
+          72,
+          29
+        ],
+        "size": [
+          648,
+          20
+        ],
+        "systemvalue": "report_title",
+        "fontsize": 13,
+        "bold": true,
+        "align": "center"
+      },
+      "Parameters": {
+        "type": "text",
+        "band": "ReportHeader",
+        "position": [
+          72,
+          54
+        ],
+        "size": [
+          540,
+          16
+        ],
+        "collection": "parameters",
+        "field": "Display",
+        "fontsize": 8,
+        "color": "#555555"
+      },
+      "RunDate": {
+        "type": "systemtext",
+        "band": "ReportHeader",
+        "position": [
+          620,
+          54
+        ],
+        "size": [
+          100,
+          16
+        ],
+        "systemvalue": "run_date",
+        "prefix": "Run: ",
+        "fontsize": 8,
+        "align": "right",
+        "color": "#555555"
+      },
+      "HeaderRule": {
+        "type": "line",
+        "band": "PageHeader",
+        "position": [
+          0,
+          4
+        ],
+        "size": [
+          720,
+          1
+        ],
+        "bordercolor": "#6D7780",
+        "borderwidth": 0.7
+      },
+      "Records": {
+        "type": "table",
+        "band": "Detail",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          720,
+          40
+        ],
+        "repeatcollection": "records",
+        "columns": [
+          {
+            "name": "ProjectNumber",
+            "label": "Number",
+            "collection": "records",
+            "field": "ProjectNumber",
+            "width": 71.45
+          },
+          {
+            "name": "ProjectName",
+            "label": "Project",
+            "collection": "records",
+            "field": "ProjectName",
+            "width": 159.39
+          },
+          {
+            "name": "ProjectStatus",
+            "label": "Project Status",
+            "collection": "records",
+            "field": "ProjectStatus",
+            "width": 82.44
+          },
+          {
+            "name": "Sequence",
+            "label": "Step",
+            "collection": "records",
+            "field": "Sequence",
+            "width": 43.97,
+            "format": "integer",
+            "align": "right"
+          },
+          {
+            "name": "StepTitle",
+            "label": "Planned Work",
+            "collection": "records",
+            "field": "StepTitle",
+            "width": 203.36
+          },
+          {
+            "name": "StepStatus",
+            "label": "Status",
+            "collection": "records",
+            "field": "StepStatus",
+            "width": 82.44
+          },
+          {
+            "name": "DueDate",
+            "label": "Due",
+            "collection": "records",
+            "field": "DueDate",
+            "width": 76.95,
+            "format": "date"
+          }
+        ]
+      },
+      "FooterLine": {
+        "type": "line",
+        "band": "PageFooter",
+        "position": [
+          0,
+          0
+        ],
+        "size": [
+          720,
+          1
+        ],
+        "bordercolor": "#808080",
+        "borderwidth": 0.5
+      },
+      "FooterCode": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          0,
+          6
+        ],
+        "size": [
+          360.0,
+          14
+        ],
+        "systemvalue": "report_code",
+        "prefix": "ChurchManager report ",
+        "fontsize": 8,
+        "color": "#555555"
+      },
+      "PageNumber": {
+        "type": "systemtext",
+        "band": "PageFooter",
+        "position": [
+          630,
+          6
+        ],
+        "size": [
+          90,
+          14
+        ],
+        "systemvalue": "page_number",
+        "prefix": "Page ",
+        "fontsize": 8,
+        "align": "right",
+        "color": "#555555"
+      }
+    }
+  }
+}

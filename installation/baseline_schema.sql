@@ -357,6 +357,75 @@ SET character_set_client = utf8mb4;
 SET character_set_client = @saved_cs_client;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `rpt_ministry_project_completed` AS SELECT
+ 1 AS `ChurchID`,
+  1 AS `ProjectID`,
+  1 AS `ProjectNumber`,
+  1 AS `ProjectName`,
+  1 AS `Purpose`,
+  1 AS `Priority`,
+  1 AS `PlannedStartDate`,
+  1 AS `TargetDate`,
+  1 AS `CompletedDate` */;
+SET character_set_client = @saved_cs_client;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `rpt_ministry_project_due` AS SELECT
+ 1 AS `ChurchID`,
+  1 AS `ProjectID`,
+  1 AS `ProjectNumber`,
+  1 AS `ProjectName`,
+  1 AS `StepID`,
+  1 AS `Sequence`,
+  1 AS `StepTitle`,
+  1 AS `AssigneeType`,
+  1 AS `AssigneeID`,
+  1 AS `Status`,
+  1 AS `DueDate`,
+  1 AS `CalendarEligible`,
+  1 AS `IsOverdue` */;
+SET character_set_client = @saved_cs_client;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `rpt_ministry_project_plan` AS SELECT
+ 1 AS `ChurchID`,
+  1 AS `ProjectID`,
+  1 AS `ProjectNumber`,
+  1 AS `ProjectName`,
+  1 AS `ProjectStatus`,
+  1 AS `Priority`,
+  1 AS `StepID`,
+  1 AS `Sequence`,
+  1 AS `StepTitle`,
+  1 AS `AssigneeType`,
+  1 AS `AssigneeID`,
+  1 AS `StepStatus`,
+  1 AS `DueDate`,
+  1 AS `CompletedDate`,
+  1 AS `Note` */;
+SET character_set_client = @saved_cs_client;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `rpt_ministry_project_summary` AS SELECT
+ 1 AS `ChurchID`,
+  1 AS `ProjectID`,
+  1 AS `ProjectNumber`,
+  1 AS `ProjectName`,
+  1 AS `Purpose`,
+  1 AS `OwnerType`,
+  1 AS `OwnerID`,
+  1 AS `Status`,
+  1 AS `Priority`,
+  1 AS `PlannedStartDate`,
+  1 AS `TargetDate`,
+  1 AS `CompletedDate`,
+  1 AS `CalendarEligible`,
+  1 AS `IsOverdue`,
+  1 AS `CompletedSteps`,
+  1 AS `OpenSteps` */;
+SET character_set_client = @saved_cs_client;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
 /*!50001 CREATE VIEW `rpt_participant` AS SELECT
  1 AS `ID`,
   1 AS `PersonID`,
@@ -2680,6 +2749,117 @@ CREATE TABLE `tblmembershipmergehistory` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblministryproject` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `ChurchID` int(11) NOT NULL,
+  `ProjectNumber` varchar(40) NOT NULL,
+  `Name` varchar(160) NOT NULL,
+  `Purpose` varchar(1000) DEFAULT NULL,
+  `OwnerType` varchar(10) DEFAULT NULL,
+  `OwnerID` int(11) DEFAULT NULL,
+  `Status` varchar(12) NOT NULL DEFAULT 'Planned',
+  `Priority` varchar(10) NOT NULL DEFAULT 'Normal',
+  `PlannedStartDate` date DEFAULT NULL,
+  `TargetDate` date DEFAULT NULL,
+  `CompletedDate` date DEFAULT NULL,
+  `CalendarEligible` tinyint(1) NOT NULL DEFAULT 0,
+  `Note` varchar(2000) DEFAULT NULL,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  `Version` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_ministry_project_number` (`ChurchID`,`ProjectNumber`),
+  KEY `ix_ministry_project_work` (`ChurchID`,`Status`,`TargetDate`,`Priority`),
+  KEY `fk_ministry_project_creator` (`CreatedByUserID`),
+  KEY `fk_ministry_project_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_ministry_project_church` FOREIGN KEY (`ChurchID`) REFERENCES `tblchurch` (`ID`),
+  CONSTRAINT `fk_ministry_project_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_ministry_project_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_ministry_project_owner` CHECK (`OwnerType` is null and `OwnerID` is null or `OwnerType` in ('Person','Group','User') and `OwnerID` is not null),
+  CONSTRAINT `ck_ministry_project_status` CHECK (`Status` in ('Planned','Active','On Hold','Completed','Cancelled')),
+  CONSTRAINT `ck_ministry_project_priority` CHECK (`Priority` in ('Low','Normal','High','Urgent')),
+  CONSTRAINT `ck_ministry_project_dates` CHECK (`TargetDate` is null or `PlannedStartDate` is null or `TargetDate` >= `PlannedStartDate`),
+  CONSTRAINT `ck_ministry_project_completed` CHECK (`Status` = 'Completed' and `CompletedDate` is not null or `Status` <> 'Completed' and `CompletedDate` is null),
+  CONSTRAINT `ck_ministry_project_version` CHECK (`Version` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblministryprojectdocument` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ProjectID` int(11) NOT NULL,
+  `StepID` int(11) DEFAULT NULL,
+  `DocumentID` int(11) NOT NULL,
+  `CreatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_ministry_project_document` (`ProjectID`,`StepID`,`DocumentID`),
+  KEY `fk_ministry_document_step` (`StepID`),
+  KEY `fk_ministry_document_document` (`DocumentID`),
+  KEY `fk_ministry_document_creator` (`CreatedByUserID`),
+  CONSTRAINT `fk_ministry_document_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_ministry_document_document` FOREIGN KEY (`DocumentID`) REFERENCES `tbldocument` (`ID`),
+  CONSTRAINT `fk_ministry_document_project` FOREIGN KEY (`ProjectID`) REFERENCES `tblministryproject` (`ID`),
+  CONSTRAINT `fk_ministry_document_step` FOREIGN KEY (`StepID`) REFERENCES `tblministryprojectstep` (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblministryprojectstep` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `ProjectID` int(11) NOT NULL,
+  `Sequence` int(11) NOT NULL,
+  `Title` varchar(200) NOT NULL,
+  `AssigneeType` varchar(10) DEFAULT NULL,
+  `AssigneeID` int(11) DEFAULT NULL,
+  `Status` varchar(15) NOT NULL DEFAULT 'Not Started',
+  `DueDate` date DEFAULT NULL,
+  `CompletedDate` date DEFAULT NULL,
+  `CalendarEligible` tinyint(1) NOT NULL DEFAULT 0,
+  `Note` varchar(1000) DEFAULT NULL,
+  `CreatedByUserID` int(11) NOT NULL,
+  `UpdatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  `UpdatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6) ON UPDATE current_timestamp(6),
+  `Version` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_ministry_project_step_order` (`ProjectID`,`Sequence`),
+  KEY `ix_ministry_project_step_due` (`Status`,`DueDate`,`AssigneeType`,`AssigneeID`),
+  KEY `fk_ministry_project_step_creator` (`CreatedByUserID`),
+  KEY `fk_ministry_project_step_updater` (`UpdatedByUserID`),
+  CONSTRAINT `fk_ministry_project_step_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_ministry_project_step_project` FOREIGN KEY (`ProjectID`) REFERENCES `tblministryproject` (`ID`),
+  CONSTRAINT `fk_ministry_project_step_updater` FOREIGN KEY (`UpdatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `ck_ministry_project_step_sequence` CHECK (`Sequence` > 0),
+  CONSTRAINT `ck_ministry_project_step_assignee` CHECK (`AssigneeType` is null and `AssigneeID` is null or `AssigneeType` in ('Person','Group','User') and `AssigneeID` is not null),
+  CONSTRAINT `ck_ministry_project_step_status` CHECK (`Status` in ('Not Started','In Progress','Blocked','Complete','Not Needed')),
+  CONSTRAINT `ck_ministry_project_step_completed` CHECK (`Status` = 'Complete' and `CompletedDate` is not null or `Status` <> 'Complete' and `CompletedDate` is null),
+  CONSTRAINT `ck_ministry_project_step_blocked` CHECK (`Status` <> 'Blocked' or `Note` is not null and trim(`Note`) <> ''),
+  CONSTRAINT `ck_ministry_project_step_version` CHECK (`Version` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblministryprojectstepdependency` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `StepID` int(11) NOT NULL,
+  `PredecessorStepID` int(11) NOT NULL,
+  `CreatedByUserID` int(11) NOT NULL,
+  `CreatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uq_ministry_step_dependency` (`StepID`,`PredecessorStepID`),
+  KEY `fk_ministry_dependency_predecessor` (`PredecessorStepID`),
+  KEY `fk_ministry_dependency_creator` (`CreatedByUserID`),
+  CONSTRAINT `fk_ministry_dependency_creator` FOREIGN KEY (`CreatedByUserID`) REFERENCES `tbluser` (`ID`),
+  CONSTRAINT `fk_ministry_dependency_predecessor` FOREIGN KEY (`PredecessorStepID`) REFERENCES `tblministryprojectstep` (`ID`) ON DELETE CASCADE,
+  CONSTRAINT `fk_ministry_dependency_step` FOREIGN KEY (`StepID`) REFERENCES `tblministryprojectstep` (`ID`) ON DELETE CASCADE,
+  CONSTRAINT `ck_ministry_dependency_not_self` CHECK (`StepID` <> `PredecessorStepID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tbloptions` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `OptionFor` varchar(255) NOT NULL,
@@ -3967,6 +4147,58 @@ SET character_set_client = @saved_cs_client;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013  SQL SECURITY DEFINER */
 /*!50001 VIEW `rpt_membership_person` AS select `tblperson`.`ID` AS `ID`,`tblperson`.`ChurchID` AS `ChurchID`,`tblperson`.`FamilyID` AS `FamilyID`,`tblperson`.`FirstName` AS `FirstName`,`tblperson`.`MiddleName` AS `MiddleName`,`tblperson`.`LastName` AS `LastName`,`tblperson`.`Title` AS `Title`,`tblperson`.`Status` AS `Status`,`tblperson`.`MaritalStatus` AS `MaritalStatus`,`tblperson`.`MarriedTo` AS `MarriedTo`,`tblperson`.`Baptized` AS `Baptized`,`tblperson`.`Confirmed` AS `Confirmed`,`tblperson`.`Member` AS `Member`,`tblperson`.`AssociateMember` AS `AssociateMember`,`tblperson`.`Voter` AS `Voter`,`tblperson`.`Picture` AS `Picture`,`tblperson`.`Note` AS `Note` from `tblperson` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!50001 DROP VIEW IF EXISTS `rpt_ministry_project_completed`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013  SQL SECURITY DEFINER */
+/*!50001 VIEW `rpt_ministry_project_completed` AS select `tblministryproject`.`ChurchID` AS `ChurchID`,`tblministryproject`.`ID` AS `ProjectID`,`tblministryproject`.`ProjectNumber` AS `ProjectNumber`,`tblministryproject`.`Name` AS `ProjectName`,`tblministryproject`.`Purpose` AS `Purpose`,`tblministryproject`.`Priority` AS `Priority`,`tblministryproject`.`PlannedStartDate` AS `PlannedStartDate`,`tblministryproject`.`TargetDate` AS `TargetDate`,`tblministryproject`.`CompletedDate` AS `CompletedDate` from `tblministryproject` where `tblministryproject`.`Status` = 'Completed' */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!50001 DROP VIEW IF EXISTS `rpt_ministry_project_due`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013  SQL SECURITY DEFINER */
+/*!50001 VIEW `rpt_ministry_project_due` AS select `p`.`ChurchID` AS `ChurchID`,`p`.`ID` AS `ProjectID`,`p`.`ProjectNumber` AS `ProjectNumber`,`p`.`Name` AS `ProjectName`,`s`.`ID` AS `StepID`,`s`.`Sequence` AS `Sequence`,`s`.`Title` AS `StepTitle`,`s`.`AssigneeType` AS `AssigneeType`,`s`.`AssigneeID` AS `AssigneeID`,`s`.`Status` AS `Status`,`s`.`DueDate` AS `DueDate`,`s`.`CalendarEligible` AS `CalendarEligible`,case when `s`.`Status` in ('Not Started','In Progress','Blocked') and `s`.`DueDate` < curdate() then 1 else 0 end AS `IsOverdue` from (`tblministryprojectstep` `s` join `tblministryproject` `p` on(`p`.`ID` = `s`.`ProjectID`)) where `p`.`Status` in ('Planned','Active','On Hold') and `s`.`Status` in ('Not Started','In Progress','Blocked') */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!50001 DROP VIEW IF EXISTS `rpt_ministry_project_plan`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013  SQL SECURITY DEFINER */
+/*!50001 VIEW `rpt_ministry_project_plan` AS select `p`.`ChurchID` AS `ChurchID`,`p`.`ID` AS `ProjectID`,`p`.`ProjectNumber` AS `ProjectNumber`,`p`.`Name` AS `ProjectName`,`p`.`Status` AS `ProjectStatus`,`p`.`Priority` AS `Priority`,`s`.`ID` AS `StepID`,`s`.`Sequence` AS `Sequence`,`s`.`Title` AS `StepTitle`,`s`.`AssigneeType` AS `AssigneeType`,`s`.`AssigneeID` AS `AssigneeID`,`s`.`Status` AS `StepStatus`,`s`.`DueDate` AS `DueDate`,`s`.`CompletedDate` AS `CompletedDate`,`s`.`Note` AS `Note` from (`tblministryproject` `p` left join `tblministryprojectstep` `s` on(`s`.`ProjectID` = `p`.`ID`)) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+/*!50001 DROP VIEW IF EXISTS `rpt_ministry_project_summary`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013  SQL SECURITY DEFINER */
+/*!50001 VIEW `rpt_ministry_project_summary` AS select `p`.`ChurchID` AS `ChurchID`,`p`.`ID` AS `ProjectID`,`p`.`ProjectNumber` AS `ProjectNumber`,`p`.`Name` AS `ProjectName`,`p`.`Purpose` AS `Purpose`,`p`.`OwnerType` AS `OwnerType`,`p`.`OwnerID` AS `OwnerID`,`p`.`Status` AS `Status`,`p`.`Priority` AS `Priority`,`p`.`PlannedStartDate` AS `PlannedStartDate`,`p`.`TargetDate` AS `TargetDate`,`p`.`CompletedDate` AS `CompletedDate`,`p`.`CalendarEligible` AS `CalendarEligible`,case when `p`.`Status` in ('Planned','Active','On Hold') and `p`.`TargetDate` < curdate() then 1 else 0 end AS `IsOverdue`,sum(case when `s`.`Status` = 'Complete' then 1 else 0 end) AS `CompletedSteps`,sum(case when `s`.`Status` in ('Not Started','In Progress','Blocked') then 1 else 0 end) AS `OpenSteps` from (`tblministryproject` `p` left join `tblministryprojectstep` `s` on(`s`.`ProjectID` = `p`.`ID`)) group by `p`.`ID` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;

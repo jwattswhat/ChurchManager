@@ -175,6 +175,29 @@ SPECS = (
         c("LocationName", "Location", 105), c("NextActionDate", "Next Action", 75, "date")),
         "ActivityDate DESC, CreatedAt DESC", 1, "landscape"),
 
+    ReportSpec("CMPS01", "Projects - Active Summary", "projects.reports", "rpt_ministry_project_summary", (
+        c("ProjectNumber", "Number", 70), c("ProjectName", "Project", 190),
+        c("Status", "Status", 70), c("Priority", "Priority", 60),
+        c("TargetDate", "Target", 75, "date"), c("CompletedSteps", "Done", 45, "integer", "right"),
+        c("OpenSteps", "Open", 45, "integer", "right")),
+        "TargetDate, ProjectNumber", 1, "landscape"),
+    ReportSpec("CMPS02", "Projects - Due and Overdue Work", "projects.reports", "rpt_ministry_project_due", (
+        c("DueDate", "Due", 70, "date"), c("ProjectNumber", "Number", 65),
+        c("ProjectName", "Project", 155), c("StepTitle", "Step", 205),
+        c("Status", "Status", 75), c("AssigneeType", "Assigned As", 75)),
+        "DueDate, ProjectNumber, Sequence", 1, "landscape"),
+    ReportSpec("CMPS03", "Projects - Project Plan", "projects.reports", "rpt_ministry_project_plan", (
+        c("ProjectNumber", "Number", 65), c("ProjectName", "Project", 145),
+        c("ProjectStatus", "Project Status", 75), c("Sequence", "Step", 40, "integer", "right"),
+        c("StepTitle", "Planned Work", 185), c("StepStatus", "Status", 75),
+        c("DueDate", "Due", 70, "date")),
+        "ProjectNumber, Sequence", 1, "landscape"),
+    ReportSpec("CMPS04", "Projects - Completed History", "projects.reports", "rpt_ministry_project_completed", (
+        c("ProjectNumber", "Number", 70), c("ProjectName", "Project", 195),
+        c("Priority", "Priority", 60), c("PlannedStartDate", "Started", 75, "date"),
+        c("TargetDate", "Target", 75, "date"), c("CompletedDate", "Completed", 80, "date")),
+        "CompletedDate DESC, ProjectNumber", 1, "landscape"),
+
     ReportSpec("CMPC03", "Pastoral Care - Journal", "reports.pastoral.confidential", "rpt_journal", (
         c("StartDate", "Start", 75, "date"), c("EndDate", "End", 75, "date"), c("Event", "Event", 180),
         c("Complete", "Complete", 65, "boolean"), c("Note", "Notes", 245)), "StartDate DESC", 5, "landscape"),

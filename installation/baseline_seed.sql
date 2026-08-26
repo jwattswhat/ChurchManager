@@ -753,6 +753,47 @@ SELECT 'CMAM03','Asset Management - Asset History','[ChurchID\r\nAssetID]',NULL,
 FROM tblPermission p WHERE p.Name='assets.view'
 ON DUPLICATE KEY UPDATE Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),Available=1,RequiredPermissionID=VALUES(RequiredPermissionID);
 
+-- source: 119_add_projects_scheduling_foundation.sql
+INSERT INTO tblPermission (Name,Description,IsSensitive,Active) VALUES
+('projects.view','View congregational projects, steps, and safe reports.',0,1),
+('projects.manage','Create and update projects, steps, dependencies, and document links.',0,1),
+('projects.assign','Assign project ownership and step responsibility.',0,1),
+('projects.complete','Complete, reopen, cancel, or restore project work.',0,1),
+('projects.admin','Administer project choices and guarded draft deletion.',1,1),
+('projects.reports','Create congregational project reports.',0,1),
+('projects.calendar','Publish eligible project dates through Calendar Integration.',1,1)
+ON DUPLICATE KEY UPDATE Description=VALUES(Description),IsSensitive=VALUES(IsSensitive),Active=1;
+
+-- source: 119_add_projects_scheduling_foundation.sql
+INSERT INTO tblRolePermission (RoleID,PermissionID)
+SELECT r.ID,p.ID FROM tblRole r CROSS JOIN tblPermission p
+WHERE r.Name='Master Administrator' AND p.Name LIKE 'projects.%'
+ON DUPLICATE KEY UPDATE RoleID=VALUES(RoleID);
+
+-- source: 120_register_project_reports.sql
+INSERT INTO tblReports (Report,Title,Params,Batch,Note,Available,RequiredPermissionID)
+SELECT 'CMPS01','Projects - Active Summary','[ChurchID]',NULL,'Current planned, active, and on-hold congregational projects.',1,p.ID
+FROM tblPermission p WHERE p.Name='projects.reports'
+ON DUPLICATE KEY UPDATE Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),Available=1,RequiredPermissionID=VALUES(RequiredPermissionID);
+
+-- source: 120_register_project_reports.sql
+INSERT INTO tblReports (Report,Title,Params,Batch,Note,Available,RequiredPermissionID)
+SELECT 'CMPS02','Projects - Due and Overdue Work','[ChurchID]',NULL,'Incomplete project steps with approaching or overdue dates.',1,p.ID
+FROM tblPermission p WHERE p.Name='projects.reports'
+ON DUPLICATE KEY UPDATE Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),Available=1,RequiredPermissionID=VALUES(RequiredPermissionID);
+
+-- source: 120_register_project_reports.sql
+INSERT INTO tblReports (Report,Title,Params,Batch,Note,Available,RequiredPermissionID)
+SELECT 'CMPS03','Projects - Project Plan','[ChurchID\r\nProjectID]',NULL,'Ordered plan for one selected congregational project.',1,p.ID
+FROM tblPermission p WHERE p.Name='projects.reports'
+ON DUPLICATE KEY UPDATE Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),Available=1,RequiredPermissionID=VALUES(RequiredPermissionID);
+
+-- source: 120_register_project_reports.sql
+INSERT INTO tblReports (Report,Title,Params,Batch,Note,Available,RequiredPermissionID)
+SELECT 'CMPS04','Projects - Completed History','[ChurchID]',NULL,'Completed congregational project history.',1,p.ID
+FROM tblPermission p WHERE p.Name='projects.reports'
+ON DUPLICATE KEY UPDATE Title=VALUES(Title),Params=VALUES(Params),Note=VALUES(Note),Available=1,RequiredPermissionID=VALUES(RequiredPermissionID);
+
 -- source: current-schema starter policy
 INSERT INTO tblWorshipRole (Name,Description,DisplayOrder,Active) VALUES
 ('Liturgist',NULL,10,1),('Crucifer','Carries the cross',20,1),

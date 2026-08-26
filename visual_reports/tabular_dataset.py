@@ -95,6 +95,8 @@ class TabularDatasetProvider:
             "rpt_group_meeting_attendance", "rpt_group_attendance_sheet",
             "rpt_custom_profile_value",
             "rpt_asset_register", "rpt_asset_maintenance_due", "rpt_asset_history",
+            "rpt_ministry_project_summary", "rpt_ministry_project_due",
+            "rpt_ministry_project_plan", "rpt_ministry_project_completed",
         }
         if view in direct:
             where, values = [f"ChurchID={marker}"], [church_id]
