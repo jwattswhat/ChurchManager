@@ -16,6 +16,15 @@ class DevelopmentBoundaryTests(unittest.TestCase):
     def test_current_development_jsform_is_the_independent_sibling(self):
         self.assertTrue(assert_development_isolation(JSForm, ROOT))
 
+    def test_frozen_build_accepts_only_its_internal_bundled_jsform(self):
+        bundled = SimpleNamespace(__file__=str(ROOT / "JSForm" / "__init__.py"))
+        self.assertTrue(assert_development_isolation(bundled, ROOT, frozen=True))
+        outside = SimpleNamespace(
+            __file__=str(ROOT.parent / "JSForm" / "__init__.py")
+        )
+        with self.assertRaises(DevelopmentIsolationError):
+            assert_development_isolation(outside, ROOT, frozen=True)
+
     def test_legacy_jsform_is_rejected(self):
         legacy = SimpleNamespace(
             __file__=str(

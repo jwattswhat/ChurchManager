@@ -13,6 +13,9 @@ HIDDEN = [
     if not name.startswith(("JSForm.tests", "JSForm.examples", "JSForm.DevelopmentTesting"))
     and name != "JSForm.run_jsform_tests"
 ]
+HIDDEN += collect_submodules("pypdf")
+HIDDEN += collect_submodules("mysql.connector.locales")
+HIDDEN += collect_submodules("mysql.connector.plugins")
 HIDDEN += [
     "reset_test_activity", "seed_beta_membership", "seed_nonaccounting_test_data",
     "seed_duplicate_review_test_data", "reset_worship_test_services",
@@ -32,6 +35,7 @@ DATAS = [
     (str(ROOT / "accounting" / "report_definitions"), "accounting/report_definitions"),
     (str(ROOT / "giving" / "report_definitions"), "giving/report_definitions"),
     (str(JSFORM / "schema"), "JSForm/schema"),
+    (str(JSFORM / "assets"), "JSForm/assets"),
     (str(JSFORM / "jsformschema.json"), "JSForm"),
     (str(ROOT / "output" / "pdf" / "ChurchManager.UserGuide.pdf"), "Documentation"),
     (str(ROOT / "TestData" / "BetaDataset" / "manifest.json"), "TestData/BetaDataset"),

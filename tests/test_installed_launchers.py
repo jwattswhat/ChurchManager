@@ -39,11 +39,22 @@ class InstalledLauncherTests(unittest.TestCase):
         for filename in ("ChurchManager.spec", "ChurchManagerSetup.spec", "ChurchManagerBundle.spec"):
             source = (ROOT / "packaging" / filename).read_text(encoding="utf-8")
             for required in (
-                "JSForm/Forms", "installation", "migrations", "packages",
+                "JSForm/Forms", "JSForm/assets", "installation", "migrations", "packages",
                 "visual_reports/definitions", "accounting/report_definitions",
                 "ChurchManager.UserGuide.pdf", 'console=False',
             ):
                 self.assertIn(required, source)
+
+    def test_specs_explicitly_bundle_readiness_checked_pdf_runtime(self):
+        for filename in ("ChurchManager.spec", "ChurchManagerSetup.spec", "ChurchManagerBundle.spec"):
+            source = (ROOT / "packaging" / filename).read_text(encoding="utf-8")
+            self.assertIn('collect_submodules("pypdf")', source)
+
+    def test_specs_bundle_mysql_connector_localization_data(self):
+        for filename in ("ChurchManager.spec", "ChurchManagerSetup.spec", "ChurchManagerBundle.spec"):
+            source = (ROOT / "packaging" / filename).read_text(encoding="utf-8")
+            self.assertIn('collect_submodules("mysql.connector.locales")', source)
+            self.assertIn('collect_submodules("mysql.connector.plugins")', source)
 
     def test_bundle_and_msi_define_both_installed_entry_points(self):
         bundle = (ROOT / "packaging" / "ChurchManagerBundle.spec").read_text(encoding="utf-8")
@@ -55,6 +66,7 @@ class InstalledLauncherTests(unittest.TestCase):
         self.assertIn("ChurchManager.exe", source)
         self.assertIn("ChurchManagerSetup.exe", source)
         self.assertIn("MajorUpgrade", source)
+        self.assertIn('AllowSameVersionUpgrades="yes"', source)
         self.assertNotIn("AppData", source)
         self.assertNotIn("Backup", source)
 
@@ -67,6 +79,8 @@ class InstalledLauncherTests(unittest.TestCase):
             evidence = json.loads(output.read_text(encoding="utf-8"))
             self.assertFalse(evidence["passed"])
             self.assertIn("forms", evidence["missing"])
+            self.assertIn("jsform_icon", evidence["missing"])
+            self.assertEqual(evidence["missing_components"], [])
 
     def test_setup_package_check_uses_the_same_noninteractive_proof(self):
         with patch("installed_setup.package_check", return_value=0) as check:

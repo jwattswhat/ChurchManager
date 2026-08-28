@@ -1,10 +1,10 @@
 :root {
   color-scheme: light;
-  --navy: #123b5d;
-  --navy-deep: #0b2a43;
+  --navy: #0b315b;
+  --navy-deep: #0b315b;
   --blue: #1f6f9f;
   --blue-soft: #eaf3f8;
-  --gold: #c9962d;
+  --gold: #f2b632;
   --ink: #17232c;
   --muted: #586a77;
   --line: #ccd8df;
@@ -50,15 +50,15 @@ a:focus-visible, .button:focus-visible { outline: 3px solid var(--gold); outline
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  min-height: 72px;
-  padding: 14px max(24px, calc((100% - 1180px) / 2));
+  min-height: 84px;
+  padding: 10px max(24px, calc((100% - 1180px) / 2));
   background: rgba(247, 250, 251, .94);
   border-bottom: 1px solid rgba(204, 216, 223, .85);
   backdrop-filter: blur(12px);
 }
 
-.brand { display: inline-flex; align-items: center; gap: 11px; color: var(--navy-deep); font-size: 1.15rem; font-weight: 750; text-decoration: none; }
-.brand-mark { display: block; width: 42px; height: 42px; }
+.brand { display: inline-flex; align-items: center; flex: 0 1 330px; min-width: 230px; text-decoration: none; }
+.brand-logo { display: block; width: min(100%, 315px); height: auto; }
 nav { display: flex; flex-wrap: wrap; gap: 22px; }
 nav a { font-size: .92rem; font-weight: 650; text-decoration: none; }
 
@@ -149,12 +149,13 @@ figcaption { padding: 15px 5px 0; color: var(--muted); font-size: .9rem; }
 .values > p { margin: 28px 0 0; }
 
 footer { display: grid; grid-template-columns: 1fr auto; gap: 22px; align-items: center; max-width: 1180px; margin: 0 auto; padding: 42px 24px; color: var(--muted); font-size: .86rem; }
-footer > div:first-child { display: grid; }
-footer strong { color: var(--navy-deep); font-size: 1rem; }
+.footer-brand img { display: block; width: min(100%, 320px); height: auto; }
 .footer-links { display: flex; flex-wrap: wrap; gap: 18px; }
 footer p { grid-column: 1 / -1; margin: 0; padding-top: 18px; border-top: 1px solid var(--line); }
 
 @media (max-width: 900px) {
+  .site-header { align-items: flex-start; }
+  .brand { flex-basis: 270px; min-width: 210px; }
   .hero, .two-column, .support, .download-grid { grid-template-columns: 1fr; }
   .hero { padding-top: 72px; }
   .trust-strip { grid-template-columns: repeat(2, 1fr); margin-right: 24px; margin-left: 24px; }
@@ -168,10 +169,10 @@ footer p { grid-column: 1 / -1; margin: 0; padding-top: 18px; border-top: 1px so
 
 @media (max-width: 620px) {
   html { scroll-behavior: auto; }
-  .site-header { position: static; align-items: flex-start; padding: 14px 18px; }
-  nav { justify-content: flex-end; gap: 10px 14px; }
+  .site-header { position: static; display: grid; gap: 12px; padding: 14px 18px; }
+  .brand { width: min(100%, 290px); min-width: 0; }
+  nav { justify-content: flex-start; gap: 10px 14px; }
   nav a { font-size: .82rem; }
-  .brand > span:last-child { display: none; }
   .hero { padding: 54px 18px 58px; }
   h1 { font-size: clamp(2.35rem, 13vw, 3.55rem); }
   .trust-strip { grid-template-columns: 1fr; margin: 0 18px 22px; }

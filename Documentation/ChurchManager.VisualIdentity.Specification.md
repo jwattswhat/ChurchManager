@@ -16,6 +16,19 @@ The identity should feel trustworthy, practical, calm, and welcoming. It should
 not resemble a commercial financial product, a denominational seal, or the logo
 of a particular congregation.
 
+## Positioning line
+
+The approved public positioning line is:
+
+> Local-first church administration for Windows
+
+Use it with the horizontal logo, repository introduction, website metadata,
+release pages, and directory listings when space permits. `Local-first` means
+that ChurchManager is installed and operated under the congregation's control;
+it does not imply that backups, database administration, or appropriate network
+security are optional. The shorter phrase `Church administration for Windows`
+may be used where space is constrained.
+
 ## Primary mark
 
 The primary mark is a white church above three gold record lines inside a deep

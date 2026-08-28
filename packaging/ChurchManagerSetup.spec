@@ -20,6 +20,7 @@ datas = [
     (str(ROOT / "accounting" / "report_definitions"), "accounting/report_definitions"),
     (str(ROOT / "giving" / "report_definitions"), "giving/report_definitions"),
     (str(JSFORM / "schema"), "JSForm/schema"),
+    (str(JSFORM / "assets"), "JSForm/assets"),
     (str(JSFORM / "jsformschema.json"), "JSForm"),
     (str(ROOT / "output" / "pdf" / "ChurchManager.UserGuide.pdf"), "Documentation"),
 ]
@@ -32,7 +33,8 @@ a = Analysis(
         name for name in collect_submodules("JSForm")
         if not name.startswith(("JSForm.tests", "JSForm.examples", "JSForm.DevelopmentTesting"))
         and name != "JSForm.run_jsform_tests"
-    ],
+    ] + collect_submodules("pypdf") + collect_submodules("mysql.connector.locales")
+    + collect_submodules("mysql.connector.plugins"),
     hookspath=[], hooksconfig={}, runtime_hooks=[],
     excludes=["JSForm.tests", "JSForm.examples", "JSForm.DevelopmentTesting", "JSForm.run_jsform_tests"],
     noarchive=False,

@@ -14,11 +14,15 @@ class InstallationReadinessTests(unittest.TestCase):
         self.assertTrue(matches[0].valid)
         self.assertTrue(matches[0].installable)
 
-    def test_order_of_service_explains_missing_hymnal_dependency(self):
+    def test_included_lsb_hymnal_satisfies_order_of_service_dependency(self):
+        hymnals = [item for item in catalog_inventory() if item.code == "lsb"]
+        self.assertEqual(len(hymnals), 1)
+        self.assertTrue(hymnals[0].valid)
+        self.assertTrue(hymnals[0].installable)
         matches = [item for item in catalog_inventory() if item.code == "lsb-service-outlines"]
         self.assertEqual(len(matches), 1)
         self.assertTrue(matches[0].valid)
-        self.assertFalse(matches[0].installable)
+        self.assertTrue(matches[0].installable)
         self.assertEqual(matches[0].dependency_code, "lsb")
 
     def test_bad_package_is_reported_without_raising(self):

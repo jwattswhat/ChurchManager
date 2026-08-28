@@ -11,6 +11,7 @@ import json
 import os
 import re
 import secrets
+import sys
 from pathlib import Path
 
 import wx
@@ -29,6 +30,13 @@ from installation_readiness import find_mariadb_tool, inspect_readiness
 
 ROOT = Path(__file__).resolve().parent
 CONFIG_PATH = configuration_path()
+INSTALLATION_TITLE = "ChurchManager Installation"
+
+
+def packaged_resource(*parts):
+    """Return a source-tree or PyInstaller path for a bundled setup resource."""
+    base = Path(getattr(sys, "_MEIPASS", ROOT))
+    return base.joinpath(*parts)
 
 
 def application_account_name(database_name):
@@ -52,8 +60,16 @@ def save_installed_configuration(database_name, application_user, path=CONFIG_PA
     })
     config.setdefault("security", {})["production_enabled"] = True
     temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(json.dumps(config, indent=4) + "\n", encoding="utf-8")
-    temporary.replace(path)
+    rendered = json.dumps(config, indent=4) + "\n"
+    temporary.write_text(rendered, encoding="utf-8")
+    try:
+        temporary.replace(path)
+    except PermissionError:
+        # Some Windows security contexts permit updating an owned file but
+        # deny deleting/replacing its directory entry. Preserve the prepared
+        # contents and use a bounded in-place fallback for that case only.
+        path.write_text(rendered, encoding="utf-8")
+        temporary.unlink(missing_ok=True)
 
 
 def finalize_installed_connection(
@@ -87,6 +103,22 @@ class SetupPage(wx.adv.WizardPageSimple):
     def __init__(self, wizard, title, explanation):
         super().__init__(wizard)
         outer = wx.BoxSizer(wx.VERTICAL)
+        banner_path = packaged_resource(
+            "assets", "brand", "png", "ChurchManager-logo-horizontal-600.png",
+        )
+        if banner_path.is_file():
+            image = wx.Image(str(banner_path), wx.BITMAP_TYPE_PNG)
+            if image.IsOk():
+                maximum_width = 390
+                if image.GetWidth() > maximum_width:
+                    height = round(image.GetHeight() * maximum_width / image.GetWidth())
+                    image = image.Scale(maximum_width, height, wx.IMAGE_QUALITY_HIGH)
+                outer.Add(
+                    wx.StaticBitmap(self, bitmap=wx.Bitmap(image)),
+                    0,
+                    wx.LEFT | wx.RIGHT | wx.TOP,
+                    12,
+                )
         heading = wx.StaticText(self, label=title)
         font = heading.GetFont(); font.SetPointSize(font.GetPointSize() + 3); font.MakeBold()
         heading.SetFont(font)
@@ -100,7 +132,11 @@ class SetupPage(wx.adv.WizardPageSimple):
 
     def row(self, label, control):
         line = wx.BoxSizer(wx.HORIZONTAL)
-        caption = wx.StaticText(self, label=label, size=(170, -1))
+        caption = wx.StaticText(self, label=label)
+        # Giving a Windows native StaticText an explicit width together with a
+        # -1 height can produce an invalid painted rectangle in packaged wx.
+        # Preserve the aligned column with a real, positive label height.
+        caption.SetMinSize((170, caption.GetBestSize().GetHeight()))
         line.Add(caption, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 8)
         line.Add(control, 1, wx.EXPAND)
         self.body.Add(line, 0, wx.EXPAND | wx.BOTTOM, 8)
@@ -110,13 +146,15 @@ class ChurchManagerSetupWizard(wx.adv.Wizard):
     """Collect a safe installation plan and optionally apply it once."""
 
     def __init__(self, parent=None, *, apply=False, root=ROOT):
-        super().__init__(parent, title="ChurchManager Setup", size=(760, 610))
+        super().__init__(parent, title=INSTALLATION_TITLE)
+        self.SetSize((760, 650))
         self.apply = bool(apply)
         self.root = Path(root)
         self.readiness = inspect_readiness(self.root)
         self.plan = None
         self.installed = False
         self._build_pages()
+        self.SetPageSize((720, 520))
         self.Bind(wx.adv.EVT_WIZARD_PAGE_CHANGING, self.on_page_changing)
         self.Bind(wx.adv.EVT_WIZARD_PAGE_CHANGED, self.on_page_changed)
 
@@ -189,7 +227,9 @@ class ChurchManagerSetupWizard(wx.adv.Wizard):
                 for item in self.readiness.packages
                 if item.family == family and item.valid and item.installable
             ]
-            control = wx.CheckListBox(self.catalog, choices=choices, size=(-1, 74))
+            # Keep all three catalog families and both default selectors visible
+            # within the supported 720x520 wizard page on standard displays.
+            control = wx.CheckListBox(self.catalog, choices=choices, size=(-1, 52))
             self.catalog_lists[family] = control
             self.catalog.body.Add(label, 0, wx.BOTTOM, 3)
             self.catalog.body.Add(control, 0, wx.EXPAND | wx.BOTTOM, 8)

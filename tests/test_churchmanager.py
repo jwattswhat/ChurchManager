@@ -744,6 +744,37 @@ class TestChurchManagerConfiguration(unittest.TestCase):
         self.assertEqual(requested, ["ChurchManager/Production"])
         self.assertEqual(resolved["password"], "stored-secret")
 
+    def test_unspecified_production_arguments_use_installed_configuration(self):
+        from churchmanager_mode import resolve_database
+
+        config = {
+            "database_settings": {
+                "host": "127.0.0.1", "port": 3306, "database": "CMTest2",
+                "jsform_database": "CMTest2", "user": "cm_cmtest2",
+                "credential_target": "ChurchManager/Production",
+            },
+        }
+        resolved = resolve_database(
+            {
+                "server": None, "database": None, "user": None,
+                "password": None, "test_mode": False, "jsform_database": None,
+            },
+            config,
+            lambda _target: ("cm_cmtest2", "stored-secret"),
+        )
+        self.assertEqual(resolved["database"], "CMTest2")
+        self.assertEqual(resolved["jsform_database"], "CMTest2")
+        self.assertEqual(resolved["user"], "cm_cmtest2")
+
+    def test_unspecified_parser_values_do_not_override_installed_configuration(self):
+        import fnCMargParse
+
+        parsed = fnCMargParse.CMargs(
+            "ChurchManager", "test", ["server", "database"], [],
+        )
+        self.assertIsNone(parsed["server"])
+        self.assertIsNone(parsed["database"])
+
     def test_argument_parser_accepts_test_switch(self):
         import fnCMargParse
 

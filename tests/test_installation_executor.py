@@ -85,6 +85,25 @@ class InstallationExecutorTests(unittest.TestCase):
                 dump_directory=Path("tools"), backup_folder=Path("backups"),
             )
 
+    @patch("installation_executor.FreshDatabaseProvisioner")
+    def test_failure_reports_stage_and_redacts_password(self, provisioner):
+        provisioner.return_value.create.side_effect = RuntimeError(
+            "database rejected secret-application-password"
+        )
+        executor = FreshInstallationExecutor(Mock(), Mock())
+        with self.assertRaises(InstallationExecutionError) as caught:
+            executor.install(
+                self.plan(), "cm_grace", "secret-application-password",
+                "secret-master-password", "secret-master-password",
+                dump_directory=Path("tools"), backup_folder=Path("backups"),
+            )
+        message = str(caught.exception)
+        self.assertIn("creating the ChurchManager database", message)
+        self.assertIn("Cause: database rejected [password hidden]", message)
+        self.assertIn("No existing database or account was changed.", message)
+        self.assertNotIn("incomplete database was removed", message)
+        self.assertNotIn("secret-application-password", message)
+
 
 if __name__ == "__main__":
     unittest.main()

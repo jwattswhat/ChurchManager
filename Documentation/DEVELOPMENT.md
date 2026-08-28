@@ -202,6 +202,9 @@ and is not committed.
 traditional per-machine MSI. It harvests the verified bundle, creates ordinary
 and protected-setup shortcuts, supports major upgrades, and owns no database,
 backup, attachment, custom definition, preference, or log location.
+Because prerelease labels are not represented in Windows Installer's numeric
+version, same-version upgrades are enabled so a corrected beta MSI replaces an
+earlier build instead of creating parallel product registrations.
 
 With the repository-local .NET and WiX tools installed, the complete Windows
 release build is one command:

@@ -10,6 +10,7 @@ import fnCMargParse
 from development_boundary import assert_development_isolation
 from authorization import ChurchManagerAuthorizationPolicy
 from churchmanager_mode import load_config, resolve_database
+from file_opening_policy import configure_churchmanager_file_opening
 from login_dialog import authenticate_user
 from churchmanager_version import __version__
 
@@ -79,6 +80,7 @@ def build_runtime(form_class, argv=None, login_provider=authenticate_user):
     JSForm.OPTION.set_Option_DBConnection(database)
     JSForm.FONT.set_Font_DBConnection(database)
     JSForm.FONT.Get_Config_Font()
+    configure_churchmanager_file_opening(JSForm, JSForm.CONFIG, os.path.dirname(__file__))
     JSForm.CONST.btnNavigationCONTROLS = JSForm.convertNavButtons(
         JSForm.CONST.btnNavigationCONTROLS
     )

@@ -1,6 +1,6 @@
 # ChurchManager User Guide
 
-**Version 0.3.0-beta.1**
+**Version 0.3.0-beta.2**
 
 **For congregations using ChurchManager**
 
@@ -785,5 +785,5 @@ version when requesting help.
 ---
 
 ChurchManager is open-source congregation software. This guide describes the
-0.3.0-beta.1 beta line and will be revised as beta testing identifies
+0.3.0-beta.2 beta line and will be revised as beta testing identifies
 additional instructions or screenshots that are needed.

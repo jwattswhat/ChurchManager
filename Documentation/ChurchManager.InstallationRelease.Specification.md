@@ -56,6 +56,18 @@ The MSI and the ChurchManager Setup Wizard have separate responsibilities:
 - the Setup Wizard configures MariaDB, congregation information, the first
   master administrator, catalogs, writable data locations, and backup proof.
 
+The Setup Wizard is titled **ChurchManager Installation** and displays the
+approved horizontal ChurchManager banner above its page headings. This is an
+installer presentation treatment only; it does not replace the application
+icon, congregation branding, shortcuts, website identity, or product colors.
+The installed wizard must construct successfully against the bundled wxPython
+runtime before applying its preferred window size. Its page area must remain
+large enough to show the full banner, instructions, readiness results, and
+navigation controls without clipping.
+The packaged resource proof must also verify every runtime component used by
+the Setup Wizard readiness check so a dependency present only in development
+cannot produce a false installation block.
+
 The installed user-facing entry points are `ChurchManager.exe` for ordinary
 operation and `ChurchManagerSetup.exe` for first-run or protected maintenance
 setup. Both include the compatible Python and JSForm runtime; an end user does
@@ -148,12 +160,38 @@ creation begins, Cancel finishes or rolls back the active transaction and
 records the incomplete stage. A password-free installation journal may store
 stage names, versions, checksums, timestamps, and safe error identifiers so the
 installer can explain whether retry or cleanup is appropriate.
+If a fresh installation fails, the visible error identifies the failed stage
+and reports a password-redacted underlying cause after cleanup.
+When setup refuses a pre-existing database or account before creating anything,
+the message states that no existing data was changed rather than claiming that
+an incomplete database was removed.
+Configuration saving normally uses atomic replacement. On Windows systems that
+permit updating an existing owned configuration file but deny replacement of
+its directory entry, setup falls back to a bounded in-place update and removes
+the completed temporary copy.
+Installed launchers accept JSForm only from their own packaged `_internal`
+bundle. Source development continues to require the separate adjacent JSForm
+project, and neither mode accepts the Frozen application's framework copy.
+Windows packages include MySQL Connector's English localization data, and the
+supported Connector authentication plugins, and the noninteractive package
+check verifies both the English error module and `mysql_native_password` before
+release.
+An installed launch with no explicit database arguments resolves its server,
+database, framework database, port, and account from the saved production
+configuration. Explicit command-line values remain available for supported
+administrative use and test mode retains its isolated configuration.
+Starter-data extraction preserves approved bounded temporary helper tables when
+later catalog mutations in the same migration depend on them.
 
 ## 5. Catalog selection
 
 The selection screen groups packages by Hymnals, Lectionaries, and Orders of
 Service. Each entry displays title, version, publisher or source, distribution
 scope, notice, dependencies, and whether it is already installed.
+The three package lists and both default selectors remain fully visible within
+the supported installer page size on a standard Windows display. Field labels
+use their native positive text height so packaged Windows builds paint the
+complete label without overlap.
 
 The installer must not imply that owning a printed publication authorizes
 distribution of protected text or music. Packages remain metadata-only and are

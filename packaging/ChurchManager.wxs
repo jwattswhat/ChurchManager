@@ -6,7 +6,8 @@
            UpgradeCode="A1C2E1E4-8B77-4B6C-AB3F-F1C02E9E4E44"
            Language="1033"
            Scope="perMachine">
-    <MajorUpgrade DowngradeErrorMessage="A newer version of ChurchManager is already installed." />
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="A newer version of ChurchManager is already installed." />
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
     <StandardDirectory Id="ProgramFiles64Folder">

@@ -1,7 +1,7 @@
 {
   "artifact": "ChurchManager fresh-install schema baseline",
   "format_version": 1,
-  "release_version": "0.3.0-beta.1",
+  "release_version": "0.3.0-beta.2",
   "schema_sha256": "f95153beb456e8ab25064476299fb466a7a675550e15069c814c7ec78d3f6ad4",
   "represented_migrations": [
     {
@@ -483,6 +483,10 @@
     {
       "version": "120_register_project_reports.sql",
       "checksum": "8951afbac2753de07e5d3fbbcdce7028c47b8018cecc139106b4134360df3c22"
+    },
+    {
+      "version": "121_remove_jsform_framework_tables.sql",
+      "checksum": "05fe9b9b4f8596f654ac6d71c58eae38b9b922b73e4f6874b1896dd8de6a584f"
     }
   ]
 }

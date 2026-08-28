@@ -18,9 +18,9 @@ def CMargs(prog,description,arguments, argv=None):
         prog=prog, description=description
     )
     if "server" in arguments:
-        cmparser.add_argument("-s", "--server", type=str, default="localhost")
+        cmparser.add_argument("-s", "--server", type=str, default=None)
     if "database" in arguments:
-        cmparser.add_argument("-d", "--database", type=str, default="ChurchDB")
+        cmparser.add_argument("-d", "--database", type=str, default=None)
     if "user" in arguments:
         cmparser.add_argument("-u", "--user", type=str)
     if "password" in arguments:
