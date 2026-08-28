@@ -35,6 +35,7 @@ DATAS = [
     (str(ROOT / "accounting" / "report_definitions"), "accounting/report_definitions"),
     (str(ROOT / "giving" / "report_definitions"), "giving/report_definitions"),
     (str(JSFORM / "schema"), "JSForm/schema"),
+    (str(JSFORM / "assets"), "JSForm/assets"),
     (str(JSFORM / "jsformschema.json"), "JSForm"),
     (str(ROOT / "output" / "pdf" / "ChurchManager.UserGuide.pdf"), "Documentation"),
     (str(ROOT / "TestData" / "BetaDataset" / "manifest.json"), "TestData/BetaDataset"),

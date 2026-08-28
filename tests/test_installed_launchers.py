@@ -39,7 +39,7 @@ class InstalledLauncherTests(unittest.TestCase):
         for filename in ("ChurchManager.spec", "ChurchManagerSetup.spec", "ChurchManagerBundle.spec"):
             source = (ROOT / "packaging" / filename).read_text(encoding="utf-8")
             for required in (
-                "JSForm/Forms", "installation", "migrations", "packages",
+                "JSForm/Forms", "JSForm/assets", "installation", "migrations", "packages",
                 "visual_reports/definitions", "accounting/report_definitions",
                 "ChurchManager.UserGuide.pdf", 'console=False',
             ):
@@ -78,6 +78,7 @@ class InstalledLauncherTests(unittest.TestCase):
             evidence = json.loads(output.read_text(encoding="utf-8"))
             self.assertFalse(evidence["passed"])
             self.assertIn("forms", evidence["missing"])
+            self.assertIn("jsform_icon", evidence["missing"])
             self.assertEqual(evidence["missing_components"], [])
 
     def test_setup_package_check_uses_the_same_noninteractive_proof(self):

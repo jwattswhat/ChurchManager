@@ -22,6 +22,7 @@ def package_check(output_path, *, module_file=__file__):
         assert_development_isolation(JSForm, root, frozen=True)
     required = {
         "forms": root / "JSForm" / "Forms" / "frmMain.json",
+        "jsform_icon": root / "JSForm" / "assets" / "jsform.ico",
         "schema": root / "installation" / "baseline_schema.sql",
         "seed": root / "installation" / "baseline_seed.sql",
         "lectionary_packages": root / "packages" / "lectionary",
