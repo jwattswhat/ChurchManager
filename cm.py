@@ -86,6 +86,7 @@ from calendar_event_dialog import show_calendar_events
 from calendar_integration_dialog import show_calendar_integration
 from asset_dialog import show_assets, show_asset_locations, show_asset_maintenance
 from project_dialog import show_projects
+from file_opening_policy import normalize_picker_directory
 
 
 arguments = None
@@ -97,6 +98,17 @@ single_instance = None
 
 
 class clsForm(JSForm.clsForm):
+    def _openfileevent(self, event):
+        """Normalize ChurchManager's legacy relative picker path before validation."""
+        field = event.GetEventObject().GetName()
+        action = self.CONTROLDESCRIPTION[field].get("action", [])
+        if action and action[0] == "openfile":
+            target = action[1]
+            description = self.CONTROLDESCRIPTION.get(target, {})
+            if description.get("type") == "FilePickerCtrl":
+                normalize_picker_directory(self.CONTROLID[target], Path(__file__).parent)
+        return super()._openfileevent(event)
+
     def fill_form(self, record):
         """Fill a form and protect package-owned catalog controls."""
         for name in getattr(self, "_package_disabled_controls", set()):
