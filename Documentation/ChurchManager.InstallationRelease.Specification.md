@@ -56,6 +56,11 @@ The MSI and the ChurchManager Setup Wizard have separate responsibilities:
 - the Setup Wizard configures MariaDB, congregation information, the first
   master administrator, catalogs, writable data locations, and backup proof.
 
+The Setup Wizard is titled **ChurchManager Installation** and displays the
+approved horizontal ChurchManager banner above its page headings. This is an
+installer presentation treatment only; it does not replace the application
+icon, congregation branding, shortcuts, website identity, or product colors.
+
 The installed user-facing entry points are `ChurchManager.exe` for ordinary
 operation and `ChurchManagerSetup.exe` for first-run or protected maintenance
 setup. Both include the compatible Python and JSForm runtime; an end user does
