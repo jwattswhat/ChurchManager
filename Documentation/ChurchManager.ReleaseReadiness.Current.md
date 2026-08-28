@@ -37,9 +37,10 @@ installation specification and roadmap.
 
 - The audited source repository is public at
   `https://github.com/jwattswhat/ChurchManager`.
-- Release `v0.3.0-beta.2` is being prepared with distinct clean-installation
-  and fictional beta-test kits. Public installer downloads remain halted until
-  the final MSI upgrade/uninstall acceptance passes.
+- Release `v0.3.0-beta.2` has distinct clean-installation and fictional
+  beta-test kits. Local MSI installation, same-version upgrade, uninstall,
+  reinstall, login, main-menu, Documents-screen, and registered document-opening
+  acceptance passed. The release is ready for public beta publication.
 - The approved static project site, exact application screenshots, release
   links, documentation links, support route, privacy statement, and licensing
   notice are live at `https://jwattswhat.github.io/ChurchManager/`.
@@ -48,14 +49,14 @@ installation specification and roadmap.
 
 ## Remaining release gates
 
-- Same-version beta MSI upgrade and uninstall ownership acceptance
 - Code signing
 - Independent clean-machine installation and visual acceptance
 
-The local Windows MSI, repair flow, installed login, main menu, Documents
-screen, registered document opening, and isolated fresh-database baseline have
-been exercised successfully. Code signing and independent-computer acceptance
-remain distinct from these local checks.
+The local Windows MSI, same-version upgrade, uninstall, reinstall, installed
+login, main menu, Documents screen, registered document opening, configuration
+preservation, and isolated fresh-database baseline have been exercised
+successfully. Code signing and independent-computer acceptance remain distinct
+from these local checks.
 
 ## Production-only gates
 
