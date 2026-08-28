@@ -32,7 +32,8 @@ a = Analysis(
         name for name in collect_submodules("JSForm")
         if not name.startswith(("JSForm.tests", "JSForm.examples", "JSForm.DevelopmentTesting"))
         and name != "JSForm.run_jsform_tests"
-    ],
+    ] + collect_submodules("pypdf") + collect_submodules("mysql.connector.locales")
+    + collect_submodules("mysql.connector.plugins"),
     hookspath=[], hooksconfig={}, runtime_hooks=[],
     excludes=["JSForm.tests", "JSForm.examples", "JSForm.DevelopmentTesting", "JSForm.run_jsform_tests"],
     noarchive=False,

@@ -41,6 +41,13 @@ _DELETE_FROM = re.compile(r"^DELETE\s+FROM\s+`?([A-Za-z0-9_]+)`?", re.I)
 _DELETE_ALIAS = re.compile(
     r"^DELETE\s+[A-Za-z0-9_]+\s+FROM\s+`?([A-Za-z0-9_]+)`?", re.I,
 )
+_CREATE_TEMPORARY = re.compile(
+    r"^CREATE\s+TEMPORARY\s+TABLE\s+`?([A-Za-z0-9_]+)`?", re.I,
+)
+_DROP_TEMPORARY = re.compile(
+    r"^DROP\s+TEMPORARY\s+TABLE\s+`?([A-Za-z0-9_]+)`?", re.I,
+)
+SEED_HELPER_TABLES = frozenset({"cm_report_rename"})
 
 
 @dataclass(frozen=True)
@@ -61,6 +68,19 @@ def mutation_table(statement):
     return None
 
 
+def seed_statement_table(statement):
+    """Return an approved persistent mutation or bounded temporary helper."""
+    table = mutation_table(statement)
+    if table:
+        return table
+    text = str(statement or "").lstrip()
+    for pattern in (_CREATE_TEMPORARY, _DROP_TEMPORARY):
+        match = pattern.match(text)
+        if match:
+            return match.group(1).casefold()
+    return None
+
+
 def build_seed_artifact(migration_directory, version):
     """Extract approved catalog mutations from immutable migration history."""
     parts = []
@@ -69,7 +89,8 @@ def build_seed_artifact(migration_directory, version):
     for record in records:
         included = 0
         for statement in split_sql_statements(record.sql):
-            if mutation_table(statement) in EXTRACTED_SEED_TABLES:
+            table = seed_statement_table(statement)
+            if table in EXTRACTED_SEED_TABLES or table in SEED_HELPER_TABLES:
                 parts.append(f"-- source: {record.version}\n{statement};")
                 included += 1
         if included:

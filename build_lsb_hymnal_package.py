@@ -107,10 +107,14 @@ def reviewed_rows(catalog_path=CATALOG, review_path=REVIEW):
     return result
 
 
-def build_package(catalog_path=CATALOG, review_path=REVIEW):
-    """Build the final package only from a completely verified review ledger."""
+def build_package(catalog_path=CATALOG, review_path=REVIEW, *, approved_as_is=False):
+    """Build the reviewed package, or the explicitly approved current metadata."""
     entries = []
-    for source, review, count in reviewed_rows(catalog_path, review_path):
+    if approved_as_is:
+        rows = ((source, None, 0) for source in catalog_rows(catalog_path))
+    else:
+        rows = reviewed_rows(catalog_path, review_path)
+    for source, review, count in rows:
         number = int(source["HymnNumber"])
         entries.append({
             "hymn_id": 10000 + number,
@@ -126,7 +130,7 @@ def build_package(catalog_path=CATALOG, review_path=REVIEW):
             "source_note": (
                 f"Stanza count verified from {review['VerificationSource']} by "
                 f"{review['VerifiedBy']} on {review['VerifiedDate']}."
-            ),
+            ) if review else "Current catalog metadata approved as-is; stanza count remains unverified.",
         })
     package = {
         "package_code": "lsb",
@@ -142,9 +146,9 @@ def build_package(catalog_path=CATALOG, review_path=REVIEW):
         "publisher": "Concordia Publishing House",
         "publication_year": 2006,
         "isbn": "978-0-7586-1217-5",
-        "source_name": "Congregation-owned Lutheran Service Book and reviewed catalog metadata",
+        "source_name": "Congregation-owned Lutheran Service Book catalog metadata",
         "source_reference": "Printed LSB hymns 331-966; see the repository review ledger",
-        "distribution_notice": "Metadata and outline support only; no lyrics, music, or published service text.",
+        "distribution_notice": "Metadata and outline support only; no lyrics, music, or published service text. A stanza count of 0 means unverified.",
         "entries": entries,
     }
     package["checksum"] = canonical_hymnal_checksum(package)
@@ -159,13 +163,14 @@ def main(argv=None):
     parser.add_argument("--catalog", type=Path, default=CATALOG)
     parser.add_argument("--review", type=Path, default=REVIEW)
     parser.add_argument("--output", type=Path, default=OUTPUT)
+    parser.add_argument("--approved-as-is", action="store_true")
     args = parser.parse_args(argv)
     if args.initialize_review:
         print(f"review_rows={initialize_review(args.catalog, args.review)}")
         print(f"review={args.review}")
         return 0
     try:
-        package = build_package(args.catalog, args.review)
+        package = build_package(args.catalog, args.review, approved_as_is=args.approved_as_is)
     except HymnalPackageError as error:
         parser.exit(1, f"LSB package not written: {error}\n")
     args.output.parent.mkdir(parents=True, exist_ok=True)

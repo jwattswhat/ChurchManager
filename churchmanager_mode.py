@@ -49,6 +49,12 @@ def resolve_database(arguments, config=None, credential_reader=read_credential):
             "credential_target", "ChurchManager/Test"
         )
     else:
+        resolved["server"] = resolved.get("server") or config["database_settings"].get(
+            "host", "127.0.0.1"
+        )
+        resolved["port"] = int(config["database_settings"].get("port", 3306))
+        resolved["database"] = resolved.get("database") or production_database
+        resolved["user"] = resolved.get("user") or config["database_settings"].get("user")
         resolved["jsform_database"] = resolved.get("jsform_database") or production_jsform
 
     if not resolved.get("password"):

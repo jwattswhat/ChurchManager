@@ -13,6 +13,9 @@ HIDDEN = [
     if not name.startswith(("JSForm.tests", "JSForm.examples", "JSForm.DevelopmentTesting"))
     and name != "JSForm.run_jsform_tests"
 ]
+HIDDEN += collect_submodules("pypdf")
+HIDDEN += collect_submodules("mysql.connector.locales")
+HIDDEN += collect_submodules("mysql.connector.plugins")
 HIDDEN += [
     "reset_test_activity", "seed_beta_membership", "seed_nonaccounting_test_data",
     "seed_duplicate_review_test_data", "reset_worship_test_services",

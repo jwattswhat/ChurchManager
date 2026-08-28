@@ -118,6 +118,13 @@ class HymnalPackageTests(unittest.TestCase):
             )
             HymnalPackageValidator().validate(value, value["checksum"])
 
+    def test_explicit_as_is_approval_builds_metadata_with_unknown_stanza_counts(self):
+        value = build_lsb_package(approved_as_is=True)
+        self.assertEqual(len(value["entries"]), 636)
+        self.assertTrue(all(entry["printed_stanza_count"] == 0 for entry in value["entries"]))
+        self.assertIn("unverified", value["distribution_notice"])
+        HymnalPackageValidator().validate(value, value["checksum"])
+
     def test_valid_package_uses_permanent_block(self):
         result = HymnalPackageValidator().validate(package(), "a" * 64)
         self.assertEqual((result.hymnal_id, result.entry_count), (3, 1))

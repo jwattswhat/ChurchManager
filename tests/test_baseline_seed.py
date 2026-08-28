@@ -2,7 +2,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from baseline_seed import SEED_TABLES, build_seed_artifact, mutation_table, write_seed_artifact
+from baseline_seed import (
+    SEED_TABLES, build_seed_artifact, mutation_table, seed_statement_table,
+    write_seed_artifact,
+)
 
 
 class BaselineSeedTests(unittest.TestCase):
@@ -12,6 +15,21 @@ class BaselineSeedTests(unittest.TestCase):
         self.assertEqual(mutation_table("DELETE FROM tblChoices WHERE ID=1"), "tblchoices")
         self.assertEqual(mutation_table("DELETE rp FROM tblRolePermission rp JOIN x"), "tblrolepermission")
         self.assertIsNone(mutation_table("DROP TABLE tblReports"))
+        self.assertEqual(
+            seed_statement_table("CREATE TEMPORARY TABLE cm_report_rename (ID INT)"),
+            "cm_report_rename",
+        )
+        self.assertEqual(
+            seed_statement_table("DROP TEMPORARY TABLE cm_report_rename"),
+            "cm_report_rename",
+        )
+
+    def test_report_rename_helper_is_complete_in_fresh_install_seed(self):
+        migrations = Path(__file__).resolve().parents[1] / "migrations"
+        artifact = build_seed_artifact(migrations, "0.3.0-dev")
+        self.assertIn("CREATE TEMPORARY TABLE cm_report_rename", artifact.sql)
+        self.assertIn("INSERT INTO cm_report_rename", artifact.sql)
+        self.assertIn("DROP TEMPORARY TABLE cm_report_rename", artifact.sql)
 
     def test_extracts_only_approved_seed_tables(self):
         with tempfile.TemporaryDirectory() as folder:

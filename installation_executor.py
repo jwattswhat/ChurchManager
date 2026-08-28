@@ -95,7 +95,9 @@ class FreshInstallationExecutor:
         provisioned = None
         connection = None
         proof = None
+        stage = "starting installation"
         try:
+            stage = "creating the ChurchManager database"
             self.progress("Creating the ChurchManager database...")
             provisioned = FreshDatabaseProvisioner(
                 self.admin, database_errors=self.database_errors,
@@ -107,6 +109,7 @@ class FreshInstallationExecutor:
                 host=host, database=plan.database_name,
                 user=application_user, password=application_password,
             )
+            stage = "installing the verified database structure"
             self.progress("Installing the verified database structure...")
             baseline = self.root / "installation"
             schema, manifest = load_baseline(
@@ -131,15 +134,20 @@ class FreshInstallationExecutor:
                 raise InstallationExecutionError(
                     "The current release migrations did not finish."
                 )
+            stage = "creating the congregation record"
             church_id = self._create_church(connection, plan.church_name)
+            stage = "creating the Master Administrator"
             self.progress("Creating the Master Administrator...")
             master_id = InitialMasterBootstrapper(connection).create(
                 plan.master_username, plan.master_display_name,
                 master_password, master_confirmation,
                 plan.master_email, plan.master_phone,
             )
+            stage = "installing selected catalogs"
             installed = self._install_packages(connection, plan, church_id)
+            stage = "verifying the installation"
             self._verify(connection, plan, church_id, master_id, installed)
+            stage = "creating and verifying the first backup"
             self.progress("Creating and verifying the first database backup...")
             proof = InitialBackupVerifier().create({
                 "server": host,
@@ -156,6 +164,7 @@ class FreshInstallationExecutor:
                 proof.path, proof.size_bytes, proof.sha256,
             )
             if completion_callback:
+                stage = "saving the local application connection"
                 self.progress("Saving the verified local application connection...")
                 completion_callback(result, application_password)
             self.progress("Fresh installation verified.")
@@ -175,9 +184,20 @@ class FreshInstallationExecutor:
                 proof.path.unlink(missing_ok=True)
             if isinstance(error, InstallationExecutionError):
                 raise
-            raise InstallationExecutionError(
-                "ChurchManager could not complete the fresh installation. "
+            detail = str(error)
+            for secret in (application_password, master_password, master_confirmation):
+                if secret:
+                    detail = detail.replace(secret, "[password hidden]")
+            if not detail:
+                detail = type(error).__name__
+            cleanup = (
                 "The incomplete database was removed."
+                if provisioned is not None
+                else "No existing database or account was changed."
+            )
+            raise InstallationExecutionError(
+                "ChurchManager could not complete the fresh installation while "
+                f"{stage}. {cleanup}\n\nCause: {detail}"
             ) from error
         finally:
             master_password = ""

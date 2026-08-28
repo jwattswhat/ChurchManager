@@ -125,6 +125,10 @@ The import tool proposes values but does not silently resolve ambiguous records.
 
 For the reference LSB package, `data/lsb_printed_hymn_review.csv` is the human
 review ledger and `build_lsb_hymnal_package.py` is the deterministic builder.
+The product owner approved the current title-and-tune metadata for beta
+distribution on August 28, 2026. Until the printed stanza review is completed,
+the beta package records stanza count `0` and labels that value as unverified;
+it does not claim that the pending review has been completed.
 The builder requires all 636 printed hymn identities from 331 through 966 and
 refuses to publish a package until every stanza count is marked `VERIFIED` with
 a source, reviewer, and review date. An unknown stanza count is never converted

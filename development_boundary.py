@@ -1,5 +1,6 @@
-"""Fail closed when development resolves components from the Frozen application."""
+"""Fail closed when ChurchManager resolves components outside its allowed tree."""
 
+import sys
 from pathlib import Path
 
 
@@ -7,10 +8,14 @@ class DevelopmentIsolationError(RuntimeError):
     """Raised when development and Frozen application paths are mixed."""
 
 
-def assert_development_isolation(jsform_module, project_root=None):
+def assert_development_isolation(jsform_module, project_root=None, *, frozen=None):
+    """Accept the adjacent development JSForm or the packaged bundled JSForm."""
     project = Path(project_root or Path(__file__).resolve().parent).resolve()
     jsform_file = Path(jsform_module.__file__).resolve()
-    expected_jsform = (project.parent / "JSForm").resolve()
+    is_frozen = bool(getattr(sys, "frozen", False)) if frozen is None else bool(frozen)
+    expected_jsform = (
+        project / "JSForm" if is_frozen else project.parent / "JSForm"
+    ).resolve()
 
     if "churchmanager-legacy" in {part.casefold() for part in project.parts}:
         raise DevelopmentIsolationError(
@@ -18,7 +23,7 @@ def assert_development_isolation(jsform_module, project_root=None):
         )
     if not jsform_file.is_relative_to(expected_jsform):
         raise DevelopmentIsolationError(
-            "Development ChurchManager must use its independent JSForm at {}. "
+            "ChurchManager must use its designated JSForm at {}. "
             "Resolved JSForm was {}.".format(expected_jsform, jsform_file)
         )
     return True
