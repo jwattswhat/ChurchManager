@@ -5,13 +5,24 @@ from unittest import mock
 from pathlib import Path
 
 from setup_wizard import (
+    INSTALLATION_TITLE,
     application_account_name,
     finalize_installed_connection,
+    packaged_resource,
     save_installed_configuration,
 )
 
 
 class SetupWizardSupportTests(unittest.TestCase):
+    def test_installer_identity_uses_narrow_installation_title_and_banner(self):
+        self.assertEqual(INSTALLATION_TITLE, "ChurchManager Installation")
+        self.assertEqual(
+            packaged_resource(
+                "assets", "brand", "png", "ChurchManager-logo-horizontal-600.png",
+            ).name,
+            "ChurchManager-logo-horizontal-600.png",
+        )
+
     def test_application_account_is_local_bounded_and_predictable(self):
         self.assertEqual(application_account_name("ChurchManager"), "cm_churchmanager")
         self.assertLessEqual(len(application_account_name("A" * 64)), 32)

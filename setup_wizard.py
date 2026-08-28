@@ -11,6 +11,7 @@ import json
 import os
 import re
 import secrets
+import sys
 from pathlib import Path
 
 import wx
@@ -29,6 +30,13 @@ from installation_readiness import find_mariadb_tool, inspect_readiness
 
 ROOT = Path(__file__).resolve().parent
 CONFIG_PATH = configuration_path()
+INSTALLATION_TITLE = "ChurchManager Installation"
+
+
+def packaged_resource(*parts):
+    """Return a source-tree or PyInstaller path for a bundled setup resource."""
+    base = Path(getattr(sys, "_MEIPASS", ROOT))
+    return base.joinpath(*parts)
 
 
 def application_account_name(database_name):
@@ -87,6 +95,22 @@ class SetupPage(wx.adv.WizardPageSimple):
     def __init__(self, wizard, title, explanation):
         super().__init__(wizard)
         outer = wx.BoxSizer(wx.VERTICAL)
+        banner_path = packaged_resource(
+            "assets", "brand", "png", "ChurchManager-logo-horizontal-600.png",
+        )
+        if banner_path.is_file():
+            image = wx.Image(str(banner_path), wx.BITMAP_TYPE_PNG)
+            if image.IsOk():
+                maximum_width = 390
+                if image.GetWidth() > maximum_width:
+                    height = round(image.GetHeight() * maximum_width / image.GetWidth())
+                    image = image.Scale(maximum_width, height, wx.IMAGE_QUALITY_HIGH)
+                outer.Add(
+                    wx.StaticBitmap(self, bitmap=wx.Bitmap(image)),
+                    0,
+                    wx.LEFT | wx.RIGHT | wx.TOP,
+                    12,
+                )
         heading = wx.StaticText(self, label=title)
         font = heading.GetFont(); font.SetPointSize(font.GetPointSize() + 3); font.MakeBold()
         heading.SetFont(font)
@@ -110,7 +134,7 @@ class ChurchManagerSetupWizard(wx.adv.Wizard):
     """Collect a safe installation plan and optionally apply it once."""
 
     def __init__(self, parent=None, *, apply=False, root=ROOT):
-        super().__init__(parent, title="ChurchManager Setup", size=(760, 610))
+        super().__init__(parent, title=INSTALLATION_TITLE, size=(760, 650))
         self.apply = bool(apply)
         self.root = Path(root)
         self.readiness = inspect_readiness(self.root)

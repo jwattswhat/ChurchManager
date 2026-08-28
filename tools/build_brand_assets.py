@@ -139,6 +139,10 @@ def build() -> None:
         ROOT / "assets" / "icons" / "ChurchManager-icon-source.png", optimize=True
     )
     copyfile(BRAND / "ChurchManager-mark.svg", ROOT / "website" / "assets" / "ChurchManager-mark.svg")
+    copyfile(
+        BRAND / "ChurchManager-logo-horizontal.svg",
+        ROOT / "website" / "assets" / "ChurchManager-logo-horizontal.svg",
+    )
 
 
 if __name__ == "__main__":
