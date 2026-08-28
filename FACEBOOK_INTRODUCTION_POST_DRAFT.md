@@ -7,7 +7,7 @@ Verified release links as of August 26, 2026:
 
 - Website: https://jwattswhat.github.io/ChurchManager/
 - Repository: https://github.com/jwattswhat/ChurchManager
-- Release: https://github.com/jwattswhat/ChurchManager/releases/tag/v0.3.0-beta.1
+- Release: https://github.com/jwattswhat/ChurchManager/releases/tag/v0.3.0-beta.2
 
 ## Full Facebook announcement
 
@@ -71,7 +71,7 @@ project, and share it with another small church that could benefit.
 
 ## Short announcement
 
-ChurchManager 0.3.0-beta.1 is now available for public beta testing.
+ChurchManager 0.3.0-beta.2 is now available for public beta testing.
 
 ChurchManager is a free, open-source Windows application created for small
 congregations of all denominations, including independent and

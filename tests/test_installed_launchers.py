@@ -66,6 +66,7 @@ class InstalledLauncherTests(unittest.TestCase):
         self.assertIn("ChurchManager.exe", source)
         self.assertIn("ChurchManagerSetup.exe", source)
         self.assertIn("MajorUpgrade", source)
+        self.assertIn('AllowSameVersionUpgrades="yes"', source)
         self.assertNotIn("AppData", source)
         self.assertNotIn("Backup", source)
 

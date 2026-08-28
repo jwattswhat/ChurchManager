@@ -13,10 +13,10 @@ class VersioningTests(unittest.TestCase):
         self.assertRegex(__version__, r"^\d+\.\d+\.\d+-(?:dev|beta\.\d+)$")
 
     def test_window_titles_include_version_and_preserve_test_warning(self):
-        self.assertEqual(main_window_title({"test_mode": False}), "ChurchManager 0.3.0-beta.1")
+        self.assertEqual(main_window_title({"test_mode": False}), "ChurchManager 0.3.0-beta.2")
         self.assertEqual(
             main_window_title({"test_mode": True, "database": "ChurchDBTest"}),
-            "ChurchManager 0.3.0-beta.1 - TEST MODE - ChurchDBTest",
+            "ChurchManager 0.3.0-beta.2 - TEST MODE - ChurchDBTest",
         )
 
     def test_framework_has_independent_semantic_version(self):

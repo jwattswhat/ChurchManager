@@ -1,25 +1,25 @@
 # ChurchManager Current Release Readiness
 
-Status date: August 26, 2026
+Status date: August 28, 2026
 
 This is the current-state companion to the historical evidence retained in the
 installation specification and roadmap.
 
 ## Current verified baseline
 
-- Application line: `0.3.0-beta.1`
-- Canonical schema: 120 represented migrations
-- Starter data: 122 statements
+- Application line: `0.3.0-beta.2`
+- Canonical schema: 121 represented migrations
+- Starter data: 125 statements
 - Schema SHA-256: `f95153beb456e8ab25064476299fb466a7a675550e15069c814c7ec78d3f6ad4`
-- Starter-data SHA-256: `73fc5604c3afe1920f8b240dd98a98ad1c41ccf268541eee718ee870e824329a`
+- Starter-data SHA-256: `288316835c44f9dd2a5f5646350baf9fe60bf74e10326458979593d761db5352`
 - Fresh setup, guarded upgrade, and guarded restore services have passed
   isolated live rehearsals. Restore acceptance includes confidential Giving
   contributor and envelope records.
 
 ## Accepted workflows
 
-- The complete source suite passes: 1,038 tests, 25 intentional
-  database/environment skips, and zero failures on August 26, 2026.
+- The complete source suites pass: 1,063 ChurchManager tests with 25 intentional
+  database/environment skips, and 399 JSForm tests with 2 intentional skips.
 - The owned-child cleanup regression confirms tracked JSForm child forms close
   and deleted native panels are safely ignored during application shutdown.
 - The source-construction audit reports 43 reviewed structural SQL exceptions,
@@ -37,23 +37,25 @@ installation specification and roadmap.
 
 - The audited source repository is public at
   `https://github.com/jwattswhat/ChurchManager`.
-- Release `v0.3.0-beta.1` provides distinct clean-installation and fictional
-  beta-test kits.
+- Release `v0.3.0-beta.2` is being prepared with distinct clean-installation
+  and fictional beta-test kits. Public installer downloads remain halted until
+  the final MSI upgrade/uninstall acceptance passes.
 - The approved static project site, exact application screenshots, release
   links, documentation links, support route, privacy statement, and licensing
   notice are live at `https://jwattswhat.github.io/ChurchManager/`.
 - The website and release describe the build as beta and do not claim that the
   remaining production-only or packaging-only gates have passed.
 
-## Deliberately deferred until the next beta installer
+## Remaining release gates
 
-- Rebuilding the MSI and packaged executables
-- MSI repair rehearsal
+- Same-version beta MSI upgrade and uninstall ownership acceptance
 - Code signing
-- Clean-machine installation and upgrade visual acceptance
+- Independent clean-machine installation and visual acceptance
 
-These packaging-only gates do not require rebuilding the installer during
-ordinary beta correction work.
+The local Windows MSI, repair flow, installed login, main menu, Documents
+screen, registered document opening, and isolated fresh-database baseline have
+been exercised successfully. Code signing and independent-computer acceptance
+remain distinct from these local checks.
 
 ## Production-only gates
 
