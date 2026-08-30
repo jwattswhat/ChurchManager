@@ -402,7 +402,7 @@ future roadmap projects:
 - **Status: current beta source gates completed August 29, 2026.** The
   current-state evidence is maintained in
   [ChurchManager Current Release Readiness](ChurchManager.ReleaseReadiness.Current.md).
-  The canonical `0.3.0-beta.2` baseline represents 121 migrations and 125 starter
+  The canonical `0.3.0-beta.3` baseline represents 121 migrations and 125 starter
   statements. The optional fictional beta dataset has a guarded versioned
   manifest. The source-construction audit, owned-child cleanup regression,
   report-family acceptance, accounting test acceptance, and permanent backup

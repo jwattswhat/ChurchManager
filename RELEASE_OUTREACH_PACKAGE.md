@@ -4,11 +4,11 @@ Status: Publication in progress. The personal Facebook announcement, GitHub
 beta-feedback discussion, and r/churchtech Show & Tell announcement were
 published on August 26, 2026.
 
-Release: ChurchManager 0.3.0-beta.2
+Release: ChurchManager 0.3.0-beta.3
 
 - Website: https://jwattswhat.github.io/ChurchManager/
 - Repository: https://github.com/jwattswhat/ChurchManager
-- Release: https://github.com/jwattswhat/ChurchManager/releases/tag/v0.3.0-beta.2
+- Release: https://github.com/jwattswhat/ChurchManager/releases/tag/v0.3.0-beta.3
 - Optional support: https://paypal.me/JonathanWatt
 
 ## 1. Personal Facebook page
@@ -32,7 +32,7 @@ Suggested post:
 
 > I am a pastor developing ChurchManager for small congregations of all
 > denominations, including independent and non-denominational congregations,
-> especially those with limited budgets. Version 0.3.0-beta.2 is now available
+> especially those with limited budgets. Version 0.3.0-beta.3 is now available
 > for public testing.
 >
 > ChurchManager combines people and family records, worship planning,
@@ -80,7 +80,7 @@ Suggested post:
 > or hymnals. It stores the references, selections, and planning information a
 > congregation needs to organize its work.
 >
-> Version 0.3.0-beta.2 is now available. I would welcome feedback from worship
+> Version 0.3.0-beta.3 is now available. I would welcome feedback from worship
 > planners and leaders in small congregations.
 >
 > Learn more and download the beta:
@@ -101,7 +101,7 @@ Suggested title:
 
 Suggested announcement:
 
-> ChurchManager 0.3.0-beta.2 is now available for public testing. It is a free,
+> ChurchManager 0.3.0-beta.3 is now available for public testing. It is a free,
 > open-source Windows application created for small congregations of all
 > denominations, especially those with limited budgets.
 >
@@ -203,9 +203,9 @@ been available for two months.
 
 ## 9A. GitHub release notes
 
-Suggested opening paragraph for release `v0.3.0-beta.2`:
+Suggested opening paragraph for release `v0.3.0-beta.3`:
 
-> ChurchManager 0.3.0-beta.2 is the corrected public beta of a free, open-source
+> ChurchManager 0.3.0-beta.3 is the corrected public beta of a free, open-source
 > Windows administration and planning system for small congregations of all
 > denominations. Two downloads are provided: a guarded fictional-data beta
 > test kit and a clean installation. Beta testers should review the website's
@@ -225,7 +225,7 @@ notes without changing the release files.
 
 Suggested title:
 
-> ChurchManager 0.3.0-beta.2: introductions, testing feedback, and questions
+> ChurchManager 0.3.0-beta.3: introductions, testing feedback, and questions
 
 Suggested discussion:
 

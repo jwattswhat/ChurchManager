@@ -128,7 +128,7 @@ def build(source: Path = SOURCE, output: Path = OUTPUT) -> Path:
     output.parent.mkdir(parents=True, exist_ok=True)
     document = SimpleDocTemplate(
         str(output), pagesize=letter, rightMargin=0.72 * inch,
-        leftMargin=0.72 * inch, topMargin=0.68 * inch, bottomMargin=0.72 * inch,
+        leftMargin=0.72 * inch, topMargin=0.68 * inch, bottomMargin=0.9 * inch,
         title="ChurchManager User Guide", author="ChurchManager Project",
         subject="Task-oriented ChurchManager user instructions",
     )

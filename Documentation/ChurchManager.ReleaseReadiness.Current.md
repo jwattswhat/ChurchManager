@@ -7,7 +7,7 @@ installation specification and roadmap.
 
 ## Current verified baseline
 
-- Application line: `0.3.0-beta.2`
+- Application line: `0.3.0-beta.3`
 - Canonical schema: 121 represented migrations
 - Starter data: 125 statements
 - Schema SHA-256: `f95153beb456e8ab25064476299fb466a7a675550e15069c814c7ec78d3f6ad4`
@@ -37,7 +37,7 @@ installation specification and roadmap.
 
 - The audited source repository is public at
   `https://github.com/jwattswhat/ChurchManager`.
-- Release `v0.3.0-beta.2` has distinct clean-installation and fictional
+- Release `v0.3.0-beta.3` has distinct clean-installation and fictional
   beta-test kits. Local and independent Windows 11 VM installation, same-version upgrade, uninstall,
   reinstall, login, main-menu, Documents-screen, and registered document-opening
   acceptance passed. The release is ready for public beta publication.
@@ -47,17 +47,16 @@ installation specification and roadmap.
 - The website and release describe the build as beta and do not claim that the
   remaining production-only or packaging-only gates have passed.
 
-The accepted compact all-button dashboard was rebuilt into the exact beta.2
-bundle on August 30, 2026. The corrected bundle contains 466 files totaling 111,273,487
-bytes and bundles JSForm `0.1.0-beta.6`. All three packaged resource proofs
-passed, including an explicit check for `Menus/main.menu.json`. The final
-rebuild from accepted commit `e29487d` produced an MSI of 51,882,414 bytes with
-SHA-256
-`6ae76abc80af50bdfe46e3e6bf3d36dcb67f92c0662bd0b6f7bf8ac2a87aca86`.
-The clean-installation and fictional-beta release kits were regenerated from
-that exact MSI. Their SHA-256 values are respectively
-`77bb4c81fb9da496f3c1962a6ed11ee5e9cb72033c408030b4f2ca62b0d140e8`
-and `2f96452b492669713e81ee280797d0784e0fcecae80dd5f070a0519c5802656a`.
+The accepted compact all-button dashboard was rebuilt into the exact beta.3
+bundle on August 30, 2026. The final bundle contains 466 files totaling
+111,273,760 bytes and bundles JSForm `0.1.0-beta.6`. All three packaged resource
+proofs passed, including an explicit check for `Menus/main.menu.json`. Its
+unsigned MSI is 51,882,414 bytes with
+SHA-256 `364dfba76fd32ae88d48b17ef3bbf3fd6f640f68bda34fec984f99730cd1ecc1`.
+The clean-installation ZIP is 51,755,095 bytes with SHA-256
+`9e15e0b7f388f17500d8f3e621d9f5a165e852231f0f20551224f83d892eeb22`.
+The fictional-data ZIP is 51,756,420 bytes with SHA-256
+`7cffc72a473e4355f118c22c0ac051e2e3903fdae11ee4ca75d42a1d859e4d3b`.
 
 ## Deferred distribution enhancement
 
