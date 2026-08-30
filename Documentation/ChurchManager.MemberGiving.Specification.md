@@ -553,7 +553,18 @@ bypass giving permissions.
   documented.
 - Envelope assignments may not overlap for the same church and number.
 - Person, family, and external contributor types enforce their link rules.
+- Person and family directory choices, direct lookups, saved contributor links,
+  directory refresh, and envelope maintenance are restricted to the active
+  church. Batch entry and imports likewise reject a contributor identifier from
+  another church. Outside contributors remain valid without a directory link.
 - A contribution and all allocations belong to the same church as their batch.
+- Giving may select only an active accounting organization owned by the batch's
+  church. Direct identifiers, imported batches, readiness review, accounting
+  handoff, and posted-batch correction all enforce that boundary; standalone
+  accounting organizations without a church remain unavailable to Giving.
+- A Giving bank account, its ledger account, every purpose, and every allocation
+  must belong to the batch's accounting organization. A purpose must also belong
+  to the batch's church.
 - Posted records and posting links are protected from ordinary update or
   deletion.
 - Statement date ranges are inclusive and use contribution received dates.

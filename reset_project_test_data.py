@@ -24,6 +24,18 @@ ROOT = Path(__file__).resolve().parent
 LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
 TABLES = ("tblMinistryProjectDocument", "tblMinistryProjectStepDependency",
           "tblMinistryProjectStep", "tblMinistryProject")
+COUNT_SQL = {
+    "tblMinistryProjectDocument": "SELECT COUNT(*) FROM tblMinistryProjectDocument",
+    "tblMinistryProjectStepDependency": "SELECT COUNT(*) FROM tblMinistryProjectStepDependency",
+    "tblMinistryProjectStep": "SELECT COUNT(*) FROM tblMinistryProjectStep",
+    "tblMinistryProject": "SELECT COUNT(*) FROM tblMinistryProject",
+}
+DELETE_SQL = {
+    "tblMinistryProjectDocument": "DELETE FROM tblMinistryProjectDocument",
+    "tblMinistryProjectStepDependency": "DELETE FROM tblMinistryProjectStepDependency",
+    "tblMinistryProjectStep": "DELETE FROM tblMinistryProjectStep",
+    "tblMinistryProject": "DELETE FROM tblMinistryProject",
+}
 
 
 def settings():
@@ -104,13 +116,13 @@ def main():
     cursor = connection.cursor()
     try:
         print(f"target={testing['host']}/{testing['database']}")
-        before = {table: int(scalar(cursor, f"SELECT COUNT(*) FROM {table}") or 0) for table in TABLES}
+        before = {table: int(scalar(cursor, COUNT_SQL[table]) or 0) for table in TABLES}
         for table, count in before.items(): print(f"before_{table}={count}")
         if not args.apply: print("No changes made. Re-run with --apply after reviewing the counts."); return 2
         path, size, digest = create_backup(testing, username, password); print(f"backup={path}"); print(f"backup_bytes={size}"); print(f"backup_sha256={digest}")
-        for table in TABLES: cursor.execute(f"DELETE FROM {table}")
+        for table in TABLES: cursor.execute(DELETE_SQL[table])
         seed(cursor)
-        after = {table: int(scalar(cursor, f"SELECT COUNT(*) FROM {table}") or 0) for table in TABLES}
+        after = {table: int(scalar(cursor, COUNT_SQL[table]) or 0) for table in TABLES}
         for table, count in after.items(): print(f"after_{table}={count}")
         if after["tblMinistryProject"] != 4 or after["tblMinistryProjectStep"] != 8 or after["tblMinistryProjectStepDependency"] != 1: raise RuntimeError("Project test dataset verification failed.")
         connection.commit(); print("project_test_dataset_verified=true"); return 0

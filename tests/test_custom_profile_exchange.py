@@ -71,6 +71,20 @@ class CustomProfileExchangeTests(unittest.TestCase):
             self.assertEqual(metadata["format"], FORMAT)
             self.assertEqual(metadata["fields"][0]["stable_key"], "parking_space")
 
+    def test_export_neutralizes_formula_like_identity_cells(self):
+        service = self.service("profiles.custom_fields.view")
+        service.repository.profile_catalog = lambda _church, _entity: [
+            {"id": 11, "first_name": "=cmd", "middle_name": "", "last_name": "@SUM(A1:A2)",
+             "display_name": "@SUM(A1:A2), =cmd"}
+        ]
+        with TemporaryDirectory() as folder:
+            target = Path(folder) / "profiles.csv"
+            service.export(2, "PERSON", target)
+            with target.open("r", encoding="utf-8-sig", newline="") as stream:
+                row = next(csv.DictReader(stream))
+        self.assertTrue(row["First Name"].startswith("'"))
+        self.assertTrue(row["Last Name"].startswith("'"))
+
     def test_restricted_export_requires_explicit_permission(self):
         service = self.service("profiles.custom_fields.view")
         with TemporaryDirectory() as folder:

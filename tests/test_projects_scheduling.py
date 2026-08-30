@@ -66,6 +66,7 @@ class ProjectsSchedulingFoundationTests(unittest.TestCase):
         menu=(ROOT/"Menus"/"main.menu.json").read_text(encoding="utf-8")
         permissions=(ROOT/"permission_catalog.py").read_text(encoding="utf-8")
         self.assertIn('"lblProjects"',dashboard)
+        self.assertIn('"lblProjects": {"type": "Button"', dashboard)
         self.assertIn("churchmanager.projects",menu)
         self.assertIn('"lblProjects": "projects.view"',permissions)
 

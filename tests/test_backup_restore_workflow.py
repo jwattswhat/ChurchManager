@@ -49,7 +49,7 @@ class BackupRestoreWorkflowTests(unittest.TestCase):
         self.assertLess(tools_position, close_position)
         self.assertLess(close_position, restore_position)
         self.assertIn("self.context.settings,tools_directory,path,backup_folder", source)
-        self.assertIn('("DBConnection", "JSConnection")', source)
+        self.assertIn("context.database.close()", source)
         self.assertIn("must restart because its database connections were closed", source)
 
     def test_pastoral_recovery_password_is_requested_before_database_close(self):

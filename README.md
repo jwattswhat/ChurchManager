@@ -49,7 +49,9 @@ Start the development application with `ChurchManager-Test.pyw`. It uses
 to see terminal diagnostics.
 
 Never put passwords on a command line or in configuration committed to Git.
-ChurchManager retrieves database secrets from Windows Credential Manager.
+ChurchManager passes the configured Windows Credential Manager target to JSForm,
+which retrieves the database secret only when opening the connection. Runtime
+settings and child-process arguments remain password-free.
 
 ## Tests
 
@@ -77,6 +79,8 @@ read-only database checks and manual verification boundaries.
 - [Migrations](migrations/README.md)
 - [Versioning](Documentation/VERSIONING.md)
 - [Public website specification](Documentation/ChurchManager.Website.Specification.md)
+- [Parochial school subsystem specification](Documentation/ChurchManager.ParochialSchool.Specification.md)
+- [Member web portal specification](Documentation/ChurchManager.MemberPortal.Specification.md)
 - [Visual identity specification](Documentation/ChurchManager.VisualIdentity.Specification.md)
 - [Contributing](CONTRIBUTING.md)
 - [Security](SECURITY.md)

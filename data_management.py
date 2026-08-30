@@ -14,6 +14,8 @@ import re
 import unicodedata
 import zipfile
 
+from csv_safety import csv_safe_row
+
 import wx
 
 from bulletin_orders import portable_connection
@@ -532,7 +534,7 @@ class MembershipExportService:
             with temporary.open("w", encoding="utf-8-sig", newline="") as stream:
                 writer = csv.writer(stream)
                 writer.writerow(headers)
-                writer.writerows(rows)
+                writer.writerows(csv_safe_row(row) for row in rows)
             digest = hashlib.sha256(temporary.read_bytes()).hexdigest()
             temporary.replace(target)
             cursor = self.connection.cursor()
@@ -572,7 +574,7 @@ class MembershipArchiveService:
         stream = io.StringIO(newline="")
         writer = csv.writer(stream, lineterminator="\n")
         writer.writerow(headers)
-        writer.writerows(rows)
+        writer.writerows(csv_safe_row(row) for row in rows)
         return ("\ufeff" + stream.getvalue()).encode("utf-8")
 
     @classmethod

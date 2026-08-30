@@ -1,6 +1,6 @@
 # ChurchManager Current Release Readiness
 
-Status date: August 28, 2026
+Status date: August 30, 2026
 
 This is the current-state companion to the historical evidence retained in the
 installation specification and roadmap.
@@ -18,11 +18,11 @@ installation specification and roadmap.
 
 ## Accepted workflows
 
-- The complete source suites pass: 1,063 ChurchManager tests with 25 intentional
-  database/environment skips, and 399 JSForm tests with 2 intentional skips.
+- The complete source suites pass: 1,099 ChurchManager tests with 25 intentional
+  database/environment skips, and 460 JSForm tests with 2 intentional skips.
 - The owned-child cleanup regression confirms tracked JSForm child forms close
   and deleted native panels are safely ignored during application shutdown.
-- The source-construction audit reports 43 reviewed structural SQL exceptions,
+- The source-construction audit reports 39 reviewed structural SQL exceptions,
   zero unexpected interpolated SQL sites, and zero `shell=True` execution sites.
 
 - Accounting entry through reports, reconciliation, budgets, period controls,
@@ -38,7 +38,7 @@ installation specification and roadmap.
 - The audited source repository is public at
   `https://github.com/jwattswhat/ChurchManager`.
 - Release `v0.3.0-beta.2` has distinct clean-installation and fictional
-  beta-test kits. Local MSI installation, same-version upgrade, uninstall,
+  beta-test kits. Local and independent Windows 11 VM installation, same-version upgrade, uninstall,
   reinstall, login, main-menu, Documents-screen, and registered document-opening
   acceptance passed. The release is ready for public beta publication.
 - The approved static project site, exact application screenshots, release
@@ -47,16 +47,56 @@ installation specification and roadmap.
 - The website and release describe the build as beta and do not claim that the
   remaining production-only or packaging-only gates have passed.
 
-## Remaining release gates
+The accepted compact all-button dashboard was rebuilt into the exact beta.2
+bundle on August 30, 2026. The corrected bundle contains 466 files totaling 111,273,487
+bytes and bundles JSForm `0.1.0-beta.6`. All three packaged resource proofs
+passed, including an explicit check for `Menus/main.menu.json`. The rebuilt MSI
+is 51,878,318 bytes with SHA-256
+`5cdf22ee8b95062f12ae3475726dc04c50fa6c5b1c0c281791bc64bc68f18ef4`.
+The clean-installation and fictional-beta release kits were regenerated from
+that exact MSI.
 
-- Code signing
-- Independent clean-machine installation and visual acceptance
+## Deferred distribution enhancement
 
-The local Windows MSI, same-version upgrade, uninstall, reinstall, installed
-login, main menu, Documents screen, registered document opening, configuration
-preservation, and isolated fresh-database baseline have been exercised
-successfully. Code signing and independent-computer acceptance remain distinct
-from these local checks.
+- Code signing is deliberately deferred for the current small, informed beta.
+  The unsigned installer must be distributed only through the official project
+  release page with its published SHA-256 checksum. Public-trust signing should
+  be reconsidered before broad public adoption.
+
+Independent clean-machine installation and visual acceptance passed on August
+30, 2026 in a clean Windows 11 25H2 Hyper-V VM. The rehearsal established that
+MariaDB Server and its client/backup tools are external prerequisites. MariaDB
+12.3.2 LTS was installed from its official, signature-verified Windows MSI.
+The first ChurchManager bundle exposed a missing `Menus/main.menu.json`
+packaging defect; the bundle specifications and packaged resource proof were
+corrected, a same-version replacement MSI was installed, and the user accepted
+the resulting application visually. The VM retains a clean pre-ChurchManager
+checkpoint for repeat acceptance.
+
+The source GUI milestone separately passed guarded database and packaged
+profiles plus manual review of Login, Participant Notifications, Project Plan,
+and Asset Editor on August 30, 2026. Login review geometry was corrected before
+acceptance. Automated desktop capture remains environment-incompatible and no
+screenshot-regression baseline is claimed.
+
+After the accepted main-dashboard width adjustment, unattended packaged GUI
+automation passed again against the final corrected rebuilt executable: package proof,
+temporary fictional login, compact main-screen discovery, accessible-name
+keyboard activation of Projects and Scheduling, native Projects-window
+detection and closure, clean application exit, and temporary-login cleanup.
+The embedded `frmMain` proof reports a `52x40` form, 32 native buttons, and
+14-character-unit action widths.
+
+The local Windows MSI, same-version upgrade, uninstall, reinstall, repair,
+installed login, main menu, Documents screen, registered document opening,
+configuration preservation, and isolated fresh-database baseline have been
+exercised successfully. On August 30, 2026, the repair rehearsal moved the
+installed `ChurchManagerBetaData.exe` aside, ran Windows Installer `/fa`,
+verified that the restored SHA-256 exactly matched, and verified that the
+writable Local AppData configuration SHA-256 was unchanged. The verbose log is
+`dist/msi-beta2-repair.log`. No installer-validation gate remains for the
+current bounded beta; public-trust code signing is a deferred distribution
+enhancement.
 
 ## Production-only gates
 

@@ -66,6 +66,39 @@ class ProjectDocumentationTests(unittest.TestCase):
         self.assertIn("encrypted VPN", security)
         self.assertIn("must not be exposed directly to the public internet", security)
 
+    def test_jsform_single_database_migration_is_completed(self):
+        roadmap = (ROOT / "Documentation" / "ChurchManager.FixList.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("Remove obsolete JSForm dual-database compatibility use", roadmap)
+        self.assertIn("Resolved: migrated from JSForm's obsolete dual-database compatibility API", roadmap)
+        self.assertIn("| 17 | Completed |", roadmap)
+        for relative_path in (
+            "startup.py", "churchmanager_mode.py", "report_support.py", "cm.py",
+            "backup_restore_dialog.py", "churchmanager.json",
+            "installation/default_churchmanager.json",
+        ):
+            source = (ROOT / relative_path).read_text(encoding="utf-8-sig")
+            for compatibility_name in (
+                "jsform_database", "JSConnection", "JSCredintials", "framework_settings",
+            ):
+                self.assertNotIn(compatibility_name, source, relative_path)
+
+    def test_confirmed_stale_development_modules_are_retired(self):
+        for name in (
+            "fnDatabase.py", "network.py", "rptFormCheck.py",
+            "CheckFormsWithSchema.py", "polish_screen_starters.py",
+            "inspect_local_bank_matching.py",
+            "inspect_local_posted_bank_lines.py",
+            "inspect_local_reconciliation_state.py", "inventory_group_data.py",
+        ):
+            self.assertFalse((ROOT / name).exists(), name)
+        roadmap = (ROOT / "Documentation" / "ChurchManager.FixList.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("Remove confirmed stale development modules", roadmap)
+        self.assertIn("Retire completed one-time development routines", roadmap)
+
     def test_license_and_readme_identify_gpl(self):
         license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
         readme = (ROOT / "README.md").read_text(encoding="utf-8")

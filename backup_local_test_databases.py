@@ -1,4 +1,4 @@
-"""Create checksum-verified dumps of the configured local test databases."""
+"""Create a checksum-verified dump of the configured local test database."""
 
 from __future__ import annotations
 
@@ -32,8 +32,8 @@ def main():
     host = str(testing["host"])
     if host not in {"127.0.0.1", "localhost", "::1"}:
         raise RuntimeError("Safety stop: local test backup host is not local.")
-    databases = (str(testing["database"]), str(testing["jsform_database"]))
-    if any("test" not in name.casefold() for name in databases):
+    database = str(testing["database"])
+    if "test" not in database.casefold():
         raise RuntimeError("Safety stop: only test databases may be backed up here.")
     username, password = read_credential(testing["credential_target"])
     destination = BACKUP_ROOT / datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -41,7 +41,7 @@ def main():
     environment = os.environ.copy(); environment["MYSQL_PWD"] = password
     results = []
     try:
-        for database in databases:
+        for database in (database,):
             output = destination / "{}.sql".format(database)
             command = [str(DUMP_EXE), "--host", host,
                        "--port", str(testing.get("port", 3306)), "--user", username,

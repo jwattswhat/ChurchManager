@@ -16,16 +16,21 @@ def load_config(path=None):
         return json.load(config_file)
 
 
-def resolve_database(arguments, config=None, credential_reader=read_credential):
-    """Return effective connection arguments, enforcing test isolation."""
+def resolve_database(
+    arguments, config=None, credential_reader=read_credential, *, resolve_credentials=True,
+):
+    """Return isolated connection settings, optionally resolving a credential now.
+
+    Desktop composition roots use ``resolve_credentials=False`` and hand the
+    protected target to JSForm. Maintenance tools may retain the established
+    immediate-resolution behavior for the duration of their own operation.
+    """
     config = config or load_config()
     resolved = dict(arguments)
     production_database = config["database_settings"].get("database", "ChurchDB")
-    production_jsform = config["database_settings"].get("jsform_database", "JSForm")
     credential_target = config["database_settings"].get(
         "credential_target", "ChurchManager/Production"
     )
-
     if resolved.get("test_mode"):
         testing = config.get("testing", {})
         test_host = testing.get("host")
@@ -38,16 +43,11 @@ def resolve_database(arguments, config=None, credential_reader=read_credential):
             raise RuntimeError("Test mode is not configured with a test database.")
         if test_database.casefold() == production_database.casefold():
             raise RuntimeError("Safety stop: the test database matches the production database.")
-        test_jsform = testing.get("jsform_database")
-        if not test_jsform:
-            raise RuntimeError("Test mode is not configured with a JSForm test database.")
-        if test_jsform.casefold() == production_jsform.casefold():
-            raise RuntimeError("Safety stop: the JSForm test database matches production.")
         resolved["database"] = test_database
-        resolved["jsform_database"] = test_jsform
         credential_target = testing.get(
             "credential_target", "ChurchManager/Test"
         )
+        resolved["user"] = resolved.get("user") or testing.get("user")
     else:
         resolved["server"] = resolved.get("server") or config["database_settings"].get(
             "host", "127.0.0.1"
@@ -55,14 +55,15 @@ def resolve_database(arguments, config=None, credential_reader=read_credential):
         resolved["port"] = int(config["database_settings"].get("port", 3306))
         resolved["database"] = resolved.get("database") or production_database
         resolved["user"] = resolved.get("user") or config["database_settings"].get("user")
-        resolved["jsform_database"] = resolved.get("jsform_database") or production_jsform
 
-    if not resolved.get("password"):
+    if resolve_credentials and not resolved.get("password"):
         stored_user, stored_password = credential_reader(credential_target)
         if resolved.get("user") and resolved["user"].casefold() != stored_user.casefold():
             raise RuntimeError("The configured database user does not match the stored credential.")
         resolved["user"] = stored_user
         resolved["password"] = stored_password
+    elif not resolve_credentials:
+        resolved.pop("password", None)
     resolved["credential_target"] = credential_target
 
     return resolved
@@ -73,9 +74,9 @@ def connection_arguments(arguments):
     result = [
         "--server", str(arguments["server"]),
         "--database", str(arguments["database"]),
-        "--user", str(arguments["user"]),
-        "--jsform-database", str(arguments["jsform_database"]),
     ]
+    if arguments.get("user"):
+        result.extend(["--user", str(arguments["user"])])
     if arguments.get("test_mode"):
         result.append("--test")
     return result

@@ -28,7 +28,6 @@ def settings():
     arguments = {
         "server": database["host"], "database": database["database"],
         "user": database["user"], "password": None, "test_mode": True,
-        "jsform_database": None,
     }
     try:
         resolved = resolve_database(arguments, config)

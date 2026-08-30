@@ -4,7 +4,6 @@
         "port": 3306,
         "user": "",
         "database": "ChurchDB",
-        "jsform_database": "ChurchDB",
         "credential_target": "ChurchManager/Production"
     },
     "security": {

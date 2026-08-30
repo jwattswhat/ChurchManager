@@ -29,13 +29,16 @@ class ParticipantNotificationDialog(wx.Dialog):
         service_row = wx.BoxSizer(wx.HORIZONTAL)
         service_row.Add(wx.StaticText(panel, label="Service"), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 8)
         self.service_choice = wx.Choice(panel, choices=[row[1] for row in self.services])
+        self.service_choice.SetName("notification_service")
         service_row.Add(self.service_choice, 1, wx.EXPAND)
         service_row.Add(wx.StaticText(panel, label="Message type"), 0, wx.ALIGN_CENTER_VERTICAL | wx.LEFT | wx.RIGHT, 8)
         self.message_kind = wx.Choice(panel, choices=["Service request", "Reminder", "Information"])
+        self.message_kind.SetName("notification_kind")
         self.message_kind.SetSelection(0); service_row.Add(self.message_kind, 0)
         outer.Add(service_row, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 10)
 
         self.recipients = wx.ListCtrl(panel, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        self.recipients.SetName("notification_recipients")
         for index, (label, width) in enumerate((
             ("Participant", 210), ("Position(s)", 230), ("Email", 300), ("Status", 150),
         )):
@@ -44,9 +47,9 @@ class ParticipantNotificationDialog(wx.Dialog):
 
         fields = wx.FlexGridSizer(2, 2, 8, 8); fields.AddGrowableCol(1, 1)
         fields.Add(wx.StaticText(panel, label="Subject"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self.subject = wx.TextCtrl(panel); fields.Add(self.subject, 1, wx.EXPAND)
+        self.subject = wx.TextCtrl(panel, name="notification_subject"); fields.Add(self.subject, 1, wx.EXPAND)
         fields.Add(wx.StaticText(panel, label="Message"), 0, wx.ALIGN_TOP)
-        self.body = wx.TextCtrl(panel, style=wx.TE_MULTILINE, size=(-1, 105)); fields.Add(self.body, 1, wx.EXPAND)
+        self.body = wx.TextCtrl(panel, style=wx.TE_MULTILINE, size=(-1, 105), name="notification_body"); fields.Add(self.body, 1, wx.EXPAND)
         outer.Add(fields, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 10)
 
         self.attachment = wx.StaticText(panel, label="Attachment: Not generated")
@@ -55,6 +58,9 @@ class ParticipantNotificationDialog(wx.Dialog):
         self.generate = wx.Button(panel, label="Generate Current Report")
         self.preview = wx.Button(panel, label="Preview Report")
         self.send = wx.Button(panel, label="Send")
+        self.generate.SetName("notification_generate")
+        self.preview.SetName("notification_preview")
+        self.send.SetName("notification_send")
         close = wx.Button(panel, wx.ID_CLOSE, "Close")
         for button in (self.generate, self.preview, self.send): buttons.Add(button, 0, wx.RIGHT, 8)
         buttons.AddStretchSpacer(); buttons.Add(close)

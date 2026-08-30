@@ -36,15 +36,8 @@ def mariadb_tools_directory(jsform):
 
 
 def close_database_connections(context):
-    """Release ChurchManager's database sessions before replacing its database."""
-    for name in ("DBConnection", "JSConnection"):
-        connection = getattr(context.database, name, None)
-        if connection is None:
-            continue
-        try:
-            connection.close()
-        except Exception:
-            pass
+    """Release ChurchManager's single owned database connection before restore."""
+    context.database.close()
 
 
 class BackupRestoreDialog(wx.Dialog):

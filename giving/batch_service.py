@@ -8,6 +8,9 @@ from decimal import Decimal, InvalidOperation
 from bulletin_orders import portable_connection
 from giving.validation import (
     GivingValidationError,
+    require_giving_bank_account,
+    require_giving_contributor,
+    require_giving_organization,
     validate_contribution_amounts,
     validate_donor_estimated_value,
     validate_gift_acknowledgment,
@@ -60,7 +63,11 @@ class DraftBatchService:
 
     def organizations(self):
         """Return active accounting organizations available to new batches."""
-        return self.all("SELECT ID,LegalName FROM tblAccountingOrganization WHERE Active=1 ORDER BY LegalName")
+        return self.all(
+            "SELECT ID,LegalName FROM tblAccountingOrganization "
+            "WHERE ChurchID=? AND Active=1 ORDER BY LegalName",
+            (self.church_id(),),
+        )
 
     def bank_accounts(self, organization_id):
         """Return active deposit accounts for one accounting organization."""
@@ -148,6 +155,8 @@ class DraftBatchService:
         church_id = self.church_id()
         cursor = self.connection.cursor()
         try:
+            require_giving_organization(cursor, church_id, organization_id)
+            require_giving_bank_account(cursor, organization_id, bank_account_id)
             cursor.execute(
                 "INSERT INTO tblContributionBatch "
                 "(ChurchID,BatchDate,Description,ServiceID,AttendanceEventID,DepositDate,"
@@ -187,12 +196,8 @@ class DraftBatchService:
                 raise GivingValidationError("Only a Draft batch can be changed.")
             if row[0] != organization_id:
                 raise GivingValidationError("The accounting organization cannot be changed after batch creation.")
-            cursor.execute(
-                "SELECT COUNT(*) FROM tblAccountingBankAccount WHERE ID=? AND OrganizationID=? AND Active=1",
-                (bank_account_id, organization_id),
-            )
-            if bank_account_id is not None and cursor.fetchone()[0] != 1:
-                raise GivingValidationError("Select an active bank account for this organization.")
+            require_giving_organization(cursor, church_id, organization_id)
+            require_giving_bank_account(cursor, organization_id, bank_account_id)
             cursor.execute(
                 "UPDATE tblContributionBatch SET BatchDate=?,Description=?,DepositDate=?,BankAccountID=?,"
                 "ControlTotal=?,Version=Version+1 WHERE ID=? AND ChurchID=? AND Status='DRAFT'",
@@ -224,7 +229,8 @@ class DraftBatchService:
             "JOIN tblContributionContributor c ON c.ID=e.ContributorID "
             "WHERE e.ChurchID=? AND " + predicate +
             " AND e.EffectiveFrom<=? AND (e.EffectiveThrough IS NULL OR e.EffectiveThrough>=?) "
-            "AND c.IsActive=1 ORDER BY e.EffectiveFrom DESC,e.ID DESC LIMIT 2",
+            "AND c.ChurchID=e.ChurchID AND c.IsActive=1 "
+            "ORDER BY e.EffectiveFrom DESC,e.ID DESC LIMIT 2",
             (self.church_id(), identity, received_date, received_date),
         )
         if len(rows) > 1:
@@ -295,6 +301,7 @@ class DraftBatchService:
                 raise GivingValidationError("The selected contribution batch is unavailable.")
             if batch[1] != "DRAFT":
                 raise GivingValidationError("Only a draft contribution batch can be changed.")
+            require_giving_contributor(cursor, church_id, contributor_id)
             organization_id = batch[0]
             if any(item[1] != organization_id for item in allocations):
                 raise GivingValidationError("Every allocation must use the batch organization.")
@@ -394,6 +401,7 @@ class DraftBatchService:
             batch = cursor.fetchone()
             if not batch or batch[1] != "DRAFT":
                 raise GivingValidationError("Only a draft contribution can be changed.")
+            require_giving_contributor(cursor, church_id, contributor_id)
             if any(item[1] != batch[0] for item in allocations):
                 raise GivingValidationError("Every allocation must use the batch organization.")
             cursor.execute("UPDATE tblContribution SET ContributorID=?,EnteredEnvelopeNumber=?,"
@@ -498,6 +506,12 @@ class DraftBatchService:
         batch = cursor.fetchone()
         if not batch: return ["The batch is unavailable."]
         issues = []
+        cursor.execute(
+            "SELECT COUNT(*) FROM tblAccountingOrganization "
+            "WHERE ID=? AND ChurchID=? AND Active=1", (batch[4], church_id),
+        )
+        if cursor.fetchone()[0] != 1:
+            issues.append("Select an active accounting organization belonging to this church.")
         cursor.execute("SELECT COUNT(*),SUM(ContributionMethod<>'NON_CASH') FROM tblContribution WHERE BatchID=?",
                        (batch_id,))
         gift_count, monetary_count = cursor.fetchone()
@@ -527,10 +541,13 @@ class DraftBatchService:
              "GROUP BY g.ID,g.Amount HAVING Allocated<>g.Amount) invalid",
              "Every contribution must be allocated exactly."),
             ("SELECT COUNT(*) FROM tblContributionAllocation a JOIN tblContribution g ON g.ID=a.ContributionID "
+             "JOIN tblContributionBatch b ON b.ID=g.BatchID "
              "LEFT JOIN tblContributionPurpose p ON p.ID=a.PurposeID "
              "LEFT JOIN tblAccountingFund f ON f.ID=a.FundID LEFT JOIN tblAccountingAccount ac ON ac.ID=a.RevenueAccountID "
              "LEFT JOIN tblAccountingFunction fn ON fn.ID=a.FunctionID "
-             "WHERE g.BatchID=? AND (p.ID IS NULL OR p.IsActive=0 OR p.ControlAndDiscretionConfirmed=0 "
+             "WHERE g.BatchID=? AND (p.ID IS NULL OR p.ChurchID<>b.ChurchID "
+             "OR p.OrganizationID<>a.OrganizationID OR a.OrganizationID<>b.OrganizationID "
+             "OR p.IsActive=0 OR p.ControlAndDiscretionConfirmed=0 "
              "OR p.EffectiveFrom>g.ReceivedDate OR (p.EffectiveThrough IS NOT NULL AND p.EffectiveThrough<g.ReceivedDate) "
              "OR f.Active=0 OR f.OrganizationID<>a.OrganizationID "
              "OR ac.Active=0 OR ac.OrganizationID<>a.OrganizationID OR ac.PostingAllowed=0 OR ac.AccountType<>'REVENUE' "
@@ -539,7 +556,9 @@ class DraftBatchService:
              "OR (a.FunctionID IS NOT NULL AND (fn.ID IS NULL OR fn.Active=0 OR fn.OrganizationID<>a.OrganizationID)))",
              "Every allocation must use an effective approved purpose and active accounting destination."),
             ("SELECT COUNT(*) FROM tblContributionBatch b LEFT JOIN tblAccountingBankAccount ba ON ba.ID=b.BankAccountID "
-             "WHERE b.ID=? AND (ba.ID IS NULL OR ba.Active=0 OR ba.OrganizationID<>b.OrganizationID)",
+             "LEFT JOIN tblAccountingAccount ac ON ac.ID=ba.AccountID "
+             "WHERE b.ID=? AND (ba.ID IS NULL OR ba.Active=0 OR ba.OrganizationID<>b.OrganizationID "
+             "OR ac.ID IS NULL OR ac.Active=0 OR ac.OrganizationID<>b.OrganizationID)",
              "Select an active bank account belonging to the batch organization."),
             ("SELECT COUNT(*) FROM (SELECT ContributionMethod,ReferenceValue,COUNT(*) Uses FROM tblContribution "
              "WHERE BatchID=? AND ReferenceValue IS NOT NULL AND ReferenceValue<>'' "

@@ -25,6 +25,14 @@ class Cursor:
         self.rowcount = 0
         if "SELECT ID FROM tblChurch" in sql:
             self.rows = [(7,)]
+        elif sql.startswith("SELECT ID FROM tblAccountingOrganization"):
+            self.rows = [(values[0],)] if self.connection.organization_owned else []
+        elif sql.startswith("SELECT ba.ID FROM tblAccountingBankAccount"):
+            self.rows = [(values[0],)] if self.connection.bank_owned else []
+        elif sql.startswith("SELECT ID FROM tblContributionContributor"):
+            self.rows = [(values[0],)] if self.connection.contributor_owned else []
+        elif sql.startswith("SELECT COUNT(*) FROM tblAccountingOrganization"):
+            self.rows = [(1 if self.connection.organization_owned else 0,)]
         elif "SELECT OrganizationID,Status FROM tblContributionBatch" in sql:
             self.rows = [self.connection.batch]
         elif "SELECT Status FROM tblContributionBatch" in sql:
@@ -56,6 +64,7 @@ class Cursor:
 class Connection:
     def __init__(self):
         self.calls, self.commits, self.rollbacks = [], 0, 0
+        self.organization_owned, self.bank_owned, self.contributor_owned = True, True, True
         self.batch, self.envelopes = (4, "DRAFT"), []
         self.totals = (Decimal("25.00"), Decimal("25.00"), date(2026, 8, 21), 2, 4)
         self.review_counts = [1, 0, 0, 0, 0, 0, 0]
@@ -85,6 +94,33 @@ class DraftBatchServiceTests(unittest.TestCase):
             organization_id=4, control_total="125.00")
         self.assertEqual((batch_id, connection.commits), (21, 1))
         self.assertTrue(any("BATCH_CREATED" in str(values) for _, values in connection.calls))
+
+    def test_organization_catalog_is_scoped_to_the_active_church(self):
+        connection = Connection()
+        self.service(connection).organizations()
+        sql, values = next(item for item in connection.calls
+                           if "FROM tblAccountingOrganization" in item[0])
+        self.assertIn("ChurchID=?", sql)
+        self.assertEqual(values, (7,))
+
+    def test_create_rejects_cross_church_organization_before_insert(self):
+        connection = Connection(); connection.organization_owned = False
+        with self.assertRaisesRegex(GivingValidationError, "belonging to this church"):
+            self.service(connection).create_batch(
+                batch_date=date(2026, 8, 21), description="Sunday offering",
+                organization_id=99, control_total="125.00")
+        self.assertFalse(any(sql.startswith("INSERT INTO tblContributionBatch")
+                             for sql, _values in connection.calls))
+        self.assertEqual((connection.commits, connection.rollbacks), (0, 1))
+
+    def test_gift_rejects_cross_church_contributor_before_insert(self):
+        connection = Connection(); connection.contributor_owned = False
+        with self.assertRaisesRegex(GivingValidationError, "contributor belonging to this church"):
+            self.service(connection).save_monetary_gift(
+                batch_id=21, received_date=date(2026, 8, 21), amount="25.00",
+                contributor_id=99, allocations=[(8, 4, 5, 6, None, "25.00", None)])
+        self.assertFalse(any(sql.startswith("INSERT INTO tblContribution ")
+                             for sql, _values in connection.calls))
 
     def test_resolves_numeric_envelope_without_leading_zero_distinction(self):
         connection = Connection(); connection.envelopes = [(45,)]

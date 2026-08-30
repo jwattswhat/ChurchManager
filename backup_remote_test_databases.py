@@ -1,4 +1,4 @@
-"""Create verified, read-only dumps of the remote test databases."""
+"""Create a verified, read-only dump of the remote test database."""
 
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ def main() -> int:
     environment["MYSQL_PWD"] = password
     results = []
     try:
-        for database in (testing["database"], testing["jsform_database"]):
+        for database in (testing["database"],):
             output = destination / f"{database}.sql"
             command = [
                 str(DUMP_EXE),

@@ -10,7 +10,12 @@ from accounting.attachment_service import AttachmentStore, load_attachment_polic
 from bulletin_orders import portable_connection
 from churchmanager_mode import load_config
 from giving.import_parser import file_hash
-from giving.validation import GivingValidationError
+from giving.validation import (
+    GivingValidationError,
+    require_giving_bank_account,
+    require_giving_contributor,
+    require_giving_organization,
+)
 
 
 class ContributionImportService:
@@ -35,6 +40,8 @@ class ContributionImportService:
         total = sum((item.source.amount for item in preview_rows), Decimal("0.00"))
         stored_path = None; cursor = self.connection.cursor()
         try:
+            require_giving_organization(cursor, church_id, organization_id)
+            require_giving_bank_account(cursor, organization_id, bank_account_id)
             cursor.execute("SELECT ID FROM tblContributionImportEvidence WHERE ChurchID=? AND FileHash=?",
                            (church_id, digest))
             if cursor.fetchone() is not None:
@@ -53,6 +60,7 @@ class ContributionImportService:
             batch_id = cursor.lastrowid
             for item in preview_rows:
                 source = item.source
+                require_giving_contributor(cursor, church_id, item.contributor_id)
                 cursor.execute(
                     "SELECT OrganizationID,FundID,RevenueAccountID,FunctionID,StatementTreatment "
                     "FROM tblContributionPurpose WHERE ID=? AND ChurchID=? AND OrganizationID=? "

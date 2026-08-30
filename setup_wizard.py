@@ -55,7 +55,6 @@ def save_installed_configuration(database_name, application_user, path=CONFIG_PA
         "port": 3306,
         "user": application_user,
         "database": database_name,
-        "jsform_database": database_name,
         "credential_target": "ChurchManager/Production",
     })
     config.setdefault("security", {})["production_enabled"] = True

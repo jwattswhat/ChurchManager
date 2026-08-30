@@ -7,7 +7,11 @@ from collections import defaultdict
 from decimal import Decimal
 
 from bulletin_orders import portable_connection
-from giving.validation import GivingValidationError
+from giving.validation import (
+    GivingValidationError,
+    require_giving_bank_account,
+    require_giving_organization,
+)
 
 
 class GivingAccountingHandoff:
@@ -25,18 +29,22 @@ class GivingAccountingHandoff:
         try:
             cursor.execute(
                 "SELECT b.ChurchID,b.OrganizationID,b.DepositDate,b.Status,b.CalculatedTotal,"
-                "b.AccountingTransactionID,b.Description,ba.AccountID,a.FunctionRequirement,b.CorrectsBatchID "
+                "b.AccountingTransactionID,b.Description,ba.AccountID,a.FunctionRequirement,b.CorrectsBatchID,"
+                "b.BankAccountID "
                 "FROM tblContributionBatch b LEFT JOIN tblAccountingBankAccount ba ON ba.ID=b.BankAccountID "
                 "LEFT JOIN tblAccountingAccount a ON a.ID=ba.AccountID "
-                "WHERE b.ID=? FOR UPDATE", (batch_id,),
+                "WHERE b.ID=? AND b.ChurchID=(SELECT ID FROM tblChurch ORDER BY ID LIMIT 1) "
+                "FOR UPDATE", (batch_id,),
             )
             batch = cursor.fetchone()
             if not batch:
                 raise GivingValidationError("The selected contribution batch is unavailable.")
+            require_giving_organization(cursor, batch[0], batch[1])
             if batch[3] != "READY" or batch[5] is not None:
                 raise GivingValidationError("Only an unlinked Ready batch can be sent to accounting.")
             if batch[2] is None or batch[7] is None:
                 raise GivingValidationError("The deposit date and receiving bank account are required.")
+            require_giving_bank_account(cursor, batch[1], batch[10])
             if batch[8] == "REQUIRED":
                 raise GivingValidationError("The receiving bank account cannot require a functional classification.")
             if batch[9] is not None:
@@ -55,6 +63,19 @@ class GivingAccountingHandoff:
             periods = cursor.fetchall()
             if len(periods) != 1:
                 raise GivingValidationError("The deposit date must belong to exactly one open fiscal period.")
+
+            cursor.execute(
+                "SELECT COUNT(*) FROM tblContributionAllocation a "
+                "JOIN tblContribution g ON g.ID=a.ContributionID "
+                "LEFT JOIN tblContributionPurpose p ON p.ID=a.PurposeID "
+                "WHERE g.BatchID=? AND (a.OrganizationID<>? OR p.ID IS NULL "
+                "OR p.ChurchID<>? OR p.OrganizationID<>a.OrganizationID)",
+                (batch_id, batch[1], batch[0]),
+            )
+            if cursor.fetchone()[0]:
+                raise GivingValidationError(
+                    "Every allocation must belong to this church and accounting organization."
+                )
 
             cursor.execute(
                 "SELECT a.FundID,a.RevenueAccountID,a.FunctionID,SUM(a.Amount) "

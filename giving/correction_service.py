@@ -5,7 +5,11 @@ from __future__ import annotations
 import json
 
 from bulletin_orders import portable_connection
-from giving.validation import GivingValidationError
+from giving.validation import (
+    GivingValidationError,
+    require_giving_bank_account,
+    require_giving_organization,
+)
 
 
 class PostedBatchCorrectionService:
@@ -26,7 +30,8 @@ class PostedBatchCorrectionService:
                 "FROM tblContribution g LEFT JOIN tblContributionContributor c ON c.ID=g.ContributorID "
                 "JOIN tblContributionBatch b ON b.ID=g.BatchID "
                 "LEFT JOIN tblContributionReturn r ON r.OriginalContributionID=g.ID "
-                "WHERE g.BatchID=? AND b.Status='POSTED' AND g.ContributionMethod='CHECK' AND r.ID IS NULL "
+                "WHERE g.BatchID=? AND b.ChurchID=(SELECT ID FROM tblChurch ORDER BY ID LIMIT 1) "
+                "AND b.Status='POSTED' AND g.ContributionMethod='CHECK' AND r.ID IS NULL "
                 "ORDER BY c.DisplayName,g.ID", (original_batch_id,),
             )
             return cursor.fetchall()
@@ -46,7 +51,8 @@ class PostedBatchCorrectionService:
                 "SELECT ChurchID,BatchDate,Description,ServiceID,AttendanceEventID,DepositDate,"
                 "OrganizationID,BankAccountID,ControlTotal,CalculatedTotal,AccountingTransactionID,"
                 "CorrectionBatchID,ReversalAccountingTransactionID FROM tblContributionBatch "
-                "WHERE ID=? AND Status='POSTED' FOR UPDATE", (original_batch_id,),
+                "WHERE ID=? AND ChurchID=(SELECT ID FROM tblChurch ORDER BY ID LIMIT 1) "
+                "AND Status='POSTED' FOR UPDATE", (original_batch_id,),
             )
             batch = cursor.fetchone()
             if not batch:
@@ -55,6 +61,8 @@ class PostedBatchCorrectionService:
                 raise GivingValidationError("A correction already exists for this contribution batch.")
             if batch[10] is None:
                 raise GivingValidationError("The posted batch has no linked accounting transaction.")
+            require_giving_organization(cursor, batch[0], batch[6])
+            require_giving_bank_account(cursor, batch[6], batch[7])
 
             returned = None
             if returned_contribution_id is not None:
@@ -75,6 +83,55 @@ class PostedBatchCorrectionService:
             original = cursor.fetchone()
             if not original or original[2] != "POSTED" or original[3] is not None or original[4] is not None:
                 raise GivingValidationError("The linked accounting transaction cannot be reversed.")
+            if original[0] != batch[6]:
+                raise GivingValidationError(
+                    "The linked accounting transaction belongs to another organization."
+                )
+            cursor.execute(
+                "SELECT COUNT(*) FROM tblAccountingTransactionLine l "
+                "LEFT JOIN tblAccountingAccount a ON a.ID=l.AccountID "
+                "LEFT JOIN tblAccountingFund f ON f.ID=l.FundID "
+                "LEFT JOIN tblAccountingFunction fn ON fn.ID=l.FunctionID "
+                "LEFT JOIN tblAccountingPayee payee ON payee.ID=l.PayeeID "
+                "WHERE l.TransactionID=? AND (a.ID IS NULL OR a.OrganizationID<>? "
+                "OR f.ID IS NULL OR f.OrganizationID<>? "
+                "OR (l.FunctionID IS NOT NULL AND (fn.ID IS NULL OR fn.OrganizationID<>?)) "
+                "OR (l.PayeeID IS NOT NULL AND (payee.ID IS NULL OR payee.OrganizationID<>?)))",
+                (batch[10], batch[6], batch[6], batch[6], batch[6]),
+            )
+            if cursor.fetchone()[0]:
+                raise GivingValidationError(
+                    "The linked accounting transaction contains an invalid accounting destination."
+                )
+            cursor.execute(
+                "SELECT COUNT(*) FROM tblContributionAllocation ca "
+                "JOIN tblContribution g ON g.ID=ca.ContributionID "
+                "LEFT JOIN tblContributionPurpose p ON p.ID=ca.PurposeID "
+                "LEFT JOIN tblAccountingFund f ON f.ID=ca.FundID "
+                "LEFT JOIN tblAccountingAccount a ON a.ID=ca.RevenueAccountID "
+                "LEFT JOIN tblAccountingFunction fn ON fn.ID=ca.FunctionID "
+                "WHERE g.BatchID=? AND (ca.OrganizationID<>? OR p.ID IS NULL "
+                "OR p.ChurchID<>? OR p.OrganizationID<>? "
+                "OR f.ID IS NULL OR f.OrganizationID<>? "
+                "OR a.ID IS NULL OR a.OrganizationID<>? "
+                "OR (ca.FunctionID IS NOT NULL AND (fn.ID IS NULL OR fn.OrganizationID<>?)))",
+                (original_batch_id, batch[6], batch[0], batch[6], batch[6], batch[6], batch[6]),
+            )
+            if cursor.fetchone()[0]:
+                raise GivingValidationError(
+                    "The posted batch contains an invalid Giving allocation."
+                )
+            cursor.execute(
+                "SELECT COUNT(*) FROM tblContribution g "
+                "LEFT JOIN tblContributionContributor c ON c.ID=g.ContributorID "
+                "WHERE g.BatchID=? AND g.ContributorID IS NOT NULL "
+                "AND (c.ID IS NULL OR c.ChurchID<>?)",
+                (original_batch_id, batch[0]),
+            )
+            if cursor.fetchone()[0]:
+                raise GivingValidationError(
+                    "The posted batch contains a contributor from another church."
+                )
             cursor.execute(
                 "SELECT p.ID FROM tblAccountingFiscalPeriod p JOIN tblAccountingFiscalYear y "
                 "ON y.ID=p.FiscalYearID WHERE y.OrganizationID=? AND ? BETWEEN p.StartDate AND p.EndDate "

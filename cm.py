@@ -830,10 +830,19 @@ def main(argv=None):
 
     for control_name in MENU_CONTROLS:
         if control_name in cmfrm.CONTROLID:
-            cmfrm.CONTROLID[control_name].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+            control = cmfrm.CONTROLID[control_name]
+            declared_type = cmfrm.CONTROLDESCRIPTION.get(control_name, {}).get("type")
+            event = wx.EVT_BUTTON if declared_type == "Button" else wx.EVT_LEFT_DOWN
+            control.Bind(
+                event,
+                lambda _event, selected=control_name: _buttonclick(selected),
+            )
     if context.session is not None:
         for control_name in SESSION_CONTROLS:
-            cmfrm.CONTROLID[control_name].Bind(wx.EVT_LEFT_DOWN, _buttonclick)
+            control = cmfrm.CONTROLID[control_name]
+            declared_type = cmfrm.CONTROLDESCRIPTION.get(control_name, {}).get("type")
+            event = wx.EVT_BUTTON if declared_type == "Button" else wx.EVT_LEFT_DOWN
+            control.Bind(event, _buttonclick)
         cmfrm.CONTROLID["lblCurrentUser"].SetLabel(
             "Signed in: {}".format(context.session.display_name)
         )
@@ -849,7 +858,7 @@ def main(argv=None):
     except Exception:
         pass
     try:
-        ChurchDB.DBConnection.close(); ChurchDB.JSConnection.close()
+        ChurchDB.close()
     except Exception:
         pass
     if restart:

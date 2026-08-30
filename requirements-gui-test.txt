@@ -1,0 +1,2 @@
+# Optional native Windows packaged-application smoke testing only.
+pywinauto==0.6.9

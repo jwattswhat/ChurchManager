@@ -11,6 +11,48 @@ class GivingValidationError(ValueError):
     """Report a giving rule violation without embedding confidential data."""
 
 
+def require_giving_organization(cursor, church_id: int, organization_id: int) -> None:
+    """Require an active accounting organization owned by the Giving church."""
+    cursor.execute(
+        "SELECT ID FROM tblAccountingOrganization "
+        "WHERE ID=? AND ChurchID=? AND Active=1 FOR UPDATE",
+        (organization_id, church_id),
+    )
+    if cursor.fetchone() is None:
+        raise GivingValidationError(
+            "Select an active accounting organization belonging to this church."
+        )
+
+
+def require_giving_bank_account(cursor, organization_id: int, bank_account_id: int | None) -> None:
+    """Require a bank account and ledger account owned by the organization."""
+    if bank_account_id is None:
+        return
+    cursor.execute(
+        "SELECT ba.ID FROM tblAccountingBankAccount ba "
+        "JOIN tblAccountingAccount a ON a.ID=ba.AccountID "
+        "WHERE ba.ID=? AND ba.OrganizationID=? AND ba.Active=1 "
+        "AND a.OrganizationID=ba.OrganizationID AND a.Active=1 FOR UPDATE",
+        (bank_account_id, organization_id),
+    )
+    if cursor.fetchone() is None:
+        raise GivingValidationError(
+            "Select an active bank account belonging to this accounting organization."
+        )
+
+
+def require_giving_contributor(cursor, church_id: int, contributor_id: int | None) -> None:
+    """Require an optional contributor identity owned by the Giving church."""
+    if contributor_id is None:
+        return
+    cursor.execute(
+        "SELECT ID FROM tblContributionContributor WHERE ID=? AND ChurchID=?",
+        (contributor_id, church_id),
+    )
+    if cursor.fetchone() is None:
+        raise GivingValidationError("Select a contributor belonging to this church.")
+
+
 def _money(value: object, field: str) -> Decimal:
     try:
         amount = Decimal(str(value)).quantize(Decimal("0.01"))

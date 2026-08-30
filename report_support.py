@@ -41,7 +41,8 @@ def connect_report(settings):
     wx_app = wx.App(0)
     database = JSForm.clsDB(
         settings["server"], settings["database"], settings["user"],
-        settings["password"], settings["jsform_database"],
+        None,
+        credential_target=settings["credential_target"],
     )
     return wx_app, database
 
@@ -54,4 +55,3 @@ def write_lines(path, lines):
 
 def open_text_file(path):
     os.startfile(str(Path(path).resolve()))
-

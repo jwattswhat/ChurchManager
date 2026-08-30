@@ -3,6 +3,7 @@
 import unittest
 import json
 import tempfile
+from types import SimpleNamespace
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from unittest.mock import patch
@@ -35,11 +36,20 @@ class InstalledLauncherTests(unittest.TestCase):
         ensure.assert_called_once()
         setup.assert_called_once()
 
+    @patch("installed_launcher.ensure_configuration")
+    @patch("installed_launcher.setup_required", return_value=True)
+    def test_explicit_test_mode_bypasses_production_setup(self, required, ensure):
+        fake_cm = SimpleNamespace(main=lambda arguments: arguments)
+        with patch.dict("sys.modules", {"cm": fake_cm}), \
+             patch("installed_setup.main") as setup:
+            self.assertEqual(installed_launcher.main(["--test"]), ["--test"])
+        setup.assert_not_called()
+
     def test_specs_include_framework_forms_baseline_catalogs_and_guide(self):
         for filename in ("ChurchManager.spec", "ChurchManagerSetup.spec", "ChurchManagerBundle.spec"):
             source = (ROOT / "packaging" / filename).read_text(encoding="utf-8")
             for required in (
-                "JSForm/Forms", "JSForm/assets", "installation", "migrations", "packages",
+                "JSForm/Forms", '"Menus"', "JSForm/assets", "installation", "migrations", "packages",
                 "visual_reports/definitions", "accounting/report_definitions",
                 "ChurchManager.UserGuide.pdf", 'console=False',
             ):
@@ -79,6 +89,7 @@ class InstalledLauncherTests(unittest.TestCase):
             evidence = json.loads(output.read_text(encoding="utf-8"))
             self.assertFalse(evidence["passed"])
             self.assertIn("forms", evidence["missing"])
+            self.assertIn("main_menu", evidence["missing"])
             self.assertIn("jsform_icon", evidence["missing"])
             self.assertEqual(evidence["missing_components"], [])
 

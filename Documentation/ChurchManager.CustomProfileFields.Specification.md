@@ -421,7 +421,9 @@ The implemented exchange is deliberately separate from ordinary membership
 CSV export. **Export Values...** writes only Active definitions marked for
 approved export and creates a companion JSON manifest containing stable field
 keys, types, privacy classes, and stable choice keys. Restricted values require
-the restricted-view permission plus a separate explicit confirmation.
+the restricted-view permission plus a separate explicit confirmation. Identity
+and custom-value cells use the shared CSV rule so spreadsheet formula prefixes
+remain text.
 
 **Import Values...** updates custom values for existing People or Families. It
 matches the profile by its exact portable name fields and definitions by

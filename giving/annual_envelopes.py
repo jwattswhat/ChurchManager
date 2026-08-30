@@ -121,10 +121,11 @@ class AnnualEnvelopeAssignmentService:
             raise GivingValidationError("There are no active contributors to assign.")
         prior_day = date(int(year) - 1, 12, 31)
         current_rows = self._all(
-            "SELECT ContributorID,EnvelopeNumber FROM tblContributionEnvelopeAssignment "
-            "WHERE ChurchID=? AND EffectiveFrom<=? "
-            "AND COALESCE(EffectiveThrough,'9999-12-31')>=? "
-            "ORDER BY ContributorID,EffectiveFrom DESC,ID DESC",
+            "SELECT e.ContributorID,e.EnvelopeNumber FROM tblContributionEnvelopeAssignment e "
+            "JOIN tblContributionContributor c ON c.ID=e.ContributorID AND c.ChurchID=e.ChurchID "
+            "WHERE e.ChurchID=? AND e.EffectiveFrom<=? "
+            "AND COALESCE(e.EffectiveThrough,'9999-12-31')>=? "
+            "ORDER BY e.ContributorID,e.EffectiveFrom DESC,e.ID DESC",
             (church_id, prior_day, prior_day),
         )
         current = {}
@@ -156,6 +157,15 @@ class AnnualEnvelopeAssignmentService:
             )
             note = f"Annual assignment for {year}"
             for row in rows:
+                cursor.execute(
+                    "SELECT ID FROM tblContributionContributor "
+                    "WHERE ID=? AND ChurchID=? AND IsActive=1 FOR UPDATE",
+                    (row.contributor_id, church_id),
+                )
+                if cursor.fetchone() is None:
+                    raise GivingValidationError(
+                        "A contributor changed churches or became inactive after preview."
+                    )
                 cursor.execute(
                     "INSERT INTO tblContributionEnvelopeAssignment "
                     "(ChurchID,ContributorID,EnvelopeNumber,EffectiveFrom,EffectiveThrough,Note) "

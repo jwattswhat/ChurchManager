@@ -27,6 +27,7 @@ EXCLUDES = ["JSForm.tests", "JSForm.examples", "JSForm.DevelopmentTesting", "JSF
 DATAS = [
     (str(ROOT / "Forms"), "JSForm/Forms"),
     (str(ROOT / "Forms"), "Forms"),
+    (str(ROOT / "Menus"), "Menus"),
     (str(ROOT / "assets"), "assets"),
     (str(ROOT / "installation"), "installation"),
     (str(ROOT / "migrations"), "migrations"),

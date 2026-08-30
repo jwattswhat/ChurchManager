@@ -44,10 +44,13 @@ previous ChurchManager installation.
 
 ### 3.0 Windows packaging boundary
 
-ChurchManager shall use a signed traditional Windows Installer (`.msi`) package
-for application-owned files, shortcuts, version registration, repair, upgrade,
-and uninstall. The MSI may be produced with WiX or another standards-compliant
-Windows Installer toolchain.
+ChurchManager uses a traditional Windows Installer (`.msi`) package for
+application-owned files, shortcuts, version registration, repair, upgrade, and
+uninstall. The MSI may be produced with WiX or another standards-compliant
+Windows Installer toolchain. A bounded beta may remain unsigned when it is
+distributed from the official project release page with a published SHA-256
+checksum and clearly identified as unsigned. Public-trust signing is the goal
+before broad public adoption.
 
 The MSI and the ChurchManager Setup Wizard have separate responsibilities:
 
@@ -55,6 +58,11 @@ The MSI and the ChurchManager Setup Wizard have separate responsibilities:
   bundled Python runtime and dependencies, icons, shortcuts, and uninstaller;
 - the Setup Wizard configures MariaDB, congregation information, the first
   master administrator, catalogs, writable data locations, and backup proof.
+
+MariaDB Server is an external prerequisite rather than an MSI payload. A clean
+computer must install a supported MariaDB Server distribution, including its
+client and dump tools, before ChurchManager setup can continue. The readiness
+page verifies those tools before requesting the MariaDB administrator password.
 
 The Setup Wizard is titled **ChurchManager Installation** and displays the
 approved horizontal ChurchManager banner above its page headings. This is an
@@ -66,7 +74,9 @@ large enough to show the full banner, instructions, readiness results, and
 navigation controls without clipping.
 The packaged resource proof must also verify every runtime component used by
 the Setup Wizard readiness check so a dependency present only in development
-cannot produce a false installation block.
+cannot produce a false installation block. It must verify the application main
+menu definition as well as forms, framework assets, installation baselines,
+catalogs, report definitions, and the User Guide.
 
 The installed user-facing entry points are `ChurchManager.exe` for ordinary
 operation and `ChurchManagerSetup.exe` for first-run or protected maintenance
@@ -314,7 +324,10 @@ The beta is complete only when:
    restore rehearsal passed August 17, 2026: it restored a deliberately changed
    congregation record from the verified first-install backup, verified all 84
    migration records, verified the pre-restore safety backup, and removed all
-   disposable resources. The repair rehearsal remains.
+   disposable resources. The MSI repair rehearsal passed August 30, 2026: an
+   installed application-owned helper was moved aside, Windows Installer `/fa`
+   restored its exact SHA-256, and the writable Local AppData configuration
+   hash remained unchanged.
 10. Prepare the beta kit and complete beta acceptance. The reproducible
     PyInstaller 6.21 shared onedir build for `ChurchManager.exe` and
     `ChurchManagerSetup.exe` is implemented. Both packaged executables passed
@@ -329,8 +342,13 @@ The beta is complete only when:
     shortcuts. The verified repeat build was 37,025,537 bytes with SHA-256
     `55ada55b111a8f4ed562c7615446f3fbec037617527551cb735cc455f52c8c67`.
     ICE validation could not run because the Windows Installer service was
-    unavailable on the development computer; clean-machine ICE validation,
-    MSI repair rehearsal, signing, and visual acceptance remain.
+    unavailable on the development computer. The MSI repair rehearsal
+    subsequently passed August 30, 2026. Independent Windows 11 25H2 VM
+    installation and visual acceptance passed August 30 after MariaDB 12.3.2
+    LTS was installed as an external prerequisite and a discovered missing-main-
+    menu bundle defect was corrected. Public-trust signing is deliberately
+    deferred for the bounded beta and should be reconsidered before broad
+    public adoption.
 11. Ship the visually verified, version-matched User Guide PDF and verify the
     main-menu Help control on an installed build.
 

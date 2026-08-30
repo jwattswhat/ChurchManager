@@ -63,6 +63,37 @@ class TestBackupService(unittest.TestCase):
             self.assertNotIn("secret", " ".join(calls[0]))
             self.assertEqual(BackupService.inspect_dump(result.path), "ChurchDBTest")
 
+    def test_backup_resolves_protected_credential_only_for_operation(self):
+        calls = []
+        settings = {
+            "server": "db", "database": "ChurchDBTest", "user": "church",
+            "credential_target": "ChurchManager/Test",
+        }
+        with tempfile.TemporaryDirectory() as folder:
+            (Path(folder) / "mysqldump.exe").write_bytes(b"")
+            service = BackupService(
+                runner=lambda command, stdout, check: (calls.append(command), stdout.write(b"backup")),
+                credential_reader=lambda target: ("church", "late-secret"),
+            )
+            service.create(settings, folder, str(Path(folder) / "backup"))
+        self.assertNotIn("password", settings)
+        self.assertNotIn("late-secret", " ".join(calls[0]))
+
+    def test_backup_rejects_credential_username_mismatch_before_runner(self):
+        calls = []
+        service = BackupService(
+            runner=lambda *args, **kwargs: calls.append(args),
+            credential_reader=lambda _target: ("other-user", "late-secret"),
+        )
+        with self.assertRaisesRegex(BackupError, "does not match") as caught:
+            service.create(
+                {"server": "db", "database": "ChurchDBTest", "user": "church",
+                 "credential_target": "ChurchManager/Test"},
+                "missing-tools", "backup",
+            )
+        self.assertEqual(calls, [])
+        self.assertNotIn("late-secret", str(caught.exception))
+
     def test_unrecognized_dump_is_rejected(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "unknown.sql"

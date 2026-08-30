@@ -105,6 +105,11 @@ visual definitions or specialized Python generators. Email, generated
 documents, filesystem archives, and database backups leave the central database
 flow and therefore require separate security and retention controls.
 
+All visible dashboard actions use a consistent native-button treatment so
+keyboard focus, activation, and accessible names are clear throughout the main
+screen. Congregation identity, logo, and current-user text remain informational
+labels rather than actions.
+
 ### 2.1 Main application
 
 `cm.py` is the application entry point and remains a JSForm application. Startup
@@ -295,17 +300,27 @@ ChurchManager and JSForm read path and formatting values from `tblConfig`. Commo
 
 | Configuration | Purpose |
 | --- | --- |
-| `Location/Form` | JSON form directory. |
+| `Location/Form` | Historical JSON form directory setting. ChurchManager startup explicitly selects its packaged or development `Forms` directory instead. |
 | `Location/Picture` | Pictures directory. |
 | `Location/Report` | Generated-report directory. |
 | `Location/MySQLDump` | Directory containing `mysqldump`. |
 | `Location/DBBackup` | Destination for database dumps. |
 | `Location/Sermon` | Sermon directory. |
 | `Location/Outline` | Outline directory. |
+| `Location/Document` | General document directory. |
 | `Location/JSONSchema` | Form-schema directory. |
 | `Format/Date` | Date display format. |
 | `Format/Time` | Time display format. |
 | `Format/DateTime` | Combined date/time display format. |
+
+ChurchManager supplies JSForm's safe file-opening policy at application startup.
+Only existing local directories configured by `Location/Document`,
+`Location/Sermon`, and `Location/Outline` are approved. Relative configured
+locations are resolved from the ChurchManager application directory. The Open
+buttons accept the documented passive formats `.doc`, `.docx`, `.pdf`, and
+`.txt`; executable, script, shortcut, remote, missing, and outside-location
+targets remain blocked by JSForm. If no configured location is currently valid,
+ChurchManager continues to start but file opening remains disabled.
 
 Exact entries depend on the current database. Use the Config screen to inspect installed values.
 
@@ -323,8 +338,9 @@ the command. Test mode ignores the normal database name and uses the database
 configured at `testing.database` in `churchmanager.json`. The main window title
 clearly displays `TEST MODE`, and ChurchManager refuses to start if the test and
 production database names match. The framework configuration connection also
-uses `testing.jsform_database` (`JSFormTest`) instead of the production `JSForm`
-database.
+uses the isolated `testing.database`; JSForm configuration tables reside in that
+same application database rather than a separate framework database
+connection.
 
 Visual report definitions do not embed a database login. Test mode builds
 datasets from `ChurchDBTest`; production mode uses the explicitly configured
@@ -339,9 +355,12 @@ Supported command-line options are:
 | `-d` | `--database` | Application database. | `ChurchDB` |
 | `-u` | `--user` | Database username. | None |
 
-Database passwords are retrieved from Windows Credential Manager using the
-`ChurchManager/Production` and `ChurchManager/Test` entries. They are not stored
-in the launcher or `churchmanager.json`.
+Database passwords are retrieved from the production or test Windows Credential
+Manager target selected by `churchmanager.json`. ChurchManager retains only that
+target; JSForm reads the secret immediately before connecting. Passwords are not
+stored in runtime settings, child-process arguments, the launcher, or
+`churchmanager.json`. Backup and restore resolve the target only while preparing
+their protected, short-lived database-tool option file.
 
 ### 5.6 Verify startup
 
@@ -1082,14 +1101,11 @@ Recommended modernization order:
 | `worship_scheduling.py` | Participant, role, availability, and service-assignment screens plus database access. |
 | `worship_scheduling_rules.py` | UI-free availability, required-slot, report-row, and suggestion rules. |
 | `fnSchedule.py` | Participant email notification using normalized worship assignments. |
-| `fnDatabase.py` | Database maintenance utility, including auto-increment reset behavior. It runs its function at import/execution and should be used cautiously. |
 | `rptAnnouncement.py` | Date- and week-filtered Sunday announcement generation. |
 | `rptPrayers.py` | Date- and week-filtered Sunday prayer generation. |
 | `rptMemberDirectory.py` | Custom FPDF membership directory. |
 | `sermon2blogger.py` | Word sermon conversion for Blogger-oriented use. |
 | `liccalendar.py` | Google Calendar authorization and service-week event retrieval. |
-| `network.py` | Simple internet-connectivity check. |
-| `CheckFormsWithSchema.py` | Experimental JSON form-schema validation. |
 | `CvtPxtoChar.py` | Layout conversion support for form development. |
 
 ## 20. Related ChurchManager documentation

@@ -36,8 +36,6 @@ def CMargs(prog,description,arguments, argv=None):
             action="store_true",
             help="Use the configured test database",
         )
-    if "jsform_database" in arguments:
-        cmparser.add_argument("--jsform-database", type=str, default=None)
 
 
     args = cmparser.parse_args(argv)
@@ -58,7 +56,5 @@ def CMargs(prog,description,arguments, argv=None):
         returnarguments["churchid"] = args.church_id
     if "test_mode" in arguments:
         returnarguments["test_mode"] = args.test_mode
-    if "jsform_database" in arguments:
-        returnarguments["jsform_database"] = args.jsform_database
 
     return returnarguments

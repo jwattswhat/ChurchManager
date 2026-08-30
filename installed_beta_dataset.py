@@ -36,7 +36,7 @@ def prepare_test_configuration(path=None):
     testing = config.setdefault("testing", {})
     testing.update({
         "host": production["host"], "port": production.get("port", 3306),
-        "user": username, "database": TARGET, "jsform_database": TARGET,
+        "user": username, "database": TARGET,
         "credential_target": test_target,
     })
     security = config.setdefault("security", {})

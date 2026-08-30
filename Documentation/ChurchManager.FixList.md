@@ -1,6 +1,6 @@
 # ChurchManager development roadmap
 
-Last reviewed: August 25, 2026
+Last reviewed: August 30, 2026
 
 This is the maintained ChurchManager development backlog. Priorities reflect
 the needs of a small congregation and a comparison with current paid and
@@ -15,7 +15,7 @@ open-source church-management systems.
 | 3 | Completed | Optional user-to-person relationship | Nullable links, administration, safe auditing, welcome email, migration, and acceptance are complete. |
 | 4 | Implemented; deployment check | Secure SMTP connection and email settings | Credential-safe settings and shared mail delivery are implemented; each installed congregation must enter and test its own provider credential. |
 | 5 | Completed | Hymnal, lectionary, and Order of Service catalogs | The permanent-ID and metadata-only catalog frameworks, local maintenance, included Historic One-Year Lectionary, and LSB Order of Service outlines are implemented and accepted. The unverified curated LSB hymnal package is intentionally withheld and is not a release requirement. |
-| 6 | In beta | Release, installation, and recovery readiness | Setup, upgrade, restore, backup, documentation, and the 0.3.0-beta.1 distribution are complete. MSI repair, code signing, and clean-machine exit acceptance remain release gates for a later installer update. |
+| 6 | Bounded beta accepted | Release, installation, and recovery readiness | Setup, upgrade, restore, backup, MSI repair, documentation, and independent Windows 11 VM installation/visual acceptance are complete. The clean-machine rehearsal documented MariaDB as an external prerequisite and caught a missing main-menu bundle resource; the specifications and packaged proof now prevent recurrence. Public-trust signing is deliberately deferred until broader distribution warrants it. |
 | 6A | Completed initial publication | Open-source publication and distribution | The audited public GitHub repository, versioned beta release assets, documentation links, approved screenshots, and live GitHub Pages site are published. Codeberg, SourceForge, WinGet, and a custom domain remain optional later distribution channels. |
 | 7 | Completed | [Confidential member giving and envelopes](ChurchManager.MemberGiving.Specification.md) | The approved first-release scope passed migrations, installation baseline, full automated suite, confidential-data restore rehearsal, and final visual acceptance. Pledges are explicitly deferred. |
 
@@ -34,7 +34,97 @@ from Sent to Accounting in the batch list.
 | 14 | Completed | [Calendar integration](ChurchManager.CalendarIntegration.Specification.md) | Event agenda, recurrence, neutral Worship/Group/Event adapters, protected preview, iCalendar export, duplicate-safe publication state, and optional one-way Google publishing are implemented. The Project milestone source will be registered when that future source exists. |
 | 15 | Completed | [Asset management](ChurchManager.AssetManagement.Specification.md) | The register, locations, activity history, due list, reviewed CSV exchange, permissions, reports, menu integration, test dataset, migration, and automated suite passed final visual acceptance on August 26, 2026. |
 | 16 | Completed | [Projects and scheduling](ChurchManager.ProjectsScheduling.Specification.md) | Normalized projects, ordered steps, ownership, dependencies, document links, reports, permissions, Calendar Integration sources, fictional test data, baseline, automated regression, and visual acceptance are complete. |
+| 17 | Completed | Remove obsolete JSForm dual-database compatibility use | ChurchManager now uses JSForm's single application-database contract throughout startup, reports, backup/restore, test-mode isolation, installation, command-line handling, and shutdown. |
+| 17A | Completed | Remove confirmed stale development modules | Removed the unused hard-coded database reset helper, duplicate import-time network probe, historical form inspection report, and experimental database-configured schema checker after confirming that current runtime, packaging, and tests had no supported dependency on them. |
+| 17B | Completed | Retire completed one-time development routines | Removed the completed blanket theme rewriter, three ad hoc accounting-state inspection scripts, and the one-time Groups data inventory after confirming that supported runtime, release, documentation, and tests had no dependency on them. |
+| 18 | Implementation complete; manually visually accepted | [Automated GUI screen testing](ChurchManager.AutomatedGUITesting.Specification.md) | Four screens have deterministic structural and representative interaction coverage, and the rollback-only database profile passes. After the compact all-button dashboard was visually accepted, the exact rebuilt bundle again passed package proof, temporary fictional login, accessible-name keyboard activation of Projects, native child-window detection, cleanup, and clean exit on August 30. Automated desktop capture still fails closed in this environment, so no screenshot baseline is claimed. |
 | Triggered | Conditional | Secure remote access and two-factor authentication | Require a safely configured VPN for desktop access and 2FA for any future remote, browser, or member-access design. |
+
+## Codex Security remediation queue
+
+These validated findings came from the August 27, 2026 standard Codex Security
+scan. Items retain their verification status below. They are ChurchManager
+application findings and are not closed merely by a related JSForm framework
+control.
+
+1. **Completed: enforce church ownership for giving batch accounting targets.**
+   Organization choices are restricted to the active church, and direct batch
+   creation, imports, readiness review, accounting handoff, and posted-batch
+   corrections now fail closed when the organization is inactive, unlinked, or
+   owned by another church. Bank-account, ledger-account, purpose, allocation,
+   and linked-transaction ownership are also checked. Regression coverage proves
+   cross-church identifiers cannot create a batch or reach accounting posting.
+2. **Completed: restrict contributor maintenance to the active church.** Person
+   and family choices and direct lookups are church-scoped; contributor creation,
+   editing, directory refresh, envelope maintenance, batch entry, and imports
+   reject foreign contributor or directory identifiers before writing. Outside
+   contributors remain supported without directory links. Regression coverage
+   protects both catalog and direct-ID paths.
+3. **Completed: neutralize spreadsheet formulas in every CSV export.** One shared
+   CSV-cell rule now protects data-management exports and archives,
+   asset exports, and custom-profile exports. Text that begins with `=`, `+`,
+   `-`, or `@`, including spreadsheet-ignored control or whitespace prefixes,
+   is emitted as text; ordinary text and non-text numeric values are unchanged.
+   Import parsing remains unchanged and does not silently reinterpret external
+   CSV values.
+4. **Completed: block unsafe stored document paths.** ChurchManager now supplies
+   its configured local Document, Sermon, and Outline roots to JSForm's safe
+   file-opening boundary. UNC, device, remote, outside-root, active, and missing
+   targets are rejected while supported local documents remain available.
+5. **Completed: late database-credential resolution.** ChurchManager desktop and
+   report composition roots now retain only the configured credential target and
+   pass it to JSForm, which resolves the vault secret immediately before opening
+   the connection. `Runtime.arguments`, application context, and child-process
+   arguments contain no database password. Backup and restore resolve the same
+   protected target only for their short-lived database-tool operation. Existing
+   production/test database, JSForm database, and credential-target separation
+   remains enforced.
+
+### JSForm security controls inherited by ChurchManager
+
+The August 28-29 JSForm remediation work is implemented and verified at the
+framework boundary. ChurchManager inherits the following controls wherever it
+uses the corresponding JSForm services:
+
+1. **Resolved: parameterized dynamic SELECT conditions.** Parent-record and
+   option values remain connector data across record loading, choices, linked
+   forms, and schedule reads.
+2. **Resolved: authorization of the database operation actually performed.**
+   Blank and new records require `create`; loaded records require `update`; the
+   application policy is checked at the form and final persistence boundaries.
+3. **Resolved: parameterized configuration and option APIs.** Families, types,
+   and values no longer enter SQL syntax, and application transaction ownership
+   is preserved.
+4. **Resolved: constrained Windows file opening.** This is also recorded as
+   completed ChurchManager item 4 above because ChurchManager supplies the
+   application-owned roots and passive file types.
+5. **Resolved: historical SMTP secrets removed from database configuration.**
+   ChurchManager persists non-secret mail settings and keeps the provider secret
+   in Windows Credential Manager.
+6. **Resolved: protected SMTP transport.** Authentication requires verified
+   implicit TLS or STARTTLS; plain SMTP is limited to an explicit,
+   unauthenticated loopback exception.
+7. **Resolved: final diagnostic redaction.** Structured error records, dialogs,
+   and support packages apply bounded redaction at persistence and disclosure
+   boundaries.
+8. **Resolved: database-password protection.** JSForm performs late protected
+   credential lookup, and ChurchManager now passes only the selected target from
+   its desktop and report composition roots as recorded in completed item 5.
+9. **Resolved: bounded image decoding.** JSForm-rendered ChurchManager controls
+   and reports enforce encoded-byte, format, frame, dimension, and pixel limits
+   before full decoding.
+10. **Resolved: migrated from JSForm's obsolete dual-database compatibility API.**
+    ChurchManager no longer supplies or reads a second database setting and no
+    longer uses the compatibility connection, credential, or framework-setting
+    aliases. Startup, report composition, backup/restore, test-mode safeguards,
+    setup, installed defaults, command-line handling, and shutdown use the one
+    application database and `database.close()` contract. Production/test
+    isolation and protected-target credential handling remain enforced.
+
+An August 29 follow-up review also found and corrected a second-order SQL
+injection in the JSForm-owned scheduling helper: service, participant, and role
+values are now bound parameters. This correction is retained for regression
+protection but does not replace ChurchManager's open tenant and CSV findings.
 
 Calendar Integration, Asset Management, and Projects and Scheduling are
 complete. Projects now supplies milestone and step-date adapters to Calendar
@@ -309,16 +399,19 @@ future roadmap projects:
 
 ### 6. Release, installation, and recovery readiness
 
-- **Status: current beta source gates completed August 26, 2026.** The
+- **Status: current beta source gates completed August 29, 2026.** The
   current-state evidence is maintained in
   [ChurchManager Current Release Readiness](ChurchManager.ReleaseReadiness.Current.md).
-  The canonical `0.3.0-beta.1` baseline represents 120 migrations and 122 starter
+  The canonical `0.3.0-beta.2` baseline represents 121 migrations and 125 starter
   statements. The optional fictional beta dataset has a guarded versioned
   manifest. The source-construction audit, owned-child cleanup regression,
   report-family acceptance, accounting test acceptance, and permanent backup
-  separation rule are maintained release gates. MSI rebuild, repair, signing,
-  and clean-machine acceptance remain intentionally deferred until the next
-  beta installer is requested.
+  separation rule are maintained release gates. The beta.2 MSI repair rehearsal
+  passed August 30, 2026 with byte-for-byte application-file restoration and
+  unchanged writable configuration. Independent Windows 11 25H2 VM installation
+  and visual acceptance passed August 30, 2026. Public-trust signing is deferred
+  for the current bounded beta and should be reconsidered before broad public
+  adoption.
 
 - Approved design:
   [Installation, Upgrade, and Beta Release Specification](ChurchManager.InstallationRelease.Specification.md).
@@ -417,8 +510,10 @@ future roadmap projects:
   executables passed the password-free resource proof for release 0.2.0-dev on
   August 17, 2026. WiX v5 MSI source defines per-machine application files,
   shortcuts, and major-upgrade protection without claiming congregation-owned
-  data. Compiler validation, repair, signing, and clean-machine visual
-  acceptance remain.
+  data. Compiler validation, repair, and clean-machine visual acceptance have
+  passed. The final packaged proof explicitly verifies the main-menu definition.
+  Public-trust signing is a deferred distribution enhancement rather than a
+  blocker for the current bounded beta.
 - Installed configuration now resolves to the writable local application-data
   folder and is initialized from a non-secret template. Source development
   retains its repository configuration, and neither mode stores a database
@@ -814,6 +909,32 @@ future roadmap projects:
   policy for every definition.
 - Avoid arbitrary custom fields where a normalized ChurchManager relationship
   or protected subsystem is more appropriate.
+
+### 18. Automated GUI screen testing
+
+- **Status: implemented and manually visually accepted August 30, 2026.** Follow
+  [ChurchManager Automated GUI Screen Testing Specification](ChurchManager.AutomatedGUITesting.Specification.md).
+- Add a reusable wxPython GUI test harness that creates and disposes application
+  frames and dialogs without crossing into the separate Frozen application.
+- Add fast screen-construction tests for essential controls, labels, initial
+  values, enabled states, sizing constraints, and keyboard focus order.
+- Add interaction tests for typing, selection, validation, Save, Cancel, and
+  representative permission-dependent states using wx events or
+  `wx.UIActionSimulator` where practical.
+- Add visual-regression tests that capture approved screen images at a fixed
+  Windows theme, font configuration, resolution, and 100 percent display
+  scaling, with reviewable difference images when a baseline changes.
+- Add a small packaged-application smoke suite using stable control identifiers
+  and Windows UI automation. Avoid coordinate-dependent automation except where
+  no stable control interface exists.
+- Start with login and three high-value screens selected during specification,
+  then expand coverage according to risk and regression history.
+- Use only guarded development and test database configuration and isolated
+  fictional data. Tests must never access the Frozen application, its runtime,
+  configuration, or production database.
+- Treat automated screenshot comparison as regression evidence, not as a
+  substitute for required human visual acceptance. Do not claim a screen is
+  visually verified unless its rendered result was actually inspected.
 
 ### Conditional: secure remote access and two-factor authentication
 

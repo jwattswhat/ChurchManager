@@ -11,6 +11,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
+from credential_store import read_credential
+
 
 class BackupError(RuntimeError):
     """Raised when backup, restore, inspection, or preference work is unsafe."""
@@ -29,10 +31,36 @@ class BackupResult:
 class BackupService:
     """Create and restore labeled MariaDB dumps with safety backups."""
 
-    def __init__(self, runner=subprocess.run, clock=datetime.now, recovery=None):
+    def __init__(
+        self, runner=subprocess.run, clock=datetime.now, recovery=None,
+        credential_reader=read_credential,
+    ):
         self.runner = runner
         self.clock = clock
         self.recovery = recovery
+        self.credential_reader = credential_reader
+
+    def _database_credentials(self, settings):
+        """Resolve credentials only for the pending database-tool operation."""
+        password = settings.get("password")
+        target = str(settings.get("credential_target") or "").strip()
+        if password is not None:
+            return settings.get("user"), password
+        if not target:
+            raise BackupError("A protected database credential target is required.")
+        try:
+            username, password = self.credential_reader(target)
+        except Exception:
+            raise BackupError("The protected database credential could not be read.") from None
+        configured_user = str(settings.get("user") or "").strip()
+        username = str(username or "").strip()
+        if configured_user and configured_user.casefold() != username.casefold():
+            password = None
+            raise BackupError("The configured database user does not match the protected credential.")
+        if not username or not password:
+            password = None
+            raise BackupError("The protected database credential is incomplete.")
+        return username, password
 
     def create(self, settings, mysqldump_directory, backup_prefix):
         stamp = self.clock().strftime("%Y-%m-%d.%H%M%S")
@@ -41,13 +69,15 @@ class BackupService:
         )
         option_path = None
         dump_path = None
+        password = None
         try:
+            username, password = self._database_credentials(settings)
             with tempfile.NamedTemporaryFile(
                 mode="w", encoding="utf-8", suffix=".cnf", delete=False
             ) as option_file:
                 option_file.write("[client]\n")
-                option_file.write("user={}\n".format(settings["user"]))
-                option_file.write("password={}\n".format(settings["password"]))
+                option_file.write("user={}\n".format(username))
+                option_file.write("password={}\n".format(password))
                 option_path = Path(option_file.name)
             os.chmod(option_path, 0o600)
             command = [
@@ -75,6 +105,7 @@ class BackupService:
                 option_path.unlink(missing_ok=True)
             if dump_path:
                 dump_path.unlink(missing_ok=True)
+            password = None
         if self.recovery is not None:
             try:
                 self.recovery.attach_to_backup(output)
@@ -154,9 +185,11 @@ class BackupService:
             settings, mariadb_directory, pre_restore_folder, automatic=False,
         )
         option_path = None
+        password = None
         try:
+            username, password = self._database_credentials(settings)
             with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix=".cnf", delete=False) as option_file:
-                option_file.write("[client]\nuser={}\npassword={}\n".format(settings["user"], settings["password"]))
+                option_file.write("[client]\nuser={}\npassword={}\n".format(username, password))
                 option_path = Path(option_file.name)
             os.chmod(option_path, 0o600)
             executable = self._tool(mariadb_directory, "mariadb", "mysql")
@@ -180,6 +213,7 @@ class BackupService:
             ) from error
         finally:
             if option_path: option_path.unlink(missing_ok=True)
+            password = None
         return safety
 
     @staticmethod

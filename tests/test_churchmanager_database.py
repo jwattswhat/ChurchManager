@@ -153,7 +153,7 @@ class TestChurchManagerDatabase(unittest.TestCase):
             {
                 "server": configured["host"], "database": configured["database"],
                 "user": configured["user"], "password": None,
-                "test_mode": True, "jsform_database": None,
+                "test_mode": True,
             }, config,
         )
         database = settings["database"]

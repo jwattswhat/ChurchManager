@@ -414,10 +414,13 @@ class PDF(FPDF):
 
 arguments = fnCMargParse.CMargs(
     "rptMemberDirectory", "Member Directory",
-    ["server", "database", "user", "test_mode", "jsform_database"],
+    ["server", "database", "user", "test_mode"],
 )
-arguments = resolve_database(arguments)
-ChurchDB = JSForm.clsDB(arguments["server"], arguments["database"], arguments["user"], arguments["password"], arguments["jsform_database"])
+arguments = resolve_database(arguments, resolve_credentials=False)
+ChurchDB = JSForm.clsDB(
+    arguments["server"], arguments["database"], arguments["user"], None,
+    credential_target=arguments["credential_target"],
+)
 JSForm.CONFIG.set_Config_DBConnection(ChurchDB.DBConnection)
 PictureLocation = JSForm.CONFIG.get_Config_Value("Location", "Picture")
 DefaultPicture = PictureLocation + "Default.jpg"

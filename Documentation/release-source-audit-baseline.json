@@ -115,13 +115,13 @@
   },
   {
     "path": "installation_executor.py",
-    "line": 291,
+    "line": 311,
     "category": "sql",
     "detail": "interpolated execute() SQL"
   },
   {
     "path": "installation_executor.py",
-    "line": 292,
+    "line": 312,
     "category": "sql",
     "detail": "interpolated execute() SQL"
   },
@@ -162,20 +162,8 @@
     "detail": "interpolated execute() SQL"
   },
   {
-    "path": "reset_worship_test_services.py",
-    "line": 65,
-    "category": "sql",
-    "detail": "interpolated execute() SQL"
-  },
-  {
     "path": "restore_local_test_databases.py",
     "line": 50,
-    "category": "sql",
-    "detail": "interpolated execute() SQL"
-  },
-  {
-    "path": "sunday_content_dialog.py",
-    "line": 101,
     "category": "sql",
     "detail": "interpolated execute() SQL"
   },
@@ -188,12 +176,6 @@
   {
     "path": "verify_local_test_migration.py",
     "line": 38,
-    "category": "sql",
-    "detail": "interpolated execute() SQL"
-  },
-  {
-    "path": "worship_scheduling.py",
-    "line": 176,
     "category": "sql",
     "detail": "interpolated execute() SQL"
   },
@@ -230,12 +212,6 @@
   {
     "path": "accounting/reporting.py",
     "line": 567,
-    "category": "sql",
-    "detail": "interpolated execute() SQL"
-  },
-  {
-    "path": "giving/contributor_dialog.py",
-    "line": 286,
     "category": "sql",
     "detail": "interpolated execute() SQL"
   },

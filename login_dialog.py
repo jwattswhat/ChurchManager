@@ -61,6 +61,8 @@ class LoginDialog(_CredentialDialog):
         fields.AddGrowableCol(1, 1)
         self.username = self.add_field(fields, "Username")
         self.password = self.add_field(fields, "Password", wx.TE_PASSWORD)
+        self.username.SetName("login_username")
+        self.password.SetName("login_password")
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(identity, 0, wx.ALL | wx.EXPAND, 18)
         root.Add(wx.StaticLine(self), 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 18)
@@ -77,6 +79,8 @@ class LoginDialog(_CredentialDialog):
         self.SetMinSize((500, self.GetSize().height))
         self.CentreOnScreen()
         self.username.SetFocus()
+        self.FindWindow(wx.ID_OK).SetName("login_submit")
+        self.FindWindow(wx.ID_CANCEL).SetName("login_cancel")
 
 
 def congregation_name(connection):

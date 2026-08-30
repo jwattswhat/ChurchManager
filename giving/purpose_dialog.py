@@ -40,22 +40,28 @@ class PurposeRepository:
 
     def organizations(self):
         return self.all(
-            "SELECT ID,LegalName FROM tblAccountingOrganization WHERE Active=1 ORDER BY LegalName"
+            "SELECT ID,LegalName FROM tblAccountingOrganization "
+            "WHERE ChurchID=? AND Active=1 ORDER BY LegalName", (self.church_id(),)
         )
 
     def destinations(self, organization_id):
         funds = self.all(
-            "SELECT ID,CONCAT(Code,' - ',Name) FROM tblAccountingFund "
-            "WHERE OrganizationID=? AND Active=1 ORDER BY Code", (organization_id,),
+            "SELECT f.ID,CONCAT(f.Code,' - ',f.Name) FROM tblAccountingFund f "
+            "JOIN tblAccountingOrganization o ON o.ID=f.OrganizationID "
+            "WHERE f.OrganizationID=? AND o.ChurchID=? AND f.Active=1 ORDER BY f.Code",
+            (organization_id, self.church_id()),
         )
         accounts = self.all(
-            "SELECT ID,CONCAT(Code,' - ',Name),FunctionRequirement FROM tblAccountingAccount "
-            "WHERE OrganizationID=? AND Active=1 AND PostingAllowed=1 "
-            "AND AccountType='REVENUE' ORDER BY Code", (organization_id,),
+            "SELECT a.ID,CONCAT(a.Code,' - ',a.Name),a.FunctionRequirement FROM tblAccountingAccount a "
+            "JOIN tblAccountingOrganization o ON o.ID=a.OrganizationID "
+            "WHERE a.OrganizationID=? AND o.ChurchID=? AND a.Active=1 AND a.PostingAllowed=1 "
+            "AND a.AccountType='REVENUE' ORDER BY a.Code", (organization_id, self.church_id()),
         )
         functions = self.all(
-            "SELECT ID,CONCAT(Code,' - ',Name) FROM tblAccountingFunction "
-            "WHERE OrganizationID=? AND Active=1 ORDER BY Code", (organization_id,),
+            "SELECT fn.ID,CONCAT(fn.Code,' - ',fn.Name) FROM tblAccountingFunction fn "
+            "JOIN tblAccountingOrganization o ON o.ID=fn.OrganizationID "
+            "WHERE fn.OrganizationID=? AND o.ChurchID=? AND fn.Active=1 ORDER BY fn.Code",
+            (organization_id, self.church_id()),
         )
         return funds, accounts, functions
 

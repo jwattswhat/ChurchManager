@@ -10,6 +10,7 @@ LocalTestMigrationBackups/
 BackupDB/
 Backups/
 tmp/
+.gui-test-artifacts/
 build/
 dist/
 # Local exports created while visually testing import and export workflows.

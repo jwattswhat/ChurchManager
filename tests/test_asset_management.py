@@ -79,6 +79,16 @@ class AssetExchangeTests(unittest.TestCase):
         content=write_csv([row]); parsed=read_csv(content)
         self.assertEqual("AST-9",parsed[0]["Asset Number"]); self.assertNotIn("Document",content)
 
+    def test_formula_like_cells_are_exported_as_spreadsheet_text(self):
+        row = {name: "" for name in HEADERS}
+        row.update({"Asset Number": "AST-10", "Asset Name": "=HYPERLINK(\"bad\")",
+                    "Category": "Furniture", "Note": " @SUM(A1:A2)"})
+        content = write_csv([row])
+        self.assertNotIn(",=HYPERLINK", content)
+        parsed = read_csv(content)[0]
+        self.assertEqual(parsed["Asset Name"], "'" + row["Asset Name"])
+        self.assertEqual(parsed["Note"], "'" + row["Note"])
+
     def test_required_headers_are_enforced(self):
         with self.assertRaises(ValueError): read_csv("Name\nPiano\n")
 

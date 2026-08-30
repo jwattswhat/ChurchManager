@@ -203,19 +203,17 @@ class WorshipSchedulingRepository:
 
     def delete_role(self, role_id):
         references = (
-            ("tblParticipantRole", "eligible participant"),
-            ("tblParticipantAvailability", "availability pattern"),
-            ("tblParticipantAvailabilityException", "unavailable period"),
-            ("tblWorshipRoleRequirement", "Order of Service template"),
-            ("tblServiceRole", "worship service assignment"),
+            ("SELECT COUNT(*) FROM tblParticipantRole WHERE WorshipRoleID=?", "eligible participant"),
+            ("SELECT COUNT(*) FROM tblParticipantAvailability WHERE WorshipRoleID=?", "availability pattern"),
+            ("SELECT COUNT(*) FROM tblParticipantAvailabilityException WHERE WorshipRoleID=?", "unavailable period"),
+            ("SELECT COUNT(*) FROM tblWorshipRoleRequirement WHERE WorshipRoleID=?", "Order of Service template"),
+            ("SELECT COUNT(*) FROM tblServiceRole WHERE WorshipRoleID=?", "worship service assignment"),
         )
         used = []
         cursor = self.connection.cursor()
         try:
-            for table, description in references:
-                cursor.execute(
-                    f"SELECT COUNT(*) FROM {table} WHERE WorshipRoleID=?", (role_id,),
-                )
+            for statement, description in references:
+                cursor.execute(statement, (role_id,))
                 count = int(cursor.fetchone()[0])
                 if count:
                     used.append(f"{count} {description}{'' if count == 1 else 's'}")

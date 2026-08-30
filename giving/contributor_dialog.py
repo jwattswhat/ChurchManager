@@ -63,30 +63,41 @@ class ContributorRepository:
     def people(self):
         return self.all(
             "SELECT ID,TRIM(CONCAT_WS(' ',NULLIF(Title,''),FirstName,MiddleName,LastName)) "
-            "FROM tblPerson ORDER BY LastName,FirstName,ID"
+            "FROM tblPerson WHERE ChurchID=? ORDER BY LastName,FirstName,ID",
+            (self.church_id(),),
         )
 
     def families(self):
-        return self.all("SELECT ID,FamilyName FROM tblFamily ORDER BY FamilyName,ID")
+        return self.all(
+            "SELECT ID,FamilyName FROM tblFamily WHERE ChurchID=? ORDER BY FamilyName,ID",
+            (self.church_id(),),
+        )
 
     def link_details(self, contributor_type, record_id):
         """Return statement defaults for a selected directory record."""
         if contributor_type == "PERSON":
             rows = self.all(
                 "SELECT TRIM(CONCAT_WS(' ',NULLIF(Title,''),FirstName,MiddleName,LastName)),FamilyID "
-                "FROM tblPerson WHERE ID=?", (record_id,),
+                "FROM tblPerson WHERE ID=? AND ChurchID=?", (record_id, self.church_id()),
             )
             if not rows:
                 return None
             display_name, family_id = rows[0]
             address = self._address("tblPersonAddress", "PersonID", record_id)
             email = self._email("tblPersonContact", "PersonID", record_id)
-            if not address and family_id:
+            family_owned = family_id and bool(self.all(
+                "SELECT ID FROM tblFamily WHERE ID=? AND ChurchID=?",
+                (family_id, self.church_id()),
+            ))
+            if not address and family_owned:
                 address = self._address("tblFamilyAddress", "FamilyID", family_id)
-            if not email and family_id:
+            if not email and family_owned:
                 email = self._email("tblFamilyContact", "FamilyID", family_id)
         else:
-            rows = self.all("SELECT FamilyName FROM tblFamily WHERE ID=?", (record_id,))
+            rows = self.all(
+                "SELECT FamilyName FROM tblFamily WHERE ID=? AND ChurchID=?",
+                (record_id, self.church_id()),
+            )
             if not rows:
                 return None
             display_name = rows[0][0]
@@ -114,9 +125,11 @@ class ContributorRepository:
 
     def envelopes(self, contributor_id):
         return self.all(
-            "SELECT ID,EnvelopeNumber,EffectiveFrom,EffectiveThrough,COALESCE(Note,'') "
-            "FROM tblContributionEnvelopeAssignment WHERE ContributorID=? "
-            "ORDER BY EffectiveFrom DESC,EnvelopeNumber", (contributor_id,)
+            "SELECT e.ID,e.EnvelopeNumber,e.EffectiveFrom,e.EffectiveThrough,COALESCE(e.Note,'') "
+            "FROM tblContributionEnvelopeAssignment e "
+            "JOIN tblContributionContributor c ON c.ID=e.ContributorID "
+            "WHERE e.ContributorID=? AND e.ChurchID=? AND c.ChurchID=e.ChurchID "
+            "ORDER BY e.EffectiveFrom DESC,e.EnvelopeNumber", (contributor_id, self.church_id())
         )
 
     def save_contributor(self, contributor_id, values):
@@ -124,13 +137,20 @@ class ContributorRepository:
         validate_contributor_links(contributor_type, person_id, family_id)
         cursor = self.connection.cursor()
         try:
+            church_id = self.church_id()
+            if contributor_type == "PERSON":
+                cursor.execute("SELECT ID FROM tblPerson WHERE ID=? AND ChurchID=?", (person_id, church_id))
+            elif contributor_type == "FAMILY":
+                cursor.execute("SELECT ID FROM tblFamily WHERE ID=? AND ChurchID=?", (family_id, church_id))
+            if contributor_type != "EXTERNAL" and cursor.fetchone() is None:
+                raise GivingValidationError("Select a directory record belonging to this church.")
             if contributor_id is None:
                 cursor.execute(
                     "INSERT INTO tblContributionContributor "
                     "(ChurchID,ContributorType,PersonID,FamilyID,DisplayName,StatementName,"
                     "Address,Address2,City,State,PostalCode,Email,IsActive,StatementEnabled,Note) "
                     "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                    (self.church_id(),) + values,
+                    (church_id,) + values,
                 )
                 contributor_id = cursor.lastrowid
             else:
@@ -138,8 +158,10 @@ class ContributorRepository:
                     "UPDATE tblContributionContributor SET ContributorType=?,PersonID=?,FamilyID=?,"
                     "DisplayName=?,StatementName=?,Address=?,Address2=?,City=?,State=?,PostalCode=?,"
                     "Email=?,IsActive=?,StatementEnabled=?,Note=? WHERE ID=? AND ChurchID=?",
-                    values + (contributor_id, self.church_id()),
+                    values + (contributor_id, church_id),
                 )
+                if cursor.rowcount != 1:
+                    raise GivingValidationError("The contributor is unavailable for this church.")
             self.connection.commit()
             return contributor_id
         except Exception:
@@ -172,19 +194,28 @@ class ContributorRepository:
             )
         cursor = self.connection.cursor()
         try:
+            church_id = self.church_id()
+            cursor.execute(
+                "SELECT ID FROM tblContributionContributor WHERE ID=? AND ChurchID=? FOR UPDATE",
+                (contributor_id, church_id),
+            )
+            if cursor.fetchone() is None:
+                raise GivingValidationError("Select a contributor belonging to this church.")
             if assignment_id is None:
                 cursor.execute(
                     "INSERT INTO tblContributionEnvelopeAssignment "
                     "(ChurchID,ContributorID,EnvelopeNumber,EffectiveFrom,EffectiveThrough,Note) "
                     "VALUES (?,?,?,?,?,?)",
-                    (self.church_id(), contributor_id, number, start, through, note or None),
+                    (church_id, contributor_id, number, start, through, note or None),
                 )
             else:
                 cursor.execute(
                     "UPDATE tblContributionEnvelopeAssignment SET EnvelopeNumber=?,EffectiveFrom=?,"
-                    "EffectiveThrough=?,Note=? WHERE ID=? AND ContributorID=?",
-                    (number, start, through, note or None, assignment_id, contributor_id),
+                    "EffectiveThrough=?,Note=? WHERE ID=? AND ContributorID=? AND ChurchID=?",
+                    (number, start, through, note or None, assignment_id, contributor_id, church_id),
                 )
+                if cursor.rowcount != 1:
+                    raise GivingValidationError("The envelope assignment is unavailable for this church.")
             self.connection.commit()
         except Exception:
             self.connection.rollback()
@@ -196,8 +227,10 @@ class ContributorRepository:
         cursor = self.connection.cursor()
         try:
             cursor.execute(
-                "DELETE FROM tblContributionEnvelopeAssignment WHERE ID=? AND ContributorID=?",
-                (assignment_id, contributor_id),
+                "DELETE e FROM tblContributionEnvelopeAssignment e "
+                "JOIN tblContributionContributor c ON c.ID=e.ContributorID "
+                "WHERE e.ID=? AND e.ContributorID=? AND e.ChurchID=? AND c.ChurchID=e.ChurchID",
+                (assignment_id, contributor_id, self.church_id()),
             )
             self.connection.commit()
         except Exception:
@@ -281,15 +314,36 @@ class ContributorRepository:
         self.merge_preview(survivor_id, duplicate_id)
         cursor = self.connection.cursor()
         try:
-            for table in ("tblContribution", "tblContributionEnvelopeAssignment",
-                          "tblContributionStatementIssue"):
-                cursor.execute(f"UPDATE {table} SET ContributorID=? WHERE ContributorID=?",
-                               (survivor_id, duplicate_id))
+            church_id = self.church_id()
+            cursor.execute(
+                "SELECT ID FROM tblContributionContributor "
+                "WHERE ID IN (?,?) AND ChurchID=? FOR UPDATE",
+                (survivor_id, duplicate_id, church_id),
+            )
+            if {row[0] for row in cursor.fetchall()} != {survivor_id, duplicate_id}:
+                raise GivingValidationError(
+                    "Both contributors must still belong to this congregation."
+                )
+            cursor.execute(
+                "UPDATE tblContribution g JOIN tblContributionBatch b ON b.ID=g.BatchID "
+                "SET g.ContributorID=? WHERE g.ContributorID=? AND b.ChurchID=?",
+                (survivor_id, duplicate_id, church_id),
+            )
+            cursor.execute(
+                "UPDATE tblContributionEnvelopeAssignment SET ContributorID=? "
+                "WHERE ContributorID=? AND ChurchID=?",
+                (survivor_id, duplicate_id, church_id),
+            )
+            cursor.execute(
+                "UPDATE tblContributionStatementIssue SET ContributorID=? "
+                "WHERE ContributorID=? AND ChurchID=?",
+                (survivor_id, duplicate_id, church_id),
+            )
             cursor.execute(
                 "UPDATE tblContributionContributor SET IsActive=0,StatementEnabled=0,"
                 "MergedIntoContributorID=?,MergedAt=CURRENT_TIMESTAMP(6),MergedByUserID=?,"
-                "MergeReason=? WHERE ID=? AND MergedIntoContributorID IS NULL",
-                (survivor_id, user_id, reason, duplicate_id),
+                "MergeReason=? WHERE ID=? AND ChurchID=? AND MergedIntoContributorID IS NULL",
+                (survivor_id, user_id, reason, duplicate_id, church_id),
             )
             if cursor.rowcount != 1:
                 raise GivingValidationError("The duplicate contributor was already merged.")
@@ -297,7 +351,7 @@ class ContributorRepository:
                 "INSERT INTO tblContributionAuditEvent "
                 "(ChurchID,UserID,Action,EntityType,EntityID,SafeReference,Reason) "
                 "VALUES (?,?,'CONTRIBUTOR_MERGED','CONTRIBUTOR',?,?,?)",
-                (self.church_id(), user_id, duplicate_id,
+                (church_id, user_id, duplicate_id,
                  f"Merged into contributor {survivor_id}", reason),
             )
             self.connection.commit()

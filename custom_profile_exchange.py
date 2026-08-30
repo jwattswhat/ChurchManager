@@ -13,6 +13,7 @@ from pathlib import Path
 from JSForm.dynamic_fields import DynamicFieldError, normalize_dynamic_value
 
 from custom_profile_fields import CustomProfileValidationError, _descriptor
+from csv_safety import csv_safe_row
 
 
 FORMAT = "churchmanager-custom-profile-values"
@@ -63,7 +64,7 @@ class CustomProfileExchangeService:
                     values = self.repository.profile_values(entity_type, profile["id"], definitions)
                     for definition in definitions:
                         row["custom." + definition["field_key"]] = self._format(values.get(definition["field_key"]))
-                    writer.writerow(row)
+                    writer.writerow(csv_safe_row(row))
             metadata = {
                 "format": FORMAT, "version": FORMAT_VERSION, "entity_type": entity_type,
                 "restricted_values_included": bool(include_restricted),

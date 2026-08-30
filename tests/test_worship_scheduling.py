@@ -162,7 +162,10 @@ class WorshipSchedulingTests(unittest.TestCase):
             "tblParticipantAvailabilityException", "tblWorshipRoleRequirement",
             "tblServiceRole",
         ):
-            self.assertIn(f'("{table}"', source)
+            self.assertIn(
+                f'"SELECT COUNT(*) FROM {table} WHERE WorshipRoleID=?"', source,
+            )
+        self.assertNotIn('f"SELECT COUNT(*) FROM {table}', source)
         self.assertIn("Edit the position and clear Active instead.", source)
 
     def test_volunteer_availability_migration_and_planner_contract(self):

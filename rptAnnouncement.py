@@ -22,10 +22,10 @@ def main(argv=None):
     config = load_report_config()
     settings = fnCMargParse.CMargs(
         "rptAnnouncement", "Sunday Announcements",
-        ["server", "database", "user", "test_mode", "jsform_database", "reportdate", "churchid"],
+        ["server", "database", "user", "test_mode", "reportdate", "churchid"],
         argv=argv,
     )
-    settings = resolve_database(settings, config)
+    settings = resolve_database(settings, config, resolve_credentials=False)
     report_date = get_today(config, settings.get("reportdate"))
     week_start, week_end = service_week(report_date)
     _app, database = connect_report(settings)

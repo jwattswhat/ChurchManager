@@ -30,6 +30,13 @@ TABLES = (
     "tblServiceBulletinOrder",
     "tblService",
 )
+COUNT_SQL = {
+    "tblServiceRole": "SELECT COUNT(*) FROM tblServiceRole",
+    "tblHymnUsage": "SELECT COUNT(*) FROM tblHymnUsage",
+    "tblServiceBulletinOrderLine": "SELECT COUNT(*) FROM tblServiceBulletinOrderLine",
+    "tblServiceBulletinOrder": "SELECT COUNT(*) FROM tblServiceBulletinOrder",
+    "tblService": "SELECT COUNT(*) FROM tblService",
+}
 
 TEST_SERVICES = (
     (datetime(2026, 8, 16, 9, 0), "Eleventh Sunday after Pentecost", True, "COMPLETE"),
@@ -47,7 +54,6 @@ def settings():
         "user": database["user"],
         "password": None,
         "test_mode": True,
-        "jsform_database": None,
     }
     try:
         resolved = resolve_database(arguments, config)
@@ -73,7 +79,7 @@ def counts(cursor):
     cursor.execute("SELECT COUNT(*) FROM tblAttendanceEvent WHERE ServiceID IS NOT NULL")
     result["service_attendance_events"] = cursor.fetchone()[0]
     for table in TABLES[2:]:
-        cursor.execute(f"SELECT COUNT(*) FROM {table}")
+        cursor.execute(COUNT_SQL[table])
         result[table] = cursor.fetchone()[0]
     cursor.execute(
         "SELECT COUNT(*) FROM tblSecurityAuditEvent "

@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+import csv
+import io
 
 from data_management import (
     MembershipArchiveService,
@@ -90,6 +92,15 @@ class DataManagementTests(unittest.TestCase):
         self.assertNotIn("PasswordHash", source)
         self.assertNotIn("tblContribution", source)
         self.assertNotIn("tblPastoral", source)
+
+    def test_archive_csv_neutralizes_formulas_and_preserves_non_text_numbers(self):
+        payload = MembershipArchiveService._csv_bytes(
+            ["First Name", "Count"], [("=cmd", 3), (" \t@SUM(A1:A2)", 4)]
+        )
+        rows = list(csv.reader(io.StringIO(payload.decode("utf-8-sig"))))
+        self.assertTrue(rows[1][0].startswith("'"))
+        self.assertTrue(rows[2][0].startswith("'"))
+        self.assertEqual(rows[1][1], "3")
 
     def test_duplicate_resolution_is_audited_and_non_destructive(self):
         migration = (ROOT / "migrations" / "101_add_duplicate_review_resolution.sql").read_text(

@@ -57,24 +57,35 @@ def main_window_title(arguments):
     return title
 
 
+def configure_application_forms(module_file=__file__):
+    """Point JSForm at ChurchManager's forms beside this runtime module."""
+    forms_directory = os.path.join(
+        os.path.dirname(os.path.abspath(module_file)), "Forms",
+    )
+    os.environ["JSFORM_APPLICATION_FORMS"] = forms_directory
+    return forms_directory
+
+
 def build_runtime(form_class, argv=None, login_provider=authenticate_user):
     arguments = fnCMargParse.CMargs(
         prog="ChurchManager",
         description="ChurchManager {}".format(__version__),
-        arguments=["server", "database", "user", "test_mode", "jsform_database"],
+        arguments=["server", "database", "user", "test_mode"],
         argv=argv,
     )
-    arguments = resolve_database(arguments)
+    arguments = resolve_database(arguments, resolve_credentials=False)
     overlay_name = "TestScreenDefinitions" if arguments.get("test_mode") else "ScreenDefinitions"
     overlay = os.path.join(os.environ.get("LOCALAPPDATA", os.getcwd()), "ChurchManager", overlay_name)
     os.makedirs(overlay, exist_ok=True)
     os.environ["JSFORM_SCREEN_OVERLAY"] = overlay
+    configure_application_forms()
     os.environ["JSFORM_DEFAULT_THEME"] = "churchmanager"
     wx_app = wx.App(0)
     JSForm.check_internetconnection(1)
     database = JSForm.clsDB(
         arguments["server"], arguments["database"], arguments["user"],
-        arguments["password"], arguments["jsform_database"],
+        None,
+        credential_target=arguments["credential_target"],
     )
     JSForm.CONFIG.set_Config_DBConnection(database)
     JSForm.OPTION.set_Option_DBConnection(database)
@@ -92,8 +103,7 @@ def build_runtime(form_class, argv=None, login_provider=authenticate_user):
             minimum_length=4 if arguments["test_mode"] else 12,
         )
         if session is None:
-            database.DBConnection.close()
-            database.JSConnection.close()
+            database.close()
             wx_app.Destroy()
             raise SystemExit(0)
         authorization = ChurchManagerAuthorizationPolicy(session)

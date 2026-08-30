@@ -4,14 +4,12 @@
         "port": 3306,
         "user": "church",
         "database": "ChurchDB",
-        "jsform_database": "JSForm",
         "credential_target": "ChurchManager/Production"
     },
     "testing": {
         "host": "127.0.0.1",
         "port": 3306,
         "database": "ChurchDBTest",
-        "jsform_database": "JSFormTest",
         "credential_target": "ChurchManager/LocalTestAdmin",
         "override_today": null
     },

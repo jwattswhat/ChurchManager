@@ -36,7 +36,6 @@ def settings():
             "user": database["user"],
             "password": None,
             "test_mode": True,
-            "jsform_database": None,
         },
         config,
     )

@@ -99,7 +99,10 @@ class SundayContentRepository:
     def delete(self, kind, item_id):
         cursor = self.connection.cursor()
         try:
-            cursor.execute(f"DELETE FROM {'tblPrayer' if kind == 'prayer' else 'tblAnnouncement'} WHERE ID=?", (item_id,))
+            if kind == "prayer":
+                cursor.execute("DELETE FROM tblPrayer WHERE ID=?", (item_id,))
+            else:
+                cursor.execute("DELETE FROM tblAnnouncement WHERE ID=?", (item_id,))
             self.connection.commit()
         except Exception:
             self.connection.rollback()

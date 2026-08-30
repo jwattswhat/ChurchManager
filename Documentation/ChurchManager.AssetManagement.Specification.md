@@ -258,7 +258,8 @@ name. It does not import activity history, Documents, or secret information.
 Preview identifies duplicates by asset number and warns about repeated serial
 numbers.
 
-CSV export contains the current asset register. The normal ChurchManager SQL
+CSV export contains the current asset register. Formula-like text cells are
+neutralized through ChurchManager's shared CSV rule. The normal ChurchManager SQL
 backup and restore include all asset tables and links. Restore does not require
 a separate asset recovery process.
 

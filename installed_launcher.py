@@ -30,10 +30,11 @@ def main(argv=None):
     if known.package_check:
         return package_check(known.package_check)
     ensure_configuration()
-    if known.setup or setup_required():
+    test_mode = "--test" in remaining
+    if known.setup or (setup_required() and not test_mode):
         from installed_setup import main as run_setup
         run_setup()
-    if setup_required():
+    if setup_required() and not test_mode:
         return 0
     from cm import main as run_churchmanager
     return run_churchmanager(remaining)

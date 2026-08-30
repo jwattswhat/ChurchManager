@@ -58,7 +58,7 @@ class SetupWizardSupportTests(unittest.TestCase):
             save_installed_configuration("ChurchManager_Grace", "cm_grace", path)
             value = json.loads(path.read_text(encoding="utf-8"))
             self.assertEqual(value["database_settings"]["database"], "ChurchManager_Grace")
-            self.assertEqual(value["database_settings"]["jsform_database"], "ChurchManager_Grace")
+            self.assertNotIn("jsform_database", value["database_settings"])
             self.assertEqual(value["testing"]["database"], "ChurchDBTest")
             self.assertTrue(value["security"]["production_enabled"])
             self.assertTrue(value["security"]["testing_enabled"])

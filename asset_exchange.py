@@ -5,6 +5,8 @@ from __future__ import annotations
 import csv
 import io
 
+from csv_safety import csv_safe_row
+
 
 HEADERS = (
     "Asset Number", "Asset Name", "Category", "Description", "Quantity",
@@ -41,5 +43,5 @@ def write_csv(rows):
     stream = io.StringIO(newline="")
     writer = csv.DictWriter(stream, fieldnames=HEADERS, extrasaction="ignore")
     writer.writeheader()
-    writer.writerows(rows)
+    writer.writerows(csv_safe_row(row) for row in rows)
     return stream.getvalue()

@@ -79,7 +79,8 @@ class ContributionImportPreviewService:
             "JOIN tblContributionContributor c ON c.ID=e.ContributorID "
             "WHERE e.ChurchID=? AND e.EnvelopeNumber REGEXP '^[0-9]+$' "
             "AND CAST(e.EnvelopeNumber AS UNSIGNED)=? AND e.EffectiveFrom<=? "
-            "AND (e.EffectiveThrough IS NULL OR e.EffectiveThrough>=?) AND c.IsActive=1 "
+            "AND (e.EffectiveThrough IS NULL OR e.EffectiveThrough>=?) "
+            "AND c.ChurchID=e.ChurchID AND c.IsActive=1 "
             "ORDER BY e.EffectiveFrom DESC,e.ID DESC LIMIT 2",
             (self.church_id, int(row.envelope_number), row.received_date, row.received_date),
         )

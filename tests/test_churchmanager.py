@@ -104,7 +104,6 @@ OPERATIONAL_MODULES = (
     "report_support.py",
     "fnSchedule.py",
     "fnUtil.py",
-    "network.py",
     "liccalendar.py",
     "rptAnnouncement.py",
     "rptPrayers.py",
@@ -151,7 +150,7 @@ class TestApplicationMenuAndDashboard(unittest.TestCase):
         self.assertNotIn("DesignersBox", controls)
         self.assertEqual(
             load_json(FORMS / "frmMain.json")["frmMainFORM"]["FORM"]["sizech"],
-            [52, 32],
+            [52, 40],
         )
         branding = (ROOT / "main_dashboard.py").read_text(encoding="utf-8")
         self.assertIn("SELECT Church, Logo FROM tblChurch", branding)
@@ -679,7 +678,7 @@ class TestChurchManagerConfiguration(unittest.TestCase):
             lambda target: ("church", "not-a-real-password"),
         )
         self.assertEqual(resolved["database"], "ChurchDBTest")
-        self.assertEqual(resolved["jsform_database"], "JSFormTest")
+        self.assertNotIn("jsform_database", resolved)
         self.assertEqual(resolved["server"], "127.0.0.1")
         self.assertEqual(resolved["credential_target"], "ChurchManager/LocalTestAdmin")
         self.assertNotEqual(
@@ -695,26 +694,6 @@ class TestChurchManagerConfiguration(unittest.TestCase):
             "testing": {"host": "127.0.0.1", "database": "churchdb"},
         }
         with self.assertRaisesRegex(RuntimeError, "production database"):
-            resolve_database(
-                {"database": "ChurchDB", "test_mode": True}, unsafe_config,
-                lambda target: ("church", "not-a-real-password"),
-            )
-
-    def test_test_mode_refuses_production_jsform_database(self):
-        from churchmanager_mode import resolve_database
-
-        unsafe_config = {
-            "database_settings": {
-                "database": "ChurchDB",
-                "jsform_database": "JSForm",
-            },
-            "testing": {
-                "host": "127.0.0.1",
-                "database": "ChurchDBTest",
-                "jsform_database": "jsform",
-            },
-        }
-        with self.assertRaisesRegex(RuntimeError, "JSForm test database"):
             resolve_database(
                 {"database": "ChurchDB", "test_mode": True}, unsafe_config,
                 lambda target: ("church", "not-a-real-password"),
@@ -736,7 +715,6 @@ class TestChurchManagerConfiguration(unittest.TestCase):
                 "user": "church",
                 "password": None,
                 "test_mode": False,
-                "jsform_database": None,
             },
             config,
             fake_reader,
@@ -744,26 +722,68 @@ class TestChurchManagerConfiguration(unittest.TestCase):
         self.assertEqual(requested, ["ChurchManager/Production"])
         self.assertEqual(resolved["password"], "stored-secret")
 
+    def test_desktop_runtime_defers_credential_lookup_to_jsform(self):
+        from churchmanager_mode import resolve_database
+
+        config = load_json(ROOT / "churchmanager.json")
+        resolved = resolve_database(
+            {"database": None, "user": None, "test_mode": False},
+            config,
+            lambda _target: (_ for _ in ()).throw(AssertionError("early credential read")),
+            resolve_credentials=False,
+        )
+        self.assertNotIn("password", resolved)
+        self.assertEqual(resolved["credential_target"], "ChurchManager/Production")
+        startup_source = (ROOT / "startup.py").read_text(encoding="utf-8")
+        self.assertIn("resolve_credentials=False", startup_source)
+        self.assertIn('credential_target=arguments["credential_target"]', startup_source)
+        self.assertNotIn('arguments["password"]', startup_source)
+
+        test_settings = resolve_database(
+            {"database": None, "user": None, "test_mode": True},
+            config,
+            lambda _target: (_ for _ in ()).throw(AssertionError("early credential read")),
+            resolve_credentials=False,
+        )
+        self.assertIsNone(test_settings["user"])
+        self.assertNotIn("password", test_settings)
+
+    def test_child_reports_use_late_credentials_without_secret_arguments(self):
+        from churchmanager_mode import connection_arguments
+
+        settings = {
+            "server": "db", "database": "ChurchDBTest", "user": "church",
+            "test_mode": True,
+            "credential_target": "ChurchManager/LocalTestAdmin",
+        }
+        command = connection_arguments(settings)
+        self.assertNotIn("ChurchManager/LocalTestAdmin", command)
+        self.assertNotIn("password", " ".join(command).casefold())
+        without_user = connection_arguments({**settings, "user": None})
+        self.assertNotIn("--user", without_user)
+        support = (ROOT / "report_support.py").read_text(encoding="utf-8")
+        self.assertIn('credential_target=settings["credential_target"]', support)
+
     def test_unspecified_production_arguments_use_installed_configuration(self):
         from churchmanager_mode import resolve_database
 
         config = {
             "database_settings": {
                 "host": "127.0.0.1", "port": 3306, "database": "CMTest2",
-                "jsform_database": "CMTest2", "user": "cm_cmtest2",
+                "user": "cm_cmtest2",
                 "credential_target": "ChurchManager/Production",
             },
         }
         resolved = resolve_database(
             {
                 "server": None, "database": None, "user": None,
-                "password": None, "test_mode": False, "jsform_database": None,
+                "password": None, "test_mode": False,
             },
             config,
             lambda _target: ("cm_cmtest2", "stored-secret"),
         )
         self.assertEqual(resolved["database"], "CMTest2")
-        self.assertEqual(resolved["jsform_database"], "CMTest2")
+        self.assertNotIn("jsform_database", resolved)
         self.assertEqual(resolved["user"], "cm_cmtest2")
 
     def test_unspecified_parser_values_do_not_override_installed_configuration(self):
@@ -787,6 +807,23 @@ class TestChurchManagerConfiguration(unittest.TestCase):
         source = (ROOT / "startup.py").read_text(encoding="utf-8-sig")
         self.assertIn("main_form.FRAME.SetTitle(", source)
         self.assertNotIn("main_form.FORM.SetTitle", source)
+
+    def test_startup_configures_churchmanager_application_forms(self):
+        import os
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+
+        from startup import configure_application_forms
+
+        with tempfile.TemporaryDirectory() as directory:
+            module_file = Path(directory) / "startup.py"
+            with patch.dict(os.environ, {}, clear=False):
+                selected = configure_application_forms(module_file)
+                self.assertEqual(selected, str(Path(directory) / "Forms"))
+                self.assertEqual(
+                    os.environ["JSFORM_APPLICATION_FORMS"], selected,
+                )
 
     def test_user_security_is_enabled_only_for_development_test_mode(self):
         from startup import security_enabled
@@ -1155,7 +1192,7 @@ class TestChurchManagerForms(unittest.TestCase):
         self.assertEqual(
             {name: controls[name]["label"] for name in expected}, expected,
         )
-        self.assertEqual({controls[name]["posch"][0] for name in expected}, {1, 14, 28})
+        self.assertEqual({controls[name]["posch"][0] for name in expected}, {1, 18, 35})
 
         occupied = []
         for name in expected:
@@ -1174,25 +1211,25 @@ class TestChurchManagerForms(unittest.TestCase):
         ]
         self.assertEqual(
             sorted(controls[name]["posch"][1] for name in planning_items),
-            list(range(2, 9)),
+            list(range(2, 16, 2)),
         )
-        self.assertEqual(controls["lblGivingContributors"]["posch"], [15, 14])
+        self.assertEqual(controls["lblGivingContributors"]["posch"], [19, 21])
         self.assertEqual(
             sorted(controls[name]["posch"][1] for name in (
                 "lblContributionBatches", "lblGivingContributors", "lblGivingReports",
-            )), [13, 14, 15],
+            )), [19, 21, 23],
         )
         self.assertEqual(
             controls["lblGivingContributors"]["security"]["invoke"],
             "giving.contributors.manage",
         )
-        self.assertEqual(controls["GivingBox"]["sizech"], [13, 7])
-        self.assertEqual(controls["lblContributionBatches"]["posch"], [15, 13])
+        self.assertEqual(controls["GivingBox"]["sizech"], [16, 8])
+        self.assertEqual(controls["lblContributionBatches"]["posch"], [19, 19])
         self.assertEqual(
             controls["lblContributionBatches"]["security"]["invoke"],
             "giving.batches.enter",
         )
-        self.assertEqual(controls["lblGivingReports"]["posch"], [15, 15])
+        self.assertEqual(controls["lblGivingReports"]["posch"], [19, 23])
         self.assertEqual(
             controls["lblGivingReports"]["security"]["invoke"],
             "giving.reports.summary",
@@ -1203,6 +1240,15 @@ class TestChurchManagerForms(unittest.TestCase):
         from main_menu import FORM_ROUTES
         self.assertEqual(FORM_ROUTES["lblHymnal"], "frmHymnal")
         self.assertEqual(FORM_ROUTES["lblHymn"], "frmHymn")
+
+    def test_visible_main_menu_actions_use_consistent_native_buttons(self):
+        from main_menu import MENU_CONTROLS, SESSION_CONTROLS
+
+        controls = load_json(FORMS / "frmMain.json")["frmMainFORM"]["CONTROLS"]
+        visible_actions = (set(MENU_CONTROLS) | set(SESSION_CONTROLS)) & set(controls)
+        self.assertGreater(len(visible_actions), 1)
+        self.assertTrue(all(controls[name]["type"] == "Button"
+                            for name in visible_actions))
 
     def test_removed_financial_features_are_not_exposed(self):
         removed_forms = {

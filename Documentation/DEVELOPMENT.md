@@ -146,6 +146,72 @@ database writes, mail, calendar operations, restores, and visual judgment.
 Rendered reports must be inspected for clipping, wrapping, pagination, privacy,
 and starter/custom fallback.
 
+The normal suite includes the deterministic `gui-structural` profile for Login,
+Participant Notifications, Project Plan, and Asset Editor. Run it alone with:
+
+```powershell
+.\.runtime-venv\Scripts\python.exe -m unittest tests.test_gui_structural -v
+```
+
+This profile constructs native wxPython windows, checks stable control
+identities and geometry, exercises representative guarded behavior, and cleans
+up its windows. It does not use a live database, compare approved screenshots,
+exercise an installed package, or establish human visual acceptance. Those
+profiles remain explicit release checks.
+
+To attempt unapproved visual candidates under the canonical Windows profile:
+
+```powershell
+.\.runtime-venv\Scripts\python.exe generate_gui_visual_candidates.py
+```
+
+Results go to the ignored `.gui-test-artifacts\visual-candidates` directory.
+Uniform black capture, failure of the bounded Windows fallback capture,
+incompatible scaling, or unavailable interactive desktop state is reported as
+environment-incompatible. Unusable images are removed. This command never
+creates, updates, or approves a version-controlled baseline.
+
+When desktop capture is unavailable, present the same four fictional-data
+screens sequentially for human inspection:
+
+```powershell
+.\.runtime-venv\Scripts\python.exe generate_gui_visual_candidates.py --review
+```
+
+Close each screen to advance to the next. The command records no approval; the
+reviewer must explicitly report whether the screens are visually accepted.
+
+The write-capable database profile requires explicit opt-in and the configured
+LocalTestAdmin credential:
+
+```powershell
+$env:CHURCHMANAGER_GUI_DATABASE='1'
+.\.runtime-venv\Scripts\python.exe run_gui_database_profile.py
+```
+
+It refuses non-local, non-`ChurchDBTest`, and production credential targets.
+The fictional Project Plan save is read back through `ProjectService`, while
+repository commits are suppressed and the entire scenario is rolled back.
+Missing protected credentials produce a recorded skip before connection.
+
+The packaged profile always verifies the current development bundle's packaged
+resources. Native UI driving is an explicit opt-in and uses the separately
+pinned test-only dependency:
+
+```powershell
+.\.runtime-venv\Scripts\python.exe -m pip install -r requirements-gui-test.txt
+$env:CHURCHMANAGER_GUI_PACKAGED='1'
+.\.runtime-venv\Scripts\python.exe run_gui_packaged_profile.py
+```
+
+The runner accepts only `dist\ChurchManagerBundle\ChurchManager.exe`, uses the
+protected LocalTestAdmin database credential, creates a temporary fictional
+application login, verifies the authenticated main window, exits, and removes
+the temporary login. It focuses the accessible Projects and Scheduling button
+by stable name, presses Enter, detects and closes the native child window, and
+then exits. Missing automation support or credentials is recorded as a skip;
+the Frozen application is never an eligible target.
+
 ### User Guide
 
 `Documentation/ChurchManager.UserGuide.md` is the maintained user-facing source.

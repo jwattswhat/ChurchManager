@@ -25,7 +25,6 @@ def main():
     settings = resolve_database({
         "server": database["host"], "database": database["database"],
         "user": database["user"], "password": None, "test_mode": True,
-        "jsform_database": None,
     }, config)
     if settings["database"].casefold() != "churchdbtest":
         raise RuntimeError("Safety stop: visual-report proof requires ChurchDBTest.")

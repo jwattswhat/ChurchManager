@@ -10,7 +10,7 @@ ROOT=Path(__file__).resolve().parent
 def settings():
     config=json.loads((ROOT/"churchmanager.json").read_text(encoding="utf-8-sig"))
     db=config["database_settings"]
-    resolved=resolve_database({"server":db["host"],"database":db["database"],"user":db["user"],"password":None,"test_mode":True,"jsform_database":None},config)
+    resolved=resolve_database({"server":db["host"],"database":db["database"],"user":db["user"],"password":None,"test_mode":True},config)
     if resolved["database"].casefold()=="churchdb" or "test" not in resolved["database"].casefold():
         raise RuntimeError("Safety stop: reset is restricted to a test database.")
     return config,resolved

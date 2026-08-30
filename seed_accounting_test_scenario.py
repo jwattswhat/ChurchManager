@@ -8,7 +8,7 @@ from churchmanager_mode import resolve_database
 
 def settings():
     config=json.load(open("churchmanager.json",encoding="utf-8-sig")); db=config["database_settings"]
-    resolved=resolve_database({"server":db["host"],"database":db["database"],"user":db["user"],"password":None,"test_mode":True,"jsform_database":None},config)
+    resolved=resolve_database({"server":db["host"],"database":db["database"],"user":db["user"],"password":None,"test_mode":True},config)
     if resolved["database"].casefold()=="churchdb" or "test" not in resolved["database"].casefold(): raise RuntimeError("Safety stop: seeding is restricted to a test database.")
     return config,resolved
 

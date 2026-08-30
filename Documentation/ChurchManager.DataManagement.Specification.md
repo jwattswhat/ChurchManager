@@ -39,7 +39,9 @@ authorization.
    rejected-row reasons, and audit the outcome without storing unnecessary source
    content.
 4. **Privacy-safe export.** Export approved people/family datasets, enforce
-   unlisted contact rules, and record who exported what and when.
+   unlisted contact rules, neutralize spreadsheet-formula cells through the
+   shared CSV rule, and record who exported what and when. Portable
+   archive CSV payloads use the same protection.
 5. **Resolution and portability.** Provide deliberate duplicate merge/archive
    actions and a documented portable archive distinct from ordinary reports and
    database backup.
