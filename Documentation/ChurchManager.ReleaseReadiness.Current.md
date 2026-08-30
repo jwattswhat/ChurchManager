@@ -50,11 +50,14 @@ installation specification and roadmap.
 The accepted compact all-button dashboard was rebuilt into the exact beta.2
 bundle on August 30, 2026. The corrected bundle contains 466 files totaling 111,273,487
 bytes and bundles JSForm `0.1.0-beta.6`. All three packaged resource proofs
-passed, including an explicit check for `Menus/main.menu.json`. The rebuilt MSI
-is 51,878,318 bytes with SHA-256
-`5cdf22ee8b95062f12ae3475726dc04c50fa6c5b1c0c281791bc64bc68f18ef4`.
+passed, including an explicit check for `Menus/main.menu.json`. The final
+rebuild from accepted commit `e29487d` produced an MSI of 51,882,414 bytes with
+SHA-256
+`6ae76abc80af50bdfe46e3e6bf3d36dcb67f92c0662bd0b6f7bf8ac2a87aca86`.
 The clean-installation and fictional-beta release kits were regenerated from
-that exact MSI.
+that exact MSI. Their SHA-256 values are respectively
+`77bb4c81fb9da496f3c1962a6ed11ee5e9cb72033c408030b4f2ca62b0d140e8`
+and `2f96452b492669713e81ee280797d0784e0fcecae80dd5f070a0519c5802656a`.
 
 ## Deferred distribution enhancement
 
