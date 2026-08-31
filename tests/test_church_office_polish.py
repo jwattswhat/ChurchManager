@@ -106,8 +106,9 @@ class TestChurchOfficePolish(unittest.TestCase):
         for capability in ("Member giving", "Groups and pastoral care", "Church office", "Events and calendars"):
             self.assertIn(capability, site)
         self.assertIn("Version 0.3.0-beta.4", site)
-        self.assertIn("ChurchManager-Beta-Test-With-Fictional-Data.zip", site)
-        self.assertIn("ChurchManager-Clean-Installation.zip", site)
+        self.assertNotIn("releases/download/", site)
+        self.assertEqual(site.count("Download temporarily unavailable"), 2)
+        self.assertIn("Downloads are temporarily unavailable", site)
         self.assertIn("Required first:</strong> install MariaDB Server for Windows", site)
         self.assertIn('href="https://mariadb.org/download/"', site)
         self.assertTrue((ROOT / "website" / ".nojekyll").is_file())
