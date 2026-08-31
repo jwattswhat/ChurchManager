@@ -4,7 +4,14 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from installation_readiness import catalog_inventory, inspect_readiness
+from installation_readiness import (
+    ReadinessCheck,
+    ReadinessReport,
+    MARIADB_DOWNLOAD_URL,
+    blocking_message,
+    catalog_inventory,
+    inspect_readiness,
+)
 
 
 class InstallationReadinessTests(unittest.TestCase):
@@ -42,6 +49,26 @@ class InstallationReadinessTests(unittest.TestCase):
         self.assertTrue(report.ready)
         self.assertEqual(report.checks, ())
         self.assertEqual(report.packages, ())
+
+    def test_missing_mariadb_tools_names_required_product_and_tools(self):
+        report = ReadinessReport((
+            ReadinessCheck("mariadb_client", False, "client missing"),
+            ReadinessCheck("database_backup", False, "backup missing"),
+        ), ())
+        message = blocking_message(report)
+        self.assertIn("MariaDB Server is required", message)
+        self.assertIn("mariadb.exe", message)
+        self.assertIn("mariadb-dump.exe", message)
+        self.assertIn(MARIADB_DOWNLOAD_URL, message)
+        self.assertNotIn("client missing", message)
+
+    def test_non_database_failures_retain_corrective_details(self):
+        report = ReadinessReport((
+            ReadinessCheck("disk_space", False, "Only 1 GB is free."),
+        ), ())
+        message = blocking_message(report)
+        self.assertIn("requirements are corrected", message)
+        self.assertIn("Only 1 GB is free.", message)
 
 
 if __name__ == "__main__":

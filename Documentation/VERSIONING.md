@@ -2,7 +2,7 @@
 
 ChurchManager uses semantic versioning and has one authoritative version in
 `churchmanager_version.py`. The locked first beta baseline is
-`0.2.0-beta.1`; the current beta test release is `0.3.0-beta.3`.
+`0.2.0-beta.1`; the current beta test release is `0.3.0-beta.4`.
 
 - Patch versions identify compatible bug fixes.
 - Minor versions identify completed compatible features.

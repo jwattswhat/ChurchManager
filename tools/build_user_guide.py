@@ -29,6 +29,11 @@ OUTPUT = ROOT / "output" / "pdf" / "ChurchManager.UserGuide.pdf"
 def _inline(text: str) -> str:
     """Convert the guide's small supported Markdown inline subset to markup."""
     text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    text = re.sub(
+        r"\[([^\]]+)\]\((https?://[^)]+)\)",
+        r"<a href='\2' color='#0B5A91'>\1</a>",
+        text,
+    )
     text = re.sub(r"`([^`]+)`", r"<font name='Courier'>\1</font>", text)
     text = re.sub(r"\*\*([^*]+)\*\*", r"<b>\1</b>", text)
     return text

@@ -25,7 +25,12 @@ from installation_plan import (
     InstallationRequest,
     build_installation_plan,
 )
-from installation_readiness import find_mariadb_tool, inspect_readiness
+from installation_readiness import (
+    MARIADB_DOWNLOAD_URL,
+    blocking_message,
+    find_mariadb_tool,
+    inspect_readiness,
+)
 
 
 ROOT = Path(__file__).resolve().parent
@@ -160,8 +165,14 @@ class ChurchManagerSetupWizard(wx.adv.Wizard):
     def _build_pages(self):
         self.system = SetupPage(
             self, "System Check",
-            "ChurchManager checks this computer before asking for any database password.",
+            "MariaDB Server is required and must be installed separately. "
+            "ChurchManager checks for MariaDB, required components, and disk space "
+            "before asking for any database password.",
         )
+        self.mariadb_download = wx.adv.HyperlinkCtrl(
+            self.system, label="Download MariaDB Server", url=MARIADB_DOWNLOAD_URL,
+        )
+        self.system.body.Add(self.mariadb_download, 0, wx.BOTTOM, 8)
         self.system_results = wx.TextCtrl(
             self.system, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.BORDER_SIMPLE,
         )
@@ -342,7 +353,7 @@ class ChurchManagerSetupWizard(wx.adv.Wizard):
         page = event.GetPage()
         try:
             if page is self.system and not self.readiness.ready:
-                raise InstallationPlanError("This computer needs attention before installation can continue.")
+                raise InstallationPlanError(blocking_message(self.readiness))
             if page is self.database and self.apply and not self.admin_password.GetValue():
                 raise InstallationPlanError("The MariaDB administrator password is required.")
             if page is self.catalog:

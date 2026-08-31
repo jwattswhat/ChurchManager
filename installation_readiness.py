@@ -24,6 +24,7 @@ from order_of_service_packages import (
 
 
 ROOT = Path(__file__).resolve().parent
+MARIADB_DOWNLOAD_URL = "https://mariadb.org/download/"
 REQUIRED_MODULES = (
     "wx", "mariadb", "mysql.connector", "jsonschema", "argon2",
     "reportlab", "pypdf", "dateutil",
@@ -65,6 +66,31 @@ class ReadinessReport:
     def ready(self):
         """Return whether host prerequisites passed."""
         return all(item.passed for item in self.checks)
+
+
+def blocking_message(report):
+    """Return plain-language directions for failed host prerequisites."""
+    failed = tuple(item for item in report.checks if not item.passed)
+    database_codes = {"mariadb_client", "database_backup"}
+    missing_database_tools = any(item.code in database_codes for item in failed)
+    other_failures = [item.message for item in failed if item.code not in database_codes]
+    paragraphs = []
+    if missing_database_tools:
+        paragraphs.append(
+            "MariaDB Server is required before ChurchManager can be installed. "
+            "Install MariaDB Server for Windows with its command-line client and "
+            "backup tools (mariadb.exe and mariadb-dump.exe), then run "
+            "ChurchManager Installation again.\n\n"
+            f"Download MariaDB Server: {MARIADB_DOWNLOAD_URL}"
+        )
+    if other_failures:
+        heading = (
+            "Also correct these requirements:"
+            if missing_database_tools else
+            "ChurchManager cannot continue until these requirements are corrected:"
+        )
+        paragraphs.append(heading + "\n" + "\n".join(f"- {item}" for item in other_failures))
+    return "\n\n".join(paragraphs) or "ChurchManager installation requirements are not satisfied."
 
 
 def find_mariadb_tool(executable):

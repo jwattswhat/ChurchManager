@@ -4,6 +4,8 @@ import json
 import unittest
 from pathlib import Path
 
+from tools.build_user_guide import _inline
+
 
 ROOT = Path(__file__).parents[1]
 
@@ -21,6 +23,13 @@ def commands(items):
 
 
 class TestChurchOfficePolish(unittest.TestCase):
+    def test_user_guide_builder_renders_https_markdown_links(self):
+        rendered = _inline("[Download MariaDB](https://mariadb.org/download/)")
+        self.assertEqual(
+            rendered,
+            "<a href='https://mariadb.org/download/' color='#0B5A91'>Download MariaDB</a>",
+        )
+
     def test_church_menu_owns_congregation_documents_journal_and_assets(self):
         church = set(commands(menu_by_label("&Church")["items"]))
         self.assertEqual(
@@ -96,9 +105,11 @@ class TestChurchOfficePolish(unittest.TestCase):
         self.assertNotIn("journal", people_card.casefold())
         for capability in ("Member giving", "Groups and pastoral care", "Church office", "Events and calendars"):
             self.assertIn(capability, site)
-        self.assertIn("Version 0.3.0-beta.3", site)
+        self.assertIn("Version 0.3.0-beta.4", site)
         self.assertIn("ChurchManager-Beta-Test-With-Fictional-Data.zip", site)
         self.assertIn("ChurchManager-Clean-Installation.zip", site)
+        self.assertIn("Required first:</strong> install MariaDB Server for Windows", site)
+        self.assertIn('href="https://mariadb.org/download/"', site)
         self.assertTrue((ROOT / "website" / ".nojekyll").is_file())
 
 

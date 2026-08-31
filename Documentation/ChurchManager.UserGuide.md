@@ -1,6 +1,6 @@
 # ChurchManager User Guide
 
-**Version 0.3.0-beta.3**
+**Version 0.3.0-beta.4**
 
 **For congregations using ChurchManager**
 
@@ -29,6 +29,12 @@ installation and development procedures are maintained separately.
 ## 1. Getting started
 
 ### Installing ChurchManager
+
+MariaDB Server for Windows is required and must be installed separately before
+ChurchManager. Include MariaDB's command-line client and backup tools when
+installing it. ChurchManager identifies this requirement explicitly if either
+`mariadb.exe` or `mariadb-dump.exe` cannot be found. Download MariaDB Server
+from the [official MariaDB Foundation download page](https://mariadb.org/download/).
 
 The ChurchManager Setup wizard checks the computer first, then collects the
 local database connection, congregation name, first Master Administrator, and
@@ -785,5 +791,5 @@ version when requesting help.
 ---
 
 ChurchManager is open-source congregation software. This guide describes the
-0.3.0-beta.3 beta line and will be revised as beta testing identifies
+0.3.0-beta.4 beta line and will be revised as beta testing identifies
 additional instructions or screenshots that are needed.

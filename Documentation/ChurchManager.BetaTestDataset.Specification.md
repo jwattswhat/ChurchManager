@@ -126,7 +126,7 @@ The canonical manifest is `TestData/BetaDataset/manifest.json`. Its ordered
 stages use the existing guarded reset/seed services, each of which refuses
 non-local production targets.
 
-Release `0.3.0-beta.3` provides two folders built from the same MSI:
+Release `0.3.0-beta.4` provides two folders built from the same MSI:
 
 - **Clean-Installation** contains only the ordinary installer and never loads
   fictional congregation records.

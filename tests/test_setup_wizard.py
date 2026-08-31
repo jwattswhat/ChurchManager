@@ -38,6 +38,14 @@ class SetupWizardSupportTests(unittest.TestCase):
             "ChurchManager-logo-horizontal-600.png",
         )
 
+    def test_system_check_names_external_mariadb_requirement(self):
+        source = inspect.getsource(ChurchManagerSetupWizard._build_pages)
+        self.assertIn("MariaDB Server is required and must be installed separately", source)
+        self.assertIn('label="Download MariaDB Server"', source)
+        self.assertIn("url=MARIADB_DOWNLOAD_URL", source)
+        changing = inspect.getsource(ChurchManagerSetupWizard.on_page_changing)
+        self.assertIn("blocking_message(self.readiness)", changing)
+
     def test_catalog_controls_fit_supported_page_height(self):
         source = inspect.getsource(ChurchManagerSetupWizard._build_pages)
         self.assertIn("size=(-1, 52)", source)

@@ -62,7 +62,9 @@ The MSI and the ChurchManager Setup Wizard have separate responsibilities:
 MariaDB Server is an external prerequisite rather than an MSI payload. A clean
 computer must install a supported MariaDB Server distribution, including its
 client and dump tools, before ChurchManager setup can continue. The readiness
-page verifies those tools before requesting the MariaDB administrator password.
+page verifies those tools before requesting the MariaDB administrator password
+and provides a visible link to the official MariaDB Foundation download page:
+`https://mariadb.org/download/`.
 
 The Setup Wizard is titled **ChurchManager Installation** and displays the
 approved horizontal ChurchManager banner above its page headings. This is an

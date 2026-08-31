@@ -7,7 +7,7 @@ installation specification and roadmap.
 
 ## Current verified baseline
 
-- Application line: `0.3.0-beta.3`
+- Application line: `0.3.0-beta.4`
 - Canonical schema: 121 represented migrations
 - Starter data: 125 statements
 - Schema SHA-256: `f95153beb456e8ab25064476299fb466a7a675550e15069c814c7ec78d3f6ad4`
@@ -37,7 +37,7 @@ installation specification and roadmap.
 
 - The audited source repository is public at
   `https://github.com/jwattswhat/ChurchManager`.
-- Release `v0.3.0-beta.3` has distinct clean-installation and fictional
+- Release `v0.3.0-beta.4` has distinct clean-installation and fictional
   beta-test kits. Local and independent Windows 11 VM installation, same-version upgrade, uninstall,
   reinstall, login, main-menu, Documents-screen, and registered document-opening
   acceptance passed. The release is ready for public beta publication.
