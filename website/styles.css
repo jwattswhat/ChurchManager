@@ -94,6 +94,10 @@ h3 { margin-bottom: 10px; font-size: 1.16rem; }
 .action-note { max-width: 640px; margin: 13px 0 0; color: var(--muted); font-size: .84rem; }
 
 .hero-card { padding: 30px; background: var(--surface); border: 1px solid var(--line); border-top: 5px solid var(--gold); border-radius: var(--radius); box-shadow: var(--shadow); }
+.requirement-callout { margin: 22px 0; padding: 18px 20px; background: #fff8e9; border: 2px solid var(--gold); border-radius: 10px; }
+.requirement-callout strong { color: var(--blue); font-size: 1.1rem; }
+.requirement-callout p { margin: 7px 0; }
+.requirement-callout a { font-weight: 800; }
 .card-kicker { margin: 0 0 18px; color: var(--navy-deep); font-weight: 800; }
 .check-list { display: grid; gap: 15px; margin: 0; padding: 0; list-style: none; }
 .check-list li { position: relative; padding-left: 29px; }

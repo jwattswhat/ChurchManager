@@ -110,6 +110,9 @@ class TestChurchOfficePolish(unittest.TestCase):
         self.assertIn("ChurchManager-Clean-Installation.zip", site)
         self.assertIn("Required first:</strong> install MariaDB Server for Windows", site)
         self.assertIn('href="https://mariadb.org/download/"', site)
+        self.assertIn("MariaDB Server is required", site)
+        self.assertIn("cannot be installed or run without MariaDB Server", site)
+        self.assertIn('class="requirement-callout"', site)
         self.assertTrue((ROOT / "website" / ".nojekyll").is_file())
 
 
