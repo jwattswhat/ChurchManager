@@ -66,6 +66,12 @@ page verifies those tools before requesting the MariaDB administrator password
 and provides a visible link to the official MariaDB Foundation download page:
 `https://mariadb.org/download/`.
 
+If ChurchManager is started before MariaDB is installed, the installed launcher
+must stop cleanly without displaying a Python traceback. It explains that
+MariaDB Server is not installed yet and provides the same clickable official
+download link. A stopped service or rejected database credential receives its
+own accurate message and must not be mislabeled as a missing installation.
+
 The Setup Wizard is titled **ChurchManager Installation** and displays the
 approved horizontal ChurchManager banner above its page headings. This is an
 installer presentation treatment only; it does not replace the application

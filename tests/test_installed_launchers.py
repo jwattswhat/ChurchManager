@@ -45,6 +45,50 @@ class InstalledLauncherTests(unittest.TestCase):
             self.assertEqual(installed_launcher.main(["--test"]), ["--test"])
         setup.assert_not_called()
 
+    @patch("installed_launcher.find_mariadb_tool", return_value=None)
+    def test_missing_mariadb_has_plain_message_without_traceback(self, _find):
+        error = RuntimeError("The database connection could not be established.")
+        message = installed_launcher.database_startup_message(error)
+        self.assertIn("MariaDB Server is not installed yet", message)
+        self.assertIn("https://mariadb.org/download/", message)
+        self.assertNotIn("Traceback", message)
+
+    def test_friendly_dialog_provides_clickable_mariadb_download(self):
+        source = Path(installed_launcher.__file__).read_text(encoding="utf-8")
+        self.assertIn("wx.adv.HyperlinkCtrl", source)
+        self.assertIn('label="Download MariaDB Server"', source)
+        self.assertIn('url="https://mariadb.org/download/"', source)
+
+    @patch("installed_launcher.find_mariadb_tool", return_value=Path("mariadb.exe"))
+    def test_authentication_failure_is_not_mislabeled_as_missing_server(self, _find):
+        cause = RuntimeError("Authentication plugin 'auth_gssapi_client' is not supported")
+        error = RuntimeError("The database connection could not be established.")
+        error.__cause__ = cause
+        message = installed_launcher.database_startup_message(error)
+        self.assertIn("could not sign in to MariaDB", message)
+        self.assertNotIn("not installed yet", message)
+
+    @patch("installed_launcher.ensure_configuration")
+    @patch("installed_launcher.setup_required", return_value=False)
+    def test_expected_database_failure_is_shown_without_escaping(self, _required, _ensure):
+        error = RuntimeError("The database connection could not be established.")
+        fake_cm = SimpleNamespace(main=lambda _arguments: (_ for _ in ()).throw(error))
+        with patch.dict("sys.modules", {"cm": fake_cm}), \
+             patch("installed_launcher.database_startup_message", return_value="Friendly") as classify, \
+             patch("installed_launcher.show_database_startup_message") as show:
+            self.assertEqual(installed_launcher.main([]), 1)
+        classify.assert_called_once_with(error)
+        show.assert_called_once_with("Friendly")
+
+    @patch("installed_launcher.ensure_configuration")
+    @patch("installed_launcher.setup_required", return_value=False)
+    def test_unexpected_programming_error_still_escapes(self, _required, _ensure):
+        error = ValueError("unexpected")
+        fake_cm = SimpleNamespace(main=lambda _arguments: (_ for _ in ()).throw(error))
+        with patch.dict("sys.modules", {"cm": fake_cm}):
+            with self.assertRaisesRegex(ValueError, "unexpected"):
+                installed_launcher.main([])
+
     def test_specs_include_framework_forms_baseline_catalogs_and_guide(self):
         for filename in ("ChurchManager.spec", "ChurchManagerSetup.spec", "ChurchManagerBundle.spec"):
             source = (ROOT / "packaging" / filename).read_text(encoding="utf-8")
