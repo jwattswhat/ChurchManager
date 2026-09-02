@@ -87,6 +87,7 @@ from calendar_integration_dialog import show_calendar_integration
 from asset_dialog import show_assets, show_asset_locations, show_asset_maintenance
 from project_dialog import show_projects
 from file_opening_policy import normalize_picker_directory
+from membership_record_selector import select_and_open_membership_record
 
 
 arguments = None
@@ -492,6 +493,12 @@ def _buttonclick(event):
     if select == "lblService":
         show_worship_services(
             cmfrm.FRAME, context.connection, context.form_factory, context.session,
+        )
+        return
+    if select in {"lblPerson", "lblFamily"}:
+        select_and_open_membership_record(
+            cmfrm.FRAME, context.connection, context.form_factory,
+            "person" if select == "lblPerson" else "family",
         )
         return
     if select in FORM_ROUTES:

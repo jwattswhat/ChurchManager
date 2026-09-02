@@ -453,6 +453,15 @@ Person records can link to:
 - membership status; and
 - notes.
 
+The **People** and **Families** commands open a searchable selector before the
+corresponding edit form. A user can type a complete or partial name and choose
+from the stable drop-down list. ChurchManager then opens the ordinary JSForm
+edit form positioned at the selected record without filtering its loaded record
+set, so First, Previous, Next, and Last continue across all records. The same
+selector provides **New Person...** or **New Family...** for record creation.
+Identical display names include their record number only where disambiguation is
+necessary.
+
 Key tables include:
 
 - `tblFamily`
@@ -967,6 +976,16 @@ User Administration may explicitly send a welcome email containing the username
 and first-login instructions. Temporary passwords must be communicated through
 a separate channel and must never appear in email, logs, audit details, or
 support packages.
+
+The congregation-wide minimum password length is stored in ChurchDB and may be
+set by an authorized user administrator from 8 through 128 characters; the
+default is 8. It governs new passwords, password changes, administrative
+resets, and generated temporary passwords without retroactively invalidating
+existing hashes. New-user and Reset Password dialogs provide **Generate** and
+create a cryptographically secure temporary password using the active minimum.
+The generated value is visible only in the active dialog and the account must
+change it at next login. Inactive users remain visible in User Administration,
+with both an **Active: No** value and Windows disabled-item row colors.
 
 ### 15.1 Current risks requiring attention
 

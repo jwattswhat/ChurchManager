@@ -332,6 +332,11 @@ the choices offered in worship planning.
 
 Create one person record for each member or other person the congregation needs
 to track. A person may have a photograph and may be linked to a family.
+Opening **People** first displays **Select Person**. Type any part of a name to
+narrow the drop-down list, choose the person, and select **Open**. The ordinary
+Person edit screen opens at that person; its First, Previous, Next, and Last
+buttons still move through the complete People list. Select **New Person...**
+when the person has not been entered yet.
 Telephone numbers are stored as digits and formatted for display. Respect every
 unlisted-contact setting; unlisted contact information is excluded from public
 directory output.
@@ -341,6 +346,10 @@ directory output.
 Family records group people for directories and household communication. A
 family may have its own photograph and address information. Confirm family
 membership before generating a directory.
+Opening **Families** first displays **Select Family**. Type any part of the
+family name to narrow the drop-down list, choose the family, and select **Open**.
+The ordinary Family edit screen opens at that family and retains navigation
+through every Family record. Select **New Family...** to start a new record.
 
 ### Users are separate from people
 
@@ -749,9 +758,22 @@ donor, personnel, medical, or other confidential narratives.
 ### Users and roles
 
 Administrators create individual accounts and assign only the permissions each
-user needs. A new account may be linked to a person and may receive a temporary
-password notice after outgoing email has been configured. Disable accounts that
-should no longer sign in instead of reusing them.
+user needs. In **User Administration**, set the congregation's minimum password
+length between 8 and 128 characters. The setting applies to newly entered and
+generated passwords for new accounts, administrative resets, and user password
+changes; it does not invalidate an existing password until that password is
+changed.
+
+When creating a user or resetting a password, select **Generate** to create a
+secure temporary password using the active minimum length. Copy it while the
+dialog remains open and communicate it separately. The temporary password is
+not recoverable afterward and is never included in welcome email. The user must
+change it at the next login.
+
+A new account may be linked to a person and may receive a first-login notice
+after outgoing email has been configured. Disable accounts that should no
+longer sign in instead of reusing them. Inactive users remain visible with an
+**Active** value of **No** and a different row color.
 
 ### Email
 

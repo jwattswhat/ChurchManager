@@ -126,7 +126,8 @@ account. Any exception must be named, justified, and approved; broad words such
 as "legacy" in a current identifier are treated as a finding rather than being
 silently retained.
 7. Create the first master administrator with a temporary password that must be
-   changed at first login.
+   changed at first login. The installer may generate a cryptographically secure
+   temporary password using the active congregation minimum.
 8. Present separately selectable hymnal, lectionary, and Order of Service
    packages, including an explicit **None** choice for every catalog family.
 9. Explain dependencies before confirmation. An Order of Service package that
@@ -222,9 +223,13 @@ clearly and cannot be silently installed.
 ## 6. First master administrator
 
 The first administrator supplies a unique username, display name, optional
-contact information, and temporary password. The installer creates the active
-master account and role assignment atomically. `MustChangePassword` remains set
-until the first successful password change.
+contact information, and temporary password. The password may be entered or
+generated; generation uses the configured congregation minimum, which defaults
+to 8 characters and may later be set from 8 through 128 in User Administration.
+The generated value is shown only in the active installer dialog and is never
+written to logs, configuration, reports, or email. The installer creates the
+active master account and role assignment atomically. `MustChangePassword`
+remains set until the first successful password change.
 
 The installer recommends creating a second master administrator after initial
 login but does not require it for a small congregation.
