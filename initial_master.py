@@ -18,7 +18,7 @@ class InitialMasterBootstrapper:
     """Validate, hash, and atomically create exactly one initial master user."""
 
     def __init__(self, connection, password_service=None, repository=None):
-        self.passwords = password_service or PasswordService(minimum_length=12)
+        self.passwords = password_service or PasswordService()
         self.repository = repository or MariaDBUserRepository(connection)
 
     def create(

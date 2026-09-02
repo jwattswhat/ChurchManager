@@ -51,6 +51,22 @@ provided by the congregation administrator. A temporary password must be
 changed when requested. Each person should use an individual account; accounts
 must not be shared.
 
+ChurchManager passwords initially require at least eight characters. An
+authorized user administrator can set a congregation-wide minimum between 8
+and 128 characters in User Administration. When creating a user, an
+administrator may select **Generate** to create a secure temporary password at
+the active minimum length. ChurchManager displays that generated value only in
+the active dialog so it can be copied and communicated separately; welcome
+email never includes the temporary password.
+
+The Reset Password dialog offers the same **Generate** option and uses the
+active congregation minimum. The generated reset password must likewise be
+communicated separately to the user.
+
+Inactive accounts remain listed in User Administration but use the Windows
+disabled-item colors to distinguish them from active accounts. The Active
+column also displays **No**, so the status does not depend on color alone.
+
 The login window identifies ChurchManager, the local congregation, the installed
 version, and the open-source license. Confirm the congregation name before
 signing in, especially when working with a test or support installation.

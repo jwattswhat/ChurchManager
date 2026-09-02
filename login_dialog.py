@@ -8,7 +8,7 @@ import wx
 
 from authentication import (
     AuthenticationError, AuthenticationService, MariaDBUserRepository,
-    PasswordService,
+    MINIMUM_PASSWORD_LENGTH, PasswordPolicyRepository, PasswordService,
 )
 from churchmanager_version import __version__
 
@@ -189,9 +189,13 @@ def require_password_change(repository, passwords, session, parent=None):
             _message(parent, str(error), "Change password")
 
 
-def change_own_password(connection, session, parent=None, minimum_length=12):
+def change_own_password(
+    connection, session, parent=None, minimum_length=None,
+):
     """Change the signed-in user's password after verifying the current one."""
     repository = MariaDBUserRepository(connection)
+    if minimum_length is None:
+        minimum_length = PasswordPolicyRepository(connection).load_minimum_length()
     passwords = PasswordService(minimum_length=minimum_length)
     dialog = ChangeOwnPasswordDialog(parent)
     try:
@@ -221,9 +225,11 @@ def change_own_password(connection, session, parent=None, minimum_length=12):
     return True
 
 
-def authenticate_user(connection, parent=None, minimum_length=12):
+def authenticate_user(connection, parent=None, minimum_length=None):
     """Run initial setup if needed, then return an authenticated session or None."""
     repository = MariaDBUserRepository(connection)
+    if minimum_length is None:
+        minimum_length = PasswordPolicyRepository(connection).load_minimum_length()
     passwords = PasswordService(minimum_length=minimum_length)
     if not ensure_initial_master(repository, passwords, parent):
         return None

@@ -9,8 +9,8 @@ class Passwords:
 
     def hash(self, value):
         self.values.append(value)
-        if len(value) < 12:
-            raise ValueError("A ChurchManager password must contain at least 12 characters.")
+        if len(value) < 8:
+            raise ValueError("A ChurchManager password must contain at least 8 characters.")
         return "argon2:" + value
 
 
@@ -49,7 +49,7 @@ class InitialMasterTests(unittest.TestCase):
         service, repository, _passwords = self.service()
         with self.assertRaisesRegex(InitialMasterError, "do not match"):
             service.create("admin", "Administrator", "long password value", "other password")
-        with self.assertRaisesRegex(InitialMasterError, "at least 12"):
+        with self.assertRaisesRegex(InitialMasterError, "at least 8"):
             service.create("admin", "Administrator", "short", "short")
         self.assertFalse(repository.created)
 

@@ -2,7 +2,7 @@
   "artifact": "ChurchManager fresh-install schema baseline",
   "format_version": 1,
   "release_version": "0.3.0-beta.4",
-  "schema_sha256": "f95153beb456e8ab25064476299fb466a7a675550e15069c814c7ec78d3f6ad4",
+  "schema_sha256": "6413b5619678d7610b2c0ceebb43390afea08f6061e1494fc4edadd2523e9123",
   "represented_migrations": [
     {
       "version": "001_normalize_and_convert_innodb.sql",
@@ -487,6 +487,10 @@
     {
       "version": "121_remove_jsform_framework_tables.sql",
       "checksum": "05fe9b9b4f8596f654ac6d71c58eae38b9b922b73e4f6874b1896dd8de6a584f"
+    },
+    {
+      "version": "122_add_password_policy.sql",
+      "checksum": "4405a7ff7a3a9b7e65d44133758042ff83f6a1ad3eab93df5b59a876cea31eba"
     }
   ]
 }

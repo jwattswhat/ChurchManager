@@ -100,7 +100,7 @@ def build_runtime(form_class, argv=None, login_provider=authenticate_user):
     if security_enabled(arguments):
         session = login_provider(
             database.DBConnection,
-            minimum_length=4 if arguments["test_mode"] else 12,
+            minimum_length=4 if arguments["test_mode"] else None,
         )
         if session is None:
             database.close()

@@ -3515,6 +3515,17 @@ CREATE TABLE `tblsecurityauditevent` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblsecuritysettings` (
+  `ID` tinyint(4) NOT NULL DEFAULT 1,
+  `MinimumPasswordLength` smallint(6) NOT NULL DEFAULT 8,
+  `UpdatedAt` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`ID`),
+  CONSTRAINT `ck_security_settings_singleton` CHECK (`ID` = 1),
+  CONSTRAINT `ck_security_password_minimum` CHECK (`MinimumPasswordLength` between 8 and 128)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tblsermon` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `Reference` varchar(255) NOT NULL,

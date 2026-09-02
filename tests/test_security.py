@@ -68,10 +68,42 @@ class TestPasswordService(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "at least 4"):
             service.hash("abc")
 
-    def test_passwords_require_twelve_characters(self):
+    def test_passwords_require_eight_characters(self):
         service = PasswordService(FakeHasher())
-        with self.assertRaises(ValueError):
-            service.hash("too short")
+        self.assertTrue(service.hash("eight888"))
+        with self.assertRaisesRegex(ValueError, "at least 8"):
+            service.hash("short7")
+
+    def test_generated_temporary_password_is_secure_and_policy_compliant(self):
+        from authentication import generate_temporary_password
+
+        password = generate_temporary_password()
+        self.assertEqual(len(password), 12)
+        self.assertRegex(password, r"[A-Z]")
+        self.assertRegex(password, r"[a-z]")
+        self.assertRegex(password, r"[0-9]")
+        self.assertRegex(password, r"[^A-Za-z0-9]")
+        self.assertTrue(PasswordService(FakeHasher()).hash(password))
+
+    def test_generated_temporary_password_rejects_less_than_policy_minimum(self):
+        from authentication import generate_temporary_password
+
+        with self.assertRaisesRegex(ValueError, "at least 8"):
+            generate_temporary_password(7)
+
+    def test_generated_temporary_password_uses_selected_minimum(self):
+        from authentication import generate_temporary_password
+
+        self.assertEqual(len(generate_temporary_password(20)), 20)
+
+    def test_password_policy_accepts_only_supported_minimums(self):
+        from authentication import validate_minimum_password_length
+
+        self.assertEqual(validate_minimum_password_length("8"), 8)
+        self.assertEqual(validate_minimum_password_length(128), 128)
+        for value in (7, 129, "not a number"):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                validate_minimum_password_length(value)
 
     def test_hash_and_verify_are_delegated(self):
         service = PasswordService(FakeHasher())
@@ -79,6 +111,21 @@ class TestPasswordService(unittest.TestCase):
         self.assertNotEqual(password_hash, "a long passphrase")
         self.assertTrue(service.verify(password_hash, "a long passphrase"))
         self.assertFalse(service.verify(password_hash, "wrong password"))
+
+    def test_verified_legacy_password_can_rehash_below_new_minimum(self):
+        class LegacyHasher(FakeHasher):
+            def verify(self, password_hash, password):
+                return password_hash == "old:" + password
+
+        repository = FakeRepository(account(password_hash="old:short7"))
+        service = AuthenticationService(
+            repository, PasswordService(LegacyHasher(), minimum_length=20),
+            clock=lambda: datetime(2026, 8, 10, 18, 0),
+            workstation=lambda: "TEST-PC",
+        )
+        session = service.authenticate("jonathan", "short7")
+        self.assertEqual(session.user_id, 1)
+        self.assertEqual(repository.successes[0][2], "hashed:short7")
 
     def test_installed_argon2_service_creates_argon2id_hash(self):
         service = PasswordService()
@@ -181,6 +228,41 @@ class TestAuthorizationPolicy(unittest.TestCase):
 
 
 class TestUserAdministrationRules(unittest.TestCase):
+    def test_new_user_dialog_offers_generated_temporary_password(self):
+        source = (Path(__file__).parents[1] / "user_admin.py").read_text(
+            encoding="utf-8-sig"
+        )
+        self.assertIn('label="Generate"', source)
+        self.assertIn("max(MINIMUM_PASSWORD_LENGTH, self.minimum_length)", source)
+        self.assertIn("self.confirmation.SetValue(password)", source)
+        self.assertIn("style=wx.TE_READONLY", source)
+        self.assertIn("Save Password Policy", source)
+
+    def test_inactive_users_receive_accessible_disabled_row_colors(self):
+        source = (Path(__file__).parents[1] / "user_admin.py").read_text(
+            encoding="utf-8-sig"
+        )
+        self.assertIn("if not user.active:", source)
+        self.assertIn("wx.SYS_COLOUR_GRAYTEXT", source)
+        self.assertIn("wx.SYS_COLOUR_BTNFACE", source)
+        self.assertIn('"Yes" if user.active else "No"', source)
+
+    def test_reset_password_dialog_uses_active_policy_generator(self):
+        source = (Path(__file__).parents[1] / "user_admin.py").read_text(
+            encoding="utf-8-sig"
+        )
+        reset_handler = source.split("def on_reset", 1)[1].split(
+            "def on_role_permissions", 1
+        )[0]
+        self.assertIn("PasswordEntryDialog", reset_handler)
+        self.assertIn("self.service.passwords.minimum_length", reset_handler)
+        password_dialog = source.split("class PasswordEntryDialog", 1)[1].split(
+            "class NewUserDialog", 1
+        )[0]
+        self.assertIn('label="Generate"', password_dialog)
+        self.assertIn("generate_temporary_password", password_dialog)
+        self.assertIn("self.confirmation.SetValue(password)", password_dialog)
+
     def test_last_active_master_cannot_be_disabled(self):
         from user_admin import UserAdministrationService
 

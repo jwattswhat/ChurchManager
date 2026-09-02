@@ -836,7 +836,7 @@ class TestChurchManagerConfiguration(unittest.TestCase):
 
     def test_test_mode_uses_relaxed_password_length_only_at_composition_root(self):
         source = (ROOT / "startup.py").read_text(encoding="utf-8-sig")
-        self.assertIn('minimum_length=4 if arguments["test_mode"] else 12', source)
+        self.assertIn('minimum_length=4 if arguments["test_mode"] else None', source)
 
 
 class TestChurchManagerForms(unittest.TestCase):

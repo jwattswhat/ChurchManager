@@ -17,6 +17,10 @@ from pathlib import Path
 import wx
 import wx.adv
 
+from authentication import (
+    MINIMUM_PASSWORD_LENGTH, generate_temporary_password,
+)
+
 from credential_store import delete_credential, read_credential, write_credential
 from configuration_paths import configuration_path, ensure_configuration
 from installation_executor import FreshInstallationExecutor
@@ -220,6 +224,21 @@ class ChurchManagerSetupWizard(wx.adv.Wizard):
             ("Confirm password", self.master_confirmation),
         ):
             self.master.row(label, control)
+        self.master_generated_password = wx.TextCtrl(
+            self.master, style=wx.TE_READONLY,
+        )
+        generate_master_password = wx.Button(
+            self.master, label="Generate temporary password",
+        )
+        generate_master_password.Bind(
+            wx.EVT_BUTTON, self.on_generate_master_password,
+        )
+        generated_password_row = wx.BoxSizer(wx.HORIZONTAL)
+        generated_password_row.Add(
+            self.master_generated_password, 1, wx.RIGHT | wx.EXPAND, 6,
+        )
+        generated_password_row.Add(generate_master_password)
+        self.master.row("Generated password", generated_password_row)
 
         self.catalog = SetupPage(
             self, "Catalog Selection",
@@ -292,6 +311,15 @@ class ChurchManagerSetupWizard(wx.adv.Wizard):
     def on_catalog_check(self, _event):
         self._refresh_default_choices()
 
+    def on_generate_master_password(self, _event):
+        """Generate and display the initial account's temporary password once."""
+        password = generate_temporary_password(MINIMUM_PASSWORD_LENGTH)
+        self.master_password.SetValue(password)
+        self.master_confirmation.SetValue(password)
+        self.master_generated_password.SetValue(password)
+        self.master_generated_password.SetFocus()
+        self.master_generated_password.SelectAll()
+
     def _selected(self, family):
         available = [
             item for item in self.readiness.packages
@@ -329,8 +357,11 @@ class ChurchManagerSetupWizard(wx.adv.Wizard):
 
     def _build_plan(self):
         self.plan = build_installation_plan(self._request(), self.readiness)
-        if len(self.master_password.GetValue()) < 12:
-            raise InstallationPlanError("The temporary password must contain at least 12 characters.")
+        if len(self.master_password.GetValue()) < MINIMUM_PASSWORD_LENGTH:
+            raise InstallationPlanError(
+                "The temporary password must contain at least {} characters."
+                .format(MINIMUM_PASSWORD_LENGTH)
+            )
         if self.master_password.GetValue() != self.master_confirmation.GetValue():
             raise InstallationPlanError("The temporary passwords do not match.")
         packages = "\n".join(f"  - {item.title}" for item in self.plan.selected_packages) or "  None"

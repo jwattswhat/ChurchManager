@@ -1,8 +1,8 @@
 # ChurchManager User and Security Specification
 
 **Status:** Approved  
-**Version:** 1.0  
-**Date:** August 10, 2026  
+**Version:** 1.2
+**Date:** September 2, 2026
 **Approved by:** Rev. Jonathan C. Watt  
 **Target application:** ChurchManager  
 **Application framework:** JSForm  
@@ -76,8 +76,17 @@ must not reveal whether the username or password was incorrect.
 - Passwords are hashed with Argon2id using a maintained Python library.
 - A newly created or administratively reset password is temporary and must be
   changed at the next login.
-- A password must contain at least 12 characters. Passphrases are encouraged;
+- The congregation's authorized user administrator may set the minimum password
+  length from 8 through 128 characters. The default is 8. The active value is
+  stored in ChurchDB and applies to new passwords, password changes,
+  administrative resets, and generated temporary passwords. Existing hashes
+  remain valid until the password is next changed. Passphrases are encouraged;
   arbitrary composition rules are not required.
+- New-user, password-reset, and initial-installation screens may generate a cryptographically
+  secure temporary password at the configured minimum length. A generated
+  password is shown only in the active
+  dialog so the administrator can copy it for separate delivery; it is never
+  included in welcome email, logs, configuration, or audit data.
 - Passwords are never placed in JSON forms, logs, command-line arguments,
   configuration files, audit before/after data, or database backups in
   plaintext.

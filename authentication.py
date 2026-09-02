@@ -4,9 +4,76 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+import secrets
 import socket
 
 from authorization import UserSession
+
+
+MINIMUM_PASSWORD_LENGTH = 8
+MAXIMUM_PASSWORD_LENGTH = 128
+GENERATED_TEMPORARY_PASSWORD_LENGTH = 12
+
+
+def validate_minimum_password_length(value):
+    """Return a supported congregation password minimum or raise ValueError."""
+    try:
+        value = int(value)
+    except (TypeError, ValueError) as error:
+        raise ValueError("The minimum password length must be a whole number.") from error
+    if not MINIMUM_PASSWORD_LENGTH <= value <= MAXIMUM_PASSWORD_LENGTH:
+        raise ValueError(
+            "The minimum password length must be between {} and {} characters."
+            .format(MINIMUM_PASSWORD_LENGTH, MAXIMUM_PASSWORD_LENGTH)
+        )
+    return value
+
+
+def generate_temporary_password(length=GENERATED_TEMPORARY_PASSWORD_LENGTH):
+    """Return a cryptographically secure temporary password for manual delivery."""
+    length = int(length)
+    if length < MINIMUM_PASSWORD_LENGTH:
+        raise ValueError(
+            "A generated temporary password must contain at least {} characters."
+            .format(MINIMUM_PASSWORD_LENGTH)
+        )
+    groups = (
+        "ABCDEFGHJKLMNPQRSTUVWXYZ",
+        "abcdefghijkmnopqrstuvwxyz",
+        "23456789",
+        "!@#$%*-_",
+    )
+    alphabet = "".join(groups)
+    characters = [secrets.choice(group) for group in groups]
+    characters.extend(
+        secrets.choice(alphabet) for _ in range(length - len(characters))
+    )
+    for index in range(len(characters) - 1, 0, -1):
+        swap = secrets.randbelow(index + 1)
+        characters[index], characters[swap] = characters[swap], characters[index]
+    return "".join(characters)
+
+
+class PasswordPolicyRepository:
+    """Load the congregation-owned password policy from ChurchDB."""
+
+    def __init__(self, connection):
+        self.connection = connection
+        module = connection.__class__.__module__
+        self.parameter_marker = "%s" if module.startswith("mysql.connector") else "?"
+
+    def load_minimum_length(self):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                "SELECT MinimumPasswordLength FROM tblSecuritySettings WHERE ID=1"
+            )
+            row = cursor.fetchone()
+        finally:
+            cursor.close()
+        if not row:
+            raise RuntimeError("The ChurchManager password policy is not installed.")
+        return validate_minimum_password_length(row[0])
 
 
 class AuthenticationError(RuntimeError):
@@ -16,7 +83,7 @@ class AuthenticationError(RuntimeError):
 class PasswordService:
     """Argon2id password hashing isolated behind a small application interface."""
 
-    def __init__(self, hasher=None, minimum_length=12):
+    def __init__(self, hasher=None, minimum_length=MINIMUM_PASSWORD_LENGTH):
         if hasher is None:
             try:
                 from argon2 import PasswordHasher
@@ -50,6 +117,10 @@ class PasswordService:
     def needs_rehash(self, password_hash: str) -> bool:
         checker = getattr(self._hasher, "check_needs_rehash", None)
         return bool(checker and checker(password_hash))
+
+    def rehash_verified_password(self, password: str) -> str:
+        """Refresh a verified legacy hash without applying new-password policy."""
+        return self._hasher.hash(password)
 
 
 @dataclass(frozen=True)
@@ -278,7 +349,7 @@ class AuthenticationService:
 
         replacement = None
         if self.passwords.needs_rehash(account.password_hash):
-            replacement = self.passwords.hash(password)
+            replacement = self.passwords.rehash_verified_password(password)
         self.repository.record_successful_login(account.id, now, replacement)
         workstation = self.workstation()
         self.repository.record_auth_event(

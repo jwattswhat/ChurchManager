@@ -9,7 +9,11 @@ from dataclasses import dataclass
 import wx
 import JSForm
 
-from authentication import MariaDBUserRepository, PasswordService
+from authentication import (
+    MAXIMUM_PASSWORD_LENGTH, MINIMUM_PASSWORD_LENGTH, MariaDBUserRepository,
+    PasswordPolicyRepository, PasswordService, generate_temporary_password,
+    validate_minimum_password_length,
+)
 from participant_notifications import configured_mail_service
 
 
@@ -564,6 +568,38 @@ class UserAdministrationService:
         finally:
             cursor.close()
 
+    def set_minimum_password_length(self, minimum_length):
+        """Persist and immediately apply the congregation password minimum."""
+        minimum_length = validate_minimum_password_length(minimum_length)
+        previous = self.passwords.minimum_length
+        cursor = self._cursor()
+        try:
+            self.repository._execute(
+                cursor,
+                "UPDATE tblSecuritySettings SET MinimumPasswordLength=? WHERE ID=1",
+                (minimum_length,),
+            )
+            self.repository._execute(
+                cursor,
+                "INSERT INTO tblSecurityAuditEvent "
+                "(UserID, Action, EntityType, EntityID, Reason) "
+                "VALUES (?, 'PASSWORD_POLICY_CHANGED', 'SecurityPolicy', "
+                "'PasswordMinimumLength', ?)",
+                (
+                    self.acting_user_id,
+                    "Minimum length changed from {} to {}".format(
+                        previous, minimum_length,
+                    ),
+                ),
+            )
+            self.connection.commit()
+            self.passwords.minimum_length = minimum_length
+        except Exception:
+            self.connection.rollback()
+            raise
+        finally:
+            cursor.close()
+
     def _audit(self, cursor, action, user_id, reason=None):
         self.repository._execute(
             cursor,
@@ -575,9 +611,12 @@ class UserAdministrationService:
 
 
 class PasswordEntryDialog(wx.Dialog):
-    def __init__(self, parent, title):
+    def __init__(
+        self, parent, title, minimum_length=MINIMUM_PASSWORD_LENGTH,
+    ):
         super().__init__(parent, title=title)
-        grid = wx.FlexGridSizer(2, 2, 8, 8)
+        self.minimum_length = int(minimum_length)
+        grid = wx.FlexGridSizer(3, 2, 8, 8)
         grid.AddGrowableCol(1, 1)
         grid.Add(wx.StaticText(self, label="Temporary password"))
         self.password = wx.TextCtrl(self, style=wx.TE_PASSWORD, size=(280, -1))
@@ -585,17 +624,39 @@ class PasswordEntryDialog(wx.Dialog):
         grid.Add(wx.StaticText(self, label="Confirm password"))
         self.confirmation = wx.TextCtrl(self, style=wx.TE_PASSWORD)
         grid.Add(self.confirmation, 1, wx.EXPAND)
+        grid.Add(wx.StaticText(self, label="Generated password"))
+        generated_row = wx.BoxSizer(wx.HORIZONTAL)
+        self.generated_password = wx.TextCtrl(self, style=wx.TE_READONLY)
+        generated_row.Add(self.generated_password, 1, wx.RIGHT | wx.EXPAND, 6)
+        generate = wx.Button(self, label="Generate")
+        generate.Bind(wx.EVT_BUTTON, self.on_generate_password)
+        generated_row.Add(generate)
+        grid.Add(generated_row, 1, wx.EXPAND)
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(grid, 1, wx.ALL | wx.EXPAND, 12)
         root.Add(self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL), 0, wx.ALL | wx.EXPAND, 10)
         self.SetSizerAndFit(root)
 
+    def on_generate_password(self, _event):
+        """Generate and display a temporary reset password for separate delivery."""
+        password = generate_temporary_password(
+            max(MINIMUM_PASSWORD_LENGTH, self.minimum_length)
+        )
+        self.password.SetValue(password)
+        self.confirmation.SetValue(password)
+        self.generated_password.SetValue(password)
+        self.generated_password.SetFocus()
+        self.generated_password.SelectAll()
+
 
 class NewUserDialog(PasswordEntryDialog):
-    def __init__(self, parent, people):
+    def __init__(self, parent, people, minimum_length=MINIMUM_PASSWORD_LENGTH):
         wx.Dialog.__init__(self, parent, title="Create ChurchManager User")
         self.people = people
-        grid = wx.FlexGridSizer(8, 2, 8, 8)
+        self.minimum_length = int(minimum_length)
+        if self.minimum_length < 1:
+            raise ValueError("The minimum password length must be positive.")
+        grid = wx.FlexGridSizer(9, 2, 8, 8)
         grid.AddGrowableCol(1, 1)
         grid.Add(wx.StaticText(self, label="Username"))
         self.username = wx.TextCtrl(self, size=(280, -1))
@@ -623,6 +684,14 @@ class NewUserDialog(PasswordEntryDialog):
         grid.Add(wx.StaticText(self, label="Confirm password"))
         self.confirmation = wx.TextCtrl(self, style=wx.TE_PASSWORD)
         grid.Add(self.confirmation, 1, wx.EXPAND)
+        grid.Add(wx.StaticText(self, label="Generated password"))
+        generated_row = wx.BoxSizer(wx.HORIZONTAL)
+        self.generated_password = wx.TextCtrl(self, style=wx.TE_READONLY)
+        generated_row.Add(self.generated_password, 1, wx.RIGHT | wx.EXPAND, 6)
+        generate = wx.Button(self, label="Generate")
+        generate.Bind(wx.EVT_BUTTON, self.on_generate_password)
+        generated_row.Add(generate)
+        grid.Add(generated_row, 1, wx.EXPAND)
         grid.AddSpacer(1)
         self.send_welcome = wx.CheckBox(
             self, label="Send welcome email now (temporary password is not included)",
@@ -632,6 +701,17 @@ class NewUserDialog(PasswordEntryDialog):
         root.Add(grid, 1, wx.ALL | wx.EXPAND, 12)
         root.Add(self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL), 0, wx.ALL | wx.EXPAND, 10)
         self.SetSizerAndFit(root)
+
+    def on_generate_password(self, _event):
+        """Generate one visible temporary password and fill both hidden fields."""
+        password = generate_temporary_password(
+            max(MINIMUM_PASSWORD_LENGTH, self.minimum_length)
+        )
+        self.password.SetValue(password)
+        self.confirmation.SetValue(password)
+        self.generated_password.SetValue(password)
+        self.generated_password.SetFocus()
+        self.generated_password.SelectAll()
 
     def on_person_selected(self, _event):
         """Use the linked person's first name as the editable display default."""
@@ -764,6 +844,21 @@ class UserAdministrationDialog(wx.Dialog):
         )):
             self.list.InsertColumn(index, label, width=width)
         self.list.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.on_roles)
+        policy = wx.BoxSizer(wx.HORIZONTAL)
+        policy.Add(
+            wx.StaticText(self, label="Minimum password length:"),
+            0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 8,
+        )
+        self.minimum_password_length = wx.SpinCtrl(
+            self, min=MINIMUM_PASSWORD_LENGTH, max=MAXIMUM_PASSWORD_LENGTH,
+            initial=max(
+                MINIMUM_PASSWORD_LENGTH, self.service.passwords.minimum_length,
+            ),
+        )
+        policy.Add(self.minimum_password_length, 0, wx.RIGHT, 8)
+        save_policy = wx.Button(self, label="Save Password Policy")
+        save_policy.Bind(wx.EVT_BUTTON, self.on_save_password_policy)
+        policy.Add(save_policy)
         buttons = wx.BoxSizer(wx.HORIZONTAL)
         actions = (
             ("New User", self.on_new), ("Edit Details", self.on_contact),
@@ -783,6 +878,7 @@ class UserAdministrationDialog(wx.Dialog):
         buttons.AddStretchSpacer()
         buttons.Add(close)
         root = wx.BoxSizer(wx.VERTICAL)
+        root.Add(policy, 0, wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, 10)
         root.Add(self.list, 1, wx.ALL | wx.EXPAND, 10)
         root.Add(buttons, 0, wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, 10)
         self.SetSizer(root)
@@ -800,6 +896,13 @@ class UserAdministrationDialog(wx.Dialog):
             self.list.SetItem(row, 5, "Yes" if user.active else "No")
             self.list.SetItem(row, 6, "Yes" if user.is_master else "No")
             self.list.SetItem(row, 7, ", ".join(user.roles))
+            if not user.active:
+                self.list.SetItemTextColour(
+                    row, wx.SystemSettings.GetColour(wx.SYS_COLOUR_GRAYTEXT),
+                )
+                self.list.SetItemBackgroundColour(
+                    row, wx.SystemSettings.GetColour(wx.SYS_COLOUR_BTNFACE),
+                )
 
     @staticmethod
     def selected_person_id(dialog):
@@ -817,7 +920,10 @@ class UserAdministrationDialog(wx.Dialog):
         wx.MessageBox(str(error), "User Administration", wx.OK | wx.ICON_ERROR)
 
     def on_new(self, event):
-        dialog = NewUserDialog(self, self.service.list_available_people())
+        dialog = NewUserDialog(
+            self, self.service.list_available_people(),
+            self.service.passwords.minimum_length,
+        )
         try:
             if dialog.ShowModal() != wx.ID_OK:
                 return
@@ -845,6 +951,19 @@ class UserAdministrationDialog(wx.Dialog):
         finally:
             dialog.Destroy()
         self.refresh()
+
+    def on_save_password_policy(self, _event):
+        try:
+            self.service.set_minimum_password_length(
+                self.minimum_password_length.GetValue()
+            )
+            wx.MessageBox(
+                "The minimum password length was saved. It applies when passwords "
+                "are created or changed.",
+                "Password Policy", wx.OK | wx.ICON_INFORMATION, self,
+            )
+        except (ValueError, RuntimeError) as error:
+            self.show_error(error)
 
     def on_contact(self, _event):
         user = self.selected()
@@ -926,7 +1045,10 @@ class UserAdministrationDialog(wx.Dialog):
         user = self.selected()
         if not user:
             return
-        dialog = PasswordEntryDialog(self, "Reset Password for {}".format(user.username))
+        dialog = PasswordEntryDialog(
+            self, "Reset Password for {}".format(user.username),
+            self.service.passwords.minimum_length,
+        )
         try:
             if dialog.ShowModal() != wx.ID_OK:
                 return
@@ -972,9 +1094,12 @@ class UserAdministrationDialog(wx.Dialog):
 
 
 def show_user_administration(
-    parent, connection, session, authorization, minimum_length=12, test_mode=False,
+    parent, connection, session, authorization,
+    minimum_length=None, test_mode=False,
 ):
     authorization.require("security.users.manage", "manage ChurchManager users")
+    if minimum_length is None:
+        minimum_length = PasswordPolicyRepository(connection).load_minimum_length()
     service = UserAdministrationService(
         connection, session.user_id,
         passwords=PasswordService(minimum_length=minimum_length),
