@@ -67,8 +67,9 @@ class TestChurchOfficePolish(unittest.TestCase):
         self.assertEqual(controls["btnPersonAddress"]["label"], "Addresses...")
         self.assertEqual(controls["btnPersonContact"]["label"], "Contacts...")
         self.assertEqual(controls["btnPersonDate"]["label"], "Significant Dates...")
-        self.assertEqual(controls["lblPicture"]["posch"], [37, 9])
-        self.assertEqual(controls["Picture"]["posch"], [37, 11])
+        self.assertEqual(controls["btnAdditionalInformation"]["sizech"], [16, 2])
+        self.assertEqual(controls["lblPicture"]["posch"], [37, 10])
+        self.assertEqual(controls["Picture"]["posch"], [37, 12])
 
     def test_document_and_journal_fixture_is_guarded_and_repeatable(self):
         source = (ROOT / "seed_document_journal_test_data.py").read_text(

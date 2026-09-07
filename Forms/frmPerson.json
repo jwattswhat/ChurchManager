@@ -155,6 +155,7 @@
                 "label": "Additional Information...",
                 "name": "btnAdditionalInformation",
                 "posch": [37, 7],
+                "sizech": [16, 2],
                 "tooltip": "Edit church-defined additional information for this person."
             },
             "lblChurchID": {
@@ -391,12 +392,12 @@
                 "type": "StaticText",
                 "label": "Individual picture:",
                 "name": "lblPicture",
-                "posch": [37, 9]
+                "posch": [37, 10]
             },
             "Picture": {
                 "type": "ImagePickerCtrl",
                 "name": "Picture",
-                "posch": [37, 11],
+                "posch": [37, 12],
                 "sizech": [16, 15],
                 "maxbytes": 5242880,
                 "tooltip": "Choose the individual's picture stored in the database."

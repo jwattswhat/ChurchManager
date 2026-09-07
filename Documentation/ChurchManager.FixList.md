@@ -148,8 +148,9 @@ future roadmap projects:
 - synchronized attendance entry and attendance reporting;
 - participant notification email, Gmail thread separation, and safe delivery
   history;
-- protected backup/restore, automatic exit backup, single-instance startup,
-  responsive main menu, and support-diagnostics/error capture.
+- protected backup/restore, automatic exit backup, single-instance startup and
+  deterministic lock release on normal shutdown, responsive main menu, and
+  support-diagnostics/error capture.
 
 ### Completed worship enhancement: hymn stanza selection
 

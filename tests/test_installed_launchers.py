@@ -27,6 +27,22 @@ class InstalledLauncherTests(unittest.TestCase):
             "database_settings": {"user": "cm_churchdb", "database": "ChurchDB"},
         }))
 
+    def test_normal_shutdown_releases_single_instance_guard(self):
+        source = (ROOT / "cm.py").read_text(encoding="utf-8")
+        close_handler = source[
+            source.index("    def on_main_close(event):") : source.index(
+                "    cmfrm.FRAME.Bind(wx.EVT_CLOSE", source.index("    def on_main_close(event):")
+            )
+        ]
+        self.assertIn("single_instance.release()", close_handler)
+        shutdown = source[source.index("    app.MainLoop()") :]
+        release = shutdown.index("    single_instance.release()")
+        restart = shutdown.index("    if restart:")
+        self.assertLess(release, restart)
+        self.assertNotIn(
+            "    if restart:\n        single_instance.release()", shutdown
+        )
+
     @patch("installed_launcher.ensure_configuration")
     @patch("installed_launcher.load_config")
     def test_incomplete_setup_does_not_launch_application(self, load, ensure):

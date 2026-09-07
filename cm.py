@@ -832,6 +832,7 @@ def main(argv=None):
                     "ChurchManager will still close.".format(error),
                     "Automatic Backup Failed", wx.OK | wx.ICON_WARNING, cmfrm.FRAME,
                 )
+        single_instance.release()
         event.Skip()
     cmfrm.FRAME.Bind(wx.EVT_CLOSE, on_main_close)
 
@@ -868,12 +869,16 @@ def main(argv=None):
         ChurchDB.close()
     except Exception:
         pass
+    # Release the named Windows mutex while shutdown is still under our control.
+    # A hidden process may otherwise linger after the last window closes and
+    # incorrectly block the next launch until Windows finishes terminating it.
+    single_instance.release()
     if restart:
-        single_instance.release()
         command = [sys.executable, str(Path(__file__).resolve())]
         if context.test_mode:
             command.append("--test")
         subprocess.Popen(command)
+    return 0
 
 
 if __name__ == "__main__":

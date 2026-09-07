@@ -154,6 +154,7 @@
                     37,
                     1
                 ],
+                "sizech": [16, 2],
                 "tooltip": "Open the family addresses form."
             },
             "btnFamilyContact": {
@@ -168,6 +169,7 @@
                     37,
                     3
                 ],
+                "sizech": [16, 2],
                 "tooltip": "Open the family contacts form."
             },
             "btnFamilyDate": {
@@ -182,6 +184,7 @@
                     37,
                     5
                 ],
+                "sizech": [16, 2],
                 "tooltip": "Open the family dates form."
             },
             "btnPerson": {
@@ -196,6 +199,7 @@
                     37,
                     7
                 ],
+                "sizech": [16, 2],
                 "tooltip": "Open the family members form."
             },
             "btnAdditionalInformation": {
@@ -203,6 +207,7 @@
                 "label": "Additional Information...",
                 "name": "btnAdditionalInformation",
                 "posch": [37, 9],
+                "sizech": [16, 2],
                 "tooltip": "Edit church-defined additional information for this family."
             },
             "lblChurchID": {
