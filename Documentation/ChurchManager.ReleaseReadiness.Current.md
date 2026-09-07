@@ -1,16 +1,16 @@
 # ChurchManager Current Release Readiness
 
-Status date: August 30, 2026
+Status date: September 7, 2026
 
 This is the current-state companion to the historical evidence retained in the
 installation specification and roadmap.
 
 ## Current verified baseline
 
-- Application line: `0.3.0-beta.4`
-- Canonical schema: 121 represented migrations
+- Application line: `0.3.0-beta.5`
+- Canonical schema: 122 represented migrations
 - Starter data: 125 statements
-- Schema SHA-256: `f95153beb456e8ab25064476299fb466a7a675550e15069c814c7ec78d3f6ad4`
+- Canonical schema SHA-256: `6413b5619678d7610b2c0ceebb43390afea08f6061e1494fc4edadd2523e9123`
 - Starter-data SHA-256: `288316835c44f9dd2a5f5646350baf9fe60bf74e10326458979593d761db5352`
 - Fresh setup, guarded upgrade, and guarded restore services have passed
   isolated live rehearsals. Restore acceptance includes confidential Giving
@@ -18,8 +18,8 @@ installation specification and roadmap.
 
 ## Accepted workflows
 
-- The complete source suites pass: 1,099 ChurchManager tests with 25 intentional
-  database/environment skips, and 460 JSForm tests with 2 intentional skips.
+- The complete source suites pass: 1,124 ChurchManager tests with 25 intentional
+  database/environment skips, and 461 JSForm tests with 2 intentional skips.
 - The owned-child cleanup regression confirms tracked JSForm child forms close
   and deleted native panels are safely ignored during application shutdown.
 - The source-construction audit reports 39 reviewed structural SQL exceptions,
@@ -37,7 +37,7 @@ installation specification and roadmap.
 
 - The audited source repository is public at
   `https://github.com/jwattswhat/ChurchManager`.
-- Release `v0.3.0-beta.4` has distinct clean-installation and fictional
+- Release `v0.3.0-beta.5` has distinct clean-installation and fictional
   beta-test kits. Local and independent Windows 11 VM installation, same-version upgrade, uninstall,
   reinstall, login, main-menu, Documents-screen, and registered document-opening
   acceptance passed. The release is ready for public beta publication.
@@ -47,16 +47,16 @@ installation specification and roadmap.
 - The website and release describe the build as beta and do not claim that the
   remaining production-only or packaging-only gates have passed.
 
-The accepted compact all-button dashboard was rebuilt into the exact beta.3
-bundle on August 30, 2026. The final bundle contains 466 files totaling
-111,273,760 bytes and bundles JSForm `0.1.0-beta.6`. All three packaged resource
+The accepted application was rebuilt into the exact beta.5 bundle on September
+7, 2026. The final bundle contains 467 files totaling 111,674,586 bytes and
+bundles JSForm `0.1.0-beta.6`. All three packaged resource
 proofs passed, including an explicit check for `Menus/main.menu.json`. Its
-unsigned MSI is 51,882,414 bytes with
-SHA-256 `364dfba76fd32ae88d48b17ef3bbf3fd6f640f68bda34fec984f99730cd1ecc1`.
-The clean-installation ZIP is 51,755,095 bytes with SHA-256
-`9e15e0b7f388f17500d8f3e621d9f5a165e852231f0f20551224f83d892eeb22`.
-The fictional-data ZIP is 51,756,420 bytes with SHA-256
-`7cffc72a473e4355f118c22c0ac051e2e3903fdae11ee4ca75d42a1d859e4d3b`.
+unsigned MSI is 51,976,730 bytes with
+SHA-256 `c4980a7c091d0f157c1de555cc631d22626f8648104a821ba679035405c3f42a`.
+The clean-installation ZIP is 51,850,084 bytes with SHA-256
+`ca0557ac0a4b88bc0f0f8940c144930ed2b09c9a03d1055a86b6a9571f05789c`.
+The fictional-data ZIP is 51,851,418 bytes with SHA-256
+`6869803a6a1e54f0b7f2377f4be263132bf6269d75f4c04f728d9b1bd96bb604`.
 
 ## Deferred distribution enhancement
 

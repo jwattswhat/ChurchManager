@@ -1,7 +1,7 @@
 {
   "artifact": "ChurchManager fresh-install schema baseline",
   "format_version": 1,
-  "release_version": "0.3.0-beta.4",
+  "release_version": "0.3.0-beta.5",
   "schema_sha256": "6413b5619678d7610b2c0ceebb43390afea08f6061e1494fc4edadd2523e9123",
   "represented_migrations": [
     {

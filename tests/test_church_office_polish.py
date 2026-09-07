@@ -106,7 +106,7 @@ class TestChurchOfficePolish(unittest.TestCase):
         self.assertNotIn("journal", people_card.casefold())
         for capability in ("Member giving", "Groups and pastoral care", "Church office", "Events and calendars"):
             self.assertIn(capability, site)
-        self.assertIn("Version 0.3.0-beta.4", site)
+        self.assertIn("Version 0.3.0-beta.5", site)
         self.assertIn("ChurchManager-Beta-Test-With-Fictional-Data.zip", site)
         self.assertIn("ChurchManager-Clean-Installation.zip", site)
         self.assertIn("Required first:</strong> install MariaDB Server for Windows", site)
